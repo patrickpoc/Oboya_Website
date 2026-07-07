@@ -1,0 +1,305 @@
+{
+  "metadata": {
+    "title": "Oboya Horticulture | Soluciones Integrales de Horticultura",
+    "description": "Su socio integral en horticultura. Soluciones integradas desde la propagación y el plantío hasta el empaquetado y la exposición en retail — al servicio de productores en todo el mundo."
+  },
+  "nav": {
+    "solutions": "Soluciones",
+    "products": "Productos",
+    "catalogue": "Catálogo",
+    "about": "Nosotros",
+    "sustainability": "Sostenibilidad",
+    "news": "Noticias",
+    "contact": "Contáctenos",
+    "openMenu": "Abrir menú",
+    "menuTitle": "Menú de navegación",
+    "mainNav": "Navegación principal",
+    "language": "Idioma",
+    "solutionsVegetables": "Verduras y Hierbas",
+    "solutionsVegetablesDesc": "Propagación, sistemas de cultivo y empaquetado para la producción de hortalizas.",
+    "solutionsFlowers": "Flores y Ornamentales",
+    "solutionsFlowersDesc": "Soluciones completas para floricultura y cultivo ornamental.",
+    "solutionsFruits": "Frutas y Bayas",
+    "solutionsFruitsDesc": "Sistemas especializados para el cultivo de bayas y frutas.",
+    "productsGrowingMedia": "Sustratos",
+    "productsGrowingMediaDesc": "Sustratos y soluciones de suelo para una salud óptima de las plantas.",
+    "productsPackaging": "Empaquetado",
+    "productsPackagingDesc": "Empaquetado listo para retail de productos frescos.",
+    "productsEquipment": "Equipamiento",
+    "productsEquipmentDesc": "Carros, bandejas y equipamiento para invernaderos."
+  },
+  "hero": {
+    "eyebrow": "Socio Global en Horticultura",
+    "title": "Su socio integral en horticultura",
+    "description": "Soluciones integradas desde la propagación y el plantío hasta el empaquetado y la exposición en retail — con la confianza de productores en más de 80 países.",
+    "ctaPrimary": "Explorar Soluciones",
+    "ctaSecondary": "Sobre Oboya",
+    "categoryVegetable": "Verdura",
+    "categoryFlower": "Flor",
+    "categoryFruit": "Fruta",
+    "categorySublabel": "Soluciones"
+  },
+  "catalogue": {
+    "eyebrow": "Catálogo de productos",
+    "title": "Catálogo Oboya Horticulture 2024",
+    "description": "Explore nuestro catálogo completo página por página. Use los controles o las flechas del teclado para avanzar y retroceder.",
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "navLabel": "Navegación del catálogo",
+    "pageInputLabel": "Ir a la página",
+    "loading": "Cargando catálogo…",
+    "error": "No se pudo cargar el catálogo. Inténtelo de nuevo más tarde."
+  },
+  "companyOverview": {
+    "headlineGreen": "Apoyamos toda la cadena de suministro hortícola ",
+    "headlineWhite": "desde la propagación y el plantío hasta el empaquetado y la exposición en retail.",
+    "statLocations": "Ubicaciones de ventas y distribución",
+    "statCountries": "Países atendidos en el mundo",
+    "statExperience": "Años de experiencia global",
+    "imageAlt": "Trabajadores en un invernadero moderno"
+  },
+  "globalPresence": {
+    "title": "Operamos en 25 países, con centros de producción en Asia, América del Sur y Europa, además de equipos de soporte local en todo el mundo.",
+    "badge": "Global",
+    "mapAlt": "Mapa global interactivo de Oboya con oficinas, fábricas y almacenes en 25 países",
+    "interactiveHint": "Mapa interactivo — pase el cursor para explorar"
+  },
+  "featuredProducts": {
+    "eyebrow": "Productos Destacados",
+    "title": "Soluciones integrales de horticultura diseñadas para eficiencia, calidad y sostenibilidad en toda la cadena de suministro.",
+    "viewAll": "Ver todos los productos",
+    "strawberryTitle": "Empaquetado de Fresa para Retail",
+    "strawberryCategory": "Empaquetado",
+    "growingMediaTitle": "Sustratos Premium",
+    "growingMediaCategory": "Sustratos",
+    "flowerTrolleyTitle": "Carro de Exposición de Flores",
+    "flowerTrolleyCategory": "Equipamiento"
+  },
+  "solutions": {
+    "eyebrow": "Soluciones",
+    "title": "Sistemas integrales para la horticultura moderna",
+    "description": "Cada solución está diseñada para integrarse a la perfección — desde el suelo del invernadero hasta la exposición en retail.",
+    "propagationTitle": "Propagación y Cultivo",
+    "propagationDesc": "Sustratos, bandejas y sistemas climatizados para un establecimiento saludable de las plantas.",
+    "packagingTitle": "Empaquetado y Logística",
+    "packagingDesc": "Empaquetado listo para retail y soluciones logísticas que preservan la frescura de la granja al estante.",
+    "sustainableTitle": "Prácticas Sostenibles",
+    "sustainableDesc": "Materiales y procesos ecológicos que reducen el impacto ambiental sin comprometer la calidad.",
+    "distributionTitle": "Red de Distribución",
+    "distributionDesc": "Infraestructura logística global que garantiza entregas fiables a sitios de producción en todo el mundo.",
+    "circularTitle": "Economía Circular",
+    "circularDesc": "Empaquetado reciclable y programas de reducción de residuos alineados con las certificaciones del sector.",
+    "explore": "Explorar"
+  },
+  "industries": {
+    "eyebrow": "Industrias",
+    "title": "Al servicio de cada segmento de la horticultura moderna",
+    "description": "Experiencia adaptada a los entornos y cultivos que definen su operación.",
+    "greenhousesTitle": "Invernaderos Comerciales",
+    "greenhousesDesc": "Sistemas escalables para cultivo protegido a gran escala.",
+    "nurseriesTitle": "Viveros y Propagación",
+    "nurseriesDesc": "Herramientas de precisión para la producción de plantas jóvenes y enraizamiento.",
+    "retailTitle": "Retail y Distribución",
+    "retailDesc": "Empaquetado y logística que preservan la calidad hasta el estante.",
+    "berriesTitle": "Bayas y Frutos Rojos",
+    "berriesDesc": "Soluciones especializadas para operaciones de bayas de alto valor.",
+    "discover": "Descubrir"
+  },
+  "innovation": {
+    "eyebrow": "Innovación",
+    "title": "Tecnología pionera y prácticas sostenibles que dan forma al futuro de la horticultura",
+    "description": "Desde sistemas avanzados de invernadero hasta soluciones de empaquetado circular, invertimos continuamente en I+D para ayudar a los productores a afrontar los retos del mañana.",
+    "news1Title": "Tecnología de invernadero de nueva generación para una producción sostenible",
+    "news2Title": "Ampliando nuestra presencia en los mercados de Asia-Pacífico"
+  },
+  "sustainability": {
+    "eyebrow": "Sostenibilidad",
+    "title": "Cultivando con responsabilidad para las futuras generaciones",
+    "description": "La sostenibilidad está integrada en cada solución que ofrecemos — desde la composición del sustrato hasta el diseño del empaquetado y la logística global.",
+    "sourcingTitle": "Abastecimiento Responsable",
+    "sourcingDesc": "Materiales certificados y cadenas de suministro éticas en todas las operaciones.",
+    "packagingTitle": "Empaquetado Circular",
+    "packagingDesc": "Soluciones reciclables y reutilizables que reducen la huella ambiental.",
+    "waterTitle": "Eficiencia Hídrica",
+    "waterDesc": "Sistemas diseñados para optimizar el riego y reducir el desperdicio de recursos.",
+    "carbonTitle": "Reducción de Carbono",
+    "carbonDesc": "Compromiso de reducir las emisiones en producción y logística.",
+    "cta": "Nuestro Compromiso con la Sostenibilidad"
+  },
+  "news": {
+    "eyebrow": "Noticias",
+    "title": "Últimas novedades de Oboya",
+    "description": "Actualizaciones del sector, noticias de la empresa y tendencias en horticultura.",
+    "viewAll": "Ver todas las noticias",
+    "readMore": "Leer más",
+    "item1Title": "Tecnología de invernadero de nueva generación para una producción sostenible",
+    "item2Title": "Ampliando nuestra presencia en los mercados de Asia-Pacífico"
+  },
+  "certifications": {
+    "title": "Certificaciones y Normas"
+  },
+  "cta": {
+    "title": "¿Listo para transformar sus operaciones hortícolas?",
+    "description": "Conéctese con nuestro equipo global para descubrir soluciones integrales adaptadas a sus necesidades de producción.",
+    "primary": "Póngase en Contacto",
+    "secondary": "Explorar Soluciones"
+  },
+  "footer": {
+    "company": "Empresa",
+    "solutions": "Soluciones",
+    "aboutUs": "Sobre Nosotros",
+    "careers": "Carreras",
+    "contact": "Contacto",
+    "vegetables": "Verduras",
+    "flowers": "Flores",
+    "fruits": "Frutas",
+    "privacy": "Política de Privacidad",
+    "terms": "Términos de Uso",
+    "rights": "Todos los derechos reservados.",
+    "linkedin": "LinkedIn",
+    "facebook": "Facebook"
+  },
+  "common": {
+    "learnMore": "Más Información",
+    "loremLink": "Lorem ipsum",
+    "backHome": "Volver al Inicio",
+    "notFoundTitle": "Página no encontrada",
+    "notFoundDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. La página que busca no existe.",
+    "loremShort": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tempor, massa eu auctor pharetra, leo est efficitur orci.",
+    "loremP1": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tempor, massa eu auctor pharetra, leo est efficitur orci.",
+    "loremP2": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+    "loremP3": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.",
+    "loremP4": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit."
+  },
+  "contact": {
+    "field1": "Nombre",
+    "field1Placeholder": "Su nombre",
+    "field2": "Telefono",
+    "field2Placeholder": "Su telefono",
+    "email": "Correo electronico",
+    "emailPlaceholder": "su@email.com",
+    "company": "Empresa",
+    "companyPlaceholder": "Nombre de la empresa",
+    "message": "Mensaje",
+    "messagePlaceholder": "Como podemos ayudarle?",
+    "submit": "Enviar"
+  },
+  "pages": {
+    "about": {
+      "title": "Sobre Nosotros",
+      "eyebrow": "Empresa"
+    },
+    "contact": {
+      "title": "Contáctenos",
+      "eyebrow": "Contacto"
+    },
+    "careers": {
+      "title": "Carreras",
+      "eyebrow": "Empresa"
+    },
+    "privacy": {
+      "title": "Política de Privacidad",
+      "eyebrow": "Legal"
+    },
+    "terms": {
+      "title": "Términos de Uso",
+      "eyebrow": "Legal"
+    },
+    "sustainability": {
+      "title": "Sostenibilidad",
+      "eyebrow": "Sostenibilidad"
+    },
+    "solutions": {
+      "title": "Soluciones",
+      "eyebrow": "Soluciones"
+    },
+    "solutionsVegetables": {
+      "title": "Verduras y Hierbas",
+      "eyebrow": "Soluciones"
+    },
+    "solutionsFlowers": {
+      "title": "Flores y Ornamentales",
+      "eyebrow": "Soluciones"
+    },
+    "solutionsFruits": {
+      "title": "Frutas y Bayas",
+      "eyebrow": "Soluciones"
+    },
+    "solutionsPropagation": {
+      "title": "Propagación y Cultivo",
+      "eyebrow": "Soluciones"
+    },
+    "solutionsPackaging": {
+      "title": "Empaquetado y Logística",
+      "eyebrow": "Soluciones"
+    },
+    "solutionsSustainability": {
+      "title": "Prácticas Sostenibles",
+      "eyebrow": "Soluciones"
+    },
+    "solutionsDistribution": {
+      "title": "Red de Distribución",
+      "eyebrow": "Soluciones"
+    },
+    "solutionsCircularEconomy": {
+      "title": "Economía Circular",
+      "eyebrow": "Soluciones"
+    },
+    "products": {
+      "title": "Productos",
+      "eyebrow": "Productos"
+    },
+    "productsGrowingMedia": {
+      "title": "Sustratos",
+      "eyebrow": "Productos"
+    },
+    "productsPackaging": {
+      "title": "Empaquetado",
+      "eyebrow": "Productos"
+    },
+    "productsEquipment": {
+      "title": "Equipamiento",
+      "eyebrow": "Productos"
+    },
+    "productsStrawberryPackaging": {
+      "title": "Empaquetado de Fresa para Retail",
+      "eyebrow": "Productos"
+    },
+    "productsFlowerTrolley": {
+      "title": "Carro de Exposición de Flores",
+      "eyebrow": "Productos"
+    },
+    "news": {
+      "title": "Noticias",
+      "eyebrow": "Noticias"
+    },
+    "newsGreenhouseTechnology": {
+      "title": "Tecnología de invernadero de nueva generación",
+      "eyebrow": "Noticias"
+    },
+    "newsAsiaPacificExpansion": {
+      "title": "Expansión en Asia-Pacífico",
+      "eyebrow": "Noticias"
+    },
+    "industries": {
+      "title": "Industrias",
+      "eyebrow": "Industrias"
+    },
+    "industriesGreenhouses": {
+      "title": "Invernaderos Comerciales",
+      "eyebrow": "Industrias"
+    },
+    "industriesNurseries": {
+      "title": "Viveros y Propagación",
+      "eyebrow": "Industrias"
+    },
+    "industriesRetail": {
+      "title": "Retail y Distribución",
+      "eyebrow": "Industrias"
+    },
+    "industriesBerries": {
+      "title": "Bayas y Frutos Rojos",
+      "eyebrow": "Industrias"
+    }
+  }
+}

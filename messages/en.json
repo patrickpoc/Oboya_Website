@@ -1,0 +1,305 @@
+{
+  "metadata": {
+    "title": "Oboya Horticulture | Integrated Horticulture Solutions",
+    "description": "Your one-stop partner for horticulture. Integrated solutions from propagation and planting to packaging and retail display — serving growers worldwide."
+  },
+  "nav": {
+    "solutions": "Solutions",
+    "products": "Products",
+    "catalogue": "Catalogue",
+    "about": "About",
+    "sustainability": "Sustainability",
+    "news": "News",
+    "contact": "Contact Us",
+    "openMenu": "Open menu",
+    "menuTitle": "Navigation menu",
+    "mainNav": "Main navigation",
+    "language": "Language",
+    "solutionsVegetables": "Vegetables & Herbs",
+    "solutionsVegetablesDesc": "Propagation, growing systems, and packaging for vegetable production.",
+    "solutionsFlowers": "Flowers & Ornamentals",
+    "solutionsFlowersDesc": "Complete solutions for floriculture and ornamental growers.",
+    "solutionsFruits": "Fruits & Berries",
+    "solutionsFruitsDesc": "Specialized systems for berry and fruit cultivation.",
+    "productsGrowingMedia": "Growing Media",
+    "productsGrowingMediaDesc": "Substrates and soil solutions for optimal plant health.",
+    "productsPackaging": "Packaging",
+    "productsPackagingDesc": "Retail-ready packaging for fresh produce.",
+    "productsEquipment": "Equipment",
+    "productsEquipmentDesc": "Trolleys, trays, and greenhouse equipment."
+  },
+  "hero": {
+    "eyebrow": "Global Horticulture Partner",
+    "title": "Your one-stop partner for horticulture",
+    "description": "Integrated solutions from propagation and planting to packaging and retail display — trusted by growers in 80+ countries worldwide.",
+    "ctaPrimary": "Explore Solutions",
+    "ctaSecondary": "About Oboya",
+    "categoryVegetable": "Vegetable",
+    "categoryFlower": "Flower",
+    "categoryFruit": "Fruit",
+    "categorySublabel": "Solutions"
+  },
+  "catalogue": {
+    "eyebrow": "Product catalogue",
+    "title": "Oboya Horticulture Catalogue 2024",
+    "description": "Browse our full product catalogue page by page. Use the navigation controls or arrow keys to move between pages.",
+    "prev": "Previous",
+    "next": "Next",
+    "navLabel": "Catalogue navigation",
+    "pageInputLabel": "Go to page",
+    "loading": "Loading catalogue…",
+    "error": "Unable to load the catalogue. Please try again later."
+  },
+  "companyOverview": {
+    "headlineGreen": "We support the entire horticultural supply chain ",
+    "headlineWhite": "from propagation and planting to packaging and retail display.",
+    "statLocations": "Sales and distribution locations",
+    "statCountries": "Countries served worldwide",
+    "statExperience": "Years of global experience",
+    "imageAlt": "Workers in a modern greenhouse facility"
+  },
+  "globalPresence": {
+    "title": "We operate in 25 countries, with production hubs in Asia, South America and Europe, as well as local support teams worldwide.",
+    "badge": "Global",
+    "mapAlt": "Interactive Oboya global presence map with offices, factories and warehouses across 25 countries worldwide",
+    "interactiveHint": "Interactive map — hover to explore"
+  },
+  "featuredProducts": {
+    "eyebrow": "Featured Products",
+    "title": "Integrated horticulture solutions designed for efficiency, quality, and sustainability across the entire supply chain.",
+    "viewAll": "View all products",
+    "strawberryTitle": "Strawberry Retail Packaging",
+    "strawberryCategory": "Packaging",
+    "growingMediaTitle": "Premium Growing Media",
+    "growingMediaCategory": "Substrates",
+    "flowerTrolleyTitle": "Flower Display Trolley",
+    "flowerTrolleyCategory": "Equipment"
+  },
+  "solutions": {
+    "eyebrow": "Solutions",
+    "title": "End-to-end systems for modern horticulture",
+    "description": "Every solution is engineered to integrate seamlessly — from the greenhouse floor to the retail display.",
+    "propagationTitle": "Propagation & Growing",
+    "propagationDesc": "Substrates, trays, and climate-controlled systems for healthy plant establishment.",
+    "packagingTitle": "Packaging & Logistics",
+    "packagingDesc": "Retail-ready packaging and supply chain solutions that preserve freshness from farm to shelf.",
+    "sustainableTitle": "Sustainable Practices",
+    "sustainableDesc": "Eco-conscious materials and processes that reduce environmental impact without compromising quality.",
+    "distributionTitle": "Distribution Network",
+    "distributionDesc": "Global logistics infrastructure ensuring reliable delivery to production sites worldwide.",
+    "circularTitle": "Circular Economy",
+    "circularDesc": "Recyclable packaging and waste-reduction programs aligned with industry certifications.",
+    "explore": "Explore"
+  },
+  "industries": {
+    "eyebrow": "Industries",
+    "title": "Serving every segment of modern horticulture",
+    "description": "Tailored expertise for the environments and crops that define your operation.",
+    "greenhousesTitle": "Commercial Greenhouses",
+    "greenhousesDesc": "Scalable systems for large-scale protected cultivation.",
+    "nurseriesTitle": "Nurseries & Propagation",
+    "nurseriesDesc": "Precision tools for young plant production and rooting.",
+    "retailTitle": "Retail & Distribution",
+    "retailDesc": "Packaging and logistics that preserve quality to the shelf.",
+    "berriesTitle": "Berry & Soft Fruit",
+    "berriesDesc": "Specialized solutions for high-value berry operations.",
+    "discover": "Discover"
+  },
+  "innovation": {
+    "eyebrow": "Innovation",
+    "title": "Pioneering technology and sustainable practices that shape the future of horticulture",
+    "description": "From advanced greenhouse systems to circular packaging solutions, we invest continuously in R&D to help growers meet tomorrow's challenges.",
+    "news1Title": "Next-generation greenhouse technology for sustainable production",
+    "news2Title": "Expanding our footprint in Asia-Pacific markets"
+  },
+  "sustainability": {
+    "eyebrow": "Sustainability",
+    "title": "Growing responsibly for future generations",
+    "description": "Sustainability is embedded in every solution we deliver — from substrate composition to packaging design and global logistics.",
+    "sourcingTitle": "Responsible Sourcing",
+    "sourcingDesc": "Certified materials and ethical supply chains across all operations.",
+    "packagingTitle": "Circular Packaging",
+    "packagingDesc": "Recyclable and reusable solutions that reduce environmental footprint.",
+    "waterTitle": "Water Efficiency",
+    "waterDesc": "Systems designed to optimize irrigation and reduce resource waste.",
+    "carbonTitle": "Carbon Reduction",
+    "carbonDesc": "Commitment to lowering emissions across production and logistics.",
+    "cta": "Our Sustainability Commitment"
+  },
+  "news": {
+    "eyebrow": "News",
+    "title": "Latest insights from Oboya",
+    "description": "Industry updates, company news, and horticulture trends.",
+    "viewAll": "View all news",
+    "readMore": "Read more",
+    "item1Title": "Next-generation greenhouse technology for sustainable production",
+    "item2Title": "Expanding our footprint in Asia-Pacific markets"
+  },
+  "certifications": {
+    "title": "Certifications & Standards"
+  },
+  "cta": {
+    "title": "Ready to transform your horticulture operations?",
+    "description": "Connect with our global team to discover integrated solutions tailored to your production needs.",
+    "primary": "Get in Touch",
+    "secondary": "Explore Solutions"
+  },
+  "footer": {
+    "company": "Company",
+    "solutions": "Solutions",
+    "aboutUs": "About Us",
+    "careers": "Careers",
+    "contact": "Contact",
+    "vegetables": "Vegetables",
+    "flowers": "Flowers",
+    "fruits": "Fruits",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use",
+    "rights": "All rights reserved.",
+    "linkedin": "LinkedIn",
+    "facebook": "Facebook"
+  },
+  "common": {
+    "learnMore": "Learn More",
+    "loremLink": "Lorem ipsum",
+    "backHome": "Back to Home",
+    "notFoundTitle": "Page not found",
+    "notFoundDesc": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. The page you are looking for does not exist.",
+    "loremShort": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tempor, massa eu auctor pharetra, leo est efficitur orci.",
+    "loremP1": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tempor, massa eu auctor pharetra, leo est efficitur orci, sed faucibus ligula erat eget magna. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
+    "loremP2": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+    "loremP3": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.",
+    "loremP4": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet."
+  },
+  "contact": {
+    "field1": "Lorem ipsum",
+    "field1Placeholder": "Dolor sit amet",
+    "field2": "Consectetur",
+    "field2Placeholder": "Adipiscing elit",
+    "email": "Email",
+    "emailPlaceholder": "lorem@ipsum.com",
+    "company": "Company",
+    "companyPlaceholder": "Vestibulum tempor",
+    "message": "Message",
+    "messagePlaceholder": "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
+    "submit": "Lorem ipsum"
+  },
+  "pages": {
+    "about": {
+      "title": "About Us",
+      "eyebrow": "Company"
+    },
+    "contact": {
+      "title": "Contact Us",
+      "eyebrow": "Contact"
+    },
+    "careers": {
+      "title": "Careers",
+      "eyebrow": "Company"
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "eyebrow": "Legal"
+    },
+    "terms": {
+      "title": "Terms of Use",
+      "eyebrow": "Legal"
+    },
+    "sustainability": {
+      "title": "Sustainability",
+      "eyebrow": "Sustainability"
+    },
+    "solutions": {
+      "title": "Solutions",
+      "eyebrow": "Solutions"
+    },
+    "solutionsVegetables": {
+      "title": "Vegetables & Herbs",
+      "eyebrow": "Solutions"
+    },
+    "solutionsFlowers": {
+      "title": "Flowers & Ornamentals",
+      "eyebrow": "Solutions"
+    },
+    "solutionsFruits": {
+      "title": "Fruits & Berries",
+      "eyebrow": "Solutions"
+    },
+    "solutionsPropagation": {
+      "title": "Propagation & Growing",
+      "eyebrow": "Solutions"
+    },
+    "solutionsPackaging": {
+      "title": "Packaging & Logistics",
+      "eyebrow": "Solutions"
+    },
+    "solutionsSustainability": {
+      "title": "Sustainable Practices",
+      "eyebrow": "Solutions"
+    },
+    "solutionsDistribution": {
+      "title": "Distribution Network",
+      "eyebrow": "Solutions"
+    },
+    "solutionsCircularEconomy": {
+      "title": "Circular Economy",
+      "eyebrow": "Solutions"
+    },
+    "products": {
+      "title": "Products",
+      "eyebrow": "Products"
+    },
+    "productsGrowingMedia": {
+      "title": "Growing Media",
+      "eyebrow": "Products"
+    },
+    "productsPackaging": {
+      "title": "Packaging",
+      "eyebrow": "Products"
+    },
+    "productsEquipment": {
+      "title": "Equipment",
+      "eyebrow": "Products"
+    },
+    "productsStrawberryPackaging": {
+      "title": "Strawberry Retail Packaging",
+      "eyebrow": "Products"
+    },
+    "productsFlowerTrolley": {
+      "title": "Flower Display Trolley",
+      "eyebrow": "Products"
+    },
+    "news": {
+      "title": "News",
+      "eyebrow": "News"
+    },
+    "newsGreenhouseTechnology": {
+      "title": "Next-generation greenhouse technology",
+      "eyebrow": "News"
+    },
+    "newsAsiaPacificExpansion": {
+      "title": "Asia-Pacific expansion",
+      "eyebrow": "News"
+    },
+    "industries": {
+      "title": "Industries",
+      "eyebrow": "Industries"
+    },
+    "industriesGreenhouses": {
+      "title": "Commercial Greenhouses",
+      "eyebrow": "Industries"
+    },
+    "industriesNurseries": {
+      "title": "Nurseries & Propagation",
+      "eyebrow": "Industries"
+    },
+    "industriesRetail": {
+      "title": "Retail & Distribution",
+      "eyebrow": "Industries"
+    },
+    "industriesBerries": {
+      "title": "Berry & Soft Fruit",
+      "eyebrow": "Industries"
+    }
+  }
+}
