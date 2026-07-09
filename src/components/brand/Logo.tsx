@@ -1,18 +1,29 @@
 "use client";
 
 import Image from "next/image";
-import { Link } from "@/i18n/navigation";
+import NextLink from "next/link";
+import { Link as IntlLink } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
   variant?: "default" | "light";
   className?: string;
   priority?: boolean;
+  href?: string;
+  intl?: boolean;
 }
 
-export function Logo({ variant = "default", className, priority }: LogoProps) {
+export function Logo({
+  variant = "default",
+  className,
+  priority,
+  href = "/",
+  intl = true,
+}: LogoProps) {
+  const LinkComponent = intl ? IntlLink : NextLink;
+
   return (
-    <Link href="/" className={cn("relative block shrink-0", className)} aria-label="Oboya Horticulture">
+    <LinkComponent href={href} className={cn("relative block shrink-0", className)} aria-label="Oboya Horticulture">
       <Image
         src="/assets/logo.svg"
         alt="Oboya Horticulture"
@@ -24,6 +35,6 @@ export function Logo({ variant = "default", className, priority }: LogoProps) {
           variant === "light" && "brightness-0 invert"
         )}
       />
-    </Link>
+    </LinkComponent>
   );
 }

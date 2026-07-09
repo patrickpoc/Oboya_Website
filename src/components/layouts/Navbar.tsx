@@ -133,8 +133,8 @@ export function Navbar({ transparent = true }: NavbarProps) {
   const isSolid = !transparent || isScrolled;
 
   const mainNavigation = getMainNavigation((key) => t(key));
-  const leftNav = mainNavigation.slice(0, 2);
-  const rightNav = mainNavigation.slice(2);
+  const leftNav = mainNavigation.slice(0, 3);
+  const rightNav = mainNavigation.slice(3);
 
   return (
     <header

@@ -1,0 +1,31 @@
+{
+  "applications": [
+    { "id": "greenhouse", "name": "Greenhouse" },
+    { "id": "nursery", "name": "Nursery" },
+    { "id": "open-field", "name": "Open Field" },
+    { "id": "retail", "name": "Retail Supply Chain" },
+    { "id": "vertical-farming", "name": "Vertical Farming" }
+  ],
+  "cultures": [
+    { "id": "vegetables", "name": "Vegetables" },
+    { "id": "flowers", "name": "Flowers & Ornamentals" },
+    { "id": "fruits", "name": "Fruits & Berries" },
+    { "id": "herbs", "name": "Herbs" },
+    { "id": "trees", "name": "Trees & Shrubs" }
+  ],
+  "certifications": [
+    { "id": "iso-9001", "name": "ISO 9001" },
+    { "id": "iso-14001", "name": "ISO 14001" },
+    { "id": "rhp", "name": "RHP Certified" },
+    { "id": "organic", "name": "Organic Compliant" },
+    { "id": "food-safe", "name": "Food Contact Safe" }
+  ],
+  "countriesOfOrigin": [
+    { "id": "NL", "name": "Netherlands" },
+    { "id": "BR", "name": "Brazil" },
+    { "id": "CN", "name": "China" },
+    { "id": "NO", "name": "Norway" },
+    { "id": "US", "name": "United States" },
+    { "id": "DE", "name": "Germany" }
+  ]
+}

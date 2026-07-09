@@ -1,0 +1,8 @@
+[
+  { "code": "US", "name": "United States", "currencies": ["USD"], "defaultCurrency": "USD", "primaryOfficeId": "usa-office" },
+  { "code": "BR", "name": "Brazil", "currencies": ["BRL", "USD"], "defaultCurrency": "BRL", "primaryOfficeId": "brazil-office" },
+  { "code": "MX", "name": "Mexico", "currencies": ["USD", "EUR"], "defaultCurrency": "USD", "primaryOfficeId": "mexico-office" },
+  { "code": "NO", "name": "Norway", "currencies": ["EUR", "USD"], "defaultCurrency": "EUR", "primaryOfficeId": "norway-office" },
+  { "code": "CN", "name": "China", "currencies": ["USD", "EUR"], "defaultCurrency": "USD", "primaryOfficeId": "china-office" },
+  { "code": "GB", "name": "United Kingdom", "currencies": ["EUR", "USD"], "defaultCurrency": "EUR", "primaryOfficeId": "england-office" }
+]

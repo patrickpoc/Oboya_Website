@@ -3,6 +3,7 @@ import "server-only";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
 import type { MapLocationsData } from "@/lib/map-locations";
+import { normalizeMapLocations } from "@/lib/map-locations";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -11,11 +12,12 @@ const MAP_CONFIG_ID = "default";
 
 async function readMapLocationsFromFile(): Promise<MapLocationsData> {
   const raw = await readFile(DATA_PATH, "utf-8");
-  return JSON.parse(raw) as MapLocationsData;
+  return normalizeMapLocations(JSON.parse(raw));
 }
 
 async function writeMapLocationsToFile(data: MapLocationsData): Promise<void> {
-  await writeFile(DATA_PATH, `${JSON.stringify(data, null, 2)}\n`, "utf-8");
+  const normalized = normalizeMapLocations(data);
+  await writeFile(DATA_PATH, `${JSON.stringify(normalized, null, 2)}\n`, "utf-8");
 }
 
 export async function readMapLocations(): Promise<MapLocationsData> {
@@ -39,12 +41,14 @@ export async function readMapLocations(): Promise<MapLocationsData> {
     return readMapLocationsFromFile();
   }
 
-  return data.data as MapLocationsData;
+  return normalizeMapLocations(data.data);
 }
 
 export async function writeMapLocations(data: MapLocationsData): Promise<void> {
+  const normalized = normalizeMapLocations(data);
+
   if (!isSupabaseConfigured()) {
-    return writeMapLocationsToFile(data);
+    return writeMapLocationsToFile(normalized);
   }
 
   const supabase = await createClient();
@@ -58,7 +62,7 @@ export async function writeMapLocations(data: MapLocationsData): Promise<void> {
 
   const { error } = await supabase.from("map_locations_config").upsert({
     id: MAP_CONFIG_ID,
-    data,
+    data: normalized,
     updated_at: new Date().toISOString(),
   });
 

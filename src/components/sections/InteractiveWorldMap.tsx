@@ -1,7 +1,8 @@
 "use client";
 
-import { Mouse } from "lucide-react";
+import { Mouse, MousePointerClick } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { MAP_VIEWBOX, type ResolvedMapLocation } from "@/lib/map-locations";
 import { MapLocationInfoPanel } from "@/components/sections/MapLocationInfoPanel";
 import { CountryFlag } from "@/components/ui/country-flag";
@@ -20,7 +21,6 @@ const FLAG_MAX_WIDTH_PX = 28;
 export interface InteractiveWorldMapProps {
   locations: ResolvedMapLocation[];
   mapAlt: string;
-  interactiveHint?: string;
   editable?: boolean;
   selectedId?: string | null;
   onSelect?: (id: string) => void;
@@ -31,13 +31,13 @@ export interface InteractiveWorldMapProps {
 export function InteractiveWorldMap({
   locations,
   mapAlt,
-  interactiveHint,
   editable = false,
   selectedId = null,
   onSelect,
   onMove,
   onMapClick,
 }: InteractiveWorldMapProps) {
+  const t = useTranslations("globalPresence");
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -205,19 +205,19 @@ export function InteractiveWorldMap({
   const activeLocation = locations.find((loc) => loc.id === highlightedId);
 
   return (
-    <div className="flex flex-col gap-3 md:gap-4">
+    <div className="flex flex-col gap-2 md:gap-3">
       <div
         ref={containerRef}
         className="relative mx-auto w-full"
         style={{ aspectRatio: `${MAP_VIEWBOX.width} / ${MAP_VIEWBOX.height}` }}
       >
-      <svg
-        ref={svgRef}
-        viewBox={`0 0 ${MAP_VIEWBOX.width} ${MAP_VIEWBOX.height}`}
-        className={cn("h-full w-full", editable && "cursor-crosshair")}
-        role="img"
-        aria-label={mapAlt}
-      >
+        <svg
+          ref={svgRef}
+          viewBox={`0 0 ${MAP_VIEWBOX.width} ${MAP_VIEWBOX.height}`}
+          className={cn("h-full w-full", editable && "cursor-crosshair")}
+          role="img"
+          aria-label={mapAlt}
+        >
         <rect
           x={0}
           y={0}
@@ -336,13 +336,22 @@ export function InteractiveWorldMap({
         );
       })}
 
-      {!editable && interactiveHint && (
+      {!editable && (
         <div className="pointer-events-none absolute right-2 bottom-2 z-[3] flex items-center gap-1.5 rounded-full border border-border/50 bg-white/95 px-3 py-1.5 text-xs font-medium text-oboya-blue-dark shadow-sm backdrop-blur-sm">
-          <Mouse
-            className="size-3.5 shrink-0 text-oboya-green"
+          <MousePointerClick
+            className="size-3.5 shrink-0 text-oboya-green [@media(hover:hover)_and_(pointer:fine)]:hidden"
             aria-hidden
           />
-          <span>{interactiveHint}</span>
+          <Mouse
+            className="hidden size-3.5 shrink-0 text-oboya-green [@media(hover:hover)_and_(pointer:fine)]:block"
+            aria-hidden
+          />
+          <span className="[@media(hover:hover)_and_(pointer:fine)]:hidden">
+            {t("interactiveHintTouch")}
+          </span>
+          <span className="hidden [@media(hover:hover)_and_(pointer:fine)]:inline">
+            {t("interactiveHint")}
+          </span>
         </div>
       )}
       </div>
@@ -351,6 +360,7 @@ export function InteractiveWorldMap({
         <MapLocationInfoPanel
           location={activeLocation}
           fadeDuration={prefersReducedMotion ? 0 : SELECTION_FADE_MS}
+          className="mx-auto w-full max-w-3xl md:max-w-4xl"
         />
       )}
     </div>

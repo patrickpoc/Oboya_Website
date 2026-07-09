@@ -1,0 +1,45 @@
+[
+  {
+    "id": "growing-media",
+    "name": "Growing Media",
+    "subcategories": [
+      { "id": "substrates", "name": "Substrates" },
+      { "id": "coco", "name": "Coco Coir" },
+      { "id": "peat", "name": "Peat-Based" }
+    ]
+  },
+  {
+    "id": "packaging",
+    "name": "Packaging",
+    "subcategories": [
+      { "id": "retail", "name": "Retail Packaging" },
+      { "id": "bulk", "name": "Bulk Packaging" },
+      { "id": "clamshells", "name": "Clamshells" }
+    ]
+  },
+  {
+    "id": "equipment",
+    "name": "Equipment",
+    "subcategories": [
+      { "id": "trolleys", "name": "Trolleys & Carts" },
+      { "id": "irrigation", "name": "Irrigation" },
+      { "id": "climate", "name": "Climate Control" }
+    ]
+  },
+  {
+    "id": "propagation",
+    "name": "Propagation",
+    "subcategories": [
+      { "id": "trays", "name": "Trays & Inserts" },
+      { "id": "seedlings", "name": "Seedling Systems" }
+    ]
+  },
+  {
+    "id": "protection",
+    "name": "Crop Protection",
+    "subcategories": [
+      { "id": "netting", "name": "Netting & Covers" },
+      { "id": "labels", "name": "Labels & Tags" }
+    ]
+  }
+]

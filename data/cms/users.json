@@ -1,0 +1,36 @@
+[
+  {
+    "id": "user-1",
+    "email": "admin@oboya.cc",
+    "name": "Oboya Admin",
+    "avatar": "",
+    "jobTitle": "Super Administrator",
+    "role": "super_admin",
+    "locale": "en",
+    "status": "active",
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "user-2",
+    "email": "content@oboya.cc",
+    "name": "Maria Silva",
+    "jobTitle": "Content Manager",
+    "role": "content_manager",
+    "locale": "pt-BR",
+    "status": "active",
+    "createdAt": "2026-01-15T00:00:00.000Z",
+    "updatedAt": "2026-01-15T00:00:00.000Z"
+  },
+  {
+    "id": "user-3",
+    "email": "sales@oboya.cc",
+    "name": "John Carter",
+    "jobTitle": "Sales Manager",
+    "role": "sales_manager",
+    "locale": "en",
+    "status": "active",
+    "createdAt": "2026-02-01T00:00:00.000Z",
+    "updatedAt": "2026-02-01T00:00:00.000Z"
+  }
+]

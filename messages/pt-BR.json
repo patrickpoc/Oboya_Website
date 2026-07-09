@@ -26,13 +26,16 @@
     "productsPackaging": "Embalagens",
     "productsPackagingDesc": "Embalagens prontas para o varejo de produtos frescos.",
     "productsEquipment": "Equipamentos",
-    "productsEquipmentDesc": "Carrinhos, bandejas e equipamentos para estufas."
+    "productsEquipmentDesc": "Carrinhos, bandejas e equipamentos para estufas.",
+    "caseStudies": "Cases",
+    "blog": "Blog",
+    "shop": "Loja"
   },
   "hero": {
     "eyebrow": "Parceiro Global em Horticultura",
     "title": "Seu parceiro completo em horticultura",
     "description": "Soluções integradas da propagação e plantio à embalagem e exposição no varejo — confiadas por produtores em mais de 80 países.",
-    "ctaPrimary": "Explorar Soluções",
+    "ctaPrimary": "Explorar a Loja",
     "ctaSecondary": "Sobre a Oboya",
     "categoryVegetable": "Vegetal",
     "categoryFlower": "Flor",
@@ -62,7 +65,14 @@
     "title": "Atuamos em 25 países, com centros de produção na Ásia, América do Sul e Europa, além de equipes de suporte locais em todo o mundo.",
     "badge": "Global",
     "mapAlt": "Mapa global interativo da Oboya com escritórios, fábricas e armazéns em 25 países",
-    "interactiveHint": "Mapa interativo — passe o mouse para explorar"
+    "interactiveHint": "Mapa interativo — passe o mouse para explorar",
+    "interactiveHintTouch": "Mapa interativo — clique para explorar",
+    "panelPhone": "Telefone",
+    "panelFacility": "Instalação",
+    "panelExplore": "Passe o mouse sobre um local no mapa para explorar nossa presença global.",
+    "panelSegments": "Segmentos atendidos",
+    "panelContactOffice": "Contatar este escritório",
+    "panelOfficeCount": "{count, plural, one {# escritório} other {# escritórios}}"
   },
   "featuredProducts": {
     "eyebrow": "Produtos em Destaque",
@@ -142,7 +152,7 @@
     "title": "Pronto para transformar suas operações hortícolas?",
     "description": "Conecte-se com nossa equipe global para descobrir soluções integradas adaptadas às suas necessidades de produção.",
     "primary": "Entre em Contato",
-    "secondary": "Explorar Soluções"
+    "secondary": "Ver Cases"
   },
   "footer": {
     "company": "Empresa",
@@ -157,7 +167,16 @@
     "terms": "Termos de Uso",
     "rights": "Todos os direitos reservados.",
     "linkedin": "LinkedIn",
-    "facebook": "Facebook"
+    "facebook": "Facebook",
+    "resources": "Recursos",
+    "shopSection": "Loja",
+    "caseStudies": "Cases",
+    "workWithUs": "Trabalhe conosco",
+    "catalogue": "Catálogo",
+    "blog": "Blog",
+    "faqs": "FAQs",
+    "shop": "Loja",
+    "askForQuotation": "Solicitar cotação"
   },
   "common": {
     "learnMore": "Saiba Mais",
@@ -173,21 +192,27 @@
   },
   "contact": {
     "field1": "Nome",
-    "field1Placeholder": "Seu nome",
-    "field2": "Telefone",
-    "field2Placeholder": "Seu telefone",
+    "field1Placeholder": "Maria",
+    "field2": "Sobrenome",
+    "field2Placeholder": "Silva",
     "email": "E-mail",
     "emailPlaceholder": "seu@email.com",
     "company": "Empresa",
     "companyPlaceholder": "Nome da empresa",
     "message": "Mensagem",
     "messagePlaceholder": "Como podemos ajudar?",
-    "submit": "Enviar"
+    "submit": "Enviar mensagem",
+    "country": "País",
+    "countryPlaceholder": "Seu país",
+    "subject": "Assunto",
+    "subjectPlaceholder": "Como podemos ajudar?",
+    "success": "Obrigado. Nossa equipe entrará em contato em breve."
   },
   "pages": {
     "about": {
       "title": "Sobre Nós",
-      "eyebrow": "Empresa"
+      "eyebrow": "Empresa",
+      "description": "Nossa história, missão e presença global em horticultura."
     },
     "contact": {
       "title": "Fale Conosco",
@@ -203,7 +228,8 @@
     },
     "terms": {
       "title": "Termos de Uso",
-      "eyebrow": "Legal"
+      "eyebrow": "Legal",
+      "description": "Termos e condições de uso do site e serviços Oboya."
     },
     "sustainability": {
       "title": "Sustentabilidade",
@@ -300,6 +326,462 @@
     "industriesBerries": {
       "title": "Bagas e Frutas Vermelhas",
       "eyebrow": "Setores"
+    },
+    "faqs": {
+      "title": "Perguntas frequentes",
+      "eyebrow": "Suporte",
+      "description": "Respostas sobre produtos, envio e cotações."
+    },
+    "workWithUs": {
+      "title": "Trabalhe conosco",
+      "eyebrow": "Carreiras",
+      "description": "Junte-se a uma equipe global de soluções hortícolas integradas."
+    }
+  },
+  "aboutPage": {
+    "nav": {
+      "history": "History",
+      "mission": "Mission & Values",
+      "timeline": "Timeline",
+      "presence": "Global Presence",
+      "certifications": "Certifications",
+      "leadership": "Leadership",
+      "partners": "Partners"
+    },
+    "history": {
+      "title": "Our history",
+      "p1": "Founded as a regional horticulture supplier, Oboya has grown into a global partner supporting propagation, growing, packaging, and retail display.",
+      "p2": "Today we operate across 25 countries with local teams, production hubs, and strategic partners serving growers worldwide.",
+      "imageAlt": "Oboya greenhouse operations"
+    },
+    "mission": {
+      "title": "Mission, vision & values",
+      "description": "We help growers deliver quality, efficiency, and sustainability across the supply chain."
+    },
+    "vision": {
+      "title": "Vision",
+      "description": "To be the most trusted integrated horticulture partner worldwide."
+    },
+    "values": {
+      "title": "Values",
+      "description": "Integrity, innovation, and sustainability guide every decision we make."
+    },
+    "valuesList": {
+      "integrity": "Integrity in every partnership",
+      "innovation": "Innovation for growers",
+      "sustainability": "Sustainability by design"
+    },
+    "timeline": {
+      "title": "Milestones",
+      "m1": {
+        "year": "1998",
+        "title": "Company founded",
+        "description": "Oboya begins as a regional horticulture supplier."
+      },
+      "m2": {
+        "year": "2005",
+        "title": "European expansion",
+        "description": "First distribution hubs open across Northern Europe."
+      },
+      "m3": {
+        "year": "2012",
+        "title": "Packaging innovation",
+        "description": "Retail-ready packaging line launched for berries and vegetables."
+      },
+      "m4": {
+        "year": "2017",
+        "title": "Asia-Pacific growth",
+        "description": "Production and sales offices established in key APAC markets."
+      },
+      "m5": {
+        "year": "2021",
+        "title": "Sustainability program",
+        "description": "Circular packaging and waste-reduction initiatives scaled globally."
+      },
+      "m6": {
+        "year": "2025",
+        "title": "Digital B2B shop",
+        "description": "International quotation platform launched for commercial buyers."
+      }
+    },
+    "presence": {
+      "title": "Global presence",
+      "description": "With offices, warehouses, and partners across continents, we support growers close to their operations.",
+      "cta": "Explore the interactive map"
+    },
+    "leadership": {
+      "title": "Leadership team",
+      "l1": {
+        "name": "Elena Nordström",
+        "role": "Chief Executive Officer"
+      },
+      "l2": {
+        "name": "James Whitfield",
+        "role": "Chief Operating Officer"
+      },
+      "l3": {
+        "name": "Ana Ribeiro",
+        "role": "Chief Commercial Officer"
+      },
+      "l4": {
+        "name": "Li Wei",
+        "role": "Head of Asia-Pacific"
+      }
+    },
+    "partners": {
+      "title": "Strategic partners",
+      "p1": "GreenHouse Pro",
+      "p2": "AgriPack",
+      "p3": "FloraLogix",
+      "p4": "BerryChain",
+      "p5": "Nordic Grow",
+      "p6": "Sunbelt Supply"
+    }
+  },
+  "shop": {
+    "eyebrow": "B2B Shop",
+    "title": "International product showcase",
+    "description": "Select your country and currency to browse available products and request a commercial quotation.",
+    "bannerShop": "Loja Online",
+    "bannerTagline": "Abastecimento B2B de produtos",
+    "bannerDescription": "Explore o portfólio global de horticultura da Oboya para o seu mercado. Monte sua lista de cotação, revise preços estimados e envie uma solicitação comercial ao escritório local — compras profissionais, sem checkout online.",
+    "selectCountry": "Country",
+    "chooseCountry": "Select a country",
+    "selectCurrency": "Currency",
+    "chooseCurrency": "Select a currency",
+    "gateHint": "Products below are filtered for your selected market.",
+    "selectToBrowse": "Select a country and currency to browse products.",
+    "noProducts": "No products are currently available for this market.",
+    "addToCart": "Add to cart",
+    "emptyCart": "Your cart is empty.",
+    "backToShop": "Back to shop",
+    "remove": "Remove",
+    "estimatedTotal": "Estimated total",
+    "estimateDisclaimer": "Final pricing is confirmed by your local sales team.",
+    "continueToCheckout": "Continue to checkout",
+    "cartTitle": "Your cart",
+    "cartDescription": "Review quantities and estimated value before requesting a quotation.",
+    "checkoutTitle": "Request a quotation",
+    "checkoutDescription": "No payment is collected online. Submit your request to the local commercial team.",
+    "orderSummary": "Order summary",
+    "company": "Company",
+    "country": "Country",
+    "phone": "Phone",
+    "email": "Email",
+    "notes": "Additional notes",
+    "askForQuotation": "Ask for Quotation",
+    "contactSales": "Contact Local Sales Team",
+    "quoteConfirmed": "Quotation request received",
+    "quoteNumber": "Reference: {id}",
+    "stepProducts": "Produtos",
+    "stepCart": "Carrinho",
+    "stepCheckout": "Cotação",
+    "stepNavLabel": "Etapas da loja",
+    "viewCart": "Ver carrinho",
+    "cartSummary": "{count, plural, one {# item no carrinho} other {# itens no carrinho}}",
+    "continueShopping": "Continuar comprando",
+    "backToCart": "Voltar ao carrinho",
+    "products": {
+      "growing-media-premium": "Growing Media Premium",
+      "strawberry-packaging": "Strawberry Packaging",
+      "flower-display-trolley": "Flower Display Trolley",
+      "propagation-tray": "Propagation Tray",
+      "retail-clamshell": "Retail Clamshell",
+      "irrigation-kit": "Irrigation Kit",
+      "coco-substrate-block": "Coco Substrate Block",
+      "peat-mix-professional": "Peat Mix Professional",
+      "berry-punnet-pack": "Berry Punnet Pack",
+      "herb-retail-sleeve": "Herb Retail Sleeve",
+      "display-trolley-xl": "Display Trolley Xl",
+      "drip-irrigation-pro": "Drip Irrigation Pro",
+      "seedling-tray-128": "Seedling Tray 128",
+      "climate-screen-diffuse": "Climate Screen Diffuse",
+      "crop-protection-net": "Crop Protection Net",
+      "plant-label-system": "Plant Label System",
+      "bulk-substrate-bag": "Bulk Substrate Bag",
+      "tomato-clamshell": "Tomato Clamshell",
+      "watering-boom-system": "Watering Boom System",
+      "ornamental-trolley": "Ornamental Trolley",
+      "vertical-farm-tray": "Vertical Farm Tray",
+      "compostable-packaging": "Compostable Packaging",
+      "greenhouse-shade-net": "Greenhouse Shade Net",
+      "rfid-plant-tag": "Rfid Plant Tag",
+      "premium-orchid-media": "Premium Orchid Media",
+      "automated-irrigation-hub": "Automated Irrigation Hub",
+      "retail-berry-tower": "Retail Berry Tower",
+      "propagation-dome-kit": "Propagation Dome Kit",
+      "sustainable-punnet": "Sustainable Punnet",
+      "logistics-pallet-box": "Logistics Pallet Box"
+    },
+    "searchPlaceholder": "Search products, SKU or category",
+    "clearSearch": "Clear search",
+    "sortBy": "Sort by",
+    "viewMode": "View",
+    "viewGrid": "Grid view",
+    "viewList": "List view",
+    "filters": "Filters",
+    "clearFilters": "Clear all filters",
+    "closeFilters": "Close filters",
+    "close": "Close",
+    "filterCategories": "Categories",
+    "allCategories": "All categories",
+    "filterSubcategories": "Subcategories",
+    "filterBrands": "Brands",
+    "filterApplication": "Application",
+    "filterCulture": "Crop / culture",
+    "filterCertifications": "Certifications",
+    "filterOrigin": "Country of manufacture",
+    "filterAvailability": "Availability",
+    "filterPriceRange": "Price range",
+    "inStockOnly": "In stock only",
+    "priceMin": "Min",
+    "priceMax": "Max",
+    "quickView": "Quick View",
+    "addToQuote": "Add to Quote",
+    "estimatedPrice": "Estimated price",
+    "requestQuotation": "Request Quotation",
+    "quoteList": "Quote list",
+    "viewQuoteList": "Ver lista de cotação",
+    "minimizeQuoteList": "Minimizar lista de cotação",
+    "expandQuoteList": "Abrir lista de cotação",
+    "items": "items",
+    "emptyQuote": "Your quote list is empty. Add products to request a quotation.",
+    "selectCountryPromptTitle": "Select your market to begin",
+    "selectCountryPromptDesc": "Choose a country and currency above to browse products available in your region and connect with your local commercial office.",
+    "noResultsTitle": "No products match your filters",
+    "noResultsDesc": "Try adjusting your search or clearing some filters.",
+    "resultsCount": "{count} products",
+    "loadMore": "Load more products",
+    "officeCardEyebrow": "Your commercial office",
+    "specifications": "Specifications",
+    "downloads": "Downloads",
+    "relatedProducts": "Related products",
+    "quantity": "Quantidade",
+    "addToQuoteDialogTitle": "Adicionar à lista de cotação",
+    "addToQuoteDialogDescription": "Informe a quantidade que deseja incluir na sua solicitação de cotação.",
+    "confirmAddToQuote": "Adicionar à cotação",
+    "cancel": "Cancelar",
+    "lineTotal": "Total da linha",
+    "decreaseQuantity": "Diminuir quantidade",
+    "increaseQuantity": "Aumentar quantidade",
+    "moq": "MOQ: {count} unidades",
+    "moqMinimumHint": "Quantidade mínima de pedido: {count} unidades",
+    "productDescriptionFallback": "Professional-grade horticulture solution designed for commercial growers and distributors. Contact your local office for detailed technical information and market-specific availability.",
+    "contactName": "Contact name",
+    "submitting": "Submitting…",
+    "continueBrowsing": "Continue browsing",
+    "rfqError": "We could not submit your request. Please try again or contact your local office.",
+    "retry": "Retry",
+    "loadError": "Unable to load products. Please refresh the page.",
+    "offlineMessage": "You are offline. Some features may be unavailable.",
+    "sort": {
+      "relevance": "Relevance",
+      "name_asc": "Name A–Z",
+      "name_desc": "Name Z–A",
+      "price_asc": "Price: low to high",
+      "price_desc": "Price: high to low",
+      "availability": "Availability"
+    },
+    "stock": {
+      "in_stock": "In stock",
+      "limited": "Limited",
+      "on_request": "On request"
+    }
+  },
+  "blog": {
+    "eyebrow": "Blog",
+    "title": "Insights & news",
+    "description": "Trends, innovation, and stories from across the horticulture supply chain.",
+    "readMore": "Read article",
+    "posts": {
+      "post1": {
+        "title": "Sustainable packaging trends in fresh produce",
+        "excerpt": "How retailers and growers are aligning packaging with circular economy goals.",
+        "p1": "Retailers are demanding packaging that protects product quality while reducing environmental impact.",
+        "p2": "Oboya partners with growers to pilot recyclable formats and optimize shelf presentation.",
+        "p3": "Early pilots show improved waste recovery without compromising freshness."
+      },
+      "post2": {
+        "title": "Greenhouse innovation in 2026",
+        "excerpt": "Climate control, substrates, and logistics are converging in modern greenhouse design.",
+        "p1": "Integrated systems help growers manage humidity, irrigation, and crop cycles with greater precision.",
+        "p2": "Digital monitoring and modular equipment reduce downtime across large facilities.",
+        "p3": "The next wave of investment focuses on energy efficiency and automation."
+      },
+      "post3": {
+        "title": "Berry category growth in retail",
+        "excerpt": "Packaging and display solutions supporting premium berry programs.",
+        "p1": "Berry sales continue to outperform broader produce categories in many markets.",
+        "p2": "Retail-ready packs and display trolleys improve visibility and reduce handling damage.",
+        "p3": "Localized assortments help chains tailor pack sizes to regional demand."
+      }
+    }
+  },
+  "caseStudies": {
+    "eyebrow": "Case Studies",
+    "title": "Proven results worldwide",
+    "description": "Selected projects demonstrating Oboya solutions across markets and crop types.",
+    "readMore": "View case study",
+    "challengeLabel": "Challenge",
+    "solutionLabel": "Solution",
+    "resultLabel": "Result",
+    "items": {
+      "case1": {
+        "title": "Scaling greenhouse logistics in the Netherlands",
+        "excerpt": "A commercial greenhouse group needed consistent tray and trolley flows across sites.",
+        "challenge": "Inconsistent logistics hardware slowed transplanting and dispatch cycles.",
+        "solution": "Oboya standardized trolley formats and propagation trays across three facilities.",
+        "result": "Handling time dropped 18% and dispatch accuracy improved across peak season."
+      },
+      "case2": {
+        "title": "Berry packaging program in Brazil",
+        "excerpt": "A berry exporter required retail-ready packs for multiple supermarket chains.",
+        "challenge": "Existing packs failed shelf-life targets for export programs.",
+        "solution": "Custom clamshell formats and palletization support were deployed with local partners.",
+        "result": "Waste claims fell 22% while maintaining premium shelf presentation."
+      },
+      "case3": {
+        "title": "Distribution hub modernization in Mexico",
+        "excerpt": "A regional distributor needed faster replenishment for greenhouse clients.",
+        "challenge": "Fragmented inventory and long lead times affected grower planning.",
+        "solution": "Oboya implemented a hub-and-spoke model with localized SKU assortments.",
+        "result": "Average replenishment lead time improved from 11 to 6 days."
+      },
+      "case4": {
+        "title": "Growing media supply in China",
+        "excerpt": "A nursery network sought consistent substrate quality across provinces.",
+        "challenge": "Variable substrate batches affected rooting uniformity.",
+        "solution": "Premium growing media blends were qualified and supplied through regional partners.",
+        "result": "Rooting consistency improved and rework rates declined across propagation lines."
+      }
+    }
+  },
+  "faqsPage": {
+    "intro": "Find quick answers about products, logistics, quotations, and support.",
+    "categories": {
+      "products": "Products",
+      "shipping": "Shipping",
+      "quotations": "Quotations",
+      "support": "Support"
+    },
+    "products": {
+      "q1": {
+        "question": "How do I know which products are available in my country?",
+        "answer": "Use the B2B shop to select your country and currency. Only available SKUs will be shown."
+      },
+      "q2": {
+        "question": "Are catalogue products the same as shop products?",
+        "answer": "The PDF catalogue shows the full range. The shop filters items available in your market."
+      },
+      "q3": {
+        "question": "Can I request samples?",
+        "answer": "Yes. Contact your local office or submit a quotation request with sample notes."
+      }
+    },
+    "shipping": {
+      "q1": {
+        "question": "Do you ship internationally?",
+        "answer": "Yes. Availability and lead times vary by product and destination."
+      },
+      "q2": {
+        "question": "How are lead times estimated?",
+        "answer": "Your local sales team confirms lead times after quotation review."
+      }
+    },
+    "quotations": {
+      "q1": {
+        "question": "Does checkout process payment?",
+        "answer": "No. Checkout creates a quotation request for the local commercial team."
+      },
+      "q2": {
+        "question": "What information should I include?",
+        "answer": "Company, country, contact details, quantities, and any project notes."
+      },
+      "q3": {
+        "question": "How fast will I receive a response?",
+        "answer": "Most requests receive a response within two business days."
+      }
+    },
+    "support": {
+      "q1": {
+        "question": "How do I contact a specific office?",
+        "answer": "Use the interactive map on the homepage or the contact form with an office reference."
+      },
+      "q2": {
+        "question": "Which languages are supported?",
+        "answer": "Our site is available in English, Portuguese, Spanish, and Chinese."
+      }
+    }
+  },
+  "workWithUsPage": {
+    "intro": "Build your career with a global horticulture company focused on innovation, sustainability, and local impact.",
+    "benefits": {
+      "b1": {
+        "title": "Global reach",
+        "description": "Work with teams and growers across 25 countries."
+      },
+      "b2": {
+        "title": "Learning culture",
+        "description": "Continuous development in products, operations, and sustainability."
+      },
+      "b3": {
+        "title": "Local impact",
+        "description": "Support growers in your region with integrated solutions."
+      },
+      "b4": {
+        "title": "Inclusive teams",
+        "description": "Collaborative teams across disciplines and markets."
+      }
+    },
+    "openings": {
+      "title": "Open positions",
+      "o1": {
+        "title": "Regional Sales Manager",
+        "location": "São Paulo, Brazil",
+        "type": "Full-time"
+      },
+      "o2": {
+        "title": "Packaging Product Specialist",
+        "location": "Malmö, Sweden",
+        "type": "Full-time"
+      },
+      "o3": {
+        "title": "Greenhouse Solutions Engineer",
+        "location": "Shanghai, China",
+        "type": "Full-time"
+      }
+    },
+    "application": {
+      "title": "Spontaneous application",
+      "description": "Don't see a matching role? Send your profile and we'll keep it on file.",
+      "name": "Full name",
+      "email": "Email",
+      "message": "Tell us about your experience",
+      "submit": "Submit application",
+      "success": "Thank you. Our HR team has received your application."
+    }
+  },
+  "legalPage": {
+    "updated": "Last updated: March 2026",
+    "s1": {
+      "title": "1. Acceptance of terms",
+      "body": "By accessing this website you agree to these terms and conditions. If you do not agree, please discontinue use of the site."
+    },
+    "s2": {
+      "title": "2. Use of content",
+      "body": "All content is provided for informational purposes. Product specifications, availability, and pricing may change without notice."
+    },
+    "s3": {
+      "title": "3. Intellectual property",
+      "body": "Trademarks, logos, text, images, and catalogue materials are owned by Oboya or its licensors and may not be reused without permission."
+    },
+    "s4": {
+      "title": "4. Limitation of liability",
+      "body": "Oboya is not liable for indirect damages arising from use of the website or reliance on estimated pricing shown in the B2B shop."
+    },
+    "s5": {
+      "title": "5. Contact",
+      "body": "For legal inquiries contact legal@oboya.example or your local Oboya office listed on the contact page."
     }
   }
 }

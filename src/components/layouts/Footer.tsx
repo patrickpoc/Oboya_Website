@@ -13,7 +13,7 @@ export async function Footer() {
   return (
     <footer className="bg-oboya-soft-white pt-16 pb-8">
       <Container>
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-6">
           <div className="lg:col-span-2">
             <Logo className="mb-6" />
             <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
@@ -61,10 +61,28 @@ export async function Footer() {
 
           <div>
             <h3 className="mb-4 text-sm font-semibold tracking-wider text-oboya-blue-dark uppercase">
-              {t("footer.solutions")}
+              {t("footer.resources")}
             </h3>
             <ul className="flex flex-col gap-3">
-              {footerNavigation.solutions.map((link) => (
+              {footerNavigation.resources.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-muted-foreground transition-colors hover:text-oboya-green"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="mb-4 text-sm font-semibold tracking-wider text-oboya-blue-dark uppercase">
+              {t("footer.shopSection")}
+            </h3>
+            <ul className="flex flex-col gap-3">
+              {footerNavigation.shop.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}

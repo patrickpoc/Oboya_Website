@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { fontVariables, notoSansSC } from "@/lib/fonts";
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
+import { AppProviders } from "@/components/providers/AppProviders";
 import "../globals.css";
 
 export function generateStaticParams() {
@@ -47,7 +48,7 @@ export default async function LocaleLayout({
         )}
       >
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <AppProviders>{children}</AppProviders>
         </NextIntlClientProvider>
       </body>
     </html>

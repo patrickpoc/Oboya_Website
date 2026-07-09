@@ -40,7 +40,7 @@ export function CallToAction() {
               <ArrowRight className="size-4" />
             </Link>
             <Link
-              href="/solutions"
+              href="/case-studies"
               className={buttonVariants({
                 variant: "outline",
                 size: "lg",

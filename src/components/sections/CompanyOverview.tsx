@@ -29,7 +29,7 @@ export function CompanyOverview() {
   return (
     <section
       ref={sectionRef}
-      className="bg-oboya-blue-dark pb-[var(--section-y-sm)] pt-16 md:pt-20"
+      className="bg-oboya-blue-dark pb-[var(--section-y-sm)] pt-24 md:pt-32"
     >
       <Container>
         <div className="grid items-center gap-6 sm:gap-8 lg:grid-cols-12 lg:gap-8 xl:gap-10">

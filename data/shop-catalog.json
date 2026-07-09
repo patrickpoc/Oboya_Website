@@ -1,0 +1,60 @@
+{
+  "countries": [
+    { "code": "US", "name": "United States", "currencies": ["USD"], "defaultCurrency": "USD" },
+    { "code": "BR", "name": "Brazil", "currencies": ["BRL", "USD"], "defaultCurrency": "BRL" },
+    { "code": "MX", "name": "Mexico", "currencies": ["USD", "EUR"], "defaultCurrency": "USD" },
+    { "code": "NO", "name": "Norway", "currencies": ["EUR", "USD"], "defaultCurrency": "EUR" },
+    { "code": "CN", "name": "China", "currencies": ["USD", "EUR"], "defaultCurrency": "USD" },
+    { "code": "GB", "name": "United Kingdom", "currencies": ["EUR", "USD"], "defaultCurrency": "EUR" }
+  ],
+  "products": [
+    {
+      "id": "growing-media-premium",
+      "sku": "GM-001",
+      "category": "Growing Media",
+      "image": "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
+      "availability": { "US": true, "BR": true, "MX": true, "NO": true, "CN": true, "GB": true },
+      "prices": { "USD": 89.0, "BRL": 480.0, "EUR": 82.0 }
+    },
+    {
+      "id": "strawberry-packaging",
+      "sku": "PK-204",
+      "category": "Packaging",
+      "image": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
+      "availability": { "US": true, "BR": true, "MX": true, "NO": false, "CN": true, "GB": true },
+      "prices": { "USD": 42.5, "BRL": 230.0, "EUR": 39.0 }
+    },
+    {
+      "id": "flower-display-trolley",
+      "sku": "EQ-118",
+      "category": "Equipment",
+      "image": "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
+      "availability": { "US": true, "BR": false, "MX": true, "NO": true, "CN": false, "GB": true },
+      "prices": { "USD": 320.0, "BRL": 1720.0, "EUR": 295.0 }
+    },
+    {
+      "id": "propagation-tray",
+      "sku": "PR-055",
+      "category": "Propagation",
+      "image": "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
+      "availability": { "US": true, "BR": true, "MX": true, "NO": true, "CN": true, "GB": false },
+      "prices": { "USD": 18.0, "BRL": 95.0, "EUR": 16.5 }
+    },
+    {
+      "id": "retail-clamshell",
+      "sku": "PK-310",
+      "category": "Packaging",
+      "image": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
+      "availability": { "US": true, "BR": true, "MX": false, "NO": true, "CN": true, "GB": true },
+      "prices": { "USD": 24.0, "BRL": 128.0, "EUR": 22.0 }
+    },
+    {
+      "id": "irrigation-kit",
+      "sku": "EQ-402",
+      "category": "Equipment",
+      "image": "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
+      "availability": { "US": true, "BR": true, "MX": true, "NO": false, "CN": true, "GB": true },
+      "prices": { "USD": 156.0, "BRL": 840.0, "EUR": 142.0 }
+    }
+  ]
+}

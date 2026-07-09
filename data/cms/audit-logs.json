@@ -1,0 +1,32 @@
+[
+  {
+    "id": "log-001",
+    "userId": "user-1",
+    "userName": "Oboya Admin",
+    "action": "update",
+    "module": "global_presence",
+    "resourceId": "BR",
+    "details": "Updated Brazil office business hours",
+    "createdAt": "2026-07-08T15:00:00.000Z"
+  },
+  {
+    "id": "log-002",
+    "userId": "user-2",
+    "userName": "Maria Silva",
+    "action": "publish",
+    "module": "blog",
+    "resourceId": "sustainable-packaging-trends",
+    "details": "Published blog post",
+    "createdAt": "2026-07-07T11:30:00.000Z"
+  },
+  {
+    "id": "log-003",
+    "userId": "user-1",
+    "userName": "Oboya Admin",
+    "action": "create",
+    "module": "marketplace",
+    "resourceId": "growing-media-premium",
+    "details": "Updated product MOQ",
+    "createdAt": "2026-07-06T09:15:00.000Z"
+  }
+]

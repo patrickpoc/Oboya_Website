@@ -28,7 +28,10 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isLoginPage = pathname === "/admin/login";
+  const isLoginPage =
+    pathname === "/admin/login" ||
+    pathname === "/admin/forgot-password" ||
+    pathname === "/admin/reset-password";
   const isAuthCallback = pathname.startsWith("/auth/callback");
 
   if (!user && !isLoginPage && !isAuthCallback) {
@@ -40,7 +43,7 @@ export async function updateSession(request: NextRequest) {
 
   if (user && isLoginPage) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/admin/map";
+    redirectUrl.pathname = "/admin/dashboard";
     redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }

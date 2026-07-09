@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { SiteLayout } from "@/components/layouts/SiteLayout";
+import { AboutPageContent } from "@/components/about/AboutPageContent";
 import { ContactForm } from "@/components/sections/ContactForm";
+import { FaqsPageContent } from "@/components/faqs/FaqsPageContent";
+import { WorkWithUsPageContent } from "@/components/work-with-us/WorkWithUsPageContent";
+import { LegalPageContent } from "@/components/legal/LegalPageContent";
 import { InnerPageHero } from "@/components/sections/InnerPageHero";
 import { LoremContent } from "@/components/sections/LoremContent";
 import { PageListing } from "@/components/sections/PageListing";
@@ -66,14 +70,25 @@ export default async function InnerPage({ params }: PageProps) {
   const title = t(`${config.messageKey}.title`);
   const eyebrow = t(`${config.messageKey}.eyebrow`);
 
+  const description =
+    config.template === "about"
+      ? t("about.description")
+      : config.template === "faqs"
+        ? t("faqs.description")
+        : config.template === "workWithUs"
+          ? t("workWithUs.description")
+          : config.template === "legal"
+            ? t("terms.description")
+            : tCommon("loremShort");
+
   return (
     <SiteLayout>
-      <InnerPageHero
-        eyebrow={eyebrow}
-        title={title}
-        description={tCommon("loremShort")}
-      />
+      <InnerPageHero eyebrow={eyebrow} title={title} description={description} />
+      {config.template === "about" && <AboutPageContent />}
       {config.template === "contact" && <ContactForm />}
+      {config.template === "faqs" && <FaqsPageContent />}
+      {config.template === "workWithUs" && <WorkWithUsPageContent />}
+      {config.template === "legal" && <LegalPageContent />}
       {config.template === "listing" && <PageListing items={children} />}
       {(!config.template || config.template === "default") && <LoremContent />}
     </SiteLayout>

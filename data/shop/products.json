@@ -1,0 +1,2174 @@
+[
+  {
+    "id": "growing-media-premium",
+    "sku": "GM-001",
+    "brandId": "oboya",
+    "categoryId": "growing-media",
+    "subcategoryId": "substrates",
+    "images": [
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "growing media",
+      "In Stock"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": true,
+      "NO": true,
+      "CN": true,
+      "GB": true
+    },
+    "prices": {
+      "USD": 89,
+      "BRL": 480,
+      "EUR": 82
+    },
+    "application": [
+      "greenhouse",
+      "nursery"
+    ],
+    "cultures": [
+      "vegetables",
+      "herbs"
+    ],
+    "certifications": [
+      "iso-9001",
+      "rhp"
+    ],
+    "countryOfOrigin": "NL",
+    "stockStatus": "in_stock",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "2 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "strawberry-packaging",
+      "flower-display-trolley"
+    ],
+    "moq": 100
+  },
+  {
+    "id": "strawberry-packaging",
+    "sku": "PK-204",
+    "brandId": "greenline",
+    "categoryId": "packaging",
+    "subcategoryId": "retail",
+    "images": [
+      "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "packaging",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": true,
+      "NO": false,
+      "CN": true,
+      "GB": true
+    },
+    "prices": {
+      "USD": 42.5,
+      "BRL": 230,
+      "EUR": 39
+    },
+    "application": [
+      "retail",
+      "greenhouse"
+    ],
+    "cultures": [
+      "fruits",
+      "fruits"
+    ],
+    "certifications": [
+      "food-safe",
+      "iso-14001"
+    ],
+    "countryOfOrigin": "BR",
+    "stockStatus": "limited",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "3 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "flower-display-trolley",
+      "propagation-tray"
+    ],
+    "moq": 1000
+  },
+  {
+    "id": "flower-display-trolley",
+    "sku": "EQ-118",
+    "brandId": "agriflow",
+    "categoryId": "equipment",
+    "subcategoryId": "trolleys",
+    "images": [
+      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1591857177580-dc82bfcb3e1e?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "equipment",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": false,
+      "MX": true,
+      "NO": true,
+      "CN": false,
+      "GB": true
+    },
+    "prices": {
+      "USD": 320,
+      "BRL": 1720,
+      "EUR": 295
+    },
+    "application": [
+      "open-field",
+      "nursery"
+    ],
+    "cultures": [
+      "flowers"
+    ],
+    "certifications": [
+      "iso-9001"
+    ],
+    "countryOfOrigin": "CN",
+    "stockStatus": "on_request",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "4 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "propagation-tray",
+      "retail-clamshell"
+    ],
+    "moq": 10
+  },
+  {
+    "id": "propagation-tray",
+    "sku": "PR-055",
+    "brandId": "nordgrow",
+    "categoryId": "propagation",
+    "subcategoryId": "trays",
+    "images": [
+      "https://images.unsplash.com/photo-1591857177580-dc82bfcb3e1e?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "propagation",
+      "In Stock"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": true,
+      "NO": true,
+      "CN": true,
+      "GB": false
+    },
+    "prices": {
+      "USD": 18,
+      "BRL": 95,
+      "EUR": 16.5
+    },
+    "application": [
+      "vertical-farming",
+      "greenhouse"
+    ],
+    "cultures": [
+      "vegetables"
+    ],
+    "certifications": [
+      "organic",
+      "rhp"
+    ],
+    "countryOfOrigin": "NO",
+    "stockStatus": "in_stock",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "2 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "retail-clamshell",
+      "irrigation-kit"
+    ],
+    "moq": 500
+  },
+  {
+    "id": "retail-clamshell",
+    "sku": "PK-310",
+    "brandId": "packwell",
+    "categoryId": "packaging",
+    "subcategoryId": "retail",
+    "images": [
+      "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "packaging",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": false,
+      "NO": true,
+      "CN": true,
+      "GB": true
+    },
+    "prices": {
+      "USD": 24,
+      "BRL": 128,
+      "EUR": 22
+    },
+    "application": [
+      "greenhouse",
+      "retail"
+    ],
+    "cultures": [
+      "fruits",
+      "flowers"
+    ],
+    "certifications": [
+      "iso-14001",
+      "food-safe"
+    ],
+    "countryOfOrigin": "US",
+    "stockStatus": "limited",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "3 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "irrigation-kit",
+      "coco-substrate-block"
+    ],
+    "moq": 2000
+  },
+  {
+    "id": "irrigation-kit",
+    "sku": "EQ-402",
+    "brandId": "oboya",
+    "categoryId": "equipment",
+    "subcategoryId": "trolleys",
+    "images": [
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "equipment",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": true,
+      "NO": false,
+      "CN": true,
+      "GB": true
+    },
+    "prices": {
+      "USD": 156,
+      "BRL": 840,
+      "EUR": 142
+    },
+    "application": [
+      "greenhouse",
+      "nursery"
+    ],
+    "cultures": [
+      "vegetables",
+      "herbs"
+    ],
+    "certifications": [
+      "iso-9001",
+      "rhp"
+    ],
+    "countryOfOrigin": "DE",
+    "stockStatus": "on_request",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "4 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "coco-substrate-block",
+      "peat-mix-professional"
+    ],
+    "moq": 50
+  },
+  {
+    "id": "coco-substrate-block",
+    "sku": "CS-106",
+    "brandId": "greenline",
+    "categoryId": "packaging",
+    "subcategoryId": "retail",
+    "images": [
+      "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "packaging",
+      "In Stock"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": false,
+      "NO": true,
+      "CN": true,
+      "GB": true
+    },
+    "prices": {
+      "USD": 92,
+      "BRL": 510,
+      "EUR": 81
+    },
+    "application": [
+      "retail",
+      "greenhouse"
+    ],
+    "cultures": [
+      "fruits",
+      "fruits"
+    ],
+    "certifications": [
+      "food-safe",
+      "iso-14001"
+    ],
+    "countryOfOrigin": "NL",
+    "stockStatus": "in_stock",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "2 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "peat-mix-professional",
+      "berry-punnet-pack"
+    ],
+    "moq": 200
+  },
+  {
+    "id": "peat-mix-professional",
+    "sku": "PM-107",
+    "brandId": "agriflow",
+    "categoryId": "equipment",
+    "subcategoryId": "trolleys",
+    "images": [
+      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1591857177580-dc82bfcb3e1e?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "equipment",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": false,
+      "MX": true,
+      "NO": true,
+      "CN": true,
+      "GB": false
+    },
+    "prices": {
+      "USD": 99,
+      "BRL": 550,
+      "EUR": 87
+    },
+    "application": [
+      "open-field",
+      "nursery"
+    ],
+    "cultures": [
+      "flowers"
+    ],
+    "certifications": [
+      "iso-9001"
+    ],
+    "countryOfOrigin": "BR",
+    "stockStatus": "limited",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "3 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "berry-punnet-pack",
+      "herb-retail-sleeve"
+    ],
+    "moq": 100
+  },
+  {
+    "id": "berry-punnet-pack",
+    "sku": "BP-108",
+    "brandId": "nordgrow",
+    "categoryId": "propagation",
+    "subcategoryId": "trays",
+    "images": [
+      "https://images.unsplash.com/photo-1591857177580-dc82bfcb3e1e?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "propagation",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": true,
+      "NO": false,
+      "CN": true,
+      "GB": true
+    },
+    "prices": {
+      "USD": 106,
+      "BRL": 590,
+      "EUR": 93
+    },
+    "application": [
+      "vertical-farming",
+      "greenhouse"
+    ],
+    "cultures": [
+      "vegetables"
+    ],
+    "certifications": [
+      "organic",
+      "rhp"
+    ],
+    "countryOfOrigin": "CN",
+    "stockStatus": "on_request",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "4 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "herb-retail-sleeve",
+      "display-trolley-xl"
+    ],
+    "moq": 5000
+  },
+  {
+    "id": "herb-retail-sleeve",
+    "sku": "HR-109",
+    "brandId": "packwell",
+    "categoryId": "protection",
+    "subcategoryId": "netting",
+    "images": [
+      "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "protection",
+      "In Stock"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": true,
+      "NO": true,
+      "CN": true,
+      "GB": false
+    },
+    "prices": {
+      "USD": 113,
+      "BRL": 630,
+      "EUR": 99
+    },
+    "application": [
+      "greenhouse",
+      "retail"
+    ],
+    "cultures": [
+      "fruits",
+      "flowers"
+    ],
+    "certifications": [
+      "iso-14001",
+      "food-safe"
+    ],
+    "countryOfOrigin": "NO",
+    "stockStatus": "in_stock",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "2 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "display-trolley-xl",
+      "drip-irrigation-pro"
+    ],
+    "moq": 3000
+  },
+  {
+    "id": "display-trolley-xl",
+    "sku": "DT-110",
+    "brandId": "oboya",
+    "categoryId": "growing-media",
+    "subcategoryId": "substrates",
+    "images": [
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "growing media",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": false,
+      "MX": false,
+      "NO": true,
+      "CN": true,
+      "GB": true
+    },
+    "prices": {
+      "USD": 120,
+      "BRL": 670,
+      "EUR": 105
+    },
+    "application": [
+      "greenhouse",
+      "nursery"
+    ],
+    "cultures": [
+      "vegetables",
+      "herbs"
+    ],
+    "certifications": [
+      "iso-9001",
+      "rhp"
+    ],
+    "countryOfOrigin": "US",
+    "stockStatus": "limited",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "3 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "drip-irrigation-pro",
+      "seedling-tray-128"
+    ],
+    "moq": 5
+  },
+  {
+    "id": "drip-irrigation-pro",
+    "sku": "DI-111",
+    "brandId": "greenline",
+    "categoryId": "packaging",
+    "subcategoryId": "retail",
+    "images": [
+      "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "packaging",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": true,
+      "NO": true,
+      "CN": true,
+      "GB": false
+    },
+    "prices": {
+      "USD": 127,
+      "BRL": 710,
+      "EUR": 111
+    },
+    "application": [
+      "retail",
+      "greenhouse"
+    ],
+    "cultures": [
+      "fruits",
+      "fruits"
+    ],
+    "certifications": [
+      "food-safe",
+      "iso-14001"
+    ],
+    "countryOfOrigin": "DE",
+    "stockStatus": "on_request",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "4 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "seedling-tray-128",
+      "climate-screen-diffuse"
+    ],
+    "moq": 100
+  },
+  {
+    "id": "seedling-tray-128",
+    "sku": "ST-112",
+    "brandId": "agriflow",
+    "categoryId": "equipment",
+    "subcategoryId": "trolleys",
+    "images": [
+      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1591857177580-dc82bfcb3e1e?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "equipment",
+      "In Stock"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": true,
+      "NO": true,
+      "CN": true,
+      "GB": true
+    },
+    "prices": {
+      "USD": 134,
+      "BRL": 750,
+      "EUR": 117
+    },
+    "application": [
+      "open-field",
+      "nursery"
+    ],
+    "cultures": [
+      "flowers"
+    ],
+    "certifications": [
+      "iso-9001"
+    ],
+    "countryOfOrigin": "NL",
+    "stockStatus": "in_stock",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "2 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "climate-screen-diffuse",
+      "crop-protection-net"
+    ],
+    "moq": 1000
+  },
+  {
+    "id": "climate-screen-diffuse",
+    "sku": "CS-113",
+    "brandId": "nordgrow",
+    "categoryId": "propagation",
+    "subcategoryId": "trays",
+    "images": [
+      "https://images.unsplash.com/photo-1591857177580-dc82bfcb3e1e?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "propagation",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": false,
+      "MX": true,
+      "NO": false,
+      "CN": true,
+      "GB": false
+    },
+    "prices": {
+      "USD": 141,
+      "BRL": 790,
+      "EUR": 123
+    },
+    "application": [
+      "vertical-farming",
+      "greenhouse"
+    ],
+    "cultures": [
+      "vegetables"
+    ],
+    "certifications": [
+      "organic",
+      "rhp"
+    ],
+    "countryOfOrigin": "BR",
+    "stockStatus": "limited",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "3 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "crop-protection-net",
+      "plant-label-system"
+    ],
+    "moq": 50
+  },
+  {
+    "id": "crop-protection-net",
+    "sku": "CP-114",
+    "brandId": "packwell",
+    "categoryId": "protection",
+    "subcategoryId": "netting",
+    "images": [
+      "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "protection",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": false,
+      "NO": true,
+      "CN": true,
+      "GB": true
+    },
+    "prices": {
+      "USD": 148,
+      "BRL": 830,
+      "EUR": 129
+    },
+    "application": [
+      "greenhouse",
+      "retail"
+    ],
+    "cultures": [
+      "fruits",
+      "flowers"
+    ],
+    "certifications": [
+      "iso-14001",
+      "food-safe"
+    ],
+    "countryOfOrigin": "CN",
+    "stockStatus": "on_request",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "4 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "plant-label-system",
+      "bulk-substrate-bag"
+    ],
+    "moq": 200
+  },
+  {
+    "id": "plant-label-system",
+    "sku": "PL-115",
+    "brandId": "oboya",
+    "categoryId": "growing-media",
+    "subcategoryId": "substrates",
+    "images": [
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "growing media",
+      "In Stock"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": true,
+      "NO": true,
+      "CN": true,
+      "GB": false
+    },
+    "prices": {
+      "USD": 155,
+      "BRL": 870,
+      "EUR": 135
+    },
+    "application": [
+      "greenhouse",
+      "nursery"
+    ],
+    "cultures": [
+      "vegetables",
+      "herbs"
+    ],
+    "certifications": [
+      "iso-9001",
+      "rhp"
+    ],
+    "countryOfOrigin": "NO",
+    "stockStatus": "in_stock",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "2 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "bulk-substrate-bag",
+      "tomato-clamshell"
+    ],
+    "moq": 500
+  },
+  {
+    "id": "bulk-substrate-bag",
+    "sku": "BS-116",
+    "brandId": "greenline",
+    "categoryId": "packaging",
+    "subcategoryId": "retail",
+    "images": [
+      "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "packaging",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": false,
+      "MX": true,
+      "NO": true,
+      "CN": true,
+      "GB": true
+    },
+    "prices": {
+      "USD": 162,
+      "BRL": 910,
+      "EUR": 141
+    },
+    "application": [
+      "retail",
+      "greenhouse"
+    ],
+    "cultures": [
+      "fruits",
+      "fruits"
+    ],
+    "certifications": [
+      "food-safe",
+      "iso-14001"
+    ],
+    "countryOfOrigin": "US",
+    "stockStatus": "limited",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "3 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "tomato-clamshell",
+      "watering-boom-system"
+    ],
+    "moq": 500
+  },
+  {
+    "id": "tomato-clamshell",
+    "sku": "TC-117",
+    "brandId": "agriflow",
+    "categoryId": "equipment",
+    "subcategoryId": "trolleys",
+    "images": [
+      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1591857177580-dc82bfcb3e1e?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "equipment",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": true,
+      "NO": true,
+      "CN": true,
+      "GB": false
+    },
+    "prices": {
+      "USD": 169,
+      "BRL": 950,
+      "EUR": 147
+    },
+    "application": [
+      "open-field",
+      "nursery"
+    ],
+    "cultures": [
+      "flowers"
+    ],
+    "certifications": [
+      "iso-9001"
+    ],
+    "countryOfOrigin": "DE",
+    "stockStatus": "on_request",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "4 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "watering-boom-system",
+      "ornamental-trolley"
+    ],
+    "moq": 2000
+  },
+  {
+    "id": "watering-boom-system",
+    "sku": "WB-118",
+    "brandId": "nordgrow",
+    "categoryId": "propagation",
+    "subcategoryId": "trays",
+    "images": [
+      "https://images.unsplash.com/photo-1591857177580-dc82bfcb3e1e?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "propagation",
+      "In Stock"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": false,
+      "NO": false,
+      "CN": true,
+      "GB": true
+    },
+    "prices": {
+      "USD": 176,
+      "BRL": 990,
+      "EUR": 153
+    },
+    "application": [
+      "vertical-farming",
+      "greenhouse"
+    ],
+    "cultures": [
+      "vegetables"
+    ],
+    "certifications": [
+      "organic",
+      "rhp"
+    ],
+    "countryOfOrigin": "NL",
+    "stockStatus": "in_stock",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "2 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "ornamental-trolley",
+      "vertical-farm-tray"
+    ],
+    "moq": 1
+  },
+  {
+    "id": "ornamental-trolley",
+    "sku": "OT-119",
+    "brandId": "packwell",
+    "categoryId": "protection",
+    "subcategoryId": "netting",
+    "images": [
+      "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "protection",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": false,
+      "MX": true,
+      "NO": true,
+      "CN": true,
+      "GB": false
+    },
+    "prices": {
+      "USD": 183,
+      "BRL": 1030,
+      "EUR": 159
+    },
+    "application": [
+      "greenhouse",
+      "retail"
+    ],
+    "cultures": [
+      "fruits",
+      "flowers"
+    ],
+    "certifications": [
+      "iso-14001",
+      "food-safe"
+    ],
+    "countryOfOrigin": "BR",
+    "stockStatus": "limited",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "3 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "vertical-farm-tray",
+      "compostable-packaging"
+    ],
+    "moq": 10
+  },
+  {
+    "id": "vertical-farm-tray",
+    "sku": "VF-120",
+    "brandId": "oboya",
+    "categoryId": "growing-media",
+    "subcategoryId": "substrates",
+    "images": [
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "growing media",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": true,
+      "NO": true,
+      "CN": true,
+      "GB": true
+    },
+    "prices": {
+      "USD": 190,
+      "BRL": 1070,
+      "EUR": 165
+    },
+    "application": [
+      "greenhouse",
+      "nursery"
+    ],
+    "cultures": [
+      "vegetables",
+      "herbs"
+    ],
+    "certifications": [
+      "iso-9001",
+      "rhp"
+    ],
+    "countryOfOrigin": "CN",
+    "stockStatus": "on_request",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "4 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "compostable-packaging",
+      "greenhouse-shade-net"
+    ],
+    "moq": 500
+  },
+  {
+    "id": "compostable-packaging",
+    "sku": "CP-121",
+    "brandId": "greenline",
+    "categoryId": "packaging",
+    "subcategoryId": "retail",
+    "images": [
+      "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "packaging",
+      "In Stock"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": true,
+      "NO": true,
+      "CN": true,
+      "GB": false
+    },
+    "prices": {
+      "USD": 197,
+      "BRL": 1110,
+      "EUR": 171
+    },
+    "application": [
+      "retail",
+      "greenhouse"
+    ],
+    "cultures": [
+      "fruits",
+      "fruits"
+    ],
+    "certifications": [
+      "food-safe",
+      "iso-14001"
+    ],
+    "countryOfOrigin": "NO",
+    "stockStatus": "in_stock",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "2 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "greenhouse-shade-net",
+      "rfid-plant-tag"
+    ],
+    "moq": 1000
+  },
+  {
+    "id": "greenhouse-shade-net",
+    "sku": "GS-122",
+    "brandId": "agriflow",
+    "categoryId": "equipment",
+    "subcategoryId": "trolleys",
+    "images": [
+      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1591857177580-dc82bfcb3e1e?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "equipment",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": false,
+      "MX": false,
+      "NO": true,
+      "CN": true,
+      "GB": true
+    },
+    "prices": {
+      "USD": 204,
+      "BRL": 1150,
+      "EUR": 177
+    },
+    "application": [
+      "open-field",
+      "nursery"
+    ],
+    "cultures": [
+      "flowers"
+    ],
+    "certifications": [
+      "iso-9001"
+    ],
+    "countryOfOrigin": "US",
+    "stockStatus": "limited",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "3 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "rfid-plant-tag",
+      "premium-orchid-media"
+    ],
+    "moq": 100
+  },
+  {
+    "id": "rfid-plant-tag",
+    "sku": "RP-123",
+    "brandId": "nordgrow",
+    "categoryId": "propagation",
+    "subcategoryId": "trays",
+    "images": [
+      "https://images.unsplash.com/photo-1591857177580-dc82bfcb3e1e?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "propagation",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": true,
+      "NO": false,
+      "CN": true,
+      "GB": false
+    },
+    "prices": {
+      "USD": 211,
+      "BRL": 1190,
+      "EUR": 183
+    },
+    "application": [
+      "vertical-farming",
+      "greenhouse"
+    ],
+    "cultures": [
+      "vegetables"
+    ],
+    "certifications": [
+      "organic",
+      "rhp"
+    ],
+    "countryOfOrigin": "DE",
+    "stockStatus": "on_request",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "4 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "premium-orchid-media",
+      "automated-irrigation-hub"
+    ],
+    "moq": 1000
+  },
+  {
+    "id": "premium-orchid-media",
+    "sku": "PO-124",
+    "brandId": "packwell",
+    "categoryId": "protection",
+    "subcategoryId": "netting",
+    "images": [
+      "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "protection",
+      "In Stock"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": true,
+      "NO": true,
+      "CN": true,
+      "GB": true
+    },
+    "prices": {
+      "USD": 218,
+      "BRL": 1230,
+      "EUR": 189
+    },
+    "application": [
+      "greenhouse",
+      "retail"
+    ],
+    "cultures": [
+      "fruits",
+      "flowers"
+    ],
+    "certifications": [
+      "iso-14001",
+      "food-safe"
+    ],
+    "countryOfOrigin": "NL",
+    "stockStatus": "in_stock",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "2 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "automated-irrigation-hub",
+      "retail-berry-tower"
+    ],
+    "moq": 50
+  },
+  {
+    "id": "automated-irrigation-hub",
+    "sku": "AI-125",
+    "brandId": "oboya",
+    "categoryId": "growing-media",
+    "subcategoryId": "substrates",
+    "images": [
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "growing media",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": false,
+      "MX": true,
+      "NO": true,
+      "CN": true,
+      "GB": false
+    },
+    "prices": {
+      "USD": 225,
+      "BRL": 1270,
+      "EUR": 195
+    },
+    "application": [
+      "greenhouse",
+      "nursery"
+    ],
+    "cultures": [
+      "vegetables",
+      "herbs"
+    ],
+    "certifications": [
+      "iso-9001",
+      "rhp"
+    ],
+    "countryOfOrigin": "BR",
+    "stockStatus": "limited",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "3 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "retail-berry-tower",
+      "propagation-dome-kit"
+    ],
+    "moq": 1
+  },
+  {
+    "id": "retail-berry-tower",
+    "sku": "RB-126",
+    "brandId": "greenline",
+    "categoryId": "packaging",
+    "subcategoryId": "retail",
+    "images": [
+      "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "packaging",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": false,
+      "NO": true,
+      "CN": true,
+      "GB": true
+    },
+    "prices": {
+      "USD": 232,
+      "BRL": 1310,
+      "EUR": 201
+    },
+    "application": [
+      "retail",
+      "greenhouse"
+    ],
+    "cultures": [
+      "fruits",
+      "fruits"
+    ],
+    "certifications": [
+      "food-safe",
+      "iso-14001"
+    ],
+    "countryOfOrigin": "CN",
+    "stockStatus": "on_request",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "4 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "propagation-dome-kit",
+      "sustainable-punnet"
+    ],
+    "moq": 5
+  },
+  {
+    "id": "propagation-dome-kit",
+    "sku": "PD-127",
+    "brandId": "agriflow",
+    "categoryId": "equipment",
+    "subcategoryId": "trolleys",
+    "images": [
+      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1591857177580-dc82bfcb3e1e?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "equipment",
+      "In Stock"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": true,
+      "NO": true,
+      "CN": true,
+      "GB": false
+    },
+    "prices": {
+      "USD": 239,
+      "BRL": 1350,
+      "EUR": 207
+    },
+    "application": [
+      "open-field",
+      "nursery"
+    ],
+    "cultures": [
+      "flowers"
+    ],
+    "certifications": [
+      "iso-9001"
+    ],
+    "countryOfOrigin": "NO",
+    "stockStatus": "in_stock",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "2 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "sustainable-punnet",
+      "logistics-pallet-box"
+    ],
+    "moq": 200
+  },
+  {
+    "id": "sustainable-punnet",
+    "sku": "SP-128",
+    "brandId": "nordgrow",
+    "categoryId": "propagation",
+    "subcategoryId": "trays",
+    "images": [
+      "https://images.unsplash.com/photo-1591857177580-dc82bfcb3e1e?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "propagation",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": false,
+      "MX": true,
+      "NO": false,
+      "CN": true,
+      "GB": true
+    },
+    "prices": {
+      "USD": 246,
+      "BRL": 1390,
+      "EUR": 213
+    },
+    "application": [
+      "vertical-farming",
+      "greenhouse"
+    ],
+    "cultures": [
+      "vegetables"
+    ],
+    "certifications": [
+      "organic",
+      "rhp"
+    ],
+    "countryOfOrigin": "US",
+    "stockStatus": "limited",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "3 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "logistics-pallet-box",
+      "growing-media-premium"
+    ],
+    "moq": 5000
+  },
+  {
+    "id": "logistics-pallet-box",
+    "sku": "LP-129",
+    "brandId": "packwell",
+    "categoryId": "protection",
+    "subcategoryId": "netting",
+    "images": [
+      "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "protection",
+      "Quote"
+    ],
+    "availability": {
+      "US": true,
+      "BR": true,
+      "MX": true,
+      "NO": true,
+      "CN": true,
+      "GB": false
+    },
+    "prices": {
+      "USD": 253,
+      "BRL": 1430,
+      "EUR": 219
+    },
+    "application": [
+      "greenhouse",
+      "retail"
+    ],
+    "cultures": [
+      "fruits",
+      "flowers"
+    ],
+    "certifications": [
+      "iso-14001",
+      "food-safe"
+    ],
+    "countryOfOrigin": "DE",
+    "stockStatus": "on_request",
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Commercial grade"
+      },
+      {
+        "label": "Unit",
+        "value": "Per pallet / case"
+      },
+      {
+        "label": "Lead time",
+        "value": "4 weeks"
+      }
+    ],
+    "documents": [
+      {
+        "title": "Technical datasheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      },
+      {
+        "title": "Safety sheet",
+        "url": "/catalogue",
+        "type": "pdf"
+      }
+    ],
+    "relatedProductIds": [
+      "growing-media-premium",
+      "strawberry-packaging"
+    ],
+    "moq": 100
+  }
+]

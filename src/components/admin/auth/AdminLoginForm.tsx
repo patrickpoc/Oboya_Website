@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Logo } from "@/components/brand/Logo";
 import { createClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 
-const isSupabaseConfigured =
-  Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
-  Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-
-function AdminLoginForm() {
+export function AdminLoginForm() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,6 +25,11 @@ function AdminLoginForm() {
     setLoading(true);
     setError(null);
 
+    if (!isSupabaseConfigured()) {
+      window.location.href = searchParams.get("next") ?? "/admin/dashboard";
+      return;
+    }
+
     const supabase = createClient();
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
@@ -36,26 +42,26 @@ function AdminLoginForm() {
       return;
     }
 
-    const next = searchParams.get("next") ?? "/admin/map";
+    const next = searchParams.get("next") ?? "/admin/dashboard";
     window.location.href = next;
   };
 
-  if (!isSupabaseConfigured) {
+  if (!isSupabaseConfigured()) {
     return (
       <Container className="flex min-h-screen items-center justify-center py-12">
         <div className="w-full max-w-sm rounded-2xl border border-border/60 bg-white p-6 shadow-[var(--shadow-card)]">
+          <Logo className="mb-4 h-8 w-auto" href="/admin/dashboard" intl={false} />
           <h1 className="font-display text-xl font-semibold text-oboya-blue-dark">
             Oboya Admin
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Supabase is not configured. Local development uses the JSON file
-            directly.
+            Supabase is not configured. Local development uses mock data.
           </p>
           <a
-            href="/admin/map"
-            className={buttonVariants({ className: "mt-6 w-full" })}
+            href="/admin/dashboard"
+            className={buttonVariants({ className: "mt-6 w-full rounded-full" })}
           >
-            Open map editor
+            Open admin dashboard
           </a>
         </div>
       </Container>
@@ -65,41 +71,46 @@ function AdminLoginForm() {
   return (
     <Container className="flex min-h-screen items-center justify-center py-12">
       <div className="w-full max-w-sm rounded-2xl border border-border/60 bg-white p-6 shadow-[var(--shadow-card)]">
+        <Logo className="mb-4 h-8 w-auto" />
         <h1 className="font-display text-xl font-semibold text-oboya-blue-dark">
-          Oboya Admin
+          Sign in to Admin
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Sign in to edit map locations.
+          Manage your website content and marketplace.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <label className="block space-y-1.5">
-            <span className="text-xs font-medium text-muted-foreground">
-              Email
-            </span>
-            <input
+          <div className="space-y-1.5">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
               type="email"
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
             />
-          </label>
+          </div>
 
-          <label className="block space-y-1.5">
-            <span className="text-xs font-medium text-muted-foreground">
-              Password
-            </span>
-            <input
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
+              <Link
+                href="/admin/forgot-password"
+                className="text-xs text-oboya-green hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
+            <Input
+              id="password"
               type="password"
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
             />
-          </label>
+          </div>
 
           {error && (
             <p className="text-sm text-destructive" role="alert">
@@ -107,7 +118,7 @@ function AdminLoginForm() {
             </p>
           )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full rounded-full" disabled={loading}>
             {loading ? "Signing in…" : "Sign in"}
           </Button>
         </form>
@@ -115,5 +126,3 @@ function AdminLoginForm() {
     </Container>
   );
 }
-
-export { AdminLoginForm };

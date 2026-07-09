@@ -16,7 +16,7 @@ export function GlobalPresence({ locations, mapAlt }: GlobalPresenceProps) {
   const t = useTranslations("globalPresence");
 
   return (
-    <section className="bg-white py-[var(--section-y)]">
+    <section id="global-presence" className="bg-white py-[var(--section-y)]">
       <Container>
         <motion.div
           initial="hidden"
@@ -35,12 +35,11 @@ export function GlobalPresence({ locations, mapAlt }: GlobalPresenceProps) {
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeInUp}
-          className="relative mx-auto w-full"
+          className="relative mx-auto w-full max-w-3xl md:max-w-4xl"
         >
           <InteractiveWorldMap
             locations={locations}
             mapAlt={mapAlt}
-            interactiveHint={t("interactiveHint")}
           />
         </motion.div>
       </Container>

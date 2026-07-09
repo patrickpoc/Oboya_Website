@@ -1,4 +1,11 @@
-export type PageTemplate = "default" | "contact" | "listing";
+export type PageTemplate =
+  | "default"
+  | "contact"
+  | "listing"
+  | "about"
+  | "faqs"
+  | "workWithUs"
+  | "legal";
 
 export interface PageConfig {
   messageKey: string;
@@ -7,11 +14,13 @@ export interface PageConfig {
 }
 
 export const pageRegistry: Record<string, PageConfig> = {
-  about: { messageKey: "about" },
+  about: { messageKey: "about", template: "about" },
   contact: { messageKey: "contact", template: "contact" },
+  "work-with-us": { messageKey: "workWithUs", template: "workWithUs" },
+  faqs: { messageKey: "faqs", template: "faqs" },
   careers: { messageKey: "careers" },
   privacy: { messageKey: "privacy" },
-  terms: { messageKey: "terms" },
+  terms: { messageKey: "terms", template: "legal" },
   sustainability: { messageKey: "sustainability" },
 
   solutions: { messageKey: "solutions", template: "listing" },

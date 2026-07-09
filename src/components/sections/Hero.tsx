@@ -68,7 +68,7 @@ export function Hero() {
               className="mt-4 flex flex-col items-center gap-4 sm:flex-row"
             >
               <Link
-                href="/solutions"
+                href="/shop"
                 className={buttonVariants({
                   size: "lg",
                   className:
@@ -97,7 +97,7 @@ export function Hero() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="mx-auto w-full max-w-2xl pb-10 md:pb-14"
+          className="mx-auto w-full max-w-2xl pb-16 md:pb-24"
         >
           <div
             className={cn(
