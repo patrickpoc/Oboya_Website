@@ -11,12 +11,12 @@ export async function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-oboya-soft-white pt-16 pb-8">
+    <footer className="bg-oboya-soft-white pt-20 pb-10">
       <Container>
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-6">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-6 lg:gap-10">
           <div className="lg:col-span-2">
             <Logo className="mb-6" />
-            <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
+            <p className="max-w-xs text-sm leading-relaxed text-oboya-blue-dark/60">
               {siteConfig.company.address}
               <br />
               {siteConfig.company.email}
@@ -24,7 +24,7 @@ export async function Footer() {
             <div className="mt-6 flex gap-4">
               <Link
                 href={siteConfig.social.linkedin}
-                className="text-sm font-medium text-oboya-blue transition-colors hover:text-oboya-green"
+                className="text-sm font-medium text-oboya-blue-dark/70 transition-colors hover:text-oboya-green"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -32,7 +32,7 @@ export async function Footer() {
               </Link>
               <Link
                 href={siteConfig.social.facebook}
-                className="text-sm font-medium text-oboya-blue transition-colors hover:text-oboya-green"
+                className="text-sm font-medium text-oboya-blue-dark/70 transition-colors hover:text-oboya-green"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -42,7 +42,7 @@ export async function Footer() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-sm font-semibold tracking-wider text-oboya-blue-dark uppercase">
+            <h3 className="mb-5 text-sm font-semibold tracking-wider text-oboya-blue-dark uppercase">
               {t("footer.company")}
             </h3>
             <ul className="flex flex-col gap-3">
@@ -50,7 +50,7 @@ export async function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground transition-colors hover:text-oboya-green"
+                    className="text-sm text-oboya-blue-dark/55 transition-colors hover:text-oboya-green"
                   >
                     {link.label}
                   </Link>
@@ -60,7 +60,7 @@ export async function Footer() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-sm font-semibold tracking-wider text-oboya-blue-dark uppercase">
+            <h3 className="mb-5 text-sm font-semibold tracking-wider text-oboya-blue-dark uppercase">
               {t("footer.resources")}
             </h3>
             <ul className="flex flex-col gap-3">
@@ -68,7 +68,7 @@ export async function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground transition-colors hover:text-oboya-green"
+                    className="text-sm text-oboya-blue-dark/55 transition-colors hover:text-oboya-green"
                   >
                     {link.label}
                   </Link>
@@ -78,7 +78,7 @@ export async function Footer() {
           </div>
 
           <div>
-            <h3 className="mb-4 text-sm font-semibold tracking-wider text-oboya-blue-dark uppercase">
+            <h3 className="mb-5 text-sm font-semibold tracking-wider text-oboya-blue-dark uppercase">
               {t("footer.shopSection")}
             </h3>
             <ul className="flex flex-col gap-3">
@@ -86,7 +86,7 @@ export async function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground transition-colors hover:text-oboya-green"
+                    className="text-sm text-oboya-blue-dark/55 transition-colors hover:text-oboya-green"
                   >
                     {link.label}
                   </Link>
@@ -96,8 +96,8 @@ export async function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border/60 pt-8 sm:flex-row">
-          <p className="text-xs text-muted-foreground">
+        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-oboya-blue-dark/10 pt-8 sm:flex-row">
+          <p className="text-xs text-oboya-blue-dark/50">
             &copy; {currentYear} {siteConfig.name}. {t("footer.rights")}
           </p>
           <ul className="flex gap-6">

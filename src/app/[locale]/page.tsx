@@ -1,17 +1,8 @@
 import { Footer } from "@/components/layouts/Footer";
 import { Navbar } from "@/components/layouts/Navbar";
-import { CallToAction } from "@/components/sections/CallToAction";
-import { Certifications } from "@/components/sections/Certifications";
-import { CompanyOverview } from "@/components/sections/CompanyOverview";
-import { FeaturedProducts } from "@/components/sections/FeaturedProducts";
-import { GlobalPresence } from "@/components/sections/GlobalPresence";
-import { Hero } from "@/components/sections/Hero";
-import { Innovation } from "@/components/sections/Innovation";
-import { News } from "@/components/sections/News";
+import { HomePageContent } from "@/components/sections/HomePageContent";
 import { routing, type Locale } from "@/i18n/routing";
-import {
-  resolveMapLocationsForLocale,
-} from "@/lib/map-locations";
+import { resolveMapLocationsForLocale } from "@/lib/map-locations";
 import { readMapLocations } from "@/lib/map-locations.server";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -51,16 +42,13 @@ export default async function Home({ params }: Props) {
 
   return (
     <>
-      <Navbar transparent />
+      <Navbar transparent variant="minimal" />
       <main>
-        <Hero />
-        <CompanyOverview />
-        <GlobalPresence locations={locations} mapAlt={t("mapAlt")} />
-        <FeaturedProducts />
-        <Innovation />
-        <News />
-        <Certifications />
-        <CallToAction />
+        <HomePageContent
+          locale={locale}
+          locations={locations}
+          mapAlt={t("mapAlt")}
+        />
       </main>
       <Footer />
     </>

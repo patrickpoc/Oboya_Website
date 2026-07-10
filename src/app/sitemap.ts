@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
 import { getAllPageSlugs } from "@/constants/pages";
+import { readBlogPosts } from "@/lib/cms/readers";
 
 const baseUrl = "https://oboya.cc";
 
@@ -28,5 +29,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  return [...homeEntries, ...catalogueEntries, ...pageEntries];
+  const newsEntries = routing.locales.flatMap((locale) => {
+    const index = {
+      url: `${baseUrl}/${locale}/news`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.85,
+    };
+    const articles = readBlogPosts().map((post) => ({
+      url: `${baseUrl}/${locale}/news/${post.slug}`,
+      lastModified: post.updatedAt ? new Date(post.updatedAt) : new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.75,
+    }));
+    return [index, ...articles];
+  });
+
+  return [...homeEntries, ...catalogueEntries, ...newsEntries, ...pageEntries];
 }

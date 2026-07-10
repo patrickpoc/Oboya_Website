@@ -7,24 +7,20 @@ import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { SectionTitle } from "@/components/ui/section-title";
 import { Link } from "@/i18n/navigation";
-import { homepageImages } from "@/constants/homepage-images";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 
-export function News() {
-  const t = useTranslations("news");
+export interface NewsPreviewItem {
+  title: string;
+  image?: string;
+  href: string;
+}
 
-  const items = [
-    {
-      title: t("item1Title"),
-      image: homepageImages.greenhouseTechnology,
-      href: "/news/greenhouse-technology",
-    },
-    {
-      title: t("item2Title"),
-      image: homepageImages.asiaPacificExpansion,
-      href: "/news/asia-pacific-expansion",
-    },
-  ];
+interface NewsProps {
+  items: NewsPreviewItem[];
+}
+
+export function News({ items }: NewsProps) {
+  const t = useTranslations("news");
 
   return (
     <section className="bg-oboya-soft-white py-[var(--section-y-sm)]">
@@ -59,13 +55,17 @@ export function News() {
             >
               <Link href={item.href} className="flex flex-col sm:flex-row">
                 <div className="relative aspect-[16/10] sm:aspect-auto sm:w-2/5">
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 100vw, 240px"
-                  />
+                  {item.image ? (
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 100vw, 240px"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-oboya-blue-dark/20 to-oboya-green/20" />
+                  )}
                 </div>
                 <div className="flex flex-1 flex-col justify-center p-6">
                   <h3 className="text-lg font-semibold leading-snug text-oboya-blue-dark transition-colors group-hover:text-oboya-green">

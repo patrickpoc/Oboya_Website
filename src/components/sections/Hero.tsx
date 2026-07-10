@@ -1,124 +1,133 @@
 "use client";
 
 import Image from "next/image";
-import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { ArrowRight, Cherry, Flower2, Sprout } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import {
+  Cherry,
+  FlaskConical,
+  Flower2,
+  Sprout,
+  Truck,
+} from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { cn } from "@/lib/utils";
+import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
+import { pickLocalized } from "@/lib/cms/utils";
 
-export function Hero() {
-  const t = useTranslations("hero");
+const pillIcons = {
+  logistics: Truck,
+  research: FlaskConical,
+  plants: Sprout,
+  vegetable: Sprout,
+  flower: Flower2,
+  fruit: Cherry,
+} as const;
 
-  const categories = [
-    { label: t("categoryVegetable"), href: "/solutions/vegetables", icon: Sprout },
-    { label: t("categoryFlower"), href: "/solutions/flowers", icon: Flower2 },
-    { label: t("categoryFruit"), href: "/solutions/fruits", icon: Cherry },
-  ] as const;
+interface HeroProps {
+  data: HomepageSettings["hero"];
+  locale: string;
+}
+
+export function Hero({ data, locale }: HeroProps) {
+  const title = pickLocalized(data.title, locale);
+  // Exact mock break: "Your one-stop partner" / "for horticulture!"
+  const titleLines = title.includes("\n")
+    ? title.split("\n")
+    : (() => {
+        const match = title.match(/^(.*?partner)\s+(for\s+horticulture!?)$/i);
+        return match ? [match[1], match[2]] : [title];
+      })();
 
   return (
-    <section className="relative flex min-h-[100svh] flex-col overflow-hidden bg-oboya-blue-dark">
+    <section
+      id="hero"
+      className="relative flex min-h-[100svh] flex-col overflow-hidden bg-oboya-blue-dark"
+    >
       <div className="absolute inset-0">
         <Image
-          src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=2070&auto=format&fit=crop"
-          alt={t("title")}
+          src={data.backgroundImage}
+          alt={title.replace(/\n/g, " ")}
           fill
           priority
-          className="object-cover"
+          className="object-cover object-[center_40%]"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-oboya-blue-dark/80 via-oboya-blue-dark/50 to-oboya-blue-dark/40" />
-        <div className="absolute inset-x-0 bottom-0 z-[1] h-48 bg-gradient-to-b from-transparent via-oboya-blue-dark/70 to-oboya-blue-dark md:h-64" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-oboya-blue-dark" />
+        <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-b from-transparent to-oboya-blue-dark" />
       </div>
 
       <Container className="relative z-10 flex flex-1 flex-col pt-20 md:pt-24">
-        <div className="flex flex-1 flex-col items-center justify-center py-10 text-center md:py-16">
+        <div className="flex flex-1 flex-col items-center justify-center px-2 pb-6 pt-8 text-center md:pb-10">
           <motion.div
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
-            className="flex max-w-4xl flex-col items-center gap-6"
+            className="flex max-w-5xl flex-col items-center"
           >
-            <motion.p
-              variants={fadeInUp}
-              className="text-sm font-medium tracking-[0.2em] text-white/90 uppercase"
-            >
-              {t("eyebrow")}
-            </motion.p>
-
             <motion.h1
               variants={fadeInUp}
-              className="font-display text-[var(--text-display)] leading-[var(--text-display-leading)] font-bold tracking-tight text-white text-balance drop-shadow-sm"
+              className="font-display text-[clamp(2.35rem,6.5vw,4.5rem)] leading-[1.05] font-bold tracking-[-0.02em] text-white"
             >
-              {t("title")}
+              {titleLines.map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
             </motion.h1>
-
-            <motion.p
-              variants={fadeInUp}
-              className="max-w-2xl text-[var(--text-subtitle)] leading-[var(--text-subtitle-leading)] text-white/90 text-pretty"
-            >
-              {t("description")}
-            </motion.p>
-
-            <motion.div
-              variants={fadeInUp}
-              className="mt-4 flex flex-col items-center gap-4 sm:flex-row"
-            >
-              <Link
-                href="/shop"
-                className={buttonVariants({
-                  size: "lg",
-                  className:
-                    "h-12 rounded-full bg-oboya-green px-8 text-base font-semibold text-white hover:bg-oboya-green/90",
-                })}
-              >
-                {t("ctaPrimary")}
-                <ArrowRight className="ml-1 size-4" />
-              </Link>
-              <Link
-                href="/about"
-                className={buttonVariants({
-                  variant: "outline",
-                  size: "lg",
-                  className:
-                    "h-12 rounded-full border-white/40 bg-white/10 px-8 text-base font-semibold text-white backdrop-blur-sm hover:bg-white/20 hover:text-white",
-                })}
-              >
-                {t("ctaSecondary")}
-              </Link>
-            </motion.div>
           </motion.div>
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="mx-auto w-full max-w-2xl pb-16 md:pb-24"
+          transition={{ delay: 0.45, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="mx-auto w-full max-w-3xl pb-8 md:pb-12"
         >
           <div
             className={cn(
-              "flex items-stretch justify-between gap-1 rounded-full p-1.5",
-              "border border-white/20 bg-white/10 backdrop-blur-xl"
+              "flex items-center rounded-full px-2 py-2.5 sm:px-3 sm:py-3",
+              "border border-white/15 bg-oboya-blue-dark/55 shadow-[0_12px_48px_rgb(1_32_63/40%)] backdrop-blur-2xl"
             )}
           >
-            {categories.map((category) => {
-              const Icon = category.icon;
+            {data.pills.map((pill, index) => {
+              const Icon = pillIcons[pill.icon] ?? Sprout;
               return (
-                <Link
-                  key={category.href}
-                  href={category.href}
-                  className="group flex flex-1 flex-col items-center gap-1 rounded-full px-3 py-3 transition-all hover:bg-white/15 sm:px-4"
-                >
-                  <Icon className="size-5 text-white/90 transition-transform group-hover:scale-110" />
-                  <span className="text-sm font-semibold text-white">{category.label}</span>
-                  <span className="text-[10px] tracking-wider text-white/65 uppercase">
-                    {t("categorySublabel")}
-                  </span>
-                </Link>
+                <div key={pill.id} className="flex min-w-0 flex-1 items-center">
+                  {index > 0 ? (
+                    <span
+                      className="mx-1 h-10 w-px shrink-0 bg-white/20 sm:mx-2 md:h-12"
+                      aria-hidden
+                    />
+                  ) : null}
+                  <Link
+                    href={pill.href}
+                    className="group flex min-w-0 flex-1 items-center gap-2.5 rounded-full px-2 py-1.5 transition-colors hover:bg-white/5 sm:gap-3 sm:px-3"
+                  >
+                    {pill.image ? (
+                      <span className="relative size-11 shrink-0 overflow-hidden rounded-full sm:size-12 md:size-14">
+                        <Image
+                          src={pill.image}
+                          alt=""
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                          sizes="56px"
+                        />
+                      </span>
+                    ) : (
+                      <Icon className="size-6 shrink-0 text-white/90" />
+                    )}
+                    <span className="min-w-0 text-left">
+                      <span className="block truncate text-sm font-semibold text-white sm:text-[0.95rem]">
+                        {pickLocalized(pill.label, locale)}
+                      </span>
+                      <span className="mt-0.5 block truncate text-[11px] font-medium text-oboya-green-light sm:text-xs">
+                        {pickLocalized(pill.sublabel, locale)}
+                      </span>
+                    </span>
+                  </Link>
+                </div>
               );
             })}
           </div>

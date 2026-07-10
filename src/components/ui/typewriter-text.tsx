@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 export interface TypewriterSegment {
   text: string;
   className?: string;
+  /** Insert a line break before this segment */
+  breakBefore?: boolean;
 }
 
 interface TypewriterTextProps {
@@ -22,7 +24,12 @@ export function TypewriterText({
   className,
 }: TypewriterTextProps) {
   const lines = useMemo(
-    () => segments.map((segment) => ({ ...segment, text: segment.text.trim() })),
+    () =>
+      segments.map((segment, index) => ({
+        ...segment,
+        text: segment.text,
+        breakBefore: segment.breakBefore ?? index > 0,
+      })),
     [segments]
   );
   const totalChars = useMemo(
@@ -32,7 +39,10 @@ export function TypewriterText({
   const [visibleChars, setVisibleChars] = useState(0);
 
   useEffect(() => {
-    if (!active) return;
+    if (!active) {
+      setVisibleChars(0);
+      return;
+    }
 
     const durationMs = duration * 1000;
     const startTime = performance.now();
@@ -50,26 +60,32 @@ export function TypewriterText({
   let consumed = 0;
 
   return (
-    <span className={cn("flex flex-col gap-1", className)}>
+    <span className={cn("inline", className)}>
       {lines.map((segment, index) => {
         const lineStart = consumed;
         consumed += segment.text.length;
-        const lineVisible = Math.max(0, Math.min(segment.text.length, visibleChars - lineStart));
+        const lineVisible = Math.max(
+          0,
+          Math.min(segment.text.length, visibleChars - lineStart)
+        );
 
         if (lineVisible <= 0) return null;
 
-        const isCurrentLine =
+        const isCurrent =
           visibleChars > lineStart && visibleChars < consumed && active;
 
         return (
-          <span key={index} className={cn("block", segment.className)}>
-            {segment.text.slice(0, lineVisible)}
-            {isCurrentLine && (
-              <span
-                className="ml-0.5 inline-block h-[0.85em] w-[2px] animate-pulse bg-oboya-green align-middle"
-                aria-hidden="true"
-              />
-            )}
+          <span key={index}>
+            {segment.breakBefore ? <br /> : null}
+            <span className={segment.className}>
+              {segment.text.slice(0, lineVisible)}
+              {isCurrent && (
+                <span
+                  className="ml-0.5 inline-block h-[0.85em] w-[2px] animate-pulse bg-oboya-green align-middle"
+                  aria-hidden
+                />
+              )}
+            </span>
           </span>
         );
       })}

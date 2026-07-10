@@ -617,6 +617,29 @@
       }
     }
   },
+  "newsPage": {
+    "metaTitle": "最新资讯",
+    "allNews": "全部资讯",
+    "filterLabel": "按类别筛选",
+    "articleLabel": "博客文章",
+    "empty": "没有符合此类别的文章。",
+    "prevPage": "上一页",
+    "nextPage": "下一页",
+    "detailPlaceholder": "在后台添加后，完整文章内容将显示在此处。"
+  },
+  "aboutV2": {
+    "metaTitle": "我们的故事 — 时间线",
+    "metaDescription": "通过交互式圆形时间线探索 Oboya 的重要里程碑。",
+    "eyebrow": "关于我们",
+    "title": "穿越时间的故事",
+    "description": "滚动以旋转浏览塑造 Oboya 成为全球园艺合作伙伴的里程碑。",
+    "prev": "返回",
+    "next": "前进",
+    "year": "年份",
+    "progressLabel": "当前里程碑",
+    "sectionLabel": "交互式公司时间线",
+    "discover": "探索"
+  },
   "caseStudies": {
     "eyebrow": "Case Studies",
     "title": "Proven results worldwide",

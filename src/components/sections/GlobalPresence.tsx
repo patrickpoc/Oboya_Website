@@ -10,10 +10,12 @@ import type { ResolvedMapLocation } from "@/lib/map-locations";
 interface GlobalPresenceProps {
   locations: ResolvedMapLocation[];
   mapAlt: string;
+  title?: string;
 }
 
-export function GlobalPresence({ locations, mapAlt }: GlobalPresenceProps) {
+export function GlobalPresence({ locations, mapAlt, title }: GlobalPresenceProps) {
   const t = useTranslations("globalPresence");
+  const heading = title ?? t("title");
 
   return (
     <section id="global-presence" className="bg-white py-[var(--section-y)]">
@@ -25,8 +27,8 @@ export function GlobalPresence({ locations, mapAlt }: GlobalPresenceProps) {
           variants={fadeInUp}
           className="mb-10 md:mb-14"
         >
-          <h2 className="max-w-3xl font-display text-[clamp(1.5rem,2.5vw,2.25rem)] leading-[1.25] font-semibold tracking-tight text-oboya-blue-dark text-balance">
-            {t("title")}
+          <h2 className="mx-auto max-w-3xl text-center font-display text-[clamp(1.35rem,2.4vw,2rem)] leading-[1.35] font-semibold tracking-tight text-oboya-blue-dark text-balance">
+            {heading}
           </h2>
         </motion.div>
 

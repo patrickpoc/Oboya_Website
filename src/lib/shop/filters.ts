@@ -7,9 +7,13 @@ import type {
 
 function matchesSearch(product: ShopProduct, query: string): boolean {
   if (!query.trim()) return true;
-  const q = query.toLowerCase();
+  const q = query.toLowerCase().trim();
+  const idAsWords = product.id.replace(/-/g, " ").toLowerCase();
+  const qAsId = q.replace(/\s+/g, "-");
   return (
     product.id.toLowerCase().includes(q) ||
+    product.id.toLowerCase().includes(qAsId) ||
+    idAsWords.includes(q) ||
     product.sku.toLowerCase().includes(q) ||
     product.tags.some((tag) => tag.toLowerCase().includes(q)) ||
     product.categoryId.toLowerCase().includes(q)

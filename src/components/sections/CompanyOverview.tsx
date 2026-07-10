@@ -2,91 +2,107 @@
 
 import Image from "next/image";
 import { useRef } from "react";
-import { useTranslations } from "next-intl";
 import { motion, useInView } from "framer-motion";
 import { Container } from "@/components/ui/container";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { TypewriterText } from "@/components/ui/typewriter-text";
-import { homepageImages } from "@/constants/homepage-images";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
+import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
+import { pickLocalized } from "@/lib/cms/utils";
 
-export function CompanyOverview() {
-  const t = useTranslations("companyOverview");
+interface CompanyOverviewProps {
+  data: HomepageSettings["companyOverview"];
+  locale: string;
+}
+
+export function CompanyOverview({ data, locale }: CompanyOverviewProps) {
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-10%" });
+  const isInView = useInView(sectionRef, { once: true, margin: "-12%" });
 
-  const stats = [
-    { value: 600, suffix: "+", label: t("statLocations") },
-    { value: 80, suffix: "+", label: t("statCountries") },
-    { value: 20, suffix: "+", label: t("statExperience") },
-  ] as const;
-
-  const headlineSegments = [
-    { text: t("headlineGreen"), className: "text-oboya-green" },
-    { text: t("headlineWhite"), className: "text-white" },
-  ];
+  const headlineSegments =
+    data.segments?.length > 0
+      ? data.segments.map((segment, index) => ({
+          text: pickLocalized(segment.text, locale),
+          className:
+            segment.tone === "green" ? "text-oboya-green" : "text-white",
+          breakBefore: segment.breakBefore ?? index > 0,
+        }))
+      : [
+          {
+            text: pickLocalized(data.headlineGreen, locale),
+            className: "text-oboya-green",
+            breakBefore: false,
+          },
+          {
+            text: pickLocalized(data.headlineWhite, locale),
+            className: "text-white",
+            breakBefore: true,
+          },
+        ];
 
   return (
     <section
       ref={sectionRef}
-      className="bg-oboya-blue-dark pb-[var(--section-y-sm)] pt-24 md:pt-32"
+      className="relative bg-oboya-blue-dark pb-16 pt-8 md:pb-20 md:pt-10"
     >
+      <div className="absolute inset-x-0 top-0 h-px bg-white/15" aria-hidden />
+
       <Container>
-        <div className="grid items-center gap-6 sm:gap-8 lg:grid-cols-12 lg:gap-8 xl:gap-10">
-          <h2 className="font-display text-[clamp(1.375rem,2.2vw,2rem)] leading-[1.25] font-semibold tracking-[-0.02em] lg:col-span-4">
-            <TypewriterText
-              segments={headlineSegments}
-              active={isInView}
-              duration={2.5}
+        <h2 className="mb-10 max-w-4xl font-display text-[clamp(1.4rem,3.2vw,2.35rem)] leading-[1.25] font-medium tracking-[-0.02em] md:mb-14">
+          <TypewriterText
+            segments={headlineSegments}
+            active={isInView}
+            duration={3.2}
+          />
+        </h2>
+
+        <div className="grid items-center gap-6 md:gap-8 lg:grid-cols-12 lg:gap-10">
+          <motion.div
+            initial={{ opacity: 0, y: 28 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            className="relative aspect-[3/4] w-full max-w-xs overflow-hidden rounded-sm lg:col-span-4 lg:max-w-none"
+          >
+            <Image
+              src={data.image}
+              alt={pickLocalized(data.imageAlt, locale)}
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 70vw, 280px"
+              priority
             />
-          </h2>
+          </motion.div>
 
-          <div className="grid grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] items-center gap-4 sm:gap-6 lg:contents">
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              className="relative aspect-[4/5] w-full max-h-[min(18rem,38vh)] overflow-hidden rounded-2xl lg:col-span-3 lg:mx-0 lg:max-h-[min(24rem,46vh)]"
-            >
-              <Image
-                src={homepageImages.companyOverview}
-                alt={t("imageAlt")}
-                width={1024}
-                height={1536}
-                className="h-full w-full object-cover"
-                sizes="(max-width: 1024px) 40vw, 220px"
-                priority
-              />
-            </motion.div>
-
-            <motion.ul
-              variants={staggerContainer}
-              initial="hidden"
-              animate={isInView ? "visible" : "hidden"}
-              className="flex flex-col lg:col-span-5"
-            >
-            {stats.map((stat, index) => (
-              <motion.li key={stat.label} variants={fadeInUp}>
-                <div className="flex items-center justify-between gap-6 py-4 md:py-5">
-                  <span className="shrink-0 font-display text-[clamp(2.25rem,4.5vw,3.5rem)] font-bold leading-none tracking-tight text-white">
+          <motion.ul
+            variants={staggerContainer}
+            initial="hidden"
+            animate={isInView ? "visible" : "hidden"}
+            className="flex flex-col lg:col-span-8"
+          >
+            {data.stats.map((stat, index) => (
+              <motion.li key={stat.id} variants={fadeInUp}>
+                {index === 0 && (
+                  <div className="h-px w-full bg-white/15" aria-hidden />
+                )}
+                <div className="flex items-center justify-between gap-5 py-4 md:gap-8 md:py-5">
+                  <span className="shrink-0 font-display text-[clamp(2rem,4.5vw,3.25rem)] font-light leading-none tracking-tight text-white">
                     <AnimatedCounter
                       value={stat.value}
                       suffix={stat.suffix}
                       active={isInView}
-                      duration={4}
+                      duration={3.8}
                     />
                   </span>
-                  <span className="max-w-[10rem] text-right text-sm leading-snug text-white/75 md:max-w-[12rem]">
-                    {stat.label}
+                  <span className="max-w-[10rem] text-right text-sm font-semibold leading-snug text-white md:max-w-[13rem] md:text-[0.95rem]">
+                    {pickLocalized(stat.label, locale)}
                   </span>
                 </div>
-                {index < stats.length - 1 && (
-                  <div className="h-px w-full bg-white/12" aria-hidden="true" />
+                {index < data.stats.length - 1 && (
+                  <div className="h-px w-full bg-white/15" aria-hidden />
                 )}
               </motion.li>
             ))}
           </motion.ul>
-          </div>
         </div>
       </Container>
     </section>

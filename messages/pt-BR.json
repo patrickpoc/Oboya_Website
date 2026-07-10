@@ -617,6 +617,29 @@
       }
     }
   },
+  "newsPage": {
+    "metaTitle": "Últimas notícias",
+    "allNews": "Todas as notícias",
+    "filterLabel": "Filtrar por categoria",
+    "articleLabel": "Artigo do blog",
+    "empty": "Nenhum artigo corresponde a esta categoria.",
+    "prevPage": "Página anterior",
+    "nextPage": "Próxima página",
+    "detailPlaceholder": "O conteúdo completo do artigo aparecerá aqui quando adicionado no painel."
+  },
+  "aboutV2": {
+    "metaTitle": "Nossa história — Timeline",
+    "metaDescription": "Explore a jornada da Oboya em uma timeline circular interativa de marcos importantes.",
+    "eyebrow": "Sobre",
+    "title": "Nossa história ao longo do tempo",
+    "description": "Role para girar pelos marcos que transformaram a Oboya em um parceiro global de horticultura.",
+    "prev": "Voltar",
+    "next": "Avançar",
+    "year": "Ano",
+    "progressLabel": "Marco atual",
+    "sectionLabel": "Timeline interativa da empresa",
+    "discover": "Descobrir"
+  },
   "caseStudies": {
     "eyebrow": "Case Studies",
     "title": "Proven results worldwide",

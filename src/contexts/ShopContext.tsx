@@ -136,28 +136,93 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const hydratedFromUrl = useRef(false);
   const skipUrlWrite = useRef(false);
   const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSyncedQuery = useRef<string | null>(null);
+  const wasOnShop = useRef(false);
+  const softOpenTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const isShopRoute = pathname === "/shop" || pathname.endsWith("/shop");
+
+  // Persist cart/country from localStorage once
   useEffect(() => {
     const persisted = loadPersisted();
-    const urlState = parseShopUrlState(searchParams);
-
     setState((prev) => ({
       ...prev,
-      countryCode: urlState.country ?? persisted.countryCode,
-      currency: urlState.currency ?? persisted.currency,
-      items: persisted.items,
+      countryCode: persisted.countryCode ?? prev.countryCode,
+      currency: persisted.currency ?? prev.currency,
+      items: persisted.items.length > 0 ? persisted.items : prev.items,
+    }));
+    setIsReady(true);
+  }, []);
+
+  // Keep shop UI in sync with URL when entering / navigating within shop
+  useEffect(() => {
+    if (!isReady) return;
+
+    if (!isShopRoute) {
+      wasOnShop.current = false;
+      if (softOpenTimer.current) {
+        clearTimeout(softOpenTimer.current);
+        softOpenTimer.current = null;
+      }
+      return;
+    }
+
+    const enteringShop = !wasOnShop.current;
+    wasOnShop.current = true;
+
+    const query = searchParams.toString();
+    if (query === lastSyncedQuery.current && !enteringShop) return;
+    lastSyncedQuery.current = query;
+
+    const urlState = parseShopUrlState(searchParams);
+    const pendingProduct = urlState.product;
+    // On first entry: apply search first, open product detail after a beat
+    const softOpen = enteringShop && Boolean(pendingProduct);
+
+    if (softOpenTimer.current) {
+      clearTimeout(softOpenTimer.current);
+      softOpenTimer.current = null;
+    }
+
+    skipUrlWrite.current = true;
+    setState((prev) => ({
+      ...prev,
+      countryCode: urlState.country ?? prev.countryCode,
+      currency: urlState.currency ?? prev.currency,
       search: urlState.q,
       sort: urlState.sort,
       viewMode: urlState.view,
       filters: urlState.filters,
-      quickViewProductId: urlState.product,
+      quickViewProductId: softOpen ? null : pendingProduct,
       isCartOpen: urlState.cart,
       isQuoteModalOpen: urlState.quote,
+      visibleCount: PRODUCTS_PAGE_SIZE,
     }));
     hydratedFromUrl.current = true;
-    setIsReady(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- hydrate once on mount
-  }, []);
+
+    if (softOpen && pendingProduct) {
+      // Keep URL intact while the catalog settles, then open the drawer
+      softOpenTimer.current = setTimeout(() => {
+        setState((prev) => ({
+          ...prev,
+          quickViewProductId: pendingProduct,
+        }));
+        softOpenTimer.current = null;
+        skipUrlWrite.current = false;
+      }, 650);
+    } else {
+      queueMicrotask(() => {
+        skipUrlWrite.current = false;
+      });
+    }
+
+    return () => {
+      if (softOpenTimer.current) {
+        clearTimeout(softOpenTimer.current);
+        softOpenTimer.current = null;
+      }
+    };
+  }, [isReady, isShopRoute, searchParams]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -169,8 +234,16 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   }, [state.countryCode, state.currency, state.items, isReady]);
 
+  // Only write shop state back to the URL while on the shop route
   useEffect(() => {
-    if (!isReady || !hydratedFromUrl.current || skipUrlWrite.current) return;
+    if (
+      !isShopRoute ||
+      !isReady ||
+      !hydratedFromUrl.current ||
+      skipUrlWrite.current
+    ) {
+      return;
+    }
 
     const params = buildShopSearchParams({
       countryCode: state.countryCode,
@@ -188,9 +261,11 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     const current = searchParams.toString();
     if (next === current) return;
 
+    lastSyncedQuery.current = next;
     router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
   }, [
     isReady,
+    isShopRoute,
     pathname,
     router,
     searchParams,

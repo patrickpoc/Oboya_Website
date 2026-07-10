@@ -1,44 +1,62 @@
 "use client";
 
 import Image from "next/image";
-import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
-import { buttonVariants } from "@/components/ui/button";
+import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
+import { pickLocalized } from "@/lib/cms/utils";
+import {
+  getCategoryById,
+  getProductById,
+} from "@/lib/shop/catalog";
+import { useProductName } from "@/lib/shop/use-product-name";
 
-export function FeaturedProducts() {
-  const t = useTranslations("featuredProducts");
-  const tCommon = useTranslations("common");
+interface FeaturedProductsProps {
+  data: HomepageSettings["featuredProducts"];
+  locale: string;
+}
 
-  const products = [
-    {
-      id: "strawberry-packaging",
-      title: t("strawberryTitle"),
-      category: t("strawberryCategory"),
-      image:
-        "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
-      href: "/products/strawberry-packaging",
-    },
-    {
-      id: "growing-media",
-      title: t("growingMediaTitle"),
-      category: t("growingMediaCategory"),
-      image:
-        "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
-      href: "/products/growing-media",
-    },
-    {
-      id: "flower-trolley",
-      title: t("flowerTrolleyTitle"),
-      category: t("flowerTrolleyCategory"),
-      image:
-        "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
-      href: "/products/flower-trolley",
-    },
-  ];
+function formatUsd(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(value);
+}
+
+function shopHref(productId: string, productName: string) {
+  const params = new URLSearchParams();
+  params.set("currency", "USD");
+  params.set("q", productName);
+  params.set("product", productId);
+  return `/shop?${params.toString()}`;
+}
+
+export function FeaturedProducts({ data, locale }: FeaturedProductsProps) {
+  const getProductName = useProductName();
+
+  const cards = data.items
+    .map((item) => {
+      const product = getProductById(item.productId);
+      if (!product) return null;
+      const name = getProductName(product.id);
+      const category =
+        item.categoryLabel != null
+          ? pickLocalized(item.categoryLabel, locale)
+          : (getCategoryById(product.categoryId)?.name ?? product.categoryId);
+      const price = product.prices.USD ?? 0;
+      return {
+        item,
+        product,
+        name,
+        category,
+        price,
+        href: shopHref(product.id, name),
+      };
+    })
+    .filter((card): card is NonNullable<typeof card> => card != null);
 
   return (
     <section className="bg-oboya-soft-white py-[var(--section-y)]">
@@ -48,13 +66,16 @@ export function FeaturedProducts() {
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeInUp}
-          className="mx-auto mb-12 max-w-3xl text-center md:mb-16"
+          className="mb-10 md:mb-14"
         >
-          <p className="mb-4 text-sm font-medium tracking-[0.2em] text-oboya-green uppercase">
-            {t("eyebrow")}
-          </p>
-          <h2 className="font-display text-[var(--text-heading)] leading-[var(--text-heading-leading)] font-semibold tracking-tight text-oboya-green text-balance">
-            {t("title")}
+          <div className="mb-6 flex items-center gap-4">
+            <p className="shrink-0 text-sm font-medium tracking-wide text-oboya-green">
+              {pickLocalized(data.eyebrow, locale)}
+            </p>
+            <div className="h-px flex-1 bg-oboya-green/35" aria-hidden />
+          </div>
+          <h2 className="max-w-4xl font-display text-[clamp(1.45rem,2.6vw,2.15rem)] leading-[1.35] font-semibold tracking-tight text-oboya-green text-balance">
+            {pickLocalized(data.title, locale)}
           </h2>
         </motion.div>
 
@@ -63,42 +84,41 @@ export function FeaturedProducts() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
-          className="grid gap-6 md:grid-cols-3"
+          className="grid gap-6 md:grid-cols-3 md:gap-8"
         >
-          {products.map((product) => (
+          {cards.map(({ product, name, category, price, href }) => (
             <motion.article
               key={product.id}
               variants={fadeInUp}
-              className="group flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-white shadow-[var(--shadow-subtle)] transition-shadow hover:shadow-[var(--shadow-card)]"
+              className="flex flex-col bg-white shadow-[var(--shadow-subtle)]"
             >
               <div className="relative aspect-[4/3] overflow-hidden bg-white">
                 <Image
-                  src={product.image}
-                  alt={product.title}
+                  src={product.images[0]}
+                  alt={name}
                   fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="object-contain p-6 transition-transform duration-500 hover:scale-105"
                   sizes="(max-width: 768px) 100vw, 33vw"
                 />
               </div>
-              <div className="flex flex-1 flex-col gap-4 p-6">
-                <div>
-                  <p className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
-                    {product.category}
-                  </p>
-                  <h3 className="mt-1 text-lg font-semibold text-oboya-blue-dark">
-                    {product.title}
-                  </h3>
-                </div>
+
+              <div className="flex flex-1 flex-col items-center px-5 pb-6 text-center">
+                <p className="text-[11px] font-bold tracking-[0.14em] text-oboya-blue uppercase">
+                  {category}
+                </p>
+                <h3 className="mt-2 text-lg font-bold text-oboya-blue-dark md:text-xl">
+                  {name}
+                </h3>
+                <p className="mt-2 text-base font-medium text-oboya-green">
+                  {formatUsd(price)}
+                </p>
+
                 <Link
-                  href={product.href}
-                  className={buttonVariants({
-                    variant: "outline",
-                    className:
-                      "mt-auto w-fit rounded-full border-oboya-blue/20 text-oboya-blue hover:bg-oboya-blue hover:text-white",
-                  })}
+                  href={href}
+                  className="mt-5 inline-flex items-center gap-2 rounded-full border border-oboya-green px-5 py-2.5 text-[11px] font-semibold tracking-[0.12em] text-oboya-blue-dark uppercase transition-colors hover:bg-oboya-green hover:text-white"
                 >
-                  {tCommon("learnMore")}
-                  <ArrowRight className="size-4" />
+                  <ShoppingBag className="size-3.5" aria-hidden />
+                  See on shop
                 </Link>
               </div>
             </motion.article>
@@ -110,14 +130,13 @@ export function FeaturedProducts() {
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeInUp}
-          className="mt-12 flex justify-center"
+          className="mt-12 flex justify-center md:mt-16"
         >
           <Link
-            href="/products"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-oboya-blue transition-colors hover:text-oboya-green"
+            href={data.ctaHref || "/shop"}
+            className="inline-flex items-center rounded-full border border-oboya-green px-8 py-3 text-xs font-semibold tracking-[0.14em] text-oboya-green uppercase transition-colors hover:bg-oboya-green hover:text-white"
           >
-            {t("viewAll")}
-            <ChevronDown className="size-4" />
+            {pickLocalized(data.ctaLabel, locale)}
           </Link>
         </motion.div>
       </Container>

@@ -3,7 +3,8 @@ import { SiteLayout } from "@/components/layouts/SiteLayout";
 import { InnerPageHero } from "@/components/sections/InnerPageHero";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
-import { blogPosts } from "@/constants/content-data";
+import { readBlogPosts } from "@/lib/cms/readers";
+import { pickLocalized } from "@/lib/cms/utils";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -11,6 +12,7 @@ export default async function BlogIndexPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("blog");
+  const posts = readBlogPosts();
 
   return (
     <SiteLayout>
@@ -18,17 +20,17 @@ export default async function BlogIndexPage({ params }: Props) {
       <section className="py-12 md:py-16">
         <Container>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {blogPosts.map((post) => (
+            {posts.map((post) => (
               <article
                 key={post.slug}
                 className="rounded-xl border border-border/60 bg-white p-6 shadow-[var(--shadow-card)]"
               >
-                <p className="text-xs text-muted-foreground">{post.date}</p>
+                <p className="text-xs text-muted-foreground">{post.publishedAt?.slice(0, 10)}</p>
                 <h2 className="mt-2 text-lg font-semibold text-oboya-blue-dark">
-                  {t(`posts.${post.messageKey}.title`)}
+                  {pickLocalized(post.title, locale)}
                 </h2>
                 <p className="mt-3 text-sm text-muted-foreground">
-                  {t(`posts.${post.messageKey}.excerpt`)}
+                  {pickLocalized(post.excerpt, locale)}
                 </p>
                 <Link
                   href={`/blog/${post.slug}`}

@@ -625,6 +625,29 @@
       }
     }
   },
+  "newsPage": {
+    "metaTitle": "Latest News",
+    "allNews": "All news",
+    "filterLabel": "Filter by category",
+    "articleLabel": "Blog article",
+    "empty": "No articles match this category.",
+    "prevPage": "Previous page",
+    "nextPage": "Next page",
+    "detailPlaceholder": "Full article content will appear here once added in the dashboard."
+  },
+  "aboutV2": {
+    "metaTitle": "Our Story — Timeline",
+    "metaDescription": "Explore Oboya's journey through an interactive circular timeline of key milestones.",
+    "eyebrow": "About",
+    "title": "Our story through time",
+    "description": "Scroll to rotate through the milestones that shaped Oboya into a global horticulture partner.",
+    "prev": "Back",
+    "next": "Forward",
+    "year": "Year",
+    "progressLabel": "Current milestone",
+    "sectionLabel": "Interactive company timeline",
+    "discover": "Discover"
+  },
   "caseStudies": {
     "eyebrow": "Case Studies",
     "title": "Proven results worldwide",

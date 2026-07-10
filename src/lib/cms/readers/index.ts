@@ -6,7 +6,10 @@
 import { getShopCatalog, getProductById as getShopProductById } from "@/lib/shop/catalog";
 import { readMapLocations } from "@/lib/map-locations.server";
 import { getCmsProducts, getCmsProductById } from "@/lib/cms/repositories/product-repository";
-import { getBlogPosts, getBlogPostById } from "@/lib/cms/repositories/blog-repository";
+import { getBlogPosts, getBlogPostBySlug } from "@/lib/cms/repositories/blog-repository";
+import { getBlogCategories } from "@/lib/cms/repositories/blog-categories-repository";
+import { getNewsPageSettings } from "@/lib/cms/repositories/news-page-repository";
+import { getHomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { getCaseStudies, getCaseStudyById } from "@/lib/cms/repositories/case-studies-repository";
 import { siteConfig } from "@/constants/site";
 
@@ -37,7 +40,20 @@ export function readBlogPosts() {
 }
 
 export function readBlogPostBySlug(slug: string) {
-  return getBlogPosts().find((p) => p.slug === slug && p.status === "published");
+  const post = getBlogPostBySlug(slug);
+  return post?.status === "published" ? post : undefined;
+}
+
+export function readBlogCategories() {
+  return getBlogCategories();
+}
+
+export function readNewsPageSettings() {
+  return getNewsPageSettings();
+}
+
+export function readHomepageSettings() {
+  return getHomepageSettings();
 }
 
 export function readCaseStudies() {

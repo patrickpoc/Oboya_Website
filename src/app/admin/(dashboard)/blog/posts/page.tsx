@@ -55,7 +55,7 @@ export default function BlogPostsPage() {
     <div>
       <AdminPageHeader
         title="Blog Posts"
-        description="Create and manage blog articles with scheduling and SEO."
+        description="Create and manage articles shown on /news and /blog."
         actions={
           <Link
             href="/admin/blog/posts/new"

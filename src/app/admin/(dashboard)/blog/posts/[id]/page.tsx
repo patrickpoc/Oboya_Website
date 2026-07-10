@@ -15,7 +15,7 @@ import {
   getBlogPostById,
   saveBlogPost,
   blogAuthors,
-  blogCategories,
+  getBlogCategories,
   type CmsBlogPost,
 } from "@/lib/cms/repositories/blog-repository";
 import type { CmsLocale, CmsStatus } from "@/lib/cms/types";
@@ -25,6 +25,7 @@ export default function BlogPostEditPage() {
   const router = useRouter();
   const id = params.id as string;
   const isNew = id === "new";
+  const categories = getBlogCategories();
 
   const [post, setPost] = useState<CmsBlogPost>(() => {
     if (isNew) {
@@ -35,7 +36,8 @@ export default function BlogPostEditPage() {
         excerpt: emptyLocalizedString(),
         body: emptyLocalizedString(),
         author: blogAuthors[0].name,
-        categoryId: blogCategories[0].id,
+        categoryId: categories[0]?.id ?? "general",
+        featuredImage: "",
         relatedPostIds: [],
         status: "draft",
         seo: { title: emptyLocalizedString(), description: emptyLocalizedString() },
@@ -102,6 +104,20 @@ export default function BlogPostEditPage() {
                       />
                     </div>
                     <div className="space-y-1.5">
+                      <Label>Excerpt</Label>
+                      <textarea
+                        value={post.excerpt[loc]}
+                        onChange={(e) =>
+                          setPost({
+                            ...post,
+                            excerpt: { ...post.excerpt, [loc]: e.target.value },
+                          })
+                        }
+                        rows={3}
+                        className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
                       <Label>Body</Label>
                       <RichTextEditor
                         value={post.body[loc]}
@@ -163,6 +179,29 @@ export default function BlogPostEditPage() {
                 />
               </div>
               <div className="space-y-1.5">
+                <Label>Published date</Label>
+                <Input
+                  type="date"
+                  value={post.publishedAt?.slice(0, 10) ?? ""}
+                  onChange={(e) =>
+                    setPost({
+                      ...post,
+                      publishedAt: e.target.value
+                        ? new Date(e.target.value).toISOString()
+                        : undefined,
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Featured image URL</Label>
+                <Input
+                  value={post.featuredImage ?? ""}
+                  onChange={(e) => setPost({ ...post, featuredImage: e.target.value })}
+                  placeholder="/assets/homepage/greenhouse-technology.webp"
+                />
+              </div>
+              <div className="space-y-1.5">
                 <Label>Author</Label>
                 <select
                   value={post.author}
@@ -183,9 +222,9 @@ export default function BlogPostEditPage() {
                   onChange={(e) => setPost({ ...post, categoryId: e.target.value })}
                   className="h-8 w-full rounded-lg border border-input px-2.5 text-sm"
                 >
-                  {blogCategories.map((c) => (
+                  {categories.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.name}
+                      {c.name.en}
                     </option>
                   ))}
                 </select>

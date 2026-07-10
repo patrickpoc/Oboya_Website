@@ -43,6 +43,7 @@ export const adminNavigation: AdminNavItem[] = [
     module: "website",
     children: [
       { label: "Home", href: "/admin/website/home" },
+      { label: "News Page", href: "/admin/website/news" },
       { label: "Pages", href: "/admin/website/pages" },
       { label: "FAQs", href: "/admin/website/faqs" },
       { label: "Terms & Conditions", href: "/admin/website/terms" },

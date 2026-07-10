@@ -40,10 +40,6 @@ export const pageRegistry: Record<string, PageConfig> = {
   "products/strawberry-packaging": { messageKey: "productsStrawberryPackaging", parent: "products" },
   "products/flower-trolley": { messageKey: "productsFlowerTrolley", parent: "products" },
 
-  news: { messageKey: "news", template: "listing" },
-  "news/greenhouse-technology": { messageKey: "newsGreenhouseTechnology", parent: "news" },
-  "news/asia-pacific-expansion": { messageKey: "newsAsiaPacificExpansion", parent: "news" },
-
   industries: { messageKey: "industries", template: "listing" },
   "industries/greenhouses": { messageKey: "industriesGreenhouses", parent: "industries" },
   "industries/nurseries": { messageKey: "industriesNurseries", parent: "industries" },
