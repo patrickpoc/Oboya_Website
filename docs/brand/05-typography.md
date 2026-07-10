@@ -60,18 +60,21 @@ Outros pesos (Medium, SemiBold, ExtraBold): **não informados** como regra; o pr
 | Regras específicas para botões, menus, formulários | Não informado |
 | Tipografia para CJK (chinês) | Não informado no Brandbook |
 
-## Implementação no produto (não é Brandbook)
+## Implementação no produto
 
-Arquivos: `src/lib/fonts.ts`, `src/styles/tokens.css`.
+Arquivos: `src/lib/fonts.ts`, `src/fonts/`, `src/styles/tokens.css`.
 
-| Papel | Implementação | Divergência |
-|-------|---------------|-------------|
-| Body | **Plus Jakarta Sans** (next/font), pesos 400–800 | Brandbook diz **Plus Jakarta Display** |
-| Display | CSS `--font-display: "Neue Haas Grotesk Display", system-ui` | Fonte **não carregada**; cai em system-ui |
+| Papel | Implementação | Pesos carregados |
+|-------|---------------|------------------|
+| Main titles (`font-display`) | **Neue Haas Grotesk Display** (local `next/font`) | 300 Light, 400 Roman, 500 Medium, 700 Bold, **900 Black** |
+| Subtitles & body (`font-body`) | **Plus Jakarta Display** (local `next/font`) | 300 Light, **400 Regular**, 500 Medium, **700 Bold** |
 | Chinês | Noto Sans SC | Extensão de produto |
-| Escala web | `clamp()` em `--text-display`, `--text-heading`, etc. | Adaptação responsiva; comentário no código cita 64/72, 48/56, 32/40 e ±8px |
+| Escala web | `clamp()` em `--text-display`, `--text-heading`, etc. | Adaptação responsiva |
 
-Detalhes dos tokens: [10-design-tokens.md](./10-design-tokens.md). Audit: [brand-audit.md](./brand-audit.md).
+Uso recomendado:
+- Títulos principais (hero, H1, headlines de seção): `font-display font-black`
+- Subtítulos: `font-body font-bold`
+- Corpo: `font-body` (Regular / Medium)
 
 ## Hierarquia recomendada para web (recomendação)
 

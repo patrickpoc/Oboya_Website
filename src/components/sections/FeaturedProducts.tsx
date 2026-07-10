@@ -75,7 +75,7 @@ export function FeaturedProducts({ data, locale }: FeaturedProductsProps) {
             </p>
             <div className="h-px flex-1 bg-oboya-green/35" aria-hidden />
           </div>
-          <h2 className="max-w-4xl font-display text-[clamp(1.45rem,2.6vw,2.15rem)] leading-[1.35] font-semibold tracking-tight text-oboya-green text-balance">
+          <h2 className="max-w-4xl font-display text-[clamp(1.45rem,2.6vw,2.15rem)] leading-[1.35] font-black tracking-tight text-oboya-green text-balance">
             {pickLocalized(data.title, locale)}
           </h2>
         </motion.div>

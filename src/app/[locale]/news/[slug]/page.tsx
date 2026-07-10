@@ -60,7 +60,7 @@ export default async function NewsArticlePage({ params }: Props) {
           <p className="text-xs font-semibold tracking-[0.14em] text-oboya-blue uppercase">
             {category ? pickLocalized(category.name, locale) : t("articleLabel")}
           </p>
-          <h1 className="mt-4 max-w-4xl font-display text-3xl leading-tight font-semibold tracking-tight text-balance md:text-4xl lg:text-5xl">
+          <h1 className="mt-4 max-w-4xl font-display text-3xl leading-tight font-black tracking-tight text-balance md:text-4xl lg:text-5xl">
             {title}
           </h1>
           <p className="mt-6 text-sm text-white/70">

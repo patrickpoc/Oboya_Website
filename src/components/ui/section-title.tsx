@@ -31,7 +31,7 @@ export function SectionTitle({
       )}
       <h2
         className={cn(
-          "font-display text-[var(--text-heading)] leading-[var(--text-heading-leading)] font-semibold tracking-tight text-oboya-blue-dark",
+          "font-display text-[var(--text-heading)] leading-[var(--text-heading-leading)] font-black tracking-tight text-oboya-blue-dark",
           titleClassName
         )}
       >

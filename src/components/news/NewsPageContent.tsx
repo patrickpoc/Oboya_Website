@@ -80,7 +80,7 @@ export function NewsPageContent({
               {eyebrow}
             </p>
             <div className="mt-4 h-px w-full max-w-4xl bg-oboya-blue/60" />
-            <h1 className="mt-8 font-display text-3xl leading-tight font-semibold tracking-tight text-balance md:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
+            <h1 className="mt-8 font-display text-3xl leading-tight font-black tracking-tight text-balance md:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
               {headline}
             </h1>
           </div>

@@ -35,7 +35,7 @@ export function HomeLatestNews({ data, posts, locale }: HomeLatestNewsProps) {
             </p>
             <div className="h-px w-full bg-white/35" aria-hidden />
           </div>
-          <h2 className="max-w-4xl font-display text-[clamp(1.45rem,2.6vw,2.15rem)] leading-[1.35] font-medium tracking-tight text-white text-balance">
+          <h2 className="max-w-4xl font-display text-[clamp(1.45rem,2.6vw,2.15rem)] leading-[1.35] font-black tracking-tight text-white text-balance">
             {pickLocalized(data.headline, locale)}
           </h2>
         </motion.div>

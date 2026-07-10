@@ -141,9 +141,11 @@ const defaultSettings = (): HomepageSettings => ({
   hero: {
     backgroundImage:
       "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2070&auto=format&fit=crop",
-    eyebrow: loc(""),
+    eyebrow: loc("Global Partner"),
     title: loc("Your one-stop partner\nfor horticulture!"),
-    description: loc(""),
+    description: loc(
+      "Integrated solutions from propagation to packaging and retail display, trusted by growers in 80+ countries Worldwide"
+    ),
     pills: [
       {
         id: "vegetable",
@@ -366,7 +368,7 @@ const defaultSettings = (): HomepageSettings => ({
 });
 
 let cache: HomepageSettings | null = null;
-const CONTENT_REVISION = "home-certs-v15-2026-07-10";
+const CONTENT_REVISION = "home-hero-v16-2026-07-10";
 let appliedRevision: string | null = null;
 
 function migrateSettings(settings: HomepageSettings): HomepageSettings {

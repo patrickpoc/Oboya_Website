@@ -15,9 +15,9 @@
   --oboya-yellow-dark: #909b03;
   --oboya-orange: #ea5744;
 
-  /* Typography families — swap display stack when Neue Haas Grotesk is licensed */
-  --font-display: "Neue Haas Grotesk Display", system-ui, sans-serif;
-
+  /* Typography families — set by next/font in src/lib/fonts.ts
+     Display: Neue Haas Grotesk Display (main titles)
+     Body: Plus Jakarta Display (subtitles & body) */
   /* Type scale — brand reference: Title 64/72, Subtitle 48/56, Tags 32/40 */
   --text-display: clamp(2.5rem, 5vw + 1rem, 4rem);
   --text-display-leading: 1.125;

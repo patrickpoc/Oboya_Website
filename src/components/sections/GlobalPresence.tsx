@@ -27,7 +27,7 @@ export function GlobalPresence({ locations, mapAlt, title }: GlobalPresenceProps
           variants={fadeInUp}
           className="mb-10 md:mb-14"
         >
-          <h2 className="mx-auto max-w-3xl text-center font-display text-[clamp(1.35rem,2.4vw,2rem)] leading-[1.35] font-semibold tracking-tight text-oboya-blue-dark text-balance">
+          <h2 className="mx-auto max-w-3xl text-center font-display text-[clamp(1.35rem,2.4vw,2rem)] leading-[1.35] font-black tracking-tight text-oboya-blue-dark text-balance">
             {heading}
           </h2>
         </motion.div>

@@ -24,7 +24,7 @@ export function Partners({ data, locale }: PartnersProps) {
           variants={fadeInUp}
           className="flex flex-col items-center gap-8 md:gap-14"
         >
-          <h2 className="max-w-2xl text-center font-display text-[clamp(1.5rem,2.8vw,2.25rem)] font-semibold tracking-tight text-oboya-blue-dark text-balance">
+          <h2 className="max-w-2xl text-center font-display text-[clamp(1.5rem,2.8vw,2.25rem)] font-black tracking-tight text-oboya-blue-dark text-balance">
             {pickLocalized(data.title, locale)}
           </h2>
           <ul className="flex w-full max-w-5xl flex-wrap items-center justify-center gap-x-8 gap-y-6 md:gap-x-14 md:gap-y-10 lg:gap-x-16">

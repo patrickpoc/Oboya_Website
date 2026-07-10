@@ -48,7 +48,7 @@ export function CompanyOverview({ data, locale }: CompanyOverviewProps) {
       <div className="absolute inset-x-0 top-0 h-px bg-white/15" aria-hidden />
 
       <Container>
-        <h2 className="mb-10 max-w-4xl font-display text-[clamp(1.4rem,3.2vw,2.35rem)] leading-[1.25] font-medium tracking-[-0.02em] md:mb-14">
+        <h2 className="mb-10 max-w-4xl font-display text-[clamp(1.75rem,4.2vw,3.25rem)] leading-[1.25] font-light tracking-[-0.02em] md:mb-14">
           <TypewriterText
             segments={headlineSegments}
             active={isInView}
@@ -85,7 +85,7 @@ export function CompanyOverview({ data, locale }: CompanyOverviewProps) {
                   <div className="h-px w-full bg-white/15" aria-hidden />
                 )}
                 <div className="flex items-center justify-between gap-5 py-4 md:gap-8 md:py-5">
-                  <span className="shrink-0 font-display text-[clamp(2rem,4.5vw,3.25rem)] font-light leading-none tracking-tight text-white">
+                  <span className="shrink-0 font-display text-[clamp(2.75rem,7vw,6.375rem)] font-thin leading-none tracking-tight text-white shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
                     <AnimatedCounter
                       value={stat.value}
                       suffix={stat.suffix}
@@ -93,7 +93,7 @@ export function CompanyOverview({ data, locale }: CompanyOverviewProps) {
                       duration={3.8}
                     />
                   </span>
-                  <span className="max-w-[10rem] text-right text-sm font-semibold leading-snug text-white md:max-w-[13rem] md:text-[0.95rem]">
+                  <span className="max-w-[10rem] text-right font-body text-[1.125rem] font-medium leading-snug text-white md:max-w-[13rem]">
                     {pickLocalized(stat.label, locale)}
                   </span>
                 </div>

@@ -13,7 +13,7 @@ export default async function NotFound() {
         <p className="mb-4 text-sm font-medium tracking-[0.2em] text-oboya-green uppercase">
           404
         </p>
-        <h1 className="mb-4 font-display text-4xl font-semibold text-oboya-blue-dark">
+        <h1 className="mb-4 font-display text-4xl font-black text-oboya-blue-dark">
           {t("notFoundTitle")}
         </h1>
         <p className="mb-8 max-w-md text-muted-foreground">{t("notFoundDesc")}</p>

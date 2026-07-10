@@ -13,7 +13,7 @@ export function InnerPageHero({ eyebrow, title, description }: InnerPageHeroProp
         <p className="mb-4 text-sm font-medium tracking-[0.2em] text-oboya-green uppercase">
           {eyebrow}
         </p>
-        <h1 className="max-w-3xl font-display text-[var(--text-heading)] leading-[var(--text-heading-leading)] font-semibold tracking-tight text-oboya-blue-dark text-balance">
+        <h1 className="max-w-3xl font-display text-[var(--text-heading)] leading-[var(--text-heading-leading)] font-black tracking-tight text-oboya-blue-dark text-balance">
           {title}
         </h1>
         <p className="mt-6 max-w-2xl text-[var(--text-body)] leading-[var(--text-body-leading)] text-muted-foreground">

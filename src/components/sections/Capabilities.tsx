@@ -32,7 +32,7 @@ export function Capabilities({ data, locale }: CapabilitiesProps) {
             </p>
             <div className="h-px flex-1 bg-oboya-blue-dark/80" aria-hidden />
           </div>
-          <h2 className="max-w-4xl font-display text-[clamp(1.45rem,2.6vw,2.15rem)] leading-[1.35] font-medium tracking-tight text-oboya-blue-dark text-balance">
+          <h2 className="max-w-4xl font-display text-[clamp(1.45rem,2.6vw,2.15rem)] leading-[1.35] font-black tracking-tight text-oboya-blue-dark text-balance">
             {pickLocalized(data.title, locale)}
           </h2>
         </motion.div>

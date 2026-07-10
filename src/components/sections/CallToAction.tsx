@@ -21,7 +21,7 @@ export function CallToAction() {
           variants={fadeInUp}
           className="flex flex-col items-center text-center"
         >
-          <h2 className="max-w-2xl font-display text-[var(--text-heading)] leading-[var(--text-heading-leading)] font-semibold tracking-tight text-white text-balance">
+          <h2 className="max-w-2xl font-display text-[var(--text-heading)] leading-[var(--text-heading-leading)] font-black tracking-tight text-white text-balance">
             {t("title")}
           </h2>
           <p className="mt-4 max-w-xl text-[var(--text-body)] leading-[var(--text-body-leading)] text-white/75">
