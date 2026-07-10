@@ -14,10 +14,12 @@ import { Can } from "@/components/admin/permissions/Can";
 import {
   getHomepageSettings,
   saveHomepageSettings,
+  type HomepageCapability,
+  type HomepageProductCard,
   type HomepageSectionId,
   type HomepageSettings,
 } from "@/lib/cms/repositories/homepage-repository";
-import type { CmsLocale } from "@/lib/cms/types";
+import type { CmsLocale, LocalizedString } from "@/lib/cms/types";
 
 const SECTION_LABELS: Record<HomepageSectionId, string> = {
   hero: "Hero",
@@ -542,6 +544,21 @@ export function HomepageAdminEditor() {
   );
 }
 
+const emptyLocalized = (): LocalizedString => ({
+  en: "",
+  "pt-BR": "",
+  es: "",
+  "zh-CN": "",
+});
+
+function updateLocalizedField(
+  value: LocalizedString,
+  locale: CmsLocale,
+  next: string
+): LocalizedString {
+  return { ...value, [locale]: next };
+}
+
 function SectionItemsEditor({
   locale,
   settings,
@@ -553,12 +570,120 @@ function SectionItemsEditor({
   setSettings: React.Dispatch<React.SetStateAction<HomepageSettings>>;
   sectionKey: "capabilities" | "featuredProducts";
 }) {
-  const section = settings[sectionKey];
+  if (sectionKey === "featuredProducts") {
+    const section = settings.featuredProducts;
+
+    const patchFeatured = (
+      patch: Partial<HomepageSettings["featuredProducts"]> & {
+        items?: HomepageProductCard[];
+      }
+    ) =>
+      setSettings((prev) => ({
+        ...prev,
+        featuredProducts: { ...prev.featuredProducts, ...patch },
+      }));
+
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Featured Products</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <LocalizedInput
+            label="Eyebrow"
+            locale={locale}
+            value={section.eyebrow[locale]}
+            onChange={(l, v) =>
+              patchFeatured({ eyebrow: updateLocalizedField(section.eyebrow, l, v) })
+            }
+          />
+          <LocalizedInput
+            label="Title"
+            locale={locale}
+            value={section.title[locale]}
+            onChange={(l, v) =>
+              patchFeatured({ title: updateLocalizedField(section.title, l, v) })
+            }
+            multiline
+          />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <LocalizedInput
+              label="CTA label"
+              locale={locale}
+              value={section.ctaLabel[locale]}
+              onChange={(l, v) =>
+                patchFeatured({ ctaLabel: updateLocalizedField(section.ctaLabel, l, v) })
+              }
+            />
+            <div className="space-y-1.5">
+              <Label>CTA link</Label>
+              <Input
+                value={section.ctaHref}
+                onChange={(e) => patchFeatured({ ctaHref: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {section.items.map((item, index) => (
+            <div key={item.id} className="space-y-3 rounded-lg border p-4">
+              <div className="space-y-1.5">
+                <Label>Shop product ID</Label>
+                <Input
+                  value={item.productId}
+                  onChange={(e) => {
+                    const items = section.items.map((it, i) =>
+                      i === index ? { ...it, productId: e.target.value } : it
+                    );
+                    patchFeatured({ items });
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Must match an id from the shop catalog (e.g. retail-clamshell).
+                </p>
+              </div>
+              <LocalizedInput
+                label="Category label (optional override)"
+                locale={locale}
+                value={item.categoryLabel?.[locale] ?? ""}
+                onChange={(l, v) => {
+                  const items = section.items.map((it, i) =>
+                    i === index
+                      ? {
+                          ...it,
+                          categoryLabel: updateLocalizedField(
+                            it.categoryLabel ?? emptyLocalized(),
+                            l,
+                            v
+                          ),
+                        }
+                      : it
+                  );
+                  patchFeatured({ items });
+                }}
+              />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const section = settings.capabilities;
+
+  const patchCapabilities = (
+    patch: Partial<HomepageSettings["capabilities"]> & {
+      items?: HomepageCapability[];
+    }
+  ) =>
+    setSettings((prev) => ({
+      ...prev,
+      capabilities: { ...prev.capabilities, ...patch },
+    }));
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{sectionKey === "capabilities" ? "Capabilities" : "Featured Products"}</CardTitle>
+        <CardTitle>Capabilities</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <LocalizedInput
@@ -566,13 +691,7 @@ function SectionItemsEditor({
           locale={locale}
           value={section.eyebrow[locale]}
           onChange={(l, v) =>
-            setSettings((prev) => ({
-              ...prev,
-              [sectionKey]: {
-                ...prev[sectionKey],
-                eyebrow: { ...prev[sectionKey].eyebrow, [l]: v },
-              },
-            }))
+            patchCapabilities({ eyebrow: updateLocalizedField(section.eyebrow, l, v) })
           }
         />
         <LocalizedInput
@@ -580,13 +699,7 @@ function SectionItemsEditor({
           locale={locale}
           value={section.title[locale]}
           onChange={(l, v) =>
-            setSettings((prev) => ({
-              ...prev,
-              [sectionKey]: {
-                ...prev[sectionKey],
-                title: { ...prev[sectionKey].title, [l]: v },
-              },
-            }))
+            patchCapabilities({ title: updateLocalizedField(section.title, l, v) })
           }
           multiline
         />
@@ -596,164 +709,76 @@ function SectionItemsEditor({
             locale={locale}
             value={section.ctaLabel[locale]}
             onChange={(l, v) =>
-              setSettings((prev) => ({
-                ...prev,
-                [sectionKey]: {
-                  ...prev[sectionKey],
-                  ctaLabel: { ...prev[sectionKey].ctaLabel, [l]: v },
-                },
-              }))
+              patchCapabilities({ ctaLabel: updateLocalizedField(section.ctaLabel, l, v) })
             }
           />
           <div className="space-y-1.5">
             <Label>CTA link</Label>
             <Input
               value={section.ctaHref}
-              onChange={(e) =>
-                setSettings((prev) => ({
-                  ...prev,
-                  [sectionKey]: { ...prev[sectionKey], ctaHref: e.target.value },
-                }))
-              }
+              onChange={(e) => patchCapabilities({ ctaHref: e.target.value })}
             />
           </div>
         </div>
 
         {section.items.map((item, index) => (
           <div key={item.id} className="space-y-3 rounded-lg border p-4">
-            {sectionKey === "featuredProducts" ? (
-              <>
-                <div className="space-y-1.5">
-                  <Label>Shop product ID</Label>
-                  <Input
-                    value={"productId" in item ? item.productId : ""}
-                    onChange={(e) => {
-                      const items = [...section.items];
-                      items[index] = {
-                        ...item,
-                        productId: e.target.value,
-                      } as (typeof section.items)[number];
-                      setSettings((prev) => ({
-                        ...prev,
-                        [sectionKey]: { ...prev[sectionKey], items },
-                      }));
-                    }}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Must match an id from the shop catalog (e.g. retail-clamshell).
-                  </p>
-                </div>
-                {"categoryLabel" in item && (
-                  <LocalizedInput
-                    label="Category label (optional override)"
-                    locale={locale}
-                    value={item.categoryLabel?.[locale] ?? ""}
-                    onChange={(l, v) => {
-                      const items = [...section.items];
-                      const current = items[index] as (typeof section.items)[number] & {
-                        categoryLabel?: Record<CmsLocale, string>;
-                      };
-                      items[index] = {
-                        ...current,
-                        categoryLabel: {
-                          ...(current.categoryLabel ?? {
-                            en: "",
-                            "pt-BR": "",
-                            es: "",
-                            "zh-CN": "",
-                          }),
-                          [l]: v,
-                        },
-                      } as (typeof section.items)[number];
-                      setSettings((prev) => ({
-                        ...prev,
-                        [sectionKey]: { ...prev[sectionKey], items },
-                      }));
-                    }}
-                  />
-                )}
-              </>
-            ) : (
-              <>
-                <LocalizedInput
-                  label="Title"
-                  locale={locale}
-                  value={"title" in item ? item.title[locale] : ""}
-                  onChange={(l, v) => {
-                    const items = [...section.items];
-                    const current = items[index] as (typeof section.items)[number] & {
-                      title: Record<CmsLocale, string>;
-                    };
-                    items[index] = {
-                      ...current,
-                      title: { ...current.title, [l]: v },
-                    };
-                    setSettings((prev) => ({
-                      ...prev,
-                      [sectionKey]: { ...prev[sectionKey], items },
-                    }));
+            <LocalizedInput
+              label="Title"
+              locale={locale}
+              value={item.title[locale]}
+              onChange={(l, v) => {
+                const items = section.items.map((it, i) =>
+                  i === index
+                    ? { ...it, title: updateLocalizedField(it.title, l, v) }
+                    : it
+                );
+                patchCapabilities({ items });
+              }}
+            />
+            <LocalizedInput
+              label="Description"
+              locale={locale}
+              value={item.description[locale]}
+              onChange={(l, v) => {
+                const items = section.items.map((it, i) =>
+                  i === index
+                    ? {
+                        ...it,
+                        description: updateLocalizedField(it.description, l, v),
+                      }
+                    : it
+                );
+                patchCapabilities({ items });
+              }}
+              multiline
+            />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>Image URL</Label>
+                <Input
+                  value={item.image}
+                  onChange={(e) => {
+                    const items = section.items.map((it, i) =>
+                      i === index ? { ...it, image: e.target.value } : it
+                    );
+                    patchCapabilities({ items });
                   }}
                 />
-                {"description" in item && (
-                  <LocalizedInput
-                    label="Description"
-                    locale={locale}
-                    value={item.description[locale]}
-                    onChange={(l, v) => {
-                      const items = [...section.items] as typeof section.items;
-                      const cap = items[index] as (typeof section.items)[0] & {
-                        description: Record<CmsLocale, string>;
-                      };
-                      items[index] = {
-                        ...cap,
-                        description: { ...cap.description, [l]: v },
-                      };
-                      setSettings((prev) => ({
-                        ...prev,
-                        [sectionKey]: { ...prev[sectionKey], items },
-                      }));
-                    }}
-                    multiline
-                  />
-                )}
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label>Image URL</Label>
-                    <Input
-                      value={"image" in item ? item.image : ""}
-                      onChange={(e) => {
-                        const items = [...section.items];
-                        items[index] = {
-                          ...item,
-                          image: e.target.value,
-                        } as (typeof section.items)[number];
-                        setSettings((prev) => ({
-                          ...prev,
-                          [sectionKey]: { ...prev[sectionKey], items },
-                        }));
-                      }}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Link</Label>
-                    <Input
-                      value={"href" in item ? item.href : ""}
-                      onChange={(e) => {
-                        const items = [...section.items];
-                        items[index] = {
-                          ...item,
-                          href: e.target.value,
-                        } as (typeof section.items)[number];
-                        setSettings((prev) => ({
-                          ...prev,
-                          [sectionKey]: { ...prev[sectionKey], items },
-                        }));
-                      }}
-                    />
-                  </div>
-                </div>
-              </>
-            )}
+              </div>
+              <div className="space-y-1.5">
+                <Label>Link</Label>
+                <Input
+                  value={item.href}
+                  onChange={(e) => {
+                    const items = section.items.map((it, i) =>
+                      i === index ? { ...it, href: e.target.value } : it
+                    );
+                    patchCapabilities({ items });
+                  }}
+                />
+              </div>
+            </div>
           </div>
         ))}
       </CardContent>
