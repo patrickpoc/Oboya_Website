@@ -9,7 +9,7 @@ import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repositor
 import { pickLocalized } from "@/lib/cms/utils";
 import { cn } from "@/lib/utils";
 
-const PER_PAGE = 3;
+const SWIPE_THRESHOLD = 48;
 
 function QuoteMark({ className }: { className?: string }) {
   return (
@@ -24,6 +24,17 @@ function QuoteMark({ className }: { className?: string }) {
   );
 }
 
+function cardsPerView(width: number) {
+  if (width < 640) return 1;
+  if (width < 1024) return 2;
+  return 3;
+}
+
+function initialPerPage() {
+  if (typeof window === "undefined") return 1;
+  return cardsPerView(window.innerWidth);
+}
+
 interface TestimonialsProps {
   data: HomepageSettings["testimonials"];
   locale: string;
@@ -32,47 +43,56 @@ interface TestimonialsProps {
 export function Testimonials({ data, locale }: TestimonialsProps) {
   const items = data.items;
   const [page, setPage] = useState(0);
+  const [perPage, setPerPage] = useState(initialPerPage);
+  const [cardWidth, setCardWidth] = useState(0);
+  const [padLeft, setPadLeft] = useState(0);
   const [offsets, setOffsets] = useState<number[]>([]);
-  const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const alignRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const pointerStartX = useRef<number | null>(null);
+  const pointerDeltaX = useRef(0);
 
   const count = items.length;
-  const pageCount = Math.max(1, Math.ceil(count / PER_PAGE));
+  const pageCount = Math.max(1, Math.ceil(count / perPage));
+  const isMobileLayout = perPage === 1;
 
   const measure = useCallback(() => {
-    const viewport = viewportRef.current;
     const track = trackRef.current;
     const align = alignRef.current;
-    if (!viewport || !track || !align) return;
+    if (!track || !align) return;
 
-    const cards = Array.from(
-      track.querySelectorAll<HTMLElement>("[data-testimonial-card]")
-    );
-    if (cards.length === 0) return;
-
+    const nextPerPage = cardsPerView(window.innerWidth);
     const styles = window.getComputedStyle(track);
-    const gap = Number.parseFloat(styles.columnGap || styles.gap || "16") || 16;
-    const padLeft =
-      Number.parseFloat(window.getComputedStyle(viewport).paddingLeft) || 0;
-    const cardWidth = cards[0].offsetWidth;
-    const pageStep = (cardWidth + gap) * PER_PAGE;
+    const nextGap =
+      Number.parseFloat(styles.columnGap || styles.gap || "16") || 16;
+
+    const alignRect = align.getBoundingClientRect();
+    const contentWidth = alignRect.width;
+    const nextPadLeft = Math.max(0, alignRect.left);
+
+    const peek = nextPerPage > 1 ? Math.min(40, contentWidth * 0.035) : 0;
+    const usable = Math.max(0, contentWidth - peek);
+    const nextCardWidth =
+      (usable - nextGap * Math.max(0, nextPerPage - 1)) / nextPerPage;
+
     const trackWidth =
-      cardWidth * cards.length + gap * Math.max(0, cards.length - 1);
+      nextCardWidth * count + nextGap * Math.max(0, count - 1);
+    const maxTranslate = Math.max(0, trackWidth - contentWidth);
+    const pageStep = (nextCardWidth + nextGap) * nextPerPage;
+    const nextPageCount = Math.max(1, Math.ceil(count / nextPerPage));
 
-    const viewportRect = viewport.getBoundingClientRect();
-    const trackStart = viewportRect.left + padLeft;
-    const alignRight = align.getBoundingClientRect().right;
-    const visibleWidth = Math.max(0, alignRight - trackStart);
-    const maxTranslate = Math.max(0, trackWidth - visibleWidth);
-
-    const nextOffsets = Array.from({ length: pageCount }, (_, i) => {
-      if (i === pageCount - 1) return maxTranslate;
+    const nextOffsets = Array.from({ length: nextPageCount }, (_, i) => {
+      if (i === nextPageCount - 1) return maxTranslate;
       return Math.min(i * pageStep, maxTranslate);
     });
 
+    setPerPage(nextPerPage);
+    setCardWidth(nextCardWidth);
+    setPadLeft(nextPadLeft);
     setOffsets(nextOffsets);
-  }, [pageCount]);
+    setPage((prev) => Math.min(prev, Math.max(0, nextOffsets.length - 1)));
+  }, [count]);
 
   useEffect(() => {
     measure();
@@ -82,7 +102,7 @@ export function Testimonials({ data, locale }: TestimonialsProps) {
       window.cancelAnimationFrame(id);
       window.removeEventListener("resize", measure);
     };
-  }, [measure, count]);
+  }, [measure]);
 
   const go = useCallback(
     (direction: -1 | 1) => {
@@ -93,6 +113,12 @@ export function Testimonials({ data, locale }: TestimonialsProps) {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      const section = sectionRef.current;
+      if (!section) return;
+      const rect = section.getBoundingClientRect();
+      const inView = rect.top < window.innerHeight * 0.7 && rect.bottom > window.innerHeight * 0.3;
+      if (!inView) return;
       if (event.key === "ArrowLeft") go(-1);
       if (event.key === "ArrowRight") go(1);
     };
@@ -100,12 +126,36 @@ export function Testimonials({ data, locale }: TestimonialsProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [go]);
 
+  const onPointerDown = (event: React.PointerEvent) => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    pointerStartX.current = event.clientX;
+    pointerDeltaX.current = 0;
+    (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
+  };
+
+  const onPointerMove = (event: React.PointerEvent) => {
+    if (pointerStartX.current == null) return;
+    pointerDeltaX.current = event.clientX - pointerStartX.current;
+  };
+
+  const onPointerUp = () => {
+    if (pointerStartX.current == null) return;
+    const delta = pointerDeltaX.current;
+    pointerStartX.current = null;
+    pointerDeltaX.current = 0;
+    if (Math.abs(delta) < SWIPE_THRESHOLD) return;
+    go(delta < 0 ? 1 : -1);
+  };
+
   if (count === 0) return null;
 
   const x = offsets[page] ?? 0;
 
   return (
-    <section className="overflow-x-hidden bg-oboya-blue-dark py-12 md:py-16 lg:py-20">
+    <section
+      ref={sectionRef}
+      className="overflow-x-hidden bg-oboya-blue-dark py-12 md:py-16 lg:py-20"
+    >
       <Container>
         <motion.div
           initial="hidden"
@@ -126,24 +176,37 @@ export function Testimonials({ data, locale }: TestimonialsProps) {
       </Container>
 
       <div
-        ref={viewportRef}
-        className="overflow-hidden pl-[var(--container-padding)] xl:pl-[max(var(--container-padding),calc((100vw-var(--container-max))/2+var(--container-padding)))]"
+        className="overflow-hidden pl-[var(--container-padding)]"
+        style={padLeft > 0 ? { paddingLeft: padLeft } : undefined}
       >
         <motion.div
           ref={trackRef}
-          className="testimonials-track flex gap-3 md:gap-4"
+          className="testimonials-track flex touch-pan-y gap-3 md:gap-4"
           animate={{ x: -x }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          style={{ width: "max-content" }}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
         >
           {items.map((item) => (
             <blockquote
               key={item.id}
               data-testimonial-card
-              className="relative flex aspect-square w-[75%] shrink-0 flex-col items-start bg-oboya-blue p-4 sm:w-[42%] md:w-[30%] md:p-5 lg:w-[28%]"
+              className={cn(
+                "relative flex shrink-0 flex-col items-start bg-oboya-blue p-4 md:p-5",
+                isMobileLayout
+                  ? "min-h-[18rem] aspect-auto"
+                  : "aspect-square"
+              )}
+              style={{
+                width: cardWidth > 0 ? cardWidth : "min(100%, 20rem)",
+              }}
             >
               <QuoteMark className="h-6 w-auto self-start text-oboya-blue-light md:h-7" />
 
-              <div className="mt-3 flex min-h-0 w-[80%] flex-[1_1_80%] flex-col gap-2.5">
+              <div className="mt-3 flex min-h-0 w-[80%] flex-1 flex-col gap-2.5">
                 <div className="flex min-h-0 flex-1 gap-2.5">
                   <div
                     className="mt-0.5 w-px shrink-0 self-stretch bg-white/25"
@@ -156,10 +219,10 @@ export function Testimonials({ data, locale }: TestimonialsProps) {
               </div>
 
               <footer className="mt-auto w-[80%] pt-3">
-                <p className="text-[11px] tracking-[0.08em] text-white/70 uppercase md:text-xs">
+                <p className="text-xs tracking-[0.08em] text-white/70 uppercase">
                   {pickLocalized(item.author, locale)}
                 </p>
-                <p className="mt-0.5 text-xs font-bold tracking-[0.06em] text-white uppercase md:text-sm">
+                <p className="mt-0.5 text-sm font-bold tracking-[0.06em] text-white uppercase">
                   {pickLocalized(item.role, locale)}
                 </p>
               </footer>

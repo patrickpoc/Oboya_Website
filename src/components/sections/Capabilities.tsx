@@ -41,7 +41,7 @@ export function Capabilities({ data, locale }: CapabilitiesProps) {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
-          className="grid gap-4 sm:gap-5 md:grid-cols-3"
+          className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3"
         >
           {data.items.map((item) => {
             const title = pickLocalized(item.title, locale);
@@ -61,7 +61,7 @@ export function Capabilities({ data, locale }: CapabilitiesProps) {
                     alt={title}
                     fill
                     className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, 33vw"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
                   <div
                     className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/10 transition-opacity duration-300 group-hover:from-black/85"
@@ -71,7 +71,7 @@ export function Capabilities({ data, locale }: CapabilitiesProps) {
                     <h3 className="text-sm font-bold text-white md:text-[0.95rem]">
                       {title}
                     </h3>
-                    <p className="mt-1.5 max-w-[95%] text-[11px] leading-snug text-white/95 md:text-xs md:leading-snug">
+                    <p className="mt-1.5 max-w-[95%] text-xs leading-snug text-white/95 md:text-sm md:leading-snug">
                       {description}
                     </p>
                   </div>
@@ -90,7 +90,7 @@ export function Capabilities({ data, locale }: CapabilitiesProps) {
         >
           <Link
             href={data.ctaHref}
-            className="inline-flex items-center rounded-full border border-oboya-blue-dark px-7 py-2.5 text-[11px] font-semibold tracking-[0.14em] text-oboya-blue-dark uppercase transition-colors hover:bg-oboya-blue-dark hover:text-white"
+            className="inline-flex items-center rounded-full border border-oboya-blue-dark px-7 py-2.5 text-xs font-semibold tracking-[0.14em] text-oboya-blue-dark uppercase transition-colors hover:bg-oboya-blue-dark hover:text-white"
           >
             {pickLocalized(data.ctaLabel, locale)}
           </Link>

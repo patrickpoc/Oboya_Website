@@ -270,7 +270,7 @@ export function Navbar({
               className="pointer-events-none fixed inset-x-0 top-0 z-50 bg-transparent"
             >
               <nav
-                className="pointer-events-auto grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-5 md:h-[4.5rem] md:px-8 lg:px-10"
+                className="pointer-events-auto grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-3 sm:px-5 md:h-[4.5rem] md:px-8 lg:px-10"
                 aria-label={t("nav.mainNav")}
               >
                 <div className="justify-self-start">
@@ -289,7 +289,7 @@ export function Navbar({
                 <div className="justify-self-end">
                   <Link
                     href="/contact"
-                    className="inline-flex items-center rounded-full border border-white px-5 py-2 text-[11px] font-semibold tracking-[0.12em] text-white uppercase transition-colors hover:bg-white/10 md:px-6 md:text-xs"
+                    className="inline-flex items-center rounded-full border border-white px-3 py-1.5 text-xs font-semibold tracking-[0.1em] text-white uppercase transition-colors hover:bg-white/10 sm:px-5 sm:py-2 sm:tracking-[0.12em] md:px-6"
                   >
                     {contactLabel}
                   </Link>

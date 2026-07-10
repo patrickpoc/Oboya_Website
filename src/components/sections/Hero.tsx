@@ -85,9 +85,49 @@ export function Hero({ data, locale }: HeroProps) {
           transition={{ delay: 0.45, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           className="mx-auto w-full max-w-3xl pb-8 md:pb-12"
         >
+          {/* Mobile: vertical stack. sm+: single glass row */}
+          <div className="flex flex-col gap-2 sm:hidden">
+            {data.pills.map((pill) => {
+              const Icon = pillIcons[pill.icon] ?? Sprout;
+              return (
+                <Link
+                  key={pill.id}
+                  href={pill.href}
+                  className={cn(
+                    "group flex items-center gap-3 rounded-full px-3 py-2.5",
+                    "border border-white/15 bg-oboya-blue-dark/55 shadow-[0_8px_32px_rgb(1_32_63/35%)] backdrop-blur-2xl",
+                    "transition-colors hover:bg-white/5"
+                  )}
+                >
+                  {pill.image ? (
+                    <span className="relative size-11 shrink-0 overflow-hidden rounded-full">
+                      <Image
+                        src={pill.image}
+                        alt=""
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        sizes="44px"
+                      />
+                    </span>
+                  ) : (
+                    <Icon className="size-6 shrink-0 text-white/90" />
+                  )}
+                  <span className="min-w-0 text-left">
+                    <span className="block text-sm font-semibold text-white">
+                      {pickLocalized(pill.label, locale)}
+                    </span>
+                    <span className="mt-0.5 block text-xs font-medium text-oboya-green-light">
+                      {pickLocalized(pill.sublabel, locale)}
+                    </span>
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+
           <div
             className={cn(
-              "flex items-center rounded-full px-2 py-2.5 sm:px-3 sm:py-3",
+              "hidden items-center rounded-full px-2 py-2.5 sm:flex sm:px-3 sm:py-3",
               "border border-white/15 bg-oboya-blue-dark/55 shadow-[0_12px_48px_rgb(1_32_63/40%)] backdrop-blur-2xl"
             )}
           >
@@ -122,7 +162,7 @@ export function Hero({ data, locale }: HeroProps) {
                       <span className="block truncate text-sm font-semibold text-white sm:text-[0.95rem]">
                         {pickLocalized(pill.label, locale)}
                       </span>
-                      <span className="mt-0.5 block truncate text-[11px] font-medium text-oboya-green-light sm:text-xs">
+                      <span className="mt-0.5 block truncate text-xs font-medium text-oboya-green-light">
                         {pickLocalized(pill.sublabel, locale)}
                       </span>
                     </span>

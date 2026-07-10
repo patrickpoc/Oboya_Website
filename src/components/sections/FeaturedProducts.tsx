@@ -84,7 +84,7 @@ export function FeaturedProducts({ data, locale }: FeaturedProductsProps) {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
-          className="grid gap-6 md:grid-cols-3 md:gap-8"
+          className="grid gap-6 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8"
         >
           {cards.map(({ product, name, category, price, href }) => (
             <motion.article
@@ -98,12 +98,12 @@ export function FeaturedProducts({ data, locale }: FeaturedProductsProps) {
                   alt={name}
                   fill
                   className="object-contain p-6 transition-transform duration-500 hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 33vw"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
               </div>
 
               <div className="flex flex-1 flex-col items-center px-5 pb-6 text-center">
-                <p className="text-[11px] font-bold tracking-[0.14em] text-oboya-blue uppercase">
+                <p className="text-xs font-bold tracking-[0.14em] text-oboya-blue uppercase">
                   {category}
                 </p>
                 <h3 className="mt-2 text-lg font-bold text-oboya-blue-dark md:text-xl">
@@ -115,7 +115,7 @@ export function FeaturedProducts({ data, locale }: FeaturedProductsProps) {
 
                 <Link
                   href={href}
-                  className="mt-5 inline-flex items-center gap-2 rounded-full border border-oboya-green px-5 py-2.5 text-[11px] font-semibold tracking-[0.12em] text-oboya-blue-dark uppercase transition-colors hover:bg-oboya-green hover:text-white"
+                  className="mt-5 inline-flex items-center gap-2 rounded-full border border-oboya-green px-5 py-2.5 text-xs font-semibold tracking-[0.12em] text-oboya-blue-dark uppercase transition-colors hover:bg-oboya-green hover:text-white"
                 >
                   <ShoppingBag className="size-3.5" aria-hidden />
                   See on shop

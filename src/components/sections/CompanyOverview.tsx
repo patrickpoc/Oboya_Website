@@ -61,14 +61,14 @@ export function CompanyOverview({ data, locale }: CompanyOverviewProps) {
             initial={{ opacity: 0, y: 28 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="relative aspect-[3/4] w-full max-w-xs overflow-hidden rounded-sm lg:col-span-4 lg:max-w-none"
+            className="relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-sm sm:max-w-md lg:col-span-4 lg:mx-0 lg:max-w-none"
           >
             <Image
               src={data.image}
               alt={pickLocalized(data.imageAlt, locale)}
               fill
               className="object-cover"
-              sizes="(max-width: 1024px) 70vw, 280px"
+              sizes="(max-width: 1024px) 90vw, 280px"
               priority
             />
           </motion.div>
