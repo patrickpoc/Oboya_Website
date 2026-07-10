@@ -82,7 +82,7 @@ export function ProductCatalog() {
             onClick={loadMoreProducts}
             className={buttonVariants({
               variant: "outline",
-              className: "rounded-full px-8",
+              size: "cta",
             })}
           >
             {t("loadMore")}

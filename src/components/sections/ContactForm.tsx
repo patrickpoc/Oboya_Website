@@ -121,8 +121,8 @@ export function ContactForm() {
           <button
             type="submit"
             className={buttonVariants({
-              className:
-                "mt-2 w-fit rounded-full bg-oboya-green px-8 text-white hover:bg-oboya-green/90",
+              size: "cta",
+              className: "mt-2 bg-oboya-green text-white hover:bg-oboya-green/90",
             })}
           >
             {t("submit")}

@@ -80,8 +80,9 @@ export function OfficeCard() {
             <Link
               href={`/contact?office=${office.officeId}`}
               className={buttonVariants({
+                size: "cta",
                 className:
-                  "shrink-0 rounded-full bg-oboya-green px-6 text-white hover:bg-oboya-green/90",
+                  "shrink-0 bg-oboya-green text-white hover:bg-oboya-green/90",
               })}
             >
               {t("contactSales")}

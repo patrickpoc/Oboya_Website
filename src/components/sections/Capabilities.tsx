@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
+import { buttonVariants } from "@/components/ui/button";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
@@ -90,7 +91,12 @@ export function Capabilities({ data, locale }: CapabilitiesProps) {
         >
           <Link
             href={data.ctaHref}
-            className="inline-flex items-center rounded-full border border-oboya-blue-dark px-7 py-2.5 text-xs font-semibold tracking-[0.14em] text-oboya-blue-dark uppercase transition-colors hover:bg-oboya-blue-dark hover:text-white"
+            className={buttonVariants({
+              size: "cta",
+              variant: "outline",
+              className:
+                "border-oboya-blue-dark bg-transparent text-oboya-blue-dark hover:bg-oboya-blue-dark hover:text-white",
+            })}
           >
             {pickLocalized(data.ctaLabel, locale)}
           </Link>

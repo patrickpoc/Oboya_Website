@@ -27,13 +27,13 @@ export function CallToAction() {
           <p className="mt-4 max-w-xl text-[var(--text-body)] leading-[var(--text-body-leading)] text-white/75">
             {t("description")}
           </p>
-          <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+          <div className="mt-8 flex w-full max-w-md flex-col gap-3 sm:max-w-none sm:flex-row sm:justify-center sm:gap-4">
             <Link
               href="/contact"
               className={buttonVariants({
-                size: "lg",
+                size: "cta-lg",
                 className:
-                  "h-12 rounded-full bg-oboya-green px-8 text-base font-semibold text-white hover:bg-oboya-green/90",
+                  "bg-oboya-green text-white hover:bg-oboya-green/90",
               })}
             >
               {t("primary")}
@@ -43,9 +43,9 @@ export function CallToAction() {
               href="/case-studies"
               className={buttonVariants({
                 variant: "outline",
-                size: "lg",
+                size: "cta-lg",
                 className:
-                  "h-12 rounded-full border-white/30 bg-transparent px-8 text-base font-semibold text-white hover:bg-white/10 hover:text-white",
+                  "border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white",
               })}
             >
               {t("secondary")}

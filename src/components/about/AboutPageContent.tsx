@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Container } from "@/components/ui/container";
 import { CallToAction } from "@/components/sections/CallToAction";
 import { Certifications } from "@/components/sections/Certifications";
+import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 
 const sectionIds = [
@@ -130,7 +131,10 @@ export function AboutPageContent() {
           <p className="mt-4 max-w-2xl text-white/80">{t("presence.description")}</p>
           <Link
             href="/#global-presence"
-            className="mt-6 inline-flex rounded-full bg-oboya-green px-6 py-2.5 text-sm font-medium text-white hover:bg-oboya-green/90"
+            className={buttonVariants({
+              size: "cta",
+              className: "mt-6 bg-oboya-green text-white hover:bg-oboya-green/90",
+            })}
           >
             {t("presence.cta")}
           </Link>

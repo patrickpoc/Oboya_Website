@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ShoppingBag } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
+import { buttonVariants } from "@/components/ui/button";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
@@ -115,7 +116,12 @@ export function FeaturedProducts({ data, locale }: FeaturedProductsProps) {
 
                 <Link
                   href={href}
-                  className="mt-5 inline-flex items-center gap-2 rounded-full border border-oboya-green px-5 py-2.5 text-xs font-semibold tracking-[0.12em] text-oboya-blue-dark uppercase transition-colors hover:bg-oboya-green hover:text-white"
+                  className={buttonVariants({
+                    size: "cta",
+                    variant: "outline",
+                    className:
+                      "mt-5 border-oboya-green bg-transparent text-oboya-blue-dark hover:bg-oboya-green hover:text-white",
+                  })}
                 >
                   <ShoppingBag className="size-3.5" aria-hidden />
                   See on shop
@@ -134,7 +140,12 @@ export function FeaturedProducts({ data, locale }: FeaturedProductsProps) {
         >
           <Link
             href={data.ctaHref || "/shop"}
-            className="inline-flex items-center rounded-full border border-oboya-green px-8 py-3 text-xs font-semibold tracking-[0.14em] text-oboya-green uppercase transition-colors hover:bg-oboya-green hover:text-white"
+            className={buttonVariants({
+              size: "cta",
+              variant: "outline",
+              className:
+                "border-oboya-green bg-transparent text-oboya-green hover:bg-oboya-green hover:text-white",
+            })}
           >
             {pickLocalized(data.ctaLabel, locale)}
           </Link>

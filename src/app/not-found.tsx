@@ -20,7 +20,8 @@ export default async function NotFound() {
         <Link
           href="/"
           className={buttonVariants({
-            className: "rounded-full bg-oboya-green px-8 text-white hover:bg-oboya-green/90",
+            size: "cta",
+            className: "bg-oboya-green text-white hover:bg-oboya-green/90",
           })}
         >
           {t("backHome")}

@@ -25,6 +25,11 @@ const buttonVariants = cva(
         xs: "h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
         sm: "h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
         lg: "h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
+        /** Marketing pill — scales padding/type from mobile up */
+        cta: "h-9 gap-1.5 rounded-full px-4 text-xs font-semibold tracking-[0.1em] uppercase sm:h-10 sm:px-6 sm:text-sm sm:tracking-[0.12em] md:px-7",
+        /** Page-level CTA block — full-width on mobile, larger on desktop */
+        "cta-lg":
+          "h-10 w-full gap-2 rounded-full px-5 text-sm font-semibold tracking-[0.1em] uppercase sm:h-11 sm:w-auto sm:px-7 sm:tracking-[0.12em] md:h-12 md:px-8 md:text-base",
         icon: "size-8",
         "icon-xs":
           "size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",

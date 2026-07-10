@@ -216,8 +216,9 @@ function HeroMenuButton({
             href="/contact"
             onClick={() => onOpenChange(false)}
             className={buttonVariants({
+              size: "cta",
               className:
-                "mt-6 w-full rounded-full bg-oboya-blue-dark text-white hover:bg-oboya-blue",
+                "mt-6 w-full bg-oboya-blue-dark text-white hover:bg-oboya-blue",
             })}
           >
             {contactLabel}
@@ -289,7 +290,12 @@ export function Navbar({
                 <div className="justify-self-end">
                   <Link
                     href="/contact"
-                    className="inline-flex items-center rounded-full border border-white px-3 py-1.5 text-xs font-semibold tracking-[0.1em] text-white uppercase transition-colors hover:bg-white/10 sm:px-5 sm:py-2 sm:tracking-[0.12em] md:px-6"
+                    className={buttonVariants({
+                      size: "cta",
+                      variant: "outline",
+                      className:
+                        "border-white bg-transparent text-white hover:bg-white/10 hover:text-white",
+                    })}
                   >
                     {contactLabel}
                   </Link>
@@ -344,8 +350,9 @@ export function Navbar({
                     <Link
                       href="/contact"
                       className={buttonVariants({
+                        size: "cta",
                         className:
-                          "rounded-full bg-oboya-blue-dark px-6 text-white hover:bg-oboya-blue",
+                          "bg-oboya-blue-dark text-white hover:bg-oboya-blue",
                       })}
                     >
                       {contactLabel}
@@ -388,8 +395,9 @@ export function Navbar({
                             href="/contact"
                             onClick={() => setMobileOpen(false)}
                             className={buttonVariants({
+                              size: "cta",
                               className:
-                                "mt-6 w-full rounded-full bg-oboya-blue-dark text-white hover:bg-oboya-blue",
+                                "mt-6 w-full bg-oboya-blue-dark text-white hover:bg-oboya-blue",
                             })}
                           >
                             {contactLabel}
@@ -452,8 +460,8 @@ export function Navbar({
           <Link
             href="/contact"
             className={buttonVariants({
-              className:
-                "rounded-full bg-oboya-green px-6 text-white hover:bg-oboya-green/90",
+              size: "cta",
+              className: "bg-oboya-green text-white hover:bg-oboya-green/90",
             })}
           >
             {contactLabel}
@@ -496,8 +504,9 @@ export function Navbar({
                   href="/contact"
                   onClick={() => setMobileOpen(false)}
                   className={buttonVariants({
+                    size: "cta",
                     className:
-                      "mt-6 w-full rounded-full bg-oboya-green text-white hover:bg-oboya-green/90",
+                      "mt-6 w-full bg-oboya-green text-white hover:bg-oboya-green/90",
                   })}
                 >
                   {contactLabel}

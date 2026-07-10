@@ -76,11 +76,15 @@ export function ProductCard({
           </p>
           <p className="text-[11px] text-oboya-green">{t("moq", { count: product.moq })}</p>
         </div>
-        <div className="flex shrink-0 flex-col justify-center gap-2">
+        <div className="flex shrink-0 flex-col justify-center gap-2 sm:min-w-[9.5rem]">
           <button
             type="button"
             onClick={onQuickView}
-            className={buttonVariants({ variant: "outline", size: "sm", className: "rounded-full" })}
+            className={buttonVariants({
+              variant: "outline",
+              size: "cta",
+              className: "w-full",
+            })}
           >
             {t("quickView")}
           </button>
@@ -88,8 +92,8 @@ export function ProductCard({
             type="button"
             onClick={onAddToQuote}
             className={buttonVariants({
-              size: "sm",
-              className: "rounded-full bg-oboya-green text-white hover:bg-oboya-green/90",
+              size: "cta",
+              className: "w-full bg-oboya-green text-white hover:bg-oboya-green/90",
             })}
           >
             {t("addToQuote")}
@@ -133,14 +137,14 @@ export function ProductCard({
         </p>
         <p className="text-[11px] text-muted-foreground">{t("estimatedPrice")}</p>
         <p className="text-[11px] text-oboya-green">{t("moq", { count: product.moq })}</p>
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
           <button
             type="button"
             onClick={onQuickView}
             className={buttonVariants({
               variant: "outline",
-              size: "sm",
-              className: "flex-1 rounded-full",
+              size: "cta",
+              className: "w-full sm:flex-1",
             })}
           >
             {t("quickView")}
@@ -149,9 +153,9 @@ export function ProductCard({
             type="button"
             onClick={onAddToQuote}
             className={buttonVariants({
-              size: "sm",
+              size: "cta",
               className:
-                "flex-1 rounded-full bg-oboya-green text-white hover:bg-oboya-green/90",
+                "w-full bg-oboya-green text-white hover:bg-oboya-green/90 sm:flex-1",
             })}
           >
             {t("addToQuote")}
