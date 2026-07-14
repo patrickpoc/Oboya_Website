@@ -87,6 +87,8 @@ export interface AboutPageSettings {
     eyebrow: LocalizedString;
     title: LocalizedString;
     description: LocalizedString;
+    /** Checklist under the intro (feature-style left column). */
+    highlights: Array<{ id: string; text: LocalizedString }>;
     items: AboutPerson[];
   };
   callout: {
@@ -303,11 +305,49 @@ const defaultSettings = (): AboutPageSettings => ({
       "公司背后的人"
     ),
     description: loc(
-      "Local expertise and global vision — the leaders guiding Oboya across markets.",
-      "Expertise local e visão global — os líderes que guiam a Oboya nos mercados.",
-      "Expertise local y visión global — los líderes que guían Oboya en los mercados.",
-      "本地专长与全球视野——指引 Oboya 各市场的领导者。"
+      "A leadership team that pairs local grower expertise with global manufacturing — aligning markets, operations, and commercial priorities across regions.",
+      "Uma liderança que une expertise local em horticultura à manufatura global — alinhando mercados, operações e prioridades comerciais entre regiões.",
+      "Un liderazgo que une experiencia local en horticultura con manufactura global — alineando mercados, operaciones y prioridades comerciales entre regiones.",
+      "一支兼具本地种植专业能力与全球制造视野的领导团队，统筹各区域市场、运营与商业重点。"
     ),
+    highlights: [
+      {
+        id: "h1",
+        text: loc(
+          "Regional leaders close to growers and local market needs",
+          "Líderes regionais próximos aos produtores e às demandas locais",
+          "Líderes regionales cerca de los productores y las necesidades locales",
+          "贴近种植者与本地市场需求的区域负责人"
+        ),
+      },
+      {
+        id: "h2",
+        text: loc(
+          "Shared standards for quality, logistics, and sustainability",
+          "Padrões compartilhados de qualidade, logística e sustentabilidade",
+          "Estándares compartidos de calidad, logística y sostenibilidad",
+          "质量、物流与可持续性的统一标准"
+        ),
+      },
+      {
+        id: "h3",
+        text: loc(
+          "Cross-site coordination from production through delivery",
+          "Coordenação entre unidades — da produção à entrega",
+          "Coordinación entre plantas — de la producción a la entrega",
+          "跨工厂协同——从生产到交付"
+        ),
+      },
+      {
+        id: "h4",
+        text: loc(
+          "Commercial focus on lasting partnerships, not one-off deals",
+          "Foco comercial em parcerias duradouras, não em negócios pontuais",
+          "Enfoque comercial en alianzas duraderas, no en negocios puntuales",
+          "以长期合作伙伴关系为核心，而非一次性交易"
+        ),
+      },
+    ],
     items: [
       {
         id: "l1",
@@ -498,7 +538,7 @@ const defaultSettings = (): AboutPageSettings => ({
 });
 
 let cache: AboutPageSettings | null = null;
-const CONTENT_REVISION = 3;
+const CONTENT_REVISION = 4;
 let cacheRevision = 0;
 
 export function getAboutPageSettings(): AboutPageSettings {

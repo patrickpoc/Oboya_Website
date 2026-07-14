@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
+import { Check } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { fadeInUp, staggerContainer, easeOutExpo } from "@/lib/animations";
+import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { pickLocalized } from "@/lib/cms/utils";
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
 import { cn } from "@/lib/utils";
@@ -12,248 +12,120 @@ import { cn } from "@/lib/utils";
 interface AboutPeopleProps {
   data: AboutPageSettings["people"];
   locale: string;
-  /** Spotlight: one person in focus; scroll advances to the next. */
+  /** @deprecated Kept for callers; block is always the split feature layout. */
   scrollSpotlight?: boolean;
 }
 
-export function AboutPeople({
-  data,
-  locale,
-  scrollSpotlight = false,
-}: AboutPeopleProps) {
-  if (scrollSpotlight) {
-    return <PeopleScrollSpotlight data={data} locale={locale} />;
-  }
-
-  return <PeopleStaticGrid data={data} locale={locale} />;
-}
-
-function PeopleHeader({
-  data,
-  locale,
-}: {
-  data: AboutPageSettings["people"];
-  locale: string;
-}) {
-  return (
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-80px" }}
-      variants={staggerContainer}
-      className="mx-auto max-w-2xl text-center"
-    >
-      <motion.p
-        variants={fadeInUp}
-        className="font-body text-[0.6875rem] font-medium tracking-[0.04em] text-oboya-green md:text-xs"
-      >
-        {pickLocalized(data.eyebrow, locale)}
-      </motion.p>
-      <motion.h2
-        variants={fadeInUp}
-        className="mt-3 font-display text-[clamp(1.25rem,2.4vw,1.75rem)] font-semibold tracking-[-0.02em] text-oboya-blue-dark text-balance"
-      >
-        {pickLocalized(data.title, locale)}
-      </motion.h2>
-      <motion.p
-        variants={fadeInUp}
-        className="mt-3 font-body text-sm leading-relaxed text-oboya-blue-dark/60 md:text-[0.9375rem]"
-      >
-        {pickLocalized(data.description, locale)}
-      </motion.p>
-    </motion.div>
-  );
-}
-
-function PeopleStaticGrid({
-  data,
-  locale,
-}: {
-  data: AboutPageSettings["people"];
-  locale: string;
-}) {
-  return (
-    <section className="bg-oboya-soft-white py-[clamp(5rem,12vw,9rem)]">
-      <Container>
-        <PeopleHeader data={data} locale={locale} />
-        <motion.ul
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          variants={staggerContainer}
-          className="mt-14 grid gap-8 sm:grid-cols-2 lg:mt-20 lg:grid-cols-4 lg:gap-10"
-        >
-          {data.items.map((person) => (
-            <motion.li key={person.id} variants={fadeInUp} className="group">
-              <div className="relative aspect-[3/4] overflow-hidden bg-oboya-blue-dark/5">
-                <Image
-                  src={person.image}
-                  alt={person.name}
-                  fill
-                  className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                />
-              </div>
-              <h3 className="mt-4 font-display text-base font-semibold text-oboya-blue-dark md:text-lg">
-                {person.name}
-              </h3>
-              <p className="mt-1 text-sm text-oboya-blue-dark/55">
-                {pickLocalized(person.role, locale)}
-              </p>
-            </motion.li>
-          ))}
-        </motion.ul>
-      </Container>
-    </section>
-  );
-}
-
 /**
- * Previous spotlight structure restored:
- * one person in evidence, slide transitions, progress dots.
- * Driven by CSS sticky + scroll progress (no GSAP pin → no scroll conflict).
+ * Leadership feature block: structured copy + checklist on the left,
+ * 2×2 portrait grid on the right (reference: split product feature).
  */
-function PeopleScrollSpotlight({
-  data,
-  locale,
-}: {
-  data: AboutPageSettings["people"];
-  locale: string;
-}) {
-  const reduce = useReducedMotion();
-  const trackRef = useRef<HTMLDivElement | null>(null);
-  const [active, setActive] = useState(0);
-  const [direction, setDirection] = useState<"forward" | "back">("forward");
-  const prevActive = useRef(0);
-  const items = data.items;
-  const count = items.length;
-  const person = items[active];
-
-  useEffect(() => {
-    if (reduce || count <= 1) return;
-
-    const track = trackRef.current;
-    if (!track) return;
-
-    const onScroll = () => {
-      const rect = track.getBoundingClientRect();
-      const trackHeight = track.offsetHeight;
-      const viewport = window.innerHeight;
-      // Progress through the sticky track (0 → 1)
-      const scrolled = -rect.top;
-      const range = Math.max(trackHeight - viewport, 1);
-      const progress = Math.min(1, Math.max(0, scrolled / range));
-      const next = Math.min(count - 1, Math.round(progress * (count - 1)));
-
-      if (next !== prevActive.current) {
-        setDirection(next > prevActive.current ? "forward" : "back");
-        prevActive.current = next;
-        setActive(next);
-      }
-    };
-
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, [count, reduce]);
-
-  if (!person) return null;
-
-  const enterX = direction === "forward" ? 56 : -56;
-  const exitX = direction === "forward" ? -56 : 56;
-  // Tall track so sticky stays pinned while scrolling through people
-  const trackStyle = {
-    height: reduce ? "auto" : `${Math.max(count, 1) * 100}vh`,
-  };
+export function AboutPeople({ data, locale }: AboutPeopleProps) {
+  const highlights = data.highlights?.length
+    ? data.highlights
+    : data.items.map((person) => ({
+        id: person.id,
+        text: person.role,
+      }));
 
   return (
-    <section className="bg-oboya-soft-white">
-      <div ref={trackRef} className="relative" style={trackStyle}>
-        <div
-          className={cn(
-            "flex flex-col justify-center py-16 md:py-20",
-            !reduce && "sticky top-0 min-h-svh"
-          )}
-        >
-          <Container>
-            <PeopleHeader data={data} locale={locale} />
+    <section className="bg-oboya-soft-white py-16 md:py-24">
+      <Container>
+        <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-14 xl:gap-16">
+          {/* Left — title, intro, structured points */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={staggerContainer}
+            className="lg:col-span-5"
+          >
+            <motion.p
+              variants={fadeInUp}
+              className="font-body text-[0.8125rem] font-medium tracking-[0.04em] text-oboya-green md:text-sm"
+            >
+              {pickLocalized(data.eyebrow, locale)}
+            </motion.p>
+            <motion.h2
+              variants={fadeInUp}
+              className="mt-4 max-w-md font-display text-[clamp(1.75rem,3.2vw,2.75rem)] font-semibold tracking-[-0.02em] text-oboya-blue-dark text-balance"
+            >
+              {pickLocalized(data.title, locale)}
+            </motion.h2>
+            <motion.p
+              variants={fadeInUp}
+              className="mt-4 max-w-md font-body text-[1.0625rem] leading-relaxed text-oboya-blue-dark/60"
+            >
+              {pickLocalized(data.description, locale)}
+            </motion.p>
 
-            <div className="relative mt-12 grid items-center gap-10 lg:mt-16 lg:grid-cols-12 lg:gap-14">
-              <div className="relative lg:col-span-6">
-                <div className="relative mx-auto aspect-[3/4] w-full max-w-md overflow-hidden bg-oboya-blue-dark/5 lg:max-w-none">
-                  <AnimatePresence initial={false} mode="wait">
-                    <motion.div
-                      key={person.id}
-                      className="absolute inset-0"
-                      initial={reduce ? { opacity: 0 } : { x: enterX, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      exit={reduce ? { opacity: 0 } : { x: exitX, opacity: 0 }}
-                      transition={{ duration: 0.55, ease: easeOutExpo }}
-                    >
-                      <Image
-                        src={person.image}
-                        alt={person.name}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 1024px) 90vw, 42vw"
-                        priority
-                      />
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-              </div>
-
-              <div className="lg:col-span-5 lg:col-start-8">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={person.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -12 }}
-                    transition={{ duration: 0.45, ease: easeOutExpo }}
+            <motion.ul
+              variants={staggerContainer}
+              className="mt-8 flex flex-col gap-4"
+            >
+              {highlights.map((item) => (
+                <motion.li
+                  key={item.id}
+                  variants={fadeInUp}
+                  className="flex items-start gap-3"
+                >
+                  <span
+                    className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-oboya-green/15 text-oboya-green"
+                    aria-hidden
                   >
-                    <p className="font-body text-[0.6875rem] font-medium tracking-[0.16em] text-oboya-green uppercase">
-                      {String(active + 1).padStart(2, "0")} /{" "}
-                      {String(count).padStart(2, "0")}
-                    </p>
-                    <h3 className="mt-3 font-display text-[clamp(1.25rem,2.4vw,1.75rem)] font-semibold tracking-[-0.02em] text-oboya-blue-dark">
+                    <Check className="size-3 stroke-[2.5]" />
+                  </span>
+                  <span className="font-body text-[1.0625rem] leading-snug text-oboya-blue-dark/80">
+                    {pickLocalized(item.text, locale)}
+                  </span>
+                </motion.li>
+              ))}
+            </motion.ul>
+          </motion.div>
+
+          {/* Right — 2×2 image grid */}
+          <motion.ul
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={staggerContainer}
+            className="grid grid-cols-2 gap-3 sm:gap-4 lg:col-span-7"
+          >
+            {data.items.slice(0, 4).map((person, index) => (
+              <motion.li
+                key={person.id}
+                variants={fadeInUp}
+                className={cn(
+                  "group relative overflow-hidden rounded-2xl bg-oboya-blue-dark/5 shadow-[0_12px_40px_-20px_rgb(1_32_63/28%)]",
+                  index === 0 && "ring-2 ring-oboya-green/70 ring-offset-2 ring-offset-oboya-soft-white"
+                )}
+              >
+                <div className="relative aspect-[4/5] w-full">
+                  <Image
+                    src={person.image}
+                    alt={person.name}
+                    fill
+                    className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
+                    sizes="(max-width: 1024px) 45vw, 22vw"
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-oboya-blue-dark/75 via-oboya-blue-dark/10 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-3.5 sm:p-4">
+                    <p className="font-display text-base font-semibold text-white sm:text-lg">
                       {person.name}
-                    </h3>
-                    <p className="mt-1.5 text-sm text-oboya-blue-dark/55 md:text-[0.9375rem]">
+                    </p>
+                    <p className="mt-0.5 text-xs leading-snug text-white/75 sm:text-sm">
                       {pickLocalized(person.role, locale)}
                     </p>
-                    {person.bio ? (
-                      <p className="mt-4 max-w-md font-body text-sm leading-relaxed text-oboya-blue-dark/60 md:text-[0.9375rem]">
-                        {pickLocalized(person.bio, locale)}
-                      </p>
-                    ) : null}
-                  </motion.div>
-                </AnimatePresence>
-
-                <ul className="mt-10 flex flex-wrap gap-2">
-                  {items.map((item, index) => (
-                    <li key={item.id}>
-                      <span
-                        className={cn(
-                          "block h-1.5 w-8 rounded-full transition-colors duration-300",
-                          index === active
-                            ? "bg-oboya-green"
-                            : "bg-oboya-blue-dark/15"
-                        )}
-                        aria-hidden
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </Container>
+                  </div>
+                  <span className="absolute top-3 right-3 rounded-md bg-white/95 px-2.5 py-1 font-body text-[0.625rem] font-semibold tracking-[0.12em] text-oboya-blue-dark uppercase shadow-sm sm:text-xs">
+                    {person.name.split(" ")[0]}
+                  </span>
+                </div>
+              </motion.li>
+            ))}
+          </motion.ul>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

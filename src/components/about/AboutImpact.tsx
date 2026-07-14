@@ -25,19 +25,19 @@ export function AboutImpact({ data, locale }: AboutImpactProps) {
         >
           <motion.p
             variants={fadeInUp}
-            className="font-body text-[0.6875rem] font-medium tracking-[0.04em] text-oboya-green md:text-xs"
+            className="font-body text-[0.8125rem] font-medium tracking-[0.04em] text-oboya-green md:text-sm"
           >
             {pickLocalized(data.eyebrow, locale)}
           </motion.p>
           <motion.h2
             variants={fadeInUp}
-            className="mt-3 font-display text-[clamp(1.25rem,2.4vw,1.75rem)] font-semibold tracking-[-0.02em] text-oboya-blue-dark text-balance"
+            className="mt-4 font-display text-[clamp(1.75rem,3.2vw,2.75rem)] font-semibold tracking-[-0.02em] text-oboya-blue-dark text-balance"
           >
             {pickLocalized(data.title, locale)}
           </motion.h2>
           <motion.p
             variants={fadeInUp}
-            className="mt-3 font-body text-sm leading-relaxed text-oboya-blue-dark/60 md:text-[0.9375rem]"
+            className="mt-4 font-body text-[1.0625rem] leading-relaxed text-oboya-blue-dark/60"
           >
             {pickLocalized(data.description, locale)}
           </motion.p>
@@ -56,14 +56,14 @@ export function AboutImpact({ data, locale }: AboutImpactProps) {
               variants={fadeInUp}
               className="text-center"
             >
-              <p className="font-display text-[clamp(1.75rem,3.5vw,2.5rem)] font-light leading-none tracking-tight text-oboya-blue-dark">
+              <p className="font-display text-[clamp(2.5rem,5vw,3.75rem)] font-light leading-none tracking-tight text-oboya-blue-dark">
                 <AnimatedCounter
                   value={stat.value}
                   suffix={stat.suffix}
                   duration={2.4}
                 />
               </p>
-              <p className="mt-3 font-body text-sm text-oboya-blue-dark/55">
+              <p className="mt-3 font-body text-sm text-oboya-blue-dark/55 md:text-base">
                 {pickLocalized(stat.label, locale)}
               </p>
             </motion.li>

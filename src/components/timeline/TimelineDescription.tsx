@@ -65,7 +65,7 @@ export function TimelineDescription({
                 },
               },
             }}
-            className="text-[0.6875rem] font-semibold tracking-[0.2em] uppercase md:text-xs"
+            className="text-xs font-semibold tracking-[0.22em] uppercase md:text-sm"
             style={{ color: event.color ?? "var(--oboya-green)" }}
           >
             <span className="sr-only">{labels.year} </span>
@@ -92,10 +92,10 @@ export function TimelineDescription({
                 },
               },
             }}
-            className="mt-2 font-display font-semibold tracking-tight text-white text-balance"
+            className="mt-3 font-display font-semibold tracking-tight text-white text-balance"
             style={{
-              fontSize: "clamp(1.25rem, 2.4vw, 1.75rem)",
-              lineHeight: 1.2,
+              fontSize: "clamp(1.85rem, 4vw, 3rem)",
+              lineHeight: 1.15,
             }}
           >
             {event.title}
@@ -121,7 +121,7 @@ export function TimelineDescription({
                 },
               },
             }}
-            className="mt-2 max-w-xl text-sm font-medium text-white/55 md:text-[0.9375rem]"
+            className="mt-3 max-w-2xl text-base font-medium text-white/60 md:text-lg"
           >
             {event.subtitle}
           </motion.p>
@@ -147,7 +147,7 @@ export function TimelineDescription({
                   },
                 },
               }}
-              className="mt-3 max-w-xl font-body text-sm leading-relaxed text-white/70 md:text-[0.9375rem] md:leading-[1.65]"
+              className="mt-5 max-w-2xl font-body text-[1.0625rem] leading-[1.75] text-white/75 md:text-lg md:leading-[1.7]"
             >
               {event.description}
             </motion.p>

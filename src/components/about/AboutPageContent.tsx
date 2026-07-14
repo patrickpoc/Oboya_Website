@@ -42,11 +42,7 @@ export function AboutPageContent({
         <AboutImpact data={about.impact} locale={locale} />
       )}
       {about.sections.people.enabled && (
-        <AboutPeople
-          data={about.people}
-          locale={locale}
-          scrollSpotlight={afterTimeline}
-        />
+        <AboutPeople data={about.people} locale={locale} />
       )}
       {about.sections.callout.enabled && (
         <AboutCallout data={about.callout} locale={locale} />
