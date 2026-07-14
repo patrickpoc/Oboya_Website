@@ -437,7 +437,7 @@ function RotatingRimTimeline({
                 </motion.p>
 
                 <motion.p
-                  className="mt-4 max-w-lg font-body text-[1.375rem] font-medium leading-relaxed text-oboya-blue-dark/55 md:mt-5"
+                  className="mt-4 max-w-lg text-center font-body text-[1.375rem] font-medium leading-relaxed text-oboya-blue-dark/55 md:mt-5"
                   variants={
                     reduceMotion
                       ? undefined
