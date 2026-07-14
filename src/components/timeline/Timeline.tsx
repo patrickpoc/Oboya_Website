@@ -1,20 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import gsap from "gsap";
+import { ChevronDown } from "lucide-react";
 import {
   TimelineBackground,
   type SlideDirection,
 } from "@/components/timeline/TimelineBackground";
-import { TimelineCircle } from "@/components/timeline/TimelineCircle";
 import { TimelineDescription } from "@/components/timeline/TimelineDescription";
-import { TimelineProgress } from "@/components/timeline/TimelineProgress";
+import { TimelineYearsRail } from "@/components/timeline/TimelineYearsRail";
+import { TimelineAtmosphere } from "@/components/timeline/TimelineAtmosphere";
 import { useTimeline } from "@/hooks/useTimeline";
 import { useScrollTimeline } from "@/hooks/useScrollTimeline";
-import {
-  getContainerRotation,
-  getRotationFromProgress,
-} from "@/hooks/useTimelineRotation";
 import type { TimelineEvent } from "@/types/timeline";
 
 interface TimelineLabels {
@@ -24,6 +20,7 @@ interface TimelineLabels {
   progressLabel: string;
   sectionLabel: string;
   discover: string;
+  skip: string;
 }
 
 interface TimelineProps {
@@ -45,19 +42,18 @@ function useMediaQuery(query: string) {
   return matches;
 }
 
-function wrapIndex(index: number, count: number) {
-  if (count <= 0) return 0;
-  return ((index % count) + count) % count;
-}
-
+/**
+ * Left year rail + hero banner image + centered copy below.
+ * Wheel/arrows only change the year; slide is point-to-point (not scroll-scrubbed).
+ */
 export function Timeline({ events, labels }: TimelineProps) {
   const isMobile = useMediaQuery("(max-width: 767px)");
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
 
   const pinRef = useRef<HTMLElement | null>(null);
-  const circleRef = useRef<HTMLDivElement | null>(null);
   const prevIndexRef = useRef(0);
   const directionRef = useRef<SlideDirection>("forward");
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   const { activeIndex, activeEvent, count, setActiveIndex } = useTimeline(events);
 
@@ -69,119 +65,59 @@ export function Timeline({ events, labels }: TimelineProps) {
     prevIndexRef.current = activeIndex;
   }, [activeIndex]);
 
-  const { scrollToIndex } = useScrollTimeline({
+  const { scrollToIndex, releaseToNextSection } = useScrollTimeline({
     count,
     enabled: !isMobile && !reducedMotion,
     reducedMotion,
     onIndexChange: setActiveIndex,
-    circleRef,
+    onProgressChange: setScrollProgress,
     pinRef,
   });
 
-  const animateCircleToIndex = useCallback(
-    (index: number, fromIndex: number, dir: SlideDirection) => {
-      if (!circleRef.current || count <= 0) return;
-      const step = 360 / count;
-      const duration = reducedMotion ? 0.15 : 0.85;
-      const fromRot = getContainerRotation(fromIndex, count);
-
-      // Loop forward: last → first (keep spinning the same way, then normalize)
-      if (dir === "forward" && fromIndex === count - 1 && index === 0) {
-        gsap.to(circleRef.current, {
-          rotate: fromRot - step,
-          duration,
-          ease: "power3.out",
-          force3D: true,
-          onComplete: () => {
-            if (circleRef.current) gsap.set(circleRef.current, { rotate: 0, force3D: true });
-          },
-        });
-        return;
-      }
-
-      // Loop back: first → last
-      if (dir === "back" && fromIndex === 0 && index === count - 1) {
-        gsap.to(circleRef.current, {
-          rotate: fromRot + step,
-          duration,
-          ease: "power3.out",
-          force3D: true,
-          onComplete: () => {
-            if (circleRef.current) {
-              gsap.set(circleRef.current, {
-                rotate: getContainerRotation(count - 1, count),
-                force3D: true,
-              });
-            }
-          },
-        });
-        return;
-      }
-
-      gsap.to(circleRef.current, {
-        rotate: getContainerRotation(index, count),
-        duration,
-        ease: "power3.out",
-        force3D: true,
-      });
-    },
-    [count, reducedMotion]
-  );
+  useEffect(() => {
+    if (!isMobile && !reducedMotion) return;
+    setScrollProgress(count <= 1 ? 0 : activeIndex / (count - 1));
+  }, [isMobile, reducedMotion, activeIndex, count]);
 
   const goToIndex = useCallback(
     (index: number, dir?: SlideDirection) => {
-      const next = wrapIndex(index, count);
-      const from = activeIndex;
-      if (next === from) return;
+      const next = Math.min(Math.max(index, 0), count - 1);
+      if (next === activeIndex) return;
 
-      const slideDir: SlideDirection =
-        dir ?? (next > from || (from === count - 1 && next === 0) ? "forward" : "back");
+      directionRef.current = dir ?? (next > activeIndex ? "forward" : "back");
 
-      // Explicit wrap directions (index math alone is ambiguous)
-      if (from === count - 1 && next === 0) directionRef.current = "forward";
-      else if (from === 0 && next === count - 1) directionRef.current = "back";
-      else directionRef.current = slideDir;
-
-      const isWrap =
-        (from === count - 1 && next === 0) || (from === 0 && next === count - 1);
-
-      if (isMobile || reducedMotion || isWrap) {
+      if (isMobile || reducedMotion) {
         setActiveIndex(next);
-        animateCircleToIndex(next, from, directionRef.current);
-        if (!isMobile && !reducedMotion && isWrap) {
-          // Sync pin scroll without scrubbing through intermediate years
-          scrollToIndex(next, { immediate: true, skipCircle: true });
-        }
+        setScrollProgress(count <= 1 ? 0 : next / (count - 1));
         return;
       }
 
       scrollToIndex(next);
     },
-    [
-      activeIndex,
-      count,
-      isMobile,
-      reducedMotion,
-      setActiveIndex,
-      animateCircleToIndex,
-      scrollToIndex,
-    ]
+    [activeIndex, count, isMobile, reducedMotion, setActiveIndex, scrollToIndex]
   );
 
   const handleSelect = useCallback(
-    (index: number) => {
-      goToIndex(index);
-    },
+    (index: number) => goToIndex(index),
     [goToIndex]
   );
 
   const handlePrev = useCallback(() => {
+    if (activeIndex <= 0) return;
     goToIndex(activeIndex - 1, "back");
   }, [activeIndex, goToIndex]);
 
   const handleNext = useCallback(() => {
+    if (activeIndex >= count - 1) {
+      releaseToNextSection();
+      return;
+    }
     goToIndex(activeIndex + 1, "forward");
-  }, [activeIndex, goToIndex]);
+  }, [activeIndex, count, goToIndex, releaseToNextSection]);
+
+  const handleSkip = useCallback(() => {
+    releaseToNextSection();
+  }, [releaseToNextSection]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -189,6 +125,11 @@ export function Timeline({ events, labels }: TimelineProps) {
       if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) {
         return;
       }
+      const pin = pinRef.current;
+      if (!pin) return;
+      const rect = pin.getBoundingClientRect();
+      const inView = rect.top <= 80 && rect.bottom > window.innerHeight * 0.35;
+      if (!inView) return;
 
       if (event.key === "ArrowRight" || event.key === "ArrowDown") {
         event.preventDefault();
@@ -196,74 +137,71 @@ export function Timeline({ events, labels }: TimelineProps) {
       } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
         event.preventDefault();
         handlePrev();
-      } else if (event.key === "Home") {
-        event.preventDefault();
-        handleSelect(0);
-      } else if (event.key === "End") {
-        event.preventDefault();
-        handleSelect(count - 1);
       }
     };
-
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [handleNext, handlePrev, handleSelect, count]);
-
-  useEffect(() => {
-    if (!circleRef.current) return;
-    if (!isMobile && !reducedMotion) return;
-    gsap.set(circleRef.current, {
-      rotate: getRotationFromProgress(
-        count <= 1 ? 0 : activeIndex / (count - 1),
-        count
-      ),
-      force3D: true,
-    });
-  }, [isMobile, reducedMotion, activeIndex, count]);
+  }, [handleNext, handlePrev]);
 
   if (!activeEvent) return null;
 
+  const canPrev = activeIndex > 0;
+  const isLastYear = activeIndex >= count - 1;
+
   return (
-    <div className="relative min-h-svh bg-oboya-blue-dark">
-      <TimelineBackground
-        events={events}
-        activeIndex={activeIndex}
-        direction={direction}
-      />
+    <div className="relative bg-oboya-blue-dark">
+      <TimelineAtmosphere />
 
       <section
         ref={pinRef}
         aria-label={labels.sectionLabel}
-        className="relative z-10 flex min-h-svh flex-col"
+        className="relative z-10 flex min-h-svh overflow-hidden"
       >
-        <div className="flex flex-1 flex-col justify-center overflow-x-clip pb-6 pt-16 md:pb-8 md:pt-20">
-          <TimelineCircle
+        {/* Left — full-height year rail */}
+        <div className="relative z-20 flex w-[5.5rem] shrink-0 flex-col border-r border-white/10 bg-oboya-blue-dark md:w-[6.25rem] lg:w-[6.75rem]">
+          <TimelineYearsRail
             events={events}
             activeIndex={activeIndex}
-            circleRef={circleRef}
+            progress={scrollProgress}
             onSelect={handleSelect}
-            footer={
-              <TimelineProgress
-                events={events}
-                activeIndex={activeIndex}
-                onSelect={handleSelect}
-                onPrev={handlePrev}
-                onNext={handleNext}
-                canPrev={count > 1}
-                canNext={count > 1}
-                labels={{ prev: labels.prev, next: labels.next }}
-              />
-            }
-          >
+            onPrev={handlePrev}
+            onNext={handleNext}
+            canPrev={canPrev}
+            isLastYear={isLastYear}
+            labels={{ prev: labels.prev, next: labels.next }}
+            className="h-full"
+          />
+        </div>
+
+        {/* Main — hero banner + centered copy */}
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+          <TimelineBackground
+            events={events}
+            activeIndex={activeIndex}
+            direction={direction}
+          />
+
+          <div className="relative flex min-h-0 flex-[1] flex-col items-center justify-center overflow-hidden px-5 py-4 md:px-10 md:py-5 lg:px-14">
             <TimelineDescription
               event={activeEvent}
               labels={{ year: labels.year }}
+              direction={direction}
             />
-          </TimelineCircle>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSkip}
+            className="absolute right-4 bottom-5 z-20 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-oboya-blue-dark/70 px-3.5 py-2 text-xs font-semibold tracking-wide text-white/80 backdrop-blur-md transition-colors duration-200 hover:border-white/40 hover:bg-white/10 hover:text-white md:right-8 md:bottom-8 md:px-4 md:py-2.5 md:text-sm"
+          >
+            {labels.skip}
+            <ChevronDown className="size-3.5 opacity-70" aria-hidden />
+          </button>
         </div>
 
         <p className="sr-only" aria-live="polite">
           {labels.progressLabel}: {activeEvent.year} — {activeEvent.title}
+          {activeIndex >= count - 1 ? `. ${labels.discover}` : ""}
         </p>
       </section>
     </div>

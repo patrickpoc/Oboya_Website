@@ -638,7 +638,8 @@
     "year": "Ano",
     "progressLabel": "Marco atual",
     "sectionLabel": "Timeline interativa da empresa",
-    "discover": "Descobrir"
+    "discover": "Descobrir",
+    "skip": "Pular timeline"
   },
   "caseStudies": {
     "eyebrow": "Case Studies",

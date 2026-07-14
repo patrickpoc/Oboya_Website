@@ -81,10 +81,17 @@ export default async function InnerPage({ params }: PageProps) {
             ? t("terms.description")
             : tCommon("loremShort");
 
+  if (config.template === "about") {
+    return (
+      <SiteLayout>
+        <AboutPageContent locale={locale} mode="full" />
+      </SiteLayout>
+    );
+  }
+
   return (
     <SiteLayout>
       <InnerPageHero eyebrow={eyebrow} title={title} description={description} />
-      {config.template === "about" && <AboutPageContent />}
       {config.template === "contact" && <ContactForm />}
       {config.template === "faqs" && <FaqsPageContent />}
       {config.template === "workWithUs" && <WorkWithUsPageContent />}

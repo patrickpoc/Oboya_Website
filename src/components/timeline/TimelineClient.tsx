@@ -23,6 +23,7 @@ interface TimelineClientProps {
     progressLabel: string;
     sectionLabel: string;
     discover: string;
+    skip: string;
   };
 }
 

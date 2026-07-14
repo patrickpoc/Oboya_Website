@@ -14,7 +14,9 @@ interface TimelineBackgroundProps {
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-/** Full-bleed year image; slides RTL on advance, LTR on back. */
+/**
+ * Full-bleed hero banner — fills ~3/4 of the main column height.
+ */
 export function TimelineBackground({
   events,
   activeIndex,
@@ -23,36 +25,43 @@ export function TimelineBackground({
   const event = events[activeIndex];
   if (!event) return null;
 
-  const enterX = direction === "forward" ? "100%" : "-100%";
-  const exitX = direction === "forward" ? "-100%" : "100%";
+  const yIn = direction === "forward" ? "100%" : "-100%";
+  const yOut = direction === "forward" ? "-100%" : "100%";
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
-      <div className="absolute inset-0 bg-oboya-blue-dark" />
-
-      <AnimatePresence initial={false} custom={direction} mode="sync">
+    <div className="relative min-h-0 w-full flex-[3] overflow-hidden bg-transparent">
+      <AnimatePresence initial={false} mode="sync">
         <motion.div
           key={event.id}
-          className="absolute inset-0"
-          custom={direction}
-          initial={{ x: enterX, opacity: 0.85 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: exitX, opacity: 0.85 }}
-          transition={{ duration: 0.75, ease }}
+          className="absolute inset-0 will-change-transform"
+          initial={{ y: yIn, opacity: 0 }}
+          animate={{
+            y: 0,
+            opacity: 1,
+            transition: {
+              y: { duration: 0.55, ease },
+              opacity: { duration: 0.4, ease, delay: 0.06 },
+            },
+          }}
+          exit={{
+            y: yOut,
+            opacity: 0,
+            transition: {
+              y: { duration: 0.5, ease },
+              opacity: { duration: 0.32, ease },
+            },
+          }}
         >
           <Image
             src={event.image}
             alt=""
             fill
             priority
-            className="object-cover scale-105"
-            sizes="100vw"
+            className="object-cover object-center"
+            sizes="(max-width: 768px) 100vw, 92vw"
           />
         </motion.div>
       </AnimatePresence>
-
-      <div className="absolute inset-0 bg-oboya-blue-dark/78" />
-      <div className="absolute inset-0 bg-gradient-to-b from-oboya-blue-dark/35 via-oboya-blue-dark/55 to-oboya-blue-dark/92" />
     </div>
   );
 }

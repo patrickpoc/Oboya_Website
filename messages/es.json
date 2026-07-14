@@ -638,7 +638,8 @@
     "year": "Año",
     "progressLabel": "Hito actual",
     "sectionLabel": "Timeline interactiva de la empresa",
-    "discover": "Descubrir"
+    "discover": "Descubrir",
+    "skip": "Saltar timeline"
   },
   "caseStudies": {
     "eyebrow": "Case Studies",

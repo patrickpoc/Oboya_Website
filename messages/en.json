@@ -646,7 +646,8 @@
     "year": "Year",
     "progressLabel": "Current milestone",
     "sectionLabel": "Interactive company timeline",
-    "discover": "Discover"
+    "discover": "Continue",
+    "skip": "Skip timeline"
   },
   "caseStudies": {
     "eyebrow": "Case Studies",

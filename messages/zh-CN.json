@@ -638,7 +638,8 @@
     "year": "年份",
     "progressLabel": "当前里程碑",
     "sectionLabel": "交互式公司时间线",
-    "discover": "探索"
+    "discover": "探索",
+    "skip": "跳过时间线"
   },
   "caseStudies": {
     "eyebrow": "Case Studies",

@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Navbar } from "@/components/layouts/Navbar";
+import { Footer } from "@/components/layouts/Footer";
 import { TimelineClient } from "@/components/timeline/TimelineClient";
+import { AboutPageContent } from "@/components/about/AboutPageContent";
+import { AboutScrollRefresh } from "@/components/about/AboutScrollRefresh";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -22,7 +25,7 @@ export default async function AboutV2Page({ params }: Props) {
 
   return (
     <>
-      <Navbar transparent persistTransparent />
+      <Navbar variant="storytelling" storyExitId="about-continue" />
       <main>
         <TimelineClient
           labels={{
@@ -32,9 +35,16 @@ export default async function AboutV2Page({ params }: Props) {
             progressLabel: t("progressLabel"),
             sectionLabel: t("sectionLabel"),
             discover: t("discover"),
+            skip: t("skip"),
           }}
         />
+
+        <div id="about-continue" className="relative bg-white">
+          <AboutScrollRefresh />
+          <AboutPageContent locale={locale} mode="afterTimeline" />
+        </div>
       </main>
+      <Footer />
     </>
   );
 }

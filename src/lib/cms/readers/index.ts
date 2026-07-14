@@ -10,6 +10,7 @@ import { getBlogPosts, getBlogPostBySlug } from "@/lib/cms/repositories/blog-rep
 import { getBlogCategories } from "@/lib/cms/repositories/blog-categories-repository";
 import { getNewsPageSettings } from "@/lib/cms/repositories/news-page-repository";
 import { getHomepageSettings } from "@/lib/cms/repositories/homepage-repository";
+import { getAboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
 import { getCaseStudies, getCaseStudyById } from "@/lib/cms/repositories/case-studies-repository";
 import { siteConfig } from "@/constants/site";
 
@@ -54,6 +55,10 @@ export function readNewsPageSettings() {
 
 export function readHomepageSettings() {
   return getHomepageSettings();
+}
+
+export function readAboutPageSettings() {
+  return getAboutPageSettings();
 }
 
 export function readCaseStudies() {

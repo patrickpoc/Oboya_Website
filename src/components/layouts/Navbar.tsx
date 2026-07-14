@@ -23,8 +23,13 @@ interface NavbarProps {
   /**
    * Homepage: transparent hero chrome → light full nav after the
    * hero category pill marker (scroll guide only).
+   * Storytelling: dark bar over timeline → light home-style bar after exit.
    */
-  variant?: "default" | "minimal";
+  variant?: "default" | "minimal" | "storytelling";
+  /** Solid header palette when not in overlay mode. */
+  solidTone?: "light" | "dark";
+  /** Element id that ends storytelling (default: about-continue). */
+  storyExitId?: string;
 }
 
 /**
@@ -53,6 +58,36 @@ function usePastTransitionMarker(elementId = "hero") {
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
+  }, [elementId]);
+
+  return past;
+}
+
+/**
+ * Storytelling → CMS handoff (mid-viewport), same moment the dark
+ * timeline and the white Impact section meet on screen.
+ * Bidirectional: light banner while continue intersects the upper half.
+ */
+function useStoryExitHandoff(elementId: string) {
+  const [past, setPast] = useState(false);
+
+  useEffect(() => {
+    const el = document.getElementById(elementId);
+    if (!el) {
+      setPast(false);
+      return;
+    }
+
+    // Observation zone = top 50% of the viewport (handoff line in the screenshot)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setPast(entry.isIntersecting);
+      },
+      { root: null, rootMargin: "0px 0px -50% 0px", threshold: 0 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
   }, [elementId]);
 
   return past;
@@ -233,27 +268,259 @@ export function Navbar({
   transparent = true,
   persistTransparent = false,
   variant = "default",
+  solidTone = "light",
+  storyExitId = "about-continue",
 }: NavbarProps) {
   const t = useTranslations();
   const isScrolled = useScrollPosition(40);
   const pastMarker = usePastTransitionMarker("hero");
+  const pastStoryExit = useStoryExitHandoff(storyExitId);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const isMinimal = variant === "minimal";
+  const isStorytelling = variant === "storytelling";
   /** Image 2: light full nav after leaving the hero pill guide */
   const showSolidHome = isMinimal && pastMarker;
+  /** Light home-style bar after leaving the storytelling pin */
+  const showLightAfterStory = isStorytelling && pastStoryExit;
 
   const isSolid = isMinimal
     ? showSolidHome
-    : persistTransparent
-      ? false
-      : !transparent || isScrolled;
+    : isStorytelling
+      ? true
+      : persistTransparent
+        ? false
+        : !transparent || isScrolled;
   const isOverlay = !isSolid && (transparent || isMinimal);
+  const isDarkSolid = isSolid && solidTone === "dark" && !showLightAfterStory;
+  const useLightChrome = isOverlay || isDarkSolid;
 
   const mainNavigation = getMainNavigation((key) => t(key));
   const leftNav = mainNavigation.slice(0, 3);
   const rightNav = mainNavigation.slice(3);
   const contactLabel = t("nav.contact");
+
+  const lightSolidNav = (
+    <motion.header
+      key="solid-nav"
+      initial={{ y: "-110%" }}
+      animate={{ y: 0 }}
+      exit={{ y: "-110%" }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      className="fixed inset-x-0 top-0 z-50 border-b border-oboya-blue-dark/8 bg-oboya-soft-white shadow-[var(--shadow-nav)]"
+    >
+      <nav
+        className="grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-[var(--nav-padding-x)] md:h-20"
+        aria-label={t("nav.mainNav")}
+      >
+        <div className="hidden items-center gap-5 justify-self-start lg:flex xl:gap-8">
+          {leftNav.map((item) => (
+            <NavDropdown
+              key={item.href}
+              item={item}
+              light={false}
+              align="start"
+            />
+          ))}
+        </div>
+
+        <Logo
+          variant="default"
+          priority
+          className="col-start-2 justify-self-center"
+        />
+
+        <div className="flex items-center justify-end gap-2 justify-self-end sm:gap-3">
+          <div className="hidden items-center gap-5 lg:flex xl:gap-8">
+            {rightNav.map((item) => (
+              <NavDropdown
+                key={item.href}
+                item={item}
+                light={false}
+                align="end"
+              />
+            ))}
+            <Link
+              href="/contact"
+              className={buttonVariants({
+                size: "cta",
+                className:
+                  "bg-oboya-blue-dark text-white hover:bg-oboya-blue",
+              })}
+            >
+              {contactLabel}
+            </Link>
+            <LanguageSwitcher light={false} />
+          </div>
+
+          <div className="flex items-center gap-1 sm:gap-2 lg:hidden">
+            <LanguageSwitcher light={false} />
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger
+                className={buttonVariants({
+                  variant: "ghost",
+                  size: "icon",
+                  className: "text-oboya-blue-dark",
+                })}
+                aria-label={t("nav.openMenu")}
+              >
+                <Menu className="size-5" />
+              </SheetTrigger>
+              <SheetContent
+                side="right"
+                className="w-full max-w-sm overflow-y-auto px-6 pt-14 pb-8 sm:px-8"
+              >
+                <SheetTitle className="sr-only">
+                  {t("nav.menuTitle")}
+                </SheetTitle>
+                <div className="flex flex-col">
+                  {mainNavigation.map((item) => (
+                    <MobileNavLink
+                      key={item.href}
+                      item={item}
+                      onNavigate={() => setMobileOpen(false)}
+                    />
+                  ))}
+                  <LanguageSwitcherMobile
+                    onNavigate={() => setMobileOpen(false)}
+                  />
+                  <Link
+                    href="/contact"
+                    onClick={() => setMobileOpen(false)}
+                    className={buttonVariants({
+                      size: "cta",
+                      className:
+                        "mt-6 w-full bg-oboya-blue-dark text-white hover:bg-oboya-blue",
+                    })}
+                  >
+                    {contactLabel}
+                  </Link>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+      </nav>
+    </motion.header>
+  );
+
+  /* ——— About storytelling: dark bar → light home-style bar on exit ——— */
+  if (isStorytelling) {
+    return (
+      <>
+        <AnimatePresence>
+          {!showLightAfterStory && (
+            <motion.header
+              key="story-dark-nav"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-oboya-blue-dark"
+            >
+              <nav
+                className="grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-[var(--nav-padding-x)] md:h-20"
+                aria-label={t("nav.mainNav")}
+              >
+                <div className="hidden items-center gap-5 justify-self-start lg:flex xl:gap-8">
+                  {leftNav.map((item) => (
+                    <NavDropdown
+                      key={item.href}
+                      item={item}
+                      light
+                      align="start"
+                    />
+                  ))}
+                </div>
+
+                <Logo
+                  variant="light"
+                  priority
+                  className="col-start-2 justify-self-center"
+                />
+
+                <div className="flex items-center justify-end gap-2 justify-self-end sm:gap-3">
+                  <div className="hidden items-center gap-5 lg:flex xl:gap-8">
+                    {rightNav.map((item) => (
+                      <NavDropdown
+                        key={item.href}
+                        item={item}
+                        light
+                        align="end"
+                      />
+                    ))}
+                    <Link
+                      href="/contact"
+                      className={buttonVariants({
+                        size: "cta",
+                        variant: "outline",
+                        className:
+                          "border-white bg-transparent text-white hover:bg-white/10 hover:text-white",
+                      })}
+                    >
+                      {contactLabel}
+                    </Link>
+                    <LanguageSwitcher light />
+                  </div>
+
+                  <div className="flex items-center gap-1 sm:gap-2 lg:hidden">
+                    <LanguageSwitcher light />
+                    <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+                      <SheetTrigger
+                        className={buttonVariants({
+                          variant: "ghost",
+                          size: "icon",
+                          className: "text-white hover:bg-white/10",
+                        })}
+                        aria-label={t("nav.openMenu")}
+                      >
+                        <Menu className="size-5" />
+                      </SheetTrigger>
+                      <SheetContent
+                        side="right"
+                        className="w-full max-w-sm overflow-y-auto px-6 pt-14 pb-8 sm:px-8"
+                      >
+                        <SheetTitle className="sr-only">
+                          {t("nav.menuTitle")}
+                        </SheetTitle>
+                        <div className="flex flex-col">
+                          {mainNavigation.map((item) => (
+                            <MobileNavLink
+                              key={item.href}
+                              item={item}
+                              onNavigate={() => setMobileOpen(false)}
+                            />
+                          ))}
+                          <LanguageSwitcherMobile
+                            onNavigate={() => setMobileOpen(false)}
+                          />
+                          <Link
+                            href="/contact"
+                            onClick={() => setMobileOpen(false)}
+                            className={buttonVariants({
+                              size: "cta",
+                              className:
+                                "mt-6 w-full bg-oboya-blue-dark text-white hover:bg-oboya-blue",
+                            })}
+                          >
+                            {contactLabel}
+                          </Link>
+                        </div>
+                      </SheetContent>
+                    </Sheet>
+                  </div>
+                </div>
+              </nav>
+            </motion.header>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showLightAfterStory && lightSolidNav}
+        </AnimatePresence>
+      </>
+    );
+  }
 
   /* ——— Homepage: transparent (img 1) → light full nav (img 2) ——— */
   if (isMinimal) {
@@ -307,109 +574,7 @@ export function Navbar({
 
         {/* Image 2 — light bar; exits upward when returning to hero */}
         <AnimatePresence>
-          {showSolidHome && (
-            <motion.header
-              key="solid-nav"
-              initial={{ y: "-110%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "-110%" }}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed inset-x-0 top-0 z-50 border-b border-oboya-blue-dark/8 bg-oboya-soft-white shadow-[var(--shadow-nav)]"
-            >
-              <nav
-                className="grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-[var(--nav-padding-x)] md:h-20"
-                aria-label={t("nav.mainNav")}
-              >
-                <div className="hidden items-center gap-5 justify-self-start lg:flex xl:gap-8">
-                  {leftNav.map((item) => (
-                    <NavDropdown
-                      key={item.href}
-                      item={item}
-                      light={false}
-                      align="start"
-                    />
-                  ))}
-                </div>
-
-                <Logo
-                  variant="default"
-                  priority
-                  className="col-start-2 justify-self-center"
-                />
-
-                <div className="flex items-center justify-end gap-2 justify-self-end sm:gap-3">
-                  <div className="hidden items-center gap-5 lg:flex xl:gap-8">
-                    {rightNav.map((item) => (
-                      <NavDropdown
-                        key={item.href}
-                        item={item}
-                        light={false}
-                        align="end"
-                      />
-                    ))}
-                    <Link
-                      href="/contact"
-                      className={buttonVariants({
-                        size: "cta",
-                        className:
-                          "bg-oboya-blue-dark text-white hover:bg-oboya-blue",
-                      })}
-                    >
-                      {contactLabel}
-                    </Link>
-                    <LanguageSwitcher light={false} />
-                  </div>
-
-                  <div className="flex items-center gap-1 sm:gap-2 lg:hidden">
-                    <LanguageSwitcher light={false} />
-                    <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-                      <SheetTrigger
-                        className={buttonVariants({
-                          variant: "ghost",
-                          size: "icon",
-                          className: "text-oboya-blue-dark",
-                        })}
-                        aria-label={t("nav.openMenu")}
-                      >
-                        <Menu className="size-5" />
-                      </SheetTrigger>
-                      <SheetContent
-                        side="right"
-                        className="w-full max-w-sm overflow-y-auto px-6 pt-14 pb-8 sm:px-8"
-                      >
-                        <SheetTitle className="sr-only">
-                          {t("nav.menuTitle")}
-                        </SheetTitle>
-                        <div className="flex flex-col">
-                          {mainNavigation.map((item) => (
-                            <MobileNavLink
-                              key={item.href}
-                              item={item}
-                              onNavigate={() => setMobileOpen(false)}
-                            />
-                          ))}
-                          <LanguageSwitcherMobile
-                            onNavigate={() => setMobileOpen(false)}
-                          />
-                          <Link
-                            href="/contact"
-                            onClick={() => setMobileOpen(false)}
-                            className={buttonVariants({
-                              size: "cta",
-                              className:
-                                "mt-6 w-full bg-oboya-blue-dark text-white hover:bg-oboya-blue",
-                            })}
-                          >
-                            {contactLabel}
-                          </Link>
-                        </div>
-                      </SheetContent>
-                    </Sheet>
-                  </div>
-                </div>
-              </nav>
-            </motion.header>
-          )}
+          {showSolidHome && lightSolidNav}
         </AnimatePresence>
       </>
     );
@@ -419,9 +584,11 @@ export function Navbar({
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+        "fixed inset-x-0 top-0 z-[100] transition-[background-color,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
         isSolid
-          ? "border-b border-border/60 bg-white/95 shadow-[var(--shadow-nav)] backdrop-blur-md"
+          ? isDarkSolid
+            ? "border-b border-white/10 bg-oboya-blue-dark"
+            : "border-b border-border/60 bg-white/95 shadow-[var(--shadow-nav)] backdrop-blur-md"
           : persistTransparent
             ? "border-b border-transparent bg-transparent"
             : "border-b border-white/12 bg-oboya-blue-dark/40 shadow-[0_4px_30px_rgb(1_32_63/20%)] backdrop-blur-2xl backdrop-saturate-150"
@@ -436,14 +603,14 @@ export function Navbar({
             <NavDropdown
               key={item.href}
               item={item}
-              light={isOverlay}
+              light={useLightChrome}
               align="start"
             />
           ))}
         </div>
 
         <Logo
-          variant={isOverlay ? "light" : "default"}
+          variant={useLightChrome ? "light" : "default"}
           priority
           className="col-start-2 justify-self-center"
         />
@@ -453,7 +620,7 @@ export function Navbar({
             <NavDropdown
               key={item.href}
               item={item}
-              light={isOverlay}
+              light={useLightChrome}
               align="end"
             />
           ))}
@@ -466,18 +633,18 @@ export function Navbar({
           >
             {contactLabel}
           </Link>
-          <LanguageSwitcher light={isOverlay} />
+          <LanguageSwitcher light={useLightChrome} />
         </div>
 
         <div className="col-start-3 flex items-center justify-end gap-1 sm:gap-2 lg:hidden">
-          <LanguageSwitcher light={isOverlay} />
+          <LanguageSwitcher light={useLightChrome} />
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger
               className={buttonVariants({
                 variant: "ghost",
                 size: "icon",
                 className: cn(
-                  isOverlay && "text-white hover:bg-white/10 hover:text-white"
+                  useLightChrome && "text-white hover:bg-white/10 hover:text-white"
                 ),
               })}
               aria-label={t("nav.openMenu")}
