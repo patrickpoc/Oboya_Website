@@ -15,7 +15,7 @@ import {
   getHomepageSettings,
   saveHomepageSettings,
   type HomepageCapability,
-  type HomepageProductCard,
+  type HomepageFeaturedCategory,
   type HomepageSectionId,
   type HomepageSettings,
 } from "@/lib/cms/repositories/homepage-repository";
@@ -27,7 +27,7 @@ const SECTION_LABELS: Record<HomepageSectionId, string> = {
   capabilities: "Capabilities",
   globalPresence: "Global Presence (title only — map is fixed)",
   testimonials: "Testimonials",
-  featuredProducts: "Featured Products",
+  featuredProducts: "Featured Categories",
   latestNews: "Latest News",
   partners: "Partners & Clients",
 };
@@ -575,7 +575,7 @@ function SectionItemsEditor({
 
     const patchFeatured = (
       patch: Partial<HomepageSettings["featuredProducts"]> & {
-        items?: HomepageProductCard[];
+        items?: HomepageFeaturedCategory[];
       }
     ) =>
       setSettings((prev) => ({
@@ -586,7 +586,7 @@ function SectionItemsEditor({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Featured Products</CardTitle>
+          <CardTitle>Featured Categories</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <LocalizedInput
@@ -627,31 +627,32 @@ function SectionItemsEditor({
           {section.items.map((item, index) => (
             <div key={item.id} className="space-y-3 rounded-lg border p-4">
               <div className="space-y-1.5">
-                <Label>Shop product ID</Label>
+                <Label>Shop category ID</Label>
                 <Input
-                  value={item.productId}
+                  value={item.categoryId}
                   onChange={(e) => {
                     const items = section.items.map((it, i) =>
-                      i === index ? { ...it, productId: e.target.value } : it
+                      i === index ? { ...it, categoryId: e.target.value } : it
                     );
                     patchFeatured({ items });
                   }}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Must match an id from the shop catalog (e.g. retail-clamshell).
+                  Must match an id from the shop catalog (e.g. packaging,
+                  propagation, equipment).
                 </p>
               </div>
               <LocalizedInput
-                label="Category label (optional override)"
+                label="Title override (optional)"
                 locale={locale}
-                value={item.categoryLabel?.[locale] ?? ""}
+                value={item.title?.[locale] ?? ""}
                 onChange={(l, v) => {
                   const items = section.items.map((it, i) =>
                     i === index
                       ? {
                           ...it,
-                          categoryLabel: updateLocalizedField(
-                            it.categoryLabel ?? emptyLocalized(),
+                          title: updateLocalizedField(
+                            it.title ?? emptyLocalized(),
                             l,
                             v
                           ),
@@ -661,6 +662,39 @@ function SectionItemsEditor({
                   patchFeatured({ items });
                 }}
               />
+              <LocalizedInput
+                label="Description (optional)"
+                locale={locale}
+                value={item.description?.[locale] ?? ""}
+                onChange={(l, v) => {
+                  const items = section.items.map((it, i) =>
+                    i === index
+                      ? {
+                          ...it,
+                          description: updateLocalizedField(
+                            it.description ?? emptyLocalized(),
+                            l,
+                            v
+                          ),
+                        }
+                      : it
+                  );
+                  patchFeatured({ items });
+                }}
+                multiline
+              />
+              <div className="space-y-1.5">
+                <Label>Cover image URL (optional)</Label>
+                <Input
+                  value={item.image ?? ""}
+                  onChange={(e) => {
+                    const items = section.items.map((it, i) =>
+                      i === index ? { ...it, image: e.target.value } : it
+                    );
+                    patchFeatured({ items });
+                  }}
+                />
+              </div>
             </div>
           ))}
         </CardContent>

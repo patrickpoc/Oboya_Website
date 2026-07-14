@@ -85,7 +85,7 @@ export function CompanyOverview({ data, locale }: CompanyOverviewProps) {
                   <div className="h-px w-full bg-white/15" aria-hidden />
                 )}
                 <div className="flex items-center justify-between gap-5 py-4 md:gap-8 md:py-5">
-                  <span className="shrink-0 font-display text-[clamp(2.75rem,7vw,6.375rem)] font-thin leading-none tracking-tight text-white shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
+                  <span className="shrink-0 font-display text-[clamp(2.75rem,7vw,6.375rem)] font-thin leading-none tracking-tight text-white">
                     <AnimatedCounter
                       value={stat.value}
                       suffix={stat.suffix}

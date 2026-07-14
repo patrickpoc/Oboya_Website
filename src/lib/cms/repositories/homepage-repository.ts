@@ -54,12 +54,16 @@ export interface HomepageTestimonial {
   role: LocalizedString;
 }
 
-export interface HomepageProductCard {
+export interface HomepageFeaturedCategory {
   id: string;
-  /** Shop product id from `data/shop/products.json` */
-  productId: string;
-  /** Optional category label override for display */
-  categoryLabel?: LocalizedString;
+  /** Shop category id from `data/shop/categories.json` */
+  categoryId: string;
+  /** Optional display title override */
+  title?: LocalizedString;
+  /** Optional short description under the category name */
+  description?: LocalizedString;
+  /** Optional cover image (defaults to first product in the category) */
+  image?: string;
 }
 
 export interface HomepagePartnerLogo {
@@ -106,7 +110,7 @@ export interface HomepageSettings {
     title: LocalizedString;
     ctaLabel: LocalizedString;
     ctaHref: string;
-    items: HomepageProductCard[];
+    items: HomepageFeaturedCategory[];
   };
   latestNews: {
     eyebrow: LocalizedString;
@@ -324,7 +328,7 @@ const defaultSettings = (): HomepageSettings => ({
     ],
   },
   featuredProducts: {
-    eyebrow: loc("Featured Products"),
+    eyebrow: loc("Featured Categories"),
     title: loc(
       "At OBOYA, we go beyond supplying products, we deliver integrated horticulture solutions designed to improve efficiency, optimize operations, and support long-term growth across the global supply chain."
     ),
@@ -332,19 +336,34 @@ const defaultSettings = (): HomepageSettings => ({
     ctaHref: "/shop",
     items: [
       {
-        id: "feat-clamshell",
-        productId: "retail-clamshell",
-        categoryLabel: loc("Packaging"),
+        id: "feat-packaging",
+        categoryId: "packaging",
+        title: loc("Packaging"),
+        description: loc(
+          "Retail and bulk packaging solutions that protect freshness from harvest to shelf."
+        ),
+        image:
+          "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
       },
       {
-        id: "feat-coco",
-        productId: "coco-substrate-block",
-        categoryLabel: loc("Seedling"),
+        id: "feat-propagation",
+        categoryId: "propagation",
+        title: loc("Propagation"),
+        description: loc(
+          "Trays, seedling systems, and tools for consistent young-plant production."
+        ),
+        image:
+          "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
       },
       {
-        id: "feat-trolley",
-        productId: "flower-display-trolley",
-        categoryLabel: loc("Logistics & Display"),
+        id: "feat-equipment",
+        categoryId: "equipment",
+        title: loc("Logistics & Display"),
+        description: loc(
+          "Trolleys, carts, and display equipment for efficient handling and retail presentation."
+        ),
+        image:
+          "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
       },
     ],
   },
@@ -368,7 +387,7 @@ const defaultSettings = (): HomepageSettings => ({
 });
 
 let cache: HomepageSettings | null = null;
-const CONTENT_REVISION = "home-hero-v16-2026-07-10";
+const CONTENT_REVISION = "home-featured-categories-v1-2026-07-14";
 let appliedRevision: string | null = null;
 
 function migrateSettings(settings: HomepageSettings): HomepageSettings {
@@ -412,14 +431,27 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
     featuredProducts: {
       ...defaults.featuredProducts,
       ...settings.featuredProducts,
-      items: settings.featuredProducts?.items?.length
-        ? settings.featuredProducts.items.map((item, i) => ({
-            ...defaults.featuredProducts.items[i],
-            ...item,
-            productId:
-              item.productId ?? defaults.featuredProducts.items[i]?.productId,
-          }))
-        : defaults.featuredProducts.items,
+      items: (() => {
+        const raw = settings.featuredProducts?.items;
+        const looksLikeProducts =
+          Array.isArray(raw) &&
+          raw.some(
+            (item) =>
+              item != null &&
+              "productId" in item &&
+              !("categoryId" in item && (item as HomepageFeaturedCategory).categoryId)
+          );
+        if (!raw?.length || looksLikeProducts) {
+          return defaults.featuredProducts.items;
+        }
+        return raw.map((item, i) => ({
+          ...defaults.featuredProducts.items[i],
+          ...item,
+          categoryId:
+            (item as HomepageFeaturedCategory).categoryId ??
+            defaults.featuredProducts.items[i]?.categoryId,
+        }));
+      })(),
     },
     latestNews: { ...defaults.latestNews, ...settings.latestNews },
     partners: { ...defaults.partners, ...settings.partners },
