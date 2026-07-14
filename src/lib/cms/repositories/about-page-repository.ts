@@ -121,8 +121,8 @@ const defaultSettings = (): AboutPageSettings => ({
     hero: { enabled: true },
     institutionalImage: { enabled: true },
     timeline: { enabled: true },
-    impact: { enabled: true },
-    people: { enabled: true },
+    impact: { enabled: false },
+    people: { enabled: false },
     callout: { enabled: true },
     culture: { enabled: true },
     honors: { enabled: true },
@@ -538,7 +538,7 @@ const defaultSettings = (): AboutPageSettings => ({
 });
 
 let cache: AboutPageSettings | null = null;
-const CONTENT_REVISION = 4;
+const CONTENT_REVISION = 5;
 let cacheRevision = 0;
 
 export function getAboutPageSettings(): AboutPageSettings {

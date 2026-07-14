@@ -20,15 +20,21 @@ export function AboutCorporateCulture({
   return (
     <section className="bg-white py-[clamp(5.5rem,12vw,10rem)]">
       <Container>
-        <motion.p
+        <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeInUp}
-          className="mb-14 font-body text-[0.8125rem] font-medium tracking-[0.04em] text-oboya-green md:mb-20 md:text-sm"
+          className="mb-14 md:mb-20"
         >
-          {pickLocalized(data.eyebrow, locale)}
-        </motion.p>
+          <p className="font-body text-[0.8125rem] font-medium tracking-[0.04em] text-oboya-green md:text-sm">
+            {pickLocalized(data.eyebrow, locale)}
+          </p>
+          <div
+            className="mt-2.5 h-px w-full bg-oboya-green/55"
+            aria-hidden
+          />
+        </motion.div>
 
         <div className="flex flex-col gap-[clamp(4.5rem,11vw,8.5rem)]">
           {data.items.map((item) => {

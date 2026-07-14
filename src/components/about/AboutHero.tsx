@@ -33,7 +33,7 @@ export function AboutHero({
           variants={fadeInUp}
           className="mx-auto max-w-[min(100%,52rem)] pt-[clamp(4.5rem,10vw,7.5rem)] pb-[clamp(4rem,9vw,7rem)] text-center lg:max-w-[78%]"
         >
-          <p className="mb-5 font-body text-[0.8125rem] font-normal tracking-[0.02em] text-oboya-blue-dark/45 md:mb-7 md:text-sm">
+          <p className="mb-5 font-body text-[1.125rem] font-medium tracking-[0.02em] text-oboya-blue-dark md:mb-7">
             {eyebrow}
           </p>
           <h1 className="font-display text-[clamp(1.625rem,3.2vw,2.875rem)] font-semibold leading-[1.28] tracking-[-0.015em] text-oboya-blue-dark text-pretty">

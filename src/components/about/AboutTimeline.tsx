@@ -1,11 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import gsap from "gsap";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { pickLocalized } from "@/lib/cms/utils";
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
+import { getItemAngle } from "@/hooks/useTimelineRotation";
 import { cn } from "@/lib/utils";
 
 interface AboutTimelineProps {
@@ -13,38 +23,57 @@ interface AboutTimelineProps {
   locale: string;
 }
 
-/** Semi-circle opening downward — peak at top center (like reference). */
-function pointOnArc(
-  index: number,
-  total: number,
-  width: number,
-  height: number
-) {
-  const t = total <= 1 ? 0.5 : index / (total - 1);
-  const start = Math.PI * 0.98;
-  const end = Math.PI * 0.02;
-  const angle = start + (end - start) * t;
-  const cx = width / 2;
-  const cy = height * 0.95;
-  const rx = width * 0.48;
-  const ry = height * 0.88;
+type TimelineEvent = AboutPageSettings["timeline"]["events"][number];
+
+const arcEase = [0.22, 1, 0.36, 1] as const;
+/** Neighbors sit at half the true rim spacing (closer to the apex). */
+const NEIGHBOR_SPREAD = 0.5;
+
+function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
+  const rad = ((angleDeg - 90) * Math.PI) / 180;
   return {
-    x: cx + Math.cos(angle) * rx,
-    y: cy - Math.sin(angle) * ry,
+    x: cx + r * Math.cos(rad),
+    y: cy + r * Math.sin(rad),
   };
 }
 
+function describeArc(
+  cx: number,
+  cy: number,
+  r: number,
+  startAngle: number,
+  endAngle: number
+) {
+  const start = polarToCartesian(cx, cy, r, endAngle);
+  const end = polarToCartesian(cx, cy, r, startAngle);
+  const largeArc = endAngle - startAngle <= 180 ? 0 : 1;
+  return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 0 ${end.x} ${end.y}`;
+}
+
+function wrapIndex(index: number, count: number) {
+  if (count <= 0) return 0;
+  return ((index % count) + count) % count;
+}
+
+function shortestAngleDelta(a: number, b: number) {
+  // Normalize for any accumulated focus angle (incl. wrap past ±360)
+  const d = ((((a - b) % 360) + 360) % 360);
+  return d > 180 ? d - 360 : d;
+}
+
+/**
+ * /about timeline: fixed green bowl + rotating year rim.
+ * Always previous · active · next (wrap). One-step rotation — never long-way across the screen.
+ */
 export function AboutTimeline({ data, locale }: AboutTimelineProps) {
   const events = data.events;
-  const [active, setActive] = useState(() =>
-    Math.min(2, Math.max(events.length - 1, 0))
-  );
+  const [active, setActive] = useState(0);
   const reduceMotion = useReducedMotion();
 
   const go = useCallback(
     (next: number) => {
       if (events.length === 0) return;
-      setActive(((next % events.length) + events.length) % events.length);
+      setActive(wrapIndex(next, events.length));
     },
     [events.length]
   );
@@ -59,189 +88,458 @@ export function AboutTimeline({ data, locale }: AboutTimelineProps) {
   const prevLabel = pickLocalized(data.prevLabel, locale);
   const nextLabel = pickLocalized(data.nextLabel, locale);
 
+  const nav = (
+    <div className="relative z-20 flex items-center justify-center gap-0">
+      <button
+        type="button"
+        onClick={() => go(active - 1)}
+        className="group relative z-20 flex items-center gap-3 px-4 font-body text-[1.125rem] font-normal tracking-[0.14em] text-oboya-blue-dark uppercase transition-colors hover:text-oboya-green md:px-6"
+        aria-label={prevLabel}
+      >
+        <span className="flex h-8 w-8 items-center justify-center rounded-full border border-oboya-green/70 text-oboya-green transition-colors group-hover:border-oboya-green group-hover:bg-oboya-green/10">
+          <ChevronLeft className="h-4 w-4" aria-hidden />
+        </span>
+        {prevLabel}
+      </button>
+
+      <span className="h-5 w-px shrink-0 bg-oboya-blue-dark/20" aria-hidden />
+
+      <button
+        type="button"
+        onClick={() => go(active + 1)}
+        className="group relative z-20 flex items-center gap-3 px-4 font-body text-[1.125rem] font-normal tracking-[0.14em] text-oboya-blue-dark uppercase transition-colors hover:text-oboya-green md:px-6"
+        aria-label={nextLabel}
+      >
+        {nextLabel}
+        <span className="flex h-8 w-8 items-center justify-center rounded-full border border-oboya-green/70 text-oboya-green transition-colors group-hover:border-oboya-green group-hover:bg-oboya-green/10">
+          <ChevronRight className="h-4 w-4" aria-hidden />
+        </span>
+      </button>
+    </div>
+  );
+
   return (
     <section
-      className="bg-white py-[clamp(5.5rem,14vw,10.5rem)]"
+      className="relative overflow-x-clip bg-white py-[clamp(3rem,8vw,5rem)]"
       aria-labelledby="about-timeline-heading"
     >
-      <Container>
-        <h2 id="about-timeline-heading" className="sr-only">
-          Timeline
-        </h2>
+      <h2 id="about-timeline-heading" className="sr-only">
+        Timeline
+      </h2>
 
-        <div className="hidden md:block">
-          <CurvedTimeline
-            events={events}
-            active={active}
-            onSelect={setActive}
-            reduceMotion={!!reduceMotion}
-          />
-        </div>
+      <div className="hidden md:block">
+        <RotatingRimTimeline
+          events={events}
+          active={active}
+          onSelect={setActive}
+          locale={locale}
+          reduceMotion={!!reduceMotion}
+          nav={nav}
+        />
+      </div>
 
-        <div className="md:hidden">
+      <div className="md:hidden">
+        <Container>
           <MobileTimeline
             events={events}
             active={active}
             onSelect={setActive}
           />
-        </div>
-
-        <div className="mx-auto mt-6 max-w-lg text-center md:-mt-2 md:max-w-xl">
           <AnimatePresence mode="wait">
-            <motion.p
+            <motion.div
               key={current.id}
-              initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+              initial={reduceMotion ? false : { opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="font-body text-[0.9375rem] leading-[1.7] text-oboya-blue-dark/55 md:text-base"
+              exit={reduceMotion ? undefined : { opacity: 0, y: 8 }}
+              transition={{ duration: 0.4, ease: arcEase }}
+              className="mx-auto mt-6 max-w-lg text-center"
             >
-              <span className="mb-3 block font-display text-xl font-semibold text-oboya-blue-dark md:hidden">
+              <p className="font-display text-2xl font-semibold text-oboya-blue-dark">
                 {current.year}
-              </span>
-              {pickLocalized(current.description, locale)}
-            </motion.p>
+              </p>
+              <p className="mt-3 font-body text-[1.375rem] font-medium leading-relaxed text-oboya-blue-dark/55">
+                {pickLocalized(current.description, locale)}
+              </p>
+            </motion.div>
           </AnimatePresence>
-
-          <div className="mt-12 flex items-center justify-center gap-0">
-            <button
-              type="button"
-              onClick={() => go(active - 1)}
-              className="group flex items-center gap-2.5 px-4 font-body text-[0.6875rem] font-medium tracking-[0.16em] text-oboya-blue-dark uppercase transition-colors hover:text-oboya-green md:px-6"
-              aria-label={prevLabel}
-            >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full border border-oboya-blue-dark/25 transition-colors group-hover:border-oboya-green">
-                <ChevronLeft className="h-3.5 w-3.5" aria-hidden />
-              </span>
-              {prevLabel}
-            </button>
-
-            <span
-              className="h-4 w-px shrink-0 bg-oboya-blue-dark/20"
-              aria-hidden
-            />
-
-            <button
-              type="button"
-              onClick={() => go(active + 1)}
-              className="group flex items-center gap-2.5 px-4 font-body text-[0.6875rem] font-medium tracking-[0.16em] text-oboya-blue-dark uppercase transition-colors hover:text-oboya-green md:px-6"
-              aria-label={nextLabel}
-            >
-              {nextLabel}
-              <span className="flex h-7 w-7 items-center justify-center rounded-full border border-oboya-blue-dark/25 transition-colors group-hover:border-oboya-green">
-                <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-              </span>
-            </button>
-          </div>
-        </div>
-      </Container>
+          <div className="mt-20">{nav}</div>
+        </Container>
+      </div>
     </section>
   );
 }
 
-function CurvedTimeline({
+function RotatingRimTimeline({
   events,
   active,
   onSelect,
+  locale,
   reduceMotion,
+  nav,
 }: {
-  events: AboutPageSettings["timeline"]["events"];
+  events: TimelineEvent[];
   active: number;
   onSelect: (index: number) => void;
+  locale: string;
   reduceMotion: boolean;
+  nav: ReactNode;
 }) {
-  const width = 1100;
-  const height = 300;
-  const n = events.length;
+  const frameRef = useRef<HTMLDivElement>(null);
+  const focusProxy = useRef({ angle: 0 });
+  const prevActive = useRef(active);
+  const [width, setWidth] = useState(1200);
+  const [focusAngle, setFocusAngle] = useState(0);
+  const count = events.length;
 
-  /** Keep chronological order; active year labeled at its own position. */
-  const arcPath = useMemo(() => {
-    const points = Array.from({ length: 64 }, (_, i) =>
-      pointOnArc(i, 64, width, height)
-    );
-    return points
-      .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
-      .join(" ");
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    const update = () => setWidth(frame.clientWidth || window.innerWidth);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(frame);
+    window.addEventListener("resize", update);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", update);
+    };
   }, []);
 
-  /** Show year labels for active + nearest neighbors (matches reference 3 labels). */
-  const labeled = useMemo(() => {
-    const set = new Set<number>([active]);
-    if (active - 1 >= 0) set.add(active - 1);
-    if (active + 1 < n) set.add(active + 1);
-    // If at edge, prefer 3 visible labels when possible
-    if (set.size < 3 && active - 2 >= 0) set.add(active - 2);
-    if (set.size < 3 && active + 2 < n) set.add(active + 2);
-    return set;
-  }, [active, n]);
+  const metrics = useMemo(() => {
+    const w = Math.max(width, 320);
+    const stepDeg = count > 0 ? 360 / count : 60;
+    // Neighbors rendered at half spacing → α only needs to cover that fan
+    const visualStep = stepDeg * NEIGHBOR_SPREAD;
+    const needAlpha = Math.min(Math.max(visualStep * 1.2, 34), 48);
+    const rise = (w / 2) * Math.tan(((needAlpha / 2) * Math.PI) / 180);
+    const radius = (rise * rise + (w / 2) * (w / 2)) / (2 * rise);
+    const alphaRad = Math.acos(
+      Math.min(1, Math.max(0, (radius - rise) / radius))
+    );
+    const alpha = (alphaRad * 180) / Math.PI;
+    const apexPad = 16;
+    const cx = w / 2;
+    const cy = apexPad + radius;
+    const height = apexPad + rise + 4;
+    const visualStepRad = (visualStep * Math.PI) / 180;
+    const neighborY = apexPad + radius * (1 - Math.cos(visualStepRad));
+    // Stem + year + copy + nav breathing room
+    const frameHeight = Math.max(height, neighborY + 48) + 320;
+
+    return {
+      width: w,
+      height,
+      radius,
+      apexPad,
+      cx,
+      cy,
+      alpha,
+      rise,
+      frameHeight,
+      stepDeg,
+    };
+  }, [width, count]);
+
+  const { height, radius, cx, cy, alpha, apexPad, frameHeight, stepDeg } =
+    metrics;
+  const diameter = radius * 2;
+  const arcPath = describeArc(cx, cy, radius, -alpha, alpha);
+
+  // Fan focus: one-step path (wrap last↔first). Snap to canonical angle after each step
+  // so focus never drifts and the start state stays identical after a full cycle.
+  useLayoutEffect(() => {
+    const step = count > 0 ? 360 / count : 0;
+    const canonical = getItemAngle(active, count);
+    const prev = prevActive.current;
+    const forward = (active - prev + count) % count;
+    const backward = (prev - active + count) % count;
+    const signedSteps = forward <= backward ? forward : -backward;
+    const delta = signedSteps * step;
+    const from = focusProxy.current.angle;
+    const to = from + delta;
+    prevActive.current = active;
+
+    gsap.killTweensOf(focusProxy.current);
+
+    const snapCanonical = () => {
+      focusProxy.current.angle = canonical;
+      setFocusAngle(canonical);
+    };
+
+    if (reduceMotion || delta === 0) {
+      snapCanonical();
+      return;
+    }
+
+    gsap.fromTo(
+      focusProxy.current,
+      { angle: from },
+      {
+        angle: to,
+        duration: 0.9,
+        ease: "power3.out",
+        overwrite: true,
+        onUpdate: () => setFocusAngle(focusProxy.current.angle),
+        onComplete: snapCanonical,
+      }
+    );
+  }, [active, count, reduceMotion]);
+
+  const current = events[active];
 
   return (
-    <div className="relative mx-auto w-full max-w-5xl">
+    <div
+      ref={frameRef}
+      className="relative w-full overflow-visible"
+      style={{ height: frameHeight }}
+    >
+      {/* Static green bowl — endpoints on screen edges */}
       <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="h-auto w-full overflow-visible"
-        role="list"
-        aria-label="Company timeline"
+        className="pointer-events-none absolute inset-x-0 top-0 h-auto w-full overflow-visible"
+        viewBox={`0 0 ${metrics.width} ${height}`}
+        preserveAspectRatio="xMidYMid meet"
+        aria-hidden
       >
         <path
           d={arcPath}
           fill="none"
-          stroke="#01203f"
-          strokeOpacity="0.14"
-          strokeWidth="1.25"
-          strokeDasharray="3 7"
+          stroke="#4daf4e"
+          strokeWidth="2"
+          vectorEffect="non-scaling-stroke"
           strokeLinecap="round"
         />
-
-        {events.map((event, index) => {
-          const pos = pointOnArc(index, n, width, height);
-          const isActive = index === active;
-          const showLabel = labeled.has(index);
-
-          return (
-            <g key={event.id} role="listitem">
-              {showLabel && (
-                <motion.text
-                  x={pos.x}
-                  y={pos.y - (isActive ? 26 : 20)}
-                  textAnchor="middle"
-                  fill={isActive ? "#01203f" : "rgba(1,32,63,0.4)"}
-                  style={{
-                    fontSize: isActive ? 26 : 15,
-                    fontWeight: isActive ? 600 : 500,
-                  }}
-                  initial={reduceMotion ? false : { opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.35 }}
-                >
-                  {event.year}
-                </motion.text>
-              )}
-              <motion.circle
-                cx={pos.x}
-                cy={pos.y}
-                r={isActive ? 7 : 4.5}
-                fill={isActive ? "#4daf4e" : "rgba(77, 175, 78, 0.55)"}
-                className="cursor-pointer"
-                onClick={() => onSelect(index)}
-                whileHover={reduceMotion ? undefined : { scale: 1.2 }}
-                transition={{ type: "spring", stiffness: 260, damping: 28 }}
-              />
-              <circle
-                cx={pos.x}
-                cy={pos.y}
-                r={20}
-                fill="transparent"
-                className="cursor-pointer"
-                onClick={() => onSelect(index)}
-              >
-                <title>{event.year}</title>
-              </circle>
-            </g>
-          );
-        })}
       </svg>
+
+      {/* Years fan: compressed toward apex (neighbors at half distance) */}
+      <div
+        className="pointer-events-none absolute left-1/2"
+        style={{
+          width: diameter,
+          height: diameter,
+          top: cy,
+          transform: "translate3d(-50%, -50%, 0)",
+        }}
+      >
+        <ul
+          role="list"
+          className="pointer-events-none absolute inset-0 m-0 list-none p-0"
+        >
+          {events.map((event, index) => (
+            <RimYear
+              key={event.id}
+              event={event}
+              index={index}
+              count={count}
+              activeIndex={active}
+              focusAngle={focusAngle}
+              stepDeg={stepDeg}
+              radius={radius}
+              onSelect={onSelect}
+            />
+          ))}
+        </ul>
+      </div>
+
+      {/* Apex column: drip stack + nav (tip travels on the rim above) */}
+      <div
+        className="pointer-events-none absolute left-1/2 z-10 flex w-[min(92vw,36rem)] -translate-x-1/2 flex-col items-center px-6"
+        style={{ top: apexPad }}
+      >
+        {/* Invisible spacer matching rim tip footprint so stem stays under apex */}
+        <span
+          className="block size-3.5 shrink-0 -translate-y-1/2 opacity-0"
+          aria-hidden
+        />
+
+        <AnimatePresence mode="wait">
+          {current ? (
+            <motion.div
+              key={current.id}
+              className="flex w-full flex-col items-center"
+              initial="hidden"
+              animate="show"
+              exit="exit"
+              variants={
+                reduceMotion
+                  ? undefined
+                  : {
+                      hidden: {},
+                      show: {
+                        transition: {
+                          staggerChildren: 0.12,
+                          delayChildren: 0.2,
+                        },
+                      },
+                      exit: {
+                        transition: {
+                          staggerChildren: 0.05,
+                          staggerDirection: -1,
+                        },
+                      },
+                    }
+              }
+            >
+              <motion.span
+                aria-hidden
+                className="mt-5 block h-20 w-px shrink-0 origin-top bg-oboya-green md:mt-6 md:h-24"
+                variants={
+                  reduceMotion
+                    ? undefined
+                    : {
+                        hidden: { opacity: 0, scaleY: 0, y: -10 },
+                        show: {
+                          opacity: 1,
+                          scaleY: 1,
+                          y: 0,
+                          transition: {
+                            duration: 0.32,
+                            ease: [0.22, 1, 0.36, 1],
+                          },
+                        },
+                        exit: {
+                          opacity: 0,
+                          scaleY: 0.25,
+                          y: -8,
+                          transition: { duration: 0.16, ease: "easeIn" },
+                        },
+                      }
+                }
+              />
+
+              <motion.p
+                className="mt-3 font-display text-[clamp(1.75rem,3vw,2.35rem)] leading-none font-semibold tabular-nums tracking-tight text-oboya-blue-dark"
+                variants={
+                  reduceMotion
+                    ? undefined
+                    : {
+                        hidden: { opacity: 0, y: -14 },
+                        show: {
+                          opacity: 1,
+                          y: 0,
+                          transition: {
+                            duration: 0.3,
+                            ease: [0.22, 1, 0.36, 1],
+                          },
+                        },
+                        exit: {
+                          opacity: 0,
+                          y: -6,
+                          transition: { duration: 0.12 },
+                        },
+                      }
+                }
+              >
+                {current.year}
+              </motion.p>
+
+              <motion.p
+                className="mt-4 max-w-lg font-body text-[1.375rem] font-medium leading-relaxed text-oboya-blue-dark/55 md:mt-5"
+                variants={
+                  reduceMotion
+                    ? undefined
+                    : {
+                        hidden: { opacity: 0, y: -16 },
+                        show: {
+                          opacity: 1,
+                          y: 0,
+                          transition: {
+                            duration: 0.32,
+                            ease: [0.22, 1, 0.36, 1],
+                          },
+                        },
+                        exit: {
+                          opacity: 0,
+                          y: -4,
+                          transition: { duration: 0.1 },
+                        },
+                      }
+                }
+              >
+                {pickLocalized(current.description, locale)}
+              </motion.p>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+
+        <div className="pointer-events-auto mt-20 md:mt-24">{nav}</div>
+      </div>
     </div>
+  );
+}
+
+function RimYear({
+  event,
+  index,
+  count,
+  activeIndex,
+  focusAngle,
+  stepDeg,
+  radius,
+  onSelect,
+}: {
+  event: TimelineEvent;
+  index: number;
+  count: number;
+  activeIndex: number;
+  focusAngle: number;
+  stepDeg: number;
+  radius: number;
+  onSelect: (index: number) => void;
+}) {
+  const itemAngle = getItemAngle(index, count);
+  const delta = shortestAngleDelta(itemAngle, focusAngle);
+  const displayAngle = delta * NEIGHBOR_SPREAD;
+  const absDelta = Math.abs(delta);
+  // Soft “active” weight while the tip travels along the arc
+  const apexWeight = Math.max(0, 1 - absDelta / Math.max(stepDeg, 1));
+  const isNearApex = apexWeight > 0.55;
+  // Discrete slots guarantee start/end of cycle always show 3 tips
+  const isActiveSlot = index === activeIndex;
+  const isPrevSlot = index === wrapIndex(activeIndex - 1, count);
+  const isNextSlot = index === wrapIndex(activeIndex + 1, count);
+  const visible = isActiveSlot || isPrevSlot || isNextSlot;
+
+  return (
+    <li
+      className="absolute top-1/2 left-1/2 h-0 w-0"
+      style={{
+        transform: `rotate(${displayAngle}deg) translate3d(0, -${radius}px, 0)`,
+        opacity: visible ? 1 : 0,
+        pointerEvents: visible ? "auto" : "none",
+        transition: "opacity 0.35s ease",
+        zIndex: isNearApex || isActiveSlot ? 2 : 1,
+      }}
+      role="listitem"
+    >
+      <button
+        type="button"
+        onClick={() => onSelect(index)}
+        aria-label={event.year}
+        aria-current={isActiveSlot ? "true" : undefined}
+        tabIndex={visible ? 0 : -1}
+        className="pointer-events-auto absolute left-0 top-0 flex -translate-x-1/2 flex-col items-center outline-none focus-visible:ring-2 focus-visible:ring-oboya-green/40"
+      >
+        <span
+          className="absolute top-0 left-1/2 block -translate-x-1/2 -translate-y-1/2 rounded-full bg-oboya-green transition-[width,height,box-shadow] duration-300 ease-out"
+          style={{
+            width: 10 + apexWeight * 4,
+            height: 10 + apexWeight * 4,
+            boxShadow:
+              apexWeight > 0.5
+                ? `0 0 0 ${3 + apexWeight * 2}px rgba(77,175,78,${0.12 + apexWeight * 0.1})`
+                : "none",
+          }}
+          aria-hidden
+        />
+        {/* Side years only — hide label as the tip nears the apex */}
+        <span
+          className="mt-5 whitespace-nowrap font-display text-base font-medium tabular-nums tracking-wide text-oboya-blue-dark/50 transition-opacity duration-300 md:text-lg"
+          style={{ opacity: visible && !isNearApex ? 1 : 0 }}
+        >
+          {event.year}
+        </span>
+      </button>
+    </li>
   );
 }
 
@@ -250,7 +548,7 @@ function MobileTimeline({
   active,
   onSelect,
 }: {
-  events: AboutPageSettings["timeline"]["events"];
+  events: TimelineEvent[];
   active: number;
   onSelect: (index: number) => void;
 }) {
@@ -263,7 +561,7 @@ function MobileTimeline({
             <li key={event.id} className="flex items-center">
               {index > 0 && (
                 <span
-                  className="mb-3 mx-0.5 h-px w-5 border-t border-dashed border-oboya-blue-dark/25 sm:w-8"
+                  className="mx-0.5 mb-3 h-px w-5 border-t border-dashed border-oboya-blue-dark/25 sm:w-8"
                   aria-hidden
                 />
               )}
@@ -278,7 +576,7 @@ function MobileTimeline({
               >
                 <span
                   className={cn(
-                    "font-display text-sm font-semibold tabular-nums",
+                    "font-display font-semibold tabular-nums",
                     isActive ? "text-base" : "text-xs"
                   )}
                 >
