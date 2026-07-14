@@ -145,23 +145,25 @@ export function AboutTimeline({ data, locale }: AboutTimelineProps) {
             active={active}
             onSelect={setActive}
           />
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={current.id}
-              initial={reduceMotion ? false : { opacity: 0, y: -12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reduceMotion ? undefined : { opacity: 0, y: 8 }}
-              transition={{ duration: 0.4, ease: arcEase }}
-              className="mx-auto mt-6 max-w-lg text-center"
-            >
-              <p className="font-display text-2xl font-semibold text-oboya-blue-dark">
-                {current.year}
-              </p>
-              <p className="mt-3 font-body text-[1.375rem] font-medium leading-relaxed text-oboya-blue-dark/55">
-                {pickLocalized(current.description, locale)}
-              </p>
-            </motion.div>
-          </AnimatePresence>
+          <div className="relative mx-auto mt-6 min-h-[10.5rem] max-w-lg">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={current.id}
+                initial={reduceMotion ? false : { opacity: 0, y: -12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reduceMotion ? undefined : { opacity: 0, y: 8 }}
+                transition={{ duration: 0.4, ease: arcEase }}
+                className="absolute inset-x-0 top-0 text-center"
+              >
+                <p className="font-display text-2xl font-semibold text-oboya-blue-dark">
+                  {current.year}
+                </p>
+                <p className="mt-3 font-body text-[1.375rem] font-medium leading-relaxed text-oboya-blue-dark/55">
+                  {pickLocalized(current.description, locale)}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+          </div>
           <div className="mt-20">{nav}</div>
         </Container>
       </div>
@@ -340,7 +342,7 @@ function RotatingRimTimeline({
         </ul>
       </div>
 
-      {/* Apex column: drip stack + nav (tip travels on the rim above) */}
+      {/* Apex column: drip stack (nav pinned to 2006 layout position) */}
       <div
         className="pointer-events-none absolute left-1/2 z-10 flex w-[min(92vw,36rem)] -translate-x-1/2 flex-col items-center px-6"
         style={{ top: apexPad }}
@@ -351,117 +353,120 @@ function RotatingRimTimeline({
           aria-hidden
         />
 
-        <AnimatePresence mode="wait">
-          {current ? (
-            <motion.div
-              key={current.id}
-              className="flex w-full flex-col items-center"
-              initial="hidden"
-              animate="show"
-              exit="exit"
-              variants={
-                reduceMotion
-                  ? undefined
-                  : {
-                      hidden: {},
-                      show: {
-                        transition: {
-                          staggerChildren: 0.12,
-                          delayChildren: 0.2,
-                        },
-                      },
-                      exit: {
-                        transition: {
-                          staggerChildren: 0.05,
-                          staggerDirection: -1,
-                        },
-                      },
-                    }
-              }
-            >
-              <motion.span
-                aria-hidden
-                className="mt-5 block h-20 w-px shrink-0 origin-top bg-oboya-green md:mt-6 md:h-24"
+        {/* Fixed-height slot = 2006 copy footprint so nav never shifts */}
+        <div className="relative w-full min-h-[16.75rem] md:min-h-[17.5rem]">
+          <AnimatePresence mode="wait">
+            {current ? (
+              <motion.div
+                key={current.id}
+                className="absolute inset-x-0 top-0 flex w-full flex-col items-center"
+                initial="hidden"
+                animate="show"
+                exit="exit"
                 variants={
                   reduceMotion
                     ? undefined
                     : {
-                        hidden: { opacity: 0, scaleY: 0, y: -10 },
+                        hidden: {},
                         show: {
-                          opacity: 1,
-                          scaleY: 1,
-                          y: 0,
                           transition: {
-                            duration: 0.32,
-                            ease: [0.22, 1, 0.36, 1],
+                            staggerChildren: 0.12,
+                            delayChildren: 0.2,
                           },
                         },
                         exit: {
-                          opacity: 0,
-                          scaleY: 0.25,
-                          y: -8,
-                          transition: { duration: 0.16, ease: "easeIn" },
-                        },
-                      }
-                }
-              />
-
-              <motion.p
-                className="mt-3 font-display text-[clamp(1.75rem,3vw,2.35rem)] leading-none font-semibold tabular-nums tracking-tight text-oboya-blue-dark"
-                variants={
-                  reduceMotion
-                    ? undefined
-                    : {
-                        hidden: { opacity: 0, y: -14 },
-                        show: {
-                          opacity: 1,
-                          y: 0,
                           transition: {
-                            duration: 0.3,
-                            ease: [0.22, 1, 0.36, 1],
+                            staggerChildren: 0.05,
+                            staggerDirection: -1,
                           },
-                        },
-                        exit: {
-                          opacity: 0,
-                          y: -6,
-                          transition: { duration: 0.12 },
                         },
                       }
                 }
               >
-                {current.year}
-              </motion.p>
-
-              <motion.p
-                className="mt-4 max-w-lg font-body text-[1.375rem] font-medium leading-relaxed text-oboya-blue-dark/55 md:mt-5"
-                variants={
-                  reduceMotion
-                    ? undefined
-                    : {
-                        hidden: { opacity: 0, y: -16 },
-                        show: {
-                          opacity: 1,
-                          y: 0,
-                          transition: {
-                            duration: 0.32,
-                            ease: [0.22, 1, 0.36, 1],
+                <motion.span
+                  aria-hidden
+                  className="mt-5 block h-20 w-px shrink-0 origin-top bg-oboya-green md:mt-6 md:h-24"
+                  variants={
+                    reduceMotion
+                      ? undefined
+                      : {
+                          hidden: { opacity: 0, scaleY: 0, y: -10 },
+                          show: {
+                            opacity: 1,
+                            scaleY: 1,
+                            y: 0,
+                            transition: {
+                              duration: 0.32,
+                              ease: [0.22, 1, 0.36, 1],
+                            },
                           },
-                        },
-                        exit: {
-                          opacity: 0,
-                          y: -4,
-                          transition: { duration: 0.1 },
-                        },
-                      }
-                }
-              >
-                {pickLocalized(current.description, locale)}
-              </motion.p>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
+                          exit: {
+                            opacity: 0,
+                            scaleY: 0.25,
+                            y: -8,
+                            transition: { duration: 0.16, ease: "easeIn" },
+                          },
+                        }
+                  }
+                />
 
-        <div className="pointer-events-auto mt-20 md:mt-24">{nav}</div>
+                <motion.p
+                  className="mt-3 font-display text-[clamp(1.75rem,3vw,2.35rem)] leading-none font-semibold tabular-nums tracking-tight text-oboya-blue-dark"
+                  variants={
+                    reduceMotion
+                      ? undefined
+                      : {
+                          hidden: { opacity: 0, y: -14 },
+                          show: {
+                            opacity: 1,
+                            y: 0,
+                            transition: {
+                              duration: 0.3,
+                              ease: [0.22, 1, 0.36, 1],
+                            },
+                          },
+                          exit: {
+                            opacity: 0,
+                            y: -6,
+                            transition: { duration: 0.12 },
+                          },
+                        }
+                  }
+                >
+                  {current.year}
+                </motion.p>
+
+                <motion.p
+                  className="mt-4 max-w-lg font-body text-[1.375rem] font-medium leading-relaxed text-oboya-blue-dark/55 md:mt-5"
+                  variants={
+                    reduceMotion
+                      ? undefined
+                      : {
+                          hidden: { opacity: 0, y: -16 },
+                          show: {
+                            opacity: 1,
+                            y: 0,
+                            transition: {
+                              duration: 0.32,
+                              ease: [0.22, 1, 0.36, 1],
+                            },
+                          },
+                          exit: {
+                            opacity: 0,
+                            y: -4,
+                            transition: { duration: 0.1 },
+                          },
+                        }
+                  }
+                >
+                  {pickLocalized(current.description, locale)}
+                </motion.p>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </div>
+
+        <div className="pointer-events-auto mt-20 shrink-0 md:mt-24">{nav}</div>
       </div>
     </div>
   );
