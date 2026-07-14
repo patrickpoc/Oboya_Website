@@ -45,19 +45,19 @@ function PeopleHeader({
     >
       <motion.p
         variants={fadeInUp}
-        className="font-body text-[0.8125rem] font-medium tracking-[0.04em] text-oboya-green md:text-sm"
+        className="font-body text-[0.6875rem] font-medium tracking-[0.04em] text-oboya-green md:text-xs"
       >
         {pickLocalized(data.eyebrow, locale)}
       </motion.p>
       <motion.h2
         variants={fadeInUp}
-        className="mt-4 font-display text-[clamp(1.75rem,3.2vw,2.75rem)] font-semibold tracking-[-0.02em] text-oboya-blue-dark text-balance"
+        className="mt-3 font-display text-[clamp(1.25rem,2.4vw,1.75rem)] font-semibold tracking-[-0.02em] text-oboya-blue-dark text-balance"
       >
         {pickLocalized(data.title, locale)}
       </motion.h2>
       <motion.p
         variants={fadeInUp}
-        className="mt-4 font-body text-[1.0625rem] leading-relaxed text-oboya-blue-dark/60"
+        className="mt-3 font-body text-sm leading-relaxed text-oboya-blue-dark/60 md:text-[0.9375rem]"
       >
         {pickLocalized(data.description, locale)}
       </motion.p>
@@ -94,7 +94,7 @@ function PeopleStaticGrid({
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />
               </div>
-              <h3 className="mt-4 font-display text-lg font-semibold text-oboya-blue-dark">
+              <h3 className="mt-4 font-display text-base font-semibold text-oboya-blue-dark md:text-lg">
                 {person.name}
               </h3>
               <p className="mt-1 text-sm text-oboya-blue-dark/55">
@@ -216,18 +216,18 @@ function PeopleScrollSpotlight({
                     exit={{ opacity: 0, y: -12 }}
                     transition={{ duration: 0.45, ease: easeOutExpo }}
                   >
-                    <p className="font-body text-xs font-medium tracking-[0.16em] text-oboya-green uppercase">
+                    <p className="font-body text-[0.6875rem] font-medium tracking-[0.16em] text-oboya-green uppercase">
                       {String(active + 1).padStart(2, "0")} /{" "}
                       {String(count).padStart(2, "0")}
                     </p>
-                    <h3 className="mt-4 font-display text-[clamp(1.75rem,3vw,2.5rem)] font-semibold tracking-[-0.02em] text-oboya-blue-dark">
+                    <h3 className="mt-3 font-display text-[clamp(1.25rem,2.4vw,1.75rem)] font-semibold tracking-[-0.02em] text-oboya-blue-dark">
                       {person.name}
                     </h3>
-                    <p className="mt-2 text-base text-oboya-blue-dark/55 md:text-lg">
+                    <p className="mt-1.5 text-sm text-oboya-blue-dark/55 md:text-[0.9375rem]">
                       {pickLocalized(person.role, locale)}
                     </p>
                     {person.bio ? (
-                      <p className="mt-5 max-w-md font-body text-[1.0625rem] leading-relaxed text-oboya-blue-dark/60">
+                      <p className="mt-4 max-w-md font-body text-sm leading-relaxed text-oboya-blue-dark/60 md:text-[0.9375rem]">
                         {pickLocalized(person.bio, locale)}
                       </p>
                     ) : null}

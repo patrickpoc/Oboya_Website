@@ -22,7 +22,7 @@ export function AboutCallout({ data, locale }: AboutCalloutProps) {
           variants={fadeInUp}
           className="max-w-4xl"
         >
-          <p className="font-display text-[clamp(1.35rem,2.8vw,2.25rem)] font-normal leading-[1.45] tracking-[-0.01em]">
+          <p className="font-display text-[clamp(1.15rem,2.2vw,1.625rem)] font-normal leading-[1.5] tracking-[-0.01em]">
             {data.segments.map((segment, index) => {
               const text = pickLocalized(segment.text, locale);
               const className =
@@ -36,7 +36,7 @@ export function AboutCallout({ data, locale }: AboutCalloutProps) {
             })}
           </p>
           {data.body ? (
-            <p className="mt-8 font-body text-[0.9375rem] leading-relaxed text-white/65">
+            <p className="mt-6 font-body text-sm leading-relaxed text-white/65 md:text-[0.9375rem]">
               {pickLocalized(data.body, locale)}
             </p>
           ) : null}

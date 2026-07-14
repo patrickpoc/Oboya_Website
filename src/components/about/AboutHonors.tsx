@@ -26,7 +26,7 @@ export function AboutHonors({ data, locale }: AboutHonorsProps) {
         >
           <motion.h2
             variants={fadeInUp}
-            className="text-center font-display text-[clamp(1.75rem,3.2vw,2.5rem)] font-normal tracking-[-0.01em] text-oboya-blue/70"
+            className="text-center font-display text-[clamp(1.25rem,2.4vw,1.75rem)] font-normal tracking-[-0.01em] text-oboya-blue/70"
           >
             {pickLocalized(data.title, locale)}
           </motion.h2>

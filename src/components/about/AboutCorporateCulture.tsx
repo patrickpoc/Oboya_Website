@@ -25,7 +25,7 @@ export function AboutCorporateCulture({
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeInUp}
-          className="mb-14 font-body text-[0.8125rem] font-medium tracking-[0.04em] text-oboya-green md:mb-20 md:text-sm"
+          className="mb-12 font-body text-[0.6875rem] font-medium tracking-[0.04em] text-oboya-green md:mb-16 md:text-xs"
         >
           {pickLocalized(data.eyebrow, locale)}
         </motion.p>
@@ -48,10 +48,10 @@ export function AboutCorporateCulture({
                     imageLeft ? "lg:order-2 lg:col-start-8" : "lg:col-start-1"
                   )}
                 >
-                  <h3 className="max-w-sm font-display text-[clamp(1.5rem,2.6vw,2.125rem)] font-semibold leading-[1.2] tracking-[-0.02em] text-oboya-blue-dark">
+                  <h3 className="max-w-sm font-display text-[clamp(1.2rem,2.2vw,1.625rem)] font-semibold leading-[1.25] tracking-[-0.02em] text-oboya-blue-dark">
                     {pickLocalized(item.title, locale)}
                   </h3>
-                  <p className="mt-5 max-w-md font-body text-[0.9375rem] leading-[1.7] text-oboya-blue-dark/55 md:text-base">
+                  <p className="mt-4 max-w-md font-body text-sm leading-relaxed text-oboya-blue-dark/55 md:text-[0.9375rem]">
                     {pickLocalized(item.description, locale)}
                   </p>
                 </div>
