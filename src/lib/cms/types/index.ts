@@ -78,12 +78,25 @@ export interface MediaAsset {
   updatedAt: string;
 }
 
+export type FormSubmissionStatus = "new" | "read" | "replied" | "archived";
+
 export interface FormSubmission {
   id: string;
   type: "contact" | "quote" | "newsletter" | "career";
-  status: "new" | "read" | "archived";
+  status: FormSubmissionStatus;
   data: Record<string, unknown>;
   createdAt: string;
+}
+
+export interface ContactSubmissionData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  countryCode: string;
+  countryName: string;
+  subject: string;
+  message: string;
 }
 
 export interface DashboardStats {

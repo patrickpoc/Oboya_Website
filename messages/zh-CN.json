@@ -29,6 +29,7 @@
     "productsEquipmentDesc": "手推车、托盘和温室设备。",
     "caseStudies": "案例研究",
     "blog": "博客",
+    "faqs": "常见问题",
     "shop": "商店"
   },
   "hero": {
@@ -191,22 +192,37 @@
     "loremP4": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur."
   },
   "contact": {
+    "sidebarTitle": "期待与您沟通。",
+    "location": "全球",
+    "linkedin": "领英",
+    "instagram": "Instagram",
     "field1": "名",
     "field1Placeholder": "明",
     "field2": "姓",
     "field2Placeholder": "李",
     "email": "电子邮件",
     "emailPlaceholder": "your@email.com",
+    "phone": "电话",
+    "phonePlaceholder": "+86 138 0000 0000",
     "company": "公司",
     "companyPlaceholder": "公司名称",
     "message": "留言",
-    "messagePlaceholder": "我们能如何帮助您？",
+    "messagePlaceholder": "",
     "submit": "发送消息",
+    "submitting": "发送中…",
     "country": "国家",
-    "countryPlaceholder": "您的国家",
-    "subject": "主题",
+    "countryPlaceholder": "请选择国家",
+    "countryOther": "其他",
+    "subject": "选择主题？",
     "subjectPlaceholder": "我们能如何帮助您？",
-    "success": "谢谢。我们的团队将尽快与您联系。"
+    "subjects": {
+      "general": "一般咨询",
+      "products": "产品与解决方案",
+      "partnership": "合作伙伴",
+      "support": "支持"
+    },
+    "success": "谢谢。我们的团队将尽快与您联系。",
+    "error": "消息发送失败，请重试。"
   },
   "pages": {
     "about": {
@@ -216,7 +232,8 @@
     },
     "contact": {
       "title": "联系我们",
-      "eyebrow": "联系"
+      "eyebrow": "联系",
+      "description": "无论是产品指导、合作支持，还是联系本地团队——我们随时准备为您提供帮助。"
     },
     "careers": {
       "title": "职业发展",
@@ -593,6 +610,13 @@
     "title": "Insights & news",
     "description": "Trends, innovation, and stories from across the horticulture supply chain.",
     "readMore": "Read article",
+    "allPosts": "All",
+    "filterLabel": "Filter by category",
+    "articleLabel": "Article",
+    "empty": "No articles match this category.",
+    "emptyAll": "No articles published yet.",
+    "featuredLabel": "Featured",
+    "detailPlaceholder": "Full article content will appear here once added in the dashboard.",
     "posts": {
       "post1": {
         "title": "Sustainable packaging trends in fresh produce",
@@ -642,10 +666,26 @@
     "skip": "跳过时间线"
   },
   "caseStudies": {
-    "eyebrow": "Case Studies",
-    "title": "Proven results worldwide",
-    "description": "Selected projects demonstrating Oboya solutions across markets and crop types.",
-    "readMore": "View case study",
+    "eyebrow": "案例研究",
+    "title": "全球验证的成果——助力种植、物流与零售规模化发展的合作伙伴关系。",
+    "description": "精选项目，展示 Oboya 在不同市场与作物类型中的解决方案。",
+    "readMore": "查看案例",
+    "closePanel": "关闭",
+    "previous": "上一个案例",
+    "next": "下一个案例",
+    "showcaseTitle": "精选故事",
+    "calloutGreen": "从温室到货架，",
+    "calloutWhite": "我们帮助团队将运营复杂性转化为可衡量的成果。",
+    "calloutBody": "每个案例都体现本地专业能力、一体化产品与长期合作，而非一次性交付。",
+    "storiesEyebrow": "故事详情",
+    "allCasesTitle": "全球成功案例",
+    "byRegionTitle": "按地区浏览",
+    "regions": {
+      "europe": "欧洲",
+      "americas": "美洲",
+      "asia": "亚洲",
+      "other": "其他地区"
+    },
     "challengeLabel": "Challenge",
     "solutionLabel": "Solution",
     "resultLabel": "Result",
@@ -678,10 +718,29 @@
         "solution": "Premium growing media blends were qualified and supplied through regional partners.",
         "result": "Rooting consistency improved and rework rates declined across propagation lines."
       }
-    }
+    },
+    "hubTitle": "来自全球种植者、包装商与分销商的实证",
+    "hubDescription": "先浏览下方精选合作案例，再按国家筛选，探索与您市场相关的更多故事。",
+    "featuredLabel": "精选",
+    "filterAll": "全部地区",
+    "emptyFilter": "该国家暂无案例研究。",
+    "ctaTitle": "面临类似挑战？",
+    "ctaDescription": "与本地团队讨论物流、包装、基质或分销支持。",
+    "ctaPrimary": "联系我们",
+    "ctaSecondary": "索取报价",
+    "backToHub": "全部案例",
+    "relatedTitle": "相关故事",
+    "factIndustry": "行业",
+    "factCountry": "国家",
+    "factRegion": "地区",
+    "filterAllCountries": "全部国家",
+    "carouselEyebrow": "按市场浏览",
+    "byCountryTitle": "按国家探索案例"
   },
   "faqsPage": {
-    "intro": "Find quick answers about products, logistics, quotations, and support.",
+    "intro": "快速了解产品、物流、报价和支持相关问题的答案。",
+    "searchPlaceholder": "按关键词搜索常见问题…",
+    "noResults": "没有匹配的常见问题。请尝试其他关键词或按分类浏览。",
     "categories": {
       "products": "Products",
       "shipping": "Shipping",

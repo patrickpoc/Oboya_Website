@@ -29,6 +29,7 @@
     "productsEquipmentDesc": "Carros, bandejas y equipamiento para invernaderos.",
     "caseStudies": "Casos de éxito",
     "blog": "Blog",
+    "faqs": "FAQs",
     "shop": "Tienda"
   },
   "hero": {
@@ -191,22 +192,37 @@
     "loremP4": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit."
   },
   "contact": {
+    "sidebarTitle": "Nos encantaría saber de usted.",
+    "location": "Mundial",
+    "linkedin": "LinkedIn",
+    "instagram": "Instagram",
     "field1": "Nombre",
     "field1Placeholder": "Ana",
     "field2": "Apellido",
     "field2Placeholder": "García",
-    "email": "Correo electronico",
+    "email": "Correo electrónico",
     "emailPlaceholder": "su@email.com",
+    "phone": "Teléfono",
+    "phonePlaceholder": "+52 55 0000 0000",
     "company": "Empresa",
     "companyPlaceholder": "Nombre de la empresa",
     "message": "Mensaje",
-    "messagePlaceholder": "Como podemos ayudarle?",
+    "messagePlaceholder": "",
     "submit": "Enviar mensaje",
+    "submitting": "Enviando…",
     "country": "País",
-    "countryPlaceholder": "Su país",
-    "subject": "Asunto",
+    "countryPlaceholder": "Seleccione su país",
+    "countryOther": "Otro",
+    "subject": "¿Seleccionar asunto?",
     "subjectPlaceholder": "¿Cómo podemos ayudar?",
-    "success": "Gracias. Nuestro equipo se pondrá en contacto pronto."
+    "subjects": {
+      "general": "Consulta general",
+      "products": "Productos y soluciones",
+      "partnership": "Alianza",
+      "support": "Soporte"
+    },
+    "success": "Gracias. Nuestro equipo se pondrá en contacto pronto.",
+    "error": "No pudimos enviar su mensaje. Inténtelo de nuevo."
   },
   "pages": {
     "about": {
@@ -216,7 +232,8 @@
     },
     "contact": {
       "title": "Contáctenos",
-      "eyebrow": "Contacto"
+      "eyebrow": "Contacto",
+      "description": "Ya sea orientación de productos, apoyo a alianzas o contacto con nuestro equipo local — estamos listos para ayudar."
     },
     "careers": {
       "title": "Carreras",
@@ -593,6 +610,13 @@
     "title": "Insights & news",
     "description": "Trends, innovation, and stories from across the horticulture supply chain.",
     "readMore": "Read article",
+    "allPosts": "All",
+    "filterLabel": "Filter by category",
+    "articleLabel": "Article",
+    "empty": "No articles match this category.",
+    "emptyAll": "No articles published yet.",
+    "featuredLabel": "Featured",
+    "detailPlaceholder": "Full article content will appear here once added in the dashboard.",
     "posts": {
       "post1": {
         "title": "Sustainable packaging trends in fresh produce",
@@ -643,9 +667,25 @@
   },
   "caseStudies": {
     "eyebrow": "Case Studies",
-    "title": "Proven results worldwide",
-    "description": "Selected projects demonstrating Oboya solutions across markets and crop types.",
-    "readMore": "View case study",
+    "title": "Resultados comprobados en todo el mundo — alianzas que escalan producción, logística y retail.",
+    "description": "Proyectos seleccionados que muestran soluciones Oboya en distintos mercados y cultivos.",
+    "readMore": "Ver caso",
+    "closePanel": "Cerrar",
+    "previous": "Caso anterior",
+    "next": "Siguiente caso",
+    "showcaseTitle": "Historias destacadas",
+    "calloutGreen": "Del invernadero al lineal,",
+    "calloutWhite": "ayudamos a convertir complejidad operativa en resultados medibles.",
+    "calloutBody": "Cada caso refleja expertise local, productos integrados y una relación a largo plazo.",
+    "storiesEyebrow": "Historias en detalle",
+    "allCasesTitle": "Historias de éxito en todo el mundo",
+    "byRegionTitle": "Más por región",
+    "regions": {
+      "europe": "Europa",
+      "americas": "Américas",
+      "asia": "Asia",
+      "other": "Otras regiones"
+    },
     "challengeLabel": "Challenge",
     "solutionLabel": "Solution",
     "resultLabel": "Result",
@@ -678,10 +718,29 @@
         "solution": "Premium growing media blends were qualified and supplied through regional partners.",
         "result": "Rooting consistency improved and rework rates declined across propagation lines."
       }
-    }
+    },
+    "hubTitle": "Prueba de growers, packers y distribuidores en todo el mundo",
+    "hubDescription": "Revise las alianzas destacadas abajo y filtre por país para explorar más historias de su mercado.",
+    "featuredLabel": "Destacado",
+    "filterAll": "Todas las regiones",
+    "emptyFilter": "Aún no hay casos de estudio en este país.",
+    "ctaTitle": "¿Trabaja en un reto similar?",
+    "ctaDescription": "Hable con nuestro equipo local sobre logística, packaging, sustratos o distribución.",
+    "ctaPrimary": "Contáctenos",
+    "ctaSecondary": "Pedir cotización",
+    "backToHub": "Todos los casos",
+    "relatedTitle": "Historias relacionadas",
+    "factIndustry": "Industria",
+    "factCountry": "País",
+    "factRegion": "Región",
+    "filterAllCountries": "Todos los países",
+    "carouselEyebrow": "Explorar por mercado",
+    "byCountryTitle": "Historias por país"
   },
   "faqsPage": {
-    "intro": "Find quick answers about products, logistics, quotations, and support.",
+    "intro": "Encuentre respuestas rápidas sobre productos, logística, cotizaciones y soporte.",
+    "searchPlaceholder": "Buscar en las FAQs por palabra clave…",
+    "noResults": "Ninguna FAQ coincide con su búsqueda. Pruebe otras palabras clave o explore por categoría.",
     "categories": {
       "products": "Products",
       "shipping": "Shipping",

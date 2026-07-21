@@ -19,17 +19,26 @@ interface HomePageContentProps {
 export function HomePageContent({ locale, locations, mapAlt }: HomePageContentProps) {
   const homepage = readHomepageSettings();
   const posts = readBlogPosts();
+  const animationsEnabled = homepage.animations?.enabled !== false;
 
   return (
     <>
       {homepage.sections.hero.enabled && (
-        <Hero data={homepage.hero} locale={locale} />
+        <Hero data={homepage.hero} locale={locale} animationsEnabled={animationsEnabled} />
       )}
       {homepage.sections.companyOverview.enabled && (
-        <CompanyOverview data={homepage.companyOverview} locale={locale} />
+        <CompanyOverview
+          data={homepage.companyOverview}
+          locale={locale}
+          animationsEnabled={animationsEnabled}
+        />
       )}
       {homepage.sections.capabilities.enabled && (
-        <Capabilities data={homepage.capabilities} locale={locale} />
+        <Capabilities
+          data={homepage.capabilities}
+          locale={locale}
+          animationsEnabled={animationsEnabled}
+        />
       )}
       {homepage.sections.globalPresence.enabled && (
         <GlobalPresence
@@ -39,16 +48,33 @@ export function HomePageContent({ locale, locations, mapAlt }: HomePageContentPr
         />
       )}
       {homepage.sections.testimonials.enabled && (
-        <Testimonials data={homepage.testimonials} locale={locale} />
+        <Testimonials
+          data={homepage.testimonials}
+          locale={locale}
+          animationsEnabled={animationsEnabled}
+        />
       )}
       {homepage.sections.featuredProducts.enabled && (
-        <FeaturedProducts data={homepage.featuredProducts} locale={locale} />
+        <FeaturedProducts
+          data={homepage.featuredProducts}
+          locale={locale}
+          animationsEnabled={animationsEnabled}
+        />
       )}
       {homepage.sections.latestNews.enabled && (
-        <HomeLatestNews data={homepage.latestNews} posts={posts} locale={locale} />
+        <HomeLatestNews
+          data={homepage.latestNews}
+          posts={posts}
+          locale={locale}
+          animationsEnabled={animationsEnabled}
+        />
       )}
       {homepage.sections.partners.enabled && (
-        <Partners data={homepage.partners} locale={locale} />
+        <Partners
+          data={homepage.partners}
+          locale={locale}
+          animationsEnabled={animationsEnabled}
+        />
       )}
     </>
   );

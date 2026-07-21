@@ -33,6 +33,7 @@ export function AdminSidebar() {
                 <li key={item.label}>
                   <Link
                     href={item.href ?? "#"}
+                    prefetch
                     className={cn(
                       "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors",
                       active
@@ -99,6 +100,7 @@ function NavGroup({
               <li key={child.label}>
                 <Link
                   href={child.href ?? "#"}
+                  prefetch
                   className={cn(
                     "block rounded-md px-2 py-1.5 text-xs transition-colors",
                     active

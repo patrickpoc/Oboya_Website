@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { SiteLayout } from "@/components/layouts/SiteLayout";
 import { AboutPageContent } from "@/components/about/AboutPageContent";
-import { ContactForm } from "@/components/sections/ContactForm";
+import { ContactPageContent } from "@/components/contact/ContactPageContent";
 import { FaqsPageContent } from "@/components/faqs/FaqsPageContent";
 import { WorkWithUsPageContent } from "@/components/work-with-us/WorkWithUsPageContent";
 import { LegalPageContent } from "@/components/legal/LegalPageContent";
@@ -89,11 +89,18 @@ export default async function InnerPage({ params }: PageProps) {
     );
   }
 
+  if (config.template === "contact") {
+    return (
+      <SiteLayout>
+        <ContactPageContent />
+      </SiteLayout>
+    );
+  }
+
   return (
     <SiteLayout>
       <InnerPageHero eyebrow={eyebrow} title={title} description={description} />
-      {config.template === "contact" && <ContactForm />}
-      {config.template === "faqs" && <FaqsPageContent />}
+      {config.template === "faqs" && <FaqsPageContent locale={locale} />}
       {config.template === "workWithUs" && <WorkWithUsPageContent />}
       {config.template === "legal" && <LegalPageContent />}
       {config.template === "listing" && <PageListing items={children} />}

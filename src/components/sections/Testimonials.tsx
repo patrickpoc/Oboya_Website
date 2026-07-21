@@ -38,9 +38,14 @@ function initialPerPage() {
 interface TestimonialsProps {
   data: HomepageSettings["testimonials"];
   locale: string;
+  animationsEnabled?: boolean;
 }
 
-export function Testimonials({ data, locale }: TestimonialsProps) {
+export function Testimonials({
+  data,
+  locale,
+  animationsEnabled = true,
+}: TestimonialsProps) {
   const items = data.items;
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(initialPerPage);
@@ -158,8 +163,8 @@ export function Testimonials({ data, locale }: TestimonialsProps) {
     >
       <Container>
         <motion.div
-          initial="hidden"
-          whileInView="visible"
+          initial={animationsEnabled ? "hidden" : false}
+          whileInView={animationsEnabled ? "visible" : undefined}
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeInUp}
           className="mb-7 md:mb-9"
@@ -183,7 +188,11 @@ export function Testimonials({ data, locale }: TestimonialsProps) {
           ref={trackRef}
           className="testimonials-track flex touch-pan-y gap-3 md:gap-4"
           animate={{ x: -x }}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          transition={
+            animationsEnabled
+              ? { duration: 0.45, ease: [0.22, 1, 0.36, 1] }
+              : { duration: 0 }
+          }
           style={{ width: "max-content" }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}

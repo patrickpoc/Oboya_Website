@@ -118,9 +118,5 @@ export function deleteBlogPost(id: string): boolean {
   return true;
 }
 
-export const blogAuthors = [
-  { id: "editorial", name: "Oboya Editorial", email: "editorial@oboya.cc" },
-  { id: "marketing", name: "Marketing Team", email: "marketing@oboya.cc" },
-];
-
+export { getBlogAuthors, type BlogAuthor } from "./blog-authors-repository";
 export { getBlogCategories } from "./blog-categories-repository";

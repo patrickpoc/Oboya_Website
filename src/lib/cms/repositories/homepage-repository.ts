@@ -64,6 +64,9 @@ export interface HomepageFeaturedCategory {
   description?: LocalizedString;
   /** Optional cover image (defaults to first product in the category) */
   image?: string;
+  ctaLabel?: LocalizedString;
+  /** If set, overrides shop category link */
+  ctaHref?: string;
 }
 
 export interface HomepagePartnerLogo {
@@ -74,6 +77,7 @@ export interface HomepagePartnerLogo {
 }
 
 export interface HomepageSettings {
+  animations: { enabled: boolean };
   sections: Record<HomepageSectionId, HomepageSectionToggle>;
   hero: {
     backgroundImage: string;
@@ -132,6 +136,7 @@ const loc = (en: string): LocalizedString => ({
 });
 
 const defaultSettings = (): HomepageSettings => ({
+  animations: { enabled: true },
   sections: {
     hero: { enabled: true },
     companyOverview: { enabled: true },
@@ -387,7 +392,7 @@ const defaultSettings = (): HomepageSettings => ({
 });
 
 let cache: HomepageSettings | null = null;
-const CONTENT_REVISION = "home-featured-categories-v1-2026-07-14";
+const CONTENT_REVISION = "home-phase1-cms-v2-2026-07-21";
 let appliedRevision: string | null = null;
 
 function migrateSettings(settings: HomepageSettings): HomepageSettings {
@@ -395,6 +400,9 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
   return {
     ...defaults,
     ...settings,
+    animations: {
+      enabled: settings.animations?.enabled ?? defaults.animations.enabled,
+    },
     hero: {
       ...defaults.hero,
       ...settings.hero,
@@ -450,6 +458,9 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
           categoryId:
             (item as HomepageFeaturedCategory).categoryId ??
             defaults.featuredProducts.items[i]?.categoryId,
+          ctaLabel:
+            item.ctaLabel ?? defaults.featuredProducts.items[i]?.ctaLabel,
+          ctaHref: item.ctaHref ?? defaults.featuredProducts.items[i]?.ctaHref,
         }));
       })(),
     },

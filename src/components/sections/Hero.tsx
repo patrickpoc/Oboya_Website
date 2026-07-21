@@ -31,9 +31,14 @@ const pillGlass =
 interface HeroProps {
   data: HomepageSettings["hero"];
   locale: string;
+  animationsEnabled?: boolean;
 }
 
-export function Hero({ data, locale }: HeroProps) {
+export function Hero({
+  data,
+  locale,
+  animationsEnabled = true,
+}: HeroProps) {
   const title = pickLocalized(data.title, locale);
   const eyebrow = pickLocalized(data.eyebrow, locale);
   const description = pickLocalized(data.description, locale);
@@ -67,8 +72,8 @@ export function Hero({ data, locale }: HeroProps) {
         <div className="flex flex-1 flex-col items-center justify-center px-2 pb-6 pt-8 text-center md:pb-10">
           <motion.div
             variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
+            initial={animationsEnabled ? "hidden" : false}
+            animate={animationsEnabled ? "visible" : false}
             className="flex max-w-3xl flex-col items-center"
           >
             {eyebrow ? (
@@ -103,9 +108,13 @@ export function Hero({ data, locale }: HeroProps) {
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          initial={animationsEnabled ? { opacity: 0, y: 20 } : false}
+          animate={animationsEnabled ? { opacity: 1, y: 0 } : false}
+          transition={
+            animationsEnabled
+              ? { delay: 0.45, duration: 0.55, ease: [0.22, 1, 0.36, 1] }
+              : { duration: 0 }
+          }
           className="mx-auto w-full max-w-3xl pb-8 md:pb-12"
         >
           {/* Mobile: vertical stack. sm+: single glass row */}

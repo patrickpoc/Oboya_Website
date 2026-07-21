@@ -13,11 +13,17 @@ import { pickLocalized } from "@/lib/cms/utils";
 interface CompanyOverviewProps {
   data: HomepageSettings["companyOverview"];
   locale: string;
+  animationsEnabled?: boolean;
 }
 
-export function CompanyOverview({ data, locale }: CompanyOverviewProps) {
+export function CompanyOverview({
+  data,
+  locale,
+  animationsEnabled = true,
+}: CompanyOverviewProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-12%" });
+  const motionActive = animationsEnabled && isInView;
 
   const headlineSegments =
     data.segments?.length > 0
@@ -49,18 +55,31 @@ export function CompanyOverview({ data, locale }: CompanyOverviewProps) {
 
       <Container>
         <h2 className="mb-10 max-w-4xl font-display text-[clamp(1.75rem,4.2vw,3.25rem)] leading-[1.25] font-light tracking-[-0.02em] md:mb-14">
-          <TypewriterText
-            segments={headlineSegments}
-            active={isInView}
-            duration={3.2}
-          />
+          {animationsEnabled ? (
+            <TypewriterText
+              segments={headlineSegments}
+              active={motionActive}
+              duration={3.2}
+            />
+          ) : (
+            headlineSegments.map((segment, index) => (
+              <span key={index}>
+                {segment.breakBefore ? <br /> : null}
+                <span className={segment.className}>{segment.text}</span>
+              </span>
+            ))
+          )}
         </h2>
 
         <div className="grid items-center gap-6 md:gap-8 lg:grid-cols-12 lg:gap-10">
           <motion.div
-            initial={{ opacity: 0, y: 28 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            initial={animationsEnabled ? { opacity: 0, y: 28 } : false}
+            animate={motionActive ? { opacity: 1, y: 0 } : animationsEnabled ? {} : { opacity: 1, y: 0 }}
+            transition={
+              animationsEnabled
+                ? { duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }
+                : { duration: 0 }
+            }
             className="relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-sm sm:max-w-md lg:col-span-4 lg:mx-0 lg:max-w-none"
           >
             <Image
@@ -75,23 +94,30 @@ export function CompanyOverview({ data, locale }: CompanyOverviewProps) {
 
           <motion.ul
             variants={staggerContainer}
-            initial="hidden"
-            animate={isInView ? "visible" : "hidden"}
+            initial={animationsEnabled ? "hidden" : false}
+            animate={motionActive ? "visible" : animationsEnabled ? "hidden" : false}
             className="flex flex-col lg:col-span-8"
           >
             {data.stats.map((stat, index) => (
-              <motion.li key={stat.id} variants={fadeInUp}>
+              <motion.li key={stat.id} variants={animationsEnabled ? fadeInUp : undefined}>
                 {index === 0 && (
                   <div className="h-px w-full bg-white/15" aria-hidden />
                 )}
                 <div className="flex items-center justify-between gap-5 py-4 md:gap-8 md:py-5">
                   <span className="shrink-0 font-display text-[clamp(2.75rem,7vw,6.375rem)] font-thin leading-none tracking-tight text-white">
-                    <AnimatedCounter
-                      value={stat.value}
-                      suffix={stat.suffix}
-                      active={isInView}
-                      duration={3.8}
-                    />
+                    {animationsEnabled ? (
+                      <AnimatedCounter
+                        value={stat.value}
+                        suffix={stat.suffix}
+                        active={motionActive}
+                        duration={3.8}
+                      />
+                    ) : (
+                      <>
+                        {stat.value}
+                        {stat.suffix}
+                      </>
+                    )}
                   </span>
                   <span className="max-w-[10rem] text-right font-body text-[1.125rem] font-medium leading-snug text-white md:max-w-[13rem]">
                     {pickLocalized(stat.label, locale)}

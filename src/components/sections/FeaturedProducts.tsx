@@ -17,6 +17,7 @@ import {
 interface FeaturedProductsProps {
   data: HomepageSettings["featuredProducts"];
   locale: string;
+  animationsEnabled?: boolean;
 }
 
 function shopCategoryHref(categoryId: string) {
@@ -37,7 +38,11 @@ function categoryCoverImage(categoryId: string, override?: string) {
   );
 }
 
-export function FeaturedProducts({ data, locale }: FeaturedProductsProps) {
+export function FeaturedProducts({
+  data,
+  locale,
+  animationsEnabled = true,
+}: FeaturedProductsProps) {
   const cards = data.items
     .map((item) => {
       const category = getCategoryById(item.categoryId);
@@ -50,23 +55,31 @@ export function FeaturedProducts({ data, locale }: FeaturedProductsProps) {
         item.description != null
           ? pickLocalized(item.description, locale)
           : null;
+      const ctaLabel =
+        item.ctaLabel != null
+          ? pickLocalized(item.ctaLabel, locale)
+          : "View category";
       return {
         item,
         category,
         title,
         description,
+        ctaLabel,
         image: categoryCoverImage(item.categoryId, item.image),
-        href: shopCategoryHref(item.categoryId),
+        href: item.ctaHref || shopCategoryHref(item.categoryId),
       };
     })
     .filter((card): card is NonNullable<typeof card> => card != null);
+
+  const motionInitial = animationsEnabled ? "hidden" : false;
+  const motionWhileInView = animationsEnabled ? "visible" : undefined;
 
   return (
     <section className="bg-oboya-soft-white py-[var(--section-y)]">
       <Container>
         <motion.div
-          initial="hidden"
-          whileInView="visible"
+          initial={motionInitial}
+          whileInView={motionWhileInView}
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeInUp}
           className="mb-10 md:mb-14"
@@ -84,12 +97,12 @@ export function FeaturedProducts({ data, locale }: FeaturedProductsProps) {
 
         <motion.div
           variants={staggerContainer}
-          initial="hidden"
-          whileInView="visible"
+          initial={motionInitial}
+          whileInView={motionWhileInView}
           viewport={{ once: true, margin: "-80px" }}
           className="grid gap-6 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8"
         >
-          {cards.map(({ item, title, description, image, href }) => (
+          {cards.map(({ item, title, description, ctaLabel, image, href }) => (
             <motion.article
               key={item.id}
               variants={fadeInUp}
@@ -127,7 +140,7 @@ export function FeaturedProducts({ data, locale }: FeaturedProductsProps) {
                       "mt-5 border-oboya-green bg-transparent text-oboya-blue-dark hover:bg-oboya-green hover:text-white",
                   })}
                 >
-                  View category
+                  {ctaLabel}
                   <ArrowRight className="size-3.5" aria-hidden />
                 </Link>
               </div>
@@ -136,8 +149,8 @@ export function FeaturedProducts({ data, locale }: FeaturedProductsProps) {
         </motion.div>
 
         <motion.div
-          initial="hidden"
-          whileInView="visible"
+          initial={motionInitial}
+          whileInView={motionWhileInView}
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeInUp}
           className="mt-12 flex justify-center md:mt-16"

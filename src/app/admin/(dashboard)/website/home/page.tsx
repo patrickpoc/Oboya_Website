@@ -1,5 +1,5 @@
-import { HomepageAdminEditor } from "@/components/admin/homepage/HomepageAdminEditor";
+import { HomepageHub } from "@/components/admin/homepage/HomepageHub";
 
 export default function HomePageAdmin() {
-  return <HomepageAdminEditor />;
+  return <HomepageHub />;
 }

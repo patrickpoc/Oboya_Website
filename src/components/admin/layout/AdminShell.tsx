@@ -3,6 +3,7 @@
 import { AdminProvider } from "@/contexts/AdminContext";
 import { AdminSidebar } from "@/components/admin/layout/AdminSidebar";
 import { AdminTopbar } from "@/components/admin/layout/AdminTopbar";
+import { AdminPageTransition } from "@/components/admin/layout/AdminPageTransition";
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
@@ -11,7 +12,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <AdminSidebar />
         <div className="pl-64">
           <AdminTopbar />
-          <main className="p-6">{children}</main>
+          <main className="p-6">
+            <AdminPageTransition>{children}</AdminPageTransition>
+          </main>
         </div>
       </div>
     </AdminProvider>

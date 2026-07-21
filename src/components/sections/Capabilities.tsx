@@ -13,15 +13,23 @@ import { cn } from "@/lib/utils";
 interface CapabilitiesProps {
   data: HomepageSettings["capabilities"];
   locale: string;
+  animationsEnabled?: boolean;
 }
 
-export function Capabilities({ data, locale }: CapabilitiesProps) {
+export function Capabilities({
+  data,
+  locale,
+  animationsEnabled = true,
+}: CapabilitiesProps) {
+  const motionInitial = animationsEnabled ? "hidden" : false;
+  const motionWhileInView = animationsEnabled ? "visible" : undefined;
+
   return (
     <section className="bg-oboya-soft-white py-[var(--section-y)]">
       <Container>
         <motion.div
-          initial="hidden"
-          whileInView="visible"
+          initial={motionInitial}
+          whileInView={motionWhileInView}
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeInUp}
           className="mb-10 md:mb-14"
@@ -39,8 +47,8 @@ export function Capabilities({ data, locale }: CapabilitiesProps) {
 
         <motion.div
           variants={staggerContainer}
-          initial="hidden"
-          whileInView="visible"
+          initial={motionInitial}
+          whileInView={motionWhileInView}
           viewport={{ once: true, margin: "-80px" }}
           className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3"
         >
@@ -83,8 +91,8 @@ export function Capabilities({ data, locale }: CapabilitiesProps) {
         </motion.div>
 
         <motion.div
-          initial="hidden"
-          whileInView="visible"
+          initial={motionInitial}
+          whileInView={motionWhileInView}
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeInUp}
           className="mt-10 flex justify-center md:mt-14"

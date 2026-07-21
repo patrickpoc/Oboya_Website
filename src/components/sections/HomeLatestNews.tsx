@@ -14,17 +14,25 @@ interface HomeLatestNewsProps {
   data: HomepageSettings["latestNews"];
   posts: CmsBlogPost[];
   locale: string;
+  animationsEnabled?: boolean;
 }
 
-export function HomeLatestNews({ data, posts, locale }: HomeLatestNewsProps) {
+export function HomeLatestNews({
+  data,
+  posts,
+  locale,
+  animationsEnabled = true,
+}: HomeLatestNewsProps) {
   const items = posts.slice(0, data.postCount);
+  const motionInitial = animationsEnabled ? "hidden" : false;
+  const motionWhileInView = animationsEnabled ? "visible" : undefined;
 
   return (
     <section className="bg-oboya-blue-dark py-12 md:py-16 lg:py-20">
       <Container>
         <motion.div
-          initial="hidden"
-          whileInView="visible"
+          initial={motionInitial}
+          whileInView={motionWhileInView}
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeInUp}
           className="mb-7 md:mb-9"
@@ -42,8 +50,8 @@ export function HomeLatestNews({ data, posts, locale }: HomeLatestNewsProps) {
 
         <motion.div
           variants={staggerContainer}
-          initial="hidden"
-          whileInView="visible"
+          initial={motionInitial}
+          whileInView={motionWhileInView}
           viewport={{ once: true, margin: "-80px" }}
           className="grid gap-5 md:grid-cols-2 md:gap-6"
         >

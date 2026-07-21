@@ -14,10 +14,10 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import {
   getBlogPostById,
   saveBlogPost,
-  blogAuthors,
   getBlogCategories,
   type CmsBlogPost,
 } from "@/lib/cms/repositories/blog-repository";
+import { getBlogAuthors } from "@/lib/cms/repositories/blog-authors-repository";
 import type { CmsLocale, CmsStatus } from "@/lib/cms/types";
 
 export default function BlogPostEditPage() {
@@ -26,6 +26,7 @@ export default function BlogPostEditPage() {
   const id = params.id as string;
   const isNew = id === "new";
   const categories = getBlogCategories();
+  const authors = getBlogAuthors();
 
   const [post, setPost] = useState<CmsBlogPost>(() => {
     if (isNew) {
@@ -35,7 +36,7 @@ export default function BlogPostEditPage() {
         title: emptyLocalizedString(),
         excerpt: emptyLocalizedString(),
         body: emptyLocalizedString(),
-        author: blogAuthors[0].name,
+        author: authors[0]?.name ?? "",
         categoryId: categories[0]?.id ?? "general",
         featuredImage: "",
         relatedPostIds: [],
@@ -53,8 +54,26 @@ export default function BlogPostEditPage() {
     return <p>Post not found</p>;
   }
 
-  const handleSave = () => {
-    saveBlogPost(post);
+  const handleSave = async () => {
+    const slug = post.slug.trim() || post.title.en.toLowerCase().replace(/\s+/g, "-");
+    const toSave: CmsBlogPost = {
+      ...post,
+      slug,
+      publishedAt:
+        post.status === "published" && !post.publishedAt
+          ? new Date().toISOString()
+          : post.publishedAt,
+    };
+    saveBlogPost(toSave);
+    try {
+      await fetch("/api/cms/blog-posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(toSave),
+      });
+    } catch {
+      // in-memory fallback
+    }
     toast.success("Post saved");
     router.push("/admin/blog/posts");
   };
@@ -147,6 +166,7 @@ export default function BlogPostEditPage() {
                 <Input
                   value={post.slug}
                   onChange={(e) => setPost({ ...post, slug: e.target.value })}
+                  placeholder="auto-generated-from-title-if-empty"
                 />
               </div>
               <div className="space-y-1.5">
@@ -208,7 +228,7 @@ export default function BlogPostEditPage() {
                   onChange={(e) => setPost({ ...post, author: e.target.value })}
                   className="h-8 w-full rounded-lg border border-input px-2.5 text-sm"
                 >
-                  {blogAuthors.map((a) => (
+                  {authors.map((a) => (
                     <option key={a.id} value={a.name}>
                       {a.name}
                     </option>

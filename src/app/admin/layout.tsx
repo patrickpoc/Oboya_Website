@@ -5,8 +5,6 @@ import { Toaster } from "sonner";
 import { NextIntlClientProvider } from "next-intl";
 import enMessages from "@/../messages/en.json";
 
-export const dynamic = "force-dynamic";
-
 export default function AdminLayout({
   children,
 }: {

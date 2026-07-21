@@ -12,6 +12,10 @@ import { getNewsPageSettings } from "@/lib/cms/repositories/news-page-repository
 import { getHomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { getAboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
 import { getCaseStudies, getCaseStudyById } from "@/lib/cms/repositories/case-studies-repository";
+import {
+  getCategories as getFaqCategories,
+  getFaqs,
+} from "@/lib/cms/repositories/faqs-repository";
 import { siteConfig } from "@/constants/site";
 
 export async function readMapDataForSite() {
@@ -71,4 +75,12 @@ export function readCaseStudyBySlug(slug: string) {
 
 export function readSiteSettings() {
   return siteConfig;
+}
+
+export function readFaqCategories() {
+  return getFaqCategories();
+}
+
+export function readFaqs() {
+  return getFaqs().filter((f) => f.status === "published");
 }

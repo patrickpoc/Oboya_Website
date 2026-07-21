@@ -8,10 +8,11 @@ export const siteConfig = {
   company: {
     address: "Global Headquarters",
     email: "info@oboya.cc",
-    phone: "+1 (000) 000-0000",
+    phone: "+86 18669728621",
   },
   social: {
     linkedin: "https://linkedin.com/company/oboya",
     facebook: "https://facebook.com/oboya",
+    instagram: "https://instagram.com/oboya",
   },
 } as const;

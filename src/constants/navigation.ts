@@ -13,6 +13,7 @@ export function getMainNavigation(t: Translator): NavItem[] {
       href: "/case-studies",
     },
     { label: t("nav.blog"), href: "/blog" },
+    { label: t("nav.faqs"), href: "/faqs" },
     { label: t("nav.catalogue"), href: "/catalogue" },
     { label: t("nav.shop"), href: "/shop" },
   ];
