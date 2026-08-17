@@ -97,10 +97,17 @@ export default async function InnerPage({ params }: PageProps) {
     );
   }
 
+  if (config.template === "faqs") {
+    return (
+      <SiteLayout>
+        <FaqsPageContent locale={locale} />
+      </SiteLayout>
+    );
+  }
+
   return (
     <SiteLayout>
       <InnerPageHero eyebrow={eyebrow} title={title} description={description} />
-      {config.template === "faqs" && <FaqsPageContent locale={locale} />}
       {config.template === "workWithUs" && <WorkWithUsPageContent />}
       {config.template === "legal" && <LegalPageContent />}
       {config.template === "listing" && <PageListing items={children} />}

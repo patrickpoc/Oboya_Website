@@ -7,6 +7,7 @@ import { HomepageSectionShell } from "./HomepageSectionShell";
 import { HeroSectionEditor } from "./sections/HeroSectionEditor";
 import { CompanyOverviewSectionEditor } from "./sections/CompanyOverviewSectionEditor";
 import { CapabilitiesSectionEditor } from "./sections/CapabilitiesSectionEditor";
+import { BusinessSolutionsSectionEditor } from "./sections/BusinessSolutionsSectionEditor";
 import { GlobalPresenceSectionEditor } from "./sections/GlobalPresenceSectionEditor";
 import { TestimonialsSectionEditor } from "./sections/TestimonialsSectionEditor";
 import { FeaturedCategoriesSectionEditor } from "./sections/FeaturedCategoriesSectionEditor";
@@ -18,6 +19,7 @@ const SECTION_EDITORS: Record<HomepageSectionSlug, ComponentType<HomepageSection
   hero: HeroSectionEditor,
   companyOverview: CompanyOverviewSectionEditor,
   capabilities: CapabilitiesSectionEditor,
+  businessSolutions: BusinessSolutionsSectionEditor,
   globalPresence: GlobalPresenceSectionEditor,
   testimonials: TestimonialsSectionEditor,
   featuredProducts: FeaturedCategoriesSectionEditor,

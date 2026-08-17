@@ -1,3 +1,4 @@
+import { BusinessSolutions } from "@/components/sections/BusinessSolutions";
 import { Capabilities } from "@/components/sections/Capabilities";
 import { CompanyOverview } from "@/components/sections/CompanyOverview";
 import { FeaturedProducts } from "@/components/sections/FeaturedProducts";
@@ -36,6 +37,13 @@ export function HomePageContent({ locale, locations, mapAlt }: HomePageContentPr
       {homepage.sections.capabilities.enabled && (
         <Capabilities
           data={homepage.capabilities}
+          locale={locale}
+          animationsEnabled={animationsEnabled}
+        />
+      )}
+      {homepage.sections.businessSolutions.enabled && (
+        <BusinessSolutions
+          data={homepage.businessSolutions}
           locale={locale}
           animationsEnabled={animationsEnabled}
         />

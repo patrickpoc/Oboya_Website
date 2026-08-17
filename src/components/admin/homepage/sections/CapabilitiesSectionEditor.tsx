@@ -32,7 +32,7 @@ export function CapabilitiesSectionEditor({
   return (
     <Card className="max-w-4xl">
       <CardHeader>
-        <CardTitle>Capabilities</CardTitle>
+        <CardTitle>Why Oboya Horticulture</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <LocalizedInput
@@ -73,7 +73,7 @@ export function CapabilitiesSectionEditor({
         {section.items.map((item, index) => (
           <div key={item.id} className="space-y-3 rounded-lg border p-4">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-medium">Item {index + 1}</p>
+              <p className="text-sm font-medium">Slide {index + 1}</p>
               <Button
                 type="button"
                 variant="outline"

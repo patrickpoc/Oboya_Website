@@ -15,7 +15,7 @@ interface AboutHonorsProps {
 
 export function AboutHonors({ data, locale }: AboutHonorsProps) {
   return (
-    <section className="bg-white pb-[clamp(5.5rem,12vw,9.5rem)] pt-[clamp(2rem,5vw,4rem)]">
+    <section className="border-t border-oboya-green/35 bg-white pb-[clamp(5.5rem,12vw,9.5rem)] pt-[clamp(4rem,8vw,6rem)]">
       <Container>
         <motion.div
           initial="hidden"
@@ -26,7 +26,7 @@ export function AboutHonors({ data, locale }: AboutHonorsProps) {
         >
           <motion.h2
             variants={fadeInUp}
-            className="text-center font-display text-[clamp(1.75rem,3.2vw,2.5rem)] font-normal tracking-[-0.01em] text-oboya-blue/70"
+            className="text-center font-display text-[clamp(1.75rem,3.2vw,2.5rem)] font-light tracking-[-0.01em] text-oboya-blue-dark"
           >
             {pickLocalized(data.title, locale)}
           </motion.h2>

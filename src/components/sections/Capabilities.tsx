@@ -1,14 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { useCallback, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { Link } from "@/i18n/navigation";
-import { buttonVariants } from "@/components/ui/button";
-import { fadeInUp, staggerContainer } from "@/lib/animations";
+import { fadeInUp } from "@/lib/animations";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
-import { cn } from "@/lib/utils";
 
 interface CapabilitiesProps {
   data: HomepageSettings["capabilities"];
@@ -21,94 +20,130 @@ export function Capabilities({
   locale,
   animationsEnabled = true,
 }: CapabilitiesProps) {
-  const motionInitial = animationsEnabled ? "hidden" : false;
-  const motionWhileInView = animationsEnabled ? "visible" : undefined;
+  const items = data.items;
+  const [index, setIndex] = useState(0);
+  const count = items.length;
+  const slide = items[index];
+
+  const go = useCallback(
+    (dir: -1 | 1) => {
+      if (count < 1) return;
+      setIndex((prev) => (prev + dir + count) % count);
+    },
+    [count]
+  );
+
+  if (!slide) return null;
+
+  const title = pickLocalized(slide.title, locale);
+  const description = pickLocalized(slide.description, locale);
 
   return (
     <section className="bg-oboya-soft-white py-[var(--section-y)]">
       <Container>
         <motion.div
-          initial={motionInitial}
-          whileInView={motionWhileInView}
+          initial={animationsEnabled ? "hidden" : false}
+          whileInView={animationsEnabled ? "visible" : undefined}
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeInUp}
-          className="mb-10 md:mb-14"
+          className="mb-8 md:mb-10"
         >
-          <div className="mb-6 flex items-center gap-4">
+          <div className="mb-5 flex items-center gap-4">
             <p className="shrink-0 text-sm font-semibold tracking-wide text-oboya-blue-dark">
               {pickLocalized(data.eyebrow, locale)}
             </p>
-            <div className="h-px flex-1 bg-oboya-blue-dark/80" aria-hidden />
+            <div className="h-px flex-1 bg-oboya-blue-dark/25" aria-hidden />
           </div>
-          <h2 className="max-w-4xl font-display text-[clamp(1.45rem,2.6vw,2.15rem)] leading-[1.35] font-black tracking-tight text-oboya-blue-dark text-balance">
-            {pickLocalized(data.title, locale)}
-          </h2>
         </motion.div>
 
-        <motion.div
-          variants={staggerContainer}
-          initial={motionInitial}
-          whileInView={motionWhileInView}
-          viewport={{ once: true, margin: "-80px" }}
-          className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3"
-        >
-          {data.items.map((item) => {
-            const title = pickLocalized(item.title, locale);
-            const description = pickLocalized(item.description, locale);
-
-            return (
-              <motion.article key={item.id} variants={fadeInUp}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "group relative block aspect-[302/290] overflow-hidden",
-                    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oboya-blue-dark"
-                  )}
+        <div className="relative overflow-hidden rounded-2xl">
+          <div className="relative aspect-[16/10] min-h-[20rem] w-full sm:aspect-[21/9] sm:min-h-[24rem]">
+            {/* Crossfade: all slides stacked — outgoing image stays until new is opaque */}
+            {items.map((item, i) => {
+              const active = i === index;
+              return (
+                <motion.div
+                  key={item.id}
+                  className="absolute inset-0"
+                  initial={false}
+                  animate={{ opacity: active ? 1 : 0 }}
+                  transition={
+                    animationsEnabled
+                      ? { duration: 0.7, ease: [0.22, 1, 0.36, 1] }
+                      : { duration: 0 }
+                  }
+                  style={{ zIndex: active ? 1 : 0 }}
+                  aria-hidden={!active}
                 >
                   <Image
                     src={item.image}
-                    alt={title}
+                    alt={pickLocalized(item.title, locale)}
                     fill
-                    className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover"
+                    sizes="100vw"
+                    priority={i === 0}
                   />
                   <div
-                    className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/10 transition-opacity duration-300 group-hover:from-black/85"
+                    className="absolute inset-0 bg-gradient-to-br from-black/55 via-black/25 to-black/45"
                     aria-hidden
                   />
-                  <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end p-4 md:p-5">
-                    <h3 className="text-sm font-bold text-white md:text-[0.95rem]">
-                      {title}
-                    </h3>
-                    <p className="mt-1.5 max-w-[95%] text-xs leading-snug text-white/95 md:text-sm md:leading-snug">
-                      {description}
-                    </p>
-                  </div>
-                </Link>
-              </motion.article>
-            );
-          })}
-        </motion.div>
-
-        <motion.div
-          initial={motionInitial}
-          whileInView={motionWhileInView}
-          viewport={{ once: true, margin: "-80px" }}
-          variants={fadeInUp}
-          className="mt-10 flex justify-center md:mt-14"
-        >
-          <Link
-            href={data.ctaHref}
-            className={buttonVariants({
-              size: "cta",
-              variant: "outline",
-              className:
-                "border-oboya-blue-dark bg-transparent text-oboya-blue-dark hover:bg-oboya-blue-dark hover:text-white",
+                </motion.div>
+              );
             })}
-          >
-            {pickLocalized(data.ctaLabel, locale)}
-          </Link>
-        </motion.div>
+
+            {/* Title — top left */}
+            <div className="absolute top-0 left-0 z-10 max-w-[min(100%,28rem)] p-6 sm:p-8 md:max-w-lg md:p-10 lg:p-12">
+              <AnimatePresence mode="wait">
+                <motion.h2
+                  key={`${slide.id}-title`}
+                  initial={animationsEnabled ? { opacity: 0, y: 8 } : false}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={animationsEnabled ? { opacity: 0, y: -6 } : undefined}
+                  transition={{ duration: 0.35 }}
+                  className="font-display text-[clamp(1.65rem,3.8vw,2.85rem)] font-bold leading-tight tracking-tight text-white text-balance"
+                >
+                  {title}
+                </motion.h2>
+              </AnimatePresence>
+            </div>
+
+            {/* Description — bottom / mid-right */}
+            <div className="absolute right-0 bottom-16 z-10 max-w-[min(100%,26rem)] p-6 text-right sm:bottom-20 sm:p-8 md:bottom-24 md:max-w-md md:p-10 lg:bottom-28 lg:p-12">
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={`${slide.id}-desc`}
+                  initial={animationsEnabled ? { opacity: 0, y: 8 } : false}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={animationsEnabled ? { opacity: 0, y: -6 } : undefined}
+                  transition={{ duration: 0.35, delay: 0.04 }}
+                  className="font-body text-sm leading-relaxed text-white/90 sm:text-base md:text-[1.0625rem] md:leading-[1.65]"
+                >
+                  {description}
+                </motion.p>
+              </AnimatePresence>
+            </div>
+
+            {/* Prev outline / Next solid — bottom right */}
+            <div className="absolute right-4 bottom-4 z-20 flex items-center gap-2.5 sm:right-6 sm:bottom-6 md:right-8 md:bottom-8">
+              <button
+                type="button"
+                onClick={() => go(-1)}
+                aria-label="Previous slide"
+                className="flex size-10 items-center justify-center rounded-full border border-white/70 bg-transparent text-white transition-colors hover:bg-white/10 sm:size-11"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => go(1)}
+                aria-label="Next slide"
+                className="flex size-10 items-center justify-center rounded-full bg-white text-oboya-blue-dark transition-colors hover:bg-white/90 sm:size-11"
+              >
+                <ChevronRight className="size-4" />
+              </button>
+            </div>
+          </div>
+        </div>
       </Container>
     </section>
   );

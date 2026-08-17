@@ -739,7 +739,7 @@
   },
   "faqsPage": {
     "intro": "Encuentre respuestas rápidas sobre productos, logística, cotizaciones y soporte.",
-    "searchPlaceholder": "Buscar en las FAQs por palabra clave…",
+    "searchPlaceholder": "Buscar FAQs por palabra clave o términos similares…",
     "noResults": "Ninguna FAQ coincide con su búsqueda. Pruebe otras palabras clave o explore por categoría.",
     "categories": {
       "products": "Products",
@@ -794,7 +794,9 @@
         "question": "Which languages are supported?",
         "answer": "Our site is available in English, Portuguese, Spanish, and Chinese."
       }
-    }
+    },
+    "heroTitle": "FAQ",
+    "heroSubtitle": "Preguntas frecuentes sobre nuestros productos y servicios"
   },
   "workWithUsPage": {
     "intro": "Build your career with a global horticulture company focused on innovation, sustainability, and local impact.",

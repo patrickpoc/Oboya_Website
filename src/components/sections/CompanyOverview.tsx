@@ -1,12 +1,8 @@
 "use client";
 
-import Image from "next/image";
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
 import { Container } from "@/components/ui/container";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { TypewriterText } from "@/components/ui/typewriter-text";
-import { fadeInUp, staggerContainer } from "@/lib/animations";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
 
@@ -21,10 +17,6 @@ export function CompanyOverview({
   locale,
   animationsEnabled = true,
 }: CompanyOverviewProps) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, margin: "-12%" });
-  const motionActive = animationsEnabled && isInView;
-
   const headlineSegments =
     data.segments?.length > 0
       ? data.segments.map((segment, index) => ({
@@ -40,26 +32,23 @@ export function CompanyOverview({
             breakBefore: false,
           },
           {
-            text: pickLocalized(data.headlineWhite, locale),
+            text: ` ${pickLocalized(data.headlineWhite, locale)}`,
             className: "text-white",
-            breakBefore: true,
+            breakBefore: false,
           },
         ];
 
-  return (
-    <section
-      ref={sectionRef}
-      className="relative bg-oboya-blue-dark pb-16 pt-8 md:pb-20 md:pt-10"
-    >
-      <div className="absolute inset-x-0 top-0 h-px bg-white/15" aria-hidden />
+  const stats = data.stats.slice(0, 3);
 
+  return (
+    <section className="relative bg-oboya-blue-dark py-14 md:py-16 lg:py-20">
       <Container>
-        <h2 className="mb-10 max-w-4xl font-display text-[clamp(1.75rem,4.2vw,3.25rem)] leading-[1.25] font-light tracking-[-0.02em] md:mb-14">
+        <h2 className="mx-auto max-w-4xl text-center font-display text-[clamp(1.55rem,3.4vw,2.65rem)] leading-[1.28] font-light tracking-[-0.02em]">
           {animationsEnabled ? (
             <TypewriterText
               segments={headlineSegments}
-              active={motionActive}
-              duration={3.2}
+              active
+              duration={3}
             />
           ) : (
             headlineSegments.map((segment, index) => (
@@ -71,65 +60,36 @@ export function CompanyOverview({
           )}
         </h2>
 
-        <div className="grid items-center gap-6 md:gap-8 lg:grid-cols-12 lg:gap-10">
-          <motion.div
-            initial={animationsEnabled ? { opacity: 0, y: 28 } : false}
-            animate={motionActive ? { opacity: 1, y: 0 } : animationsEnabled ? {} : { opacity: 1, y: 0 }}
-            transition={
-              animationsEnabled
-                ? { duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }
-                : { duration: 0 }
-            }
-            className="relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-sm sm:max-w-md lg:col-span-4 lg:mx-0 lg:max-w-none"
-          >
-            <Image
-              src={data.image}
-              alt={pickLocalized(data.imageAlt, locale)}
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 90vw, 280px"
-              priority
-            />
-          </motion.div>
-
-          <motion.ul
-            variants={staggerContainer}
-            initial={animationsEnabled ? "hidden" : false}
-            animate={motionActive ? "visible" : animationsEnabled ? "hidden" : false}
-            className="flex flex-col lg:col-span-8"
-          >
-            {data.stats.map((stat, index) => (
-              <motion.li key={stat.id} variants={animationsEnabled ? fadeInUp : undefined}>
-                {index === 0 && (
-                  <div className="h-px w-full bg-white/15" aria-hidden />
-                )}
-                <div className="flex items-center justify-between gap-5 py-4 md:gap-8 md:py-5">
-                  <span className="shrink-0 font-display text-[clamp(2.75rem,7vw,6.375rem)] font-thin leading-none tracking-tight text-white">
-                    {animationsEnabled ? (
-                      <AnimatedCounter
-                        value={stat.value}
-                        suffix={stat.suffix}
-                        active={motionActive}
-                        duration={3.8}
-                      />
-                    ) : (
-                      <>
-                        {stat.value}
-                        {stat.suffix}
-                      </>
-                    )}
-                  </span>
-                  <span className="max-w-[10rem] text-right font-body text-[1.125rem] font-medium leading-snug text-white md:max-w-[13rem]">
-                    {pickLocalized(stat.label, locale)}
-                  </span>
-                </div>
-                {index < data.stats.length - 1 && (
-                  <div className="h-px w-full bg-white/15" aria-hidden />
-                )}
-              </motion.li>
-            ))}
-          </motion.ul>
-        </div>
+        <ul className="mt-12 flex flex-col md:mt-14">
+          {stats.map((stat, index) => (
+            <li key={stat.id}>
+              {index === 0 ? (
+                <div className="h-px w-full bg-white/25" aria-hidden />
+              ) : null}
+              <div className="flex items-center justify-between gap-8 py-5 md:gap-12 md:py-6 lg:py-7">
+                <span className="shrink-0 font-display text-[clamp(3rem,8vw,6.5rem)] font-thin leading-none tracking-tight text-white">
+                  {animationsEnabled ? (
+                    <AnimatedCounter
+                      value={stat.value}
+                      suffix={stat.suffix}
+                      active
+                      duration={2.2}
+                    />
+                  ) : (
+                    <>
+                      {stat.value}
+                      {stat.suffix}
+                    </>
+                  )}
+                </span>
+                <span className="max-w-[12rem] text-right font-body text-base font-semibold leading-snug text-white sm:max-w-[16rem] sm:text-lg md:max-w-[20rem] md:text-xl lg:max-w-[24rem] lg:text-2xl">
+                  {pickLocalized(stat.label, locale)}
+                </span>
+              </div>
+              <div className="h-px w-full bg-white/25" aria-hidden />
+            </li>
+          ))}
+        </ul>
       </Container>
     </section>
   );

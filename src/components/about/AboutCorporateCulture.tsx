@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Container } from "@/components/ui/container";
+import { Link } from "@/i18n/navigation";
 import { fadeInUp } from "@/lib/animations";
 import { pickLocalized } from "@/lib/cms/utils";
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
@@ -17,28 +18,38 @@ export function AboutCorporateCulture({
   data,
   locale,
 }: AboutCorporateCultureProps) {
+  const eyebrow = pickLocalized(data.eyebrow, locale).trim();
+
   return (
     <section className="bg-white py-[clamp(5.5rem,12vw,10rem)]">
       <Container>
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          variants={fadeInUp}
-          className="mb-14 md:mb-20"
-        >
-          <p className="font-body text-[0.8125rem] font-medium tracking-[0.04em] text-oboya-green md:text-sm">
-            {pickLocalized(data.eyebrow, locale)}
-          </p>
-          <div
-            className="mt-2.5 h-px w-full bg-oboya-green/55"
-            aria-hidden
-          />
-        </motion.div>
+        {eyebrow ? (
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={fadeInUp}
+            className="mb-14 md:mb-20"
+          >
+            <p className="font-body text-[0.8125rem] font-medium tracking-[0.04em] text-oboya-green md:text-sm">
+              {eyebrow}
+            </p>
+            <div
+              className="mt-2.5 h-px w-full bg-oboya-green/55"
+              aria-hidden
+            />
+          </motion.div>
+        ) : null}
 
         <div className="flex flex-col gap-[clamp(4.5rem,11vw,8.5rem)]">
           {data.items.map((item) => {
             const imageLeft = item.imageSide === "left";
+            const ctaLabel =
+              item.ctaLabel != null
+                ? pickLocalized(item.ctaLabel, locale)
+                : "Learn More";
+            const href = item.ctaHref || "/solutions";
+
             return (
               <motion.article
                 key={item.id}
@@ -46,20 +57,26 @@ export function AboutCorporateCulture({
                 whileInView="visible"
                 viewport={{ once: true, margin: "-80px" }}
                 variants={fadeInUp}
-                className="grid items-center gap-10 lg:grid-cols-12 lg:gap-14"
+                className="grid items-stretch gap-10 lg:grid-cols-12 lg:gap-14"
               >
                 <div
                   className={cn(
-                    "lg:col-span-5",
+                    "flex flex-col lg:col-span-5",
                     imageLeft ? "lg:order-2 lg:col-start-8" : "lg:col-start-1"
                   )}
                 >
-                  <h3 className="max-w-sm font-display text-[clamp(1.5rem,2.6vw,2.125rem)] font-semibold leading-[1.2] tracking-[-0.02em] text-oboya-blue-dark">
+                  <h3 className="min-h-[2.4em] max-w-sm font-display text-[clamp(1.5rem,2.6vw,2.125rem)] font-semibold leading-[1.2] tracking-[-0.02em] text-oboya-blue-dark">
                     {pickLocalized(item.title, locale)}
                   </h3>
-                  <p className="mt-5 max-w-md font-body text-[0.9375rem] leading-[1.7] text-oboya-blue-dark/55 md:text-base">
+                  <p className="mt-5 min-h-[5.1em] max-w-md font-body text-[0.9375rem] leading-[1.7] text-oboya-blue-dark/55 md:text-base">
                     {pickLocalized(item.description, locale)}
                   </p>
+                  <Link
+                    href={href}
+                    className="mt-auto inline-flex pt-8 text-sm font-semibold tracking-[0.08em] text-oboya-blue uppercase transition-colors hover:text-oboya-blue-dark"
+                  >
+                    {ctaLabel} →
+                  </Link>
                 </div>
 
                 <div
@@ -70,7 +87,6 @@ export function AboutCorporateCulture({
                       : "lg:col-start-7"
                   )}
                 >
-                  {/* Offset geometric block behind image (reference layered depth) */}
                   <div
                     className={cn(
                       "absolute inset-0 bg-oboya-soft-white",

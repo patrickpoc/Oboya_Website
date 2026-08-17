@@ -38,7 +38,7 @@ export default function AboutPageAdmin() {
       <div>
         <AdminPageHeader
           title="About Us"
-          description="CMS content for /about — hero, timeline, impact, people, culture and honors."
+          description="CMS content for /about — hero, timeline, culture, mission, vision, values and honors."
         />
 
         <div className="grid max-w-3xl gap-6">
@@ -49,12 +49,13 @@ export default function AboutPageAdmin() {
             <CardContent className="space-y-3 text-sm text-muted-foreground">
               <p>
                 Timeline events: {settings.timeline.events.length} · Culture
-                items: {settings.culture.items.length} · Honors:{" "}
+                items: {settings.culture.items.length} · Values:{" "}
+                {settings.values.items.length} · Honors:{" "}
                 {settings.honors.items.length}
               </p>
               <p>
-                Impact stats: {settings.impact.stats.length} · People:{" "}
-                {settings.people.items.length}
+                Mission images: {settings.mission.images.length} · Vision
+                images: {settings.vision.images.length}
               </p>
               <Button type="button" onClick={handleSave}>
                 Save settings

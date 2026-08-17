@@ -2,31 +2,13 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import {
-  Cherry,
-  FlaskConical,
-  Flower2,
-  Sprout,
-  Truck,
-} from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
+import { buttonVariants } from "@/components/ui/button";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { cn } from "@/lib/utils";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
-
-const pillIcons = {
-  logistics: Truck,
-  research: FlaskConical,
-  plants: Sprout,
-  vegetable: Sprout,
-  flower: Flower2,
-  fruit: Cherry,
-} as const;
-
-const pillGlass =
-  "border border-white/30 bg-white/15 shadow-[0_12px_48px_rgb(0_0_0/25%)] backdrop-blur-2xl";
 
 interface HeroProps {
   data: HomepageSettings["hero"];
@@ -42,13 +24,15 @@ export function Hero({
   const title = pickLocalized(data.title, locale);
   const eyebrow = pickLocalized(data.eyebrow, locale);
   const description = pickLocalized(data.description, locale);
-  // Exact mock break: "Your one-stop partner" / "for horticulture!"
   const titleLines = title.includes("\n")
     ? title.split("\n")
     : (() => {
         const match = title.match(/^(.*?partner)\s+(for\s+horticulture!?)$/i);
         return match ? [match[1], match[2]] : [title];
       })();
+
+  const primaryLabel = pickLocalized(data.ctaPrimary.label, locale);
+  const secondaryLabel = pickLocalized(data.ctaSecondary.label, locale);
 
   return (
     <section
@@ -64,12 +48,12 @@ export function Hero({
           className="object-cover object-[center_40%]"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/20 to-oboya-blue-dark/90" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/25 to-oboya-blue-dark/92" />
         <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-b from-transparent to-oboya-blue-dark" />
       </div>
 
       <Container className="relative z-10 flex flex-1 flex-col pt-20 md:pt-24">
-        <div className="flex flex-1 flex-col items-center justify-center px-2 pb-6 pt-8 text-center md:pb-10">
+        <div className="flex flex-1 flex-col items-center justify-center px-2 pb-16 pt-8 text-center md:pb-20">
           <motion.div
             variants={staggerContainer}
             initial={animationsEnabled ? "hidden" : false}
@@ -79,7 +63,7 @@ export function Hero({
             {eyebrow ? (
               <motion.p
                 variants={fadeInUp}
-                className="mb-4 text-sm font-semibold tracking-[0.2em] text-oboya-yellow-light uppercase md:mb-5"
+                className="mb-4 text-sm font-semibold tracking-[0.18em] text-[#c9b85c] uppercase md:mb-5 md:text-[0.9375rem]"
               >
                 {eyebrow}
               </motion.p>
@@ -99,111 +83,40 @@ export function Hero({
             {description ? (
               <motion.p
                 variants={fadeInUp}
-                className="mt-5 max-w-2xl font-body text-[clamp(0.95rem,1.6vw,1.125rem)] leading-relaxed font-normal text-white/90 md:mt-6"
+                className="mt-5 max-w-2xl font-body text-[clamp(0.95rem,1.6vw,1.125rem)] leading-relaxed font-normal text-white/95 md:mt-6"
               >
                 {description}
               </motion.p>
             ) : null}
+
+            <motion.div
+              variants={fadeInUp}
+              className="mt-8 flex w-full flex-col items-stretch justify-center gap-3 sm:mt-10 sm:w-auto sm:flex-row sm:items-center"
+            >
+              <Link
+                href={data.ctaPrimary.href || "/contact"}
+                className={cn(
+                  buttonVariants({ size: "cta" }),
+                  "rounded-full bg-oboya-green px-8 text-white hover:bg-oboya-green/90"
+                )}
+              >
+                {primaryLabel}
+                <span aria-hidden className="ml-1">
+                  →
+                </span>
+              </Link>
+              <Link
+                href={data.ctaSecondary.href || "/solutions"}
+                className={cn(
+                  buttonVariants({ size: "cta" }),
+                  "rounded-full bg-white px-8 text-oboya-green hover:bg-white/90"
+                )}
+              >
+                {secondaryLabel}
+              </Link>
+            </motion.div>
           </motion.div>
         </div>
-
-        <motion.div
-          initial={animationsEnabled ? { opacity: 0, y: 20 } : false}
-          animate={animationsEnabled ? { opacity: 1, y: 0 } : false}
-          transition={
-            animationsEnabled
-              ? { delay: 0.45, duration: 0.55, ease: [0.22, 1, 0.36, 1] }
-              : { duration: 0 }
-          }
-          className="mx-auto w-full max-w-3xl pb-8 md:pb-12"
-        >
-          {/* Mobile: vertical stack. sm+: single glass row */}
-          <div className="flex flex-col gap-2 sm:hidden">
-            {data.pills.map((pill) => {
-              const Icon = pillIcons[pill.icon] ?? Sprout;
-              return (
-                <Link
-                  key={pill.id}
-                  href={pill.href}
-                  className={cn(
-                    "group flex items-center gap-3 rounded-full px-3 py-2.5",
-                    pillGlass,
-                    "transition-colors hover:bg-white/20"
-                  )}
-                >
-                  {pill.image ? (
-                    <span className="relative size-11 shrink-0 overflow-hidden rounded-full">
-                      <Image
-                        src={pill.image}
-                        alt=""
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                        sizes="44px"
-                      />
-                    </span>
-                  ) : (
-                    <Icon className="size-6 shrink-0 text-white/90" />
-                  )}
-                  <span className="min-w-0 text-left">
-                    <span className="block text-sm font-semibold text-white">
-                      {pickLocalized(pill.label, locale)}
-                    </span>
-                    <span className="mt-0.5 block text-xs font-medium text-oboya-green-light">
-                      {pickLocalized(pill.sublabel, locale)}
-                    </span>
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-
-          <div
-            className={cn(
-              "hidden items-center rounded-full px-2 py-2.5 sm:flex sm:px-3 sm:py-3",
-              pillGlass
-            )}
-          >
-            {data.pills.map((pill, index) => {
-              const Icon = pillIcons[pill.icon] ?? Sprout;
-              return (
-                <div key={pill.id} className="flex min-w-0 flex-1 items-center">
-                  {index > 0 ? (
-                    <span
-                      className="mx-1 h-10 w-px shrink-0 bg-oboya-green/70 sm:mx-2 md:h-12"
-                      aria-hidden
-                    />
-                  ) : null}
-                  <Link
-                    href={pill.href}
-                    className="group flex min-w-0 flex-1 items-center gap-2.5 rounded-full px-2 py-1.5 transition-colors hover:bg-white/10 sm:gap-3 sm:px-3"
-                  >
-                    {pill.image ? (
-                      <span className="relative size-11 shrink-0 overflow-hidden rounded-full sm:size-12 md:size-14">
-                        <Image
-                          src={pill.image}
-                          alt=""
-                          fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-110"
-                          sizes="56px"
-                        />
-                      </span>
-                    ) : (
-                      <Icon className="size-6 shrink-0 text-white/90" />
-                    )}
-                    <span className="min-w-0 text-left">
-                      <span className="block truncate text-sm font-semibold text-white sm:text-[0.95rem]">
-                        {pickLocalized(pill.label, locale)}
-                      </span>
-                      <span className="mt-0.5 block truncate text-xs font-medium text-oboya-green-light">
-                        {pickLocalized(pill.sublabel, locale)}
-                      </span>
-                    </span>
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-        </motion.div>
       </Container>
     </section>
   );

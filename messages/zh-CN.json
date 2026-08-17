@@ -739,7 +739,7 @@
   },
   "faqsPage": {
     "intro": "快速了解产品、物流、报价和支持相关问题的答案。",
-    "searchPlaceholder": "按关键词搜索常见问题…",
+    "searchPlaceholder": "按关键词或相近词搜索常见问题…",
     "noResults": "没有匹配的常见问题。请尝试其他关键词或按分类浏览。",
     "categories": {
       "products": "Products",
@@ -794,7 +794,9 @@
         "question": "Which languages are supported?",
         "answer": "Our site is available in English, Portuguese, Spanish, and Chinese."
       }
-    }
+    },
+    "heroTitle": "FAQ",
+    "heroSubtitle": "关于我们产品与服务的常见问题"
   },
   "workWithUsPage": {
     "intro": "Build your career with a global horticulture company focused on innovation, sustainability, and local impact.",

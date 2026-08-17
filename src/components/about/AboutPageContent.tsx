@@ -3,6 +3,9 @@ import { AboutHero } from "@/components/about/AboutHero";
 import { AboutTimeline } from "@/components/about/AboutTimeline";
 import { AboutCallout } from "@/components/about/AboutCallout";
 import { AboutCorporateCulture } from "@/components/about/AboutCorporateCulture";
+import { AboutMission } from "@/components/about/AboutMission";
+import { AboutVision } from "@/components/about/AboutVision";
+import { AboutValues } from "@/components/about/AboutValues";
 import { AboutHonors } from "@/components/about/AboutHonors";
 
 interface AboutPageContentProps {
@@ -41,6 +44,15 @@ export function AboutPageContent({
       )}
       {about.sections.culture.enabled && (
         <AboutCorporateCulture data={about.culture} locale={locale} />
+      )}
+      {about.sections.mission.enabled && (
+        <AboutMission data={about.mission} locale={locale} />
+      )}
+      {about.sections.vision.enabled && (
+        <AboutVision data={about.vision} locale={locale} />
+      )}
+      {about.sections.values.enabled && (
+        <AboutValues data={about.values} locale={locale} />
       )}
       {about.sections.honors.enabled && (
         <AboutHonors data={about.honors} locale={locale} />

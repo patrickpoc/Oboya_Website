@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ImageField } from "@/components/admin/media/ImageField";
-import type { HomepageInnovation } from "@/lib/cms/repositories/homepage-repository";
+import type { HomepageBusinessSolution } from "@/lib/cms/repositories/homepage-repository";
 import {
   LocalizedInput,
   emptyLocalized,
@@ -14,25 +14,25 @@ import {
   type HomepageSectionEditorProps,
 } from "../shared";
 
-export function FeaturedCategoriesSectionEditor({
+export function BusinessSolutionsSectionEditor({
   settings,
   setSettings,
   locale,
 }: HomepageSectionEditorProps) {
-  const section = settings.featuredProducts;
+  const section = settings.businessSolutions;
 
-  const patchFeatured = (
-    patch: Partial<typeof section> & { items?: HomepageInnovation[] }
+  const patch = (
+    next: Partial<typeof section> & { items?: HomepageBusinessSolution[] }
   ) =>
     setSettings((prev) => ({
       ...prev,
-      featuredProducts: { ...prev.featuredProducts, ...patch },
+      businessSolutions: { ...prev.businessSolutions, ...next },
     }));
 
   return (
     <Card className="max-w-4xl">
       <CardHeader>
-        <CardTitle>Featured Innovations</CardTitle>
+        <CardTitle>Solutions Tailored to Your Business</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <LocalizedInput
@@ -40,7 +40,7 @@ export function FeaturedCategoriesSectionEditor({
           locale={locale}
           value={section.eyebrow[locale]}
           onChange={(l, v) =>
-            patchFeatured({ eyebrow: updateLocalizedField(section.eyebrow, l, v) })
+            patch({ eyebrow: updateLocalizedField(section.eyebrow, l, v) })
           }
         />
         <LocalizedInput
@@ -48,42 +48,23 @@ export function FeaturedCategoriesSectionEditor({
           locale={locale}
           value={section.title[locale]}
           onChange={(l, v) =>
-            patchFeatured({ title: updateLocalizedField(section.title, l, v) })
+            patch({ title: updateLocalizedField(section.title, l, v) })
           }
           multiline
         />
-        <div className="grid gap-3 sm:grid-cols-2">
-          <LocalizedInput
-            label="Section CTA label (optional)"
-            locale={locale}
-            value={section.ctaLabel[locale]}
-            onChange={(l, v) =>
-              patchFeatured({ ctaLabel: updateLocalizedField(section.ctaLabel, l, v) })
-            }
-          />
-          <div className="space-y-1.5">
-            <Label>Default CTA link</Label>
-            <Input
-              value={section.ctaHref}
-              onChange={(e) => patchFeatured({ ctaHref: e.target.value })}
-            />
-          </div>
-        </div>
 
         {section.items.map((item, index) => (
           <div key={item.id} className="space-y-3 rounded-lg border p-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm font-medium">Innovation {index + 1}</p>
+              <p className="text-sm font-medium">Card {index + 1}</p>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 className="w-full sm:w-auto"
-                onClick={() => {
-                  patchFeatured({
-                    items: section.items.filter((_, i) => i !== index),
-                  });
-                }}
+                onClick={() =>
+                  patch({ items: section.items.filter((_, i) => i !== index) })
+                }
               >
                 Remove
               </Button>
@@ -98,7 +79,7 @@ export function FeaturedCategoriesSectionEditor({
                     ? { ...it, title: updateLocalizedField(it.title, l, v) }
                     : it
                 );
-                patchFeatured({ items });
+                patch({ items });
               }}
             />
             <LocalizedInput
@@ -114,23 +95,23 @@ export function FeaturedCategoriesSectionEditor({
                       }
                     : it
                 );
-                patchFeatured({ items });
+                patch({ items });
               }}
               multiline
             />
             <ImageField
-              label="Image"
-              value={item.image}
+              label="Background image"
+              value={item.image ?? ""}
               onChange={(url) => {
                 const items = section.items.map((it, i) =>
                   i === index ? { ...it, image: url } : it
                 );
-                patchFeatured({ items });
+                patch({ items });
               }}
             />
             <div className="grid gap-3 sm:grid-cols-2">
               <LocalizedInput
-                label="Learn more label"
+                label="Explore label"
                 locale={locale}
                 value={(item.ctaLabel ?? emptyLocalized())[locale]}
                 onChange={(l, v) => {
@@ -146,18 +127,18 @@ export function FeaturedCategoriesSectionEditor({
                         }
                       : it
                   );
-                  patchFeatured({ items });
+                  patch({ items });
                 }}
               />
               <div className="space-y-1.5">
-                <Label>Learn more link</Label>
+                <Label>Link</Label>
                 <Input
-                  value={item.ctaHref ?? ""}
+                  value={item.href ?? ""}
                   onChange={(e) => {
                     const items = section.items.map((it, i) =>
-                      i === index ? { ...it, ctaHref: e.target.value } : it
+                      i === index ? { ...it, href: e.target.value } : it
                     );
-                    patchFeatured({ items });
+                    patch({ items });
                   }}
                 />
               </div>
@@ -169,8 +150,8 @@ export function FeaturedCategoriesSectionEditor({
           type="button"
           variant="outline"
           className="w-full sm:w-auto"
-          onClick={() => {
-            patchFeatured({
+          onClick={() =>
+            patch({
               items: [
                 ...section.items,
                 {
@@ -178,14 +159,14 @@ export function FeaturedCategoriesSectionEditor({
                   title: emptyLocalized(),
                   description: emptyLocalized(),
                   image: "",
+                  href: "/solutions",
                   ctaLabel: emptyLocalized(),
-                  ctaHref: "/shop",
                 },
               ],
-            });
-          }}
+            })
+          }
         >
-          Add innovation
+          Add card
         </Button>
       </CardContent>
     </Card>

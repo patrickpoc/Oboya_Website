@@ -20,7 +20,7 @@ export function AboutCallout({ data, locale }: AboutCalloutProps) {
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeInUp}
-          className="max-w-4xl"
+          className="mx-auto max-w-5xl text-center"
         >
           <p className="font-display text-[clamp(1.35rem,2.8vw,2.25rem)] font-normal leading-[1.45] tracking-[-0.01em]">
             {data.segments.map((segment, index) => {

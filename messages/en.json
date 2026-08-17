@@ -746,8 +746,10 @@
     }
   },
   "faqsPage": {
+    "heroTitle": "FAQ",
+    "heroSubtitle": "Frequently Asked Questions About Our Products and Services",
     "intro": "Find quick answers about products, logistics, quotations, and support.",
-    "searchPlaceholder": "Search FAQs by keyword…",
+    "searchPlaceholder": "Search FAQs by keyword or similar terms…",
     "noResults": "No FAQs match your search. Try different keywords or browse by category below.",
     "categories": {
       "products": "Products",

@@ -4,6 +4,7 @@ export type HomepageSectionId =
   | "hero"
   | "companyOverview"
   | "capabilities"
+  | "businessSolutions"
   | "globalPresence"
   | "testimonials"
   | "featuredProducts"
@@ -20,8 +21,12 @@ export interface HomepageHeroPill {
   sublabel: LocalizedString;
   href: string;
   icon: "logistics" | "research" | "plants" | "vegetable" | "flower" | "fruit";
-  /** Circular photo asset for the hero glass pill */
   image?: string;
+}
+
+export interface HomepageHeroCta {
+  label: LocalizedString;
+  href: string;
 }
 
 export interface HomepageStat {
@@ -34,7 +39,6 @@ export interface HomepageStat {
 export interface HomepageHeadlineSegment {
   text: LocalizedString;
   tone: "green" | "white";
-  /** Start a new visual line before this segment (default true except first) */
   breakBefore?: boolean;
 }
 
@@ -47,6 +51,15 @@ export interface HomepageCapability {
   ctaLabel?: LocalizedString;
 }
 
+export interface HomepageBusinessSolution {
+  id: string;
+  title: LocalizedString;
+  description: LocalizedString;
+  image?: string;
+  href?: string;
+  ctaLabel?: LocalizedString;
+}
+
 export interface HomepageTestimonial {
   id: string;
   quote: LocalizedString;
@@ -54,20 +67,20 @@ export interface HomepageTestimonial {
   role: LocalizedString;
 }
 
-export interface HomepageFeaturedCategory {
+/** Featured Innovations card (legacy `categoryId` optional for migration). */
+export interface HomepageInnovation {
   id: string;
-  /** Shop category id from `data/shop/categories.json` */
-  categoryId: string;
-  /** Optional display title override */
-  title?: LocalizedString;
-  /** Optional short description under the category name */
-  description?: LocalizedString;
-  /** Optional cover image (defaults to first product in the category) */
-  image?: string;
+  title: LocalizedString;
+  description: LocalizedString;
+  image: string;
   ctaLabel?: LocalizedString;
-  /** If set, overrides shop category link */
   ctaHref?: string;
+  /** @deprecated Shop category link — ignored on public innovations UI */
+  categoryId?: string;
 }
+
+/** @deprecated Use HomepageInnovation */
+export type HomepageFeaturedCategory = HomepageInnovation;
 
 export interface HomepagePartnerLogo {
   id: string;
@@ -84,10 +97,12 @@ export interface HomepageSettings {
     eyebrow: LocalizedString;
     title: LocalizedString;
     description: LocalizedString;
+    ctaPrimary: HomepageHeroCta;
+    ctaSecondary: HomepageHeroCta;
+    /** @deprecated Kept for migration; not shown on public hero */
     pills: HomepageHeroPill[];
   };
   companyOverview: {
-    /** @deprecated Prefer `segments` for multi-highlight headlines */
     headlineGreen: LocalizedString;
     headlineWhite: LocalizedString;
     segments: HomepageHeadlineSegment[];
@@ -102,6 +117,11 @@ export interface HomepageSettings {
     ctaHref: string;
     items: HomepageCapability[];
   };
+  businessSolutions: {
+    eyebrow: LocalizedString;
+    title: LocalizedString;
+    items: HomepageBusinessSolution[];
+  };
   globalPresence: {
     title: LocalizedString;
   };
@@ -114,7 +134,7 @@ export interface HomepageSettings {
     title: LocalizedString;
     ctaLabel: LocalizedString;
     ctaHref: string;
-    items: HomepageFeaturedCategory[];
+    items: HomepageInnovation[];
   };
   latestNews: {
     eyebrow: LocalizedString;
@@ -135,12 +155,20 @@ const loc = (en: string): LocalizedString => ({
   "zh-CN": en,
 });
 
+const emptyLoc = (): LocalizedString => ({
+  en: "",
+  "pt-BR": "",
+  es: "",
+  "zh-CN": "",
+});
+
 const defaultSettings = (): HomepageSettings => ({
   animations: { enabled: true },
   sections: {
     hero: { enabled: true },
     companyOverview: { enabled: true },
     capabilities: { enabled: true },
+    businessSolutions: { enabled: true },
     globalPresence: { enabled: true },
     testimonials: { enabled: true },
     featuredProducts: { enabled: true },
@@ -150,68 +178,38 @@ const defaultSettings = (): HomepageSettings => ({
   hero: {
     backgroundImage:
       "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2070&auto=format&fit=crop",
-    eyebrow: loc("Global Partner"),
+    eyebrow: loc("Solutions that work, value that grows."),
     title: loc("Your one-stop partner\nfor horticulture!"),
     description: loc(
-      "Integrated solutions from propagation to packaging and retail display, trusted by growers in 80+ countries Worldwide"
+      "Through integrated solutions for cultivation, packaging, logistics, transport systems, retail display, and technical advisory services, Oboya supports the businesses that keep horticulture moving forward."
     ),
-    pills: [
-      {
-        id: "vegetable",
-        label: loc("Vegetable"),
-        sublabel: loc("Agribusiness"),
-        href: "/solutions/vegetables",
-        icon: "vegetable",
-        image: "/assets/homepage/hero-pill-logistics.png",
-      },
-      {
-        id: "fruit",
-        label: loc("Fruit"),
-        sublabel: loc("Agribusiness"),
-        href: "/solutions/fruits",
-        icon: "fruit",
-        image: "/assets/homepage/hero-pill-rd.png",
-      },
-      {
-        id: "flower",
-        label: loc("Flower"),
-        sublabel: loc("Agribusiness"),
-        href: "/solutions/flowers",
-        icon: "flower",
-        image: "/assets/homepage/hero-pill-plants.png",
-      },
-    ],
+    ctaPrimary: {
+      label: loc("Request a quote"),
+      href: "/contact",
+    },
+    ctaSecondary: {
+      label: loc("Explore solutions"),
+      href: "/solutions",
+    },
+    pills: [],
   },
   companyOverview: {
-    headlineGreen: loc("We support the entire horticultural supply chain:"),
+    headlineGreen: loc("Delivering solutions to horticultural businesses"),
     headlineWhite: loc(
-      "from propagation and planting to packaging and retail display."
+      "around the world through a combination of global capabilities and local expertise."
     ),
     segments: [
       {
-        text: loc("We support the entire horticultural"),
+        text: loc("Delivering solutions to horticultural businesses"),
         tone: "green",
         breakBefore: false,
       },
       {
-        text: loc("supply chain: "),
-        tone: "green",
-        breakBefore: true,
-      },
-      {
-        text: loc("from propagation"),
+        text: loc(
+          " around the world through a combination of global capabilities and local expertise."
+        ),
         tone: "white",
         breakBefore: false,
-      },
-      {
-        text: loc("and planting to packaging and"),
-        tone: "white",
-        breakBefore: true,
-      },
-      {
-        text: loc("retail display."),
-        tone: "white",
-        breakBefore: true,
       },
     ],
     image: "/assets/homepage/company-overview.webp",
@@ -233,44 +231,96 @@ const defaultSettings = (): HomepageSettings => ({
         id: "experience",
         value: 20,
         suffix: "+",
-        label: loc("Years of Industry Experience"),
+        label: loc("Years Supporting Horticulture"),
       },
     ],
   },
   capabilities: {
-    eyebrow: loc("Solutions"),
+    eyebrow: loc("Why Oboya Horticulture?"),
     title: loc(
-      "We combine global capabilities, industry expertise, and integrated solutions to help growers and horticulture businesses operate more efficiently at every stage."
+      "Stories and strengths that define how we partner with growers worldwide."
     ),
-    ctaLabel: loc("Find the right solution"),
-    ctaHref: "/solutions",
+    ctaLabel: loc("Learn more"),
+    ctaHref: "/about",
     items: [
       {
-        id: "integrated",
-        title: loc("Integrated Solutions"),
+        id: "built-challenges",
+        title: loc("Built Around Real Challenges"),
         description: loc(
-          "From Production To Logistics, We Deliver End-To-End Horticulture Solutions Instead Of Standalone Products."
+          "Through integrated solutions for cultivation, packaging, logistics, transport systems, retail display, and technical advisory services, Oboya supports the businesses that keep horticulture moving forward."
         ),
         image: "/assets/homepage/solutions-integrated.jpg",
-        href: "/solutions",
+        href: "/about",
       },
       {
-        id: "global",
+        id: "global-local",
         title: loc("Global Reach, Local Expertise"),
         description: loc(
-          "Worldwide Manufacturing Backed By Localized Production, Support, And Deep Horticulture Knowledge."
+          "Worldwide manufacturing backed by localized production, support, and deep horticulture knowledge."
         ),
         image: "/assets/homepage/solutions-global.jpg",
-        href: "/solutions",
+        href: "/about",
       },
       {
-        id: "integrated-2",
-        title: loc("Integrated Solutions"),
+        id: "integrated-chain",
+        title: loc("One Partner Across The Chain"),
         description: loc(
-          "From Production To Logistics, We Deliver End-To-End Horticulture Solutions Instead Of Standalone Products."
+          "Propagation, packaging, and logistics connected — so growers focus on growing, not juggling suppliers."
         ),
         image: "/assets/homepage/solutions-logistics.jpg",
+        href: "/about",
+      },
+    ],
+  },
+  businessSolutions: {
+    eyebrow: loc("Solutions Tailored to Your Business"),
+    title: loc(
+      "Every crop, operation, and supply chain has unique requirements. Explore the solutions, expertise, and support designed for your sector."
+    ),
+    items: [
+      {
+        id: "flowers",
+        title: loc("Flowers"),
+        description: loc(
+          "Solutions for growers, exporters, distributors, and retailers across the floriculture industry."
+        ),
+        image:
+          "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
+        href: "/solutions/flowers",
+        ctaLabel: loc("Explore Solutions"),
+      },
+      {
+        id: "vegetables",
+        title: loc("Vegetables & Herbs"),
+        description: loc(
+          "Integrated solutions that support efficient production, handling, logistics, and commercialization."
+        ),
+        image:
+          "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
+        href: "/solutions/vegetables",
+        ctaLabel: loc("Explore Solutions"),
+      },
+      {
+        id: "fruits",
+        title: loc("Fruits"),
+        description: loc(
+          "Solutions designed to protect quality, improve handling, and optimize supply chain performance."
+        ),
+        image:
+          "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
+        href: "/solutions/fruits",
+        ctaLabel: loc("Explore Solutions"),
+      },
+      {
+        id: "plants",
+        title: loc("Plants"),
+        description: loc(
+          "Young-plant systems and logistics tools that standardize quality across nursery networks."
+        ),
+        image:
+          "https://images.unsplash.com/photo-1466692476867-a0881dfc0648?q=80&w=800&auto=format&fit=crop",
         href: "/solutions",
+        ctaLabel: loc("Explore Solutions"),
       },
     ],
   },
@@ -333,7 +383,7 @@ const defaultSettings = (): HomepageSettings => ({
     ],
   },
   featuredProducts: {
-    eyebrow: loc("Featured Categories"),
+    eyebrow: loc("Featured Innovations"),
     title: loc(
       "At OBOYA, we go beyond supplying products, we deliver integrated horticulture solutions designed to improve efficiency, optimize operations, and support long-term growth across the global supply chain."
     ),
@@ -341,34 +391,37 @@ const defaultSettings = (): HomepageSettings => ({
     ctaHref: "/shop",
     items: [
       {
-        id: "feat-packaging",
-        categoryId: "packaging",
-        title: loc("Packaging"),
+        id: "innov-ecovaso",
+        title: loc("Oboya Ecovaso"),
         description: loc(
-          "Retail and bulk packaging solutions that protect freshness from harvest to shelf."
+          "Sustainable growing containers engineered for healthier roots and cleaner retail presentation."
         ),
         image:
           "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
+        ctaLabel: loc("Learn More"),
+        ctaHref: "/shop",
       },
       {
-        id: "feat-propagation",
-        categoryId: "propagation",
-        title: loc("Propagation"),
+        id: "innov-bioglitter",
+        title: loc("Bioglitter"),
         description: loc(
-          "Trays, seedling systems, and tools for consistent young-plant production."
+          "Decorative finishes that add shelf impact while supporting more responsible material choices."
         ),
         image:
           "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
+        ctaLabel: loc("Learn More"),
+        ctaHref: "/shop",
       },
       {
-        id: "feat-equipment",
-        categoryId: "equipment",
-        title: loc("Logistics & Display"),
+        id: "innov-display",
+        title: loc("Retail Display Systems"),
         description: loc(
-          "Trolleys, carts, and display equipment for efficient handling and retail presentation."
+          "Display and handling solutions that protect product quality from greenhouse floor to store shelf."
         ),
         image:
           "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
+        ctaLabel: loc("Learn More"),
+        ctaHref: "/shop",
       },
     ],
   },
@@ -380,7 +433,7 @@ const defaultSettings = (): HomepageSettings => ({
     postCount: 2,
   },
   partners: {
-    title: loc("Certified by the best in the industry"),
+    title: loc("Our collaborations"),
     logos: [
       { id: "brcgs", name: "BRCGS", image: "/assets/homepage/cert-brcgs.png", href: "" },
       { id: "sedex-smeta", name: "Sedex | SMETA", image: "/assets/homepage/cert-sedex-smeta.png", href: "" },
@@ -392,11 +445,16 @@ const defaultSettings = (): HomepageSettings => ({
 });
 
 let cache: HomepageSettings | null = null;
-const CONTENT_REVISION = "home-phase1-cms-v2-2026-07-21";
+const CONTENT_REVISION = "home-overview-3-stats-2026-08-11";
 let appliedRevision: string | null = null;
 
 function migrateSettings(settings: HomepageSettings): HomepageSettings {
   const defaults = defaultSettings();
+  const rawHero = settings.hero as HomepageSettings["hero"] & {
+    ctaPrimary?: HomepageHeroCta;
+    ctaSecondary?: HomepageHeroCta;
+  };
+
   return {
     ...defaults,
     ...settings,
@@ -406,12 +464,20 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
     hero: {
       ...defaults.hero,
       ...settings.hero,
+      ctaPrimary: {
+        ...defaults.hero.ctaPrimary,
+        ...rawHero?.ctaPrimary,
+        label: rawHero?.ctaPrimary?.label ?? defaults.hero.ctaPrimary.label,
+        href: rawHero?.ctaPrimary?.href ?? defaults.hero.ctaPrimary.href,
+      },
+      ctaSecondary: {
+        ...defaults.hero.ctaSecondary,
+        ...rawHero?.ctaSecondary,
+        label: rawHero?.ctaSecondary?.label ?? defaults.hero.ctaSecondary.label,
+        href: rawHero?.ctaSecondary?.href ?? defaults.hero.ctaSecondary.href,
+      },
       pills: settings.hero?.pills?.length
-        ? settings.hero.pills.map((pill, i) => ({
-            ...defaults.hero.pills[i],
-            ...pill,
-            image: pill.image ?? defaults.hero.pills[i]?.image,
-          }))
+        ? settings.hero.pills
         : defaults.hero.pills,
     },
     companyOverview: {
@@ -421,6 +487,11 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
         settings.companyOverview?.segments?.length > 0
           ? settings.companyOverview.segments
           : defaults.companyOverview.segments,
+      stats: (
+        settings.companyOverview?.stats?.length > 0
+          ? settings.companyOverview.stats
+          : defaults.companyOverview.stats
+      ).slice(0, 3),
     },
     capabilities: {
       ...defaults.capabilities,
@@ -434,6 +505,23 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
           }))
         : defaults.capabilities.items,
     },
+    businessSolutions: {
+      ...defaults.businessSolutions,
+      ...settings.businessSolutions,
+      items: settings.businessSolutions?.items?.length
+        ? settings.businessSolutions.items.map((item, i) => ({
+            ...defaults.businessSolutions.items[i],
+            ...item,
+            title: item.title ?? defaults.businessSolutions.items[i]?.title ?? emptyLoc(),
+            description:
+              item.description ??
+              defaults.businessSolutions.items[i]?.description ??
+              emptyLoc(),
+            ctaLabel:
+              item.ctaLabel ?? defaults.businessSolutions.items[i]?.ctaLabel,
+          }))
+        : defaults.businessSolutions.items,
+    },
     globalPresence: { ...defaults.globalPresence, ...settings.globalPresence },
     testimonials: { ...defaults.testimonials, ...settings.testimonials },
     featuredProducts: {
@@ -441,32 +529,53 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
       ...settings.featuredProducts,
       items: (() => {
         const raw = settings.featuredProducts?.items;
-        const looksLikeProducts =
-          Array.isArray(raw) &&
-          raw.some(
-            (item) =>
-              item != null &&
-              "productId" in item &&
-              !("categoryId" in item && (item as HomepageFeaturedCategory).categoryId)
-          );
-        if (!raw?.length || looksLikeProducts) {
-          return defaults.featuredProducts.items;
+        if (!raw?.length) return defaults.featuredProducts.items;
+        const mapped = raw.map((item, i) => {
+          const fallback = defaults.featuredProducts.items[i];
+          const title =
+            item.title && Object.values(item.title).some(Boolean)
+              ? item.title
+              : fallback?.title ?? emptyLoc();
+          const description =
+            item.description && Object.values(item.description).some(Boolean)
+              ? item.description
+              : fallback?.description ?? emptyLoc();
+          return {
+            id: item.id ?? fallback?.id ?? `innov-${i}`,
+            title,
+            description,
+            image: item.image || fallback?.image || "",
+            ctaLabel: item.ctaLabel ?? fallback?.ctaLabel,
+            ctaHref: item.ctaHref ?? fallback?.ctaHref,
+            categoryId: item.categoryId,
+          };
+        });
+        // Always keep a full 3-card innovations row when CMS has fewer items
+        if (mapped.length >= defaults.featuredProducts.items.length) {
+          return mapped;
         }
-        return raw.map((item, i) => ({
-          ...defaults.featuredProducts.items[i],
-          ...item,
-          categoryId:
-            (item as HomepageFeaturedCategory).categoryId ??
-            defaults.featuredProducts.items[i]?.categoryId,
-          ctaLabel:
-            item.ctaLabel ?? defaults.featuredProducts.items[i]?.ctaLabel,
-          ctaHref: item.ctaHref ?? defaults.featuredProducts.items[i]?.ctaHref,
-        }));
+        const seen = new Set(mapped.map((m) => m.id));
+        const padded = [...mapped];
+        for (const fallback of defaults.featuredProducts.items) {
+          if (padded.length >= defaults.featuredProducts.items.length) break;
+          if (seen.has(fallback.id)) continue;
+          padded.push(fallback);
+          seen.add(fallback.id);
+        }
+        return padded;
       })(),
     },
     latestNews: { ...defaults.latestNews, ...settings.latestNews },
     partners: { ...defaults.partners, ...settings.partners },
-    sections: { ...defaults.sections, ...settings.sections },
+    sections: {
+      ...defaults.sections,
+      ...settings.sections,
+      businessSolutions: {
+        enabled:
+          settings.sections?.businessSolutions?.enabled ??
+          defaults.sections.businessSolutions.enabled,
+      },
+    },
   };
 }
 
@@ -489,7 +598,6 @@ export function saveHomepageSettings(settings: HomepageSettings): HomepageSettin
   return updated;
 }
 
-/** Reset in-memory CMS to homepage defaults. */
 export function resetHomepageSettings(): HomepageSettings {
   cache = defaultSettings();
   appliedRevision = CONTENT_REVISION;

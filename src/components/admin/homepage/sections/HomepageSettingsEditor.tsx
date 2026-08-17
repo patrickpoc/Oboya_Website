@@ -11,6 +11,7 @@ const VISIBILITY_SECTION_IDS: HomepageSectionId[] = [
   "hero",
   "companyOverview",
   "capabilities",
+  "businessSolutions",
   "globalPresence",
   "testimonials",
   "featuredProducts",
@@ -37,11 +38,16 @@ export function HomepageSettingsEditor({ settings, setSettings }: HomepageSectio
         </CardHeader>
         <CardContent className="space-y-3">
           {VISIBILITY_SECTION_IDS.map((id) => (
-            <div key={id} className="flex items-center justify-between gap-4">
-              <Label htmlFor={`section-${id}`}>{HOMEPAGE_SECTION_META[id].title}</Label>
+            <div
+              key={id}
+              className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <Label htmlFor={`section-${id}`}>
+                {HOMEPAGE_SECTION_META[id].title}
+              </Label>
               <Switch
                 id={`section-${id}`}
-                checked={settings.sections[id].enabled}
+                checked={settings.sections[id]?.enabled ?? true}
                 onCheckedChange={() => toggleSection(id)}
               />
             </div>
@@ -54,9 +60,9 @@ export function HomepageSettingsEditor({ settings, setSettings }: HomepageSectio
           <CardTitle>Animations</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <Label htmlFor="animations-enabled">
-              Enable homepage animations (marquees, motion, counters)
+              Enable homepage animations (marquees, motion, counters, scroll-telling)
             </Label>
             <Switch
               id="animations-enabled"
