@@ -530,7 +530,7 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
       items: (() => {
         const raw = settings.featuredProducts?.items;
         if (!raw?.length) return defaults.featuredProducts.items;
-        const mapped = raw.map((item, i) => {
+        const mapped: HomepageInnovation[] = raw.map((item, i) => {
           const fallback = defaults.featuredProducts.items[i];
           const title =
             item.title && Object.values(item.title).some(Boolean)
@@ -555,7 +555,7 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
           return mapped;
         }
         const seen = new Set(mapped.map((m) => m.id));
-        const padded = [...mapped];
+        const padded: HomepageInnovation[] = [...mapped];
         for (const fallback of defaults.featuredProducts.items) {
           if (padded.length >= defaults.featuredProducts.items.length) break;
           if (seen.has(fallback.id)) continue;
