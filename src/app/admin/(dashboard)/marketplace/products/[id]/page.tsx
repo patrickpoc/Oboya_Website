@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
-  getCmsProductById,
   saveCmsProduct,
+  type CmsProduct,
 } from "@/lib/cms/repositories/product-repository";
 import { ProductEditorForm } from "@/components/admin/marketplace/ProductEditorForm";
 import Link from "next/link";
@@ -16,9 +16,30 @@ export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
-  const existing = getCmsProductById(id);
+  const [product, setProduct] = useState<CmsProduct | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const [product, setProduct] = useState(existing);
+  useEffect(() => {
+    void (async () => {
+      try {
+        const response = await fetch(`/api/cms/products/${id}`, { cache: "no-store" });
+        if (!response.ok) {
+          setProduct(null);
+          return;
+        }
+        const payload = (await response.json()) as CmsProduct;
+        setProduct(payload);
+      } catch {
+        setProduct(null);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [id]);
+
+  if (loading) {
+    return <div className="text-center text-muted-foreground">Loading product...</div>;
+  }
 
   if (!product) {
     return (

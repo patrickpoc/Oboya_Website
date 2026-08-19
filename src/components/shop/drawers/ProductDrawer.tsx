@@ -29,7 +29,7 @@ export function ProductDrawer() {
     : null;
   const isOpen = Boolean(product && currency);
 
-  const name = product ? getProductName(product.id) : "";
+  const name = product ? getProductName(product as Parameters<typeof getProductName>[0]) : "";
   const brand = product ? getBrandById(product.brandId) : null;
   const category = product ? getCategoryById(product.categoryId) : null;
   const price =

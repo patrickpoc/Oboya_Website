@@ -33,13 +33,13 @@ export function RelatedProducts({ ids, onSelect }: RelatedProductsProps) {
             <div className="relative size-12 shrink-0 overflow-hidden rounded-md">
               <Image
                 src={product.images[0]}
-                alt={getProductName(product.id)}
+                alt={getProductName(product as Parameters<typeof getProductName>[0])}
                 fill
                 className="object-cover"
               />
             </div>
             <span className="text-sm font-medium text-oboya-blue-dark">
-              {getProductName(product.id)}
+              {getProductName(product as Parameters<typeof getProductName>[0])}
             </span>
           </button>
         ))}

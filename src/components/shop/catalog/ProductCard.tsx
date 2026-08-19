@@ -46,7 +46,7 @@ export function ProductCard({
 }: ProductCardProps) {
   const t = useTranslations("shop");
   const getProductName = useProductName();
-  const name = getProductName(product.id);
+  const name = getProductName(product as Parameters<typeof getProductName>[0]);
   const brand = getBrandById(product.brandId);
   const category = getCategoryById(product.categoryId);
   const price = product.prices[currency as keyof typeof product.prices] ?? 0;

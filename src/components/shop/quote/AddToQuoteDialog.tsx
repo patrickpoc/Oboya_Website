@@ -38,7 +38,9 @@ export function AddToQuoteDialog() {
   useEffect(() => {
     if (!addToQuoteProductId) return;
     const nextProduct = getProductById(addToQuoteProductId);
-    setQuantity(getProductMoq(nextProduct));
+    queueMicrotask(() => {
+      setQuantity(getProductMoq(nextProduct));
+    });
   }, [addToQuoteProductId]);
 
   if (!product) {
@@ -50,7 +52,7 @@ export function AddToQuoteDialog() {
     );
   }
 
-  const name = getProductName(product.id);
+  const name = getProductName(product as Parameters<typeof getProductName>[0]);
   const unitPrice = currency ? (product.prices[currency] ?? 0) : 0;
 
   const handleConfirm = () => {
