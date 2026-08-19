@@ -22,88 +22,124 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const product = await readProductById(id);
-  if (!product) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(product);
+  try {
+    const { id } = await params;
+    const product = await readProductById(id);
+    if (!product) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json(product);
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "Failed to load product",
+      },
+      { status: 500 }
+    );
+  }
 }
 
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (isSupabaseConfigured()) {
-    const user = await requireAdminUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    if (isSupabaseConfigured()) {
+      const user = await requireAdminUser();
+      if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
     }
-  }
 
-  const { id } = await params;
-  const body = (await request.json()) as CmsProduct;
-  if (body.id !== id) {
-    return NextResponse.json({ error: "ID mismatch" }, { status: 400 });
-  }
-  const saved = saveCmsProduct(body);
+    const { id } = await params;
+    const body = (await request.json()) as CmsProduct;
+    if (body.id !== id) {
+      return NextResponse.json({ error: "ID mismatch" }, { status: 400 });
+    }
+    const saved = saveCmsProduct(body);
 
-  if (isSupabaseConfigured()) {
-    await saveProduct(saved);
-  }
+    if (isSupabaseConfigured()) {
+      await saveProduct(saved);
+    }
 
-  await persistProductsToFile(getCmsProducts({ includeDeleted: true }));
-  return NextResponse.json(saved);
+    await persistProductsToFile(getCmsProducts({ includeDeleted: true }));
+    return NextResponse.json(saved);
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "Failed to persist product",
+      },
+      { status: 500 }
+    );
+  }
 }
 
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (isSupabaseConfigured()) {
-    const user = await requireAdminUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    if (isSupabaseConfigured()) {
+      const user = await requireAdminUser();
+      if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
     }
-  }
 
-  const { id } = await params;
-  const hardDelete = new URL(_request.url).searchParams.get("hard") === "1";
-  if (hardDelete) {
-    hardDeleteCmsProduct(id);
-  } else {
-    softDeleteCmsProduct(id);
-  }
+    const { id } = await params;
+    const hardDelete = new URL(_request.url).searchParams.get("hard") === "1";
+    if (hardDelete) {
+      hardDeleteCmsProduct(id);
+    } else {
+      softDeleteCmsProduct(id);
+    }
 
-  if (isSupabaseConfigured()) {
-    if (hardDelete) await hardDeleteProduct(id);
-    else await softDeleteProduct(id);
-  }
+    if (isSupabaseConfigured()) {
+      if (hardDelete) await hardDeleteProduct(id);
+      else await softDeleteProduct(id);
+    }
 
-  await persistProductsToFile(getCmsProducts({ includeDeleted: true }));
-  return NextResponse.json({ ok: true });
+    await persistProductsToFile(getCmsProducts({ includeDeleted: true }));
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "Failed to delete product",
+      },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (isSupabaseConfigured()) {
-    const user = await requireAdminUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    if (isSupabaseConfigured()) {
+      const user = await requireAdminUser();
+      if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
     }
-  }
 
-  const { id } = await params;
-  const action = new URL(_request.url).searchParams.get("action");
+    const { id } = await params;
+    const action = new URL(_request.url).searchParams.get("action");
 
-  if (action !== "restore") {
-    return NextResponse.json({ error: "Unsupported action" }, { status: 400 });
-  }
+    if (action !== "restore") {
+      return NextResponse.json({ error: "Unsupported action" }, { status: 400 });
+    }
 
-  restoreCmsProduct(id);
-  if (isSupabaseConfigured()) {
-    await restoreProduct(id);
+    restoreCmsProduct(id);
+    if (isSupabaseConfigured()) {
+      await restoreProduct(id);
+    }
+    await persistProductsToFile(getCmsProducts({ includeDeleted: true }));
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "Failed to restore product",
+      },
+      { status: 500 }
+    );
   }
-  await persistProductsToFile(getCmsProducts({ includeDeleted: true }));
-  return NextResponse.json({ ok: true });
 }
