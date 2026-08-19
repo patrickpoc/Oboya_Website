@@ -506,7 +506,7 @@ export default function FaqsAdminPage() {
                         .filter(Boolean),
                     })
                   }
-                  placeholder="shop, catalogue, samples"
+                  placeholder="shop, products, samples"
                 />
               </div>
 

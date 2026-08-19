@@ -65,8 +65,23 @@ function matchesFilters(
     return false;
   }
   if (filters.availabilityOnly && countryCode) {
-    if (!product.availability[countryCode]) return false;
+    const enabledMap = product.enabledCountries ?? product.availability;
+    if (!enabledMap[countryCode]) return false;
   }
+  return true;
+}
+
+function isVisibleByBusinessRules(
+  product: ShopProduct,
+  countryCode: string | null,
+  currency: CurrencyCode | null
+): boolean {
+  if (!countryCode || !currency) return true;
+  const enabledMap = product.enabledCountries ?? product.availability;
+  if (!enabledMap[countryCode]) return false;
+  const price = product.prices[currency];
+  if (price === undefined || price <= 0) return false;
+  if (!product.unlimitedStock && (product.stockQuantity ?? 0) <= 0) return false;
   return true;
 }
 
@@ -96,7 +111,7 @@ export function filterProducts(
   const { countryCode, currency, search, filters } = options;
 
   return products.filter((product) => {
-    if (countryCode && !product.availability[countryCode]) return false;
+    if (!isVisibleByBusinessRules(product, countryCode, currency)) return false;
     if (!matchesSearch(product, search)) return false;
     if (!matchesFilters(product, filters, countryCode)) return false;
     if (!matchesPriceRange(product, currency, filters.priceMin, filters.priceMax)) {

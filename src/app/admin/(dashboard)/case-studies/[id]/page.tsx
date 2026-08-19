@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { RichTextEditor } from "@/components/admin/editors/RichTextEditor";
 import { LocaleFieldTabs, emptyLocalizedString } from "@/components/admin/forms/LocaleFieldTabs";
+import { ImageField } from "@/components/admin/media/ImageField";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -176,14 +177,12 @@ export default function CaseStudyEditPage() {
               <Label>Slug</Label>
               <Input value={study.slug} onChange={(e) => setStudy({ ...study, slug: e.target.value })} />
             </div>
-            <div className="space-y-1.5">
-              <Label>Cover image URL</Label>
-              <Input
-                value={study.coverImage}
-                onChange={(e) => setStudy({ ...study, coverImage: e.target.value })}
-                placeholder="https://images.unsplash.com/..."
-              />
-            </div>
+            <ImageField
+              label="Cover image"
+              value={study.coverImage}
+              onChange={(url) => setStudy({ ...study, coverImage: url })}
+              optional
+            />
             <div className="space-y-1.5">
               <Label>Country</Label>
               <Input value={study.country} onChange={(e) => setStudy({ ...study, country: e.target.value })} />

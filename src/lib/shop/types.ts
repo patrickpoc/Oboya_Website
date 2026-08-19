@@ -65,11 +65,14 @@ export interface ShopProduct {
   tags: string[];
   availability: Record<string, boolean>;
   prices: Partial<Record<CurrencyCode, number>>;
+  enabledCountries?: Record<string, boolean>;
   application: string[];
   cultures: string[];
   certifications: string[];
   countryOfOrigin: string;
   stockStatus: StockStatus;
+  stockQuantity: number | null;
+  unlimitedStock: boolean;
   specs: ProductSpec[];
   documents: ProductDocument[];
   relatedProductIds: string[];

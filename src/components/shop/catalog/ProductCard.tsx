@@ -107,7 +107,7 @@ export function ProductCard({
     <motion.article
       whileHover={{ y: -2 }}
       transition={{ duration: 0.2 }}
-      className="group overflow-hidden rounded-xl border border-border/60 bg-white shadow-[var(--shadow-card)] transition-shadow hover:shadow-md"
+      className="group flex flex-col overflow-hidden rounded-xl border border-border/60 bg-white shadow-[var(--shadow-card)] transition-shadow hover:shadow-md"
     >
       <div className="relative aspect-[4/3] bg-oboya-soft-white">
         <Image src={product.images[0]} alt={name} fill className="object-cover" />
@@ -115,16 +115,16 @@ export function ProductCard({
           <StockBadge status={product.stockStatus} />
         </div>
       </div>
-      <div className="p-4">
+      <div className="flex flex-1 flex-col p-4">
         <p className="text-xs font-medium uppercase tracking-wide text-oboya-green">
           {category?.name}
         </p>
-        <h3 className="mt-1 line-clamp-2 font-semibold text-oboya-blue-dark">{name}</h3>
+        <h3 className="mt-1 min-h-[2.5rem] line-clamp-2 font-semibold text-oboya-blue-dark">{name}</h3>
         <p className="mt-1 text-xs text-muted-foreground">
           {product.sku} · {brand?.name}
         </p>
         {product.tags.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
+          <div className="mt-2 flex min-h-[1.5rem] flex-wrap gap-1">
             {product.tags.slice(0, 2).map((tag) => (
               <Badge key={tag} variant="secondary" className="text-[10px]">
                 {tag}
@@ -132,19 +132,20 @@ export function ProductCard({
             ))}
           </div>
         )}
+        {product.tags.length === 0 && <div className="mt-2 min-h-[1.5rem]" />}
         <p className="mt-3 text-sm font-semibold text-oboya-blue-dark">
           {currency} {price.toFixed(2)}
         </p>
         <p className="text-[11px] text-muted-foreground">{t("estimatedPrice")}</p>
         <p className="text-[11px] text-oboya-green">{t("moq", { count: product.moq })}</p>
-        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <div className="mt-auto flex gap-2 pt-4">
           <button
             type="button"
             onClick={onQuickView}
             className={buttonVariants({
               variant: "outline",
-              size: "cta",
-              className: "w-full sm:flex-1",
+              size: "sm",
+              className: "flex-1 rounded-full text-[11px] font-semibold uppercase tracking-wide",
             })}
           >
             {t("quickView")}
@@ -153,9 +154,9 @@ export function ProductCard({
             type="button"
             onClick={onAddToQuote}
             className={buttonVariants({
-              size: "cta",
+              size: "sm",
               className:
-                "w-full bg-oboya-green text-white hover:bg-oboya-green/90 sm:flex-1",
+                "flex-1 rounded-full bg-oboya-green text-[11px] font-semibold uppercase tracking-wide text-white hover:bg-oboya-green/90",
             })}
           >
             {t("addToQuote")}

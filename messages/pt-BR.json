@@ -6,7 +6,6 @@
   "nav": {
     "solutions": "Soluções",
     "products": "Produtos",
-    "catalogue": "Catálogo",
     "about": "Sobre",
     "sustainability": "Sustentabilidade",
     "news": "Notícias",
@@ -42,17 +41,6 @@
     "categoryFlower": "Flor",
     "categoryFruit": "Fruta",
     "categorySublabel": "Soluções"
-  },
-  "catalogue": {
-    "eyebrow": "Catálogo de produtos",
-    "title": "Catálogo Oboya Horticulture 2024",
-    "description": "Navegue pelo nosso catálogo completo página a página. Use os controles ou as setas do teclado para avançar e voltar.",
-    "prev": "Anterior",
-    "next": "Próxima",
-    "navLabel": "Navegação do catálogo",
-    "pageInputLabel": "Ir para a página",
-    "loading": "Carregando catálogo…",
-    "error": "Não foi possível carregar o catálogo. Tente novamente mais tarde."
   },
   "companyOverview": {
     "headlineGreen": "Apoiamos toda a cadeia de suprimentos hortícola ",
@@ -173,7 +161,6 @@
     "shopSection": "Loja",
     "caseStudies": "Cases",
     "workWithUs": "Trabalhe conosco",
-    "catalogue": "Catálogo",
     "blog": "Blog",
     "faqs": "FAQs",
     "shop": "Loja",
@@ -753,8 +740,8 @@
         "answer": "Use the B2B shop to select your country and currency. Only available SKUs will be shown."
       },
       "q2": {
-        "question": "Are catalogue products the same as shop products?",
-        "answer": "The PDF catalogue shows the full range. The shop filters items available in your market."
+        "question": "Are all products available in the shop?",
+        "answer": "The complete product range may vary by region. The shop shows only items currently available in your market."
       },
       "q3": {
         "question": "Can I request samples?",
@@ -858,7 +845,7 @@
     },
     "s3": {
       "title": "3. Intellectual property",
-      "body": "Trademarks, logos, text, images, and catalogue materials are owned by Oboya or its licensors and may not be reused without permission."
+      "body": "Trademarks, logos, text, and images are owned by Oboya or its licensors and may not be reused without permission."
     },
     "s4": {
       "title": "4. Limitation of liability",

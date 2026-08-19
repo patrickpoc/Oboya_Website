@@ -65,6 +65,13 @@ export interface AuditLogEntry {
   createdAt: string;
 }
 
+export interface MediaFolder {
+  id: string;
+  name: string;
+  parentId: string | null;
+  createdAt: string;
+}
+
 export interface MediaAsset {
   id: string;
   name: string;
@@ -72,8 +79,11 @@ export interface MediaAsset {
   type: "image" | "document" | "video";
   mimeType: string;
   size: number;
+  width?: number;
+  height?: number;
   alt?: LocalizedString;
   folder: string;
+  tags: string[];
   createdAt: string;
   updatedAt: string;
 }

@@ -30,11 +30,6 @@ function cardsPerView(width: number) {
   return 3;
 }
 
-function initialPerPage() {
-  if (typeof window === "undefined") return 1;
-  return cardsPerView(window.innerWidth);
-}
-
 interface TestimonialsProps {
   data: HomepageSettings["testimonials"];
   locale: string;
@@ -48,7 +43,7 @@ export function Testimonials({
 }: TestimonialsProps) {
   const items = data.items;
   const [page, setPage] = useState(0);
-  const [perPage, setPerPage] = useState(initialPerPage);
+  const [perPage, setPerPage] = useState(1);
   const [cardWidth, setCardWidth] = useState(0);
   const [padLeft, setPadLeft] = useState(0);
   const [offsets, setOffsets] = useState<number[]>([]);

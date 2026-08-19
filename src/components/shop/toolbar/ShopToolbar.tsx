@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Container } from "@/components/ui/container";
@@ -15,37 +16,72 @@ export function ShopToolbar() {
   const t = useTranslations("shop");
   const { activeFilterCount, setFilterDrawerOpen, countryCode } = useShop();
 
+  const [collapsed, setCollapsed] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setCollapsed(!entry.isIntersecting),
+      { threshold: 0, rootMargin: "-80px 0px 0px 0px" }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="sticky top-16 z-30 border-b border-border/60 bg-white/95 shadow-sm backdrop-blur-md md:top-20">
-      <Container className="py-4">
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
-            <CountrySelector className="lg:w-44" />
-            <CurrencySelector className="lg:w-36" />
-            <SearchBar />
-            <SortDropdown className="lg:w-40" />
-            <ViewSwitcher className="lg:w-24" />
-            <button
-              type="button"
-              onClick={() => setFilterDrawerOpen(true)}
-              disabled={!countryCode}
-              className={buttonVariants({
-                variant: "outline",
-                className:
-                  "h-10 shrink-0 rounded-lg border-border lg:hidden",
-              })}
+    <>
+      {/* Sentinel: collapse triggers when this scrolls behind the sticky navbar */}
+      <div ref={sentinelRef} className="pointer-events-none h-px" aria-hidden />
+
+      <div ref={toolbarRef} className="sticky top-16 z-30 border-b border-border/60 bg-white/95 shadow-sm backdrop-blur-md md:top-20">
+        <Container className="py-4">
+          <div className="flex flex-col gap-4">
+            {/* Controls that hide on mobile scroll */}
+            <div
+              className={`flex flex-col gap-3 transition-all duration-300 md:!max-h-none md:!opacity-100 md:!overflow-visible lg:flex-row lg:items-end ${
+                collapsed
+                  ? "max-h-0 opacity-0 overflow-hidden !py-0 !gap-0 !mt-0 !mb-0"
+                  : "max-h-[500px] opacity-100"
+              }`}
             >
-              <SlidersHorizontal className="mr-2 size-4" />
-              {t("filters")}
-              {activeFilterCount > 0 && (
-                <span className="ml-1.5 rounded-full bg-oboya-green px-1.5 text-[10px] font-semibold text-white">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
+              <CountrySelector className="lg:w-44" />
+              <CurrencySelector className="lg:w-36" />
+              <div className="hidden lg:block lg:flex-1">
+                <SearchBar />
+              </div>
+              <SortDropdown className="lg:w-40" />
+              <ViewSwitcher className="lg:w-24" />
+            </div>
+
+            {/* Search bar + Filters button — always visible on mobile */}
+            <div className="flex gap-2 lg:hidden">
+              <div className="flex-1">
+                <SearchBar />
+              </div>
+              <button
+                type="button"
+                onClick={() => setFilterDrawerOpen(true)}
+                disabled={!countryCode}
+                className={buttonVariants({
+                  variant: "outline",
+                  className: "h-10 shrink-0 rounded-lg border-border",
+                })}
+              >
+                <SlidersHorizontal className="mr-2 size-4" />
+                {t("filters")}
+                {activeFilterCount > 0 && (
+                  <span className="ml-1.5 rounded-full bg-oboya-green px-1.5 text-[10px] font-semibold text-white">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
-        </div>
-      </Container>
-    </div>
+        </Container>
+      </div>
+    </>
   );
 }

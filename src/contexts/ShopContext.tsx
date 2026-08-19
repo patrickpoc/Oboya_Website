@@ -13,9 +13,7 @@ import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import {
   PRODUCTS_PAGE_SIZE,
-  getAvailableProducts,
   getCountryByCode,
-  getProductById,
   getShopCatalog,
 } from "@/lib/shop/catalog";
 import { countActiveFilters, filterProducts, sortProducts } from "@/lib/shop/filters";
@@ -29,11 +27,13 @@ import type {
   CurrencyCode,
   RfqPayload,
   ShopFilters,
+  ShopProduct,
   ShopState,
   SortOption,
   ViewMode,
 } from "@/lib/shop/types";
 import { EMPTY_SHOP_FILTERS } from "@/lib/shop/types";
+import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 
 const STORAGE_KEY = "oboya-shop-quote";
 
@@ -47,8 +47,8 @@ interface ShopContextValue extends ShopState {
   isReady: boolean;
   itemCount: number;
   activeFilterCount: number;
-  filteredProducts: ReturnType<typeof getAvailableProducts>;
-  displayedProducts: ReturnType<typeof getAvailableProducts>;
+  filteredProducts: ShopProduct[];
+  displayedProducts: ShopProduct[];
   hasMoreProducts: boolean;
   estimatedTotal: number;
   countries: ReturnType<typeof getShopCatalog>["countries"];
@@ -114,7 +114,7 @@ const defaultState: ShopState = {
   sort: "relevance",
   viewMode: "grid",
   filters: EMPTY_SHOP_FILTERS,
-  isCartOpen: false,
+  isCartOpen: true,
   quickViewProductId: null,
   isQuoteModalOpen: false,
   isFilterDrawerOpen: false,
@@ -133,6 +133,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     null
   );
   const [isReady, setIsReady] = useState(false);
+  const [shopProducts, setShopProducts] = useState<ShopProduct[]>(() => getShopCatalog().products);
   const hydratedFromUrl = useRef(false);
   const skipUrlWrite = useRef(false);
   const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -145,13 +146,35 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   // Persist cart/country from localStorage once
   useEffect(() => {
     const persisted = loadPersisted();
-    setState((prev) => ({
-      ...prev,
-      countryCode: persisted.countryCode ?? prev.countryCode,
-      currency: persisted.currency ?? prev.currency,
-      items: persisted.items.length > 0 ? persisted.items : prev.items,
-    }));
-    setIsReady(true);
+    queueMicrotask(() => {
+      setState((prev) => ({
+        ...prev,
+        countryCode: persisted.countryCode ?? prev.countryCode,
+        currency: persisted.currency ?? prev.currency,
+        items: persisted.items.length > 0 ? persisted.items : prev.items,
+      }));
+    });
+    queueMicrotask(() => {
+      setIsReady(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const response = await fetch("/api/cms/products", { cache: "no-store" });
+        if (!response.ok) return;
+        const products = (await response.json()) as CmsProduct[];
+        const published = products.filter(
+          (product) => product.status === "published" && !product.deletedAt
+        );
+        if (published.length > 0) {
+          setShopProducts(published);
+        }
+      } catch {
+        // Keep static fallback catalog when API is unavailable.
+      }
+    })();
   }, []);
 
   // Keep shop UI in sync with URL when entering / navigating within shop
@@ -289,7 +312,9 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
     if (!navigator.onLine) {
-      setState((prev) => ({ ...prev, status: "offline" }));
+      queueMicrotask(() => {
+        setState((prev) => ({ ...prev, status: "offline" }));
+      });
     }
     return () => {
       window.removeEventListener("online", handleOnline);
@@ -309,6 +334,11 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       search: "",
     }));
   }, []);
+
+  const getProductByIdFromState = useCallback(
+    (productId: string) => shopProducts.find((product) => product.id === productId),
+    [shopProducts]
+  );
 
   const setCurrency = useCallback((currency: CurrencyCode) => {
     setState((prev) => ({ ...prev, currency }));
@@ -348,7 +378,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const addItem = useCallback((productId: string, quantity = 1) => {
-    const product = getProductById(productId);
+    const product = getProductByIdFromState(productId);
     const moq = getProductMoq(product);
     const normalizedQuantity = clampQuantity(quantity, moq);
 
@@ -366,10 +396,10 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         : [...prev.items, { productId, quantity: nextQuantity }];
       return { ...prev, items, isCartOpen: true };
     });
-  }, []);
+  }, [getProductByIdFromState]);
 
   const updateQuantity = useCallback((productId: string, quantity: number) => {
-    const product = getProductById(productId);
+    const product = getProductByIdFromState(productId);
     const moq = getProductMoq(product);
 
     setState((prev) => ({
@@ -380,7 +410,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           : item
       ),
     }));
-  }, []);
+  }, [getProductByIdFromState]);
 
   const removeItem = useCallback((productId: string) => {
     setState((prev) => ({
@@ -431,9 +461,14 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const catalog = getShopCatalog();
 
   const baseProducts = useMemo(
-    () =>
-      state.countryCode ? getAvailableProducts(state.countryCode) : catalog.products,
-    [catalog.products, state.countryCode]
+    () => {
+      if (!state.countryCode) return shopProducts;
+      return shopProducts.filter((product) => {
+        const enabledMap = product.enabledCountries ?? product.availability;
+        return Boolean(enabledMap[state.countryCode!]);
+      });
+    },
+    [shopProducts, state.countryCode]
   );
 
   const filteredProducts = useMemo(() => {
@@ -462,7 +497,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     if (!state.currency) return [];
     return state.items
       .map((item) => {
-        const product = getProductById(item.productId);
+        const product = getProductByIdFromState(item.productId);
         if (!product) return null;
         const unitPrice = product.prices[state.currency!] ?? 0;
         return {
@@ -480,7 +515,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       .filter(Boolean) as ShopContextValue["getLineItems"] extends () => infer R
       ? R
       : never;
-  }, [state.currency, state.items]);
+  }, [getProductByIdFromState, state.currency, state.items]);
 
   const estimatedTotal = useMemo(
     () => getLineItems().reduce((sum, item) => sum + item.lineTotal, 0),

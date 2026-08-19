@@ -6,7 +6,6 @@
   "nav": {
     "solutions": "Soluciones",
     "products": "Productos",
-    "catalogue": "Catálogo",
     "about": "Nosotros",
     "sustainability": "Sostenibilidad",
     "news": "Noticias",
@@ -42,17 +41,6 @@
     "categoryFlower": "Flor",
     "categoryFruit": "Fruta",
     "categorySublabel": "Soluciones"
-  },
-  "catalogue": {
-    "eyebrow": "Catálogo de productos",
-    "title": "Catálogo Oboya Horticulture 2024",
-    "description": "Explore nuestro catálogo completo página por página. Use los controles o las flechas del teclado para avanzar y retroceder.",
-    "prev": "Anterior",
-    "next": "Siguiente",
-    "navLabel": "Navegación del catálogo",
-    "pageInputLabel": "Ir a la página",
-    "loading": "Cargando catálogo…",
-    "error": "No se pudo cargar el catálogo. Inténtelo de nuevo más tarde."
   },
   "companyOverview": {
     "headlineGreen": "Apoyamos toda la cadena de suministro hortícola ",
@@ -173,7 +161,6 @@
     "shopSection": "Tienda",
     "caseStudies": "Casos de éxito",
     "workWithUs": "Trabaja con nosotros",
-    "catalogue": "Catálogo",
     "blog": "Blog",
     "faqs": "FAQs",
     "shop": "Tienda",
@@ -461,7 +448,7 @@
     "description": "Select your country and currency to browse available products and request a commercial quotation.",
     "bannerShop": "Tienda Online",
     "bannerTagline": "Abastecimiento B2B de productos",
-    "bannerDescription": "Explore el catálogo global de horticultura de Oboya para su mercado. Arme su lista de cotización, revise precios estimados y envíe una solicitud comercial a su oficina local — abastecimiento profesional, sin pago en línea.",
+    "bannerDescription": "Explore la gama global de horticultura de Oboya para su mercado. Arme su lista de cotización, revise precios estimados y envíe una solicitud comercial a su oficina local — abastecimiento profesional, sin pago en línea.",
     "selectCountry": "Country",
     "chooseCountry": "Select a country",
     "selectCurrency": "Currency",
@@ -753,8 +740,8 @@
         "answer": "Use the B2B shop to select your country and currency. Only available SKUs will be shown."
       },
       "q2": {
-        "question": "Are catalogue products the same as shop products?",
-        "answer": "The PDF catalogue shows the full range. The shop filters items available in your market."
+        "question": "Are all products available in the shop?",
+        "answer": "The complete product range may vary by region. The shop shows only items currently available in your market."
       },
       "q3": {
         "question": "Can I request samples?",
@@ -858,7 +845,7 @@
     },
     "s3": {
       "title": "3. Intellectual property",
-      "body": "Trademarks, logos, text, images, and catalogue materials are owned by Oboya or its licensors and may not be reused without permission."
+      "body": "Trademarks, logos, text, and images are owned by Oboya or its licensors and may not be reused without permission."
     },
     "s4": {
       "title": "4. Limitation of liability",

@@ -42,7 +42,10 @@ export function getCategoryById(id: string) {
 
 export function getAvailableProducts(countryCode: string) {
   return catalog.products.filter(
-    (product) => product.availability[countryCode]
+    (product) => {
+      const enabledMap = product.enabledCountries ?? product.availability;
+      return Boolean(enabledMap[countryCode]);
+    }
   );
 }
 

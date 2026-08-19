@@ -106,18 +106,18 @@ const defaultFaqs = (): CmsFaqItem[] => [
     id: "products-2",
     categoryId: "products",
     question: loc(
-      "Are catalogue products the same as shop products?",
-      "Os produtos do catálogo são os mesmos da loja?",
-      "¿Los productos del catálogo son los mismos que los de la tienda?",
-      "目录中的产品与商店产品相同吗？"
+      "Are all products available in the shop?",
+      "Todos os produtos estão disponíveis na loja?",
+      "¿Todos los productos están disponibles en la tienda?",
+      "所有产品都可以在商店购买吗？"
     ),
     answer: loc(
-      "The PDF catalogue shows the full range. The shop filters items available in your market.",
-      "O catálogo PDF mostra a gama completa. A loja filtra itens disponíveis no seu mercado.",
-      "El catálogo PDF muestra la gama completa. La tienda filtra los artículos disponibles en su mercado.",
-      "PDF 目录展示完整产品线，商店则按您所在市场筛选可售商品。"
+      "The complete product range may vary by region. The shop shows only items currently available in your market.",
+      "A linha completa de produtos pode variar por região. A loja exibe apenas os itens disponíveis no seu mercado.",
+      "La gama completa de productos puede variar por región. La tienda muestra solo los artículos disponibles en su mercado.",
+      "完整产品线会因地区而异。商店仅显示您所在市场当前可售的商品。"
     ),
-    keywords: ["catalogue", "pdf", "shop", "range"],
+    keywords: ["products", "shop", "availability", "range"],
     order: 2,
     status: "published",
   },

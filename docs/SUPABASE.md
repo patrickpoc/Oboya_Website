@@ -4,6 +4,8 @@
 
 1. Go to [supabase.com](https://supabase.com) and create a project.
 2. In **SQL Editor**, run the contents of [`supabase/schema.sql`](./supabase/schema.sql).
+3. Then run marketplace products migration:
+   - [`supabase/migrations/20260819_marketplace_products.sql`](../supabase/migrations/20260819_marketplace_products.sql)
 3. In **Authentication → Users**, create an admin user (email + password).
 
 ## 2. Environment variables
@@ -18,15 +20,18 @@ Copy [`.env.example`](./.env.example) to `.env.local` and fill in:
 
 On **Vercel**, add only the two `NEXT_PUBLIC_*` variables.
 
-## 3. Seed map data
+## 3. Seed data
 
 After running the SQL schema:
 
 ```bash
 npm run seed:map
+npm run seed:products
 ```
 
-This uploads `data/map-locations.json` to the `map_locations_config` table.
+This uploads:
+- `data/map-locations.json` to `map_locations_config`
+- `data/shop/products.json` to `cms_products`
 
 ## 4. Deploy on Vercel
 

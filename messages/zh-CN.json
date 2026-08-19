@@ -6,7 +6,6 @@
   "nav": {
     "solutions": "解决方案",
     "products": "产品",
-    "catalogue": "产品目录",
     "about": "关于我们",
     "sustainability": "可持续发展",
     "news": "新闻",
@@ -42,17 +41,6 @@
     "categoryFlower": "花卉",
     "categoryFruit": "水果",
     "categorySublabel": "解决方案"
-  },
-  "catalogue": {
-    "eyebrow": "产品目录",
-    "title": "Oboya Horticulture 2024 产品目录",
-    "description": "逐页浏览我们的完整产品目录。使用导航按钮或键盘方向键翻页。",
-    "prev": "上一页",
-    "next": "下一页",
-    "navLabel": "目录导航",
-    "pageInputLabel": "跳转到页面",
-    "loading": "正在加载目录…",
-    "error": "无法加载目录，请稍后再试。"
   },
   "companyOverview": {
     "headlineGreen": "我们支持整个园艺供应链 ",
@@ -173,7 +161,6 @@
     "shopSection": "商店",
     "caseStudies": "案例研究",
     "workWithUs": "加入我们",
-    "catalogue": "产品目录",
     "blog": "博客",
     "faqs": "常见问题",
     "shop": "商店",
@@ -753,8 +740,8 @@
         "answer": "Use the B2B shop to select your country and currency. Only available SKUs will be shown."
       },
       "q2": {
-        "question": "Are catalogue products the same as shop products?",
-        "answer": "The PDF catalogue shows the full range. The shop filters items available in your market."
+        "question": "Are all products available in the shop?",
+        "answer": "The complete product range may vary by region. The shop shows only items currently available in your market."
       },
       "q3": {
         "question": "Can I request samples?",
@@ -858,7 +845,7 @@
     },
     "s3": {
       "title": "3. Intellectual property",
-      "body": "Trademarks, logos, text, images, and catalogue materials are owned by Oboya or its licensors and may not be reused without permission."
+      "body": "Trademarks, logos, text, and images are owned by Oboya or its licensors and may not be reused without permission."
     },
     "s4": {
       "title": "4. Limitation of liability",

@@ -6,7 +6,6 @@
   "nav": {
     "solutions": "Solutions",
     "products": "Products",
-    "catalogue": "Catalogue",
     "about": "About",
     "caseStudies": "Case Studies",
     "blog": "Blog",
@@ -42,17 +41,6 @@
     "categoryFlower": "Flower",
     "categoryFruit": "Fruit",
     "categorySublabel": "Solutions"
-  },
-  "catalogue": {
-    "eyebrow": "Product catalogue",
-    "title": "Oboya Horticulture Catalogue 2024",
-    "description": "Browse our full product catalogue page by page. Use the navigation controls or arrow keys to move between pages.",
-    "prev": "Previous",
-    "next": "Next",
-    "navLabel": "Catalogue navigation",
-    "pageInputLabel": "Go to page",
-    "loading": "Loading catalogue…",
-    "error": "Unable to load the catalogue. Please try again later."
   },
   "companyOverview": {
     "headlineGreen": "We support the entire horticultural supply chain ",
@@ -165,7 +153,6 @@
     "caseStudies": "Case Studies",
     "workWithUs": "Work with us",
     "contact": "Contact",
-    "catalogue": "Catalogue",
     "blog": "Blog",
     "faqs": "FAQs",
     "shop": "Shop",
@@ -763,8 +750,8 @@
         "answer": "Use the B2B shop to select your country and currency. Only available SKUs will be shown."
       },
       "q2": {
-        "question": "Are catalogue products the same as shop products?",
-        "answer": "The PDF catalogue shows the full range. The shop filters items available in your market."
+        "question": "Are all products available in the shop?",
+        "answer": "The complete product range may vary by region. The shop shows only items currently available in your market."
       },
       "q3": {
         "question": "Can I request samples?",
@@ -866,7 +853,7 @@
     },
     "s3": {
       "title": "3. Intellectual property",
-      "body": "Trademarks, logos, text, images, and catalogue materials are owned by Oboya or its licensors and may not be reused without permission."
+      "body": "Trademarks, logos, text, and images are owned by Oboya or its licensors and may not be reused without permission."
     },
     "s4": {
       "title": "4. Limitation of liability",

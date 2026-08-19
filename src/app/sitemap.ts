@@ -22,13 +22,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }))
   );
 
-  const catalogueEntries = routing.locales.map((locale) => ({
-    url: `${baseUrl}/${locale}/catalogue`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.8,
-  }));
-
   const newsEntries = routing.locales.flatMap((locale) => {
     const index = {
       url: `${baseUrl}/${locale}/news`,
@@ -45,5 +38,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     return [index, ...articles];
   });
 
-  return [...homeEntries, ...catalogueEntries, ...newsEntries, ...pageEntries];
+  return [...homeEntries, ...newsEntries, ...pageEntries];
 }

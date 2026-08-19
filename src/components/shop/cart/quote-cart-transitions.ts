@@ -19,10 +19,9 @@ export const mobileSheetTransition = {
 };
 
 export const desktopPanelMotion = {
-  initial: { scaleY: 0.12, opacity: 0.92 },
-  animate: { scaleY: 1, opacity: 1 },
-  exit: { scaleY: 0.12, opacity: 0.92 },
-  style: { transformOrigin: "bottom right" as const },
+  initial: { y: "100%", opacity: 0 },
+  animate: { y: 0, opacity: 1 },
+  exit: { y: "100%", opacity: 0 },
 };
 
 export const desktopChipMotion = {

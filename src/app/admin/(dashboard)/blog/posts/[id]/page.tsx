@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { RichTextEditor } from "@/components/admin/editors/RichTextEditor";
 import { LocaleFieldTabs, emptyLocalizedString } from "@/components/admin/forms/LocaleFieldTabs";
+import { ImageField } from "@/components/admin/media/ImageField";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -213,14 +214,12 @@ export default function BlogPostEditPage() {
                   }
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label>Featured image URL</Label>
-                <Input
-                  value={post.featuredImage ?? ""}
-                  onChange={(e) => setPost({ ...post, featuredImage: e.target.value })}
-                  placeholder="/assets/homepage/greenhouse-technology.webp"
-                />
-              </div>
+              <ImageField
+                label="Featured image"
+                value={post.featuredImage ?? ""}
+                onChange={(url) => setPost({ ...post, featuredImage: url })}
+                optional
+              />
               <div className="space-y-1.5">
                 <Label>Author</Label>
                 <select

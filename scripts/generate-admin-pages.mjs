@@ -8,7 +8,6 @@ const pages = [
   ["website/terms", "Terms & Conditions", "Manage legal terms content.", "website"],
   ["website/header", "Header & Navigation", "Manage main navigation and header.", "website"],
   ["website/footer", "Footer", "Manage footer links and content.", "website"],
-  ["website/catalogue", "Catalogue", "Manage PDF catalogue settings.", "website"],
   ["website/seo", "SEO", "Manage global and page-level SEO settings.", "website"],
   ["marketplace/categories", "Categories", "Manage product categories.", "marketplace"],
   ["marketplace/brands", "Brands", "Manage product brands.", "marketplace"],

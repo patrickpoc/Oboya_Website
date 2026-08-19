@@ -54,6 +54,7 @@ export function ImageField({
         mimeType: file.type || "image/jpeg",
         size: file.size,
         folder: "uploads",
+        tags: [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });

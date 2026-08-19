@@ -4,12 +4,48 @@
     "type": "contact",
     "status": "new",
     "data": {
-      "name": "Ana Costa",
+      "firstName": "Ana",
+      "lastName": "Costa",
       "email": "ana@greenhouse.nl",
-      "company": "GreenHouse BV",
-      "message": "Interested in distribution partnership in Netherlands."
+      "phone": "+31 6 1234 5678",
+      "countryCode": "BR",
+      "countryName": "Brazil",
+      "subject": "partnership",
+      "message": "Interested in distribution partnership in Brazil for berry packaging solutions."
     },
     "createdAt": "2026-07-08T14:30:00.000Z"
+  },
+  {
+    "id": "sub-005",
+    "type": "contact",
+    "status": "new",
+    "data": {
+      "firstName": "Wei",
+      "lastName": "Chen",
+      "email": "wei.chen@grower.cn",
+      "phone": "+86 138 0000 1122",
+      "countryCode": "CN",
+      "countryName": "China",
+      "subject": "products",
+      "message": "Looking for product specifications for vegetable trays and growing media."
+    },
+    "createdAt": "2026-07-10T09:12:00.000Z"
+  },
+  {
+    "id": "sub-006",
+    "type": "contact",
+    "status": "read",
+    "data": {
+      "firstName": "James",
+      "lastName": "Miller",
+      "email": "jmiller@pacificfarms.com",
+      "phone": "+1 503 555 0199",
+      "countryCode": "US",
+      "countryName": "United States",
+      "subject": "general",
+      "message": "General inquiry about Oboya presence and support in the Pacific Northwest."
+    },
+    "createdAt": "2026-07-09T16:45:00.000Z"
   },
   {
     "id": "sub-002",

@@ -14,7 +14,6 @@ export function getMainNavigation(t: Translator): NavItem[] {
     },
     { label: t("nav.blog"), href: "/blog" },
     { label: t("nav.faqs"), href: "/faqs" },
-    { label: t("nav.catalogue"), href: "/catalogue" },
     { label: t("nav.shop"), href: "/shop" },
   ];
 }
@@ -28,7 +27,6 @@ export function getFooterNavigation(t: Translator) {
       { label: t("footer.contact"), href: "/contact" },
     ],
     resources: [
-      { label: t("footer.catalogue"), href: "/catalogue" },
       { label: t("footer.blog"), href: "/blog" },
       { label: t("footer.faqs"), href: "/faqs" },
     ],

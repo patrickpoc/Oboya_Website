@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed:map": "node scripts/seed-map-locations.mjs"
+    "seed:map": "node scripts/seed-map-locations.mjs",
+    "seed:products": "node scripts/seed-products.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
