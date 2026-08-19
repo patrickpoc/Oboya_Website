@@ -20,6 +20,14 @@ const catalog: ShopCatalog = {
   products: productsData as ShopProduct[],
 };
 
+export function updateShopCatalog(patch: Partial<ShopCatalog>) {
+  if (patch.countries) catalog.countries = patch.countries;
+  if (patch.categories) catalog.categories = patch.categories;
+  if (patch.brands) catalog.brands = patch.brands;
+  if (patch.filterOptions) catalog.filterOptions = patch.filterOptions;
+  if (patch.products) catalog.products = patch.products;
+}
+
 export function getShopCatalog(): ShopCatalog {
   return catalog;
 }

@@ -1,12 +1,26 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useShop } from "@/contexts/ShopContext";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { ShopLocalizedText } from "@/lib/shop/types";
 
 function toggleInList(list: string[], id: string) {
   return list.includes(id) ? list.filter((item) => item !== id) : [...list, id];
+}
+
+function pickLocalizedLabel(
+  locale: string,
+  name: string,
+  localized?: ShopLocalizedText
+) {
+  const key = locale as keyof ShopLocalizedText;
+  const value = localized?.[key]?.trim();
+  if (value) return value;
+  const en = localized?.en?.trim();
+  if (en) return en;
+  return name;
 }
 
 function FilterGroup({
@@ -56,6 +70,7 @@ function CheckboxRow({
 
 export function FilterSidebar({ className }: { className?: string }) {
   const t = useTranslations("shop");
+  const locale = useLocale();
   const {
     categories,
     brands,
@@ -119,7 +134,7 @@ export function FilterSidebar({ className }: { className?: string }) {
                 : "text-muted-foreground hover:bg-muted"
             )}
           >
-            {category.name}
+            {pickLocalizedLabel(locale, category.name, category.nameI18n)}
           </button>
         ))}
       </FilterGroup>
@@ -130,7 +145,7 @@ export function FilterSidebar({ className }: { className?: string }) {
             <CheckboxRow
               key={sub.id}
               id={`sub-${sub.id}`}
-              label={sub.name}
+              label={pickLocalizedLabel(locale, sub.name, sub.nameI18n)}
               checked={filters.subcategoryIds.includes(sub.id)}
               onChange={() =>
                 updateFilters({
@@ -147,7 +162,7 @@ export function FilterSidebar({ className }: { className?: string }) {
           <CheckboxRow
             key={brand.id}
             id={`brand-${brand.id}`}
-            label={brand.name}
+            label={pickLocalizedLabel(locale, brand.name, brand.nameI18n)}
             checked={filters.brandIds.includes(brand.id)}
             onChange={() =>
               updateFilters({
@@ -163,7 +178,7 @@ export function FilterSidebar({ className }: { className?: string }) {
           <CheckboxRow
             key={item.id}
             id={`app-${item.id}`}
-            label={item.name}
+            label={pickLocalizedLabel(locale, item.name, item.nameI18n)}
             checked={filters.applications.includes(item.id)}
             onChange={() =>
               updateFilters({
@@ -179,7 +194,7 @@ export function FilterSidebar({ className }: { className?: string }) {
           <CheckboxRow
             key={item.id}
             id={`culture-${item.id}`}
-            label={item.name}
+            label={pickLocalizedLabel(locale, item.name, item.nameI18n)}
             checked={filters.cultures.includes(item.id)}
             onChange={() =>
               updateFilters({
@@ -195,7 +210,7 @@ export function FilterSidebar({ className }: { className?: string }) {
           <CheckboxRow
             key={item.id}
             id={`cert-${item.id}`}
-            label={item.name}
+            label={pickLocalizedLabel(locale, item.name, item.nameI18n)}
             checked={filters.certifications.includes(item.id)}
             onChange={() =>
               updateFilters({
@@ -211,7 +226,7 @@ export function FilterSidebar({ className }: { className?: string }) {
           <CheckboxRow
             key={item.id}
             id={`origin-${item.id}`}
-            label={item.name}
+            label={pickLocalizedLabel(locale, item.name, item.nameI18n)}
             checked={filters.countriesOfOrigin.includes(item.id)}
             onChange={() =>
               updateFilters({

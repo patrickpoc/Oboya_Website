@@ -2,14 +2,18 @@
 
 import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { Plus, Trash2, Upload } from "lucide-react";
+import { ImageIcon, Plus, Trash2, Upload } from "lucide-react";
 import { LocaleFieldTabs } from "@/components/admin/forms/LocaleFieldTabs";
+import {
+  MediaLibraryDialog,
+  type MediaLibraryImage,
+} from "@/components/admin/media/ImageField";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { saveMediaAsset } from "@/lib/cms/repositories/media-repository";
+import { getMediaAssets, saveMediaAsset } from "@/lib/cms/repositories/media-repository";
 import { getShopCatalog } from "@/lib/shop/catalog";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { CmsLocale, CmsStatus } from "@/lib/cms/types";
@@ -18,8 +22,6 @@ interface ProductEditorFormProps {
   product: CmsProduct;
   onChange: (next: CmsProduct) => void;
 }
-
-const CURRENCIES = ["USD", "BRL", "EUR"] as const;
 
 export function createEmptyCmsProduct(seed?: {
   categoryId?: string;
@@ -66,12 +68,27 @@ export function ProductEditorForm({ product, onChange }: ProductEditorFormProps)
   const [newTag, setNewTag] = useState("");
   const imageUploadRef = useRef<HTMLInputElement>(null);
   const [uploadTargetIndex, setUploadTargetIndex] = useState<number | null>(null);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [libraryTargetIndex, setLibraryTargetIndex] = useState<number | null>(null);
   const catalog = getShopCatalog();
+  const mediaLibraryImages = useMemo<MediaLibraryImage[]>(
+    () => getMediaAssets().filter((asset) => asset.type === "image"),
+    []
+  );
 
   const selectedCategory = useMemo(
     () => catalog.categories.find((c) => c.id === product.categoryId),
     [catalog.categories, product.categoryId]
   );
+  const currencies = useMemo(() => {
+    const set = new Set<string>();
+    catalog.countries.forEach((country) => {
+      country.currencies.forEach((currency) => set.add(currency));
+      set.add(country.defaultCurrency);
+    });
+    Object.keys(product.prices ?? {}).forEach((currency) => set.add(currency));
+    return Array.from(set).sort();
+  }, [catalog.countries, product.prices]);
 
   const update = (patch: Partial<CmsProduct>) => onChange({ ...product, ...patch });
 
@@ -134,7 +151,7 @@ export function ProductEditorForm({ product, onChange }: ProductEditorFormProps)
     reader.readAsDataURL(file);
   };
 
-  const setCurrencyPrice = (currency: (typeof CURRENCIES)[number], value: string) => {
+  const setCurrencyPrice = (currency: string, value: string) => {
     const nextPrices = { ...product.prices };
     if (value.trim() === "") {
       delete nextPrices[currency];
@@ -306,6 +323,19 @@ export function ProductEditorForm({ product, onChange }: ProductEditorFormProps)
             >
               <Upload className="mr-1 size-3.5" /> Upload from PC
             </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                const nextIndex = product.images.length;
+                addImage();
+                setLibraryTargetIndex(nextIndex);
+                setLibraryOpen(true);
+              }}
+            >
+              <ImageIcon className="mr-1 size-3.5" /> Media library
+            </Button>
           </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -362,6 +392,16 @@ export function ProductEditorForm({ product, onChange }: ProductEditorFormProps)
               </Button>
               <Button
                 type="button"
+                variant="outline"
+                onClick={() => {
+                  setLibraryTargetIndex(index);
+                  setLibraryOpen(true);
+                }}
+              >
+                <ImageIcon className="mr-1 size-3.5" /> Library
+              </Button>
+              <Button
+                type="button"
                 size="icon"
                 variant="outline"
                 onClick={() => removeImage(index)}
@@ -386,6 +426,25 @@ export function ProductEditorForm({ product, onChange }: ProductEditorFormProps)
             setUploadTargetIndex(null);
           }}
         />
+        {libraryOpen && (
+          <MediaLibraryDialog
+            images={mediaLibraryImages}
+            selected={
+              libraryTargetIndex !== null ? (product.images[libraryTargetIndex] ?? "") : undefined
+            }
+            onClose={() => {
+              setLibraryOpen(false);
+              setLibraryTargetIndex(null);
+            }}
+            onSelect={(url) => {
+              if (libraryTargetIndex !== null) {
+                setImageAt(libraryTargetIndex, url);
+              }
+              setLibraryOpen(false);
+              setLibraryTargetIndex(null);
+            }}
+          />
+        )}
       </div>
 
       <div className="space-y-2">
@@ -394,7 +453,7 @@ export function ProductEditorForm({ product, onChange }: ProductEditorFormProps)
           Price equal to 0 or empty means product is hidden in that currency.
         </p>
         <div className="grid gap-3 sm:grid-cols-3">
-          {CURRENCIES.map((currency) => (
+          {currencies.map((currency) => (
             <div key={currency} className="space-y-1.5">
               <Label>{currency}</Label>
               <Input

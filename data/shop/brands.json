@@ -1,3 +1,6 @@
 [
-  { "id": "brand-demo", "name": "Brand Demo" }
+  {
+    "id": "brand-demo",
+    "name": "Brand Demo"
+  }
 ]

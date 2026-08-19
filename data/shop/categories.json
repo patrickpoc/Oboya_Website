@@ -3,7 +3,20 @@
     "id": "categoria-demo",
     "name": "Categoria Demo",
     "subcategories": [
-      { "id": "subcategoria-demo", "name": "Subcategoria Demo" }
+      {
+        "id": "subcategoria-demo",
+        "name": "Subcategoria Demo"
+      }
+    ]
+  },
+  {
+    "id": "category-1787160196293-240",
+    "name": "Teste Categoria",
+    "subcategories": [
+      {
+        "id": "subcategory-1787160210785-231",
+        "name": "Teste subcategoria"
+      }
     ]
   }
 ]

@@ -90,5 +90,97 @@
     },
     "deletedAt": null,
     "purgeAt": null
+  },
+  {
+    "id": "produto-demo-copy-1787157507059",
+    "sku": "SKU-001-COPY",
+    "moq": 10,
+    "brandId": "brand-demo",
+    "categoryId": "categoria-demo",
+    "subcategoryId": "subcategoria-demo",
+    "images": [
+      "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop"
+    ],
+    "tags": [
+      "demo"
+    ],
+    "availability": {
+      "BR": false,
+      "CN": false,
+      "GB": false,
+      "MX": false,
+      "NO": false,
+      "US": true
+    },
+    "enabledCountries": {
+      "BR": false,
+      "CN": false,
+      "GB": false,
+      "MX": false,
+      "NO": false,
+      "US": true
+    },
+    "prices": {
+      "BRL": 500,
+      "EUR": 0,
+      "USD": 100
+    },
+    "application": [
+      "greenhouse"
+    ],
+    "cultures": [
+      "vegetables"
+    ],
+    "certifications": [
+      "iso-9001"
+    ],
+    "countryOfOrigin": "BR",
+    "stockStatus": "in_stock",
+    "stockQuantity": 10,
+    "unlimitedStock": false,
+    "specs": [
+      {
+        "label": "Material",
+        "value": "Demo"
+      }
+    ],
+    "documents": [],
+    "relatedProductIds": [],
+    "name": {
+      "en": "Produto Demo",
+      "es": "Produto Demo",
+      "pt-BR": "Produto Demo",
+      "zh-CN": "Produto Demo"
+    },
+    "shortDescription": {
+      "en": "",
+      "es": "",
+      "pt-BR": "",
+      "zh-CN": ""
+    },
+    "description": {
+      "en": "",
+      "es": "",
+      "pt-BR": "",
+      "zh-CN": ""
+    },
+    "status": "draft",
+    "seo": {
+      "title": {
+        "en": "",
+        "es": "",
+        "pt-BR": "",
+        "zh-CN": ""
+      },
+      "description": {
+        "en": "",
+        "es": "",
+        "pt-BR": "",
+        "zh-CN": ""
+      }
+    },
+    "deletedAt": null,
+    "purgeAt": null
   }
 ]

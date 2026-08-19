@@ -1,4 +1,5 @@
-export type CurrencyCode = "USD" | "BRL" | "EUR";
+export type CurrencyCode = string;
+export type ShopLocalizedText = Partial<Record<"en" | "pt-BR" | "es" | "zh-CN", string>>;
 
 export type StockStatus = "in_stock" | "limited" | "on_request";
 
@@ -23,17 +24,20 @@ export interface ShopCountry {
 export interface ShopCategory {
   id: string;
   name: string;
-  subcategories: { id: string; name: string }[];
+  nameI18n?: ShopLocalizedText;
+  subcategories: { id: string; name: string; nameI18n?: ShopLocalizedText }[];
 }
 
 export interface ShopBrand {
   id: string;
   name: string;
+  nameI18n?: ShopLocalizedText;
 }
 
 export interface FilterOption {
   id: string;
   name: string;
+  nameI18n?: ShopLocalizedText;
 }
 
 export interface ShopFilterOptions {

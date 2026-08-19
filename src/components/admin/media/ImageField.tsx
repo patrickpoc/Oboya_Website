@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 
 type ImageSourceMode = "upload" | "url" | "library";
+export type MediaLibraryImage = { id: string; name: string; url: string };
 
 interface ImageFieldProps {
   label: string;
@@ -33,13 +34,12 @@ export function ImageField({
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setUrlDraft(value);
+    queueMicrotask(() => {
+      setUrlDraft(value);
+    });
   }, [value]);
 
-  const images = useMemo(
-    () => getMediaAssets().filter((asset) => asset.type === "image"),
-    [libraryOpen]
-  );
+  const images = useMemo(() => getMediaAssets().filter((asset) => asset.type === "image"), []);
 
   const applyUpload = (file: File) => {
     const reader = new FileReader();
@@ -184,13 +184,13 @@ export function ImageField({
   );
 }
 
-function MediaLibraryDialog({
+export function MediaLibraryDialog({
   images,
   selected,
   onSelect,
   onClose,
 }: {
-  images: { id: string; name: string; url: string }[];
+  images: MediaLibraryImage[];
   selected?: string;
   onSelect: (url: string) => void;
   onClose: () => void;
