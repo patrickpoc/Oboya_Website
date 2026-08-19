@@ -175,6 +175,7 @@ export default function Page() {
                       <Select
                         value={country.defaultCurrency}
                         onValueChange={(nextValue) => {
+                          if (!nextValue) return;
                           const nextCountries = [...countries];
                           nextCountries[countryIndex] = {
                             ...country,
