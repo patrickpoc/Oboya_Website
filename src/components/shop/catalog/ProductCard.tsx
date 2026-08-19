@@ -8,7 +8,6 @@ import { buttonVariants } from "@/components/ui/button";
 import { getBrandById, getCategoryById } from "@/lib/shop/catalog";
 import { useProductName } from "@/lib/shop/use-product-name";
 import type { ShopProduct } from "@/lib/shop/types";
-import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
   product: ShopProduct;
@@ -16,25 +15,6 @@ interface ProductCardProps {
   viewMode?: "grid" | "list";
   onQuickView: () => void;
   onAddToQuote: () => void;
-}
-
-function StockBadge({ status }: { status: ShopProduct["stockStatus"] }) {
-  const t = useTranslations("shop.stock");
-  const variants = {
-    in_stock: "bg-oboya-green/10 text-oboya-green border-oboya-green/20",
-    limited: "bg-amber-500/10 text-amber-700 border-amber-500/20",
-    on_request: "bg-muted text-muted-foreground border-border",
-  };
-  return (
-    <span
-      className={cn(
-        "inline-flex rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide",
-        variants[status]
-      )}
-    >
-      {t(status)}
-    </span>
-  );
 }
 
 export function ProductCard({
@@ -65,7 +45,6 @@ export function ProductCard({
             <p className="text-xs font-medium uppercase tracking-wide text-oboya-green">
               {category?.name}
             </p>
-            <StockBadge status={product.stockStatus} />
           </div>
           <h3 className="mt-1 font-semibold text-oboya-blue-dark">{name}</h3>
           <p className="text-xs text-muted-foreground">
@@ -111,9 +90,6 @@ export function ProductCard({
     >
       <div className="relative aspect-[4/3] bg-oboya-soft-white">
         <Image src={product.images[0]} alt={name} fill className="object-cover" />
-        <div className="absolute top-3 left-3">
-          <StockBadge status={product.stockStatus} />
-        </div>
       </div>
       <div className="flex flex-1 flex-col p-4">
         <p className="text-xs font-medium uppercase tracking-wide text-oboya-green">

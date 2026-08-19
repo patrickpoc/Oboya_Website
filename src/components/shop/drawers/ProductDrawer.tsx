@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useShop } from "@/contexts/ShopContext";
-import { getBrandById, getCategoryById, getProductById } from "@/lib/shop/catalog";
 import { useProductName } from "@/lib/shop/use-product-name";
 import { ProductGallery } from "@/components/shop/drawers/ProductGallery";
 import { SpecificationTable } from "@/components/shop/drawers/SpecificationTable";
@@ -21,6 +20,9 @@ export function ProductDrawer() {
     setQuickViewProductId,
     currency,
     openAddToQuoteDialog,
+    getProductById,
+    brands,
+    categories,
   } = useShop();
   const getProductName = useProductName();
 
@@ -30,8 +32,8 @@ export function ProductDrawer() {
   const isOpen = Boolean(product && currency);
 
   const name = product ? getProductName(product as Parameters<typeof getProductName>[0]) : "";
-  const brand = product ? getBrandById(product.brandId) : null;
-  const category = product ? getCategoryById(product.categoryId) : null;
+  const brand = product ? brands.find((item) => item.id === product.brandId) : null;
+  const category = product ? categories.find((item) => item.id === product.categoryId) : null;
   const price =
     product && currency ? (product.prices[currency] ?? 0) : 0;
 

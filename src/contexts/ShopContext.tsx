@@ -55,6 +55,7 @@ interface ShopContextValue extends ShopState {
   categories: ReturnType<typeof getShopCatalog>["categories"];
   brands: ReturnType<typeof getShopCatalog>["brands"];
   filterOptions: ReturnType<typeof getShopCatalog>["filterOptions"];
+  getProductById: (productId: string) => ShopProduct | undefined;
   setCountry: (countryCode: string) => void;
   setCurrency: (currency: CurrencyCode) => void;
   setSearch: (search: string) => void;
@@ -608,6 +609,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       categories: catalog.categories,
       brands: catalog.brands,
       filterOptions: catalog.filterOptions,
+      getProductById: getProductByIdFromState,
       setCountry,
       setCurrency,
       setSearch,
@@ -642,6 +644,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       displayedProducts,
       estimatedTotal,
       catalog,
+      getProductByIdFromState,
       setCountry,
       setCurrency,
       setSearch,

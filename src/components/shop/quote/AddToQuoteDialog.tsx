@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useShop } from "@/contexts/ShopContext";
-import { getProductById } from "@/lib/shop/catalog";
 import { useProductName } from "@/lib/shop/use-product-name";
 import { getProductMoq } from "@/lib/shop/quantity";
 import { QuantityInput } from "@/components/shop/QuantityInput";
@@ -26,6 +25,7 @@ export function AddToQuoteDialog() {
     closeAddToQuoteDialog,
     addItem,
     currency,
+    getProductById,
   } = useShop();
   const getProductName = useProductName();
   const [quantity, setQuantity] = useState(1);
@@ -41,7 +41,7 @@ export function AddToQuoteDialog() {
     queueMicrotask(() => {
       setQuantity(getProductMoq(nextProduct));
     });
-  }, [addToQuoteProductId]);
+  }, [addToQuoteProductId, getProductById]);
 
   if (!product) {
     return (
