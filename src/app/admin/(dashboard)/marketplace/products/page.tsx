@@ -17,6 +17,17 @@ const PAGE_SIZE = 20;
 
 type ViewTab = "active" | "trash";
 
+function buildUniqueDuplicateSku(baseSku: string, existingSkus: Set<string>) {
+  const candidate = `${baseSku}-COPY`;
+  if (!existingSkus.has(candidate.toLowerCase())) return candidate;
+
+  let suffix = 2;
+  while (existingSkus.has(`${baseSku}-COPY-${suffix}`.toLowerCase())) {
+    suffix += 1;
+  }
+  return `${baseSku}-COPY-${suffix}`;
+}
+
 export default function ProductsPage() {
   const router = useRouter();
   const [products, setProducts] = useState<CmsProduct[]>([]);
@@ -87,10 +98,11 @@ export default function ProductsPage() {
     void (async () => {
       const original = products.find((product) => product.id === id);
       if (!original) return;
+      const existingSkus = new Set(products.map((product) => product.sku.toLowerCase()));
       const copy: CmsProduct = {
         ...JSON.parse(JSON.stringify(original)),
         id: `${original.id}-copy-${Date.now()}`,
-        sku: `${original.sku}-COPY`,
+        sku: buildUniqueDuplicateSku(original.sku, existingSkus),
         status: "draft",
         deletedAt: null,
         purgeAt: null,

@@ -195,7 +195,21 @@ export async function hardDeleteProduct(id: string) {
 }
 
 export async function persistProductsToFile(products: CmsProduct[]) {
+  if (isSupabaseConfigured()) {
+    return;
+  }
   await writeFile(PRODUCTS_FILE, `${JSON.stringify(products, null, 2)}\n`, "utf-8");
+}
+
+export async function persistProductsToFileSafe(products: CmsProduct[]) {
+  try {
+    await persistProductsToFile(products);
+  } catch (error) {
+    if (error instanceof Error && /EROFS|read-only file system/i.test(error.message)) {
+      return;
+    }
+    throw error;
+  }
 }
 
 export async function readProductsFromFile() {

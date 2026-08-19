@@ -61,6 +61,17 @@ function seedProducts(): CmsProduct[] {
   return (productsData as ShopProduct[]).map(withDefaults);
 }
 
+function buildUniqueDuplicateSku(baseSku: string, existingSkus: Set<string>) {
+  const candidate = `${baseSku}-COPY`;
+  if (!existingSkus.has(candidate.toLowerCase())) return candidate;
+
+  let suffix = 2;
+  while (existingSkus.has(`${baseSku}-COPY-${suffix}`.toLowerCase())) {
+    suffix += 1;
+  }
+  return `${baseSku}-COPY-${suffix}`;
+}
+
 export function getCmsProducts(options?: { includeDeleted?: boolean }): CmsProduct[] {
   if (!productsCache) productsCache = seedProducts();
   productsCache = purgeExpired(productsCache);
@@ -131,10 +142,13 @@ export function hardDeleteCmsProduct(id: string): boolean {
 export function duplicateCmsProduct(id: string): CmsProduct | null {
   const original = getCmsProductById(id);
   if (!original) return null;
+  const existingSkus = new Set(
+    getCmsProducts({ includeDeleted: true }).map((product) => product.sku.toLowerCase())
+  );
   const copy: CmsProduct = {
     ...JSON.parse(JSON.stringify(original)),
     id: `${original.id}-copy-${Date.now()}`,
-    sku: `${original.sku}-COPY`,
+    sku: buildUniqueDuplicateSku(original.sku, existingSkus),
     status: "draft",
     deletedAt: null,
     purgeAt: null,

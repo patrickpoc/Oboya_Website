@@ -9,7 +9,7 @@ import {
 } from "@/lib/cms/repositories/product-repository";
 import {
   hardDeleteProduct,
-  persistProductsToFile,
+  persistProductsToFileSafe,
   readProductById,
   restoreProduct,
   saveProduct,
@@ -60,7 +60,7 @@ export async function PUT(
       await saveProduct(saved);
     }
 
-    await persistProductsToFile(getCmsProducts({ includeDeleted: true }));
+    await persistProductsToFileSafe(getCmsProducts({ includeDeleted: true }));
     return NextResponse.json(saved);
   } catch (error) {
     return NextResponse.json(
@@ -97,7 +97,7 @@ export async function DELETE(
       else await softDeleteProduct(id);
     }
 
-    await persistProductsToFile(getCmsProducts({ includeDeleted: true }));
+    await persistProductsToFileSafe(getCmsProducts({ includeDeleted: true }));
     return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json(
@@ -132,7 +132,7 @@ export async function POST(
     if (isSupabaseConfigured()) {
       await restoreProduct(id);
     }
-    await persistProductsToFile(getCmsProducts({ includeDeleted: true }));
+    await persistProductsToFileSafe(getCmsProducts({ includeDeleted: true }));
     return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json(

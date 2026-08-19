@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getCmsProducts, saveCmsProduct, type CmsProduct } from "@/lib/cms/repositories/product-repository";
-import { readProducts, saveProduct, persistProductsToFile } from "@/lib/cms/server/products.server";
+import {
+  readProducts,
+  saveProduct,
+  persistProductsToFileSafe,
+} from "@/lib/cms/server/products.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
 
@@ -41,7 +45,7 @@ export async function POST(request: Request) {
       await saveProduct(saved);
     }
 
-    await persistProductsToFile(getCmsProducts({ includeDeleted: true }));
+    await persistProductsToFileSafe(getCmsProducts({ includeDeleted: true }));
     return NextResponse.json(saved, { status: 201 });
   } catch (error) {
     return NextResponse.json(
