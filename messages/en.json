@@ -664,6 +664,12 @@
     "eyebrow": "Case Studies",
     "title": "Proven results worldwide — partnerships that scale growers, logistics, and retail outcomes.",
     "description": "Selected projects demonstrating Oboya solutions across markets and crop types.",
+    "heroEyebrow": "Real Challenges. Measurable Results.",
+    "heroTitle": "Discover how growers, exporters, distributors, and retailers have partnered with Oboya to improve efficiency, strengthen supply chains, and achieve meaningful business outcomes.",
+    "introTitle": "Every Operation Has Its Own Challenges.",
+    "introBody": "From greenhouse floors to retail shelves, every partner faces distinct operational pressures. These stories show how Oboya collaborates locally to unlock efficiency, resilience, and lasting results.",
+    "findOutMore": "Find out more",
+    "emptyState": "Case studies are coming soon.",
     "hubTitle": "Proof from growers, packers, and distributors worldwide",
     "hubDescription": "Browse featured partnerships below, then filter by country to explore more stories from your market.",
     "featuredLabel": "Featured",
@@ -689,7 +695,9 @@
     "ctaSecondary": "Ask for a quotation",
     "backToHub": "All case studies",
     "relatedTitle": "Related stories",
+    "factClient": "Client",
     "factIndustry": "Industry",
+    "factTimeline": "Timeline",
     "factCountry": "Country",
     "factRegion": "Region",
     "regions": {
@@ -700,7 +708,9 @@
     },
     "challengeLabel": "Challenge",
     "solutionLabel": "Solution",
-    "resultLabel": "Result",
+    "implementationLabel": "Implementation",
+    "resultLabel": "Results",
+    "clientPerspective": "Client Perspective",
     "items": {
       "case1": {
         "title": "Scaling greenhouse logistics in the Netherlands",
