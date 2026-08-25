@@ -20,6 +20,8 @@ export interface AdminNavItem {
   href?: string;
   icon?: LucideIcon;
   module?: CmsModule;
+  /** True when the route is a placeholder UI without durable CMS backend. */
+  stub?: boolean;
   children?: AdminNavItem[];
 }
 
@@ -38,12 +40,12 @@ export const adminNavigation: AdminNavItem[] = [
       { label: "Home", href: "/admin/website/home" },
       { label: "About Us", href: "/admin/website/about" },
       { label: "News Page", href: "/admin/website/news" },
-      { label: "Pages", href: "/admin/website/pages" },
+      { label: "Pages", href: "/admin/website/pages", stub: true },
       { label: "FAQs", href: "/admin/website/faqs" },
-      { label: "Terms & Conditions", href: "/admin/website/terms" },
-      { label: "Header", href: "/admin/website/header" },
-      { label: "Footer", href: "/admin/website/footer" },
-      { label: "SEO", href: "/admin/website/seo" },
+      { label: "Terms & Conditions", href: "/admin/website/terms", stub: true },
+      { label: "Header", href: "/admin/website/header", stub: true },
+      { label: "Footer", href: "/admin/website/footer", stub: true },
+      { label: "SEO", href: "/admin/website/seo", stub: true },
     ],
   },
   {
@@ -55,7 +57,7 @@ export const adminNavigation: AdminNavItem[] = [
       { label: "Bulk Import", href: "/admin/marketplace/products/bulk-import" },
       { label: "Bulk Update", href: "/admin/marketplace/products/bulk-update" },
       { label: "Filters", href: "/admin/marketplace/filters" },
-      { label: "Specifications", href: "/admin/marketplace/specifications" },
+      { label: "Specifications", href: "/admin/marketplace/specifications", stub: true },
       { label: "Currencies", href: "/admin/marketplace/currencies" },
       { label: "Shop Config", href: "/admin/marketplace/shop-config" },
     ],
@@ -65,9 +67,9 @@ export const adminNavigation: AdminNavItem[] = [
     icon: Map,
     module: "global_presence",
     children: [
-      { label: "Countries", href: "/admin/global-presence/countries" },
-      { label: "Offices", href: "/admin/global-presence/offices" },
-      { label: "Partners", href: "/admin/global-presence/partners" },
+      { label: "Countries", href: "/admin/global-presence/countries", stub: true },
+      { label: "Offices", href: "/admin/global-presence/offices", stub: true },
+      { label: "Partners", href: "/admin/global-presence/partners", stub: true },
       { label: "Interactive Map", href: "/admin/global-presence/map" },
     ],
   },
@@ -92,8 +94,8 @@ export const adminNavigation: AdminNavItem[] = [
     icon: Building2,
     module: "careers",
     children: [
-      { label: "Job Openings", href: "/admin/careers/openings" },
-      { label: "Applications", href: "/admin/careers/applications" },
+      { label: "Job Openings", href: "/admin/careers/openings", stub: true },
+      { label: "Applications", href: "/admin/careers/applications", stub: true },
     ],
   },
   {
@@ -109,7 +111,7 @@ export const adminNavigation: AdminNavItem[] = [
     children: [
       { label: "Contact", href: "/admin/forms/contact" },
       { label: "Quote Requests", href: "/admin/forms/quotes" },
-      { label: "Newsletter", href: "/admin/forms/newsletter" },
+      { label: "Newsletter", href: "/admin/forms/newsletter", stub: true },
     ],
   },
   {
@@ -126,14 +128,14 @@ export const adminNavigation: AdminNavItem[] = [
     icon: Settings,
     module: "settings",
     children: [
-      { label: "General", href: "/admin/settings/general" },
-      { label: "Localization", href: "/admin/settings/localization" },
-      { label: "Languages", href: "/admin/settings/languages" },
-      { label: "Social Networks", href: "/admin/settings/social" },
-      { label: "Integrations", href: "/admin/settings/integrations" },
-      { label: "Email Templates", href: "/admin/settings/email-templates" },
-      { label: "Analytics", href: "/admin/settings/analytics" },
-      { label: "Backups", href: "/admin/settings/backups" },
+      { label: "General", href: "/admin/settings/general", stub: true },
+      { label: "Localization", href: "/admin/settings/localization", stub: true },
+      { label: "Languages", href: "/admin/settings/languages", stub: true },
+      { label: "Social Networks", href: "/admin/settings/social", stub: true },
+      { label: "Integrations", href: "/admin/settings/integrations", stub: true },
+      { label: "Email Templates", href: "/admin/settings/email-templates", stub: true },
+      { label: "Analytics", href: "/admin/settings/analytics", stub: true },
+      { label: "Backups", href: "/admin/settings/backups", stub: true },
     ],
   },
   {

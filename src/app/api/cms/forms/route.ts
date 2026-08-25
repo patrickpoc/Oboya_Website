@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import {
-  addFormSubmission,
-} from "@/lib/cms/repositories/forms-repository";
-import { readFormSubmissions } from "@/lib/cms/server/forms.server";
+  addFormSubmissionDurable,
+  readFormSubmissions,
+} from "@/lib/cms/server/forms.server";
 import type { FormSubmission } from "@/lib/cms/types";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const submission = addFormSubmission({
+    const submission = await addFormSubmissionDurable({
       type: "contact",
       status: "new",
       data: {

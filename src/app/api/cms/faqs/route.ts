@@ -1,42 +1,55 @@
 import { NextResponse } from "next/server";
-import {
-  getCategories,
-  getFaqs,
-  saveCategory,
-  saveFaq,
-  deleteCategory,
-  deleteFaq,
-  type CmsFaqCategory,
-  type CmsFaqItem,
+import type {
+  CmsFaqCategory,
+  CmsFaqItem,
 } from "@/lib/cms/repositories/faqs-repository";
+import { unauthorizedIfNeeded } from "@/lib/cms/server/cms-auth.server";
+import { revalidatePublicSite } from "@/lib/cms/server/cms-revalidate.server";
+import {
+  deleteFaqCategoryDurable,
+  deleteFaqItemDurable,
+  readFaqsDurable,
+  saveFaqCategoryDurable,
+  saveFaqItemDurable,
+} from "@/lib/cms/server/content.server";
 
 export async function GET() {
-  return NextResponse.json({
-    categories: getCategories(),
-    faqs: getFaqs(),
-  });
+  return NextResponse.json(await readFaqsDurable());
 }
 
 export async function PUT(request: Request) {
-  const body = (await request.json()) as {
-    type: "category" | "faq";
-    data: CmsFaqCategory | CmsFaqItem;
-  };
+  const denied = await unauthorizedIfNeeded();
+  if (denied) return denied;
 
-  if (body.type === "category") {
-    const saved = saveCategory(body.data as CmsFaqCategory);
-    return NextResponse.json(saved);
+  try {
+    const body = (await request.json()) as {
+      type: "category" | "faq";
+      data: CmsFaqCategory | CmsFaqItem;
+    };
+
+    if (body.type === "category") {
+      const saved = await saveFaqCategoryDurable(body.data as CmsFaqCategory);
+      revalidatePublicSite(["/faqs"]);
+      return NextResponse.json(saved);
+    }
+
+    if (body.type === "faq") {
+      const saved = await saveFaqItemDurable(body.data as CmsFaqItem);
+      revalidatePublicSite(["/faqs"]);
+      return NextResponse.json(saved);
+    }
+
+    return NextResponse.json({ error: "Invalid type" }, { status: 400 });
+  } catch (error) {
+    console.error("Failed to save FAQ:", error);
+    return NextResponse.json({ error: "Failed to save FAQ" }, { status: 500 });
   }
-
-  if (body.type === "faq") {
-    const saved = saveFaq(body.data as CmsFaqItem);
-    return NextResponse.json(saved);
-  }
-
-  return NextResponse.json({ error: "Invalid type" }, { status: 400 });
 }
 
 export async function DELETE(request: Request) {
+  const denied = await unauthorizedIfNeeded();
+  if (denied) return denied;
+
   const { searchParams } = new URL(request.url);
   const type = searchParams.get("type");
   const id = searchParams.get("id");
@@ -46,12 +59,14 @@ export async function DELETE(request: Request) {
   }
 
   if (type === "category") {
-    deleteCategory(id);
+    await deleteFaqCategoryDurable(id);
+    revalidatePublicSite(["/faqs"]);
     return NextResponse.json({ ok: true });
   }
 
   if (type === "faq") {
-    deleteFaq(id);
+    await deleteFaqItemDurable(id);
+    revalidatePublicSite(["/faqs"]);
     return NextResponse.json({ ok: true });
   }
 

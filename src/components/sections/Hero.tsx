@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
+import { CmsResponsiveImage } from "@/components/media/CmsResponsiveImage";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { cn } from "@/lib/utils";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
@@ -40,7 +40,7 @@ export function Hero({
       className="relative flex min-h-[100svh] flex-col overflow-hidden bg-oboya-blue-dark"
     >
       <div className="absolute inset-0">
-        <Image
+        <CmsResponsiveImage
           src={data.backgroundImage}
           alt={title.replace(/\n/g, " ")}
           fill
@@ -56,8 +56,8 @@ export function Hero({
         <div className="flex flex-1 flex-col items-center justify-center px-2 pb-16 pt-8 text-center md:pb-20">
           <motion.div
             variants={staggerContainer}
-            initial={animationsEnabled ? "hidden" : false}
-            animate={animationsEnabled ? "visible" : false}
+            initial={false}
+            animate={animationsEnabled ? "visible" : undefined}
             className="flex max-w-3xl flex-col items-center"
           >
             {eyebrow ? (

@@ -11,7 +11,6 @@ interface CaseStudiesPageContentProps {
   locale: string;
 }
 
-const FEATURED_COUNT = 2;
 const FALLBACK_COVER = "/assets/homepage/greenhouse-technology.webp";
 
 function coverSrc(url: string) {
@@ -29,7 +28,6 @@ export async function CaseStudiesPageContent({
 }: CaseStudiesPageContentProps) {
   const t = await getTranslations("caseStudies");
   const published = studies.filter((s) => s.status === "published");
-  const featured = published.slice(0, FEATURED_COUNT);
 
   return (
     <>
@@ -41,13 +39,13 @@ export async function CaseStudiesPageContent({
         aria-label={t("showcaseTitle")}
       >
         <Container>
-          {featured.length === 0 ? (
+          {published.length === 0 ? (
             <p className="font-body text-base text-oboya-blue-dark/55">
               {t("emptyState")}
             </p>
           ) : (
             <div className="flex flex-col gap-[clamp(4.5rem,11vw,8.5rem)]">
-              {featured.map((study, index) => {
+              {published.map((study, index) => {
                 const title = pickLocalized(study.title, locale);
                 const paragraphs = [
                   pickLocalized(study.challenge, locale),

@@ -15,14 +15,17 @@ export default function BlogPostsPage() {
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Delete this post? This cannot be undone.")) return;
-    deleteBlogPost(id);
-    setPosts(getBlogPosts());
     try {
-      await fetch(`/api/cms/blog-posts?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      const res = await fetch(`/api/cms/blog-posts?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete post");
+      deleteBlogPost(id);
+      setPosts(getBlogPosts());
+      toast.success("Post deleted");
     } catch {
-      // in-memory fallback
+      toast.error("Failed to delete post");
     }
-    toast.success("Post deleted");
   };
 
   const columns = useMemo(

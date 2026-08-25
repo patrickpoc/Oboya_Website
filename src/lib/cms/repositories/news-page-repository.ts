@@ -38,3 +38,10 @@ export function saveNewsPageSettings(settings: NewsPageSettings): NewsPageSettin
   cache = updated;
   return updated;
 }
+
+export function replaceNewsPageSettingsCache(
+  settings: NewsPageSettings
+): NewsPageSettings {
+  cache = { ...settings };
+  return cache;
+}

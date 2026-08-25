@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, LogOut, Search, User } from "lucide-react";
+import { Bell, ExternalLink, LogOut, Search } from "lucide-react";
 import { getBreadcrumbs } from "@/lib/cms/navigation";
 import { useAdmin } from "@/contexts/AdminContext";
 import { ROLE_LABELS } from "@/lib/cms/permissions/matrix";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { defaultLocale } from "@/i18n/routing";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export function AdminTopbar() {
   const pathname = usePathname();
@@ -77,6 +80,18 @@ export function AdminTopbar() {
             {ROLE_LABELS[user.role]}
           </p>
         </div>
+      </Link>
+
+      <Link
+        href={`/${defaultLocale}`}
+        className={cn(
+          buttonVariants({ variant: "outline", size: "sm" }),
+          "gap-1.5 rounded-full border-oboya-green/30 text-oboya-blue-dark hover:border-oboya-green hover:bg-oboya-green/10"
+        )}
+        aria-label="View site"
+      >
+        <ExternalLink className="size-3.5" />
+        <span className="hidden sm:inline">View site</span>
       </Link>
 
       <button

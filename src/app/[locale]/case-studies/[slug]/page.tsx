@@ -7,9 +7,10 @@ import { routing } from "@/i18n/routing";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const studies = await readCaseStudies();
   return routing.locales.flatMap((locale) =>
-    readCaseStudies().map((item) => ({ locale, slug: item.slug }))
+    studies.map((item) => ({ locale, slug: item.slug }))
   );
 }
 
@@ -17,7 +18,7 @@ export default async function CaseStudyDetailPage({ params }: Props) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
 
-  const study = readCaseStudyBySlug(slug);
+  const study = await readCaseStudyBySlug(slug);
   if (!study) notFound();
 
   return (

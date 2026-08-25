@@ -1,19 +1,49 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ImageIcon, Link2, Upload, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  getMediaAssets,
-  saveMediaAsset,
-} from "@/lib/cms/repositories/media-repository";
+import { getMediaAssets } from "@/lib/cms/repositories/media-repository";
+import type { MediaAsset } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
 
 type ImageSourceMode = "upload" | "url" | "library";
-export type MediaLibraryImage = { id: string; name: string; url: string };
+export type MediaLibraryImage = {
+  id: string;
+  name: string;
+  url: string;
+  size?: number;
+  width?: number;
+  height?: number;
+  format?: string;
+  optimizationStatus?: string;
+  originalSize?: number;
+};
+
+function formatBytes(bytes?: number) {
+  if (bytes == null) return null;
+  if (bytes >= 1048576) return `${(bytes / 1048576).toFixed(1)} MB`;
+  if (bytes >= 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${bytes} B`;
+}
+
+function toLibraryImage(asset: MediaAsset): MediaLibraryImage {
+  return {
+    id: asset.id,
+    name: asset.name,
+    url: asset.url,
+    size: asset.size,
+    width: asset.width,
+    height: asset.height,
+    format: asset.format,
+    optimizationStatus: asset.optimizationStatus,
+    originalSize: asset.originalSize,
+  };
+}
 
 interface ImageFieldProps {
   label: string;
@@ -33,35 +63,81 @@ export function ImageField({
   const [urlDraft, setUrlDraft] = useState(value);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [libraryAssets, setLibraryAssets] = useState<MediaLibraryImage[]>([]);
+  const [uploading, setUploading] = useState(false);
+
   useEffect(() => {
     queueMicrotask(() => {
       setUrlDraft(value);
     });
   }, [value]);
 
-  const images = useMemo(() => getMediaAssets().filter((asset) => asset.type === "image"), []);
-
-  const applyUpload = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = String(reader.result ?? "");
-      if (!dataUrl) return;
-      const asset = saveMediaAsset({
-        id: `media-upload-${Date.now()}`,
-        name: file.name,
-        url: dataUrl,
-        type: "image",
-        mimeType: file.type || "image/jpeg",
-        size: file.size,
-        folder: "uploads",
-        tags: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-      onChange(asset.url);
-      setMode("upload");
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/cms/media");
+        if (!res.ok) return;
+        const data = (await res.json()) as MediaAsset[];
+        if (!cancelled && Array.isArray(data)) {
+          setLibraryAssets(
+            data
+              .filter((asset) => asset.type === "image")
+              .map(toLibraryImage)
+          );
+        }
+      } catch {
+        // Fall back to in-memory seed for offline/admin preview.
+        setLibraryAssets(
+          getMediaAssets()
+            .filter((asset) => asset.type === "image")
+            .map(toLibraryImage)
+        );
+      }
+    })();
+    return () => {
+      cancelled = true;
     };
-    reader.readAsDataURL(file);
+  }, []);
+
+  const applyUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const res = await fetch("/api/cms/media", {
+        method: "POST",
+        body,
+      });
+      if (!res.ok) {
+        const payload = (await res.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(payload?.error ?? "Upload failed");
+      }
+      const asset = (await res.json()) as MediaAsset;
+      onChange(asset.url);
+      setLibraryAssets((prev) => [
+        toLibraryImage(asset),
+        ...prev.filter((item) => item.id !== asset.id),
+      ]);
+      setMode("upload");
+      if (asset.optimizationStatus === "optimized" && asset.originalSize) {
+        toast.success(
+          `Optimized ${formatBytes(asset.originalSize)} → ${formatBytes(asset.size)}`
+        );
+      } else if (asset.optimizationStatus === "failed") {
+        toast.error("Uploaded, but optimization failed — using original");
+      } else {
+        toast.success("Image uploaded");
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Upload failed"
+      );
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -107,9 +183,10 @@ export function ImageField({
             setMode("upload");
             fileRef.current?.click();
           }}
+          disabled={uploading}
         >
           <Upload className="size-3.5" />
-          Upload from PC
+          {uploading ? "Uploading…" : "Upload from PC"}
         </Button>
         <Button
           type="button"
@@ -143,7 +220,7 @@ export function ImageField({
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
-          if (file) applyUpload(file);
+          if (file) void applyUpload(file);
           e.target.value = "";
         }}
       />
@@ -162,7 +239,20 @@ export function ImageField({
             type="button"
             size="sm"
             className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
-            onClick={() => onChange(urlDraft.trim())}
+            onClick={() => {
+              const next = urlDraft.trim();
+              if (!next) {
+                onChange("");
+                return;
+              }
+              if (next.startsWith("data:") || next.startsWith("blob:")) {
+                toast.error(
+                  "Use Upload or a public path (/assets/…, /uploads/…, Unsplash URL). Data URLs are not saved."
+                );
+                return;
+              }
+              onChange(next);
+            }}
           >
             Apply URL
           </Button>
@@ -171,7 +261,7 @@ export function ImageField({
 
       {libraryOpen && (
         <MediaLibraryDialog
-          images={images}
+          images={libraryAssets}
           selected={value}
           onClose={() => setLibraryOpen(false)}
           onSelect={(url) => {
@@ -256,9 +346,25 @@ export function MediaLibraryDialog({
                         unoptimized
                       />
                     </div>
-                    <p className="truncate px-2 py-1.5 text-[11px] text-muted-foreground">
-                      {asset.name}
-                    </p>
+                    <div className="space-y-0.5 px-2 py-1.5">
+                      <p className="truncate text-[11px] text-muted-foreground">
+                        {asset.name}
+                      </p>
+                      <p className="truncate text-[10px] text-muted-foreground/80">
+                        {[
+                          asset.format?.toUpperCase(),
+                          formatBytes(asset.size),
+                          asset.width && asset.height
+                            ? `${asset.width}×${asset.height}`
+                            : null,
+                          asset.optimizationStatus === "optimized"
+                            ? "Optimized"
+                            : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    </div>
                   </button>
                 );
               })}

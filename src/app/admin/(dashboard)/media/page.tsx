@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import {
   ChevronRight,
@@ -14,6 +14,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,9 +30,44 @@ import {
   searchMediaAssets,
   getAllTags,
   updateAssetTags,
+  replaceMediaAssetsCache,
+  saveMediaAsset,
 } from "@/lib/cms/repositories/media-repository";
 import type { MediaAsset, MediaFolder } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
+
+function formatBytes(bytes: number) {
+  if (bytes >= 1048576) return `${(bytes / 1048576).toFixed(1)} MB`;
+  if (bytes >= 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${bytes} B`;
+}
+
+function optimizationBadge(asset: MediaAsset) {
+  const status = asset.optimizationStatus;
+  if (!status) return null;
+  const styles: Record<string, string> = {
+    optimized: "bg-oboya-green/15 text-oboya-green",
+    skipped: "bg-muted text-muted-foreground",
+    failed: "bg-destructive/10 text-destructive",
+    pending: "bg-amber-100 text-amber-800",
+  };
+  const labels: Record<string, string> = {
+    optimized: "Optimized",
+    skipped: "Skipped",
+    failed: "Failed",
+    pending: "Pending",
+  };
+  return (
+    <span
+      className={cn(
+        "rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+        styles[status] ?? "bg-muted text-muted-foreground"
+      )}
+    >
+      {labels[status] ?? status}
+    </span>
+  );
+}
 
 function TagBadge({
   tag,
@@ -350,8 +386,30 @@ export default function MediaLibraryPage() {
   const [renamingFolder, setRenamingFolder] = useState<MediaFolder | null>(null);
   const [movingFolder, setMovingFolder] = useState<MediaFolder | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [uploading, setUploading] = useState(false);
+  const uploadRef = useRef<HTMLInputElement>(null);
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/cms/media");
+        if (!res.ok) return;
+        const data = (await res.json()) as MediaAsset[];
+        if (!cancelled && Array.isArray(data)) {
+          replaceMediaAssetsCache(data);
+          refresh();
+        }
+      } catch {
+        /* keep seeded client cache */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [refresh]);
 
   const allTags = useMemo(() => getAllTags(), [refreshKey]);
   const breadcrumb = useMemo(() => getFolderBreadcrumb(currentFolderId), [currentFolderId, refreshKey]);
@@ -403,6 +461,30 @@ export default function MediaLibraryPage() {
     refresh();
   };
 
+  const handleUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      body.append("folderId", currentFolderId);
+      const res = await fetch("/api/cms/media", { method: "POST", body });
+      if (!res.ok) {
+        const payload = (await res.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(payload?.error ?? "Upload failed");
+      }
+      const asset = (await res.json()) as MediaAsset;
+      saveMediaAsset(asset);
+      refresh();
+      toast.success("Image uploaded");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div>
       <AdminPageHeader
@@ -418,10 +500,26 @@ export default function MediaLibraryPage() {
               <FolderPlus className="size-4" />
               New Folder
             </button>
-            <button type="button" className={buttonVariants({ className: "gap-1.5 rounded-full" })}>
+            <button
+              type="button"
+              disabled={uploading}
+              onClick={() => uploadRef.current?.click()}
+              className={buttonVariants({ className: "gap-1.5 rounded-full" })}
+            >
               <Upload className="size-4" />
-              Upload
+              {uploading ? "Uploading…" : "Upload"}
             </button>
+            <input
+              ref={uploadRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void handleUpload(file);
+                e.target.value = "";
+              }}
+            />
           </div>
         }
       />
@@ -561,18 +659,30 @@ export default function MediaLibraryPage() {
               <p className="truncate text-sm font-medium text-oboya-blue-dark">{asset.name}</p>
               <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                 <Badge variant="secondary" className="text-[10px]">{asset.type}</Badge>
+                {optimizationBadge(asset)}
+                {asset.format ? (
+                  <span className="text-[10px] font-medium uppercase text-oboya-blue-dark/70">
+                    {asset.format}
+                  </span>
+                ) : null}
                 <span className="text-[10px] text-muted-foreground">
-                  {asset.size >= 1048576
-                    ? `${(asset.size / 1048576).toFixed(1)} MB`
-                    : `${(asset.size / 1024).toFixed(0)} KB`}
+                  {formatBytes(asset.size)}
                 </span>
-                {asset.width && asset.height && (
+                {asset.width && asset.height ? (
                   <span className="text-[10px] text-muted-foreground">
                     {asset.width} × {asset.height}px
                   </span>
-                )}
+                ) : null}
                 <span className="text-[10px] text-muted-foreground">{asset.mimeType}</span>
               </div>
+              {asset.originalSize &&
+              asset.optimizationStatus === "optimized" &&
+              asset.originalSize > asset.size ? (
+                <p className="mt-1.5 text-[10px] text-muted-foreground">
+                  Original {formatBytes(asset.originalSize)} → {formatBytes(asset.size)}{" "}
+                  (−{Math.round((1 - asset.size / asset.originalSize) * 100)}%)
+                </p>
+              ) : null}
               {asset.tags.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1">
                   {asset.tags.map((tag) => (
