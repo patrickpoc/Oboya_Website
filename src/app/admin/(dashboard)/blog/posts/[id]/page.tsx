@@ -14,7 +14,6 @@ import { Label } from "@/components/ui/label";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   getBlogPostById,
-  saveBlogPost,
   getBlogCategories,
   type CmsBlogPost,
 } from "@/lib/cms/repositories/blog-repository";
@@ -65,18 +64,25 @@ export default function BlogPostEditPage() {
           ? new Date().toISOString()
           : post.publishedAt,
     };
-    saveBlogPost(toSave);
     try {
-      await fetch("/api/cms/blog-posts", {
+      const response = await fetch("/api/cms/blog-posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(toSave),
       });
-    } catch {
-      // in-memory fallback
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(payload?.error ?? "Failed to save post");
+      }
+      toast.success("Post saved — live site will update shortly");
+      router.push("/admin/blog/posts");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save post"
+      );
     }
-    toast.success("Post saved");
-    router.push("/admin/blog/posts");
   };
 
   return (

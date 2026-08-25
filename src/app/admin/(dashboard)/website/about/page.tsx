@@ -16,12 +16,15 @@ export default function AboutPageAdmin() {
 
   const handleSave = async () => {
     try {
-      await fetch("/api/cms/about", {
+      const response = await fetch("/api/cms/about", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       });
-      toast.success("About page settings saved");
+      if (!response.ok) {
+        throw new Error("Failed to save about page settings");
+      }
+      toast.success("About page settings saved — live site will update shortly");
     } catch {
       toast.error("Failed to save about page settings");
     }
@@ -57,7 +60,11 @@ export default function AboutPageAdmin() {
                 Mission images: {settings.mission.images.length} · Vision
                 images: {settings.vision.images.length}
               </p>
-              <Button type="button" onClick={handleSave}>
+              <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-900">
+                Field-level About editors are not wired yet. Save persists the
+                current snapshot durably and revalidates the public site.
+              </p>
+              <Button type="button" onClick={() => void handleSave()}>
                 Save settings
               </Button>
             </CardContent>

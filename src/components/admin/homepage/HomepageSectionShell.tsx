@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -8,8 +8,7 @@ import { LocaleFieldTabs } from "@/components/admin/forms/LocaleFieldTabs";
 import { Button } from "@/components/ui/button";
 import { Can } from "@/components/admin/permissions/Can";
 import {
-  getHomepageSettings,
-  saveHomepageSettings,
+  replaceHomepageSettingsCache,
   type HomepageSettings,
 } from "@/lib/cms/repositories/homepage-repository";
 import {
@@ -21,26 +20,70 @@ import type { HomepageSectionEditorProps } from "./shared";
 
 type HomepageSectionShellProps = {
   section: HomepageSectionSlug;
+  initialSettings: HomepageSettings;
   children: (props: HomepageSectionEditorProps) => ReactNode;
 };
 
-export function HomepageSectionShell({ section, children }: HomepageSectionShellProps) {
+export function HomepageSectionShell({
+  section,
+  initialSettings,
+  children,
+}: HomepageSectionShellProps) {
   const meta = HOMEPAGE_SECTION_META[section];
-  const [settings, setSettings] = useState<HomepageSettings>(getHomepageSettings());
+  const [settings, setSettings] = useState<HomepageSettings>(initialSettings);
   const [locale, setLocale] = useState<CmsLocale>("en");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    replaceHomepageSettingsCache(initialSettings);
+  }, [initialSettings]);
+
+  // Soft refresh from API in case another tab saved while this page was open.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetch("/api/cms/homepage", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = (await response.json()) as HomepageSettings;
+        if (!cancelled) {
+          replaceHomepageSettingsCache(data);
+          setSettings(data);
+        }
+      } catch {
+        /* keep server-provided initialSettings */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleSave = async () => {
-    saveHomepageSettings(settings);
+    setSaving(true);
     try {
-      await fetch("/api/cms/homepage", {
+      const response = await fetch("/api/cms/homepage", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       });
-    } catch {
-      // in-memory fallback
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(payload?.error ?? "Failed to save homepage");
+      }
+      const saved = (await response.json()) as HomepageSettings;
+      replaceHomepageSettingsCache(saved);
+      setSettings(saved);
+      toast.success("Homepage saved — live site will update shortly");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save homepage"
+      );
+    } finally {
+      setSaving(false);
     }
-    toast.success("Homepage saved");
   };
 
   return (
@@ -62,10 +105,11 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
           description={meta.description}
           actions={
             <Button
-              onClick={handleSave}
+              onClick={() => void handleSave()}
+              disabled={saving}
               className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
             >
-              Save
+              {saving ? "Saving…" : "Save"}
             </Button>
           }
         />

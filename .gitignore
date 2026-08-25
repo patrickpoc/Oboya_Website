@@ -42,3 +42,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# CMS media uploads (keep folder via .gitkeep)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# Runtime CMS uploads stay local/ephemeral; seed JSON is tracked in data/cms/

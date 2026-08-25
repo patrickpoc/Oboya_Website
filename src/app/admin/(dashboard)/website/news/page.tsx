@@ -10,7 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
   getNewsPageSettings,
-  saveNewsPageSettings,
   type NewsPageSettings,
 } from "@/lib/cms/repositories/news-page-repository";
 import type { CmsLocale } from "@/lib/cms/types";
@@ -21,17 +20,26 @@ export default function NewsPageAdmin() {
   const [locale, setLocale] = useState<CmsLocale>("en");
 
   const handleSave = async () => {
-    saveNewsPageSettings(settings);
     try {
-      await fetch("/api/cms/news-page", {
+      const response = await fetch("/api/cms/news-page", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       });
-    } catch {
-      // In-memory save still applies for dev
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(payload?.error ?? "Failed to save news page");
+      }
+      const saved = (await response.json()) as NewsPageSettings;
+      setSettings(saved);
+      toast.success("News page saved — live site will update shortly");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save news page"
+      );
     }
-    toast.success("News page settings saved");
   };
 
   return (

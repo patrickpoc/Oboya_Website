@@ -269,6 +269,10 @@ export function saveCaseStudy(study: CmsCaseStudy): CmsCaseStudy {
   return updated;
 }
 
+export function replaceCaseStudiesCache(studies: CmsCaseStudy[]) {
+  cache = [...studies];
+}
+
 export function deleteCaseStudy(id: string): boolean {
   const items = getCaseStudies();
   const idx = items.findIndex((c) => c.id === id);

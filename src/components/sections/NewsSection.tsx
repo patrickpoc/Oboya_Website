@@ -6,8 +6,8 @@ interface NewsSectionProps {
   locale: string;
 }
 
-export function NewsSection({ locale }: NewsSectionProps) {
-  const items: NewsPreviewItem[] = readBlogPosts()
+export async function NewsSection({ locale }: NewsSectionProps) {
+  const items: NewsPreviewItem[] = (await readBlogPosts())
     .slice(0, 2)
     .map((post) => ({
       title: pickLocalized(post.title, locale),

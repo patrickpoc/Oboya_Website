@@ -109,6 +109,10 @@ export function saveBlogPost(post: CmsBlogPost): CmsBlogPost {
   return updated;
 }
 
+export function replaceBlogPostsCache(posts: CmsBlogPost[]) {
+  cache = [...posts];
+}
+
 export function deleteBlogPost(id: string): boolean {
   const posts = getBlogPosts();
   const idx = posts.findIndex((p) => p.id === id);

@@ -17,9 +17,9 @@ interface HomePageContentProps {
   mapAlt: string;
 }
 
-export function HomePageContent({ locale, locations, mapAlt }: HomePageContentProps) {
-  const homepage = readHomepageSettings();
-  const posts = readBlogPosts();
+export async function HomePageContent({ locale, locations, mapAlt }: HomePageContentProps) {
+  const homepage = await readHomepageSettings();
+  const posts = await readBlogPosts();
   const animationsEnabled = homepage.animations?.enabled !== false;
 
   return (
