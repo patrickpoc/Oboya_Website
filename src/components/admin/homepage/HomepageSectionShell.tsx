@@ -8,7 +8,6 @@ import { LocaleFieldTabs } from "@/components/admin/forms/LocaleFieldTabs";
 import { Button } from "@/components/ui/button";
 import { Can } from "@/components/admin/permissions/Can";
 import {
-  getHomepageSettings,
   replaceHomepageSettingsCache,
   type HomepageSettings,
 } from "@/lib/cms/repositories/homepage-repository";
@@ -29,45 +28,47 @@ export function HomepageSectionShell({
   children,
 }: HomepageSectionShellProps) {
   const meta = HOMEPAGE_SECTION_META[section];
-  const [settings, setSettings] = useState<HomepageSettings>(
-    getHomepageSettings
-  );
+  // Start empty so SSR/client don't hydrate-mismatch on Date.now() defaults.
+  const [settings, setSettings] = useState<HomepageSettings | null>(null);
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    const timeout = window.setTimeout(() => {
-      if (!cancelled) setLoading(false);
-    }, 8000);
 
     void (async () => {
       try {
         const response = await fetch("/api/cms/homepage", {
           cache: "no-store",
         });
-        if (response.ok) {
-          const data = (await response.json()) as HomepageSettings;
-          if (!cancelled) {
-            replaceHomepageSettingsCache(data);
-            setSettings(data);
-          }
+        if (!response.ok) {
+          throw new Error("Failed to load homepage settings");
         }
-      } catch {
-        /* keep seeded client cache */
-      } finally {
-        if (!cancelled) setLoading(false);
+        const data = (await response.json()) as HomepageSettings;
+        if (!cancelled) {
+          replaceHomepageSettingsCache(data);
+          setSettings(data);
+          setLoadError(null);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setLoadError(
+            error instanceof Error
+              ? error.message
+              : "Failed to load homepage settings"
+          );
+        }
       }
     })();
 
     return () => {
       cancelled = true;
-      window.clearTimeout(timeout);
     };
   }, []);
 
   const handleSave = async () => {
+    if (!settings) return;
     setSaving(true);
     try {
       const response = await fetch("/api/cms/homepage", {
@@ -114,7 +115,7 @@ export function HomepageSectionShell({
           actions={
             <Button
               onClick={() => void handleSave()}
-              disabled={saving || loading}
+              disabled={saving || !settings}
               className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
             >
               {saving ? "Saving…" : "Save"}
@@ -122,13 +123,19 @@ export function HomepageSectionShell({
           }
         />
 
-        {loading ? (
+        {!settings && !loadError ? (
           <p className="text-sm text-muted-foreground">Loading saved content…</p>
-        ) : (
+        ) : null}
+
+        {loadError ? (
+          <p className="text-sm text-destructive">{loadError}</p>
+        ) : null}
+
+        {settings ? (
           <LocaleFieldTabs value={locale} onChange={setLocale}>
             {(loc) => children({ settings, setSettings, locale: loc })}
           </LocaleFieldTabs>
-        )}
+        ) : null}
       </div>
     </Can>
   );
