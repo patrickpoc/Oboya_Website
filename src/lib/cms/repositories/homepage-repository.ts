@@ -176,8 +176,7 @@ const defaultSettings = (): HomepageSettings => ({
     partners: { enabled: true },
   },
   hero: {
-    backgroundImage:
-      "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2070&auto=format&fit=crop",
+    backgroundImage: "/assets/homepage/hero-vineyard.jpg",
     eyebrow: loc("Solutions that work, value that grows."),
     title: loc("Your one-stop partner\nfor horticulture!"),
     description: loc(

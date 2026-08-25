@@ -125,7 +125,7 @@ export function BusinessSolutions({
             </p>
             <div className="h-px flex-1 bg-oboya-blue-dark/25" aria-hidden />
           </div>
-          <h2 className="max-w-4xl font-display text-[clamp(1.45rem,2.8vw,2.25rem)] font-bold leading-[1.3] tracking-tight text-oboya-blue-dark text-balance">
+          <h2 className="max-w-4xl font-display text-[clamp(1.45rem,2.8vw,2.25rem)] font-light leading-[1.3] tracking-tight text-oboya-blue-dark text-balance">
             {pickLocalized(data.title, locale)}
           </h2>
         </motion.div>

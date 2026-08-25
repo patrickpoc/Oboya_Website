@@ -37,7 +37,7 @@ export function FeaturedProducts({
             {pickLocalized(data.eyebrow, locale)}
           </p>
           <div className="mt-3 h-px w-full bg-oboya-green/55" aria-hidden />
-          <h2 className="mt-6 max-w-5xl font-display text-[clamp(1.45rem,2.6vw,2.15rem)] leading-[1.35] font-bold tracking-tight text-oboya-blue-dark text-balance">
+          <h2 className="mt-6 max-w-5xl font-display text-[clamp(1.45rem,2.6vw,2.15rem)] leading-[1.35] font-light tracking-tight text-oboya-blue-dark text-balance">
             {pickLocalized(data.title, locale)}
           </h2>
         </motion.div>
