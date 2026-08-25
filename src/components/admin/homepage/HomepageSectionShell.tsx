@@ -20,55 +20,46 @@ import type { HomepageSectionEditorProps } from "./shared";
 
 type HomepageSectionShellProps = {
   section: HomepageSectionSlug;
+  initialSettings: HomepageSettings;
   children: (props: HomepageSectionEditorProps) => ReactNode;
 };
 
 export function HomepageSectionShell({
   section,
+  initialSettings,
   children,
 }: HomepageSectionShellProps) {
   const meta = HOMEPAGE_SECTION_META[section];
-  // Start empty so SSR/client don't hydrate-mismatch on Date.now() defaults.
-  const [settings, setSettings] = useState<HomepageSettings | null>(null);
+  const [settings, setSettings] = useState<HomepageSettings>(initialSettings);
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [saving, setSaving] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
+    replaceHomepageSettingsCache(initialSettings);
+  }, [initialSettings]);
 
+  // Soft refresh from API in case another tab saved while this page was open.
+  useEffect(() => {
+    let cancelled = false;
     void (async () => {
       try {
-        const response = await fetch("/api/cms/homepage", {
-          cache: "no-store",
-        });
-        if (!response.ok) {
-          throw new Error("Failed to load homepage settings");
-        }
+        const response = await fetch("/api/cms/homepage", { cache: "no-store" });
+        if (!response.ok) return;
         const data = (await response.json()) as HomepageSettings;
         if (!cancelled) {
           replaceHomepageSettingsCache(data);
           setSettings(data);
-          setLoadError(null);
         }
-      } catch (error) {
-        if (!cancelled) {
-          setLoadError(
-            error instanceof Error
-              ? error.message
-              : "Failed to load homepage settings"
-          );
-        }
+      } catch {
+        /* keep server-provided initialSettings */
       }
     })();
-
     return () => {
       cancelled = true;
     };
   }, []);
 
   const handleSave = async () => {
-    if (!settings) return;
     setSaving(true);
     try {
       const response = await fetch("/api/cms/homepage", {
@@ -115,7 +106,7 @@ export function HomepageSectionShell({
           actions={
             <Button
               onClick={() => void handleSave()}
-              disabled={saving || !settings}
+              disabled={saving}
               className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
             >
               {saving ? "Saving…" : "Save"}
@@ -123,19 +114,9 @@ export function HomepageSectionShell({
           }
         />
 
-        {!settings && !loadError ? (
-          <p className="text-sm text-muted-foreground">Loading saved content…</p>
-        ) : null}
-
-        {loadError ? (
-          <p className="text-sm text-destructive">{loadError}</p>
-        ) : null}
-
-        {settings ? (
-          <LocaleFieldTabs value={locale} onChange={setLocale}>
-            {(loc) => children({ settings, setSettings, locale: loc })}
-          </LocaleFieldTabs>
-        ) : null}
+        <LocaleFieldTabs value={locale} onChange={setLocale}>
+          {(loc) => children({ settings, setSettings, locale: loc })}
+        </LocaleFieldTabs>
       </div>
     </Can>
   );
