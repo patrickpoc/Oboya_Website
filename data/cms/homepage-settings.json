@@ -32,7 +32,7 @@
     }
   },
   "hero": {
-    "backgroundImage": "/assets/homepage/hero-cms-live.png",
+    "backgroundImage": "/uploads/media-hero-cms-live/desktop.webp",
     "eyebrow": {
       "en": "Solutions that work, value that grows.",
       "pt-BR": "Solutions that work, value that grows.",
@@ -616,5 +616,5 @@
       }
     ]
   },
-  "updatedAt": "2026-08-25T19:39:41.788Z"
+  "updatedAt": "2026-08-25T20:00:32.724Z"
 }

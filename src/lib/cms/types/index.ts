@@ -72,6 +72,38 @@ export interface MediaFolder {
   createdAt: string;
 }
 
+export type MediaOptimizationStatus =
+  | "pending"
+  | "optimized"
+  | "skipped"
+  | "failed";
+
+export type MediaImageFormat =
+  | "webp"
+  | "avif"
+  | "jpeg"
+  | "png"
+  | "svg"
+  | "gif";
+
+export interface MediaImageVariant {
+  url: string;
+  width: number;
+  height: number;
+  size: number;
+  mimeType: string;
+}
+
+export interface MediaAssetVariants {
+  thumb?: MediaImageVariant;
+  mobile?: MediaImageVariant;
+  desktop?: MediaImageVariant;
+  mobileAvif?: MediaImageVariant;
+  desktopAvif?: MediaImageVariant;
+  desktopJpeg?: MediaImageVariant;
+  card?: MediaImageVariant;
+}
+
 export interface MediaAsset {
   id: string;
   name: string;
@@ -86,6 +118,12 @@ export interface MediaAsset {
   tags: string[];
   createdAt: string;
   updatedAt: string;
+  optimizationStatus?: MediaOptimizationStatus;
+  originalUrl?: string;
+  originalSize?: number;
+  originalMimeType?: string;
+  format?: MediaImageFormat;
+  variants?: MediaAssetVariants;
 }
 
 export type FormSubmissionStatus = "new" | "read" | "replied" | "archived";

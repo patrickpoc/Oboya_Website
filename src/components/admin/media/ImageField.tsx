@@ -8,10 +8,42 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getMediaAssets } from "@/lib/cms/repositories/media-repository";
+import type { MediaAsset } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
 
 type ImageSourceMode = "upload" | "url" | "library";
-export type MediaLibraryImage = { id: string; name: string; url: string };
+export type MediaLibraryImage = {
+  id: string;
+  name: string;
+  url: string;
+  size?: number;
+  width?: number;
+  height?: number;
+  format?: string;
+  optimizationStatus?: string;
+  originalSize?: number;
+};
+
+function formatBytes(bytes?: number) {
+  if (bytes == null) return null;
+  if (bytes >= 1048576) return `${(bytes / 1048576).toFixed(1)} MB`;
+  if (bytes >= 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${bytes} B`;
+}
+
+function toLibraryImage(asset: MediaAsset): MediaLibraryImage {
+  return {
+    id: asset.id,
+    name: asset.name,
+    url: asset.url,
+    size: asset.size,
+    width: asset.width,
+    height: asset.height,
+    format: asset.format,
+    optimizationStatus: asset.optimizationStatus,
+    originalSize: asset.originalSize,
+  };
+}
 
 interface ImageFieldProps {
   label: string;
@@ -46,14 +78,12 @@ export function ImageField({
       try {
         const res = await fetch("/api/cms/media");
         if (!res.ok) return;
-        const data = (await res.json()) as MediaLibraryImage[];
+        const data = (await res.json()) as MediaAsset[];
         if (!cancelled && Array.isArray(data)) {
           setLibraryAssets(
-            data.map((asset) => ({
-              id: asset.id,
-              name: asset.name,
-              url: asset.url,
-            }))
+            data
+              .filter((asset) => asset.type === "image")
+              .map(toLibraryImage)
           );
         }
       } catch {
@@ -61,11 +91,7 @@ export function ImageField({
         setLibraryAssets(
           getMediaAssets()
             .filter((asset) => asset.type === "image")
-            .map((asset) => ({
-              id: asset.id,
-              name: asset.name,
-              url: asset.url,
-            }))
+            .map(toLibraryImage)
         );
       }
     })();
@@ -89,13 +115,22 @@ export function ImageField({
         } | null;
         throw new Error(payload?.error ?? "Upload failed");
       }
-      const asset = (await res.json()) as MediaLibraryImage & { url: string };
+      const asset = (await res.json()) as MediaAsset;
       onChange(asset.url);
       setLibraryAssets((prev) => [
-        { id: asset.id, name: asset.name, url: asset.url },
+        toLibraryImage(asset),
         ...prev.filter((item) => item.id !== asset.id),
       ]);
       setMode("upload");
+      if (asset.optimizationStatus === "optimized" && asset.originalSize) {
+        toast.success(
+          `Optimized ${formatBytes(asset.originalSize)} → ${formatBytes(asset.size)}`
+        );
+      } else if (asset.optimizationStatus === "failed") {
+        toast.error("Uploaded, but optimization failed — using original");
+      } else {
+        toast.success("Image uploaded");
+      }
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Upload failed"
@@ -311,9 +346,25 @@ export function MediaLibraryDialog({
                         unoptimized
                       />
                     </div>
-                    <p className="truncate px-2 py-1.5 text-[11px] text-muted-foreground">
-                      {asset.name}
-                    </p>
+                    <div className="space-y-0.5 px-2 py-1.5">
+                      <p className="truncate text-[11px] text-muted-foreground">
+                        {asset.name}
+                      </p>
+                      <p className="truncate text-[10px] text-muted-foreground/80">
+                        {[
+                          asset.format?.toUpperCase(),
+                          formatBytes(asset.size),
+                          asset.width && asset.height
+                            ? `${asset.width}×${asset.height}`
+                            : null,
+                          asset.optimizationStatus === "optimized"
+                            ? "Optimized"
+                            : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    </div>
                   </button>
                 );
               })}

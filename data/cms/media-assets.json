@@ -1,5 +1,80 @@
 [
   {
+    "id": "media-hero-cms-live",
+    "name": "hero-cms-live.png",
+    "url": "/uploads/media-hero-cms-live/desktop.webp",
+    "type": "image",
+    "mimeType": "image/webp",
+    "size": 195624,
+    "width": 1920,
+    "height": 1081,
+    "folder": "folder-root",
+    "tags": [
+      "upload",
+      "optimized",
+      "homepage",
+      "hero"
+    ],
+    "createdAt": "2026-08-25T19:59:35.487Z",
+    "updatedAt": "2026-08-25T19:59:35.487Z",
+    "optimizationStatus": "optimized",
+    "originalUrl": "/uploads/media-hero-cms-live/original.png",
+    "originalSize": 5968888,
+    "originalMimeType": "image/png",
+    "format": "webp",
+    "variants": {
+      "thumb": {
+        "url": "/uploads/media-hero-cms-live/thumb.webp",
+        "width": 400,
+        "height": 225,
+        "size": 12472,
+        "mimeType": "image/webp"
+      },
+      "mobile": {
+        "url": "/uploads/media-hero-cms-live/mobile.webp",
+        "width": 1080,
+        "height": 608,
+        "size": 83996,
+        "mimeType": "image/webp"
+      },
+      "mobileAvif": {
+        "url": "/uploads/media-hero-cms-live/mobile.avif",
+        "width": 1080,
+        "height": 608,
+        "size": 80047,
+        "mimeType": "image/avif"
+      },
+      "card": {
+        "url": "/uploads/media-hero-cms-live/card.webp",
+        "width": 1200,
+        "height": 675,
+        "size": 98688,
+        "mimeType": "image/webp"
+      },
+      "desktop": {
+        "url": "/uploads/media-hero-cms-live/desktop.webp",
+        "width": 1920,
+        "height": 1081,
+        "size": 195624,
+        "mimeType": "image/webp"
+      },
+      "desktopAvif": {
+        "url": "/uploads/media-hero-cms-live/desktop.avif",
+        "width": 1920,
+        "height": 1081,
+        "size": 172894,
+        "mimeType": "image/avif"
+      },
+      "desktopJpeg": {
+        "url": "/uploads/media-hero-cms-live/desktop.jpg",
+        "width": 1920,
+        "height": 1081,
+        "size": 269781,
+        "mimeType": "image/jpeg"
+      }
+    }
+  },
+  {
     "id": "media-1",
     "name": "company-overview.webp",
     "url": "/assets/homepage/company-overview.webp",
@@ -237,19 +312,76 @@
     "updatedAt": "2026-02-01T00:00:00.000Z"
   },
   {
-    "id": "media-upload-1787686445052",
-    "name": "hero-cms-live.png",
-    "url": "/assets/homepage/hero-cms-live.png",
+    "id": "media-1787688032882-hero-vineyard",
+    "name": "hero-vineyard.jpg",
+    "url": "/uploads/media-1787688032882-hero-vineyard/desktop.webp",
     "type": "image",
-    "mimeType": "image/png",
-    "size": 5968888,
+    "mimeType": "image/webp",
+    "size": 134318,
+    "width": 1024,
+    "height": 640,
     "folder": "folder-root",
     "tags": [
-      "hero",
-      "homepage",
-      "upload"
+      "upload",
+      "optimized"
     ],
-    "createdAt": "2026-08-25T19:34:05.052Z",
-    "updatedAt": "2026-08-25T19:34:05.052Z"
+    "createdAt": "2026-08-25T20:00:32.882Z",
+    "updatedAt": "2026-08-25T20:00:32.882Z",
+    "optimizationStatus": "optimized",
+    "originalUrl": "/uploads/media-1787688032882-hero-vineyard/original.jpg",
+    "originalSize": 233382,
+    "originalMimeType": "image/jpeg",
+    "format": "webp",
+    "variants": {
+      "thumb": {
+        "url": "/uploads/media-1787688032882-hero-vineyard/thumb.webp",
+        "width": 400,
+        "height": 250,
+        "size": 19068,
+        "mimeType": "image/webp"
+      },
+      "mobile": {
+        "url": "/uploads/media-1787688032882-hero-vineyard/mobile.webp",
+        "width": 1024,
+        "height": 640,
+        "size": 127896,
+        "mimeType": "image/webp"
+      },
+      "mobileAvif": {
+        "url": "/uploads/media-1787688032882-hero-vineyard/mobile.avif",
+        "width": 1024,
+        "height": 640,
+        "size": 120627,
+        "mimeType": "image/avif"
+      },
+      "card": {
+        "url": "/uploads/media-1787688032882-hero-vineyard/card.webp",
+        "width": 1024,
+        "height": 640,
+        "size": 127896,
+        "mimeType": "image/webp"
+      },
+      "desktop": {
+        "url": "/uploads/media-1787688032882-hero-vineyard/desktop.webp",
+        "width": 1024,
+        "height": 640,
+        "size": 134318,
+        "mimeType": "image/webp"
+      },
+      "desktopAvif": {
+        "url": "/uploads/media-1787688032882-hero-vineyard/desktop.avif",
+        "width": 1024,
+        "height": 640,
+        "size": 120627,
+        "mimeType": "image/avif"
+      },
+      "desktopJpeg": {
+        "url": "/uploads/media-1787688032882-hero-vineyard/desktop.jpg",
+        "width": 1024,
+        "height": 640,
+        "size": 132237,
+        "mimeType": "image/jpeg"
+      }
+    }
   }
 ]

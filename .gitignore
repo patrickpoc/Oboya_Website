@@ -46,5 +46,9 @@ next-env.d.ts
 # CMS media uploads (keep folder via .gitkeep)
 /public/uploads/*
 !/public/uploads/.gitkeep
+# Seed/optimized hero variants for deploy (exclude bulky original)
+!/public/uploads/media-hero-cms-live/
+!/public/uploads/media-hero-cms-live/**
+/public/uploads/media-hero-cms-live/original.png
 
 # Runtime CMS uploads stay local/ephemeral; seed JSON is tracked in data/cms/

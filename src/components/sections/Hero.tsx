@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
+import { CmsResponsiveImage } from "@/components/media/CmsResponsiveImage";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { cn } from "@/lib/utils";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
@@ -40,7 +40,7 @@ export function Hero({
       className="relative flex min-h-[100svh] flex-col overflow-hidden bg-oboya-blue-dark"
     >
       <div className="absolute inset-0">
-        <Image
+        <CmsResponsiveImage
           src={data.backgroundImage}
           alt={title.replace(/\n/g, " ")}
           fill

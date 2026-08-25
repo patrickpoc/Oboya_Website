@@ -1,11 +1,11 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { NextResponse } from "next/server";
+import path from "node:path";
 import { unauthorizedIfNeeded } from "@/lib/cms/server/cms-auth.server";
 import {
   readMediaDurable,
   saveMediaDurable,
 } from "@/lib/cms/server/content.server";
+import { optimizeImageUpload } from "@/lib/cms/server/image-optimize.server";
 import type { MediaAsset } from "@/lib/cms/types";
 
 const ALLOWED_TYPES = new Set([
@@ -65,38 +65,46 @@ export async function POST(request: Request) {
         : "folder-root";
 
     const bytes = Buffer.from(await file.arrayBuffer());
-    const ext =
-      path.extname(file.name).toLowerCase() ||
-      (file.type === "image/png"
-        ? ".png"
-        : file.type === "image/webp"
-          ? ".webp"
-          : file.type === "image/gif"
-            ? ".gif"
-            : file.type === "image/svg+xml"
-              ? ".svg"
-              : ".jpg");
-    const base = sanitizeFilename(path.basename(file.name, path.extname(file.name))) ||
-      "upload";
-    const filename = `${Date.now()}-${base}${ext}`;
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadsDir, { recursive: true });
-    await writeFile(path.join(uploadsDir, filename), bytes);
-
-    const publicUrl = `/uploads/${filename}`;
+    const base =
+      sanitizeFilename(
+        path.basename(file.name, path.extname(file.name))
+      ) || "upload";
+    const assetId = `media-${Date.now()}-${base}`.slice(0, 80);
     const now = new Date().toISOString();
-    const asset: MediaAsset = {
-      id: `media-upload-${Date.now()}`,
-      name: file.name,
-      url: publicUrl,
-      type: "image",
+
+    const optimized = await optimizeImageUpload({
+      buffer: bytes,
+      assetId,
+      originalFilename: file.name,
       mimeType: file.type || "image/jpeg",
-      size: file.size,
+    });
+
+    const asset: MediaAsset = {
+      id: assetId,
+      name: file.name,
+      url: optimized.url,
+      type: "image",
+      mimeType: optimized.mimeType,
+      size: optimized.size,
+      width: optimized.width || undefined,
+      height: optimized.height || undefined,
       folder: folderId,
-      tags: ["upload"],
+      tags: ["upload", "optimized"].filter(Boolean),
       createdAt: now,
       updatedAt: now,
+      optimizationStatus: optimized.status,
+      originalUrl: optimized.originalUrl,
+      originalSize: optimized.originalSize,
+      originalMimeType: optimized.originalMimeType,
+      format: optimized.format,
+      variants: optimized.variants,
     };
+
+    if (optimized.status === "failed") {
+      asset.tags = ["upload", "optimization-failed"];
+    } else if (optimized.status === "skipped") {
+      asset.tags = ["upload", "passthrough"];
+    }
 
     const saved = await saveMediaDurable(asset);
     return NextResponse.json(saved, { status: 201 });
