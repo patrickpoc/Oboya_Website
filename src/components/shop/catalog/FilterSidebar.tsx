@@ -1,7 +1,9 @@
 "use client";
 
+import { useCallback, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useShop } from "@/contexts/ShopContext";
+import { useOverlayA11y } from "@/hooks/use-overlay-a11y";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ShopLocalizedText } from "@/lib/shop/types";
@@ -254,34 +256,52 @@ export function FilterSidebar({ className }: { className?: string }) {
       {currency && (
         <FilterGroup title={t("filterPriceRange")}>
           <div className="grid grid-cols-2 gap-2">
-            <input
-              type="number"
-              min={0}
-              placeholder={t("priceMin")}
-              value={filters.priceMin ?? ""}
-              onChange={(event) =>
-                updateFilters({
-                  priceMin: event.target.value
-                    ? Number(event.target.value)
-                    : null,
-                })
-              }
-              className="h-9 rounded-lg border border-border px-2 text-sm"
-            />
-            <input
-              type="number"
-              min={0}
-              placeholder={t("priceMax")}
-              value={filters.priceMax ?? ""}
-              onChange={(event) =>
-                updateFilters({
-                  priceMax: event.target.value
-                    ? Number(event.target.value)
-                    : null,
-                })
-              }
-              className="h-9 rounded-lg border border-border px-2 text-sm"
-            />
+            <div className="space-y-1">
+              <label
+                htmlFor="shop-price-min"
+                className="text-[11px] font-medium text-muted-foreground"
+              >
+                {t("priceMin")}
+              </label>
+              <input
+                id="shop-price-min"
+                type="number"
+                min={0}
+                placeholder={t("priceMin")}
+                value={filters.priceMin ?? ""}
+                onChange={(event) =>
+                  updateFilters({
+                    priceMin: event.target.value
+                      ? Number(event.target.value)
+                      : null,
+                  })
+                }
+                className="h-9 w-full rounded-lg border border-border px-2 text-sm"
+              />
+            </div>
+            <div className="space-y-1">
+              <label
+                htmlFor="shop-price-max"
+                className="text-[11px] font-medium text-muted-foreground"
+              >
+                {t("priceMax")}
+              </label>
+              <input
+                id="shop-price-max"
+                type="number"
+                min={0}
+                placeholder={t("priceMax")}
+                value={filters.priceMax ?? ""}
+                onChange={(event) =>
+                  updateFilters({
+                    priceMax: event.target.value
+                      ? Number(event.target.value)
+                      : null,
+                  })
+                }
+                className="h-9 w-full rounded-lg border border-border px-2 text-sm"
+              />
+            </div>
           </div>
           <p className="mt-1 text-[11px] text-muted-foreground">
             {currency}
@@ -295,6 +315,14 @@ export function FilterSidebar({ className }: { className?: string }) {
 export function FilterDrawer() {
   const t = useTranslations("shop");
   const { isFilterDrawerOpen, setFilterDrawerOpen } = useShop();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const handleClose = useCallback(() => setFilterDrawerOpen(false), [setFilterDrawerOpen]);
+
+  useOverlayA11y({
+    open: isFilterDrawerOpen,
+    onClose: handleClose,
+    containerRef: panelRef,
+  });
 
   if (!isFilterDrawerOpen) return null;
 
@@ -303,15 +331,22 @@ export function FilterDrawer() {
       <button
         type="button"
         className="absolute inset-0 bg-oboya-blue-dark/40"
-        onClick={() => setFilterDrawerOpen(false)}
+        onClick={handleClose}
         aria-label={t("closeFilters")}
+        tabIndex={-1}
       />
-      <div className="absolute inset-y-0 left-0 w-full max-w-sm overflow-y-auto bg-white p-4 shadow-xl">
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("filters")}
+        className="absolute inset-y-0 left-0 w-full max-w-sm overflow-y-auto bg-white p-4 shadow-xl"
+      >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-semibold text-oboya-blue-dark">{t("filters")}</h2>
           <button
             type="button"
-            onClick={() => setFilterDrawerOpen(false)}
+            onClick={handleClose}
             className={buttonVariants({ variant: "ghost", size: "sm" })}
           >
             {t("close")}

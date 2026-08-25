@@ -10,13 +10,23 @@ function matchesSearch(product: ShopProduct, query: string): boolean {
   const q = query.toLowerCase().trim();
   const idAsWords = product.id.replace(/-/g, " ").toLowerCase();
   const qAsId = q.replace(/\s+/g, "-");
+  const localizedName = (
+    product as ShopProduct & {
+      name?: Partial<Record<"en" | "pt-BR" | "es" | "zh-CN", string>>;
+    }
+  ).name;
+  const nameValues = localizedName
+    ? Object.values(localizedName).filter(Boolean).map((value) => value.toLowerCase())
+    : [];
+
   return (
     product.id.toLowerCase().includes(q) ||
     product.id.toLowerCase().includes(qAsId) ||
     idAsWords.includes(q) ||
     product.sku.toLowerCase().includes(q) ||
     product.tags.some((tag) => tag.toLowerCase().includes(q)) ||
-    product.categoryId.toLowerCase().includes(q)
+    product.categoryId.toLowerCase().includes(q) ||
+    nameValues.some((name) => name.includes(q))
   );
 }
 
@@ -130,9 +140,21 @@ export function sortProducts(
 
   switch (sort) {
     case "name_asc":
-      return list.sort((a, b) => a.id.localeCompare(b.id));
+      return list.sort((a, b) => {
+        const aName =
+          (a as ShopProduct & { name?: { en?: string } }).name?.en ?? a.id;
+        const bName =
+          (b as ShopProduct & { name?: { en?: string } }).name?.en ?? b.id;
+        return aName.localeCompare(bName);
+      });
     case "name_desc":
-      return list.sort((a, b) => b.id.localeCompare(a.id));
+      return list.sort((a, b) => {
+        const aName =
+          (a as ShopProduct & { name?: { en?: string } }).name?.en ?? a.id;
+        const bName =
+          (b as ShopProduct & { name?: { en?: string } }).name?.en ?? b.id;
+        return bName.localeCompare(aName);
+      });
     case "price_asc":
       return list.sort(
         (a, b) =>

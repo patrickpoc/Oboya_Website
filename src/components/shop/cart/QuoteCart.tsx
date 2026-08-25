@@ -12,6 +12,7 @@ import {
 } from "@/components/shop/cart/quote-cart-transitions";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyQuote } from "@/components/shop/states/ShopStateViews";
+import { formatShopPrice } from "@/lib/shop/format-price";
 
 export function QuoteCart() {
   const t = useTranslations("shop");
@@ -95,7 +96,7 @@ export function QuoteCart() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">{t("estimatedTotal")}</span>
                 <span className="font-semibold text-oboya-blue-dark">
-                  {currency} {estimatedTotal.toFixed(2)}
+                  {formatShopPrice(estimatedTotal, currency)}
                 </span>
               </div>
               <p className="mt-1 text-[11px] text-muted-foreground">

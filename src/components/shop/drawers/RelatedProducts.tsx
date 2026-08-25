@@ -2,8 +2,10 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { getProductsByIds } from "@/lib/shop/catalog";
+import { useShop } from "@/contexts/ShopContext";
 import { useProductName } from "@/lib/shop/use-product-name";
+
+const FALLBACK_IMAGE = "/assets/homepage/greenhouse-technology.webp";
 
 interface RelatedProductsProps {
   ids: string[];
@@ -13,7 +15,11 @@ interface RelatedProductsProps {
 export function RelatedProducts({ ids, onSelect }: RelatedProductsProps) {
   const t = useTranslations("shop");
   const getProductName = useProductName();
-  const products = getProductsByIds(ids).slice(0, 3);
+  const { getProductById } = useShop();
+  const products = ids
+    .map((id) => getProductById(id))
+    .filter(Boolean)
+    .slice(0, 3) as NonNullable<ReturnType<typeof getProductById>>[];
 
   if (products.length === 0) return null;
 
@@ -30,16 +36,17 @@ export function RelatedProducts({ ids, onSelect }: RelatedProductsProps) {
             onClick={() => onSelect(product.id)}
             className="flex items-center gap-3 rounded-lg border border-border/60 p-2 text-left transition-colors hover:border-oboya-green/40 hover:bg-oboya-soft-white"
           >
-            <div className="relative size-12 shrink-0 overflow-hidden rounded-md">
+            <div className="relative size-12 shrink-0 overflow-hidden rounded-md bg-oboya-soft-white">
               <Image
-                src={product.images[0]}
-                alt={getProductName(product as Parameters<typeof getProductName>[0])}
+                src={product.images[0] || FALLBACK_IMAGE}
+                alt={getProductName(product)}
                 fill
                 className="object-cover"
+                sizes="48px"
               />
             </div>
             <span className="text-sm font-medium text-oboya-blue-dark">
-              {getProductName(product as Parameters<typeof getProductName>[0])}
+              {getProductName(product)}
             </span>
           </button>
         ))}

@@ -7,7 +7,22 @@ export function getProductMoq(product: ShopProduct | null | undefined): number {
   return product?.moq ?? 1;
 }
 
-export function clampQuantity(quantity: number, moq = 1): number {
+export function clampQuantity(
+  quantity: number,
+  moq = 1,
+  maxQuantity = MAX_QUANTITY
+): number {
   if (!Number.isFinite(quantity)) return moq;
-  return Math.max(moq, Math.min(MAX_QUANTITY, Math.round(quantity)));
+  const max = Math.max(moq, Math.min(MAX_QUANTITY, maxQuantity));
+  return Math.max(moq, Math.min(max, Math.round(quantity)));
+}
+
+export function getProductMaxQuantity(
+  product: ShopProduct | null | undefined
+): number {
+  if (!product || product.unlimitedStock) return MAX_QUANTITY;
+  if (product.stockQuantity != null && product.stockQuantity > 0) {
+    return Math.max(getProductMoq(product), product.stockQuantity);
+  }
+  return MAX_QUANTITY;
 }

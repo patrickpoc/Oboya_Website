@@ -41,19 +41,19 @@ export function ShopToolbar() {
           <div className="flex flex-col gap-4">
             {/* Controls that hide on mobile scroll */}
             <div
-              className={`flex flex-col gap-3 transition-all duration-300 md:!max-h-none md:!opacity-100 md:!overflow-visible lg:flex-row lg:items-end ${
+              className={`flex flex-col gap-3 transition-all duration-300 md:!max-h-none md:!opacity-100 md:!overflow-visible lg:flex-row lg:items-end lg:gap-4 ${
                 collapsed
                   ? "max-h-0 opacity-0 overflow-hidden !py-0 !gap-0 !mt-0 !mb-0"
                   : "max-h-[500px] opacity-100"
               }`}
             >
-              <CountrySelector className="lg:w-44" />
-              <CurrencySelector className="lg:w-36" />
-              <div className="hidden lg:block lg:flex-1">
+              <CountrySelector className="lg:w-48" />
+              <CurrencySelector className="lg:w-32" />
+              <div className="hidden min-w-[14rem] flex-1 lg:block">
                 <SearchBar />
               </div>
-              <SortDropdown className="lg:w-40" />
-              <ViewSwitcher className="lg:w-24" />
+              <SortDropdown className="lg:w-44" />
+              <ViewSwitcher className="lg:w-28" />
             </div>
 
             {/* Search bar + Filters button — always visible on mobile */}

@@ -21,7 +21,11 @@ import {
   buildShopSearchParams,
   parseShopUrlState,
 } from "@/lib/shop/url-state";
-import { clampQuantity, getProductMoq } from "@/lib/shop/quantity";
+import {
+  clampQuantity,
+  getProductMaxQuantity,
+  getProductMoq,
+} from "@/lib/shop/quantity";
 import type {
   CartItem,
   CurrencyCode,
@@ -94,6 +98,23 @@ interface ShopContextValue extends ShopState {
 
 const ShopContext = createContext<ShopContextValue | null>(null);
 
+function sanitizeCartItems(items: unknown): CartItem[] {
+  if (!Array.isArray(items)) return [];
+  return items
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+      const row = item as Partial<CartItem>;
+      if (typeof row.productId !== "string" || !row.productId.trim()) return null;
+      const quantity = Number(row.quantity);
+      if (!Number.isFinite(quantity) || quantity <= 0) return null;
+      return {
+        productId: row.productId.trim(),
+        quantity: clampQuantity(quantity, 1),
+      };
+    })
+    .filter(Boolean) as CartItem[];
+}
+
 function loadPersisted(): PersistedState {
   if (typeof window === "undefined") {
     return { countryCode: null, currency: null, items: [] };
@@ -101,7 +122,12 @@ function loadPersisted(): PersistedState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return { countryCode: null, currency: null, items: [] };
-    return JSON.parse(raw) as PersistedState;
+    const parsed = JSON.parse(raw) as PersistedState;
+    return {
+      countryCode: parsed.countryCode ?? null,
+      currency: parsed.currency ?? null,
+      items: sanitizeCartItems(parsed.items),
+    };
   } catch {
     return { countryCode: null, currency: null, items: [] };
   }
@@ -115,7 +141,7 @@ const defaultState: ShopState = {
   sort: "relevance",
   viewMode: "grid",
   filters: EMPTY_SHOP_FILTERS,
-  isCartOpen: true,
+  isCartOpen: false,
   quickViewProductId: null,
   isQuoteModalOpen: false,
   isFilterDrawerOpen: false,
@@ -160,23 +186,50 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  // Fetch catalog only on shop routes to avoid site-wide product API load.
   useEffect(() => {
+    if (!isShopRoute) return;
+
+    let cancelled = false;
+    setState((prev) =>
+      prev.status === "offline" ? prev : { ...prev, status: "loading" }
+    );
+
     void (async () => {
       try {
         const response = await fetch("/api/cms/products", { cache: "no-store" });
-        if (!response.ok) return;
+        if (!response.ok) throw new Error("Failed to load products");
         const products = (await response.json()) as CmsProduct[];
         const published = products.filter(
           (product) => product.status === "published" && !product.deletedAt
         );
+        if (cancelled) return;
         if (published.length > 0) {
           setShopProducts(published);
+          const validIds = new Set(published.map((product) => product.id));
+          setState((prev) => ({
+            ...prev,
+            status: prev.status === "offline" ? "offline" : "idle",
+            items: prev.items.filter((item) => validIds.has(item.productId)),
+          }));
+        } else {
+          setState((prev) =>
+            prev.status === "offline" ? prev : { ...prev, status: "idle" }
+          );
         }
       } catch {
+        if (cancelled) return;
         // Keep static fallback catalog when API is unavailable.
+        setState((prev) =>
+          prev.status === "offline" ? prev : { ...prev, status: "error" }
+        );
       }
     })();
-  }, []);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isShopRoute]);
 
   // Keep shop UI in sync with URL when entering / navigating within shop
   useEffect(() => {
@@ -346,8 +399,15 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setSearch = useCallback((search: string) => {
-    setState((prev) => ({ ...prev, search, visibleCount: PRODUCTS_PAGE_SIZE }));
     if (searchDebounce.current) clearTimeout(searchDebounce.current);
+    searchDebounce.current = setTimeout(() => {
+      setState((prev) => ({
+        ...prev,
+        search,
+        visibleCount: PRODUCTS_PAGE_SIZE,
+      }));
+      searchDebounce.current = null;
+    }, 300);
   }, []);
 
   const setSort = useCallback((sort: SortOption) => {
@@ -381,12 +441,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const addItem = useCallback((productId: string, quantity = 1) => {
     const product = getProductByIdFromState(productId);
     const moq = getProductMoq(product);
-    const normalizedQuantity = clampQuantity(quantity, moq);
+    const maxQty = getProductMaxQuantity(product);
+    const normalizedQuantity = clampQuantity(quantity, moq, maxQty);
 
     setState((prev) => {
       const existing = prev.items.find((item) => item.productId === productId);
       const nextQuantity = existing
-        ? clampQuantity(existing.quantity + normalizedQuantity, moq)
+        ? clampQuantity(existing.quantity + normalizedQuantity, moq, maxQty)
         : normalizedQuantity;
       const items = existing
         ? prev.items.map((item) =>
@@ -402,12 +463,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const updateQuantity = useCallback((productId: string, quantity: number) => {
     const product = getProductByIdFromState(productId);
     const moq = getProductMoq(product);
+    const maxQty = getProductMaxQuantity(product);
 
     setState((prev) => ({
       ...prev,
       items: prev.items.map((item) =>
         item.productId === productId
-          ? { ...item, quantity: clampQuantity(quantity, moq) }
+          ? { ...item, quantity: clampQuantity(quantity, moq, maxQty) }
           : item
       ),
     }));
@@ -433,7 +495,18 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setQuoteModalOpen = useCallback((open: boolean) => {
-    setState((prev) => ({ ...prev, isQuoteModalOpen: open }));
+    setState((prev) => ({
+      ...prev,
+      isQuoteModalOpen: open,
+      // Reset sticky success/error when closing or starting a new quote request.
+      ...(open || prev.rfqStatus === "success" || prev.rfqStatus === "error"
+        ? open && prev.rfqStatus === "success"
+          ? { rfqStatus: "idle" as const, rfqReferenceId: null }
+          : !open
+            ? { rfqStatus: "idle" as const, rfqReferenceId: null }
+            : {}
+        : {}),
+    }));
   }, []);
 
   const setFilterDrawerOpen = useCallback((open: boolean) => {
@@ -523,10 +596,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     [getLineItems]
   );
 
-  const itemCount = useMemo(
-    () => state.items.reduce((sum, item) => sum + item.quantity, 0),
-    [state.items]
-  );
+  const itemCount = useMemo(() => getLineItems().length, [getLineItems]);
 
   const activeFilterCount = useMemo(
     () => countActiveFilters(state.filters),
@@ -549,9 +619,24 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         throw new Error("Country and currency required");
       }
 
-      setState((prev) => ({ ...prev, rfqStatus: "submitting" }));
+      let shouldSubmit = true;
+      setState((prev) => {
+        if (prev.rfqStatus === "submitting") {
+          shouldSubmit = false;
+          return prev;
+        }
+        return { ...prev, rfqStatus: "submitting" };
+      });
+      if (!shouldSubmit) {
+        throw new Error("Submission already in progress");
+      }
 
       const lineItems = getLineItems();
+      if (lineItems.length === 0) {
+        setState((prev) => ({ ...prev, rfqStatus: "error" }));
+        throw new Error("Quote list is empty");
+      }
+
       const payload: RfqPayload = {
         ...form,
         countryCode: state.countryCode,
@@ -584,7 +669,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           rfqStatus: "success",
           rfqReferenceId: referenceId,
           items: [],
-          isQuoteModalOpen: false,
+          // Keep modal open so RfqSuccess is visible.
+          isQuoteModalOpen: true,
         }));
         return referenceId;
       } catch {

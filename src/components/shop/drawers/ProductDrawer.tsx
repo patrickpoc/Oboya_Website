@@ -2,14 +2,17 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
+import { useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useShop } from "@/contexts/ShopContext";
 import { useProductName } from "@/lib/shop/use-product-name";
+import { useOverlayA11y } from "@/hooks/use-overlay-a11y";
 import { ProductGallery } from "@/components/shop/drawers/ProductGallery";
 import { SpecificationTable } from "@/components/shop/drawers/SpecificationTable";
 import { DownloadsList } from "@/components/shop/drawers/DownloadsList";
 import { RelatedProducts } from "@/components/shop/drawers/RelatedProducts";
 import { buttonVariants } from "@/components/ui/button";
+import { formatShopPrice } from "@/lib/shop/format-price";
 
 const panelEase = [0.22, 1, 0.36, 1] as const;
 
@@ -25,6 +28,7 @@ export function ProductDrawer() {
     categories,
   } = useShop();
   const getProductName = useProductName();
+  const panelRef = useRef<HTMLElement>(null);
 
   const product = quickViewProductId
     ? getProductById(quickViewProductId)
@@ -37,7 +41,13 @@ export function ProductDrawer() {
   const price =
     product && currency ? (product.prices[currency] ?? 0) : 0;
 
-  const handleClose = () => setQuickViewProductId(null);
+  const handleClose = useCallback(() => setQuickViewProductId(null), [setQuickViewProductId]);
+
+  useOverlayA11y({
+    open: isOpen,
+    onClose: handleClose,
+    containerRef: panelRef,
+  });
 
   const handleAdd = () => {
     if (!product) return;
@@ -60,12 +70,17 @@ export function ProductDrawer() {
             className="absolute inset-0 bg-oboya-blue-dark/40"
             onClick={handleClose}
             aria-label={t("close")}
+            tabIndex={-1}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.28, ease: "easeOut" }}
           />
           <motion.aside
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("quickView")}
             className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col bg-white shadow-2xl"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
@@ -79,9 +94,10 @@ export function ProductDrawer() {
               <button
                 type="button"
                 onClick={handleClose}
+                aria-label={t("close")}
                 className="rounded-full p-2 text-muted-foreground hover:bg-muted"
               >
-                <X className="size-5" />
+                <X className="size-5" aria-hidden />
               </button>
             </div>
 
@@ -99,7 +115,7 @@ export function ProductDrawer() {
                   {product.sku} · {brand?.name}
                 </p>
                 <p className="mt-3 text-lg font-semibold text-oboya-blue-dark">
-                  {currency} {price.toFixed(2)}
+                  {formatShopPrice(price, currency)}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {t("estimatedPrice")}

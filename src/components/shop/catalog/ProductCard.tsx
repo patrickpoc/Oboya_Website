@@ -8,6 +8,9 @@ import { buttonVariants } from "@/components/ui/button";
 import { getBrandById, getCategoryById } from "@/lib/shop/catalog";
 import { useProductName } from "@/lib/shop/use-product-name";
 import type { ShopProduct } from "@/lib/shop/types";
+import { formatShopPrice } from "@/lib/shop/format-price";
+
+const FALLBACK_IMAGE = "/assets/homepage/greenhouse-technology.webp";
 
 interface ProductCardProps {
   product: ShopProduct;
@@ -30,15 +33,22 @@ export function ProductCard({
   const brand = getBrandById(product.brandId);
   const category = getCategoryById(product.categoryId);
   const price = product.prices[currency as keyof typeof product.prices] ?? 0;
+  const imageSrc = product.images[0] || FALLBACK_IMAGE;
 
   if (viewMode === "list") {
     return (
       <motion.article
         layout
-        className="flex gap-4 rounded-xl border border-border/60 bg-white p-4 shadow-[var(--shadow-card)] transition-shadow hover:shadow-md"
+        className="flex flex-col gap-4 rounded-xl border border-border/60 bg-white p-4 shadow-[var(--shadow-card)] transition-shadow hover:shadow-md sm:flex-row"
       >
-        <div className="relative size-24 shrink-0 overflow-hidden rounded-lg bg-oboya-soft-white">
-          <Image src={product.images[0]} alt={name} fill className="object-cover" />
+        <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-lg bg-oboya-soft-white sm:aspect-auto sm:size-24">
+          <Image
+            src={imageSrc}
+            alt={name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, 96px"
+          />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -51,22 +61,11 @@ export function ProductCard({
             {product.sku} · {brand?.name}
           </p>
           <p className="mt-2 text-sm font-semibold text-oboya-blue-dark">
-            {t("estimatedPrice")}: {currency} {price.toFixed(2)}
+            {t("estimatedPrice")}: {formatShopPrice(price, currency)}
           </p>
           <p className="text-[11px] text-oboya-green">{t("moq", { count: product.moq })}</p>
         </div>
-        <div className="flex shrink-0 flex-col justify-center gap-2 sm:min-w-[9.5rem]">
-          <button
-            type="button"
-            onClick={onQuickView}
-            className={buttonVariants({
-              variant: "outline",
-              size: "cta",
-              className: "w-full",
-            })}
-          >
-            {t("quickView")}
-          </button>
+        <div className="flex shrink-0 flex-col justify-center gap-2 sm:min-w-[10rem]">
           <button
             type="button"
             onClick={onAddToQuote}
@@ -76,6 +75,17 @@ export function ProductCard({
             })}
           >
             {t("addToQuote")}
+          </button>
+          <button
+            type="button"
+            onClick={onQuickView}
+            className={buttonVariants({
+              variant: "outline",
+              size: "sm",
+              className: "w-full rounded-full",
+            })}
+          >
+            {t("quickView")}
           </button>
         </div>
       </motion.article>
@@ -89,7 +99,13 @@ export function ProductCard({
       className="group flex flex-col overflow-hidden rounded-xl border border-border/60 bg-white shadow-[var(--shadow-card)] transition-shadow hover:shadow-md"
     >
       <div className="relative aspect-[4/3] bg-oboya-soft-white">
-        <Image src={product.images[0]} alt={name} fill className="object-cover" />
+        <Image
+          src={imageSrc}
+          alt={name}
+          fill
+          className="object-cover"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        />
       </div>
       <div className="flex flex-1 flex-col p-4">
         <p className="text-xs font-medium uppercase tracking-wide text-oboya-green">
@@ -110,32 +126,32 @@ export function ProductCard({
         )}
         {product.tags.length === 0 && <div className="mt-2 min-h-[1.5rem]" />}
         <p className="mt-3 text-sm font-semibold text-oboya-blue-dark">
-          {currency} {price.toFixed(2)}
+          {formatShopPrice(price, currency)}
         </p>
         <p className="text-[11px] text-muted-foreground">{t("estimatedPrice")}</p>
         <p className="text-[11px] text-oboya-green">{t("moq", { count: product.moq })}</p>
-        <div className="mt-auto flex gap-2 pt-4">
+        <div className="mt-auto flex flex-col gap-2 pt-4">
+          <button
+            type="button"
+            onClick={onAddToQuote}
+            className={buttonVariants({
+              size: "cta",
+              className:
+                "w-full rounded-full bg-oboya-green font-semibold text-white hover:bg-oboya-green/90",
+            })}
+          >
+            {t("addToQuote")}
+          </button>
           <button
             type="button"
             onClick={onQuickView}
             className={buttonVariants({
               variant: "outline",
               size: "sm",
-              className: "flex-1 rounded-full text-[11px] font-semibold uppercase tracking-wide",
+              className: "w-full rounded-full",
             })}
           >
             {t("quickView")}
-          </button>
-          <button
-            type="button"
-            onClick={onAddToQuote}
-            className={buttonVariants({
-              size: "sm",
-              className:
-                "flex-1 rounded-full bg-oboya-green text-[11px] font-semibold uppercase tracking-wide text-white hover:bg-oboya-green/90",
-            })}
-          >
-            {t("addToQuote")}
           </button>
         </div>
       </div>

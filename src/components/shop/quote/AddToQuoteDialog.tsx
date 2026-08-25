@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useShop } from "@/contexts/ShopContext";
 import { useProductName } from "@/lib/shop/use-product-name";
 import { getProductMoq } from "@/lib/shop/quantity";
+import { formatShopPrice } from "@/lib/shop/format-price";
 import { QuantityInput } from "@/components/shop/QuantityInput";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -88,7 +89,7 @@ export function AddToQuoteDialog() {
             </p>
             {currency && (
               <p className="mt-1 text-sm font-medium text-oboya-blue-dark">
-                {currency} {unitPrice.toFixed(2)}
+                {formatShopPrice(unitPrice, currency)}
               </p>
             )}
           </div>
@@ -105,7 +106,7 @@ export function AddToQuoteDialog() {
           />
           {currency && quantity > 0 && (
             <p className="text-xs text-muted-foreground">
-              {t("lineTotal")}: {currency} {(unitPrice * quantity).toFixed(2)}
+              {t("lineTotal")}: {formatShopPrice(unitPrice * quantity, currency)}
             </p>
           )}
         </div>

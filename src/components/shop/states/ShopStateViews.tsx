@@ -4,6 +4,7 @@ import { Globe, PackageOpen, SearchX, ShoppingBag, WifiOff } from "lucide-react"
 import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buttonVariants } from "@/components/ui/button";
+import { useShop } from "@/contexts/ShopContext";
 
 export function SelectCountryPrompt() {
   const t = useTranslations("shop");
@@ -23,12 +24,23 @@ export function SelectCountryPrompt() {
 
 export function EmptyResults() {
   const t = useTranslations("shop");
+  const { clearFilters } = useShop();
 
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-border/60 bg-white px-6 py-16 text-center">
       <SearchX className="size-10 text-muted-foreground" aria-hidden />
       <h3 className="mt-4 font-semibold text-oboya-blue-dark">{t("noResultsTitle")}</h3>
       <p className="mt-2 text-sm text-muted-foreground">{t("noResultsDesc")}</p>
+      <button
+        type="button"
+        onClick={clearFilters}
+        className={buttonVariants({
+          variant: "outline",
+          className: "mt-6 rounded-full",
+        })}
+      >
+        {t("clearFilters")}
+      </button>
     </div>
   );
 }

@@ -8,6 +8,10 @@ export function getFormSubmissions(type?: FormSubmission["type"]): FormSubmissio
   return cache.filter((s) => s.type === type);
 }
 
+export function replaceFormSubmissionsCache(entries: FormSubmission[]) {
+  cache = [...entries];
+}
+
 export function updateSubmissionStatus(
   id: string,
   status: FormSubmission["status"]

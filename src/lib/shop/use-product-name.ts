@@ -32,12 +32,13 @@ export function useProductName() {
         return fromContent;
       }
 
+      // CMS / dynamic IDs are not in messages — avoid MISSING_MESSAGE console errors.
+      if (!tProducts.has(id as Parameters<typeof tProducts.has>[0])) {
+        return normalizeIdFallback(id);
+      }
+
       try {
-        const translated = tProducts(id as Parameters<typeof tProducts>[0]);
-        if (translated === `shop.products.${id}`) {
-          return normalizeIdFallback(id);
-        }
-        return translated;
+        return tProducts(id as Parameters<typeof tProducts>[0]);
       } catch {
         return normalizeIdFallback(id);
       }

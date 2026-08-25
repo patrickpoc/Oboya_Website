@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import {
   addFormSubmission,
-  getFormSubmissions,
 } from "@/lib/cms/repositories/forms-repository";
+import { readFormSubmissions } from "@/lib/cms/server/forms.server";
 import type { FormSubmission } from "@/lib/cms/types";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { requireAdminUser } from "@/lib/map-locations.server";
 
 const CONTACT_SUBJECTS = new Set([
   "general",
@@ -13,10 +15,17 @@ const CONTACT_SUBJECTS = new Set([
 ]);
 
 export async function GET(request: Request) {
+  if (isSupabaseConfigured()) {
+    const user = await requireAdminUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+  }
+
   const { searchParams } = new URL(request.url);
   const type = searchParams.get("type") as FormSubmission["type"] | null;
 
-  const submissions = getFormSubmissions(type ?? undefined);
+  const submissions = await readFormSubmissions(type ?? undefined);
   return NextResponse.json(submissions);
 }
 

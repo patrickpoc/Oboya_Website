@@ -2,13 +2,16 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
+import { useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useShop } from "@/contexts/ShopContext";
+import { useOverlayA11y } from "@/hooks/use-overlay-a11y";
 import { CartItemRow } from "@/components/shop/cart/CartItem";
 import { QuoteCartMinimizedButton } from "@/components/shop/cart/QuoteCartMinimizedButton";
 import { mobileSheetTransition } from "@/components/shop/cart/quote-cart-transitions";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyQuote } from "@/components/shop/states/ShopStateViews";
+import { formatShopPrice } from "@/lib/shop/format-price";
 
 export function QuoteCartFab() {
   const { itemCount, isCartOpen, setCartOpen } = useShop();
@@ -40,6 +43,14 @@ export function QuoteCartSheet() {
     removeItem,
     setQuoteModalOpen,
   } = useShop();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const handleClose = useCallback(() => setCartOpen(false), [setCartOpen]);
+
+  useOverlayA11y({
+    open: isCartOpen,
+    onClose: handleClose,
+    containerRef: panelRef,
+  });
 
   const lineItems = getLineItems();
 
@@ -57,10 +68,15 @@ export function QuoteCartSheet() {
           <button
             type="button"
             className="absolute inset-0 bg-oboya-blue-dark/40"
-            onClick={() => setCartOpen(false)}
+            onClick={handleClose}
             aria-label={t("close")}
+            tabIndex={-1}
           />
           <motion.div
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("quoteList")}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
@@ -76,11 +92,11 @@ export function QuoteCartSheet() {
                 </span>
                 <button
                   type="button"
-                  onClick={() => setCartOpen(false)}
+                  onClick={handleClose}
                   className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
                   aria-label={t("minimizeQuoteList")}
                 >
-                  <ChevronDown className="size-4" />
+                  <ChevronDown className="size-4" aria-hidden />
                 </button>
               </div>
             </div>
@@ -108,7 +124,7 @@ export function QuoteCartSheet() {
                 <div className="flex justify-between text-sm font-semibold text-oboya-blue-dark">
                   <span>{t("estimatedTotal")}</span>
                   <span>
-                    {currency} {estimatedTotal.toFixed(2)}
+                    {formatShopPrice(estimatedTotal, currency)}
                   </span>
                 </div>
                 <button
