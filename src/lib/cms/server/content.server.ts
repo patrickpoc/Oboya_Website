@@ -58,32 +58,21 @@ const FILES = {
   media: "media-assets.json",
 } as const;
 
-const hydrated = {
-  about: false,
-  news: false,
-  faqs: false,
-  blog: false,
-  cases: false,
-  media: false,
-};
-
-async function hydrateAbout() {
-  if (hydrated.about) return;
-  hydrated.about = true;
+/**
+ * Disk is the shared source of truth across Next.js API and RSC bundles
+ * (module memory is not shared between them).
+ */
+async function loadAboutFromDisk() {
   const data = await readCmsJsonFile<AboutPageSettings>(FILES.about);
   if (data) replaceAboutPageSettingsCache(data);
 }
 
-async function hydrateNews() {
-  if (hydrated.news) return;
-  hydrated.news = true;
+async function loadNewsFromDisk() {
   const data = await readCmsJsonFile<NewsPageSettings>(FILES.news);
   if (data) replaceNewsPageSettingsCache(data);
 }
 
-async function hydrateFaqs() {
-  if (hydrated.faqs) return;
-  hydrated.faqs = true;
+async function loadFaqsFromDisk() {
   const data = await readCmsJsonFile<{
     categories: CmsFaqCategory[];
     faqs: CmsFaqItem[];
@@ -91,23 +80,17 @@ async function hydrateFaqs() {
   if (data?.categories && data?.faqs) replaceFaqsCache(data);
 }
 
-async function hydrateBlog() {
-  if (hydrated.blog) return;
-  hydrated.blog = true;
+async function loadBlogFromDisk() {
   const data = await readCmsJsonFile<CmsBlogPost[]>(FILES.blog);
   if (Array.isArray(data)) replaceBlogPostsCache(data);
 }
 
-async function hydrateCases() {
-  if (hydrated.cases) return;
-  hydrated.cases = true;
+async function loadCasesFromDisk() {
   const data = await readCmsJsonFile<CmsCaseStudy[]>(FILES.cases);
   if (Array.isArray(data)) replaceCaseStudiesCache(data);
 }
 
-async function hydrateMedia() {
-  if (hydrated.media) return;
-  hydrated.media = true;
+async function loadMediaFromDisk() {
   const data = await readCmsJsonFile<MediaAsset[]>(FILES.media);
   if (Array.isArray(data) && data.length > 0) replaceMediaAssetsCache(data);
 }
@@ -120,12 +103,12 @@ async function persistFaqs() {
 }
 
 export async function readAboutDurable() {
-  await hydrateAbout();
+  await loadAboutFromDisk();
   return getAboutPageSettings();
 }
 
 export async function saveAboutDurable(settings: AboutPageSettings) {
-  await hydrateAbout();
+  await loadAboutFromDisk();
   const saved = saveAboutMemory(settings);
   try {
     await writeCmsJsonFile(FILES.about, saved);
@@ -136,12 +119,12 @@ export async function saveAboutDurable(settings: AboutPageSettings) {
 }
 
 export async function readNewsDurable() {
-  await hydrateNews();
+  await loadNewsFromDisk();
   return getNewsPageSettings();
 }
 
 export async function saveNewsDurable(settings: NewsPageSettings) {
-  await hydrateNews();
+  await loadNewsFromDisk();
   const saved = saveNewsMemory(settings);
   try {
     await writeCmsJsonFile(FILES.news, saved);
@@ -152,12 +135,12 @@ export async function saveNewsDurable(settings: NewsPageSettings) {
 }
 
 export async function readFaqsDurable() {
-  await hydrateFaqs();
+  await loadFaqsFromDisk();
   return { categories: getCategories(), faqs: getFaqs() };
 }
 
 export async function saveFaqCategoryDurable(category: CmsFaqCategory) {
-  await hydrateFaqs();
+  await loadFaqsFromDisk();
   const saved = saveCategoryMemory(category);
   try {
     await persistFaqs();
@@ -168,7 +151,7 @@ export async function saveFaqCategoryDurable(category: CmsFaqCategory) {
 }
 
 export async function saveFaqItemDurable(faq: CmsFaqItem) {
-  await hydrateFaqs();
+  await loadFaqsFromDisk();
   const saved = saveFaqMemory(faq);
   try {
     await persistFaqs();
@@ -179,7 +162,7 @@ export async function saveFaqItemDurable(faq: CmsFaqItem) {
 }
 
 export async function deleteFaqCategoryDurable(id: string) {
-  await hydrateFaqs();
+  await loadFaqsFromDisk();
   const ok = deleteCategoryMemory(id);
   try {
     await persistFaqs();
@@ -190,7 +173,7 @@ export async function deleteFaqCategoryDurable(id: string) {
 }
 
 export async function deleteFaqItemDurable(id: string) {
-  await hydrateFaqs();
+  await loadFaqsFromDisk();
   const ok = deleteFaqMemory(id);
   try {
     await persistFaqs();
@@ -201,12 +184,12 @@ export async function deleteFaqItemDurable(id: string) {
 }
 
 export async function readBlogDurable() {
-  await hydrateBlog();
+  await loadBlogFromDisk();
   return getBlogPosts();
 }
 
 export async function saveBlogDurable(post: CmsBlogPost) {
-  await hydrateBlog();
+  await loadBlogFromDisk();
   const saved = saveBlogMemory(post);
   try {
     await writeCmsJsonFile(FILES.blog, getBlogPosts());
@@ -217,7 +200,7 @@ export async function saveBlogDurable(post: CmsBlogPost) {
 }
 
 export async function deleteBlogDurable(id: string) {
-  await hydrateBlog();
+  await loadBlogFromDisk();
   const ok = deleteBlogMemory(id);
   try {
     await writeCmsJsonFile(FILES.blog, getBlogPosts());
@@ -228,12 +211,12 @@ export async function deleteBlogDurable(id: string) {
 }
 
 export async function readCasesDurable() {
-  await hydrateCases();
+  await loadCasesFromDisk();
   return getCaseStudies();
 }
 
 export async function saveCaseDurable(study: CmsCaseStudy) {
-  await hydrateCases();
+  await loadCasesFromDisk();
   const saved = saveCaseMemory(study);
   try {
     await writeCmsJsonFile(FILES.cases, getCaseStudies());
@@ -244,7 +227,7 @@ export async function saveCaseDurable(study: CmsCaseStudy) {
 }
 
 export async function deleteCaseDurable(id: string) {
-  await hydrateCases();
+  await loadCasesFromDisk();
   const ok = deleteCaseMemory(id);
   try {
     await writeCmsJsonFile(FILES.cases, getCaseStudies());
@@ -255,12 +238,12 @@ export async function deleteCaseDurable(id: string) {
 }
 
 export async function readMediaDurable() {
-  await hydrateMedia();
+  await loadMediaFromDisk();
   return getMediaAssets();
 }
 
 export async function saveMediaDurable(asset: MediaAsset) {
-  await hydrateMedia();
+  await loadMediaFromDisk();
   const saved = saveMediaMemory(asset);
   try {
     await writeCmsJsonFile(FILES.media, getMediaAssets());
@@ -271,7 +254,7 @@ export async function saveMediaDurable(asset: MediaAsset) {
 }
 
 export async function deleteMediaDurable(id: string) {
-  await hydrateMedia();
+  await loadMediaFromDisk();
   const ok = deleteMediaMemory(id);
   try {
     await writeCmsJsonFile(FILES.media, getMediaAssets());

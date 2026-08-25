@@ -13,26 +13,21 @@ import {
 
 const FILENAME = "homepage-settings.json";
 
-let hydrated = false;
-
-async function hydrateFromDisk() {
-  if (hydrated) return;
-  hydrated = true;
+/**
+ * Always prefer disk so API route handlers and RSC share the same source of
+ * truth (module-level memory is not shared across Next.js bundles).
+ */
+export async function readHomepageSettingsDurable(): Promise<HomepageSettings> {
   const fromDisk = await readCmsJsonFile<HomepageSettings>(FILENAME);
   if (fromDisk) {
-    replaceHomepageSettingsCache(fromDisk);
+    return replaceHomepageSettingsCache(fromDisk);
   }
-}
-
-export async function readHomepageSettingsDurable(): Promise<HomepageSettings> {
-  await hydrateFromDisk();
   return getHomepageSettings();
 }
 
 export async function saveHomepageSettingsDurable(
   settings: HomepageSettings
 ): Promise<HomepageSettings> {
-  await hydrateFromDisk();
   const saved = saveToMemory(settings);
   try {
     await writeCmsJsonFile(FILENAME, saved);

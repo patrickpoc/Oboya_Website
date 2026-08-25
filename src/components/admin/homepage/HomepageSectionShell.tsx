@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Can } from "@/components/admin/permissions/Can";
 import {
   getHomepageSettings,
+  replaceHomepageSettingsCache,
   type HomepageSettings,
 } from "@/lib/cms/repositories/homepage-repository";
 import {
@@ -29,10 +30,33 @@ export function HomepageSectionShell({
 }: HomepageSectionShellProps) {
   const meta = HOMEPAGE_SECTION_META[section];
   const [settings, setSettings] = useState<HomepageSettings>(
-    getHomepageSettings()
+    getHomepageSettings
   );
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetch("/api/cms/homepage");
+        if (!response.ok) return;
+        const data = (await response.json()) as HomepageSettings;
+        if (!cancelled) {
+          replaceHomepageSettingsCache(data);
+          setSettings(data);
+        }
+      } catch {
+        /* keep seeded client cache */
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -49,6 +73,7 @@ export function HomepageSectionShell({
         throw new Error(payload?.error ?? "Failed to save homepage");
       }
       const saved = (await response.json()) as HomepageSettings;
+      replaceHomepageSettingsCache(saved);
       setSettings(saved);
       toast.success("Homepage saved — live site will update shortly");
     } catch (error) {
@@ -80,7 +105,7 @@ export function HomepageSectionShell({
           actions={
             <Button
               onClick={() => void handleSave()}
-              disabled={saving}
+              disabled={saving || loading}
               className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
             >
               {saving ? "Saving…" : "Save"}
@@ -88,9 +113,13 @@ export function HomepageSectionShell({
           }
         />
 
-        <LocaleFieldTabs value={locale} onChange={setLocale}>
-          {(loc) => children({ settings, setSettings, locale: loc })}
-        </LocaleFieldTabs>
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Loading saved content…</p>
+        ) : (
+          <LocaleFieldTabs value={locale} onChange={setLocale}>
+            {(loc) => children({ settings, setSettings, locale: loc })}
+          </LocaleFieldTabs>
+        )}
       </div>
     </Can>
   );
