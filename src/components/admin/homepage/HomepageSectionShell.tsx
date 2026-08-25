@@ -38,14 +38,21 @@ export function HomepageSectionShell({
 
   useEffect(() => {
     let cancelled = false;
+    const timeout = window.setTimeout(() => {
+      if (!cancelled) setLoading(false);
+    }, 8000);
+
     void (async () => {
       try {
-        const response = await fetch("/api/cms/homepage");
-        if (!response.ok) return;
-        const data = (await response.json()) as HomepageSettings;
-        if (!cancelled) {
-          replaceHomepageSettingsCache(data);
-          setSettings(data);
+        const response = await fetch("/api/cms/homepage", {
+          cache: "no-store",
+        });
+        if (response.ok) {
+          const data = (await response.json()) as HomepageSettings;
+          if (!cancelled) {
+            replaceHomepageSettingsCache(data);
+            setSettings(data);
+          }
         }
       } catch {
         /* keep seeded client cache */
@@ -53,8 +60,10 @@ export function HomepageSectionShell({
         if (!cancelled) setLoading(false);
       }
     })();
+
     return () => {
       cancelled = true;
+      window.clearTimeout(timeout);
     };
   }, []);
 
