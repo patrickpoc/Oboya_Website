@@ -1,16 +1,31 @@
 import { NextResponse } from "next/server";
+import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
+import { unauthorizedIfNeeded } from "@/lib/cms/server/cms-auth.server";
+import { revalidatePublicSite } from "@/lib/cms/server/cms-revalidate.server";
 import {
-  getHomepageSettings,
-  saveHomepageSettings,
-  type HomepageSettings,
-} from "@/lib/cms/repositories/homepage-repository";
+  readHomepageSettingsDurable,
+  saveHomepageSettingsDurable,
+} from "@/lib/cms/server/homepage.server";
 
 export async function GET() {
-  return NextResponse.json(getHomepageSettings());
+  const settings = await readHomepageSettingsDurable();
+  return NextResponse.json(settings);
 }
 
 export async function PUT(request: Request) {
-  const body = (await request.json()) as HomepageSettings;
-  const saved = saveHomepageSettings(body);
-  return NextResponse.json(saved);
+  const denied = await unauthorizedIfNeeded();
+  if (denied) return denied;
+
+  try {
+    const body = (await request.json()) as HomepageSettings;
+    const saved = await saveHomepageSettingsDurable(body);
+    revalidatePublicSite();
+    return NextResponse.json(saved);
+  } catch (error) {
+    console.error("Failed to save homepage settings:", error);
+    return NextResponse.json(
+      { error: "Failed to save homepage settings" },
+      { status: 500 }
+    );
+  }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -11,16 +11,48 @@ import { buttonVariants } from "@/components/ui/button";
 import {
   deleteCaseStudy,
   getCaseStudies,
+  replaceCaseStudiesCache,
+  type CmsCaseStudy,
 } from "@/lib/cms/repositories/case-studies-repository";
 
 export default function CaseStudiesPage() {
-  const [studies, setStudies] = useState(getCaseStudies());
+  const [studies, setStudies] = useState<CmsCaseStudy[]>(() => getCaseStudies());
 
-  const handleDelete = (id: string) => {
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/cms/case-studies");
+        if (!res.ok) return;
+        const data = (await res.json()) as CmsCaseStudy[];
+        if (!cancelled && Array.isArray(data)) {
+          replaceCaseStudiesCache(data);
+          setStudies([...getCaseStudies()]);
+        }
+      } catch {
+        /* keep seeded cache */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleDelete = async (id: string) => {
     if (!window.confirm("Delete this case study?")) return;
-    deleteCaseStudy(id);
-    setStudies([...getCaseStudies()]);
-    toast.success("Case study deleted");
+    try {
+      const res = await fetch(`/api/cms/case-studies?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        throw new Error("Failed to delete case study");
+      }
+      deleteCaseStudy(id);
+      setStudies([...getCaseStudies()]);
+      toast.success("Case study deleted");
+    } catch {
+      toast.error("Failed to delete case study");
+    }
   };
 
   const columns = useMemo(
@@ -57,7 +89,7 @@ export default function CaseStudiesPage() {
             </Link>
             <button
               type="button"
-              onClick={() => handleDelete(row.id)}
+              onClick={() => void handleDelete(row.id)}
               className="rounded p-1 text-destructive hover:bg-muted"
               aria-label="Delete case study"
             >

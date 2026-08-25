@@ -42,7 +42,12 @@ export function AdminSidebar() {
                     )}
                   >
                     {item.icon && <item.icon className="size-4 shrink-0" />}
-                    {item.label}
+                    <span className="flex-1">{item.label}</span>
+                    {item.stub ? (
+                      <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-800">
+                        Stub
+                      </span>
+                    ) : null}
                   </Link>
                 </li>
               );
@@ -102,13 +107,18 @@ function NavGroup({
                   href={child.href ?? "#"}
                   prefetch
                   className={cn(
-                    "block rounded-md px-2 py-1.5 text-xs transition-colors",
+                    "flex items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors",
                     active
                       ? "bg-oboya-green/10 font-medium text-oboya-green"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  {child.label}
+                  <span className="flex-1">{child.label}</span>
+                  {child.stub ? (
+                    <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-800">
+                      Stub
+                    </span>
+                  ) : null}
                 </Link>
               </li>
             );

@@ -543,3 +543,11 @@ export function deleteFaq(id: string): boolean {
   faqsCache = faqs;
   return true;
 }
+
+export function replaceFaqsCache(data: {
+  categories: CmsFaqCategory[];
+  faqs: CmsFaqItem[];
+}) {
+  categoriesCache = [...data.categories];
+  faqsCache = [...data.faqs];
+}

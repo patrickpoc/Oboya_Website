@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import {
   ChevronRight,
@@ -14,6 +14,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +30,8 @@ import {
   searchMediaAssets,
   getAllTags,
   updateAssetTags,
+  replaceMediaAssetsCache,
+  saveMediaAsset,
 } from "@/lib/cms/repositories/media-repository";
 import type { MediaAsset, MediaFolder } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
@@ -350,8 +353,30 @@ export default function MediaLibraryPage() {
   const [renamingFolder, setRenamingFolder] = useState<MediaFolder | null>(null);
   const [movingFolder, setMovingFolder] = useState<MediaFolder | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [uploading, setUploading] = useState(false);
+  const uploadRef = useRef<HTMLInputElement>(null);
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/cms/media");
+        if (!res.ok) return;
+        const data = (await res.json()) as MediaAsset[];
+        if (!cancelled && Array.isArray(data)) {
+          replaceMediaAssetsCache(data);
+          refresh();
+        }
+      } catch {
+        /* keep seeded client cache */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [refresh]);
 
   const allTags = useMemo(() => getAllTags(), [refreshKey]);
   const breadcrumb = useMemo(() => getFolderBreadcrumb(currentFolderId), [currentFolderId, refreshKey]);
@@ -403,6 +428,30 @@ export default function MediaLibraryPage() {
     refresh();
   };
 
+  const handleUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      body.append("folderId", currentFolderId);
+      const res = await fetch("/api/cms/media", { method: "POST", body });
+      if (!res.ok) {
+        const payload = (await res.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(payload?.error ?? "Upload failed");
+      }
+      const asset = (await res.json()) as MediaAsset;
+      saveMediaAsset(asset);
+      refresh();
+      toast.success("Image uploaded");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div>
       <AdminPageHeader
@@ -418,10 +467,26 @@ export default function MediaLibraryPage() {
               <FolderPlus className="size-4" />
               New Folder
             </button>
-            <button type="button" className={buttonVariants({ className: "gap-1.5 rounded-full" })}>
+            <button
+              type="button"
+              disabled={uploading}
+              onClick={() => uploadRef.current?.click()}
+              className={buttonVariants({ className: "gap-1.5 rounded-full" })}
+            >
               <Upload className="size-4" />
-              Upload
+              {uploading ? "Uploading…" : "Upload"}
             </button>
+            <input
+              ref={uploadRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void handleUpload(file);
+                e.target.value = "";
+              }}
+            />
           </div>
         }
       />

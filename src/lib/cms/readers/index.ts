@@ -1,22 +1,22 @@
 /**
  * Unified CMS readers — public site should consume these instead of direct JSON imports.
- * Currently delegates to existing data sources with CMS layer on top where available.
+ * Hydrates durable CMS files into memory before returning content.
  */
 
 import { getShopCatalog, getProductById as getShopProductById } from "@/lib/shop/catalog";
 import { readMapLocations } from "@/lib/map-locations.server";
 import { getCmsProducts, getCmsProductById } from "@/lib/cms/repositories/product-repository";
-import { getBlogPosts, getBlogPostBySlug } from "@/lib/cms/repositories/blog-repository";
+import { getBlogPostBySlug } from "@/lib/cms/repositories/blog-repository";
 import { getBlogCategories } from "@/lib/cms/repositories/blog-categories-repository";
-import { getNewsPageSettings } from "@/lib/cms/repositories/news-page-repository";
-import { getHomepageSettings } from "@/lib/cms/repositories/homepage-repository";
-import { getAboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
-import { getCaseStudies, getCaseStudyById } from "@/lib/cms/repositories/case-studies-repository";
-import {
-  getCategories as getFaqCategories,
-  getFaqs,
-} from "@/lib/cms/repositories/faqs-repository";
 import { siteConfig } from "@/constants/site";
+import { readHomepageSettingsDurable } from "@/lib/cms/server/homepage.server";
+import {
+  readAboutDurable,
+  readBlogDurable,
+  readCasesDurable,
+  readFaqsDurable,
+  readNewsDurable,
+} from "@/lib/cms/server/content.server";
 
 export async function readMapDataForSite() {
   return readMapLocations();
@@ -40,11 +40,13 @@ export function readProductById(id: string) {
   return getShopProductById(id);
 }
 
-export function readBlogPosts() {
-  return getBlogPosts().filter((p) => p.status === "published");
+export async function readBlogPosts() {
+  const posts = await readBlogDurable();
+  return posts.filter((p) => p.status === "published");
 }
 
-export function readBlogPostBySlug(slug: string) {
+export async function readBlogPostBySlug(slug: string) {
+  await readBlogDurable();
   const post = getBlogPostBySlug(slug);
   return post?.status === "published" ? post : undefined;
 }
@@ -53,34 +55,38 @@ export function readBlogCategories() {
   return getBlogCategories();
 }
 
-export function readNewsPageSettings() {
-  return getNewsPageSettings();
+export async function readNewsPageSettings() {
+  return readNewsDurable();
 }
 
-export function readHomepageSettings() {
-  return getHomepageSettings();
+export async function readHomepageSettings() {
+  return readHomepageSettingsDurable();
 }
 
-export function readAboutPageSettings() {
-  return getAboutPageSettings();
+export async function readAboutPageSettings() {
+  return readAboutDurable();
 }
 
-export function readCaseStudies() {
-  return getCaseStudies().filter((c) => c.status === "published");
+export async function readCaseStudies() {
+  const studies = await readCasesDurable();
+  return studies.filter((c) => c.status === "published");
 }
 
-export function readCaseStudyBySlug(slug: string) {
-  return getCaseStudies().find((c) => c.slug === slug && c.status === "published");
+export async function readCaseStudyBySlug(slug: string) {
+  const studies = await readCasesDurable();
+  return studies.find((c) => c.slug === slug && c.status === "published");
 }
 
 export function readSiteSettings() {
   return siteConfig;
 }
 
-export function readFaqCategories() {
-  return getFaqCategories();
+export async function readFaqCategories() {
+  const data = await readFaqsDurable();
+  return data.categories;
 }
 
-export function readFaqs() {
-  return getFaqs().filter((f) => f.status === "published");
+export async function readFaqs() {
+  const data = await readFaqsDurable();
+  return data.faqs.filter((f) => f.status === "published");
 }

@@ -579,22 +579,27 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
 }
 
 export function getHomepageSettings(): HomepageSettings {
-  if (appliedRevision !== CONTENT_REVISION) {
-    cache = defaultSettings();
-    appliedRevision = CONTENT_REVISION;
-  }
   if (!cache) cache = defaultSettings();
   return migrateSettings(cache);
 }
 
-export function saveHomepageSettings(settings: HomepageSettings): HomepageSettings {
+export function replaceHomepageSettingsCache(
+  settings: HomepageSettings
+): HomepageSettings {
   const updated = migrateSettings({
     ...settings,
-    updatedAt: new Date().toISOString(),
+    updatedAt: settings.updatedAt ?? new Date().toISOString(),
   });
   cache = updated;
   appliedRevision = CONTENT_REVISION;
   return updated;
+}
+
+export function saveHomepageSettings(settings: HomepageSettings): HomepageSettings {
+  return replaceHomepageSettingsCache({
+    ...settings,
+    updatedAt: new Date().toISOString(),
+  });
 }
 
 export function resetHomepageSettings(): HomepageSettings {

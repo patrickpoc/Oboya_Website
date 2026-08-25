@@ -13,7 +13,7 @@ type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const settings = readNewsPageSettings();
+  const settings = await readNewsPageSettings();
   const t = await getTranslations({ locale, namespace: "newsPage" });
 
   return {
@@ -26,9 +26,9 @@ export default async function NewsIndexPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const posts = readBlogPosts();
+  const posts = await readBlogPosts();
   const categories = readBlogCategories();
-  const settings = readNewsPageSettings();
+  const settings = await readNewsPageSettings();
 
   return (
     <SiteLayout>

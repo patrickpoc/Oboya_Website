@@ -236,6 +236,10 @@ export function saveMediaAsset(asset: MediaAsset): MediaAsset {
   return asset;
 }
 
+export function replaceMediaAssetsCache(assets: MediaAsset[]) {
+  cache = [...assets];
+}
+
 export function deleteMediaAsset(id: string): boolean {
   const idx = cache.findIndex((m) => m.id === id);
   if (idx < 0) return false;

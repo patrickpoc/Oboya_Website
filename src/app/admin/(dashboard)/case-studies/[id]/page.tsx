@@ -15,7 +15,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   getCaseStudyById,
-  saveCaseStudy,
   type CaseStudyRegion,
   type CmsCaseStudy,
 } from "@/lib/cms/repositories/case-studies-repository";
@@ -83,10 +82,26 @@ export default function CaseStudyEditPage() {
 
   if (!study) return <p>Case study not found</p>;
 
-  const handleSave = () => {
-    saveCaseStudy(study);
-    toast.success("Case study saved");
-    router.push("/admin/case-studies");
+  const handleSave = async () => {
+    try {
+      const response = await fetch("/api/cms/case-studies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(study),
+      });
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(payload?.error ?? "Failed to save case study");
+      }
+      toast.success("Case study saved — live site will update shortly");
+      router.push("/admin/case-studies");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save case study"
+      );
+    }
   };
 
   const setImageAt = (index: number, url: string) => {
@@ -108,7 +123,10 @@ export default function CaseStudyEditPage() {
             >
               Back
             </Link>
-            <Button onClick={handleSave} className="rounded-full bg-oboya-green hover:bg-oboya-green/90">
+            <Button
+              onClick={() => void handleSave()}
+              className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
+            >
               Save
             </Button>
           </div>

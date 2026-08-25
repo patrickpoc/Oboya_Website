@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Can } from "@/components/admin/permissions/Can";
 import {
   getHomepageSettings,
-  saveHomepageSettings,
   type HomepageSettings,
 } from "@/lib/cms/repositories/homepage-repository";
 import {
@@ -24,23 +23,41 @@ type HomepageSectionShellProps = {
   children: (props: HomepageSectionEditorProps) => ReactNode;
 };
 
-export function HomepageSectionShell({ section, children }: HomepageSectionShellProps) {
+export function HomepageSectionShell({
+  section,
+  children,
+}: HomepageSectionShellProps) {
   const meta = HOMEPAGE_SECTION_META[section];
-  const [settings, setSettings] = useState<HomepageSettings>(getHomepageSettings());
+  const [settings, setSettings] = useState<HomepageSettings>(
+    getHomepageSettings()
+  );
   const [locale, setLocale] = useState<CmsLocale>("en");
+  const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
-    saveHomepageSettings(settings);
+    setSaving(true);
     try {
-      await fetch("/api/cms/homepage", {
+      const response = await fetch("/api/cms/homepage", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       });
-    } catch {
-      // in-memory fallback
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(payload?.error ?? "Failed to save homepage");
+      }
+      const saved = (await response.json()) as HomepageSettings;
+      setSettings(saved);
+      toast.success("Homepage saved — live site will update shortly");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save homepage"
+      );
+    } finally {
+      setSaving(false);
     }
-    toast.success("Homepage saved");
   };
 
   return (
@@ -62,10 +79,11 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
           description={meta.description}
           actions={
             <Button
-              onClick={handleSave}
+              onClick={() => void handleSave()}
+              disabled={saving}
               className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
             >
-              Save
+              {saving ? "Saving…" : "Save"}
             </Button>
           }
         />
