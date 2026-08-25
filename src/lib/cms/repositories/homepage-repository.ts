@@ -452,7 +452,13 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
   const rawHero = settings.hero as HomepageSettings["hero"] & {
     ctaPrimary?: HomepageHeroCta;
     ctaSecondary?: HomepageHeroCta;
+    /** Legacy field used by older admin saves / seeds */
+    image?: string;
   };
+  const backgroundImage =
+    rawHero?.backgroundImage ||
+    rawHero?.image ||
+    defaults.hero.backgroundImage;
 
   return {
     ...defaults,
@@ -463,6 +469,7 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
     hero: {
       ...defaults.hero,
       ...settings.hero,
+      backgroundImage,
       ctaPrimary: {
         ...defaults.hero.ctaPrimary,
         ...rawHero?.ctaPrimary,

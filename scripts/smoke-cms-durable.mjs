@@ -28,7 +28,7 @@ async function main() {
 
   const payload = {
     hero: {
-      image: "/uploads/smoke-upload.png",
+      backgroundImage: "/uploads/smoke-upload.png",
       title: { en: "Smoke hero", pt: "", es: "", zh: "" },
     },
     _smoke: true,
@@ -36,8 +36,14 @@ async function main() {
 
   await writeFile(homepageFile, `${JSON.stringify(payload, null, 2)}\n`, "utf-8");
   const roundTrip = JSON.parse(await readFile(homepageFile, "utf-8"));
-  assert(roundTrip.hero?.image === "/uploads/smoke-upload.png", "homepage JSON round-trip failed");
-  assert(!String(roundTrip.hero.image).startsWith("data:"), "data URL must not persist");
+  assert(
+    roundTrip.hero?.backgroundImage === "/uploads/smoke-upload.png",
+    "homepage JSON round-trip failed"
+  );
+  assert(
+    !String(roundTrip.hero.backgroundImage).startsWith("data:"),
+    "data URL must not persist"
+  );
 
   await writeFile(uploadFile, MINI_PNG);
   await access(uploadFile);
