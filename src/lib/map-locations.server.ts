@@ -25,23 +25,34 @@ export async function readMapLocations(): Promise<MapLocationsData> {
     return readMapLocationsFromFile();
   }
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("map_locations_config")
-    .select("data")
-    .eq("id", MAP_CONFIG_ID)
-    .maybeSingle();
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("map_locations_config")
+      .select("data")
+      .eq("id", MAP_CONFIG_ID)
+      .maybeSingle();
 
-  if (error) {
-    console.error("Supabase read map locations failed:", error);
-    throw new Error("Failed to read map locations from Supabase");
-  }
+    if (error) {
+      console.error(
+        "Supabase read map locations failed; falling back to local file:",
+        error,
+      );
+      return readMapLocationsFromFile();
+    }
 
-  if (!data?.data) {
+    if (!data?.data) {
+      return readMapLocationsFromFile();
+    }
+
+    return normalizeMapLocations(data.data);
+  } catch (error) {
+    console.error(
+      "Supabase read map locations threw; falling back to local file:",
+      error,
+    );
     return readMapLocationsFromFile();
   }
-
-  return normalizeMapLocations(data.data);
 }
 
 export async function writeMapLocations(data: MapLocationsData): Promise<void> {
