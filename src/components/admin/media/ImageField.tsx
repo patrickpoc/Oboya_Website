@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getMediaAssets, saveMediaAsset, replaceMediaAssetsCache } from "@/lib/cms/repositories/media-repository";
+import { FOLDER_WEBSITE_FILES } from "@/lib/cms/media-folder-ids";
 import { uploadMediaFile } from "@/lib/cms/client/upload-media";
 import type { MediaAsset } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
@@ -199,7 +200,9 @@ export function MediaField({
   const applyUpload = async (file: File) => {
     setUploading(true);
     try {
-      const asset = await uploadMediaFile(file);
+      const asset = await uploadMediaFile(file, {
+        folder: FOLDER_WEBSITE_FILES,
+      });
       saveMediaAsset(asset);
       setLibraryTick((n) => n + 1);
       setKnownName(asset.name || file.name);

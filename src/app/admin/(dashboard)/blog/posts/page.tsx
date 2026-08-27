@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -8,21 +8,43 @@ import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { DataTable } from "@/components/admin/data-table/DataTable";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { deleteBlogPost, getBlogPosts } from "@/lib/cms/repositories/blog-repository";
+import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
 
 export default function BlogPostsPage() {
-  const [posts, setPosts] = useState(getBlogPosts());
+  const [posts, setPosts] = useState<CmsBlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    const res = await fetch("/api/cms/blog-posts");
+    if (!res.ok) throw new Error("Failed to load posts");
+    const data = (await res.json()) as CmsBlogPost[];
+    setPosts(Array.isArray(data) ? data : []);
+  };
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        await load();
+      } catch {
+        toast.error("Could not load blog posts");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Delete this post? This cannot be undone.")) return;
-    deleteBlogPost(id);
-    setPosts(getBlogPosts());
     try {
-      await fetch(`/api/cms/blog-posts?id=${encodeURIComponent(id)}`, { method: "DELETE" });
-    } catch {
-      // in-memory fallback
+      const res = await fetch(`/api/cms/blog-posts?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Delete failed");
+      await load();
+      toast.success("Post deleted");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not delete");
     }
-    toast.success("Post deleted");
   };
 
   const columns = useMemo(
@@ -92,7 +114,11 @@ export default function BlogPostsPage() {
           </Link>
         }
       />
-      <DataTable data={posts} columns={columns} searchKey="slug" />
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      ) : (
+        <DataTable data={posts} columns={columns} searchKey="slug" />
+      )}
     </div>
   );
 }

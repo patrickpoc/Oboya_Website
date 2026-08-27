@@ -33,6 +33,10 @@ export function getNewsPageSettings(): NewsPageSettings {
   return cache;
 }
 
+export function replaceNewsPageSettingsCache(settings: NewsPageSettings) {
+  cache = settings;
+}
+
 export function saveNewsPageSettings(settings: NewsPageSettings): NewsPageSettings {
   const updated = { ...settings, updatedAt: new Date().toISOString() };
   cache = updated;

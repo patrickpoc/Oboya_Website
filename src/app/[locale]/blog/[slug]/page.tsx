@@ -9,8 +9,8 @@ import { routing } from "@/i18n/routing";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
-export function generateStaticParams() {
-  const posts = readBlogPosts();
+export async function generateStaticParams() {
+  const posts = await readBlogPosts();
   return routing.locales.flatMap((locale) =>
     posts.map((post) => ({ locale, slug: post.slug }))
   );
@@ -18,7 +18,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
-  const post = readBlogPostBySlug(slug);
+  const post = await readBlogPostBySlug(slug);
   if (!post) return { title: "Not Found" };
 
   return {
@@ -42,11 +42,11 @@ export default async function BlogPostPage({ params }: Props) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
 
-  const post = readBlogPostBySlug(slug);
+  const post = await readBlogPostBySlug(slug);
   if (!post) notFound();
 
   const t = await getTranslations("blog");
-  const categories = readBlogCategories();
+  const categories = await readBlogCategories();
   const category = categories.find((c) => c.id === post.categoryId);
   const title = pickLocalized(post.title, locale);
   const excerpt = pickLocalized(post.excerpt, locale);

@@ -17,11 +17,11 @@ interface AboutPageContentProps {
   mode?: "full" | "afterTimeline";
 }
 
-export function AboutPageContent({
+export async function AboutPageContent({
   locale,
   mode = "full",
 }: AboutPageContentProps) {
-  const about = readAboutPageSettings();
+  const about = await readAboutPageSettings();
   const afterTimeline = mode === "afterTimeline";
 
   return (

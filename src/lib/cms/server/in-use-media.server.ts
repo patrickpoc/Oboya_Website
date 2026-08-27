@@ -1,11 +1,10 @@
 import "server-only";
 
-import { getAboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
-import { getBlogPosts } from "@/lib/cms/repositories/blog-repository";
-import { getCaseStudies } from "@/lib/cms/repositories/case-studies-repository";
-import { getHomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { getCmsProducts } from "@/lib/cms/repositories/product-repository";
 import { readHomepageSettingsDurable } from "@/lib/cms/server/homepage.server";
+import { readAboutPageSettingsDurable } from "@/lib/cms/server/about-page.server";
+import { readBlogPostsDurable } from "@/lib/cms/server/blog-posts.server";
+import { readCaseStudiesDurable } from "@/lib/cms/server/case-studies.server";
 import {
   SITE_IN_USE_MEDIA_URLS,
   buildSiteInUseMediaAssets,
@@ -53,16 +52,7 @@ function collectFromValue(value: unknown, into: Set<string>) {
 export async function collectInUseMediaUrls(): Promise<Set<string>> {
   const urls = new Set<string>();
 
-  for (const url of SITE_IN_USE_MEDIA_URLS) {
-    urls.add(normalizeMediaUrl(url));
-  }
-
-  try {
-    collectFromValue(getHomepageSettings(), urls);
-  } catch (error) {
-    console.error("in-use media: homepage defaults skipped", error);
-  }
-
+  // Prefer live CMS content over hardcoded seed lists so unused assets stay out.
   try {
     collectFromValue(await readHomepageSettingsDurable(), urls);
   } catch (error) {
@@ -70,19 +60,19 @@ export async function collectInUseMediaUrls(): Promise<Set<string>> {
   }
 
   try {
-    collectFromValue(getAboutPageSettings(), urls);
+    collectFromValue(await readAboutPageSettingsDurable(), urls);
   } catch (error) {
     console.error("in-use media: about skipped", error);
   }
 
   try {
-    collectFromValue(getBlogPosts(), urls);
+    collectFromValue(await readBlogPostsDurable(), urls);
   } catch (error) {
     console.error("in-use media: blog skipped", error);
   }
 
   try {
-    collectFromValue(getCaseStudies(), urls);
+    collectFromValue(await readCaseStudiesDurable(), urls);
   } catch (error) {
     console.error("in-use media: case studies skipped", error);
   }
@@ -91,6 +81,13 @@ export async function collectInUseMediaUrls(): Promise<Set<string>> {
     collectFromValue(getCmsProducts(), urls);
   } catch (error) {
     console.error("in-use media: products skipped", error);
+  }
+
+  // Brand/logo fallbacks only if nothing else resolved (avoid empty picker).
+  if (urls.size === 0) {
+    for (const url of SITE_IN_USE_MEDIA_URLS) {
+      urls.add(normalizeMediaUrl(url));
+    }
   }
 
   return urls;

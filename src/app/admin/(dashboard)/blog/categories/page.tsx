@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -10,18 +10,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Can } from "@/components/admin/permissions/Can";
-import {
-  getBlogCategories,
-  saveBlogCategory,
-  deleteBlogCategory,
-  type BlogCategory,
-} from "@/lib/cms/repositories/blog-categories-repository";
+import type { BlogCategory } from "@/lib/cms/repositories/blog-categories-repository";
 import type { CmsLocale } from "@/lib/cms/types";
 
 export default function BlogCategoriesPage() {
-  const [categories, setCategories] = useState(getBlogCategories());
+  const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    const res = await fetch("/api/cms/blog-categories");
+    if (!res.ok) throw new Error("Failed to load");
+    const data = (await res.json()) as BlogCategory[];
+    setCategories(Array.isArray(data) ? data : []);
+  };
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        await load();
+      } catch {
+        toast.error("Could not load categories");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   const editing = useMemo(
     () => categories.find((c) => c.id === editingId),
@@ -29,19 +44,19 @@ export default function BlogCategoriesPage() {
   );
 
   const handleSave = async (category: BlogCategory) => {
-    saveBlogCategory(category);
-    setCategories(getBlogCategories());
     try {
-      await fetch("/api/cms/blog-categories", {
+      const res = await fetch("/api/cms/blog-categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(category),
       });
-    } catch {
-      // in-memory fallback
+      if (!res.ok) throw new Error("Save failed");
+      await load();
+      toast.success("Category saved");
+      setEditingId(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not save");
     }
-    toast.success("Category saved");
-    setEditingId(null);
   };
 
   const handleAdd = () => {
@@ -51,21 +66,20 @@ export default function BlogCategoriesPage() {
       slug: id,
       name: emptyLocalizedString(),
     };
-    saveBlogCategory(category);
-    setCategories(getBlogCategories());
+    setCategories((prev) => [...prev, category]);
     setEditingId(id);
   };
 
   const handleDelete = async (id: string) => {
-    deleteBlogCategory(id);
-    setCategories(getBlogCategories());
     try {
-      await fetch(`/api/cms/blog-categories?id=${id}`, { method: "DELETE" });
-    } catch {
-      // in-memory fallback
+      const res = await fetch(`/api/cms/blog-categories?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Delete failed");
+      await load();
+      toast.success("Category deleted");
+      if (editingId === id) setEditingId(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not delete");
     }
-    toast.success("Category deleted");
-    if (editingId === id) setEditingId(null);
   };
 
   return (
@@ -111,8 +125,9 @@ export default function BlogCategoriesPage() {
                     value={editing.slug}
                     onChange={(e) => {
                       const updated = { ...editing, slug: e.target.value };
-                      saveBlogCategory(updated);
-                      setCategories(getBlogCategories());
+                      setCategories((prev) =>
+                        prev.map((c) => (c.id === updated.id ? updated : c))
+                      );
                       setEditingId(updated.id);
                     }}
                   />
@@ -129,8 +144,9 @@ export default function BlogCategoriesPage() {
                             ...editing,
                             name: { ...editing.name, [loc]: e.target.value },
                           };
-                          saveBlogCategory(updated);
-                          setCategories(getBlogCategories());
+                          setCategories((prev) =>
+                            prev.map((c) => (c.id === updated.id ? updated : c))
+                          );
                           setEditingId(updated.id);
                         }}
                       />

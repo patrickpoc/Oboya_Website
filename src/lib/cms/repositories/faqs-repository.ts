@@ -492,6 +492,14 @@ export function getCategories(): CmsFaqCategory[] {
   return [...categoriesCache].sort((a, b) => a.order - b.order);
 }
 
+export function replaceFaqsCache(input: {
+  categories: CmsFaqCategory[];
+  faqs: CmsFaqItem[];
+}) {
+  categoriesCache = input.categories.map((c) => ({ ...c }));
+  faqsCache = input.faqs.map((f) => ({ ...f }));
+}
+
 export function getCategoryById(id: string): CmsFaqCategory | undefined {
   return getCategories().find((c) => c.id === id);
 }

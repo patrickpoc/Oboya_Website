@@ -8,7 +8,18 @@ import {
   storeMediaLocally,
   storeMediaViaSupabaseServer,
 } from "@/lib/cms/server/media-upload.server";
-import { syncMediaLibraryFromSupabase } from "@/lib/cms/server/media-library.server";
+import { syncMediaLibraryFromSupabase, persistMediaAssetRow } from "@/lib/cms/server/media-library.server";
+import {
+  readMediaFoldersDurable,
+  saveMediaFoldersDurable,
+} from "@/lib/cms/server/media-folders.server";
+import {
+  createMediaFolder,
+  getMediaAssets,
+  getMediaFolders,
+  moveMediaFolder,
+  renameMediaFolder,
+} from "@/lib/cms/repositories/media-repository";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
 
@@ -24,11 +35,15 @@ export async function GET() {
   }
 
   try {
-    const assets = await syncMediaLibraryFromSupabase();
+    const [assets, folders] = await Promise.all([
+      syncMediaLibraryFromSupabase(),
+      readMediaFoldersDurable(),
+    ]);
     return NextResponse.json({
       ok: true,
       ready: true,
       assets,
+      folders,
       count: assets.length,
     });
   } catch (error) {
@@ -81,6 +96,8 @@ export async function POST(request: Request) {
         url?: string;
         type?: "image" | "video";
         folder?: string;
+        parentId?: string | null;
+        targetParentId?: string;
       };
 
       if (body.action === "sign") {
@@ -118,6 +135,122 @@ export async function POST(request: Request) {
           size: Number(body.size) || 0,
           folder: body.folder,
         });
+        return NextResponse.json({ ok: true, asset });
+      }
+
+      if (body.action === "folder-create") {
+        if (!body.name?.trim()) {
+          return NextResponse.json(
+            { error: "Folder name is required" },
+            { status: 400 }
+          );
+        }
+        await readMediaFoldersDurable();
+        const folder = createMediaFolder(
+          body.name.trim(),
+          body.parentId ?? "folder-root"
+        );
+        const folders = await saveMediaFoldersDurable(getMediaFolders());
+        return NextResponse.json({ ok: true, folder, folders });
+      }
+
+      if (body.action === "folder-rename") {
+        if (!body.id || !body.name?.trim()) {
+          return NextResponse.json(
+            { error: "Folder id and name are required" },
+            { status: 400 }
+          );
+        }
+        await readMediaFoldersDurable();
+        const folder = renameMediaFolder(body.id, body.name.trim());
+        if (!folder) {
+          return NextResponse.json({ error: "Folder not found" }, { status: 404 });
+        }
+        const folders = await saveMediaFoldersDurable(getMediaFolders());
+        return NextResponse.json({ ok: true, folder, folders });
+      }
+
+      if (body.action === "folder-move") {
+        if (!body.id || !body.targetParentId) {
+          return NextResponse.json(
+            { error: "Folder id and targetParentId are required" },
+            { status: 400 }
+          );
+        }
+        await readMediaFoldersDurable();
+        const folder = moveMediaFolder(body.id, body.targetParentId);
+        if (!folder) {
+          return NextResponse.json(
+            { error: "Invalid folder move" },
+            { status: 400 }
+          );
+        }
+        const folders = await saveMediaFoldersDurable(getMediaFolders());
+        return NextResponse.json({ ok: true, folder, folders });
+      }
+
+      if (body.action === "update-tags") {
+        if (!body.id || !Array.isArray((body as { tags?: unknown }).tags)) {
+          return NextResponse.json(
+            { error: "Asset id and tags are required" },
+            { status: 400 }
+          );
+        }
+        await syncMediaLibraryFromSupabase();
+        const tags = (body as { tags: string[] }).tags
+          .map((t) => String(t).trim())
+          .filter(Boolean);
+        const current = getMediaAssets().find((a) => a.id === body.id);
+        if (!current) {
+          return NextResponse.json({ error: "Asset not found" }, { status: 404 });
+        }
+        if (
+          current.id.startsWith("site-") ||
+          current.id.startsWith("used-") ||
+          current.url.startsWith("/assets/")
+        ) {
+          return NextResponse.json(
+            { error: "Site reference tags can’t be edited" },
+            { status: 400 }
+          );
+        }
+        const asset = {
+          ...current,
+          tags,
+          updatedAt: new Date().toISOString(),
+        };
+        await persistMediaAssetRow(asset);
+        return NextResponse.json({ ok: true, asset });
+      }
+
+      if (body.action === "move-asset") {
+        if (!body.id || !body.folder) {
+          return NextResponse.json(
+            { error: "Asset id and folder are required" },
+            { status: 400 }
+          );
+        }
+        await syncMediaLibraryFromSupabase();
+        const current = getMediaAssets().find((a) => a.id === body.id);
+        if (!current) {
+          return NextResponse.json({ error: "Asset not found" }, { status: 404 });
+        }
+        if (
+          current.id.startsWith("site-") ||
+          current.id.startsWith("used-") ||
+          current.url.startsWith("/assets/")
+        ) {
+          return NextResponse.json(
+            { error: "Site references can’t be moved" },
+            { status: 400 }
+          );
+        }
+        const asset = {
+          ...current,
+          folder: body.folder,
+          updatedAt: new Date().toISOString(),
+        };
+        await persistMediaAssetRow(asset);
         return NextResponse.json({ ok: true, asset });
       }
 

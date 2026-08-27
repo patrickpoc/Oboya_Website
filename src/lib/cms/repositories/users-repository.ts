@@ -31,6 +31,10 @@ export function getAuditLogs(): AuditLogEntry[] {
   return auditCache;
 }
 
+export function replaceAuditLogsCache(entries: AuditLogEntry[]) {
+  auditCache = [...entries];
+}
+
 export function addAuditLog(
   entry: Omit<AuditLogEntry, "id" | "createdAt">
 ): AuditLogEntry {

@@ -713,6 +713,11 @@ export function getAboutPageSettings(): AboutPageSettings {
   return cache;
 }
 
+export function replaceAboutPageSettingsCache(settings: AboutPageSettings) {
+  cache = settings;
+  cacheRevision = CONTENT_REVISION;
+}
+
 export function saveAboutPageSettings(
   settings: AboutPageSettings
 ): AboutPageSettings {

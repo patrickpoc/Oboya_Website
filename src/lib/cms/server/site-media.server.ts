@@ -3,6 +3,12 @@ import "server-only";
 import { readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import type { MediaAsset, MediaFolder } from "@/lib/cms/types";
+import {
+  FOLDER_ECOVASO_PRODUCTS,
+  FOLDER_PRODUCTS,
+  FOLDER_ROOT,
+  FOLDER_WEBSITE_FILES,
+} from "@/lib/cms/media-folder-ids";
 
 const MEDIA_EXT = new Set([
   ".jpg",
@@ -26,31 +32,16 @@ const MIME_BY_EXT: Record<string, string> = {
   ".webm": "video/webm",
 };
 
+function folderIdForPublicPath(_publicPath: string): string {
+  return FOLDER_WEBSITE_FILES;
+}
+
 function slugId(input: string) {
   return input
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 80);
-}
-
-function folderIdForPublicPath(publicPath: string): string {
-  // publicPath like /assets/homepage/foo.jpg
-  const parts = publicPath.split("/").filter(Boolean);
-  if (parts[0] === "uploads") return "folder-uploads";
-  if (parts[0] !== "assets") return "folder-site";
-
-  const fileName = parts[parts.length - 1] || "";
-  if (fileName.startsWith("cert-")) return "folder-certs";
-
-  const section = parts[1];
-  if (!section || section.includes(".")) return "folder-brand";
-
-  if (section === "homepage") return "folder-homepage";
-  if (section === "about") return "folder-about";
-  if (section === "solutions") return "folder-solutions";
-  if (section === "pdf-pages") return "folder-pdf-pages";
-  return `folder-${slugId(section)}`;
 }
 
 function tagsForPublicPath(publicPath: string): string[] {
@@ -83,33 +74,21 @@ async function walkFiles(absDir: string, relFromPublic: string): Promise<string[
 
 export const SITE_MEDIA_FOLDERS: MediaFolder[] = [
   {
-    id: "folder-about",
-    name: "About",
-    parentId: "folder-root",
+    id: FOLDER_WEBSITE_FILES,
+    name: "Website Files",
+    parentId: FOLDER_ROOT,
     createdAt: "2026-01-01T00:00:00.000Z",
   },
   {
-    id: "folder-solutions",
-    name: "Solutions",
-    parentId: "folder-root",
+    id: FOLDER_PRODUCTS,
+    name: "Products",
+    parentId: FOLDER_ROOT,
     createdAt: "2026-01-01T00:00:00.000Z",
   },
   {
-    id: "folder-brand",
-    name: "Brand",
-    parentId: "folder-root",
-    createdAt: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "folder-pdf-pages",
-    name: "PDF Pages",
-    parentId: "folder-root",
-    createdAt: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "folder-uploads",
-    name: "Uploads",
-    parentId: "folder-root",
+    id: FOLDER_ECOVASO_PRODUCTS,
+    name: "Ecovaso Products",
+    parentId: FOLDER_PRODUCTS,
     createdAt: "2026-01-01T00:00:00.000Z",
   },
 ];

@@ -1,16 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { DataTable } from "@/components/admin/data-table/DataTable";
 import { FormDrawer } from "@/components/admin/forms/FormDrawer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  getFormSubmissions,
-  updateSubmissionStatus,
-} from "@/lib/cms/repositories/forms-repository";
 import type {
   FormSubmission,
   FormSubmissionStatus,
@@ -57,29 +53,57 @@ function statusBadgeVariant(
 }
 
 export default function ContactFormsPage() {
-  const [submissions, setSubmissions] = useState(
-    getFormSubmissions("contact")
-  );
+  const [submissions, setSubmissions] = useState<FormSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
   const [countryFilter, setCountryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<FormSubmissionStatus | "all">(
     "all"
   );
   const [selected, setSelected] = useState<FormSubmission | null>(null);
 
-  const refresh = () => setSubmissions(getFormSubmissions("contact"));
+  const refresh = async () => {
+    const res = await fetch("/api/cms/forms?type=contact");
+    if (!res.ok) throw new Error("Failed to load submissions");
+    const data = (await res.json()) as FormSubmission[];
+    setSubmissions(Array.isArray(data) ? data : []);
+  };
 
-  const handleStatus = (
+  useEffect(() => {
+    void (async () => {
+      try {
+        await refresh();
+      } catch {
+        toast.error("Could not load contact submissions");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const handleStatus = async (
     id: string,
     status: FormSubmissionStatus,
     options?: { silent?: boolean }
   ) => {
-    updateSubmissionStatus(id, status);
-    refresh();
-    setSelected((current) =>
-      current?.id === id ? { ...current, status } : current
-    );
-    if (!options?.silent) {
-      toast.success("Status updated");
+    try {
+      const res = await fetch("/api/cms/forms", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status }),
+      });
+      const data = (await res.json()) as FormSubmission & { error?: string };
+      if (!res.ok) throw new Error(data.error ?? "Update failed");
+      setSubmissions((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, status } : s))
+      );
+      setSelected((current) =>
+        current?.id === id ? { ...current, status } : current
+      );
+      if (!options?.silent) {
+        toast.success("Status updated");
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not update");
     }
   };
 
@@ -165,8 +189,7 @@ export default function ContactFormsPage() {
 
   const openDetail = (row: FormSubmission) => {
     if (row.status === "new") {
-      updateSubmissionStatus(row.id, "read");
-      refresh();
+      void handleStatus(row.id, "read", { silent: true });
       setSelected({ ...row, status: "read" });
     } else {
       setSelected(row);
@@ -209,13 +232,17 @@ export default function ContactFormsPage() {
         ))}
       </div>
 
-      <DataTable
-        data={filtered}
-        columns={columns}
-        getRowId={(row) => row.id}
-        onRowClick={openDetail}
-        emptyMessage="No contact submissions match these filters."
-      />
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      ) : (
+        <DataTable
+          data={filtered}
+          columns={columns}
+          getRowId={(row) => row.id}
+          onRowClick={openDetail}
+          emptyMessage="No contact submissions match these filters."
+        />
+      )}
 
       <FormDrawer
         open={!!selected}
@@ -234,7 +261,7 @@ export default function ContactFormsPage() {
               <select
                 value={selected.status}
                 onChange={(e) =>
-                  handleStatus(
+                  void handleStatus(
                     selected.id,
                     e.target.value as FormSubmissionStatus
                   )

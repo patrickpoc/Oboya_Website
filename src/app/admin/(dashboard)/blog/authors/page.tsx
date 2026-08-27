@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -9,16 +9,31 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Can } from "@/components/admin/permissions/Can";
-import {
-  getBlogAuthors,
-  saveBlogAuthor,
-  deleteBlogAuthor,
-  type BlogAuthor,
-} from "@/lib/cms/repositories/blog-authors-repository";
+import type { BlogAuthor } from "@/lib/cms/repositories/blog-authors-repository";
 
 export default function BlogAuthorsPage() {
-  const [authors, setAuthors] = useState(getBlogAuthors());
+  const [authors, setAuthors] = useState<BlogAuthor[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    const res = await fetch("/api/cms/blog-authors");
+    if (!res.ok) throw new Error("Failed to load");
+    const data = (await res.json()) as BlogAuthor[];
+    setAuthors(Array.isArray(data) ? data : []);
+  };
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        await load();
+      } catch {
+        toast.error("Could not load authors");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   const editing = useMemo(
     () => authors.find((a) => a.id === editingId),
@@ -26,19 +41,19 @@ export default function BlogAuthorsPage() {
   );
 
   const handleSave = async (author: BlogAuthor) => {
-    saveBlogAuthor(author);
-    setAuthors(getBlogAuthors());
     try {
-      await fetch("/api/cms/blog-authors", {
+      const res = await fetch("/api/cms/blog-authors", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(author),
       });
-    } catch {
-      // in-memory fallback
+      if (!res.ok) throw new Error("Save failed");
+      await load();
+      toast.success("Author saved");
+      setEditingId(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not save");
     }
-    toast.success("Author saved");
-    setEditingId(null);
   };
 
   const handleAdd = () => {
@@ -48,24 +63,23 @@ export default function BlogAuthorsPage() {
       name: "",
       email: "",
     };
-    saveBlogAuthor(author);
-    setAuthors(getBlogAuthors());
+    setAuthors((prev) => [...prev, author]);
     setEditingId(id);
   };
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Delete this author?")) return;
-    deleteBlogAuthor(id);
-    setAuthors(getBlogAuthors());
     try {
-      await fetch(`/api/cms/blog-authors?id=${encodeURIComponent(id)}`, {
+      const res = await fetch(`/api/cms/blog-authors?id=${encodeURIComponent(id)}`, {
         method: "DELETE",
       });
-    } catch {
-      // in-memory fallback
+      if (!res.ok) throw new Error("Delete failed");
+      await load();
+      toast.success("Author deleted");
+      if (editingId === id) setEditingId(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not delete");
     }
-    toast.success("Author deleted");
-    if (editingId === id) setEditingId(null);
   };
 
   return (
@@ -117,8 +131,9 @@ export default function BlogAuthorsPage() {
                     value={editing.name}
                     onChange={(e) => {
                       const updated = { ...editing, name: e.target.value };
-                      saveBlogAuthor(updated);
-                      setAuthors(getBlogAuthors());
+                      setAuthors((prev) =>
+                        prev.map((a) => (a.id === updated.id ? updated : a))
+                      );
                       setEditingId(updated.id);
                     }}
                   />
@@ -130,8 +145,9 @@ export default function BlogAuthorsPage() {
                     value={editing.email}
                     onChange={(e) => {
                       const updated = { ...editing, email: e.target.value };
-                      saveBlogAuthor(updated);
-                      setAuthors(getBlogAuthors());
+                      setAuthors((prev) =>
+                        prev.map((a) => (a.id === updated.id ? updated : a))
+                      );
                       setEditingId(updated.id);
                     }}
                   />

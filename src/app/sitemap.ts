@@ -5,7 +5,7 @@ import { readBlogPosts } from "@/lib/cms/readers";
 
 const baseUrl = "https://oboya.cc";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const homeEntries = routing.locales.map((locale) => ({
     url: `${baseUrl}/${locale}`,
     lastModified: new Date(),
@@ -22,6 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }))
   );
 
+  const posts = await readBlogPosts();
   const newsEntries = routing.locales.flatMap((locale) => {
     const index = {
       url: `${baseUrl}/${locale}/news`,
@@ -29,7 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly" as const,
       priority: 0.85,
     };
-    const articles = readBlogPosts().map((post) => ({
+    const articles = posts.map((post) => ({
       url: `${baseUrl}/${locale}/news/${post.slug}`,
       lastModified: post.updatedAt ? new Date(post.updatedAt) : new Date(),
       changeFrequency: "monthly" as const,

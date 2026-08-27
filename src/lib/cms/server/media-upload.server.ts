@@ -5,6 +5,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { MediaAsset } from "@/lib/cms/types";
 import { saveMediaAsset, deleteMediaAsset } from "@/lib/cms/repositories/media-repository";
+import { FOLDER_WEBSITE_FILES } from "@/lib/cms/media-folder-ids";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -114,7 +115,7 @@ export async function registerMediaAsset(input: {
   folder?: string;
 }) {
   const now = new Date().toISOString();
-  const folder = input.folder || "folder-root";
+  const folder = input.folder || FOLDER_WEBSITE_FILES;
   const asset: MediaAsset = {
     id: input.id,
     name: input.name,

@@ -20,8 +20,8 @@ export default async function BlogIndexPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const posts = readBlogPosts();
-  const categories = readBlogCategories();
+  const posts = await readBlogPosts();
+  const categories = await readBlogCategories();
 
   return (
     <SiteLayout>

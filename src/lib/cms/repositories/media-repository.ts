@@ -1,20 +1,56 @@
 import type { MediaAsset, MediaFolder } from "@/lib/cms/types";
+import {
+  FOLDER_ECOVASO_PRODUCTS,
+  FOLDER_PRODUCTS,
+  FOLDER_ROOT,
+  FOLDER_WEBSITE_FILES,
+  LEGACY_WEBSITE_FOLDER_IDS,
+} from "@/lib/cms/media-folder-ids";
 
 /* ── Folders ─────────────────────────────────────────────── */
 
 const MOCK_FOLDERS: MediaFolder[] = [
-  { id: "folder-root", name: "Root", parentId: null, createdAt: "2026-01-01T00:00:00.000Z" },
-  { id: "folder-homepage", name: "Homepage", parentId: "folder-root", createdAt: "2026-01-01T00:00:00.000Z" },
-  { id: "folder-about", name: "About", parentId: "folder-root", createdAt: "2026-01-01T00:00:00.000Z" },
-  { id: "folder-solutions", name: "Solutions", parentId: "folder-root", createdAt: "2026-01-01T00:00:00.000Z" },
-  { id: "folder-brand", name: "Brand", parentId: "folder-root", createdAt: "2026-01-01T00:00:00.000Z" },
-  { id: "folder-pdf-pages", name: "PDF Pages", parentId: "folder-root", createdAt: "2026-01-01T00:00:00.000Z" },
-  { id: "folder-uploads", name: "Uploads", parentId: "folder-root", createdAt: "2026-01-01T00:00:00.000Z" },
-  { id: "folder-stock", name: "Stock Photos", parentId: "folder-root", createdAt: "2026-02-01T00:00:00.000Z" },
-  { id: "folder-certs", name: "Certifications", parentId: "folder-homepage", createdAt: "2026-01-15T00:00:00.000Z" },
+  { id: FOLDER_ROOT, name: "Root", parentId: null, createdAt: "2026-01-01T00:00:00.000Z" },
+  {
+    id: FOLDER_WEBSITE_FILES,
+    name: "Website Files",
+    parentId: FOLDER_ROOT,
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: FOLDER_PRODUCTS,
+    name: "Products",
+    parentId: FOLDER_ROOT,
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: FOLDER_ECOVASO_PRODUCTS,
+    name: "Ecovaso Products",
+    parentId: FOLDER_PRODUCTS,
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
 ];
 
+const LEGACY_FOLDER_ID_SET = new Set<string>(LEGACY_WEBSITE_FOLDER_IDS);
+
 let folders = [...MOCK_FOLDERS];
+
+export function getDefaultMediaFolders(): MediaFolder[] {
+  return MOCK_FOLDERS.map((f) => ({ ...f }));
+}
+
+export function isLegacyWebsiteFolderId(id: string): boolean {
+  return LEGACY_FOLDER_ID_SET.has(id);
+}
+
+export function replaceMediaFoldersCache(next: MediaFolder[]) {
+  folders = next.map((f) => ({ ...f })).filter((f) => !LEGACY_FOLDER_ID_SET.has(f.id));
+  for (const folder of MOCK_FOLDERS) {
+    if (!folders.some((f) => f.id === folder.id)) {
+      folders.push({ ...folder });
+    }
+  }
+}
 
 export function ensureMediaFolders(extra: MediaFolder[]) {
   const byId = new Map(folders.map((f) => [f.id, f]));

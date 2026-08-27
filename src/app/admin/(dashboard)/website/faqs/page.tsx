@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -17,15 +17,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  getCategories,
-  getFaqs,
-  saveCategory,
-  saveFaq,
-  deleteCategory,
-  deleteFaq,
-  type CmsFaqCategory,
-  type CmsFaqItem,
+import type {
+  CmsFaqCategory,
+  CmsFaqItem,
 } from "@/lib/cms/repositories/faqs-repository";
 import type { CmsLocale } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
@@ -33,52 +27,36 @@ import { cn } from "@/lib/utils";
 type DrawerMode = "category" | "faq" | null;
 
 async function persistCategory(category: CmsFaqCategory) {
-  saveCategory(category);
-  try {
-    await fetch("/api/cms/faqs", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "category", data: category }),
-    });
-  } catch {
-    // in-memory fallback
-  }
+  const res = await fetch("/api/cms/faqs", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type: "category", data: category }),
+  });
+  if (!res.ok) throw new Error("Failed to save category");
 }
 
 async function persistFaq(faq: CmsFaqItem) {
-  saveFaq(faq);
-  try {
-    await fetch("/api/cms/faqs", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "faq", data: faq }),
-    });
-  } catch {
-    // in-memory fallback
-  }
+  const res = await fetch("/api/cms/faqs", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type: "faq", data: faq }),
+  });
+  if (!res.ok) throw new Error("Failed to save FAQ");
 }
 
 async function removeCategory(id: string) {
-  deleteCategory(id);
-  try {
-    await fetch(`/api/cms/faqs?type=category&id=${id}`, { method: "DELETE" });
-  } catch {
-    // in-memory fallback
-  }
+  const res = await fetch(`/api/cms/faqs?type=category&id=${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Failed to delete category");
 }
 
 async function removeFaq(id: string) {
-  deleteFaq(id);
-  try {
-    await fetch(`/api/cms/faqs?type=faq&id=${id}`, { method: "DELETE" });
-  } catch {
-    // in-memory fallback
-  }
+  const res = await fetch(`/api/cms/faqs?type=faq&id=${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Failed to delete FAQ");
 }
 
 export default function FaqsAdminPage() {
-  const [categories, setCategories] = useState(getCategories());
-  const [faqs, setFaqs] = useState(getFaqs());
+  const [categories, setCategories] = useState<CmsFaqCategory[]>([]);
+  const [faqs, setFaqs] = useState<CmsFaqItem[]>([]);
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [drawerMode, setDrawerMode] = useState<DrawerMode>(null);
   const [editingCategory, setEditingCategory] = useState<CmsFaqCategory | null>(
@@ -86,11 +64,30 @@ export default function FaqsAdminPage() {
   );
   const [editingFaq, setEditingFaq] = useState<CmsFaqItem | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [loading, setLoading] = useState(true);
 
-  const refresh = () => {
-    setCategories(getCategories());
-    setFaqs(getFaqs());
+  const refresh = async () => {
+    const res = await fetch("/api/cms/faqs");
+    if (!res.ok) throw new Error("Failed to load FAQs");
+    const data = (await res.json()) as {
+      categories: CmsFaqCategory[];
+      faqs: CmsFaqItem[];
+    };
+    setCategories(Array.isArray(data.categories) ? data.categories : []);
+    setFaqs(Array.isArray(data.faqs) ? data.faqs : []);
   };
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        await refresh();
+      } catch {
+        toast.error("Could not load FAQs");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   const editingCategoryDraft = editingCategory;
 
@@ -119,8 +116,7 @@ export default function FaqsAdminPage() {
       title: emptyLocalizedString(),
       order: categories.length + 1,
     };
-    saveCategory(category);
-    refresh();
+    setCategories((prev) => [...prev, category]);
     setEditingCategory(category);
     setDrawerMode("category");
   };
@@ -161,32 +157,48 @@ export default function FaqsAdminPage() {
 
   const handleSaveCategory = async () => {
     if (!editingCategoryDraft) return;
-    await persistCategory(editingCategoryDraft);
-    refresh();
-    toast.success("Category saved");
-    closeDrawer();
+    try {
+      await persistCategory(editingCategoryDraft);
+      await refresh();
+      toast.success("Category saved");
+      closeDrawer();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not save");
+    }
   };
 
   const handleDeleteCategory = async (id: string) => {
-    await removeCategory(id);
-    refresh();
-    toast.success("Category deleted");
-    if (editingCategoryDraft?.id === id) closeDrawer();
+    try {
+      await removeCategory(id);
+      await refresh();
+      toast.success("Category deleted");
+      if (editingCategoryDraft?.id === id) closeDrawer();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not delete");
+    }
   };
 
   const handleSaveFaq = async () => {
     if (!editingFaq) return;
-    await persistFaq(editingFaq);
-    refresh();
-    toast.success("FAQ saved");
-    closeDrawer();
+    try {
+      await persistFaq(editingFaq);
+      await refresh();
+      toast.success("FAQ saved");
+      closeDrawer();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not save");
+    }
   };
 
   const handleDeleteFaq = async (id: string) => {
-    await removeFaq(id);
-    refresh();
-    toast.success("FAQ deleted");
-    if (editingFaq?.id === id) closeDrawer();
+    try {
+      await removeFaq(id);
+      await refresh();
+      toast.success("FAQ deleted");
+      if (editingFaq?.id === id) closeDrawer();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not delete");
+    }
   };
 
   const faqColumns = [
@@ -223,6 +235,10 @@ export default function FaqsAdminPage() {
       ),
     },
   ];
+
+  if (loading) {
+    return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
+  }
 
   return (
     <Can

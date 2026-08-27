@@ -1,24 +1,45 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { DataTable } from "@/components/admin/data-table/DataTable";
-import { getAuditLogs } from "@/lib/cms/repositories/users-repository";
+import type { AuditLogEntry } from "@/lib/cms/types";
+import { toast } from "sonner";
 
 export default function AuditLogsPage() {
-  const logs = getAuditLogs();
+  const [logs, setLogs] = useState<AuditLogEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const res = await fetch("/api/cms/audit-logs");
+        if (!res.ok) throw new Error("Failed to load");
+        const data = (await res.json()) as AuditLogEntry[];
+        setLogs(Array.isArray(data) ? data : []);
+      } catch {
+        toast.error("Could not load audit logs");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   const columns = useMemo(
     () => [
-      { key: "userName", header: "User", cell: (r: (typeof logs)[0]) => r.userName },
-      { key: "action", header: "Action", cell: (r: (typeof logs)[0]) => r.action },
-      { key: "module", header: "Module", cell: (r: (typeof logs)[0]) => r.module },
-      { key: "details", header: "Details", cell: (r: (typeof logs)[0]) => r.details ?? "—" },
+      { key: "userName", header: "User", cell: (r: AuditLogEntry) => r.userName },
+      { key: "action", header: "Action", cell: (r: AuditLogEntry) => r.action },
+      { key: "module", header: "Module", cell: (r: AuditLogEntry) => r.module },
+      {
+        key: "details",
+        header: "Details",
+        cell: (r: AuditLogEntry) => r.details ?? "—",
+      },
       {
         key: "createdAt",
         header: "Date",
         sortable: true,
-        cell: (r: (typeof logs)[0]) => new Date(r.createdAt).toLocaleString(),
+        cell: (r: AuditLogEntry) => new Date(r.createdAt).toLocaleString(),
       },
     ],
     []
@@ -30,7 +51,11 @@ export default function AuditLogsPage() {
         title="Audit Logs"
         description="Track administrative actions across the system."
       />
-      <DataTable data={logs} columns={columns} searchKey="userName" />
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      ) : (
+        <DataTable data={logs} columns={columns} searchKey="userName" />
+      )}
     </div>
   );
 }

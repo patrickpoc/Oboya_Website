@@ -16,6 +16,10 @@ export function getBlogAuthors(): BlogAuthor[] {
   return cache;
 }
 
+export function replaceBlogAuthorsCache(authors: BlogAuthor[]) {
+  cache = authors.map((a) => ({ ...a }));
+}
+
 export function getBlogAuthorById(id: string): BlogAuthor | undefined {
   return getBlogAuthors().find((a) => a.id === id);
 }

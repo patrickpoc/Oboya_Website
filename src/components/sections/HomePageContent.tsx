@@ -25,7 +25,7 @@ export async function HomePageContent({
   mapAlt,
   homepage,
 }: HomePageContentProps) {
-  const posts = readBlogPosts();
+  const posts = await readBlogPosts();
   const animationsEnabled = homepage.animations?.enabled !== false;
 
   return (

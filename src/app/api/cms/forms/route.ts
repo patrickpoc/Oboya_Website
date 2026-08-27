@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import {
-  addFormSubmission,
-} from "@/lib/cms/repositories/forms-repository";
-import { readFormSubmissions } from "@/lib/cms/server/forms.server";
-import type { FormSubmission } from "@/lib/cms/types";
+  addFormSubmissionDurable,
+  readFormSubmissions,
+  updateFormSubmissionStatusDurable,
+} from "@/lib/cms/server/forms.server";
+import type { FormSubmission, FormSubmissionStatus } from "@/lib/cms/types";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
 
@@ -27,6 +28,41 @@ export async function GET(request: Request) {
 
   const submissions = await readFormSubmissions(type ?? undefined);
   return NextResponse.json(submissions);
+}
+
+export async function PATCH(request: Request) {
+  if (isSupabaseConfigured()) {
+    const user = await requireAdminUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+  }
+
+  try {
+    const body = (await request.json()) as {
+      id?: string;
+      status?: FormSubmissionStatus;
+    };
+    if (!body.id || !body.status) {
+      return NextResponse.json(
+        { error: "id and status are required" },
+        { status: 400 }
+      );
+    }
+    const updated = await updateFormSubmissionStatusDurable(
+      body.id,
+      body.status
+    );
+    if (!updated) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    return NextResponse.json(updated);
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to update submission" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: Request) {
@@ -67,7 +103,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const submission = addFormSubmission({
+    const submission = await addFormSubmissionDurable({
       type: "contact",
       status: "new",
       data: {

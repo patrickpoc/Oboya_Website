@@ -1,31 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Can } from "@/components/admin/permissions/Can";
-import {
-  getAboutPageSettings,
-  type AboutPageSettings,
-} from "@/lib/cms/repositories/about-page-repository";
+import type { AboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
 
 export default function AboutPageAdmin() {
-  const [settings] = useState<AboutPageSettings>(getAboutPageSettings());
+  const [settings, setSettings] = useState<AboutPageSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const res = await fetch("/api/cms/about");
+        if (!res.ok) throw new Error("Failed to load");
+        setSettings(await res.json());
+      } catch {
+        toast.error("Could not load about page settings");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   const handleSave = async () => {
+    if (!settings) return;
     try {
-      await fetch("/api/cms/about", {
+      const res = await fetch("/api/cms/about", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       });
+      if (!res.ok) throw new Error("Save failed");
       toast.success("About page settings saved");
     } catch {
       toast.error("Failed to save about page settings");
     }
   };
+
+  if (loading || !settings) {
+    return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
+  }
 
   return (
     <Can

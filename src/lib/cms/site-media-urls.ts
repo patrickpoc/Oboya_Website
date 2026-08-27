@@ -1,4 +1,5 @@
 import { homepageImages } from "@/constants/homepage-images";
+import { FOLDER_WEBSITE_FILES } from "@/lib/cms/media-folder-ids";
 import type { MediaAsset } from "@/lib/cms/types";
 
 /** Paths used by live site elements (shared client/server). */
@@ -32,14 +33,8 @@ function slugId(input: string) {
     .slice(0, 80);
 }
 
-function folderForUrl(url: string): string {
-  if (url.includes("/about/")) return "folder-about";
-  if (url.includes("/solutions/")) return "folder-solutions";
-  if (url.includes("cert-")) return "folder-certs";
-  if (url.includes("/homepage/")) return "folder-homepage";
-  if (url.startsWith("/uploads/")) return "folder-uploads";
-  if (url.startsWith("http")) return "folder-site";
-  return "folder-brand";
+function folderForUrl(_url: string): string {
+  return FOLDER_WEBSITE_FILES;
 }
 
 function mimeFromUrl(url: string): string {

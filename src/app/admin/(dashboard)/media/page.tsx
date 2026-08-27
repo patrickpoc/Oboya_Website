@@ -35,6 +35,7 @@ import {
   deleteMediaAsset,
   replaceMediaAssetsCache,
   clearMediaAssetsCache,
+  replaceMediaFoldersCache,
 } from "@/lib/cms/repositories/media-repository";
 import type { MediaAsset, MediaFolder } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
@@ -376,6 +377,7 @@ export default function MediaLibraryPage() {
         const res = await fetch("/api/cms/media");
         const data = (await res.json()) as {
           assets?: MediaAsset[];
+          folders?: MediaFolder[];
           error?: string;
           ready?: boolean;
         };
@@ -384,6 +386,9 @@ export default function MediaLibraryPage() {
         }
         if (cancelled) return;
         replaceMediaAssetsCache(data.assets ?? []);
+        if (data.folders?.length) {
+          replaceMediaFoldersCache(data.folders);
+        }
         setLibraryVersion((n) => n + 1);
         refresh();
         setLibraryReady(true);
@@ -468,19 +473,79 @@ export default function MediaLibraryPage() {
     );
   };
 
-  const handleCreateFolder = (name: string) => {
-    createMediaFolder(name, currentFolderId);
-    refresh();
+  const handleCreateFolder = async (name: string) => {
+    try {
+      const res = await fetch("/api/cms/media", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "folder-create",
+          name,
+          parentId: currentFolderId,
+        }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        folders?: MediaFolder[];
+      };
+      if (!res.ok) throw new Error(data.error || "Failed to create folder");
+      if (data.folders) replaceMediaFoldersCache(data.folders);
+      else createMediaFolder(name, currentFolderId);
+      refresh();
+      toast.success("Folder created");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to create folder");
+    }
   };
 
-  const handleRenameFolder = (id: string, name: string) => {
-    renameMediaFolder(id, name);
-    refresh();
+  const handleRenameFolder = async (id: string, name: string) => {
+    try {
+      const res = await fetch("/api/cms/media", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "folder-rename",
+          id,
+          name,
+        }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        folders?: MediaFolder[];
+      };
+      if (!res.ok) throw new Error(data.error || "Failed to rename folder");
+      if (data.folders) replaceMediaFoldersCache(data.folders);
+      else renameMediaFolder(id, name);
+      refresh();
+      toast.success("Folder renamed");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to rename folder");
+    }
   };
 
-  const handleMoveFolder = (id: string, targetId: string) => {
-    moveMediaFolder(id, targetId);
-    refresh();
+  const handleMoveFolder = async (id: string, targetId: string) => {
+    try {
+      const res = await fetch("/api/cms/media", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "folder-move",
+          id,
+          targetParentId: targetId,
+        }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        folders?: MediaFolder[];
+      };
+      if (!res.ok) throw new Error(data.error || "Failed to move folder");
+      if (data.folders) replaceMediaFoldersCache(data.folders);
+      else moveMediaFolder(id, targetId);
+      refresh();
+      toast.success("Folder moved");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to move folder");
+    }
   };
 
   const handleFolderContextMenu = (e: React.MouseEvent, folder: MediaFolder) => {
@@ -489,13 +554,40 @@ export default function MediaLibraryPage() {
   };
 
   const handleSaveTags = (asset: MediaAsset, tags: string[]) => {
-    updateAssetTags(asset.id, tags);
-    refresh();
+    void (async () => {
+      try {
+        const res = await fetch("/api/cms/media", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "update-tags",
+            id: asset.id,
+            tags,
+          }),
+        });
+        const data = (await res.json()) as { error?: string; asset?: MediaAsset };
+        if (!res.ok) throw new Error(data.error ?? "Could not save tags");
+        if (data.asset) {
+          updateAssetTags(data.asset.id, data.asset.tags);
+          saveMediaAsset(data.asset);
+        } else {
+          updateAssetTags(asset.id, tags);
+        }
+        refresh();
+        toast.success("Tags saved");
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Could not save tags");
+      }
+    })();
   };
 
   const handleDeleteAsset = async (asset: MediaAsset) => {
-    if (asset.id.startsWith("site-")) {
-      toast.error("Bundled site files can’t be removed from the library.");
+    if (
+      asset.id.startsWith("site-") ||
+      asset.id.startsWith("used-") ||
+      asset.url.startsWith("/assets/")
+    ) {
+      toast.error("Site files in use can’t be removed from the library.");
       return;
     }
 
@@ -523,7 +615,7 @@ export default function MediaLibraryPage() {
     <div>
       <AdminPageHeader
         title="Media Library"
-        description="Images and videos currently used on the site, plus your uploads."
+        description="Only assets in use on the site, plus recent uploads."
         actions={
           <div className="flex gap-2">
             <button
@@ -759,7 +851,9 @@ export default function MediaLibraryPage() {
                   <Tag className="size-3" />
                   Edit Tags
                 </button>
-                {!asset.id.startsWith("site-") ? (
+                {!asset.id.startsWith("site-") &&
+                !asset.id.startsWith("used-") &&
+                !asset.url.startsWith("/assets/") ? (
                   <button
                     type="button"
                     onClick={() => void handleDeleteAsset(asset)}
@@ -770,7 +864,7 @@ export default function MediaLibraryPage() {
                     <X className="size-3.5" strokeWidth={2.5} />
                   </button>
                 ) : (
-                  <span className="text-[10px] text-muted-foreground">Site file</span>
+                  <span className="text-[10px] text-muted-foreground">In use</span>
                 )}
               </div>
             </CardContent>
@@ -799,7 +893,9 @@ export default function MediaLibraryPage() {
       )}
       {showNewFolder && (
         <NewFolderDialog
-          onConfirm={handleCreateFolder}
+          onConfirm={(name) => {
+            void handleCreateFolder(name);
+          }}
           onClose={() => setShowNewFolder(false)}
         />
       )}
@@ -821,14 +917,18 @@ export default function MediaLibraryPage() {
       {renamingFolder && (
         <RenameFolderDialog
           currentName={renamingFolder.name}
-          onConfirm={(name) => handleRenameFolder(renamingFolder.id, name)}
+          onConfirm={(name) => {
+            void handleRenameFolder(renamingFolder.id, name);
+          }}
           onClose={() => setRenamingFolder(null)}
         />
       )}
       {movingFolder && (
         <MoveToDialog
           folderId={movingFolder.id}
-          onConfirm={(targetId) => handleMoveFolder(movingFolder.id, targetId)}
+          onConfirm={(targetId) => {
+            void handleMoveFolder(movingFolder.id, targetId);
+          }}
           onClose={() => setMovingFolder(null)}
         />
       )}

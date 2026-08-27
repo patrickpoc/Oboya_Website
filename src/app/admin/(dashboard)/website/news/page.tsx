@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { LocaleFieldTabs } from "@/components/admin/forms/LocaleFieldTabs";
@@ -8,31 +8,47 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-  getNewsPageSettings,
-  saveNewsPageSettings,
-  type NewsPageSettings,
-} from "@/lib/cms/repositories/news-page-repository";
+import type { NewsPageSettings } from "@/lib/cms/repositories/news-page-repository";
 import type { CmsLocale } from "@/lib/cms/types";
 import { Can } from "@/components/admin/permissions/Can";
 
 export default function NewsPageAdmin() {
-  const [settings, setSettings] = useState<NewsPageSettings>(getNewsPageSettings());
+  const [settings, setSettings] = useState<NewsPageSettings | null>(null);
   const [locale, setLocale] = useState<CmsLocale>("en");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const res = await fetch("/api/cms/news-page");
+        if (!res.ok) throw new Error("Failed to load");
+        setSettings(await res.json());
+      } catch {
+        toast.error("Could not load news page settings");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   const handleSave = async () => {
-    saveNewsPageSettings(settings);
+    if (!settings) return;
     try {
-      await fetch("/api/cms/news-page", {
+      const res = await fetch("/api/cms/news-page", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       });
+      if (!res.ok) throw new Error("Save failed");
+      toast.success("News page settings saved");
     } catch {
-      // In-memory save still applies for dev
+      toast.error("Failed to save news page settings");
     }
-    toast.success("News page settings saved");
   };
+
+  if (loading || !settings) {
+    return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
+  }
 
   return (
     <Can module="website" action="edit" fallback={<p className="text-sm text-muted-foreground">Access denied.</p>}>

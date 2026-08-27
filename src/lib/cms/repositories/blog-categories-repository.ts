@@ -66,6 +66,10 @@ export function getBlogCategories(): BlogCategory[] {
   return cache;
 }
 
+export function replaceBlogCategoriesCache(categories: BlogCategory[]) {
+  cache = categories.map((c) => ({ ...c }));
+}
+
 export function getBlogCategoryById(id: string): BlogCategory | undefined {
   return getBlogCategories().find((c) => c.id === id);
 }

@@ -255,6 +255,10 @@ export function getCaseStudies(): CmsCaseStudy[] {
   return cache;
 }
 
+export function replaceCaseStudiesCache(studies: CmsCaseStudy[]) {
+  cache = studies.map((s) => ({ ...s }));
+}
+
 export function getCaseStudyById(id: string): CmsCaseStudy | undefined {
   return getCaseStudies().find((c) => c.id === id);
 }

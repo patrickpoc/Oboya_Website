@@ -91,6 +91,10 @@ export function getBlogPosts(): CmsBlogPost[] {
   return cache;
 }
 
+export function replaceBlogPostsCache(posts: CmsBlogPost[]) {
+  cache = posts.map((p) => ({ ...p }));
+}
+
 export function getBlogPostById(id: string): CmsBlogPost | undefined {
   return getBlogPosts().find((p) => p.id === id);
 }

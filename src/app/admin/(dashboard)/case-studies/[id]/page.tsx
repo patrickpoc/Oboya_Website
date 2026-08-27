@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -14,8 +14,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
-  getCaseStudyById,
-  saveCaseStudy,
   type CaseStudyRegion,
   type CmsCaseStudy,
 } from "@/lib/cms/repositories/case-studies-repository";
@@ -62,32 +60,69 @@ export default function CaseStudyEditPage() {
   const id = params.id as string;
   const isNew = id === "new";
 
-  const [study, setStudy] = useState<CmsCaseStudy>(() => {
-    if (isNew) return emptyStudy();
-    const existing = getCaseStudyById(id)!;
-    return {
-      ...existing,
-      metric: existing.metric ?? emptyLocalizedString(),
-      implementation: existing.implementation ?? emptyLocalizedString(),
-      timeline: existing.timeline ?? emptyLocalizedString(),
-      client: existing.client ?? "",
-      images: existing.images?.length ? existing.images : ["", ""],
-      testimonial: existing.testimonial ?? {
-        quote: emptyLocalizedString(),
-        author: "",
-        company: "",
-      },
-    };
-  });
+  const [study, setStudy] = useState<CmsCaseStudy | null>(
+    isNew ? emptyStudy() : null
+  );
   const [locale, setLocale] = useState<CmsLocale>("en");
+  const [loading, setLoading] = useState(!isNew);
+  const [saving, setSaving] = useState(false);
 
-  if (!study) return <p>Case study not found</p>;
+  useEffect(() => {
+    if (isNew) return;
+    void (async () => {
+      try {
+        const res = await fetch("/api/cms/case-studies");
+        if (!res.ok) throw new Error("Failed to load");
+        const data = (await res.json()) as CmsCaseStudy[];
+        const existing = data.find((item) => item.id === id);
+        if (!existing) {
+          toast.error("Case study not found");
+          router.push("/admin/case-studies");
+          return;
+        }
+        setStudy({
+          ...existing,
+          metric: existing.metric ?? emptyLocalizedString(),
+          implementation: existing.implementation ?? emptyLocalizedString(),
+          timeline: existing.timeline ?? emptyLocalizedString(),
+          client: existing.client ?? "",
+          images: existing.images?.length ? existing.images : ["", ""],
+          testimonial: existing.testimonial ?? {
+            quote: emptyLocalizedString(),
+            author: "",
+            company: "",
+          },
+        });
+      } catch {
+        toast.error("Could not load case study");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [id, isNew, router]);
 
-  const handleSave = () => {
-    saveCaseStudy(study);
-    toast.success("Case study saved");
-    router.push("/admin/case-studies");
+  const handleSave = async () => {
+    if (!study) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/cms/case-studies", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(study),
+      });
+      if (!res.ok) throw new Error("Save failed");
+      toast.success("Case study saved");
+      router.push("/admin/case-studies");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not save");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading || !study) {
+    return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
+  }
 
   const setImageAt = (index: number, url: string) => {
     const next = [...study.images];
@@ -108,8 +143,12 @@ export default function CaseStudyEditPage() {
             >
               Back
             </Link>
-            <Button onClick={handleSave} className="rounded-full bg-oboya-green hover:bg-oboya-green/90">
-              Save
+            <Button
+              onClick={() => void handleSave()}
+              disabled={saving}
+              className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
+            >
+              {saving ? "Saving…" : "Save"}
             </Button>
           </div>
         }

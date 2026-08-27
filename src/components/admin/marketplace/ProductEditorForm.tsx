@@ -14,9 +14,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { getMediaAssets, saveMediaAsset } from "@/lib/cms/repositories/media-repository";
+import { uploadMediaFile } from "@/lib/cms/client/upload-media";
+import { FOLDER_ECOVASO_PRODUCTS } from "@/lib/cms/media-folder-ids";
 import { getShopCatalog } from "@/lib/shop/catalog";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { CmsLocale, CmsStatus } from "@/lib/cms/types";
+import { toast } from "sonner";
 
 interface ProductEditorFormProps {
   product: CmsProduct;
@@ -138,25 +141,18 @@ export function ProductEditorForm({ product, onChange }: ProductEditorFormProps)
     update({ images: next });
   };
   const uploadImageAt = (index: number, file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = String(reader.result ?? "");
-      if (!dataUrl) return;
-      const asset = saveMediaAsset({
-        id: `media-upload-${Date.now()}`,
-        name: file.name,
-        url: dataUrl,
-        type: "image",
-        mimeType: file.type || "image/jpeg",
-        size: file.size,
-        folder: "uploads",
-        tags: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-      setImageAt(index, asset.url);
-    };
-    reader.readAsDataURL(file);
+    void (async () => {
+      try {
+        const asset = await uploadMediaFile(file, {
+          folder: FOLDER_ECOVASO_PRODUCTS,
+        });
+        saveMediaAsset(asset);
+        setImageAt(index, asset.url);
+        toast.success("Image uploaded");
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Upload failed");
+      }
+    })();
   };
 
   const setCurrencyPrice = (currency: string, value: string) => {
