@@ -7,7 +7,8 @@ import { Hero } from "@/components/sections/Hero";
 import { HomeLatestNews } from "@/components/sections/HomeLatestNews";
 import { Partners } from "@/components/sections/Partners";
 import { Testimonials } from "@/components/sections/Testimonials";
-import { readBlogPosts, readHomepageSettings } from "@/lib/cms/readers";
+import { readBlogPosts } from "@/lib/cms/readers";
+import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
 import type { ResolvedMapLocation } from "@/lib/map-locations";
 
@@ -15,10 +16,15 @@ interface HomePageContentProps {
   locale: string;
   locations: ResolvedMapLocation[];
   mapAlt: string;
+  homepage: HomepageSettings;
 }
 
-export async function HomePageContent({ locale, locations, mapAlt }: HomePageContentProps) {
-  const homepage = await readHomepageSettings();
+export async function HomePageContent({
+  locale,
+  locations,
+  mapAlt,
+  homepage,
+}: HomePageContentProps) {
   const posts = readBlogPosts();
   const animationsEnabled = homepage.animations?.enabled !== false;
 

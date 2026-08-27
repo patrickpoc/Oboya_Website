@@ -74,17 +74,99 @@ export function MediaField({
   const applyUpload = async (file: File) => {
     setUploading(true);
     try {
-      const body = new FormData();
-      body.append("file", file);
-      const res = await fetch("/api/cms/media", { method: "POST", body });
-      const data = (await res.json()) as {
-        error?: string;
-        asset?: MediaAsset;
-      };
-      if (!res.ok || !data.asset) {
-        throw new Error(data.error ?? "Upload failed");
+      const mime = (file.type || "").toLowerCase();
+      const isVideo = mime.startsWith("video/");
+      const max = isVideo ? 50 * 1024 * 1024 : 8 * 1024 * 1024;
+      if (file.size > max) {
+        throw new Error(
+          `File too large. Max ${isVideo ? "50MB" : "8MB"}.`
+        );
       }
-      onChange(data.asset.url);
+
+      // Prefer direct-to-Supabase when configured — Vercel cannot write public/uploads
+      // and serverless request bodies cap around 4.5MB.
+      const useDirect =
+        Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+        (isVideo || file.size > 3.5 * 1024 * 1024);
+
+      let asset: MediaAsset | undefined;
+
+      if (useDirect) {
+        const signRes = await fetch("/api/cms/media", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "sign",
+            mimeType: mime,
+            size: file.size,
+            name: file.name,
+          }),
+        });
+        const signed = (await signRes.json()) as {
+          error?: string;
+          id?: string;
+          publicUrl?: string;
+          signedUrl?: string;
+          token?: string;
+          kind?: MediaAsset["type"];
+          mimeType?: string;
+          originalName?: string;
+        };
+        if (!signRes.ok || !signed.signedUrl || !signed.id || !signed.publicUrl) {
+          throw new Error(signed.error ?? "Could not start upload");
+        }
+
+        const putRes = await fetch(signed.signedUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": mime || "application/octet-stream",
+          },
+          body: file,
+        });
+        if (!putRes.ok) {
+          const detail = await putRes.text().catch(() => "");
+          throw new Error(
+            detail ||
+              "Storage upload failed. Confirm the cms-media bucket exists in Supabase."
+          );
+        }
+
+        const completeRes = await fetch("/api/cms/media", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "complete",
+            id: signed.id,
+            url: signed.publicUrl,
+            type: signed.kind ?? (isVideo ? "video" : "image"),
+            mimeType: signed.mimeType ?? mime,
+            size: file.size,
+            name: signed.originalName ?? file.name,
+          }),
+        });
+        const completed = (await completeRes.json()) as {
+          error?: string;
+          asset?: MediaAsset;
+        };
+        if (!completeRes.ok || !completed.asset) {
+          throw new Error(completed.error ?? "Upload finalize failed");
+        }
+        asset = completed.asset;
+      } else {
+        const body = new FormData();
+        body.append("file", file);
+        const res = await fetch("/api/cms/media", { method: "POST", body });
+        const data = (await res.json()) as {
+          error?: string;
+          asset?: MediaAsset;
+        };
+        if (!res.ok || !data.asset) {
+          throw new Error(data.error ?? "Upload failed");
+        }
+        asset = data.asset;
+      }
+
+      onChange(asset.url);
       setMode("upload");
       toast.success("Media uploaded");
     } catch (error) {

@@ -5,7 +5,7 @@ import path from "path";
 import type { MapLocationsData } from "@/lib/map-locations";
 import { normalizeMapLocations } from "@/lib/map-locations";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createPublicClient } from "@/lib/supabase/server";
 
 const DATA_PATH = path.join(process.cwd(), "data", "map-locations.json");
 const MAP_CONFIG_ID = "default";
@@ -26,7 +26,8 @@ export async function readMapLocations(): Promise<MapLocationsData> {
   }
 
   try {
-    const supabase = await createClient();
+    // Public read must not call cookies() or /[locale] cannot prerender.
+    const supabase = createPublicClient();
     const query = supabase
       .from("map_locations_config")
       .select("data")
@@ -46,7 +47,7 @@ export async function readMapLocations(): Promise<MapLocationsData> {
     if (error) {
       console.error(
         "Supabase read map locations failed; falling back to local file:",
-        error
+        error.message ?? error
       );
       return readMapLocationsFromFile();
     }
@@ -57,9 +58,11 @@ export async function readMapLocations(): Promise<MapLocationsData> {
 
     return normalizeMapLocations(data.data);
   } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unknown Supabase read error";
     console.error(
       "Supabase read map locations failed; falling back to local file:",
-      error
+      message
     );
     return readMapLocationsFromFile();
   }

@@ -1,9 +1,11 @@
 import { Footer } from "@/components/layouts/Footer";
 import { Navbar } from "@/components/layouts/Navbar";
+import { HomeIntroGate } from "@/components/layout/HomeIntroGate";
 import { HomePageContent } from "@/components/sections/HomePageContent";
 import { routing, type Locale } from "@/i18n/routing";
 import { resolveMapLocationsForLocale } from "@/lib/map-locations";
 import { readMapLocations } from "@/lib/map-locations.server";
+import { readHomepageSettings } from "@/lib/cms/readers";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -30,9 +32,10 @@ export default async function Home({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [mapData, t] = await Promise.all([
+  const [mapData, t, homepage] = await Promise.all([
     readMapLocations(),
     getTranslations({ locale, namespace: "globalPresence" }),
+    readHomepageSettings(),
   ]);
 
   const locations = resolveMapLocationsForLocale(
@@ -40,17 +43,24 @@ export default async function Home({ params }: Props) {
     locale as Locale
   );
 
+  const waitForHero =
+    homepage.sections.hero.enabled &&
+    (homepage.hero.mediaType === "video"
+      ? Boolean(homepage.hero.backgroundVideo)
+      : Boolean(homepage.hero.backgroundImage));
+
   return (
-    <>
+    <HomeIntroGate waitForHero={waitForHero}>
       <Navbar transparent variant="minimal" />
       <main>
         <HomePageContent
           locale={locale}
           locations={locations}
           mapAlt={t("mapAlt")}
+          homepage={homepage}
         />
       </main>
       <Footer />
-    </>
+    </HomeIntroGate>
   );
 }

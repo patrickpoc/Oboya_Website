@@ -1,47 +1,76 @@
-import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { NextResponse } from "next/server";
-import { saveMediaAsset } from "@/lib/cms/repositories/media-repository";
-import type { MediaAsset } from "@/lib/cms/types";
+import {
+  createSignedMediaUpload,
+  mediaKind,
+  maxBytesForKind,
+  registerMediaAsset,
+  storeMediaLocally,
+  storeMediaViaSupabaseServer,
+} from "@/lib/cms/server/media-upload.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
 
-const IMAGE_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-]);
-const VIDEO_TYPES = new Set(["video/mp4", "video/webm"]);
-
-const IMAGE_MAX = 8 * 1024 * 1024;
-const VIDEO_MAX = 15 * 1024 * 1024;
-
-const EXT_BY_MIME: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-  "image/gif": "gif",
-  "video/mp4": "mp4",
-  "video/webm": "webm",
-};
-
-function mediaKind(mime: string): MediaAsset["type"] | null {
-  if (IMAGE_TYPES.has(mime)) return "image";
-  if (VIDEO_TYPES.has(mime)) return "video";
-  return null;
+async function assertAdmin() {
+  if (!isSupabaseConfigured()) return true;
+  const user = await requireAdminUser();
+  return Boolean(user);
 }
 
 export async function POST(request: Request) {
-  if (isSupabaseConfigured()) {
-    const user = await requireAdminUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (!(await assertAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const contentType = request.headers.get("content-type") || "";
+
   try {
+    if (contentType.includes("application/json")) {
+      const body = (await request.json()) as {
+        action?: string;
+        mimeType?: string;
+        size?: number;
+        name?: string;
+        id?: string;
+        url?: string;
+        type?: "image" | "video";
+      };
+
+      if (body.action === "sign") {
+        if (!isSupabaseConfigured()) {
+          return NextResponse.json(
+            { error: "Direct uploads require Supabase Storage." },
+            { status: 400 }
+          );
+        }
+        const signed = await createSignedMediaUpload({
+          mime: body.mimeType || "",
+          size: Number(body.size) || 0,
+          originalName: body.name,
+        });
+        return NextResponse.json({ ok: true, ...signed });
+      }
+
+      if (body.action === "complete") {
+        if (!body.id || !body.url || !body.type || !body.mimeType) {
+          return NextResponse.json(
+            { error: "Missing upload metadata." },
+            { status: 400 }
+          );
+        }
+        const asset = await registerMediaAsset({
+          id: body.id,
+          name: body.name || body.id,
+          url: body.url,
+          type: body.type,
+          mimeType: body.mimeType,
+          size: Number(body.size) || 0,
+        });
+        return NextResponse.json({ ok: true, asset });
+      }
+
+      return NextResponse.json({ error: "Unknown action" }, { status: 400 });
+    }
+
     const form = await request.formData();
     const file = form.get("file");
     if (!(file instanceof File)) {
@@ -57,43 +86,24 @@ export async function POST(request: Request) {
       );
     }
 
-    const max = kind === "video" ? VIDEO_MAX : IMAGE_MAX;
-    if (file.size > max) {
+    if (file.size > maxBytesForKind(kind)) {
       return NextResponse.json(
         {
-          error: `File too large. Max ${kind === "video" ? "15MB" : "8MB"}.`,
+          error: `File too large. Max ${kind === "video" ? "50MB" : "8MB"}.`,
         },
         { status: 400 }
       );
     }
 
-    const ext = EXT_BY_MIME[mime] ?? "bin";
-    const id = `media-${randomUUID()}`;
-    const filename = `${id}.${ext}`;
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadsDir, { recursive: true });
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(path.join(uploadsDir, filename), buffer);
-
-    const url = `/uploads/${filename}`;
-    const asset = saveMediaAsset({
-      id,
-      name: file.name || filename,
-      url,
-      type: kind,
-      mimeType: mime,
-      size: file.size,
-      folder: "uploads",
-      tags: kind === "video" ? ["video", "upload"] : ["upload"],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+    const asset = isSupabaseConfigured()
+      ? await storeMediaViaSupabaseServer({ file, mime, kind })
+      : await storeMediaLocally({ file, mime, kind });
 
     return NextResponse.json({ ok: true, asset });
-  } catch {
-    return NextResponse.json(
-      { error: "Failed to upload media" },
-      { status: 500 }
-    );
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to upload media";
+    console.error("Media upload failed:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

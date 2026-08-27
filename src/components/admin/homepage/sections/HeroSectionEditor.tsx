@@ -30,7 +30,9 @@ export function HeroSectionEditor({
             ? hero.backgroundVideo || "/assets/homepage/hero-hands-herbs.mp4"
             : hero.backgroundVideo,
         backgroundImage:
-          hero.backgroundImage || "/assets/homepage/hero-vineyard.jpg",
+          next === "image"
+            ? hero.backgroundImage || "/assets/homepage/hero-vineyard.jpg"
+            : hero.backgroundImage,
       },
     });
   };
@@ -80,39 +82,29 @@ export function HeroSectionEditor({
             }
           />
         ) : (
-          <>
-            <MediaField
-              label="Background video"
-              value={hero.backgroundVideo ?? ""}
-              allowedTypes={["video"]}
-              onChange={(url) =>
-                setSettings({
-                  ...settings,
-                  hero: {
-                    ...hero,
-                    mediaType: "video",
-                    backgroundVideo: url || null,
-                  },
-                })
-              }
-            />
-            <MediaField
-              label="Poster / fallback image"
-              value={hero.backgroundImage}
-              allowedTypes={["image"]}
-              onChange={(url) =>
-                setSettings({
-                  ...settings,
-                  hero: { ...hero, backgroundImage: url },
-                })
-              }
-            />
-            <p className="text-xs text-muted-foreground">
-              Poster shows while the video loads, when autoplay is blocked, or when
-              the visitor prefers reduced motion.
-            </p>
-          </>
+          <MediaField
+            label="Background video"
+            value={hero.backgroundVideo ?? ""}
+            allowedTypes={["video"]}
+            onChange={(url) =>
+              setSettings({
+                ...settings,
+                hero: {
+                  ...hero,
+                  mediaType: "video",
+                  backgroundVideo: url || null,
+                },
+              })
+            }
+          />
         )}
+
+        {mediaType === "video" ? (
+          <p className="text-xs text-muted-foreground">
+            The homepage shows a loading spinner until the video and page are ready.
+            A poster image is not required.
+          </p>
+        ) : null}
 
         <LocalizedInput
           label="Eyebrow"

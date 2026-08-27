@@ -6,7 +6,9 @@
 2. In **SQL Editor**, run the contents of [`supabase/schema.sql`](./supabase/schema.sql).
 3. Then run marketplace products migration:
    - [`supabase/migrations/20260819_marketplace_products.sql`](../supabase/migrations/20260819_marketplace_products.sql)
-3. In **Authentication → Users**, create an admin user (email + password).
+4. Then run CMS media storage migration (required for admin video/image uploads on Vercel):
+   - [`supabase/migrations/20260827_cms_media_storage.sql`](../supabase/migrations/20260827_cms_media_storage.sql)
+5. In **Authentication → Users**, create an admin user (email + password).
 
 ## 2. Environment variables
 
