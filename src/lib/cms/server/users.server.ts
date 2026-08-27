@@ -73,9 +73,79 @@ export async function requireAdminActor(): Promise<CmsUser | null> {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const me = await getOrCreateProfileForAuthUser(user.id, user.email ?? "");
+  let me = await getOrCreateProfileForAuthUser(user.id, user.email ?? "");
   if (!me || me.status !== "active") return null;
+
+  if (me.role !== "super_admin" && me.role !== "admin") {
+    me = await promoteToSuperAdminIfNoAdmins(me);
+  }
+
   if (me.role !== "super_admin" && me.role !== "admin") return null;
+  return me;
+}
+
+async function countActiveAdmins(): Promise<number | null> {
+  try {
+    if (isServiceRoleConfigured()) {
+      const admin = createServiceClient();
+      const { count, error } = await admin
+        .from("cms_user_profiles")
+        .select("id", { count: "exact", head: true })
+        .in("role", ["super_admin", "admin"])
+        .eq("status", "active");
+      if (error) return null;
+      return count ?? 0;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+async function promoteToSuperAdminIfNoAdmins(me: CmsUser): Promise<CmsUser> {
+  const adminCount = await countActiveAdmins();
+  // Only auto-promote when we can confirm there are zero admins (needs service role).
+  if (adminCount === null || adminCount > 0) return me;
+
+  try {
+    if (isServiceRoleConfigured()) {
+      const admin = createServiceClient();
+      const { data, error } = await admin
+        .from("cms_user_profiles")
+        .update({
+          role: "super_admin",
+          status: "active",
+          must_change_password: false,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", me.id)
+        .select("*")
+        .single();
+      if (!error && data) {
+        return profileToCmsUser(data as ProfileRow, me.email);
+      }
+    }
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("cms_user_profiles")
+      .update({
+        role: "super_admin",
+        status: "active",
+        must_change_password: false,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", me.id)
+      .select("*")
+      .single();
+
+    if (!error && data) {
+      return profileToCmsUser(data as ProfileRow, me.email);
+    }
+  } catch (error) {
+    console.error("Failed to bootstrap super_admin:", error);
+  }
+
   return me;
 }
 
@@ -149,33 +219,62 @@ export async function getOrCreateProfileForAuthUser(
 }
 
 export async function listCmsUsersDurable(): Promise<CmsUser[]> {
-  if (!isSupabaseConfigured() || !isServiceRoleConfigured()) {
+  if (!isSupabaseConfigured()) {
     return getCmsUsers();
   }
 
-  const admin = createServiceClient();
-  const [{ data: profiles, error: profileError }, authUsers] =
-    await Promise.all([
-      admin.from("cms_user_profiles").select("*").order("created_at"),
-      admin.auth.admin.listUsers({ page: 1, perPage: 200 }),
-    ]);
+  if (isServiceRoleConfigured()) {
+    const admin = createServiceClient();
+    const [{ data: profiles, error: profileError }, authUsers] =
+      await Promise.all([
+        admin.from("cms_user_profiles").select("*").order("created_at"),
+        admin.auth.admin.listUsers({ page: 1, perPage: 200 }),
+      ]);
 
-  if (profileError) {
-    throw new Error(profileError.message);
+    if (profileError) {
+      throw new Error(profileError.message);
+    }
+    if (authUsers.error) {
+      throw new Error(authUsers.error.message);
+    }
+
+    const emailById = new Map(
+      authUsers.data.users.map((u) => [u.id, u.email ?? ""])
+    );
+
+    const users =
+      (profiles as ProfileRow[] | null)?.map((profile) =>
+        profileToCmsUser(profile, emailById.get(profile.id) || "")
+      ) ?? [];
+
+    for (const user of users) saveCmsUser(user);
+    return users;
   }
-  if (authUsers.error) {
-    throw new Error(authUsers.error.message);
+
+  // Fallback without service role: RLS admin policy must allow reading profiles.
+  const supabase = await createClient();
+  const {
+    data: { user: authUser },
+  } = await supabase.auth.getUser();
+  const { data: profiles, error } = await supabase
+    .from("cms_user_profiles")
+    .select("*")
+    .order("created_at");
+
+  if (error) {
+    throw new Error(
+      `${error.message}. Add SUPABASE_SERVICE_ROLE_KEY on Vercel for full Users & Permissions.`
+    );
   }
 
-  const emailById = new Map(
-    authUsers.data.users.map((u) => [u.id, u.email ?? ""])
-  );
+  const users =
+    (profiles as ProfileRow[] | null)?.map((profile) =>
+      profileToCmsUser(
+        profile,
+        profile.id === authUser?.id ? authUser.email ?? "" : ""
+      )
+    ) ?? [];
 
-  const users = (profiles as ProfileRow[] | null)?.map((profile) =>
-    profileToCmsUser(profile, emailById.get(profile.id) || "")
-  ) ?? [];
-
-  // Keep in-memory mirror for other mock consumers.
   for (const user of users) saveCmsUser(user);
   return users;
 }
@@ -188,7 +287,7 @@ export async function createCmsUserDurable(input: {
   jobTitle?: string;
   status?: CmsUser["status"];
 }): Promise<CmsUser> {
-  if (!isSupabaseConfigured() || !isServiceRoleConfigured()) {
+  if (!isSupabaseConfigured()) {
     const now = new Date().toISOString();
     const user: CmsUser = {
       id: `user-${Date.now()}`,
@@ -203,6 +302,12 @@ export async function createCmsUserDurable(input: {
       updatedAt: now,
     };
     return saveCmsUser(user);
+  }
+
+  if (!isServiceRoleConfigured()) {
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY is missing on the server. Add it in Vercel → Settings → Environment Variables, then redeploy."
+    );
   }
 
   const admin = createServiceClient();

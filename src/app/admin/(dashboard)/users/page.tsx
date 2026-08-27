@@ -31,19 +31,24 @@ type DraftUser = {
 export default function UsersPage() {
   const [users, setUsers] = useState<CmsUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editing, setEditing] = useState<DraftUser | null>(null);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await fetch("/api/cms/users");
       const data = (await res.json()) as { users?: CmsUser[]; error?: string };
       if (!res.ok) throw new Error(data.error || "Failed to load users");
       setUsers(data.users ?? []);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to load users");
+      const message =
+        error instanceof Error ? error.message : "Failed to load users";
+      setLoadError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -255,6 +260,18 @@ export default function UsersPage() {
 
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading users…</p>
+      ) : loadError ? (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+          <p className="font-medium">Could not load users</p>
+          <p className="mt-1 text-destructive/90">{loadError}</p>
+          <button
+            type="button"
+            className="mt-3 text-oboya-green underline"
+            onClick={() => void loadUsers()}
+          >
+            Retry
+          </button>
+        </div>
       ) : (
         <DataTable data={users} columns={columns} searchKey="email" />
       )}

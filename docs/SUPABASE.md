@@ -36,6 +36,24 @@ Copy [`.env.example`](./.env.example) to `.env.local` and fill in:
 
 On **Vercel**, add the two `NEXT_PUBLIC_*` variables **and** `SUPABASE_SERVICE_ROLE_KEY` as a **server-only** secret (never prefix with `NEXT_PUBLIC_`). Required for creating/editing/deleting admin users.
 
+## Live checklist (Vercel + Supabase)
+
+If **Users** stays empty after “Loading users…” or **Media Library** is empty in production:
+
+1. **Supabase → SQL Editor** run [`diagnostics/fix-from-check-20260827.sql`](../supabase/diagnostics/fix-from-check-20260827.sql) (creates `cms_media` / `cms_documents` and promotes a `super_admin`).
+2. **Vercel → Project → Settings → Environment Variables** (Production + Preview):
+
+| Variable | Required |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | yes |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes |
+| `SUPABASE_SERVICE_ROLE_KEY` | **yes** for Users create/edit/delete/list emails |
+
+3. **Redeploy** after adding env vars (env changes do not apply to old deployments).
+4. Log out / log in to the admin so the session picks up the `super_admin` profile.
+
+`SUPABASE_SERVICE_ROLE_KEY` is server-only — never prefix with `NEXT_PUBLIC_`.
+
 ## 3. Seed data
 
 After running the SQL schema:

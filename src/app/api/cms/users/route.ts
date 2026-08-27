@@ -9,12 +9,22 @@ import type { CmsLocale, CmsRole } from "@/lib/cms/types";
 export async function GET() {
   const actor = await requireAdminActor();
   if (!actor) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      {
+        error:
+          "Unauthorized. Your account needs an active admin/super_admin profile. Run supabase/diagnostics/fix-from-check-20260827.sql and set SUPABASE_SERVICE_ROLE_KEY on Vercel.",
+      },
+      { status: 401 }
+    );
   }
 
   try {
     const users = await listCmsUsersDurable();
-    return NextResponse.json({ ok: true, users });
+    return NextResponse.json({
+      ok: true,
+      users,
+      serviceRole: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to list users";

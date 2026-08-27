@@ -157,7 +157,7 @@ export function isUrlInUse(url: string, inUse: Set<string>): boolean {
   return inUse.has(normalizeMediaUrl(url));
 }
 
-/** Build MediaAsset entries for remote in-use URLs not already in the library. */
+/** Build MediaAsset entries for in-use URLs missing from disk/DB (needed on Vercel). */
 export function assetsFromInUseUrls(
   urls: Set<string>,
   alreadyHave: Set<string>
@@ -167,14 +167,13 @@ export function assetsFromInUseUrls(
 
   for (const url of urls) {
     if (alreadyHave.has(normalizeMediaUrl(url))) continue;
-    // Local files must come from disk scan; only synthesize remote URLs.
-    if (!url.startsWith("http://") && !url.startsWith("https://")) continue;
 
     const mime = mimeFromUrl(url);
     const isVideo = mime.startsWith("video/");
     const name = decodeURIComponent(
       url.split("/").pop()?.split("?")[0] || "media"
     );
+    const isRemote = url.startsWith("http://") || url.startsWith("https://");
 
     assets.push({
       id: `used-${slugId(url)}`,
@@ -184,7 +183,7 @@ export function assetsFromInUseUrls(
       mimeType: mime,
       size: 0,
       folder: folderForUrl(url),
-      tags: ["in-use", "remote"],
+      tags: isRemote ? ["in-use", "remote"] : ["in-use", "site"],
       createdAt: now,
       updatedAt: now,
     });
