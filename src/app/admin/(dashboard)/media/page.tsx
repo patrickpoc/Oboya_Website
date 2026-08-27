@@ -366,15 +366,21 @@ export default function MediaLibraryPage() {
     void (async () => {
       try {
         const res = await fetch("/api/cms/media");
-        if (!res.ok) return;
-        const data = (await res.json()) as { assets?: MediaAsset[] };
+        const data = (await res.json()) as {
+          assets?: MediaAsset[];
+          error?: string;
+        };
+        if (!res.ok) {
+          toast.error(data.error || "Could not load media library");
+          return;
+        }
         if (!cancelled && data.assets) {
           replaceMediaAssetsCache(data.assets);
           setLibraryVersion((n) => n + 1);
           refresh();
         }
       } catch {
-        // Keep seed media.
+        toast.error("Could not load media library");
       }
     })();
     return () => {
@@ -502,7 +508,7 @@ export default function MediaLibraryPage() {
     <div>
       <AdminPageHeader
         title="Media Library"
-        description="Centralized storage for images, documents and videos."
+        description="Images and videos currently used on the site, plus your uploads."
         actions={
           <div className="flex gap-2">
             <button

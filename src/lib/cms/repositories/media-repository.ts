@@ -99,66 +99,30 @@ export function getFolderBreadcrumb(folderId: string): MediaFolder[] {
 
 /* ── Assets ──────────────────────────────────────────────── */
 
-/** Remote stock references still useful in the picker (not local files). */
-const STOCK_MEDIA: MediaAsset[] = [
-  {
-    id: "media-3", name: "greenhouse-hero.jpg",
-    url: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800",
-    type: "image", mimeType: "image/jpeg", size: 180000, width: 800, height: 534,
-    folder: "folder-stock", tags: ["greenhouse", "hero", "stock"],
-    createdAt: "2026-02-01T00:00:00.000Z", updatedAt: "2026-02-01T00:00:00.000Z",
-  },
-  {
-    id: "media-4", name: "berries-packaging.jpg",
-    url: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800",
-    type: "image", mimeType: "image/jpeg", size: 160000, width: 800, height: 534,
-    folder: "folder-stock", tags: ["berries", "packaging", "stock"],
-    createdAt: "2026-02-01T00:00:00.000Z", updatedAt: "2026-02-01T00:00:00.000Z",
-  },
-  {
-    id: "media-5", name: "flowers-field.jpg",
-    url: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800",
-    type: "image", mimeType: "image/jpeg", size: 170000, width: 800, height: 534,
-    folder: "folder-stock", tags: ["flowers", "nature", "stock"],
-    createdAt: "2026-02-01T00:00:00.000Z", updatedAt: "2026-02-01T00:00:00.000Z",
-  },
-];
-
-let cache = [...STOCK_MEDIA];
+let cache: MediaAsset[] = [];
 
 export function getMediaAssets(folderId?: string): MediaAsset[] {
-  if (!folderId) return cache;
+  // Root shows the full library; nested folders filter by exact folder id.
+  if (!folderId || folderId === "folder-root") return cache;
   return cache.filter((m) => m.folder === folderId);
 }
 
 /**
- * Rebuild library cache from site files + remote uploads + stock references.
- * Dedupes by URL (remote/site win over older entries with the same path).
+ * Rebuild library cache from in-use site files + remote uploads.
+ * Dedupes by URL.
+ *
+ * Single-arg form: treat the array as the full library from the API.
  */
 export function replaceMediaAssetsCache(remote: MediaAsset[], site: MediaAsset[] = []) {
   const byUrl = new Map<string, MediaAsset>();
-  const byId = new Map<string, MediaAsset>();
+  const source =
+    site.length === 0 && remote.length > 0 ? remote : [...site, ...remote];
 
-  for (const asset of [...STOCK_MEDIA, ...site, ...remote]) {
+  for (const asset of source) {
     byUrl.set(asset.url, asset);
-    byId.set(asset.id, asset);
   }
 
-  // Prefer URL uniqueness so site path and DB row for the same file collapse.
-  const unique = new Map<string, MediaAsset>();
-  for (const asset of byUrl.values()) {
-    unique.set(asset.id, asset);
-  }
-  // Keep any id-only leftovers (should be none after URL pass).
-  for (const asset of byId.values()) {
-    if (![...unique.values()].some((a) => a.url === asset.url)) {
-      unique.set(asset.id, asset);
-    }
-  }
-
-  cache = Array.from(unique.values()).sort((a, b) =>
-    a.name.localeCompare(b.name)
-  );
+  cache = Array.from(byUrl.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export function getAllTags(): string[] {

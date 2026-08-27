@@ -9,10 +9,12 @@
 4. Then run CMS media storage migration (required for admin video/image uploads on Vercel):
    - [`supabase/migrations/20260827_cms_media_storage.sql`](../supabase/migrations/20260827_cms_media_storage.sql)
 5. Also run the extended CMS schema if you have not already (homepage + media DB tables):
-   - [`supabase/cms-schema.sql`](../supabase/cms-schema.sql)
-6. Run user profiles migration (first-login password change + admin user management):
-   - [`supabase/migrations/20260827_cms_user_profiles.sql`](../supabase/migrations/20260827_cms_user_profiles.sql)
-7. Create the first admin user:
+   - [`supabase/cms-schema.sql`](../supabase/cms-schema.sql)  
+   (idempotent — safe to re-run)
+6. Prefer the one-shot users repair instead of stacking partial migrations:
+   - Diagnostic (copy results back if something is wrong): [`supabase/diagnostics/check-cms-users.sql`](../supabase/diagnostics/check-cms-users.sql)
+   - Fix (safe to re-run): [`supabase/diagnostics/fix-cms-users.sql`](../supabase/diagnostics/fix-cms-users.sql)
+7. Create/reset the first admin user:
 
 ```bash
 node scripts/create-admin-user.mjs

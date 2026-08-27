@@ -8,6 +8,12 @@ import {
   saveMediaAsset,
 } from "@/lib/cms/repositories/media-repository";
 import {
+  assetsFromInUseUrls,
+  collectInUseMediaUrls,
+  isUrlInUse,
+  normalizeMediaUrl,
+} from "@/lib/cms/server/in-use-media.server";
+import {
   SITE_MEDIA_FOLDERS,
   scanSiteMediaAssets,
 } from "@/lib/cms/server/site-media.server";
@@ -50,27 +56,58 @@ function rowToAsset(row: CmsMediaRow): MediaAsset {
 async function readRemoteMedia(): Promise<MediaAsset[]> {
   if (!isSupabaseConfigured()) return [];
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("cms_media")
-    .select(
-      "id, name, url, type, mime_type, size, folder, metadata, created_at, updated_at"
-    )
-    .order("created_at", { ascending: false });
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("cms_media")
+      .select(
+        "id, name, url, type, mime_type, size, folder, metadata, created_at, updated_at"
+      )
+      .order("created_at", { ascending: false });
 
-  if (error) {
-    throw new Error(error.message || "Failed to load media library");
+    if (error) {
+      console.error("cms_media load skipped:", error.message);
+      return [];
+    }
+
+    return (data as CmsMediaRow[] | null)?.map(rowToAsset) ?? [];
+  } catch (error) {
+    console.error(
+      "cms_media load skipped:",
+      error instanceof Error ? error.message : error
+    );
+    return [];
   }
-
-  return (data as CmsMediaRow[] | null)?.map(rowToAsset) ?? [];
 }
 
-/** Site files + Supabase uploads + stock refs for the admin Media Library. */
+/**
+ * Media Library = assets actually wired into site/CMS elements
+ * (+ CMS uploads so newly added files remain pickable).
+ * Unused files under public/assets and stock fillers are omitted.
+ */
 export async function syncMediaLibraryFromSupabase(): Promise<MediaAsset[]> {
   ensureMediaFolders(SITE_MEDIA_FOLDERS);
-  const site = await scanSiteMediaAssets();
+
+  const inUse = await collectInUseMediaUrls();
+  const scanned = await scanSiteMediaAssets();
+  const site = scanned.filter((asset) => isUrlInUse(asset.url, inUse));
+
   const remote = await readRemoteMedia();
-  replaceMediaAssetsCache(remote, site);
+  // Keep uploads always; remote stock-like rows only if referenced.
+  const remoteKept = remote.filter(
+    (asset) =>
+      asset.url.includes("/uploads/") ||
+      asset.url.includes("cms-media") ||
+      asset.tags.includes("upload") ||
+      isUrlInUse(asset.url, inUse)
+  );
+
+  const have = new Set(
+    [...site, ...remoteKept].map((a) => normalizeMediaUrl(a.url))
+  );
+  const synthesized = assetsFromInUseUrls(inUse, have);
+
+  replaceMediaAssetsCache([...remoteKept, ...synthesized], site);
   return getMediaAssets();
 }
 
