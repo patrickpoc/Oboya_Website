@@ -31,6 +31,11 @@ export function AdminLoginForm() {
     }
 
     const supabase = createClient();
+
+    // Drop any previous session before signing in as this account.
+    await supabase.auth.signOut();
+    localStorage.removeItem("oboya-admin-user");
+
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,

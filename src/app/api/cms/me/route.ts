@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import {
   getOrCreateProfileForAuthUser,
+  profileToCmsUser,
   updateOwnProfileDurable,
 } from "@/lib/cms/server/users.server";
 import { createClient } from "@/lib/supabase/server";
+import {
+  createServiceClient,
+  isServiceRoleConfigured,
+} from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { getCmsUsers } from "@/lib/cms/repositories/users-repository";
 import type { CmsLocale } from "@/lib/cms/types";
@@ -26,13 +31,45 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await getOrCreateProfileForAuthUser(
-      authUser.id,
-      authUser.email ?? ""
-    );
+    let user = null;
+
+    // Prefer service-role read so we always get THIS auth user's profile.
+    if (isServiceRoleConfigured()) {
+      try {
+        const admin = createServiceClient();
+        const { data } = await admin
+          .from("cms_user_profiles")
+          .select("*")
+          .eq("id", authUser.id)
+          .maybeSingle();
+        if (data) {
+          user = profileToCmsUser(
+            data as Parameters<typeof profileToCmsUser>[0],
+            authUser.email ?? ""
+          );
+        }
+      } catch (error) {
+        console.error("/api/cms/me service read failed:", error);
+      }
+    }
+
+    if (!user) {
+      user = await getOrCreateProfileForAuthUser(
+        authUser.id,
+        authUser.email ?? ""
+      );
+    }
+
     if (!user) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
+
+    // Always trust Auth email for the session identity.
+    user = {
+      ...user,
+      id: authUser.id,
+      email: authUser.email ?? user.email,
+    };
 
     const mustChange =
       authUser.user_metadata?.must_change_password === true ||

@@ -51,6 +51,7 @@ export default function ChangePasswordPage() {
       const { createClient } = await import("@/lib/supabase/client");
       const supabase = createClient();
       await supabase.auth.refreshSession();
+      localStorage.removeItem("oboya-admin-user");
 
       window.location.href = "/admin/dashboard";
     } catch {

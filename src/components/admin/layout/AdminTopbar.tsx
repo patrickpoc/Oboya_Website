@@ -73,6 +73,7 @@ export function AdminTopbar() {
         </div>
         <div className="hidden text-left lg:block">
           <p className="text-xs font-medium text-oboya-blue-dark">{user.name}</p>
+          <p className="text-[10px] text-muted-foreground">{user.email}</p>
           <p className="text-[10px] text-muted-foreground">
             {ROLE_LABELS[user.role]}
           </p>

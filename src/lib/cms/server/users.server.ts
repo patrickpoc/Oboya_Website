@@ -128,6 +128,11 @@ export async function resolveAdminActor(): Promise<AdminActorResult> {
       profile = (data as ProfileRow | null) ?? null;
 
       if (!profile) {
+        const { count } = await admin
+          .from("cms_user_profiles")
+          .select("id", { count: "exact", head: true });
+        const role =
+          !count || count === 0 ? "super_admin" : "viewer";
         const now = new Date().toISOString();
         const { data: created } = await admin
           .from("cms_user_profiles")
@@ -136,11 +141,11 @@ export async function resolveAdminActor(): Promise<AdminActorResult> {
             name:
               (user.user_metadata?.name as string | undefined) ||
               user.email?.split("@")[0] ||
-              "Admin",
-            role: "super_admin",
+              "User",
+            role,
             locale: "en",
             status: "active",
-            must_change_password: false,
+            must_change_password: role !== "super_admin",
             created_at: now,
             updated_at: now,
           })
@@ -149,19 +154,20 @@ export async function resolveAdminActor(): Promise<AdminActorResult> {
         profile = (created as ProfileRow | null) ?? null;
       }
 
+      // Only force-promote when explicitly configured — never every non-admin login.
       const bootstrapEmail = process.env.CMS_BOOTSTRAP_ADMIN_EMAIL?.toLowerCase();
       const shouldForcePromote =
         Boolean(process.env.CMS_AUTO_PROMOTE_ADMIN === "true") ||
         Boolean(
           bootstrapEmail && user.email?.toLowerCase() === bootstrapEmail
-        ) ||
-        // Early-setup unlock: if this login is not admin, promote it when
-        // service role is present (trusted server). Existing admins stay.
-        (profile != null &&
-          profile.role !== "super_admin" &&
-          profile.role !== "admin");
+        );
 
-      if (profile && shouldForcePromote) {
+      if (
+        profile &&
+        shouldForcePromote &&
+        profile.role !== "super_admin" &&
+        profile.role !== "admin"
+      ) {
         const { data: promoted } = await admin
           .from("cms_user_profiles")
           .update({
