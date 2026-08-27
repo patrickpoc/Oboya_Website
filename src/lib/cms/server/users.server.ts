@@ -62,26 +62,195 @@ export function profileToCmsUser(
   };
 }
 
+export type AdminActorResult =
+  | { ok: true; user: CmsUser }
+  | {
+      ok: false;
+      error: string;
+      debug: {
+        hasSession: boolean;
+        email?: string;
+        userId?: string;
+        role?: string;
+        status?: string;
+        serviceRole: boolean;
+        profileFound: boolean;
+      };
+    };
+
 export async function requireAdminActor(): Promise<CmsUser | null> {
+  const result = await resolveAdminActor();
+  return result.ok ? result.user : null;
+}
+
+export async function resolveAdminActor(): Promise<AdminActorResult> {
   if (!isSupabaseConfigured()) {
-    return getCmsUsers()[0] ?? null;
+    const fallback = getCmsUsers()[0];
+    if (!fallback) {
+      return {
+        ok: false,
+        error: "No local mock admin user.",
+        debug: { hasSession: false, serviceRole: false, profileFound: false },
+      };
+    }
+    return { ok: true, user: fallback };
   }
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return null;
 
-  let me = await getOrCreateProfileForAuthUser(user.id, user.email ?? "");
-  if (!me || me.status !== "active") return null;
+  if (!user) {
+    return {
+      ok: false,
+      error: "Not authenticated. Log in again at /admin/login.",
+      debug: {
+        hasSession: false,
+        serviceRole: isServiceRoleConfigured(),
+        profileFound: false,
+      },
+    };
+  }
+
+  const serviceRole = isServiceRoleConfigured();
+  let profile: ProfileRow | null = null;
+
+  // Prefer service role so RLS cannot hide the profile.
+  if (serviceRole) {
+    try {
+      const admin = createServiceClient();
+      const { data } = await admin
+        .from("cms_user_profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+      profile = (data as ProfileRow | null) ?? null;
+
+      if (!profile) {
+        const now = new Date().toISOString();
+        const { data: created } = await admin
+          .from("cms_user_profiles")
+          .upsert({
+            id: user.id,
+            name:
+              (user.user_metadata?.name as string | undefined) ||
+              user.email?.split("@")[0] ||
+              "Admin",
+            role: "super_admin",
+            locale: "en",
+            status: "active",
+            must_change_password: false,
+            created_at: now,
+            updated_at: now,
+          })
+          .select("*")
+          .single();
+        profile = (created as ProfileRow | null) ?? null;
+      }
+
+      const bootstrapEmail = process.env.CMS_BOOTSTRAP_ADMIN_EMAIL?.toLowerCase();
+      const shouldForcePromote =
+        Boolean(process.env.CMS_AUTO_PROMOTE_ADMIN === "true") ||
+        Boolean(
+          bootstrapEmail && user.email?.toLowerCase() === bootstrapEmail
+        ) ||
+        // Early-setup unlock: if this login is not admin, promote it when
+        // service role is present (trusted server). Existing admins stay.
+        (profile != null &&
+          profile.role !== "super_admin" &&
+          profile.role !== "admin");
+
+      if (profile && shouldForcePromote) {
+        const { data: promoted } = await admin
+          .from("cms_user_profiles")
+          .update({
+            role: "super_admin",
+            status: "active",
+            must_change_password: false,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", user.id)
+          .select("*")
+          .single();
+        if (promoted) profile = promoted as ProfileRow;
+      }
+    } catch (error) {
+      console.error("resolveAdminActor service role path failed:", error);
+    }
+  }
+
+  if (!profile) {
+    const me = await getOrCreateProfileForAuthUser(user.id, user.email ?? "");
+    if (me) {
+      profile = {
+        id: me.id,
+        name: me.name,
+        job_title: me.jobTitle ?? null,
+        role: me.role,
+        locale: me.locale,
+        status: me.status,
+        must_change_password: me.mustChangePassword ?? null,
+        created_at: me.createdAt,
+        updated_at: me.updatedAt,
+      };
+    }
+  }
+
+  if (!profile) {
+    return {
+      ok: false,
+      error:
+        "No cms_user_profiles row for your account. Run supabase/diagnostics/force-all-super-admin.sql",
+      debug: {
+        hasSession: true,
+        email: user.email ?? undefined,
+        userId: user.id,
+        serviceRole,
+        profileFound: false,
+      },
+    };
+  }
+
+  let me = profileToCmsUser(profile, user.email ?? "");
+
+  if (me.status !== "active") {
+    return {
+      ok: false,
+      error: `Your profile status is "${me.status}". Set status=active in cms_user_profiles.`,
+      debug: {
+        hasSession: true,
+        email: me.email,
+        userId: me.id,
+        role: me.role,
+        status: me.status,
+        serviceRole,
+        profileFound: true,
+      },
+    };
+  }
 
   if (me.role !== "super_admin" && me.role !== "admin") {
     me = await promoteToSuperAdminIfNoAdmins(me);
   }
 
-  if (me.role !== "super_admin" && me.role !== "admin") return null;
-  return me;
+  if (me.role !== "super_admin" && me.role !== "admin") {
+    return {
+      ok: false,
+      error: `Logged in as ${me.email || user.email} with role "${me.role}". Run force-all-super-admin.sql or set CMS_BOOTSTRAP_ADMIN_EMAIL=${me.email || user.email} on Vercel and redeploy.`,
+      debug: {
+        hasSession: true,
+        email: me.email || user.email || undefined,
+        userId: me.id,
+        role: me.role,
+        status: me.status,
+        serviceRole,
+        profileFound: true,
+      },
+    };
+  }
+
+  return { ok: true, user: me };
 }
 
 async function countActiveAdmins(): Promise<number | null> {

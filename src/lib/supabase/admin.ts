@@ -4,7 +4,7 @@ import { getSupabaseEnv } from "@/lib/supabase/env";
 /** Server-only Supabase client with service role (user admin APIs). */
 export function createServiceClient() {
   const { url } = getSupabaseEnv();
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 
   if (!serviceKey) {
     throw new Error(
@@ -23,6 +23,6 @@ export function createServiceClient() {
 export function isServiceRoleConfigured() {
   return Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.SUPABASE_SERVICE_ROLE_KEY
+      process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
   );
 }

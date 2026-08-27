@@ -2,17 +2,17 @@ import { NextResponse } from "next/server";
 import {
   createCmsUserDurable,
   listCmsUsersDurable,
-  requireAdminActor,
+  resolveAdminActor,
 } from "@/lib/cms/server/users.server";
 import type { CmsLocale, CmsRole } from "@/lib/cms/types";
 
 export async function GET() {
-  const actor = await requireAdminActor();
-  if (!actor) {
+  const actor = await resolveAdminActor();
+  if (!actor.ok) {
     return NextResponse.json(
       {
-        error:
-          "Unauthorized. Your account is not admin/super_admin yet. Run supabase/diagnostics/unlock-users-admin.sql in Supabase SQL Editor, confirm your email appears as super_admin, then log out and log in again. Also set SUPABASE_SERVICE_ROLE_KEY on Vercel and redeploy.",
+        error: actor.error,
+        debug: actor.debug,
       },
       { status: 401 }
     );
@@ -33,9 +33,12 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const actor = await requireAdminActor();
-  if (!actor) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const actor = await resolveAdminActor();
+  if (!actor.ok) {
+    return NextResponse.json(
+      { error: actor.error, debug: actor.debug },
+      { status: 401 }
+    );
   }
 
   try {

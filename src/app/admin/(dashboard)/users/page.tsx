@@ -41,8 +41,17 @@ export default function UsersPage() {
     setLoadError(null);
     try {
       const res = await fetch("/api/cms/users");
-      const data = (await res.json()) as { users?: CmsUser[]; error?: string };
-      if (!res.ok) throw new Error(data.error || "Failed to load users");
+      const data = (await res.json()) as {
+        users?: CmsUser[];
+        error?: string;
+        debug?: Record<string, unknown>;
+      };
+      if (!res.ok) {
+        const debugHint = data.debug
+          ? ` (${JSON.stringify(data.debug)})`
+          : "";
+        throw new Error(`${data.error || "Failed to load users"}${debugHint}`);
+      }
       setUsers(data.users ?? []);
     } catch (error) {
       const message =
