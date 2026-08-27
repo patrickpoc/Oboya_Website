@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { MediaAsset } from "@/lib/cms/types";
-import { saveMediaAsset } from "@/lib/cms/repositories/media-repository";
+import { saveMediaAsset, deleteMediaAsset } from "@/lib/cms/repositories/media-repository";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -111,8 +111,10 @@ export async function registerMediaAsset(input: {
   type: MediaAsset["type"];
   mimeType: string;
   size: number;
+  folder?: string;
 }) {
   const now = new Date().toISOString();
+  const folder = input.folder || "folder-root";
   const asset = saveMediaAsset({
     id: input.id,
     name: input.name,
@@ -120,7 +122,7 @@ export async function registerMediaAsset(input: {
     type: input.type,
     mimeType: input.mimeType,
     size: input.size,
-    folder: "uploads",
+    folder,
     tags: input.type === "video" ? ["video", "upload"] : ["upload"],
     createdAt: now,
     updatedAt: now,
@@ -136,7 +138,7 @@ export async function registerMediaAsset(input: {
         type: input.type,
         mime_type: input.mimeType,
         size: input.size,
-        folder: "uploads",
+        folder,
         metadata: { tags: asset.tags },
         updated_at: now,
       });
@@ -152,6 +154,7 @@ export async function storeMediaLocally(input: {
   file: File;
   mime: string;
   kind: MediaAsset["type"];
+  folder?: string;
 }) {
   if (input.file.size > SERVERLESS_BODY_MAX) {
     throw new Error(
@@ -172,6 +175,7 @@ export async function storeMediaLocally(input: {
     type: input.kind,
     mimeType: input.mime,
     size: input.file.size,
+    folder: input.folder,
   });
 }
 
@@ -179,6 +183,7 @@ export async function storeMediaViaSupabaseServer(input: {
   file: File;
   mime: string;
   kind: MediaAsset["type"];
+  folder?: string;
 }) {
   // Keep under platform body limits when proxying through the Next.js route.
   if (input.file.size > SERVERLESS_BODY_MAX) {
@@ -216,5 +221,48 @@ export async function storeMediaViaSupabaseServer(input: {
     type: input.kind,
     mimeType: input.mime,
     size: input.file.size,
+    folder: input.folder,
   });
+}
+
+function storagePathFromPublicUrl(url: string): string | null {
+  const marker = `/object/public/${MEDIA_BUCKET}/`;
+  const idx = url.indexOf(marker);
+  if (idx >= 0) {
+    return decodeURIComponent(url.slice(idx + marker.length).split("?")[0]);
+  }
+  if (url.startsWith("/uploads/")) {
+    return url.replace(/^\//, "");
+  }
+  return null;
+}
+
+export async function removeMediaAsset(input: {
+  id: string;
+  url?: string;
+}): Promise<boolean> {
+  const removed = deleteMediaAsset(input.id);
+
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      await supabase.from("cms_media").delete().eq("id", input.id);
+
+      const objectPath = input.url ? storagePathFromPublicUrl(input.url) : null;
+      if (objectPath?.startsWith("uploads/")) {
+        await supabase.storage.from(MEDIA_BUCKET).remove([objectPath]);
+      }
+    } catch (error) {
+      console.error("Supabase media delete failed:", error);
+    }
+  } else if (input.url?.startsWith("/uploads/")) {
+    try {
+      const { unlink } = await import("node:fs/promises");
+      await unlink(path.join(process.cwd(), "public", input.url.replace(/^\//, "")));
+    } catch {
+      // File may already be gone.
+    }
+  }
+
+  return removed;
 }

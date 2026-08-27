@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import {
   ChevronRight,
@@ -14,10 +14,12 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { uploadMediaFile } from "@/lib/cms/client/upload-media";
 import {
   getMediaAssets,
   getMediaFolders,
@@ -29,6 +31,8 @@ import {
   searchMediaAssets,
   getAllTags,
   updateAssetTags,
+  saveMediaAsset,
+  deleteMediaAsset,
 } from "@/lib/cms/repositories/media-repository";
 import type { MediaAsset, MediaFolder } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
@@ -350,8 +354,47 @@ export default function MediaLibraryPage() {
   const [renamingFolder, setRenamingFolder] = useState<MediaFolder | null>(null);
   const [movingFolder, setMovingFolder] = useState<MediaFolder | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
+
+  const handleUploadFiles = async (files: FileList | null) => {
+    if (!files?.length) return;
+    setUploading(true);
+    let ok = 0;
+    let failed = 0;
+    try {
+      for (const file of Array.from(files)) {
+        try {
+          const asset = await uploadMediaFile(file, {
+            folder: currentFolderId,
+          });
+          saveMediaAsset(asset);
+          ok += 1;
+        } catch (error) {
+          failed += 1;
+          toast.error(
+            error instanceof Error
+              ? `${file.name}: ${error.message}`
+              : `${file.name}: upload failed`
+          );
+        }
+      }
+      if (ok > 0) {
+        refresh();
+        toast.success(
+          ok === 1 ? "1 file uploaded" : `${ok} files uploaded`
+        );
+      }
+      if (failed > 0 && ok === 0) {
+        // Errors already toasted per file.
+      }
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const allTags = useMemo(() => getAllTags(), [refreshKey]);
   const breadcrumb = useMemo(() => getFolderBreadcrumb(currentFolderId), [currentFolderId, refreshKey]);
@@ -403,6 +446,27 @@ export default function MediaLibraryPage() {
     refresh();
   };
 
+  const handleDeleteAsset = async (asset: MediaAsset) => {
+    const confirmed = window.confirm(`Remove “${asset.name}”? This cannot be undone.`);
+    if (!confirmed) return;
+
+    try {
+      const params = new URLSearchParams({ id: asset.id, url: asset.url });
+      const res = await fetch(`/api/cms/media?${params.toString()}`, {
+        method: "DELETE",
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        throw new Error(data.error ?? "Delete failed");
+      }
+      deleteMediaAsset(asset.id);
+      refresh();
+      toast.success("File removed");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not remove file");
+    }
+  };
+
   return (
     <div>
       <AdminPageHeader
@@ -418,9 +482,24 @@ export default function MediaLibraryPage() {
               <FolderPlus className="size-4" />
               New Folder
             </button>
-            <button type="button" className={buttonVariants({ className: "gap-1.5 rounded-full" })}>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                void handleUploadFiles(e.target.files);
+              }}
+            />
+            <button
+              type="button"
+              disabled={uploading}
+              onClick={() => fileInputRef.current?.click()}
+              className={buttonVariants({ className: "gap-1.5 rounded-full" })}
+            >
               <Upload className="size-4" />
-              Upload
+              {uploading ? "Uploading…" : "Upload"}
             </button>
           </div>
         }
@@ -546,10 +625,18 @@ export default function MediaLibraryPage() {
       {/* Assets grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {assets.map((asset) => (
-          <Card key={asset.id} className="group overflow-hidden">
+          <Card key={asset.id} className="group relative overflow-hidden">
             <div className="relative aspect-video bg-muted">
               {asset.type === "image" ? (
                 <Image src={asset.url} alt={asset.name} fill className="object-cover" unoptimized />
+              ) : asset.type === "video" ? (
+                <video
+                  src={`${asset.url}${asset.url.includes("#") ? "" : "#t=0.1"}`}
+                  className="absolute inset-0 size-full object-cover"
+                  muted
+                  playsInline
+                  preload="metadata"
+                />
               ) : (
                 <div className="flex h-full flex-col items-center justify-center gap-1 text-muted-foreground">
                   <FileText className="size-8" />
@@ -585,14 +672,25 @@ export default function MediaLibraryPage() {
                   ))}
                 </div>
               )}
-              <button
-                type="button"
-                onClick={() => setEditingAsset(asset)}
-                className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-oboya-green"
-              >
-                <Tag className="size-3" />
-                Edit Tags
-              </button>
+              <div className="mt-2 flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingAsset(asset)}
+                  className="flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-oboya-green"
+                >
+                  <Tag className="size-3" />
+                  Edit Tags
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleDeleteAsset(asset)}
+                  className="flex size-7 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600 transition-colors hover:bg-red-600 hover:text-white"
+                  aria-label={`Remove ${asset.name}`}
+                  title="Remove file"
+                >
+                  <X className="size-3.5" strokeWidth={2.5} />
+                </button>
+              </div>
             </CardContent>
           </Card>
         ))}

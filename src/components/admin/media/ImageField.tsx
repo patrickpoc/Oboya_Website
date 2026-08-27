@@ -7,7 +7,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getMediaAssets } from "@/lib/cms/repositories/media-repository";
+import { getMediaAssets, saveMediaAsset } from "@/lib/cms/repositories/media-repository";
+import { uploadMediaFile } from "@/lib/cms/client/upload-media";
 import type { MediaAsset } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
 
@@ -40,6 +41,89 @@ function acceptFor(types: MediaFieldAllowedType[]) {
   return parts.join(",");
 }
 
+function fileNameFromUrl(url: string) {
+  try {
+    const path = url.startsWith("http")
+      ? new URL(url).pathname
+      : url.split("?")[0];
+    const name = decodeURIComponent(path.split("/").filter(Boolean).pop() || "");
+    return name || url;
+  } catch {
+    return url.split("/").pop()?.split("?")[0] || url;
+  }
+}
+
+function isVideoUrl(url: string) {
+  return /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url);
+}
+
+/** Seek to a frame so the admin preview shows a real thumbnail, not a blank box. */
+function VideoThumbnail({
+  src,
+  className,
+}: {
+  src: string;
+  className?: string;
+}) {
+  const [frame, setFrame] = useState<string | null>(null);
+
+  return (
+    <div
+      key={src}
+      className={cn("relative size-full bg-oboya-blue-dark/10", className)}
+    >
+      {frame ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={frame} alt="" className="size-full object-cover" />
+      ) : (
+        <video
+          src={`${src}${src.includes("#") ? "" : "#t=0.1"}`}
+          className="size-full object-cover"
+          muted
+          playsInline
+          preload="auto"
+          crossOrigin="anonymous"
+          onLoadedData={(e) => {
+            const v = e.currentTarget;
+            if (v.currentTime < 0.05) {
+              try {
+                v.currentTime = 0.15;
+              } catch {
+                // Some browsers block seeks until more data arrives.
+              }
+            }
+          }}
+          onSeeked={(e) => {
+            const v = e.currentTarget;
+            if (!v.videoWidth || !v.videoHeight) return;
+            try {
+              const canvas = document.createElement("canvas");
+              const maxW = 480;
+              const scale = Math.min(1, maxW / v.videoWidth);
+              canvas.width = Math.max(1, Math.round(v.videoWidth * scale));
+              canvas.height = Math.max(1, Math.round(v.videoHeight * scale));
+              const ctx = canvas.getContext("2d");
+              if (!ctx) return;
+              ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+              setFrame(canvas.toDataURL("image/jpeg", 0.72));
+            } catch {
+              // CORS-tainted canvas — keep the seeked <video> frame visible.
+            }
+          }}
+        />
+      )}
+      <span
+        className="pointer-events-none absolute inset-0 flex items-center justify-center"
+        aria-hidden
+      >
+        <span className="flex size-9 items-center justify-center rounded-full bg-black/45 text-white shadow-sm backdrop-blur-[1px]">
+          <Film className="size-4" />
+        </span>
+      </span>
+    </div>
+  );
+}
+
 export function MediaField({
   label,
   value,
@@ -53,6 +137,7 @@ export function MediaField({
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [urlDraft, setUrlDraft] = useState(value);
   const [uploading, setUploading] = useState(false);
+  const [knownName, setKnownName] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -67,105 +152,33 @@ export function MediaField({
     [types]
   );
 
-  const isVideoValue =
-    Boolean(value) &&
-    (/\.(mp4|webm)(\?|$)/i.test(value) || value.includes("video"));
+  const isVideoValue = Boolean(value) && (videoOnly || isVideoUrl(value));
+
+  const displayName = useMemo(() => {
+    if (!value) return null;
+    const fromLibrary = assets.find((asset) => asset.url === value);
+    if (fromLibrary?.name) return fromLibrary.name;
+    if (knownName) return knownName;
+    return fileNameFromUrl(value);
+  }, [value, assets, knownName]);
+
+  useEffect(() => {
+    if (!value) {
+      queueMicrotask(() => setKnownName(null));
+      return;
+    }
+    const fromLibrary = assets.find((asset) => asset.url === value);
+    if (fromLibrary?.name) {
+      queueMicrotask(() => setKnownName(fromLibrary.name));
+    }
+  }, [value, assets]);
 
   const applyUpload = async (file: File) => {
     setUploading(true);
     try {
-      const mime = (file.type || "").toLowerCase();
-      const isVideo = mime.startsWith("video/");
-      const max = isVideo ? 50 * 1024 * 1024 : 8 * 1024 * 1024;
-      if (file.size > max) {
-        throw new Error(
-          `File too large. Max ${isVideo ? "50MB" : "8MB"}.`
-        );
-      }
-
-      // Prefer direct-to-Supabase when configured — Vercel cannot write public/uploads
-      // and serverless request bodies cap around 4.5MB.
-      const useDirect =
-        Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
-        (isVideo || file.size > 3.5 * 1024 * 1024);
-
-      let asset: MediaAsset | undefined;
-
-      if (useDirect) {
-        const signRes = await fetch("/api/cms/media", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "sign",
-            mimeType: mime,
-            size: file.size,
-            name: file.name,
-          }),
-        });
-        const signed = (await signRes.json()) as {
-          error?: string;
-          id?: string;
-          publicUrl?: string;
-          signedUrl?: string;
-          token?: string;
-          kind?: MediaAsset["type"];
-          mimeType?: string;
-          originalName?: string;
-        };
-        if (!signRes.ok || !signed.signedUrl || !signed.id || !signed.publicUrl) {
-          throw new Error(signed.error ?? "Could not start upload");
-        }
-
-        const putRes = await fetch(signed.signedUrl, {
-          method: "PUT",
-          headers: {
-            "Content-Type": mime || "application/octet-stream",
-          },
-          body: file,
-        });
-        if (!putRes.ok) {
-          const detail = await putRes.text().catch(() => "");
-          throw new Error(
-            detail ||
-              "Storage upload failed. Confirm the cms-media bucket exists in Supabase."
-          );
-        }
-
-        const completeRes = await fetch("/api/cms/media", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "complete",
-            id: signed.id,
-            url: signed.publicUrl,
-            type: signed.kind ?? (isVideo ? "video" : "image"),
-            mimeType: signed.mimeType ?? mime,
-            size: file.size,
-            name: signed.originalName ?? file.name,
-          }),
-        });
-        const completed = (await completeRes.json()) as {
-          error?: string;
-          asset?: MediaAsset;
-        };
-        if (!completeRes.ok || !completed.asset) {
-          throw new Error(completed.error ?? "Upload finalize failed");
-        }
-        asset = completed.asset;
-      } else {
-        const body = new FormData();
-        body.append("file", file);
-        const res = await fetch("/api/cms/media", { method: "POST", body });
-        const data = (await res.json()) as {
-          error?: string;
-          asset?: MediaAsset;
-        };
-        if (!res.ok || !data.asset) {
-          throw new Error(data.error ?? "Upload failed");
-        }
-        asset = data.asset;
-      }
-
+      const asset = await uploadMediaFile(file);
+      saveMediaAsset(asset);
+      setKnownName(asset.name || file.name);
       onChange(asset.url);
       setMode("upload");
       toast.success("Media uploaded");
@@ -191,7 +204,10 @@ export function MediaField({
             variant="ghost"
             size="sm"
             className="h-7 text-xs text-muted-foreground"
-            onClick={() => onChange("")}
+            onClick={() => {
+              setKnownName(null);
+              onChange("");
+            }}
           >
             Clear
           </Button>
@@ -199,19 +215,26 @@ export function MediaField({
       </div>
 
       {value ? (
-        <div className="relative h-28 w-full max-w-xs overflow-hidden rounded-lg border border-border/60 bg-white">
-          {isVideoValue || videoOnly ? (
-            <video
-              src={value}
-              className="size-full object-cover"
-              muted
-              playsInline
-              preload="metadata"
-            />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={value} alt="" className="size-full object-cover" />
-          )}
+        <div className="max-w-xs space-y-2">
+          <div className="relative h-28 w-full overflow-hidden rounded-lg border border-border/60 bg-white">
+            {isVideoValue ? (
+              <VideoThumbnail src={value} />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={value} alt="" className="size-full object-cover" />
+            )}
+          </div>
+          {displayName ? (
+            <p
+              className="truncate font-body text-xs leading-5 text-oboya-blue-dark"
+              title={displayName}
+            >
+              <span className="font-medium">
+                {isVideoValue ? "Video" : "File"}:
+              </span>{" "}
+              <span className="text-muted-foreground">{displayName}</span>
+            </p>
+          ) : null}
         </div>
       ) : (
         <div className="flex h-28 max-w-xs items-center justify-center rounded-lg border border-dashed border-border bg-white text-xs text-muted-foreground">
@@ -291,7 +314,11 @@ export function MediaField({
             type="button"
             size="sm"
             className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
-            onClick={() => onChange(urlDraft.trim())}
+            onClick={() => {
+              const next = urlDraft.trim();
+              setKnownName(next ? fileNameFromUrl(next) : null);
+              onChange(next);
+            }}
           >
             Apply URL
           </Button>
@@ -308,7 +335,8 @@ export function MediaField({
           }))}
           selected={value}
           onClose={() => setLibraryOpen(false)}
-          onSelect={(url) => {
+          onSelect={(url, name) => {
+            setKnownName(name);
             onChange(url);
             setLibraryOpen(false);
           }}
@@ -331,7 +359,7 @@ export function MediaLibraryDialog({
 }: {
   items: MediaLibraryItem[];
   selected?: string;
-  onSelect: (url: string) => void;
+  onSelect: (url: string, name: string) => void;
   onClose: () => void;
 }) {
   return (
@@ -378,7 +406,7 @@ export function MediaLibraryDialog({
                   <button
                     key={asset.id}
                     type="button"
-                    onClick={() => onSelect(asset.url)}
+                    onClick={() => onSelect(asset.url, asset.name)}
                     className={cn(
                       "overflow-hidden rounded-xl border bg-oboya-soft-white text-left transition-shadow hover:shadow-md",
                       active
@@ -388,13 +416,7 @@ export function MediaLibraryDialog({
                   >
                     <div className="relative aspect-video bg-muted">
                       {asset.type === "video" ? (
-                        <video
-                          src={asset.url}
-                          className="absolute inset-0 size-full object-cover"
-                          muted
-                          playsInline
-                          preload="metadata"
-                        />
+                        <VideoThumbnail src={asset.url} />
                       ) : (
                         <Image
                           src={asset.url}

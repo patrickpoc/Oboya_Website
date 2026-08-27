@@ -4,6 +4,7 @@ import {
   mediaKind,
   maxBytesForKind,
   registerMediaAsset,
+  removeMediaAsset,
   storeMediaLocally,
   storeMediaViaSupabaseServer,
 } from "@/lib/cms/server/media-upload.server";
@@ -14,6 +15,35 @@ async function assertAdmin() {
   if (!isSupabaseConfigured()) return true;
   const user = await requireAdminUser();
   return Boolean(user);
+}
+
+export async function DELETE(request: Request) {
+  if (!(await assertAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    const url = searchParams.get("url") ?? undefined;
+
+    if (!id) {
+      return NextResponse.json({ error: "Asset id is required" }, { status: 400 });
+    }
+
+    const removed = await removeMediaAsset({ id, url });
+    if (!removed) {
+      // Still attempt remote cleanup for uploaded ids that only exist in storage.
+      return NextResponse.json({ ok: true, removed: false });
+    }
+
+    return NextResponse.json({ ok: true, removed: true });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to delete media";
+    console.error("Media delete failed:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -33,6 +63,7 @@ export async function POST(request: Request) {
         id?: string;
         url?: string;
         type?: "image" | "video";
+        folder?: string;
       };
 
       if (body.action === "sign") {
@@ -47,7 +78,11 @@ export async function POST(request: Request) {
           size: Number(body.size) || 0,
           originalName: body.name,
         });
-        return NextResponse.json({ ok: true, ...signed });
+        return NextResponse.json({
+          ok: true,
+          ...signed,
+          folder: body.folder,
+        });
       }
 
       if (body.action === "complete") {
@@ -64,6 +99,7 @@ export async function POST(request: Request) {
           type: body.type,
           mimeType: body.mimeType,
           size: Number(body.size) || 0,
+          folder: body.folder,
         });
         return NextResponse.json({ ok: true, asset });
       }
@@ -73,6 +109,10 @@ export async function POST(request: Request) {
 
     const form = await request.formData();
     const file = form.get("file");
+    const folderField = form.get("folder");
+    const folder =
+      typeof folderField === "string" && folderField ? folderField : undefined;
+
     if (!(file instanceof File)) {
       return NextResponse.json({ error: "File is required" }, { status: 400 });
     }
@@ -96,8 +136,8 @@ export async function POST(request: Request) {
     }
 
     const asset = isSupabaseConfigured()
-      ? await storeMediaViaSupabaseServer({ file, mime, kind })
-      : await storeMediaLocally({ file, mime, kind });
+      ? await storeMediaViaSupabaseServer({ file, mime, kind, folder })
+      : await storeMediaLocally({ file, mime, kind, folder });
 
     return NextResponse.json({ ok: true, asset });
   } catch (error) {
