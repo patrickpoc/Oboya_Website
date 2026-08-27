@@ -12,33 +12,42 @@ interface AboutCalloutProps {
 }
 
 export function AboutCallout({ data, locale }: AboutCalloutProps) {
+  const eyebrow = data.segments
+    .map((segment) => pickLocalized(segment.text, locale))
+    .join("");
+  const body = data.body ? pickLocalized(data.body, locale) : "";
+
   return (
-    <section className="bg-oboya-blue-dark py-[clamp(5.5rem,12vw,9rem)]">
+    <section className="bg-oboya-blue-dark pt-[clamp(2.25rem,5vw,3.75rem)] pb-[clamp(2rem,4.5vw,3.25rem)]">
       <Container>
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: true, amount: 0.35 }}
           variants={fadeInUp}
-          className="mx-auto max-w-5xl text-center"
         >
-          <p className="font-display text-[clamp(1.35rem,2.8vw,2.25rem)] font-normal leading-[1.45] tracking-[-0.01em]">
+          <p className="font-body text-sm font-medium leading-relaxed text-white/85 md:text-[0.9375rem]">
             {data.segments.map((segment, index) => {
               const text = pickLocalized(segment.text, locale);
               const className =
-                segment.tone === "green" ? "text-oboya-green" : "text-white";
+                segment.tone === "green" ? "text-oboya-green" : "text-white/85";
               return (
-                <span key={index} className={className}>
+                <span key={`${text}-${index}`} className={className}>
                   {segment.breakBefore ? <br /> : null}
                   {text}
                 </span>
               );
             })}
           </p>
-          {data.body ? (
-            <p className="mt-8 font-body text-[0.9375rem] leading-relaxed text-white/65">
-              {pickLocalized(data.body, locale)}
-            </p>
+          <div className="mt-3 h-px w-full bg-white/25 md:mt-4" aria-hidden />
+          {body ? (
+            <h2 className="mt-4 max-w-2xl whitespace-pre-line font-display text-[clamp(1.125rem,2vw,1.625rem)] font-light leading-[1.35] tracking-[-0.02em] text-white text-pretty md:mt-5 lg:max-w-[52%]">
+              {body}
+            </h2>
+          ) : eyebrow ? (
+            <h2 className="mt-4 max-w-2xl font-display text-[clamp(1.125rem,2vw,1.625rem)] font-light leading-[1.35] tracking-[-0.02em] text-white text-pretty md:mt-5 lg:max-w-[52%]">
+              {eyebrow}
+            </h2>
           ) : null}
         </motion.div>
       </Container>

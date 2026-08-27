@@ -26,21 +26,26 @@ export function AboutHero({
 
   return (
     <section className="bg-white">
-      <Container>
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={fadeInUp}
-          className="mx-auto max-w-[min(100%,52rem)] pt-[clamp(4.5rem,10vw,7.5rem)] pb-[clamp(4rem,9vw,7rem)] text-center lg:max-w-[78%]"
-        >
-          <p className="mb-5 font-body text-sm font-semibold tracking-[0.18em] text-oboya-green uppercase md:mb-7 md:text-[0.9375rem]">
-            {eyebrow}
-          </p>
-          <h1 className="font-display text-[clamp(1.625rem,3.2vw,2.875rem)] font-semibold leading-[1.28] tracking-[-0.015em] text-oboya-blue-dark text-pretty">
-            {title}
-          </h1>
-        </motion.div>
-      </Container>
+      <div className="pt-[clamp(2.25rem,5vw,3.75rem)] pb-[clamp(2rem,4.5vw,3.25rem)]">
+        <Container>
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUp}
+          >
+            <p className="font-body text-sm font-medium leading-relaxed text-oboya-blue-dark/85 md:text-[0.9375rem]">
+              {eyebrow}
+            </p>
+            <div
+              className="mt-3 h-px w-full bg-oboya-blue-dark/20 md:mt-4"
+              aria-hidden
+            />
+            <h1 className="mt-4 max-w-2xl font-display text-[clamp(1.125rem,2vw,1.625rem)] font-light leading-[1.35] tracking-[-0.02em] text-oboya-blue-dark text-pretty md:mt-5 lg:max-w-[52%]">
+              {title}
+            </h1>
+          </motion.div>
+        </Container>
+      </div>
 
       {showImage && (
         <motion.div

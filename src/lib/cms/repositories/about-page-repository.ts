@@ -172,7 +172,7 @@ const defaultSettings = (): AboutPageSettings => ({
   hero: {
     eyebrow: loc("Who We Are", "Quem somos", "Quiénes somos", "我们是谁"),
     title: loc(
-      "Oboya Horticulture is a leading One-Stop Shopping supplier for Flowers, Vegetables Growers, Packaging Companies, and Wholesalers in more than 60 countries around the world.",
+      "Oboya Horticulture supports growers, exporters, distributors, retailers, research centers, and industry partners through solutions designed for every stage of the horticultural journey, backed by global manufacturing, sourcing, and product development capabilities. Helping strengthen performance across the value chain.",
       "A Oboya Horticulture é um fornecedor One-Stop Shopping líder para produtores de flores e vegetais, empresas de embalagem e atacadistas em mais de 60 países.",
       "Oboya Horticulture es un proveedor One-Stop Shopping líder para productores de flores y vegetales, empresas de packaging y mayoristas en más de 60 países.",
       "Oboya Horticulture 是面向花卉与蔬菜种植者、包装企业及批发商的领先一站式采购供应商，业务覆盖全球 60 多个国家。"
@@ -430,51 +430,14 @@ const defaultSettings = (): AboutPageSettings => ({
   callout: {
     segments: [
       {
-        text: loc(
-          "Founded in 1998, Oboya maintains a strategy with its general headquarters based in ",
-          "Fundada em 1998, a Oboya mantém uma estratégia com sede geral na ",
-          "Fundada en 1998, Oboya mantiene una estrategia con sede general en ",
-          "Oboya 成立于 1998 年，总部战略立足"
-        ),
-        tone: "white",
-        breakBefore: false,
-      },
-      {
-        text: loc("China", "China", "China", "中国"),
-        tone: "green",
-        breakBefore: false,
-      },
-      {
-        text: loc(
-          ". In the recent decades, we have our own companies in ",
-          ". Nas últimas décadas, temos empresas próprias em ",
-          ". En las últimas décadas, tenemos empresas propias en ",
-          "。近几十年来，我们在"
-        ),
-        tone: "white",
-        breakBefore: false,
-      },
-      {
-        text: loc(
-          "Kenya, Poland, Sweden, Norway, Ecuador, Israel, Arab, Colombia, Brazil, Peru, Chile, Mexico",
-          "Quênia, Polônia, Suécia, Noruega, Equador, Israel, países árabes, Colômbia, Brasil, Peru, Chile, México",
-          "Kenia, Polonia, Suecia, Noruega, Ecuador, Israel, países árabes, Colombia, Brasil, Perú, Chile, México",
-          "肯尼亚、波兰、瑞典、挪威、厄瓜多尔、以色列、阿拉伯地区、哥伦比亚、巴西、秘鲁、智利、墨西哥"
-        ),
-        tone: "green",
-        breakBefore: false,
-      },
-      {
-        text: loc(
-          " and have sales organizations.",
-          " e organizações comerciais.",
-          " y organizaciones de ventas.",
-          "设有自有公司及销售机构。"
-        ),
+        text: loc("More Than a Supplier"),
         tone: "white",
         breakBefore: false,
       },
     ],
+    body: loc(
+      "Many suppliers focus on individual categories. Oboya Horticulture takes a wider perspective.\n\nBy offering solutions across multiple stages of the horticultural journey, we help customers improve efficiency, protect quality, optimize resources, and create long-term value throughout their operations."
+    ),
   },
   culture: {
     eyebrow: loc(""),
@@ -739,7 +702,7 @@ const defaultSettings = (): AboutPageSettings => ({
 });
 
 let cache: AboutPageSettings | null = null;
-const CONTENT_REVISION = 10;
+const CONTENT_REVISION = 12;
 let cacheRevision = 0;
 
 export function getAboutPageSettings(): AboutPageSettings {

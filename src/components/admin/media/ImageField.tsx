@@ -2,66 +2,96 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { ImageIcon, Link2, Upload, X } from "lucide-react";
+import { Film, ImageIcon, Link2, Upload, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  getMediaAssets,
-  saveMediaAsset,
-} from "@/lib/cms/repositories/media-repository";
+import { getMediaAssets } from "@/lib/cms/repositories/media-repository";
+import type { MediaAsset } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
 
-type ImageSourceMode = "upload" | "url" | "library";
-export type MediaLibraryImage = { id: string; name: string; url: string };
+type SourceMode = "upload" | "url" | "library";
+export type MediaLibraryItem = {
+  id: string;
+  name: string;
+  url: string;
+  type: MediaAsset["type"];
+};
+/** @deprecated Use MediaLibraryItem */
+export type MediaLibraryImage = MediaLibraryItem;
 
-interface ImageFieldProps {
+export type MediaFieldAllowedType = "image" | "video";
+
+interface MediaFieldProps {
   label: string;
   value: string;
   onChange: (url: string) => void;
   optional?: boolean;
+  allowedTypes?: MediaFieldAllowedType[];
 }
 
-export function ImageField({
+const DEFAULT_TYPES: MediaFieldAllowedType[] = ["image"];
+
+function acceptFor(types: MediaFieldAllowedType[]) {
+  const parts: string[] = [];
+  if (types.includes("image")) parts.push("image/*");
+  if (types.includes("video")) parts.push("video/mp4,video/webm");
+  return parts.join(",");
+}
+
+export function MediaField({
   label,
   value,
   onChange,
   optional = false,
-}: ImageFieldProps) {
-  const [mode, setMode] = useState<ImageSourceMode>("url");
+  allowedTypes = DEFAULT_TYPES,
+}: MediaFieldProps) {
+  const types = allowedTypes.length ? allowedTypes : DEFAULT_TYPES;
+  const videoOnly = types.length === 1 && types[0] === "video";
+  const [mode, setMode] = useState<SourceMode>("url");
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [urlDraft, setUrlDraft] = useState(value);
+  const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    queueMicrotask(() => {
-      setUrlDraft(value);
-    });
+    queueMicrotask(() => setUrlDraft(value));
   }, [value]);
 
-  const images = useMemo(() => getMediaAssets().filter((asset) => asset.type === "image"), []);
+  const assets = useMemo(
+    () =>
+      getMediaAssets().filter((asset) =>
+        types.includes(asset.type as MediaFieldAllowedType)
+      ),
+    [types]
+  );
 
-  const applyUpload = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = String(reader.result ?? "");
-      if (!dataUrl) return;
-      const asset = saveMediaAsset({
-        id: `media-upload-${Date.now()}`,
-        name: file.name,
-        url: dataUrl,
-        type: "image",
-        mimeType: file.type || "image/jpeg",
-        size: file.size,
-        folder: "uploads",
-        tags: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-      onChange(asset.url);
+  const isVideoValue =
+    Boolean(value) &&
+    (/\.(mp4|webm)(\?|$)/i.test(value) || value.includes("video"));
+
+  const applyUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const res = await fetch("/api/cms/media", { method: "POST", body });
+      const data = (await res.json()) as {
+        error?: string;
+        asset?: MediaAsset;
+      };
+      if (!res.ok || !data.asset) {
+        throw new Error(data.error ?? "Upload failed");
+      }
+      onChange(data.asset.url);
       setMode("upload");
-    };
-    reader.readAsDataURL(file);
+      toast.success("Media uploaded");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -88,12 +118,22 @@ export function ImageField({
 
       {value ? (
         <div className="relative h-28 w-full max-w-xs overflow-hidden rounded-lg border border-border/60 bg-white">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={value} alt="" className="size-full object-cover" />
+          {isVideoValue || videoOnly ? (
+            <video
+              src={value}
+              className="size-full object-cover"
+              muted
+              playsInline
+              preload="metadata"
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={value} alt="" className="size-full object-cover" />
+          )}
         </div>
       ) : (
         <div className="flex h-28 max-w-xs items-center justify-center rounded-lg border border-dashed border-border bg-white text-xs text-muted-foreground">
-          No image selected
+          No {videoOnly ? "video" : "media"} selected
         </div>
       )}
 
@@ -103,13 +143,14 @@ export function ImageField({
           variant={mode === "upload" ? "default" : "outline"}
           size="sm"
           className="rounded-full"
+          disabled={uploading}
           onClick={() => {
             setMode("upload");
             fileRef.current?.click();
           }}
         >
           <Upload className="size-3.5" />
-          Upload from PC
+          {uploading ? "Uploading…" : "Upload from PC"}
         </Button>
         <Button
           type="button"
@@ -131,7 +172,11 @@ export function ImageField({
             setLibraryOpen(true);
           }}
         >
-          <ImageIcon className="size-3.5" />
+          {videoOnly ? (
+            <Film className="size-3.5" />
+          ) : (
+            <ImageIcon className="size-3.5" />
+          )}
           Media library
         </Button>
       </div>
@@ -139,11 +184,11 @@ export function ImageField({
       <input
         ref={fileRef}
         type="file"
-        accept="image/*"
+        accept={acceptFor(types)}
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
-          if (file) applyUpload(file);
+          if (file) void applyUpload(file);
           e.target.value = "";
         }}
       />
@@ -151,7 +196,9 @@ export function ImageField({
       {mode === "url" && (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
           <div className="flex-1 space-y-1.5">
-            <Label className="text-xs text-muted-foreground">Image URL</Label>
+            <Label className="text-xs text-muted-foreground">
+              {videoOnly ? "Video URL" : "Media URL"}
+            </Label>
             <Input
               value={urlDraft}
               onChange={(e) => setUrlDraft(e.target.value)}
@@ -171,7 +218,12 @@ export function ImageField({
 
       {libraryOpen && (
         <MediaLibraryDialog
-          images={images}
+          items={assets.map((a) => ({
+            id: a.id,
+            name: a.name,
+            url: a.url,
+            type: a.type,
+          }))}
           selected={value}
           onClose={() => setLibraryOpen(false)}
           onSelect={(url) => {
@@ -184,13 +236,18 @@ export function ImageField({
   );
 }
 
+/** @deprecated Prefer MediaField — kept for existing image-only editors */
+export function ImageField(props: Omit<MediaFieldProps, "allowedTypes">) {
+  return <MediaField {...props} allowedTypes={["image"]} />;
+}
+
 export function MediaLibraryDialog({
-  images,
+  items,
   selected,
   onSelect,
   onClose,
 }: {
-  images: MediaLibraryImage[];
+  items: MediaLibraryItem[];
   selected?: string;
   onSelect: (url: string) => void;
   onClose: () => void;
@@ -215,7 +272,7 @@ export function MediaLibraryDialog({
               Media library
             </h3>
             <p className="text-xs text-muted-foreground">
-              Choose an image to use in this field
+              Choose a file to use in this field
             </p>
           </div>
           <button
@@ -229,11 +286,11 @@ export function MediaLibraryDialog({
         </div>
 
         <div className="flex-1 overflow-y-auto p-5">
-          {images.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No images in the library yet.</p>
+          {items.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No matching media yet.</p>
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-              {images.map((asset) => {
+              {items.map((asset) => {
                 const active = selected === asset.url;
                 return (
                   <button
@@ -248,13 +305,23 @@ export function MediaLibraryDialog({
                     )}
                   >
                     <div className="relative aspect-video bg-muted">
-                      <Image
-                        src={asset.url}
-                        alt={asset.name}
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
+                      {asset.type === "video" ? (
+                        <video
+                          src={asset.url}
+                          className="absolute inset-0 size-full object-cover"
+                          muted
+                          playsInline
+                          preload="metadata"
+                        />
+                      ) : (
+                        <Image
+                          src={asset.url}
+                          alt={asset.name}
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
+                      )}
                     </div>
                     <p className="truncate px-2 py-1.5 text-[11px] text-muted-foreground">
                       {asset.name}

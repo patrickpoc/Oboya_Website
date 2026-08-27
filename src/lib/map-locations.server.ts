@@ -25,23 +25,44 @@ export async function readMapLocations(): Promise<MapLocationsData> {
     return readMapLocationsFromFile();
   }
 
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("map_locations_config")
-    .select("data")
-    .eq("id", MAP_CONFIG_ID)
-    .maybeSingle();
+  try {
+    const supabase = await createClient();
+    const query = supabase
+      .from("map_locations_config")
+      .select("data")
+      .eq("id", MAP_CONFIG_ID)
+      .maybeSingle();
 
-  if (error) {
-    console.error("Supabase read map locations failed:", error);
-    throw new Error("Failed to read map locations from Supabase");
-  }
+    // Avoid hanging the homepage when Supabase is unreachable.
+    const result = await Promise.race([
+      query,
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Supabase map locations timeout")), 1500)
+      ),
+    ]);
 
-  if (!data?.data) {
+    const { data, error } = result;
+
+    if (error) {
+      console.error(
+        "Supabase read map locations failed; falling back to local file:",
+        error
+      );
+      return readMapLocationsFromFile();
+    }
+
+    if (!data?.data) {
+      return readMapLocationsFromFile();
+    }
+
+    return normalizeMapLocations(data.data);
+  } catch (error) {
+    console.error(
+      "Supabase read map locations failed; falling back to local file:",
+      error
+    );
     return readMapLocationsFromFile();
   }
-
-  return normalizeMapLocations(data.data);
 }
 
 export async function writeMapLocations(data: MapLocationsData): Promise<void> {

@@ -9,7 +9,7 @@ import { getCmsProducts, getCmsProductById } from "@/lib/cms/repositories/produc
 import { getBlogPosts, getBlogPostBySlug } from "@/lib/cms/repositories/blog-repository";
 import { getBlogCategories } from "@/lib/cms/repositories/blog-categories-repository";
 import { getNewsPageSettings } from "@/lib/cms/repositories/news-page-repository";
-import { getHomepageSettings } from "@/lib/cms/repositories/homepage-repository";
+import { readHomepageSettingsDurable } from "@/lib/cms/server/homepage.server";
 import { getAboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
 import { getCaseStudies, getCaseStudyById } from "@/lib/cms/repositories/case-studies-repository";
 import {
@@ -57,8 +57,8 @@ export function readNewsPageSettings() {
   return getNewsPageSettings();
 }
 
-export function readHomepageSettings() {
-  return getHomepageSettings();
+export async function readHomepageSettings() {
+  return readHomepageSettingsDurable();
 }
 
 export function readAboutPageSettings() {

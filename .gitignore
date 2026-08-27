@@ -42,3 +42,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# CMS runtime uploads / durable homepage overrides
+/public/uploads/*
+!/public/uploads/.gitkeep
+/data/cms/homepage-settings.json

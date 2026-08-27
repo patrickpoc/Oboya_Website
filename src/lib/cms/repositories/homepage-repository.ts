@@ -93,7 +93,9 @@ export interface HomepageSettings {
   animations: { enabled: boolean };
   sections: Record<HomepageSectionId, HomepageSectionToggle>;
   hero: {
+    mediaType: "image" | "video";
     backgroundImage: string;
+    backgroundVideo: string | null;
     eyebrow: LocalizedString;
     title: LocalizedString;
     description: LocalizedString;
@@ -176,11 +178,13 @@ const defaultSettings = (): HomepageSettings => ({
     partners: { enabled: true },
   },
   hero: {
+    mediaType: "video",
     backgroundImage: "/assets/homepage/hero-vineyard.jpg",
+    backgroundVideo: "/assets/homepage/hero-hands-herbs.mp4",
     eyebrow: loc("Solutions that work, value that grows."),
-    title: loc("Your one-stop partner\nfor horticulture!"),
+    title: loc("Your one-stop partner for horticulture"),
     description: loc(
-      "Through integrated solutions for cultivation, packaging, logistics, transport systems, retail display, and technical advisory services, Oboya supports the businesses that keep horticulture moving forward."
+      "Helping Horticulture Perform Better.\nFrom propagation to point of sale, Oboya helps growers and partners improve performance, protect quality, and strengthen supply chains — with global capability and local support."
     ),
     ctaPrimary: {
       label: loc("Request a quote"),
@@ -244,44 +248,44 @@ const defaultSettings = (): HomepageSettings => ({
     items: [
       {
         id: "built-challenges",
-        title: loc("Built Around Real Challenges"),
+        title: loc("One Partner Across the Entire Value Chain"),
         description: loc(
-          "Through integrated solutions for cultivation, packaging, logistics, transport systems, retail display, and technical advisory services, Oboya supports the businesses that keep horticulture moving forward."
+          "From cultivation to commercialization, we help businesses improve performance, protect quality, and stay competitive across every stage of their operation."
         ),
-        image: "/assets/homepage/solutions-integrated.jpg",
+        image: "/assets/homepage/capabilities-value-chain.jpg",
         href: "/about",
       },
       {
         id: "global-local",
-        title: loc("Global Reach, Local Expertise"),
+        title: loc("Global Capabilities. Local Understanding."),
         description: loc(
-          "Worldwide manufacturing backed by localized production, support, and deep horticulture knowledge."
+          "A global network backed by international manufacturing, product development, and sourcing capabilities — with local responsiveness and deep horticulture expertise."
         ),
-        image: "/assets/homepage/solutions-global.jpg",
+        image: "/assets/homepage/capabilities-global-local.jpg",
         href: "/about",
       },
       {
         id: "integrated-chain",
-        title: loc("One Partner Across The Chain"),
+        title: loc("Partnerships Built for the Long Term"),
         description: loc(
-          "Propagation, packaging, and logistics connected — so growers focus on growing, not juggling suppliers."
+          "Working alongside customers over time to support growth, adaptation, and lasting business performance."
         ),
-        image: "/assets/homepage/solutions-logistics.jpg",
+        image: "/assets/homepage/capabilities-partnerships.jpg",
         href: "/about",
       },
     ],
   },
   businessSolutions: {
-    eyebrow: loc("Solutions Tailored to Your Business"),
+    eyebrow: loc("Solutions Built Around Your Business"),
     title: loc(
-      "Every crop, operation, and supply chain has unique requirements. Explore the solutions, expertise, and support designed for your sector."
+      "Every crop, operation, and supply chain has unique requirements — explore the solutions, expertise, and support designed for your sector."
     ),
     items: [
       {
         id: "flowers",
         title: loc("Flowers"),
         description: loc(
-          "Solutions for growers, exporters, distributors, and retailers across the floriculture industry."
+          "End-to-end solutions for floriculture operations — from propagation and packaging through to retail."
         ),
         image:
           "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
@@ -292,7 +296,7 @@ const defaultSettings = (): HomepageSettings => ({
         id: "vegetables",
         title: loc("Vegetables & Herbs"),
         description: loc(
-          "Integrated solutions that support efficient production, handling, logistics, and commercialization."
+          "Integrated solutions that support efficient production, handling, packaging, and commercialization."
         ),
         image:
           "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
@@ -303,7 +307,7 @@ const defaultSettings = (): HomepageSettings => ({
         id: "fruits",
         title: loc("Fruits"),
         description: loc(
-          "Solutions designed to protect quality, improve handling, and optimize supply chain performance."
+          "Solutions that optimize cultivation, handling, packaging, and distribution across the fruit supply chain."
         ),
         image:
           "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
@@ -311,13 +315,22 @@ const defaultSettings = (): HomepageSettings => ({
         ctaLabel: loc("Explore Solutions"),
       },
       {
-        id: "plants",
-        title: loc("Plants"),
+        id: "logistics-display",
+        title: loc("Logistics & Display"),
         description: loc(
-          "Young-plant systems and logistics tools that standardize quality across nursery networks."
+          "Systems that improve product movement, merchandising, and point-of-sale presentation."
         ),
-        image:
-          "https://images.unsplash.com/photo-1466692476867-a0881dfc0648?q=80&w=800&auto=format&fit=crop",
+        image: "/assets/homepage/solutions-logistics.jpg",
+        href: "/solutions/distribution",
+        ctaLabel: loc("Explore Solutions"),
+      },
+      {
+        id: "machinery-automation",
+        title: loc("Machinery & Automation"),
+        description: loc(
+          "Technology that increases efficiency, consistency, and scalability as operations grow."
+        ),
+        image: "/assets/homepage/greenhouse-technology.webp",
         href: "/solutions",
         ctaLabel: loc("Explore Solutions"),
       },
@@ -444,7 +457,7 @@ const defaultSettings = (): HomepageSettings => ({
 });
 
 let cache: HomepageSettings | null = null;
-const CONTENT_REVISION = "home-overview-3-stats-2026-08-11";
+const CONTENT_REVISION = "home-capabilities-images-2026-08-27";
 let appliedRevision: string | null = null;
 
 function migrateSettings(settings: HomepageSettings): HomepageSettings {
@@ -452,7 +465,14 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
   const rawHero = settings.hero as HomepageSettings["hero"] & {
     ctaPrimary?: HomepageHeroCta;
     ctaSecondary?: HomepageHeroCta;
+    mediaType?: "image" | "video";
+    backgroundVideo?: string | null;
   };
+
+  const mediaType: "image" | "video" =
+    rawHero?.mediaType === "video" || rawHero?.mediaType === "image"
+      ? rawHero.mediaType
+      : "image";
 
   return {
     ...defaults,
@@ -463,6 +483,15 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
     hero: {
       ...defaults.hero,
       ...settings.hero,
+      mediaType,
+      backgroundImage:
+        settings.hero?.backgroundImage || defaults.hero.backgroundImage,
+      backgroundVideo:
+        rawHero?.backgroundVideo !== undefined
+          ? rawHero.backgroundVideo
+          : mediaType === "video"
+            ? defaults.hero.backgroundVideo
+            : null,
       ctaPrimary: {
         ...defaults.hero.ctaPrimary,
         ...rawHero?.ctaPrimary,
@@ -507,19 +536,35 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
     businessSolutions: {
       ...defaults.businessSolutions,
       ...settings.businessSolutions,
-      items: settings.businessSolutions?.items?.length
-        ? settings.businessSolutions.items.map((item, i) => ({
-            ...defaults.businessSolutions.items[i],
+      items: (() => {
+        const raw = settings.businessSolutions?.items;
+        if (!raw?.length) return defaults.businessSolutions.items;
+        const mapped = raw.map((item, i) => {
+          const fallback = defaults.businessSolutions.items[i];
+          return {
+            ...fallback,
             ...item,
-            title: item.title ?? defaults.businessSolutions.items[i]?.title ?? emptyLoc(),
-            description:
-              item.description ??
-              defaults.businessSolutions.items[i]?.description ??
-              emptyLoc(),
-            ctaLabel:
-              item.ctaLabel ?? defaults.businessSolutions.items[i]?.ctaLabel,
-          }))
-        : defaults.businessSolutions.items,
+            id: item.id ?? fallback?.id ?? `solution-${i}`,
+            title: item.title ?? fallback?.title ?? emptyLoc(),
+            description: item.description ?? fallback?.description ?? emptyLoc(),
+            ctaLabel: item.ctaLabel ?? fallback?.ctaLabel,
+            image: item.image || fallback?.image || "",
+            href: item.href || fallback?.href || "/solutions",
+          };
+        });
+        if (mapped.length >= defaults.businessSolutions.items.length) {
+          return mapped;
+        }
+        const seen = new Set(mapped.map((m) => m.id));
+        const padded = [...mapped];
+        for (const fallback of defaults.businessSolutions.items) {
+          if (padded.length >= defaults.businessSolutions.items.length) break;
+          if (seen.has(fallback.id)) continue;
+          padded.push(fallback);
+          seen.add(fallback.id);
+        }
+        return padded;
+      })(),
     },
     globalPresence: { ...defaults.globalPresence, ...settings.globalPresence },
     testimonials: { ...defaults.testimonials, ...settings.testimonials },
@@ -585,6 +630,11 @@ export function getHomepageSettings(): HomepageSettings {
   }
   if (!cache) cache = defaultSettings();
   return migrateSettings(cache);
+}
+
+export function replaceHomepageSettingsCache(settings: HomepageSettings) {
+  cache = migrateSettings(settings);
+  appliedRevision = CONTENT_REVISION;
 }
 
 export function saveHomepageSettings(settings: HomepageSettings): HomepageSettings {

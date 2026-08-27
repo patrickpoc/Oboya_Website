@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Can } from "@/components/admin/permissions/Can";
 import {
   getHomepageSettings,
-  saveHomepageSettings,
   type HomepageSettings,
 } from "@/lib/cms/repositories/homepage-repository";
 import {
@@ -28,19 +27,44 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
   const meta = HOMEPAGE_SECTION_META[section];
   const [settings, setSettings] = useState<HomepageSettings>(getHomepageSettings());
   const [locale, setLocale] = useState<CmsLocale>("en");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/cms/homepage");
+        if (!res.ok) return;
+        const data = (await res.json()) as HomepageSettings;
+        if (!cancelled && data?.hero) {
+          setSettings(data);
+        }
+      } catch {
+        // Keep seed defaults.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleSave = async () => {
-    saveHomepageSettings(settings);
+    setSaving(true);
     try {
-      await fetch("/api/cms/homepage", {
+      const res = await fetch("/api/cms/homepage", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       });
+      if (!res.ok) throw new Error("Save failed");
+      const saved = (await res.json()) as HomepageSettings;
+      setSettings(saved);
+      toast.success("Homepage saved");
     } catch {
-      // in-memory fallback
+      toast.error("Could not save homepage settings");
+    } finally {
+      setSaving(false);
     }
-    toast.success("Homepage saved");
   };
 
   return (
@@ -62,10 +86,11 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
           description={meta.description}
           actions={
             <Button
-              onClick={handleSave}
+              onClick={() => void handleSave()}
+              disabled={saving}
               className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
             >
-              Save
+              {saving ? "Saving…" : "Save"}
             </Button>
           }
         />

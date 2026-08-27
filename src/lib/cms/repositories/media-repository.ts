@@ -93,6 +93,20 @@ const MOCK_MEDIA: MediaAsset[] = [
     createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z",
   },
   {
+    id: "media-hero-vineyard", name: "hero-vineyard.jpg",
+    url: "/assets/homepage/hero-vineyard.jpg",
+    type: "image", mimeType: "image/jpeg", size: 233382, width: 1024, height: 640,
+    folder: "folder-homepage", tags: ["hero", "poster"],
+    createdAt: "2026-08-25T00:00:00.000Z", updatedAt: "2026-08-25T00:00:00.000Z",
+  },
+  {
+    id: "media-hero-hands-herbs", name: "hero-hands-herbs.mp4",
+    url: "/assets/homepage/hero-hands-herbs.mp4",
+    type: "video", mimeType: "video/mp4", size: 3460000,
+    folder: "folder-homepage", tags: ["hero", "video"],
+    createdAt: "2026-08-27T00:00:00.000Z", updatedAt: "2026-08-27T00:00:00.000Z",
+  },
+  {
     id: "media-hero-pill-1", name: "hero-pill-logistics.png",
     url: "/assets/homepage/hero-pill-logistics.png",
     type: "image", mimeType: "image/png", size: 42000, width: 400, height: 400,

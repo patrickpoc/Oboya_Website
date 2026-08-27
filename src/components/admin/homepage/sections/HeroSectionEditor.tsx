@@ -3,7 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ImageField } from "@/components/admin/media/ImageField";
+import { MediaField } from "@/components/admin/media/ImageField";
+import { cn } from "@/lib/utils";
 import {
   LocalizedInput,
   updateLocalizedField,
@@ -16,6 +17,23 @@ export function HeroSectionEditor({
   locale,
 }: HomepageSectionEditorProps) {
   const hero = settings.hero;
+  const mediaType = hero.mediaType ?? "image";
+
+  const setMediaType = (next: "image" | "video") => {
+    setSettings({
+      ...settings,
+      hero: {
+        ...hero,
+        mediaType: next,
+        backgroundVideo:
+          next === "video"
+            ? hero.backgroundVideo || "/assets/homepage/hero-hands-herbs.mp4"
+            : hero.backgroundVideo,
+        backgroundImage:
+          hero.backgroundImage || "/assets/homepage/hero-vineyard.jpg",
+      },
+    });
+  };
 
   return (
     <Card className="max-w-4xl">
@@ -23,16 +41,79 @@ export function HeroSectionEditor({
         <CardTitle>Hero</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <ImageField
-          label="Background image"
-          value={hero.backgroundImage}
-          onChange={(url) =>
-            setSettings({
-              ...settings,
-              hero: { ...hero, backgroundImage: url },
-            })
-          }
-        />
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Media type</Label>
+          <div className="flex flex-wrap gap-2">
+            {(
+              [
+                { id: "image", label: "Image" },
+                { id: "video", label: "Video" },
+              ] as const
+            ).map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => setMediaType(option.id)}
+                className={cn(
+                  "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
+                  mediaType === option.id
+                    ? "border-oboya-blue-dark bg-oboya-blue-dark text-white"
+                    : "border-border bg-white text-oboya-blue-dark hover:border-oboya-blue-dark/40"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {mediaType === "image" ? (
+          <MediaField
+            label="Background image"
+            value={hero.backgroundImage}
+            allowedTypes={["image"]}
+            onChange={(url) =>
+              setSettings({
+                ...settings,
+                hero: { ...hero, backgroundImage: url },
+              })
+            }
+          />
+        ) : (
+          <>
+            <MediaField
+              label="Background video"
+              value={hero.backgroundVideo ?? ""}
+              allowedTypes={["video"]}
+              onChange={(url) =>
+                setSettings({
+                  ...settings,
+                  hero: {
+                    ...hero,
+                    mediaType: "video",
+                    backgroundVideo: url || null,
+                  },
+                })
+              }
+            />
+            <MediaField
+              label="Poster / fallback image"
+              value={hero.backgroundImage}
+              allowedTypes={["image"]}
+              onChange={(url) =>
+                setSettings({
+                  ...settings,
+                  hero: { ...hero, backgroundImage: url },
+                })
+              }
+            />
+            <p className="text-xs text-muted-foreground">
+              Poster shows while the video loads, when autoplay is blocked, or when
+              the visitor prefers reduced motion.
+            </p>
+          </>
+        )}
+
         <LocalizedInput
           label="Eyebrow"
           locale={locale}
@@ -92,7 +173,7 @@ export function HeroSectionEditor({
               }
             />
             <div className="space-y-1.5">
-              <Label>Link</Label>
+              <Label className="text-xs text-muted-foreground">Link</Label>
               <Input
                 value={hero.ctaPrimary.href}
                 onChange={(e) =>
@@ -107,7 +188,6 @@ export function HeroSectionEditor({
               />
             </div>
           </div>
-
           <div className="space-y-3 rounded-lg border p-4">
             <p className="text-sm font-medium">Secondary CTA</p>
             <LocalizedInput
@@ -128,7 +208,7 @@ export function HeroSectionEditor({
               }
             />
             <div className="space-y-1.5">
-              <Label>Link</Label>
+              <Label className="text-xs text-muted-foreground">Link</Label>
               <Input
                 value={hero.ctaSecondary.href}
                 onChange={(e) =>

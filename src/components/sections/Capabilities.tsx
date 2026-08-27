@@ -108,7 +108,7 @@ export function Capabilities({
             </div>
 
             {/* Description — bottom / mid-right */}
-            <div className="absolute right-0 bottom-16 z-10 max-w-[min(100%,26rem)] p-6 text-right sm:bottom-20 sm:p-8 md:bottom-24 md:max-w-md md:p-10 lg:bottom-28 lg:p-12">
+            <div className="absolute right-0 bottom-16 z-10 max-w-[min(100%,30rem)] p-6 text-right sm:bottom-20 sm:p-8 md:bottom-24 md:max-w-xl md:p-10 lg:bottom-28 lg:p-12">
               <AnimatePresence mode="wait">
                 <motion.p
                   key={`${slide.id}-desc`}
@@ -116,7 +116,7 @@ export function Capabilities({
                   animate={{ opacity: 1, y: 0 }}
                   exit={animationsEnabled ? { opacity: 0, y: -6 } : undefined}
                   transition={{ duration: 0.35, delay: 0.04 }}
-                  className="font-body text-sm leading-relaxed text-white/90 sm:text-base md:text-[1.0625rem] md:leading-[1.65]"
+                  className="font-body text-base leading-relaxed text-white/92 sm:text-lg md:text-[1.25rem] md:leading-[1.6]"
                 >
                   {description}
                 </motion.p>

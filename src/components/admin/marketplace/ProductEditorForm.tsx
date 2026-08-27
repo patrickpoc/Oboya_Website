@@ -72,7 +72,15 @@ export function ProductEditorForm({ product, onChange }: ProductEditorFormProps)
   const [libraryTargetIndex, setLibraryTargetIndex] = useState<number | null>(null);
   const catalog = getShopCatalog();
   const mediaLibraryImages = useMemo<MediaLibraryImage[]>(
-    () => getMediaAssets().filter((asset) => asset.type === "image"),
+    () =>
+      getMediaAssets()
+        .filter((asset) => asset.type === "image")
+        .map((asset) => ({
+          id: asset.id,
+          name: asset.name,
+          url: asset.url,
+          type: asset.type,
+        })),
     []
   );
 
@@ -428,7 +436,7 @@ export function ProductEditorForm({ product, onChange }: ProductEditorFormProps)
         />
         {libraryOpen && (
           <MediaLibraryDialog
-            images={mediaLibraryImages}
+            items={mediaLibraryImages}
             selected={
               libraryTargetIndex !== null ? (product.images[libraryTargetIndex] ?? "") : undefined
             }
