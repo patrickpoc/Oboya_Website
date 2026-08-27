@@ -103,8 +103,21 @@ async function countActiveAdmins(): Promise<number | null> {
 }
 
 async function promoteToSuperAdminIfNoAdmins(me: CmsUser): Promise<CmsUser> {
+  // Prefer DB security-definer RPC (works even without service role key).
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("ensure_cms_super_admin");
+    if (!error && data) {
+      const row = (Array.isArray(data) ? data[0] : data) as ProfileRow | null;
+      if (row?.id) {
+        return profileToCmsUser(row, me.email);
+      }
+    }
+  } catch (error) {
+    console.error("ensure_cms_super_admin rpc failed:", error);
+  }
+
   const adminCount = await countActiveAdmins();
-  // Only auto-promote when we can confirm there are zero admins (needs service role).
   if (adminCount === null || adminCount > 0) return me;
 
   try {

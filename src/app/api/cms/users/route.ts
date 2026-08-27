@@ -12,7 +12,7 @@ export async function GET() {
     return NextResponse.json(
       {
         error:
-          "Unauthorized. Your account needs an active admin/super_admin profile. Run supabase/diagnostics/fix-from-check-20260827.sql and set SUPABASE_SERVICE_ROLE_KEY on Vercel.",
+          "Unauthorized. Your account is not admin/super_admin yet. Run supabase/diagnostics/unlock-users-admin.sql in Supabase SQL Editor, confirm your email appears as super_admin, then log out and log in again. Also set SUPABASE_SERVICE_ROLE_KEY on Vercel and redeploy.",
       },
       { status: 401 }
     );
