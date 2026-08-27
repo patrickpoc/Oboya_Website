@@ -15,6 +15,7 @@ export function HeroSectionEditor({
   settings,
   setSettings,
   locale,
+  persistSettings,
 }: HomepageSectionEditorProps) {
   const hero = settings.hero;
   const mediaType = hero.mediaType ?? "image";
@@ -35,6 +36,21 @@ export function HeroSectionEditor({
             : hero.backgroundImage,
       },
     });
+  };
+
+  const applyHeroVideo = async (url: string) => {
+    const next: typeof settings = {
+      ...settings,
+      hero: {
+        ...hero,
+        mediaType: "video",
+        backgroundVideo: url || null,
+      },
+    };
+    setSettings(next);
+    if (url && persistSettings) {
+      await persistSettings(next);
+    }
   };
 
   return (
@@ -86,23 +102,16 @@ export function HeroSectionEditor({
             label="Background video"
             value={hero.backgroundVideo ?? ""}
             allowedTypes={["video"]}
-            onChange={(url) =>
-              setSettings({
-                ...settings,
-                hero: {
-                  ...hero,
-                  mediaType: "video",
-                  backgroundVideo: url || null,
-                },
-              })
-            }
+            onChange={(url) => {
+              void applyHeroVideo(url);
+            }}
           />
         )}
 
         {mediaType === "video" ? (
           <p className="text-xs text-muted-foreground">
-            The homepage shows a loading spinner until the video and page are ready.
-            A poster image is not required.
+            Uploading a video saves it to storage and publishes the homepage hero
+            automatically. The homepage shows a loading spinner until the video is ready.
           </p>
         ) : null}
 

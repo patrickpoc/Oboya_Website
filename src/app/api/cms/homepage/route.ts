@@ -32,11 +32,14 @@ export async function PUT(request: Request) {
     const body = (await request.json()) as HomepageSettings;
     const saved = await saveHomepageSettingsDurable(body);
     revalidatePath("/", "layout");
+    for (const locale of ["en", "pt-BR", "es", "zh-CN"]) {
+      revalidatePath(`/${locale}`);
+    }
     return NextResponse.json(saved);
-  } catch {
-    return NextResponse.json(
-      { error: "Failed to save homepage settings" },
-      { status: 500 }
-    );
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to save homepage settings";
+    console.error("Homepage save failed:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

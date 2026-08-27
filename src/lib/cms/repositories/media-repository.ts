@@ -5,11 +5,26 @@ import type { MediaAsset, MediaFolder } from "@/lib/cms/types";
 const MOCK_FOLDERS: MediaFolder[] = [
   { id: "folder-root", name: "Root", parentId: null, createdAt: "2026-01-01T00:00:00.000Z" },
   { id: "folder-homepage", name: "Homepage", parentId: "folder-root", createdAt: "2026-01-01T00:00:00.000Z" },
+  { id: "folder-about", name: "About", parentId: "folder-root", createdAt: "2026-01-01T00:00:00.000Z" },
+  { id: "folder-solutions", name: "Solutions", parentId: "folder-root", createdAt: "2026-01-01T00:00:00.000Z" },
+  { id: "folder-brand", name: "Brand", parentId: "folder-root", createdAt: "2026-01-01T00:00:00.000Z" },
+  { id: "folder-pdf-pages", name: "PDF Pages", parentId: "folder-root", createdAt: "2026-01-01T00:00:00.000Z" },
+  { id: "folder-uploads", name: "Uploads", parentId: "folder-root", createdAt: "2026-01-01T00:00:00.000Z" },
   { id: "folder-stock", name: "Stock Photos", parentId: "folder-root", createdAt: "2026-02-01T00:00:00.000Z" },
   { id: "folder-certs", name: "Certifications", parentId: "folder-homepage", createdAt: "2026-01-15T00:00:00.000Z" },
 ];
 
 let folders = [...MOCK_FOLDERS];
+
+export function ensureMediaFolders(extra: MediaFolder[]) {
+  const byId = new Map(folders.map((f) => [f.id, f]));
+  for (const folder of extra) {
+    if (!byId.has(folder.id)) {
+      byId.set(folder.id, folder);
+    }
+  }
+  folders = Array.from(byId.values());
+}
 
 export function getMediaFolders(): MediaFolder[] {
   return folders;
@@ -84,126 +99,66 @@ export function getFolderBreadcrumb(folderId: string): MediaFolder[] {
 
 /* ── Assets ──────────────────────────────────────────────── */
 
-const MOCK_MEDIA: MediaAsset[] = [
-  {
-    id: "media-1", name: "company-overview.webp",
-    url: "/assets/homepage/company-overview.webp",
-    type: "image", mimeType: "image/webp", size: 245000, width: 1920, height: 1080,
-    folder: "folder-homepage", tags: ["hero", "company"],
-    createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "media-hero-vineyard", name: "hero-vineyard.jpg",
-    url: "/assets/homepage/hero-vineyard.jpg",
-    type: "image", mimeType: "image/jpeg", size: 233382, width: 1024, height: 640,
-    folder: "folder-homepage", tags: ["hero", "poster"],
-    createdAt: "2026-08-25T00:00:00.000Z", updatedAt: "2026-08-25T00:00:00.000Z",
-  },
-  {
-    id: "media-hero-hands-herbs", name: "hero-hands-herbs.mp4",
-    url: "/assets/homepage/hero-hands-herbs.mp4",
-    type: "video", mimeType: "video/mp4", size: 3460000,
-    folder: "folder-homepage", tags: ["hero", "video"],
-    createdAt: "2026-08-27T00:00:00.000Z", updatedAt: "2026-08-27T00:00:00.000Z",
-  },
-  {
-    id: "media-hero-pill-1", name: "hero-pill-logistics.png",
-    url: "/assets/homepage/hero-pill-logistics.png",
-    type: "image", mimeType: "image/png", size: 42000, width: 400, height: 400,
-    folder: "folder-homepage", tags: ["hero", "logistics"],
-    createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "media-hero-pill-2", name: "hero-pill-rd.png",
-    url: "/assets/homepage/hero-pill-rd.png",
-    type: "image", mimeType: "image/png", size: 40000, width: 400, height: 400,
-    folder: "folder-homepage", tags: ["hero", "r&d"],
-    createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "media-hero-pill-3", name: "hero-pill-plants.png",
-    url: "/assets/homepage/hero-pill-plants.png",
-    type: "image", mimeType: "image/png", size: 41000, width: 400, height: 400,
-    folder: "folder-homepage", tags: ["hero", "plants"],
-    createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "media-solutions-1", name: "solutions-integrated.jpg",
-    url: "/assets/homepage/solutions-integrated.jpg",
-    type: "image", mimeType: "image/jpeg", size: 120000, width: 1200, height: 800,
-    folder: "folder-homepage", tags: ["solutions"],
-    createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "media-solutions-2", name: "solutions-global.jpg",
-    url: "/assets/homepage/solutions-global.jpg",
-    type: "image", mimeType: "image/jpeg", size: 118000, width: 1200, height: 800,
-    folder: "folder-homepage", tags: ["solutions", "global"],
-    createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "media-solutions-3", name: "solutions-logistics.jpg",
-    url: "/assets/homepage/solutions-logistics.jpg",
-    type: "image", mimeType: "image/jpeg", size: 115000, width: 1200, height: 800,
-    folder: "folder-homepage", tags: ["solutions", "logistics"],
-    createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "media-cert-brcgs", name: "cert-brcgs.png",
-    url: "/assets/homepage/cert-brcgs.png",
-    type: "image", mimeType: "image/png", size: 28000, width: 200, height: 200,
-    folder: "folder-certs", tags: ["certification", "brcgs"],
-    createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "media-cert-sedex", name: "cert-sedex-smeta.png",
-    url: "/assets/homepage/cert-sedex-smeta.png",
-    type: "image", mimeType: "image/png", size: 32000, width: 200, height: 200,
-    folder: "folder-certs", tags: ["certification", "sedex"],
-    createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "media-cert-grs", name: "cert-grs.png",
-    url: "/assets/homepage/cert-grs.png",
-    type: "image", mimeType: "image/png", size: 30000, width: 200, height: 200,
-    folder: "folder-certs", tags: ["certification", "grs"],
-    createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z",
-  },
-  {
-    id: "media-cert-iso", name: "cert-iso-9001.png",
-    url: "/assets/homepage/cert-iso-9001.png",
-    type: "image", mimeType: "image/png", size: 26000, width: 200, height: 200,
-    folder: "folder-certs", tags: ["certification", "iso"],
-    createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z",
-  },
+/** Remote stock references still useful in the picker (not local files). */
+const STOCK_MEDIA: MediaAsset[] = [
   {
     id: "media-3", name: "greenhouse-hero.jpg",
     url: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800",
     type: "image", mimeType: "image/jpeg", size: 180000, width: 800, height: 534,
-    folder: "folder-stock", tags: ["greenhouse", "hero"],
+    folder: "folder-stock", tags: ["greenhouse", "hero", "stock"],
     createdAt: "2026-02-01T00:00:00.000Z", updatedAt: "2026-02-01T00:00:00.000Z",
   },
   {
     id: "media-4", name: "berries-packaging.jpg",
     url: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800",
     type: "image", mimeType: "image/jpeg", size: 160000, width: 800, height: 534,
-    folder: "folder-stock", tags: ["berries", "packaging"],
+    folder: "folder-stock", tags: ["berries", "packaging", "stock"],
     createdAt: "2026-02-01T00:00:00.000Z", updatedAt: "2026-02-01T00:00:00.000Z",
   },
   {
     id: "media-5", name: "flowers-field.jpg",
     url: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800",
     type: "image", mimeType: "image/jpeg", size: 170000, width: 800, height: 534,
-    folder: "folder-stock", tags: ["flowers", "nature"],
+    folder: "folder-stock", tags: ["flowers", "nature", "stock"],
     createdAt: "2026-02-01T00:00:00.000Z", updatedAt: "2026-02-01T00:00:00.000Z",
   },
 ];
 
-let cache = [...MOCK_MEDIA];
+let cache = [...STOCK_MEDIA];
 
 export function getMediaAssets(folderId?: string): MediaAsset[] {
   if (!folderId) return cache;
   return cache.filter((m) => m.folder === folderId);
+}
+
+/**
+ * Rebuild library cache from site files + remote uploads + stock references.
+ * Dedupes by URL (remote/site win over older entries with the same path).
+ */
+export function replaceMediaAssetsCache(remote: MediaAsset[], site: MediaAsset[] = []) {
+  const byUrl = new Map<string, MediaAsset>();
+  const byId = new Map<string, MediaAsset>();
+
+  for (const asset of [...STOCK_MEDIA, ...site, ...remote]) {
+    byUrl.set(asset.url, asset);
+    byId.set(asset.id, asset);
+  }
+
+  // Prefer URL uniqueness so site path and DB row for the same file collapse.
+  const unique = new Map<string, MediaAsset>();
+  for (const asset of byUrl.values()) {
+    unique.set(asset.id, asset);
+  }
+  // Keep any id-only leftovers (should be none after URL pass).
+  for (const asset of byId.values()) {
+    if (![...unique.values()].some((a) => a.url === asset.url)) {
+      unique.set(asset.id, asset);
+    }
+  }
+
+  cache = Array.from(unique.values()).sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
 }
 
 export function getAllTags(): string[] {

@@ -8,7 +8,19 @@
    - [`supabase/migrations/20260819_marketplace_products.sql`](../supabase/migrations/20260819_marketplace_products.sql)
 4. Then run CMS media storage migration (required for admin video/image uploads on Vercel):
    - [`supabase/migrations/20260827_cms_media_storage.sql`](../supabase/migrations/20260827_cms_media_storage.sql)
-5. In **Authentication → Users**, create an admin user (email + password).
+5. Also run the extended CMS schema if you have not already (homepage + media DB tables):
+   - [`supabase/cms-schema.sql`](../supabase/cms-schema.sql)
+6. Run user profiles migration (first-login password change + admin user management):
+   - [`supabase/migrations/20260827_cms_user_profiles.sql`](../supabase/migrations/20260827_cms_user_profiles.sql)
+7. Create the first admin user:
+
+```bash
+node scripts/create-admin-user.mjs
+```
+
+Default credentials: `admin@oboya.cc` / `Oboya2026` (override with `ADMIN_EMAIL` / `ADMIN_PASSWORD`).
+
+New users created in **Users & Permissions** also start with temporary password `Oboya2026` and must change it on first login.
 
 ## 2. Environment variables
 
@@ -18,9 +30,9 @@ Copy [`.env.example`](./.env.example) to `.env.local` and fill in:
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Same page (anon public key) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Same page (local seed only — **never** add to Vercel) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Same page (server-only — used for seeding and Users & Permissions APIs) |
 
-On **Vercel**, add only the two `NEXT_PUBLIC_*` variables.
+On **Vercel**, add the two `NEXT_PUBLIC_*` variables **and** `SUPABASE_SERVICE_ROLE_KEY` as a **server-only** secret (never prefix with `NEXT_PUBLIC_`). Required for creating/editing/deleting admin users.
 
 ## 3. Seed data
 
@@ -39,7 +51,7 @@ This uploads:
 
 1. Connect the Git repository.
 2. Set root directory to `oboya` (if the repo root is the parent folder).
-3. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+3. Add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and server-only `SUPABASE_SERVICE_ROLE_KEY`.
 4. Deploy.
 
 ## Behaviour

@@ -50,6 +50,7 @@ export interface CmsUser {
   role: CmsRole;
   locale: CmsLocale;
   status: "active" | "inactive";
+  mustChangePassword?: boolean;
   createdAt: string;
   updatedAt: string;
 }

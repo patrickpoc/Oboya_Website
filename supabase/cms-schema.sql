@@ -9,6 +9,7 @@ create table if not exists public.cms_user_profiles (
   role text not null default 'viewer',
   locale text not null default 'en',
   status text not null default 'active',
+  must_change_password boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

@@ -115,7 +115,7 @@ export async function registerMediaAsset(input: {
 }) {
   const now = new Date().toISOString();
   const folder = input.folder || "folder-root";
-  const asset = saveMediaAsset({
+  const asset: MediaAsset = {
     id: input.id,
     name: input.name,
     url: input.url,
@@ -126,28 +126,31 @@ export async function registerMediaAsset(input: {
     tags: input.type === "video" ? ["video", "upload"] : ["upload"],
     createdAt: now,
     updatedAt: now,
-  });
+  };
 
   if (isSupabaseConfigured()) {
-    try {
-      const supabase = await createClient();
-      await supabase.from("cms_media").upsert({
-        id: input.id,
-        name: input.name,
-        url: input.url,
-        type: input.type,
-        mime_type: input.mimeType,
-        size: input.size,
-        folder,
-        metadata: { tags: asset.tags },
-        updated_at: now,
-      });
-    } catch {
-      // Library persistence is best-effort; public URL still works.
+    const supabase = await createClient();
+    const { error } = await supabase.from("cms_media").upsert({
+      id: asset.id,
+      name: asset.name,
+      url: asset.url,
+      type: asset.type,
+      mime_type: asset.mimeType,
+      size: asset.size,
+      folder: asset.folder,
+      metadata: { tags: asset.tags },
+      created_at: asset.createdAt,
+      updated_at: asset.updatedAt,
+    });
+
+    if (error) {
+      throw new Error(
+        error.message || "Failed to save media asset to the database"
+      );
     }
   }
 
-  return asset;
+  return saveMediaAsset(asset);
 }
 
 export async function storeMediaLocally(input: {
@@ -244,18 +247,29 @@ export async function removeMediaAsset(input: {
   const removed = deleteMediaAsset(input.id);
 
   if (isSupabaseConfigured()) {
-    try {
-      const supabase = await createClient();
-      await supabase.from("cms_media").delete().eq("id", input.id);
+    const supabase = await createClient();
+    const { error: dbError } = await supabase
+      .from("cms_media")
+      .delete()
+      .eq("id", input.id);
 
-      const objectPath = input.url ? storagePathFromPublicUrl(input.url) : null;
-      if (objectPath?.startsWith("uploads/")) {
-        await supabase.storage.from(MEDIA_BUCKET).remove([objectPath]);
-      }
-    } catch (error) {
-      console.error("Supabase media delete failed:", error);
+    if (dbError) {
+      throw new Error(dbError.message || "Failed to delete media from database");
     }
-  } else if (input.url?.startsWith("/uploads/")) {
+
+    const objectPath = input.url ? storagePathFromPublicUrl(input.url) : null;
+    if (objectPath?.startsWith("uploads/")) {
+      const { error: storageError } = await supabase.storage
+        .from(MEDIA_BUCKET)
+        .remove([objectPath]);
+      if (storageError) {
+        console.error("Supabase storage delete failed:", storageError.message);
+      }
+    }
+    return true;
+  }
+
+  if (input.url?.startsWith("/uploads/")) {
     try {
       const { unlink } = await import("node:fs/promises");
       await unlink(path.join(process.cwd(), "public", input.url.replace(/^\//, "")));

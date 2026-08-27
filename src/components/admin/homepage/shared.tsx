@@ -10,6 +10,8 @@ export type HomepageSectionEditorProps = {
   settings: HomepageSettings;
   setSettings: Dispatch<SetStateAction<HomepageSettings>>;
   locale: CmsLocale;
+  /** Persist current settings to durable storage (Supabase / disk). */
+  persistSettings?: (next?: HomepageSettings) => Promise<boolean>;
 };
 
 export function newId() {

@@ -8,6 +8,7 @@ import {
   storeMediaLocally,
   storeMediaViaSupabaseServer,
 } from "@/lib/cms/server/media-upload.server";
+import { syncMediaLibraryFromSupabase } from "@/lib/cms/server/media-library.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
 
@@ -15,6 +16,23 @@ async function assertAdmin() {
   if (!isSupabaseConfigured()) return true;
   const user = await requireAdminUser();
   return Boolean(user);
+}
+
+export async function GET() {
+  if (!(await assertAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    // Always include scanned site assets, even without Supabase.
+    const assets = await syncMediaLibraryFromSupabase();
+    return NextResponse.json({ ok: true, assets });
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to load media library";
+    console.error("Media library load failed:", message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
 
 export async function DELETE(request: Request) {
@@ -32,12 +50,7 @@ export async function DELETE(request: Request) {
     }
 
     const removed = await removeMediaAsset({ id, url });
-    if (!removed) {
-      // Still attempt remote cleanup for uploaded ids that only exist in storage.
-      return NextResponse.json({ ok: true, removed: false });
-    }
-
-    return NextResponse.json({ ok: true, removed: true });
+    return NextResponse.json({ ok: true, removed });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to delete media";

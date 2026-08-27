@@ -2,6 +2,16 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 
+function mustChangePassword(user: {
+  user_metadata?: Record<string, unknown>;
+  app_metadata?: Record<string, unknown>;
+}) {
+  return (
+    user.user_metadata?.must_change_password === true ||
+    user.app_metadata?.must_change_password === true
+  );
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
   const { url, anonKey } = getSupabaseEnv();
@@ -32,6 +42,7 @@ export async function updateSession(request: NextRequest) {
     pathname === "/admin/login" ||
     pathname === "/admin/forgot-password" ||
     pathname === "/admin/reset-password";
+  const isChangePasswordPage = pathname === "/admin/change-password";
   const isAuthCallback = pathname.startsWith("/auth/callback");
 
   if (!user && !isLoginPage && !isAuthCallback) {
@@ -41,11 +52,31 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (user && isLoginPage) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/admin/dashboard";
-    redirectUrl.search = "";
-    return NextResponse.redirect(redirectUrl);
+  if (user) {
+    const needsPasswordChange = mustChangePassword(user);
+
+    if (needsPasswordChange && !isChangePasswordPage && !isAuthCallback) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/admin/change-password";
+      redirectUrl.search = "";
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    if (!needsPasswordChange && isChangePasswordPage) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/admin/dashboard";
+      redirectUrl.search = "";
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    if (isLoginPage) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = needsPasswordChange
+        ? "/admin/change-password"
+        : "/admin/dashboard";
+      redirectUrl.search = "";
+      return NextResponse.redirect(redirectUrl);
+    }
   }
 
   return supabaseResponse;

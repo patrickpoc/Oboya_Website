@@ -10,6 +10,7 @@ interface AdminContextValue {
   user: CmsUser;
   setUser: (user: CmsUser) => void;
   can: (module: CmsModule, action?: CmsAction) => boolean;
+  loading: boolean;
 }
 
 const AdminContext = createContext<AdminContextValue | null>(null);
@@ -18,16 +19,38 @@ const DEFAULT_USER = mockUsers[0] as CmsUser;
 
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<CmsUser>(DEFAULT_USER);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem("oboya-admin-user");
-    if (stored) {
+    let cancelled = false;
+
+    async function loadMe() {
       try {
-        setUser(JSON.parse(stored) as CmsUser);
+        const res = await fetch("/api/cms/me");
+        if (!res.ok) return;
+        const data = (await res.json()) as { user?: CmsUser };
+        if (!cancelled && data.user) {
+          setUser(data.user);
+          localStorage.setItem("oboya-admin-user", JSON.stringify(data.user));
+        }
       } catch {
-        /* ignore */
+        const stored = localStorage.getItem("oboya-admin-user");
+        if (stored && !cancelled) {
+          try {
+            setUser(JSON.parse(stored) as CmsUser);
+          } catch {
+            /* ignore */
+          }
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     }
+
+    void loadMe();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleSetUser = (next: CmsUser) => {
@@ -40,7 +63,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AdminContext.Provider
-      value={{ user, setUser: handleSetUser, can }}
+      value={{ user, setUser: handleSetUser, can, loading }}
     >
       {children}
     </AdminContext.Provider>

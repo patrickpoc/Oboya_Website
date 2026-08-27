@@ -42,8 +42,21 @@ export function AdminLoginForm() {
       return;
     }
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const mustChange =
+      user?.user_metadata?.must_change_password === true ||
+      user?.app_metadata?.must_change_password === true;
+
+    if (mustChange) {
+      window.location.href = "/admin/change-password";
+      return;
+    }
+
     const next = searchParams.get("next") ?? "/admin/dashboard";
-    window.location.href = next;
+    window.location.href =
+      next === "/admin/change-password" ? "/admin/dashboard" : next;
   };
 
   if (!isSupabaseConfigured()) {

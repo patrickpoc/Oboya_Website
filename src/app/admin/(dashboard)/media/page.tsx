@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import {
   ChevronRight,
@@ -33,6 +33,7 @@ import {
   updateAssetTags,
   saveMediaAsset,
   deleteMediaAsset,
+  replaceMediaAssetsCache,
 } from "@/lib/cms/repositories/media-repository";
 import type { MediaAsset, MediaFolder } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
@@ -355,15 +356,36 @@ export default function MediaLibraryPage() {
   const [movingFolder, setMovingFolder] = useState<MediaFolder | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [uploading, setUploading] = useState(false);
+  const [libraryVersion, setLibraryVersion] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/cms/media");
+        if (!res.ok) return;
+        const data = (await res.json()) as { assets?: MediaAsset[] };
+        if (!cancelled && data.assets) {
+          replaceMediaAssetsCache(data.assets);
+          setLibraryVersion((n) => n + 1);
+          refresh();
+        }
+      } catch {
+        // Keep seed media.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [refresh]);
 
   const handleUploadFiles = async (files: FileList | null) => {
     if (!files?.length) return;
     setUploading(true);
     let ok = 0;
-    let failed = 0;
     try {
       for (const file of Array.from(files)) {
         try {
@@ -373,7 +395,6 @@ export default function MediaLibraryPage() {
           saveMediaAsset(asset);
           ok += 1;
         } catch (error) {
-          failed += 1;
           toast.error(
             error instanceof Error
               ? `${file.name}: ${error.message}`
@@ -382,13 +403,18 @@ export default function MediaLibraryPage() {
         }
       }
       if (ok > 0) {
+        try {
+          const res = await fetch("/api/cms/media");
+          if (res.ok) {
+            const data = (await res.json()) as { assets?: MediaAsset[] };
+            if (data.assets) replaceMediaAssetsCache(data.assets);
+          }
+        } catch {
+          // Local cache already has uploads.
+        }
+        setLibraryVersion((n) => n + 1);
         refresh();
-        toast.success(
-          ok === 1 ? "1 file uploaded" : `${ok} files uploaded`
-        );
-      }
-      if (failed > 0 && ok === 0) {
-        // Errors already toasted per file.
+        toast.success(ok === 1 ? "1 file uploaded" : `${ok} files uploaded`);
       }
     } finally {
       setUploading(false);
@@ -413,7 +439,7 @@ export default function MediaLibraryPage() {
       results = results.filter((a) => a.type === typeFilter);
     }
     return results;
-  }, [currentFolderId, searchQuery, selectedTags, typeFilter, refreshKey, isSearching]);
+  }, [currentFolderId, searchQuery, selectedTags, typeFilter, refreshKey, isSearching, libraryVersion]);
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
@@ -447,6 +473,11 @@ export default function MediaLibraryPage() {
   };
 
   const handleDeleteAsset = async (asset: MediaAsset) => {
+    if (asset.id.startsWith("site-")) {
+      toast.error("Bundled site files can’t be removed from the library.");
+      return;
+    }
+
     const confirmed = window.confirm(`Remove “${asset.name}”? This cannot be undone.`);
     if (!confirmed) return;
 
@@ -681,15 +712,19 @@ export default function MediaLibraryPage() {
                   <Tag className="size-3" />
                   Edit Tags
                 </button>
-                <button
-                  type="button"
-                  onClick={() => void handleDeleteAsset(asset)}
-                  className="flex size-7 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600 transition-colors hover:bg-red-600 hover:text-white"
-                  aria-label={`Remove ${asset.name}`}
-                  title="Remove file"
-                >
-                  <X className="size-3.5" strokeWidth={2.5} />
-                </button>
+                {!asset.id.startsWith("site-") ? (
+                  <button
+                    type="button"
+                    onClick={() => void handleDeleteAsset(asset)}
+                    className="flex size-7 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600 transition-colors hover:bg-red-600 hover:text-white"
+                    aria-label={`Remove ${asset.name}`}
+                    title="Remove file"
+                  >
+                    <X className="size-3.5" strokeWidth={2.5} />
+                  </button>
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">Site file</span>
+                )}
               </div>
             </CardContent>
           </Card>

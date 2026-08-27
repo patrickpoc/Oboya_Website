@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -48,23 +48,39 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
     };
   }, []);
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const res = await fetch("/api/cms/homepage", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(settings),
-      });
-      if (!res.ok) throw new Error("Save failed");
-      const saved = (await res.json()) as HomepageSettings;
-      setSettings(saved);
-      toast.success("Homepage saved");
-    } catch {
-      toast.error("Could not save homepage settings");
-    } finally {
-      setSaving(false);
-    }
+  const persistSettings = useCallback(
+    async (next?: HomepageSettings) => {
+      const payload = next ?? settings;
+      setSaving(true);
+      try {
+        const res = await fetch("/api/cms/homepage", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = (await res.json()) as HomepageSettings & { error?: string };
+        if (!res.ok) {
+          throw new Error(data.error ?? "Save failed");
+        }
+        setSettings(data);
+        toast.success("Homepage saved");
+        return true;
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Could not save homepage settings"
+        );
+        return false;
+      } finally {
+        setSaving(false);
+      }
+    },
+    [settings]
+  );
+
+  const handleSave = () => {
+    void persistSettings();
   };
 
   return (
@@ -86,7 +102,7 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
           description={meta.description}
           actions={
             <Button
-              onClick={() => void handleSave()}
+              onClick={handleSave}
               disabled={saving}
               className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
             >
@@ -96,7 +112,14 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
         />
 
         <LocaleFieldTabs value={locale} onChange={setLocale}>
-          {(loc) => children({ settings, setSettings, locale: loc })}
+          {(loc) =>
+            children({
+              settings,
+              setSettings,
+              locale: loc,
+              persistSettings,
+            })
+          }
         </LocaleFieldTabs>
       </div>
     </Can>

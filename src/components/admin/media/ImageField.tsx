@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { Film, ImageIcon, Link2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getMediaAssets, saveMediaAsset } from "@/lib/cms/repositories/media-repository";
+import { getMediaAssets, saveMediaAsset, replaceMediaAssetsCache } from "@/lib/cms/repositories/media-repository";
 import { uploadMediaFile } from "@/lib/cms/client/upload-media";
 import type { MediaAsset } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
@@ -58,7 +58,7 @@ function isVideoUrl(url: string) {
 }
 
 /** Seek to a frame so the admin preview shows a real thumbnail, not a blank box. */
-function VideoThumbnail({
+function VideoThumbnailInner({
   src,
   className,
 }: {
@@ -66,18 +66,20 @@ function VideoThumbnail({
   className?: string;
 }) {
   const [frame, setFrame] = useState<string | null>(null);
+  const previewSrc = useMemo(() => {
+    const join = src.includes("?") ? "&" : "?";
+    // Cache-bust so a newly uploaded file always reloads its first frame.
+    return `${src}${join}preview=1#t=0.15`;
+  }, [src]);
 
   return (
-    <div
-      key={src}
-      className={cn("relative size-full bg-oboya-blue-dark/10", className)}
-    >
+    <div className={cn("relative size-full bg-oboya-blue-dark/10", className)}>
       {frame ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={frame} alt="" className="size-full object-cover" />
       ) : (
         <video
-          src={`${src}${src.includes("#") ? "" : "#t=0.1"}`}
+          src={previewSrc}
           className="size-full object-cover"
           muted
           playsInline
@@ -124,6 +126,10 @@ function VideoThumbnail({
   );
 }
 
+function VideoThumbnail(props: { src: string; className?: string }) {
+  return <VideoThumbnailInner key={props.src} {...props} />;
+}
+
 export function MediaField({
   label,
   value,
@@ -138,18 +144,35 @@ export function MediaField({
   const [urlDraft, setUrlDraft] = useState(value);
   const [uploading, setUploading] = useState(false);
   const [knownName, setKnownName] = useState<string | null>(null);
+  const [libraryTick, setLibraryTick] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     queueMicrotask(() => setUrlDraft(value));
   }, [value]);
 
+  const refreshLibrary = useCallback(async () => {
+    try {
+      const res = await fetch("/api/cms/media");
+      if (!res.ok) return;
+      const data = (await res.json()) as { assets?: MediaAsset[] };
+      if (data.assets) {
+        replaceMediaAssetsCache(data.assets);
+        setLibraryTick((n) => n + 1);
+      }
+    } catch {
+      // Keep local seed library.
+    }
+  }, []);
+
   const assets = useMemo(
     () =>
       getMediaAssets().filter((asset) =>
         types.includes(asset.type as MediaFieldAllowedType)
       ),
-    [types]
+    // libraryTick forces recompute after remote sync mutates the module cache.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [types, libraryTick]
   );
 
   const isVideoValue = Boolean(value) && (videoOnly || isVideoUrl(value));
@@ -178,6 +201,7 @@ export function MediaField({
     try {
       const asset = await uploadMediaFile(file);
       saveMediaAsset(asset);
+      setLibraryTick((n) => n + 1);
       setKnownName(asset.name || file.name);
       onChange(asset.url);
       setMode("upload");
@@ -275,6 +299,7 @@ export function MediaField({
           onClick={() => {
             setMode("library");
             setLibraryOpen(true);
+            void refreshLibrary();
           }}
         >
           {videoOnly ? (
