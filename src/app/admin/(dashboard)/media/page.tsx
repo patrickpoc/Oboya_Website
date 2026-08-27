@@ -34,6 +34,7 @@ import {
   saveMediaAsset,
   deleteMediaAsset,
   replaceMediaAssetsCache,
+  clearMediaAssetsCache,
 } from "@/lib/cms/repositories/media-repository";
 import type { MediaAsset, MediaFolder } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
@@ -357,32 +358,46 @@ export default function MediaLibraryPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [libraryVersion, setLibraryVersion] = useState(0);
+  const [libraryReady, setLibraryReady] = useState(false);
+  const [libraryError, setLibraryError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
   useEffect(() => {
     let cancelled = false;
+    clearMediaAssetsCache();
+    setLibraryReady(false);
+    setLibraryError(null);
+    setLibraryVersion((n) => n + 1);
+
     void (async () => {
       try {
         const res = await fetch("/api/cms/media");
         const data = (await res.json()) as {
           assets?: MediaAsset[];
           error?: string;
+          ready?: boolean;
         };
         if (!res.ok) {
-          toast.error(data.error || "Could not load media library");
-          return;
+          throw new Error(data.error || "Could not load media library");
         }
-        if (!cancelled && data.assets) {
-          replaceMediaAssetsCache(data.assets);
-          setLibraryVersion((n) => n + 1);
-          refresh();
-        }
-      } catch {
-        toast.error("Could not load media library");
+        if (cancelled) return;
+        replaceMediaAssetsCache(data.assets ?? []);
+        setLibraryVersion((n) => n + 1);
+        refresh();
+        setLibraryReady(true);
+      } catch (error) {
+        if (cancelled) return;
+        clearMediaAssetsCache();
+        setLibraryVersion((n) => n + 1);
+        const message =
+          error instanceof Error ? error.message : "Could not load media library";
+        setLibraryError(message);
+        toast.error(message);
       }
     })();
+
     return () => {
       cancelled = true;
     };
@@ -513,6 +528,7 @@ export default function MediaLibraryPage() {
           <div className="flex gap-2">
             <button
               type="button"
+              disabled={!libraryReady}
               onClick={() => setShowNewFolder(true)}
               className={buttonVariants({ variant: "outline", className: "gap-1.5 rounded-full" })}
             >
@@ -531,7 +547,7 @@ export default function MediaLibraryPage() {
             />
             <button
               type="button"
-              disabled={uploading}
+              disabled={!libraryReady || uploading}
               onClick={() => fileInputRef.current?.click()}
               className={buttonVariants({ className: "gap-1.5 rounded-full" })}
             >
@@ -542,6 +558,31 @@ export default function MediaLibraryPage() {
         }
       />
 
+      {!libraryReady && !libraryError ? (
+        <div
+          className="flex min-h-[420px] flex-col items-center justify-center gap-3 rounded-2xl border border-border/60 bg-white"
+          aria-busy="true"
+          aria-live="polite"
+        >
+          <div className="size-8 animate-spin rounded-full border-2 border-oboya-green/25 border-t-oboya-green" />
+          <p className="text-sm text-muted-foreground">
+            Loading media library…
+          </p>
+        </div>
+      ) : libraryError ? (
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-sm text-destructive">
+          <p className="font-medium">Could not load media library</p>
+          <p className="mt-1 text-destructive/90">{libraryError}</p>
+          <button
+            type="button"
+            className="mt-3 text-oboya-green underline"
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </button>
+        </div>
+      ) : (
+        <>
       {/* Search bar */}
       <div className="mb-4 flex gap-3">
         <div className="relative flex-1">
@@ -790,6 +831,8 @@ export default function MediaLibraryPage() {
           onConfirm={(targetId) => handleMoveFolder(movingFolder.id, targetId)}
           onClose={() => setMovingFolder(null)}
         />
+      )}
+        </>
       )}
     </div>
   );

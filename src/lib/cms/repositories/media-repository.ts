@@ -1,5 +1,4 @@
 import type { MediaAsset, MediaFolder } from "@/lib/cms/types";
-import { buildSiteInUseMediaAssets } from "@/lib/cms/site-media-urls";
 
 /* ── Folders ─────────────────────────────────────────────── */
 
@@ -100,8 +99,12 @@ export function getFolderBreadcrumb(folderId: string): MediaFolder[] {
 
 /* ── Assets ──────────────────────────────────────────────── */
 
-/** Start with site in-use baseline so the UI is never blank before API load. */
-let cache: MediaAsset[] = buildSiteInUseMediaAssets();
+/** Empty until /api/cms/media finishes loading real assets. */
+let cache: MediaAsset[] = [];
+
+export function clearMediaAssetsCache() {
+  cache = [];
+}
 
 export function getMediaAssets(folderId?: string): MediaAsset[] {
   // Root shows the full library; nested folders filter by exact folder id.
@@ -110,21 +113,14 @@ export function getMediaAssets(folderId?: string): MediaAsset[] {
 }
 
 /**
- * Rebuild library cache from in-use site files + remote uploads.
- * Dedupes by URL.
+ * Rebuild library cache from API payload (site scan + remote uploads).
+ * Dedupes by URL. Allows empty results — no local seed fallback.
  */
 export function replaceMediaAssetsCache(remote: MediaAsset[], site: MediaAsset[] = []) {
   const byUrl = new Map<string, MediaAsset>();
 
   for (const asset of [...site, ...remote]) {
     byUrl.set(asset.url, asset);
-  }
-
-  // Never wipe the library to empty — keep baseline site assets.
-  if (byUrl.size === 0) {
-    for (const asset of buildSiteInUseMediaAssets()) {
-      byUrl.set(asset.url, asset);
-    }
   }
 
   cache = Array.from(byUrl.values()).sort((a, b) => a.name.localeCompare(b.name));
