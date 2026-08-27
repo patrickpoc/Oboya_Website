@@ -5,9 +5,9 @@ interface FaqsPageContentProps {
   locale: string;
 }
 
-export function FaqsPageContent({ locale }: FaqsPageContentProps) {
-  const categories = readFaqCategories();
-  const faqs = readFaqs();
+export async function FaqsPageContent({ locale }: FaqsPageContentProps) {
+  const categories = await readFaqCategories();
+  const faqs = await readFaqs();
 
   return (
     <FaqsPageView locale={locale} categories={categories} faqs={faqs} />

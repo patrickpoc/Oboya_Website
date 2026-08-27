@@ -1,0 +1,17 @@
+{
+  "name": "Oboya Website",
+  "install": "npm install",
+  "terminals": [
+    {
+      "name": "Next.js Dev",
+      "command": "npm run dev -- --hostname 0.0.0.0 --port 3000",
+      "description": "Next.js app on port 3000 (forward to localhost)"
+    }
+  ],
+  "ports": [
+    {
+      "name": "web",
+      "port": 3000
+    }
+  ]
+}

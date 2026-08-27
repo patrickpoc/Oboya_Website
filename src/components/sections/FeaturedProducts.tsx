@@ -62,9 +62,11 @@ export function FeaturedProducts({
             const title = pickLocalized(item.title, locale);
             const description = pickLocalized(item.description, locale);
             const ctaLabel =
-              item.ctaLabel != null
-                ? pickLocalized(item.ctaLabel, locale)
-                : "Learn More";
+              (item.ctaLabel != null &&
+                pickLocalized(item.ctaLabel, locale).trim()) ||
+              (data.ctaLabel != null &&
+                pickLocalized(data.ctaLabel, locale).trim()) ||
+              "Learn More";
             const href = item.ctaHref || data.ctaHref || "/shop";
 
             return (

@@ -56,8 +56,8 @@ export function Hero({
         <div className="flex flex-1 flex-col items-center justify-center px-2 pb-16 pt-8 text-center md:pb-20">
           <motion.div
             variants={staggerContainer}
-            initial={animationsEnabled ? "hidden" : false}
-            animate={animationsEnabled ? "visible" : false}
+            initial={false}
+            animate={animationsEnabled ? "visible" : undefined}
             className="flex max-w-3xl flex-col items-center"
           >
             {eyebrow ? (

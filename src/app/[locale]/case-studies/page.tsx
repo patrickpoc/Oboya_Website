@@ -8,7 +8,7 @@ type Props = { params: Promise<{ locale: string }> };
 export default async function CaseStudiesIndexPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const studies = readCaseStudies();
+  const studies = await readCaseStudies();
 
   return (
     <SiteLayout>

@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
+import type { CmsCaseStudy } from "@/lib/cms/repositories/case-studies-repository";
 import { unauthorizedIfNeeded } from "@/lib/cms/server/cms-auth.server";
 import { revalidatePublicSite } from "@/lib/cms/server/cms-revalidate.server";
 import {
-  deleteBlogDurable,
-  readBlogDurable,
-  saveBlogDurable,
+  deleteCaseDurable,
+  readCasesDurable,
+  saveCaseDurable,
 } from "@/lib/cms/server/content.server";
 
 export async function GET() {
-  return NextResponse.json(await readBlogDurable());
+  return NextResponse.json(await readCasesDurable());
 }
 
 export async function POST(request: Request) {
@@ -17,14 +17,14 @@ export async function POST(request: Request) {
   if (denied) return denied;
 
   try {
-    const body = (await request.json()) as CmsBlogPost;
-    const saved = await saveBlogDurable(body);
-    revalidatePublicSite(["/blog", "/news"]);
+    const body = (await request.json()) as CmsCaseStudy;
+    const saved = await saveCaseDurable(body);
+    revalidatePublicSite(["/case-studies"]);
     return NextResponse.json(saved, { status: 201 });
   } catch (error) {
-    console.error("Failed to save blog post:", error);
+    console.error("Failed to save case study:", error);
     return NextResponse.json(
-      { error: "Failed to save blog post" },
+      { error: "Failed to save case study" },
       { status: 500 }
     );
   }
@@ -39,7 +39,7 @@ export async function DELETE(request: Request) {
   if (!id) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
   }
-  await deleteBlogDurable(id);
-  revalidatePublicSite(["/blog", "/news"]);
+  await deleteCaseDurable(id);
+  revalidatePublicSite(["/case-studies"]);
   return NextResponse.json({ ok: true });
 }

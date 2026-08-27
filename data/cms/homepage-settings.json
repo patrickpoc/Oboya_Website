@@ -1,0 +1,620 @@
+{
+  "animations": {
+    "enabled": true
+  },
+  "sections": {
+    "hero": {
+      "enabled": true
+    },
+    "companyOverview": {
+      "enabled": true
+    },
+    "capabilities": {
+      "enabled": true
+    },
+    "businessSolutions": {
+      "enabled": true
+    },
+    "globalPresence": {
+      "enabled": true
+    },
+    "testimonials": {
+      "enabled": true
+    },
+    "featuredProducts": {
+      "enabled": true
+    },
+    "latestNews": {
+      "enabled": true
+    },
+    "partners": {
+      "enabled": true
+    }
+  },
+  "hero": {
+    "backgroundImage": "/assets/homepage/hero-cms-live.png",
+    "eyebrow": {
+      "en": "Solutions that work, value that grows.",
+      "pt-BR": "Solutions that work, value that grows.",
+      "es": "Solutions that work, value that grows.",
+      "zh-CN": "Solutions that work, value that grows."
+    },
+    "title": {
+      "en": "Your one-stop partner for horticulture!",
+      "pt-BR": "Your one-stop partner\nfor horticulture!",
+      "es": "Your one-stop partner\nfor horticulture!",
+      "zh-CN": "Your one-stop partner\nfor horticulture!"
+    },
+    "description": {
+      "en": "Through integrated solutions for cultivation, packaging, logistics, transport systems, retail display, and technical advisory services, Oboya supports the businesses that keep horticulture moving forward.",
+      "pt-BR": "Through integrated solutions for cultivation, packaging, logistics, transport systems, retail display, and technical advisory services, Oboya supports the businesses that keep horticulture moving forward.",
+      "es": "Through integrated solutions for cultivation, packaging, logistics, transport systems, retail display, and technical advisory services, Oboya supports the businesses that keep horticulture moving forward.",
+      "zh-CN": "Through integrated solutions for cultivation, packaging, logistics, transport systems, retail display, and technical advisory services, Oboya supports the businesses that keep horticulture moving forward."
+    },
+    "ctaPrimary": {
+      "label": {
+        "en": "Request a quote",
+        "pt-BR": "Request a quote",
+        "es": "Request a quote",
+        "zh-CN": "Request a quote"
+      },
+      "href": "/contact"
+    },
+    "ctaSecondary": {
+      "label": {
+        "en": "Explore solutions",
+        "pt-BR": "Explore solutions",
+        "es": "Explore solutions",
+        "zh-CN": "Explore solutions"
+      },
+      "href": "/solutions"
+    },
+    "pills": []
+  },
+  "companyOverview": {
+    "headlineGreen": {
+      "en": "Delivering solutions to horticultural businesses",
+      "pt-BR": "Delivering solutions to horticultural businesses",
+      "es": "Delivering solutions to horticultural businesses",
+      "zh-CN": "Delivering solutions to horticultural businesses"
+    },
+    "headlineWhite": {
+      "en": "around the world through a combination of global capabilities and local expertise.",
+      "pt-BR": "around the world through a combination of global capabilities and local expertise.",
+      "es": "around the world through a combination of global capabilities and local expertise.",
+      "zh-CN": "around the world through a combination of global capabilities and local expertise."
+    },
+    "segments": [
+      {
+        "text": {
+          "en": "Delivering solutions to horticultural businesses",
+          "pt-BR": "Delivering solutions to horticultural businesses",
+          "es": "Delivering solutions to horticultural businesses",
+          "zh-CN": "Delivering solutions to horticultural businesses"
+        },
+        "tone": "green",
+        "breakBefore": false
+      },
+      {
+        "text": {
+          "en": " around the world through a combination of global capabilities and local expertise.",
+          "pt-BR": " around the world through a combination of global capabilities and local expertise.",
+          "es": " around the world through a combination of global capabilities and local expertise.",
+          "zh-CN": " around the world through a combination of global capabilities and local expertise."
+        },
+        "tone": "white",
+        "breakBefore": false
+      }
+    ],
+    "image": "/assets/homepage/company-overview.webp",
+    "imageAlt": {
+      "en": "Workers in a modern greenhouse facility",
+      "pt-BR": "Workers in a modern greenhouse facility",
+      "es": "Workers in a modern greenhouse facility",
+      "zh-CN": "Workers in a modern greenhouse facility"
+    },
+    "stats": [
+      {
+        "id": "employees",
+        "value": 600,
+        "suffix": "+",
+        "label": {
+          "en": "Employees Across Global Operations",
+          "pt-BR": "Employees Across Global Operations",
+          "es": "Employees Across Global Operations",
+          "zh-CN": "Employees Across Global Operations"
+        }
+      },
+      {
+        "id": "countries",
+        "value": 80,
+        "suffix": "+",
+        "label": {
+          "en": "Countries Served Worldwide",
+          "pt-BR": "Countries Served Worldwide",
+          "es": "Countries Served Worldwide",
+          "zh-CN": "Countries Served Worldwide"
+        }
+      },
+      {
+        "id": "experience",
+        "value": 20,
+        "suffix": "+",
+        "label": {
+          "en": "Years Supporting Horticulture",
+          "pt-BR": "Years Supporting Horticulture",
+          "es": "Years Supporting Horticulture",
+          "zh-CN": "Years Supporting Horticulture"
+        }
+      }
+    ]
+  },
+  "capabilities": {
+    "eyebrow": {
+      "en": "Why Oboya Horticulture?",
+      "pt-BR": "Why Oboya Horticulture?",
+      "es": "Why Oboya Horticulture?",
+      "zh-CN": "Why Oboya Horticulture?"
+    },
+    "title": {
+      "en": "Stories and strengths that define how we partner with growers worldwide.",
+      "pt-BR": "Stories and strengths that define how we partner with growers worldwide.",
+      "es": "Stories and strengths that define how we partner with growers worldwide.",
+      "zh-CN": "Stories and strengths that define how we partner with growers worldwide."
+    },
+    "ctaLabel": {
+      "en": "Learn more",
+      "pt-BR": "Learn more",
+      "es": "Learn more",
+      "zh-CN": "Learn more"
+    },
+    "ctaHref": "/about",
+    "items": [
+      {
+        "id": "built-challenges",
+        "title": {
+          "en": "Built Around Real Challenges",
+          "pt-BR": "Built Around Real Challenges",
+          "es": "Built Around Real Challenges",
+          "zh-CN": "Built Around Real Challenges"
+        },
+        "description": {
+          "en": "Through integrated solutions for cultivation, packaging, logistics, transport systems, retail display, and technical advisory services, Oboya supports the businesses that keep horticulture moving forward.",
+          "pt-BR": "Through integrated solutions for cultivation, packaging, logistics, transport systems, retail display, and technical advisory services, Oboya supports the businesses that keep horticulture moving forward.",
+          "es": "Through integrated solutions for cultivation, packaging, logistics, transport systems, retail display, and technical advisory services, Oboya supports the businesses that keep horticulture moving forward.",
+          "zh-CN": "Through integrated solutions for cultivation, packaging, logistics, transport systems, retail display, and technical advisory services, Oboya supports the businesses that keep horticulture moving forward."
+        },
+        "image": "/assets/homepage/solutions-integrated.jpg",
+        "href": "/about"
+      },
+      {
+        "id": "global-local",
+        "title": {
+          "en": "Global Reach, Local Expertise",
+          "pt-BR": "Global Reach, Local Expertise",
+          "es": "Global Reach, Local Expertise",
+          "zh-CN": "Global Reach, Local Expertise"
+        },
+        "description": {
+          "en": "Worldwide manufacturing backed by localized production, support, and deep horticulture knowledge.",
+          "pt-BR": "Worldwide manufacturing backed by localized production, support, and deep horticulture knowledge.",
+          "es": "Worldwide manufacturing backed by localized production, support, and deep horticulture knowledge.",
+          "zh-CN": "Worldwide manufacturing backed by localized production, support, and deep horticulture knowledge."
+        },
+        "image": "/assets/homepage/solutions-global.jpg",
+        "href": "/about"
+      },
+      {
+        "id": "integrated-chain",
+        "title": {
+          "en": "One Partner Across The Chain",
+          "pt-BR": "One Partner Across The Chain",
+          "es": "One Partner Across The Chain",
+          "zh-CN": "One Partner Across The Chain"
+        },
+        "description": {
+          "en": "Propagation, packaging, and logistics connected — so growers focus on growing, not juggling suppliers.",
+          "pt-BR": "Propagation, packaging, and logistics connected — so growers focus on growing, not juggling suppliers.",
+          "es": "Propagation, packaging, and logistics connected — so growers focus on growing, not juggling suppliers.",
+          "zh-CN": "Propagation, packaging, and logistics connected — so growers focus on growing, not juggling suppliers."
+        },
+        "image": "/assets/homepage/solutions-logistics.jpg",
+        "href": "/about"
+      }
+    ]
+  },
+  "businessSolutions": {
+    "eyebrow": {
+      "en": "Solutions Tailored to Your Business",
+      "pt-BR": "Solutions Tailored to Your Business",
+      "es": "Solutions Tailored to Your Business",
+      "zh-CN": "Solutions Tailored to Your Business"
+    },
+    "title": {
+      "en": "Every crop, operation, and supply chain has unique requirements. Explore the solutions, expertise, and support designed for your sector.",
+      "pt-BR": "Every crop, operation, and supply chain has unique requirements. Explore the solutions, expertise, and support designed for your sector.",
+      "es": "Every crop, operation, and supply chain has unique requirements. Explore the solutions, expertise, and support designed for your sector.",
+      "zh-CN": "Every crop, operation, and supply chain has unique requirements. Explore the solutions, expertise, and support designed for your sector."
+    },
+    "items": [
+      {
+        "id": "flowers",
+        "title": {
+          "en": "Flowers",
+          "pt-BR": "Flowers",
+          "es": "Flowers",
+          "zh-CN": "Flowers"
+        },
+        "description": {
+          "en": "Solutions for growers, exporters, distributors, and retailers across the floriculture industry.",
+          "pt-BR": "Solutions for growers, exporters, distributors, and retailers across the floriculture industry.",
+          "es": "Solutions for growers, exporters, distributors, and retailers across the floriculture industry.",
+          "zh-CN": "Solutions for growers, exporters, distributors, and retailers across the floriculture industry."
+        },
+        "image": "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
+        "href": "/solutions/flowers",
+        "ctaLabel": {
+          "en": "Explore Solutions",
+          "pt-BR": "Explore Solutions",
+          "es": "Explore Solutions",
+          "zh-CN": "Explore Solutions"
+        }
+      },
+      {
+        "id": "vegetables",
+        "title": {
+          "en": "Vegetables & Herbs",
+          "pt-BR": "Vegetables & Herbs",
+          "es": "Vegetables & Herbs",
+          "zh-CN": "Vegetables & Herbs"
+        },
+        "description": {
+          "en": "Integrated solutions that support efficient production, handling, logistics, and commercialization.",
+          "pt-BR": "Integrated solutions that support efficient production, handling, logistics, and commercialization.",
+          "es": "Integrated solutions that support efficient production, handling, logistics, and commercialization.",
+          "zh-CN": "Integrated solutions that support efficient production, handling, logistics, and commercialization."
+        },
+        "image": "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
+        "href": "/solutions/vegetables",
+        "ctaLabel": {
+          "en": "Explore Solutions",
+          "pt-BR": "Explore Solutions",
+          "es": "Explore Solutions",
+          "zh-CN": "Explore Solutions"
+        }
+      },
+      {
+        "id": "fruits",
+        "title": {
+          "en": "Fruits",
+          "pt-BR": "Fruits",
+          "es": "Fruits",
+          "zh-CN": "Fruits"
+        },
+        "description": {
+          "en": "Solutions designed to protect quality, improve handling, and optimize supply chain performance.",
+          "pt-BR": "Solutions designed to protect quality, improve handling, and optimize supply chain performance.",
+          "es": "Solutions designed to protect quality, improve handling, and optimize supply chain performance.",
+          "zh-CN": "Solutions designed to protect quality, improve handling, and optimize supply chain performance."
+        },
+        "image": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
+        "href": "/solutions/fruits",
+        "ctaLabel": {
+          "en": "Explore Solutions",
+          "pt-BR": "Explore Solutions",
+          "es": "Explore Solutions",
+          "zh-CN": "Explore Solutions"
+        }
+      },
+      {
+        "id": "plants",
+        "title": {
+          "en": "Plants",
+          "pt-BR": "Plants",
+          "es": "Plants",
+          "zh-CN": "Plants"
+        },
+        "description": {
+          "en": "Young-plant systems and logistics tools that standardize quality across nursery networks.",
+          "pt-BR": "Young-plant systems and logistics tools that standardize quality across nursery networks.",
+          "es": "Young-plant systems and logistics tools that standardize quality across nursery networks.",
+          "zh-CN": "Young-plant systems and logistics tools that standardize quality across nursery networks."
+        },
+        "image": "https://images.unsplash.com/photo-1466692476867-a0881dfc0648?q=80&w=800&auto=format&fit=crop",
+        "href": "/solutions",
+        "ctaLabel": {
+          "en": "Explore Solutions",
+          "pt-BR": "Explore Solutions",
+          "es": "Explore Solutions",
+          "zh-CN": "Explore Solutions"
+        }
+      }
+    ]
+  },
+  "globalPresence": {
+    "title": {
+      "en": "We operate in 25 countries, with production hubs in Asia, South America and Europe, as well as support teams worldwide.",
+      "pt-BR": "We operate in 25 countries, with production hubs in Asia, South America and Europe, as well as support teams worldwide.",
+      "es": "We operate in 25 countries, with production hubs in Asia, South America and Europe, as well as support teams worldwide.",
+      "zh-CN": "We operate in 25 countries, with production hubs in Asia, South America and Europe, as well as support teams worldwide."
+    }
+  },
+  "testimonials": {
+    "eyebrow": {
+      "en": "Testimonials",
+      "pt-BR": "Testimonials",
+      "es": "Testimonials",
+      "zh-CN": "Testimonials"
+    },
+    "items": [
+      {
+        "id": "t1",
+        "quote": {
+          "en": "Oboya helped us unify packaging and logistics across our greenhouse network. Delivery reliability improved within the first season.",
+          "pt-BR": "Oboya helped us unify packaging and logistics across our greenhouse network. Delivery reliability improved within the first season.",
+          "es": "Oboya helped us unify packaging and logistics across our greenhouse network. Delivery reliability improved within the first season.",
+          "zh-CN": "Oboya helped us unify packaging and logistics across our greenhouse network. Delivery reliability improved within the first season."
+        },
+        "author": {
+          "en": "Maria Jensen",
+          "pt-BR": "Maria Jensen",
+          "es": "Maria Jensen",
+          "zh-CN": "Maria Jensen"
+        },
+        "role": {
+          "en": "Nordic Growers",
+          "pt-BR": "Nordic Growers",
+          "es": "Nordic Growers",
+          "zh-CN": "Nordic Growers"
+        }
+      },
+      {
+        "id": "t2",
+        "quote": {
+          "en": "Their local teams understood our retail requirements and delivered display solutions that lifted shelf presence without slowing operations.",
+          "pt-BR": "Their local teams understood our retail requirements and delivered display solutions that lifted shelf presence without slowing operations.",
+          "es": "Their local teams understood our retail requirements and delivered display solutions that lifted shelf presence without slowing operations.",
+          "zh-CN": "Their local teams understood our retail requirements and delivered display solutions that lifted shelf presence without slowing operations."
+        },
+        "author": {
+          "en": "Carlos Mendes",
+          "pt-BR": "Carlos Mendes",
+          "es": "Carlos Mendes",
+          "zh-CN": "Carlos Mendes"
+        },
+        "role": {
+          "en": "Fresh Retail Group",
+          "pt-BR": "Fresh Retail Group",
+          "es": "Fresh Retail Group",
+          "zh-CN": "Fresh Retail Group"
+        }
+      },
+      {
+        "id": "t3",
+        "quote": {
+          "en": "From substrates to retail-ready packaging, Oboya has become a long-term partner for our berry programs across Asia Pacific.",
+          "pt-BR": "From substrates to retail-ready packaging, Oboya has become a long-term partner for our berry programs across Asia Pacific.",
+          "es": "From substrates to retail-ready packaging, Oboya has become a long-term partner for our berry programs across Asia Pacific.",
+          "zh-CN": "From substrates to retail-ready packaging, Oboya has become a long-term partner for our berry programs across Asia Pacific."
+        },
+        "author": {
+          "en": "Li Wei",
+          "pt-BR": "Li Wei",
+          "es": "Li Wei",
+          "zh-CN": "Li Wei"
+        },
+        "role": {
+          "en": "Asia Pacific Berries",
+          "pt-BR": "Asia Pacific Berries",
+          "es": "Asia Pacific Berries",
+          "zh-CN": "Asia Pacific Berries"
+        }
+      },
+      {
+        "id": "t4",
+        "quote": {
+          "en": "We needed one partner for cultivation support and outbound logistics. Oboya connected both ends of the chain with clear accountability.",
+          "pt-BR": "We needed one partner for cultivation support and outbound logistics. Oboya connected both ends of the chain with clear accountability.",
+          "es": "We needed one partner for cultivation support and outbound logistics. Oboya connected both ends of the chain with clear accountability.",
+          "zh-CN": "We needed one partner for cultivation support and outbound logistics. Oboya connected both ends of the chain with clear accountability."
+        },
+        "author": {
+          "en": "Elena Rossi",
+          "pt-BR": "Elena Rossi",
+          "es": "Elena Rossi",
+          "zh-CN": "Elena Rossi"
+        },
+        "role": {
+          "en": "MediFlora Cooperative",
+          "pt-BR": "MediFlora Cooperative",
+          "es": "MediFlora Cooperative",
+          "zh-CN": "MediFlora Cooperative"
+        }
+      },
+      {
+        "id": "t5",
+        "quote": {
+          "en": "Scale and local expertise rarely come together. With Oboya, we get global manufacturing strength and on-the-ground support where we grow.",
+          "pt-BR": "Scale and local expertise rarely come together. With Oboya, we get global manufacturing strength and on-the-ground support where we grow.",
+          "es": "Scale and local expertise rarely come together. With Oboya, we get global manufacturing strength and on-the-ground support where we grow.",
+          "zh-CN": "Scale and local expertise rarely come together. With Oboya, we get global manufacturing strength and on-the-ground support where we grow."
+        },
+        "author": {
+          "en": "James Okonkwo",
+          "pt-BR": "James Okonkwo",
+          "es": "James Okonkwo",
+          "zh-CN": "James Okonkwo"
+        },
+        "role": {
+          "en": "GreenHorizon Farms",
+          "pt-BR": "GreenHorizon Farms",
+          "es": "GreenHorizon Farms",
+          "zh-CN": "GreenHorizon Farms"
+        }
+      },
+      {
+        "id": "t6",
+        "quote": {
+          "en": "Switching to Oboya's integrated solutions cut complexity for our growers and gave our buyers a more consistent product experience.",
+          "pt-BR": "Switching to Oboya's integrated solutions cut complexity for our growers and gave our buyers a more consistent product experience.",
+          "es": "Switching to Oboya's integrated solutions cut complexity for our growers and gave our buyers a more consistent product experience.",
+          "zh-CN": "Switching to Oboya's integrated solutions cut complexity for our growers and gave our buyers a more consistent product experience."
+        },
+        "author": {
+          "en": "Sophie Dubois",
+          "pt-BR": "Sophie Dubois",
+          "es": "Sophie Dubois",
+          "zh-CN": "Sophie Dubois"
+        },
+        "role": {
+          "en": "EuroFresh Alliance",
+          "pt-BR": "EuroFresh Alliance",
+          "es": "EuroFresh Alliance",
+          "zh-CN": "EuroFresh Alliance"
+        }
+      }
+    ]
+  },
+  "featuredProducts": {
+    "eyebrow": {
+      "en": "Featured Innovations",
+      "pt-BR": "Featured Innovations",
+      "es": "Featured Innovations",
+      "zh-CN": "Featured Innovations"
+    },
+    "title": {
+      "en": "At OBOYA, we go beyond supplying products, we deliver integrated horticulture solutions designed to improve efficiency, optimize operations, and support long-term growth across the global supply chain.",
+      "pt-BR": "At OBOYA, we go beyond supplying products, we deliver integrated horticulture solutions designed to improve efficiency, optimize operations, and support long-term growth across the global supply chain.",
+      "es": "At OBOYA, we go beyond supplying products, we deliver integrated horticulture solutions designed to improve efficiency, optimize operations, and support long-term growth across the global supply chain.",
+      "zh-CN": "At OBOYA, we go beyond supplying products, we deliver integrated horticulture solutions designed to improve efficiency, optimize operations, and support long-term growth across the global supply chain."
+    },
+    "ctaLabel": {
+      "en": "See all products",
+      "pt-BR": "See all products",
+      "es": "See all products",
+      "zh-CN": "See all products"
+    },
+    "ctaHref": "/shop",
+    "items": [
+      {
+        "id": "innov-ecovaso",
+        "title": {
+          "en": "Oboya Ecovaso",
+          "pt-BR": "Oboya Ecovaso",
+          "es": "Oboya Ecovaso",
+          "zh-CN": "Oboya Ecovaso"
+        },
+        "description": {
+          "en": "Sustainable growing containers engineered for healthier roots and cleaner retail presentation.",
+          "pt-BR": "Sustainable growing containers engineered for healthier roots and cleaner retail presentation.",
+          "es": "Sustainable growing containers engineered for healthier roots and cleaner retail presentation.",
+          "zh-CN": "Sustainable growing containers engineered for healthier roots and cleaner retail presentation."
+        },
+        "image": "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
+        "ctaLabel": {
+          "en": "Learn More",
+          "pt-BR": "Learn More",
+          "es": "Learn More",
+          "zh-CN": "Learn More"
+        },
+        "ctaHref": "/shop"
+      },
+      {
+        "id": "innov-bioglitter",
+        "title": {
+          "en": "Bioglitter",
+          "pt-BR": "Bioglitter",
+          "es": "Bioglitter",
+          "zh-CN": "Bioglitter"
+        },
+        "description": {
+          "en": "Decorative finishes that add shelf impact while supporting more responsible material choices.",
+          "pt-BR": "Decorative finishes that add shelf impact while supporting more responsible material choices.",
+          "es": "Decorative finishes that add shelf impact while supporting more responsible material choices.",
+          "zh-CN": "Decorative finishes that add shelf impact while supporting more responsible material choices."
+        },
+        "image": "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
+        "ctaLabel": {
+          "en": "Learn More",
+          "pt-BR": "Learn More",
+          "es": "Learn More",
+          "zh-CN": "Learn More"
+        },
+        "ctaHref": "/shop"
+      },
+      {
+        "id": "innov-display",
+        "title": {
+          "en": "Retail Display Systems",
+          "pt-BR": "Retail Display Systems",
+          "es": "Retail Display Systems",
+          "zh-CN": "Retail Display Systems"
+        },
+        "description": {
+          "en": "Display and handling solutions that protect product quality from greenhouse floor to store shelf.",
+          "pt-BR": "Display and handling solutions that protect product quality from greenhouse floor to store shelf.",
+          "es": "Display and handling solutions that protect product quality from greenhouse floor to store shelf.",
+          "zh-CN": "Display and handling solutions that protect product quality from greenhouse floor to store shelf."
+        },
+        "image": "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
+        "ctaLabel": {
+          "en": "Learn More",
+          "pt-BR": "Learn More",
+          "es": "Learn More",
+          "zh-CN": "Learn More"
+        },
+        "ctaHref": "/shop"
+      }
+    ]
+  },
+  "latestNews": {
+    "eyebrow": {
+      "en": "Latest News",
+      "pt-BR": "Latest News",
+      "es": "Latest News",
+      "zh-CN": "Latest News"
+    },
+    "headline": {
+      "en": "Learn more about our latest developments and stories from the field in our Latest News section.",
+      "pt-BR": "Learn more about our latest developments and stories from the field in our Latest News section.",
+      "es": "Learn more about our latest developments and stories from the field in our Latest News section.",
+      "zh-CN": "Learn more about our latest developments and stories from the field in our Latest News section."
+    },
+    "postCount": 2
+  },
+  "partners": {
+    "title": {
+      "en": "Our collaborations",
+      "pt-BR": "Our collaborations",
+      "es": "Our collaborations",
+      "zh-CN": "Our collaborations"
+    },
+    "logos": [
+      {
+        "id": "brcgs",
+        "name": "BRCGS",
+        "image": "/assets/homepage/cert-brcgs.png",
+        "href": ""
+      },
+      {
+        "id": "sedex-smeta",
+        "name": "Sedex | SMETA",
+        "image": "/assets/homepage/cert-sedex-smeta.png",
+        "href": ""
+      },
+      {
+        "id": "grs",
+        "name": "Global Recycled Standard",
+        "image": "/assets/homepage/cert-grs.png",
+        "href": ""
+      },
+      {
+        "id": "iso",
+        "name": "ISO 9001:2015",
+        "image": "/assets/homepage/cert-iso-9001.png",
+        "href": ""
+      }
+    ]
+  },
+  "updatedAt": "2026-08-25T19:39:41.788Z"
+}

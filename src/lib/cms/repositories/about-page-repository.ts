@@ -743,10 +743,17 @@ const CONTENT_REVISION = 10;
 let cacheRevision = 0;
 
 export function getAboutPageSettings(): AboutPageSettings {
-  if (!cache || cacheRevision !== CONTENT_REVISION) {
+  if (!cache) {
     cache = defaultSettings();
-    cacheRevision = CONTENT_REVISION;
   }
+  return cache;
+}
+
+export function replaceAboutPageSettingsCache(
+  settings: AboutPageSettings
+): AboutPageSettings {
+  cache = { ...settings };
+  cacheRevision = CONTENT_REVISION;
   return cache;
 }
 
@@ -755,10 +762,12 @@ export function saveAboutPageSettings(
 ): AboutPageSettings {
   const updated = { ...settings, updatedAt: new Date().toISOString() };
   cache = updated;
+  cacheRevision = CONTENT_REVISION;
   return updated;
 }
 
 export function resetAboutPageSettings(): AboutPageSettings {
   cache = defaultSettings();
+  cacheRevision = CONTENT_REVISION;
   return cache;
 }

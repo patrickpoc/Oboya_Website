@@ -452,7 +452,13 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
   const rawHero = settings.hero as HomepageSettings["hero"] & {
     ctaPrimary?: HomepageHeroCta;
     ctaSecondary?: HomepageHeroCta;
+    /** Legacy field used by older admin saves / seeds */
+    image?: string;
   };
+  const backgroundImage =
+    rawHero?.backgroundImage ||
+    rawHero?.image ||
+    defaults.hero.backgroundImage;
 
   return {
     ...defaults,
@@ -463,6 +469,7 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
     hero: {
       ...defaults.hero,
       ...settings.hero,
+      backgroundImage,
       ctaPrimary: {
         ...defaults.hero.ctaPrimary,
         ...rawHero?.ctaPrimary,
@@ -579,22 +586,27 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
 }
 
 export function getHomepageSettings(): HomepageSettings {
-  if (appliedRevision !== CONTENT_REVISION) {
-    cache = defaultSettings();
-    appliedRevision = CONTENT_REVISION;
-  }
   if (!cache) cache = defaultSettings();
   return migrateSettings(cache);
 }
 
-export function saveHomepageSettings(settings: HomepageSettings): HomepageSettings {
+export function replaceHomepageSettingsCache(
+  settings: HomepageSettings
+): HomepageSettings {
   const updated = migrateSettings({
     ...settings,
-    updatedAt: new Date().toISOString(),
+    updatedAt: settings.updatedAt ?? new Date().toISOString(),
   });
   cache = updated;
   appliedRevision = CONTENT_REVISION;
   return updated;
+}
+
+export function saveHomepageSettings(settings: HomepageSettings): HomepageSettings {
+  return replaceHomepageSettingsCache({
+    ...settings,
+    updatedAt: new Date().toISOString(),
+  });
 }
 
 export function resetHomepageSettings(): HomepageSettings {
