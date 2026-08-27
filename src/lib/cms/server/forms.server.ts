@@ -1,6 +1,6 @@
 import "server-only";
 
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { FormSubmission, FormSubmissionStatus } from "@/lib/cms/types";
 import {
@@ -9,6 +9,7 @@ import {
   replaceFormSubmissionsCache,
   updateSubmissionStatus as updateStatusMemory,
 } from "@/lib/cms/repositories/forms-repository";
+import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 import {
@@ -52,19 +53,13 @@ async function hydrateFromDisk() {
   }
 }
 
-async function persistFormSubmissions(submissions: FormSubmission[]) {
-  await mkdir(path.dirname(FORMS_FILE), { recursive: true });
-  await writeFile(
-    FORMS_FILE,
-    `${JSON.stringify(submissions, null, 2)}\n`,
-    "utf-8"
-  );
+function writeClient() {
+  if (isServiceRoleConfigured()) return createServiceClient();
+  return null;
 }
 
-async function readFormsFromSupabase(): Promise<FormSubmission[] | null> {
-  const supabase = createPublicClient();
-  // Prefer authenticated client when available for RLS.
-  let client = supabase;
+async function readFormsFromSupabase(): Promise<FormSubmission[]> {
+  let client = createPublicClient();
   try {
     client = await createClient();
   } catch {
@@ -77,32 +72,17 @@ async function readFormsFromSupabase(): Promise<FormSubmission[] | null> {
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
-  if (!data) return [];
-  return (data as FormRow[]).map(rowToSubmission);
-}
-
-function writeClient() {
-  if (isServiceRoleConfigured()) return createServiceClient();
-  return null;
+  return ((data as FormRow[] | null) ?? []).map(rowToSubmission);
 }
 
 export async function readFormSubmissions(
   type?: FormSubmission["type"]
 ): Promise<FormSubmission[]> {
   if (isSupabaseConfigured()) {
-    try {
-      const remote = await readFormsFromSupabase();
-      if (remote) {
-        replaceFormSubmissionsCache(remote);
-        hydrated = true;
-        return type ? remote.filter((s) => s.type === type) : remote;
-      }
-    } catch (error) {
-      console.error(
-        "cms_form_submissions read failed:",
-        error instanceof Error ? error.message : error
-      );
-    }
+    const remote = await readFormsFromSupabase();
+    replaceFormSubmissionsCache(remote);
+    hydrated = true;
+    return type ? remote.filter((s) => s.type === type) : remote;
   }
 
   await hydrateFromDisk();
@@ -113,38 +93,26 @@ export async function addFormSubmissionDurable(
   submission: Omit<FormSubmission, "id" | "createdAt">
 ): Promise<FormSubmission> {
   if (isSupabaseConfigured()) {
-    try {
-      const client = writeClient() ?? (await createClient());
-      const { data, error } = await client
-        .from("cms_form_submissions")
-        .insert({
-          type: submission.type,
-          status: submission.status,
-          data: submission.data,
-        })
-        .select("id, type, status, data, created_at")
-        .single();
+    const client = writeClient() ?? (await createClient());
+    const { data, error } = await client
+      .from("cms_form_submissions")
+      .insert({
+        type: submission.type,
+        status: submission.status,
+        data: submission.data,
+      })
+      .select("id, type, status, data, created_at")
+      .single();
 
-      if (error) throw new Error(error.message);
-      const entry = rowToSubmission(data as FormRow);
-      await readFormSubmissions();
-      return entry;
-    } catch (error) {
-      console.error(
-        "cms_form_submissions insert failed:",
-        error instanceof Error ? error.message : error
-      );
-      // Fall through to disk/memory.
-    }
+    if (error) throw new Error(error.message);
+    const entry = rowToSubmission(data as FormRow);
+    await readFormSubmissions();
+    return entry;
   }
 
   await hydrateFromDisk();
   const entry = addToMemory(submission);
-  try {
-    await persistFormSubmissions(getFromMemory());
-  } catch {
-    // Keep in-memory even if disk write fails (e.g. read-only deploy).
-  }
+  await writeLocalJsonFile(FORMS_FILE, getFromMemory());
   return entry;
 }
 
@@ -153,37 +121,25 @@ export async function updateFormSubmissionStatusDurable(
   status: FormSubmissionStatus
 ): Promise<FormSubmission | null> {
   if (isSupabaseConfigured()) {
-    try {
-      const client = writeClient() ?? (await createClient());
-      const { data, error } = await client
-        .from("cms_form_submissions")
-        .update({ status })
-        .eq("id", id)
-        .select("id, type, status, data, created_at")
-        .maybeSingle();
+    const client = writeClient() ?? (await createClient());
+    const { data, error } = await client
+      .from("cms_form_submissions")
+      .update({ status })
+      .eq("id", id)
+      .select("id, type, status, data, created_at")
+      .maybeSingle();
 
-      if (error) throw new Error(error.message);
-      if (data) {
-        const entry = rowToSubmission(data as FormRow);
-        updateStatusMemory(id, status);
-        return entry;
-      }
-    } catch (error) {
-      console.error(
-        "cms_form_submissions status update failed:",
-        error instanceof Error ? error.message : error
-      );
-    }
+    if (error) throw new Error(error.message);
+    if (!data) return null;
+    const entry = rowToSubmission(data as FormRow);
+    updateStatusMemory(id, status);
+    return entry;
   }
 
   await hydrateFromDisk();
   const updated = updateStatusMemory(id, status);
   if (updated) {
-    try {
-      await persistFormSubmissions(getFromMemory());
-    } catch {
-      /* keep memory */
-    }
+    await writeLocalJsonFile(FORMS_FILE, getFromMemory());
   }
   return updated;
 }

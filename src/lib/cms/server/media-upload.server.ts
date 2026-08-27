@@ -6,6 +6,7 @@ import path from "node:path";
 import type { MediaAsset } from "@/lib/cms/types";
 import { saveMediaAsset, deleteMediaAsset } from "@/lib/cms/repositories/media-repository";
 import { FOLDER_WEBSITE_FILES } from "@/lib/cms/media-folder-ids";
+import { assertLocalDiskWritable } from "@/lib/cms/server/local-fs.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -160,6 +161,8 @@ export async function storeMediaLocally(input: {
   kind: MediaAsset["type"];
   folder?: string;
 }) {
+  assertLocalDiskWritable();
+
   if (input.file.size > SERVERLESS_BODY_MAX) {
     throw new Error(
       "File too large for local upload path. Configure Supabase Storage or use a file under 4MB."

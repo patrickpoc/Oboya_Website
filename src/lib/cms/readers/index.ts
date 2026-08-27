@@ -13,17 +13,20 @@ import { readHomepageSettingsDurable } from "@/lib/cms/server/homepage.server";
 import { readAboutPageSettingsDurable } from "@/lib/cms/server/about-page.server";
 import { readCaseStudiesDurable } from "@/lib/cms/server/case-studies.server";
 import { readFaqsDurable } from "@/lib/cms/server/faqs.server";
+import { hydrateShopCatalogDurable } from "@/lib/cms/server/marketplace-config.server";
 import { siteConfig } from "@/constants/site";
 
 export async function readMapDataForSite() {
   return readMapLocations();
 }
 
-export function readShopCatalog() {
+export async function readShopCatalog() {
+  await hydrateShopCatalogDurable();
   return getShopCatalog();
 }
 
-export function readProducts() {
+export async function readProducts() {
+  await hydrateShopCatalogDurable();
   const cmsProducts = getCmsProducts();
   if (cmsProducts.length > 0) {
     return cmsProducts.filter((p) => p.status === "published");

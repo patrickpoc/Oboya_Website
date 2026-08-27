@@ -1,8 +1,9 @@
 import "server-only";
 
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { getCmsProducts, type CmsProduct } from "@/lib/cms/repositories/product-repository";
+import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -198,14 +199,20 @@ export async function persistProductsToFile(products: CmsProduct[]) {
   if (isSupabaseConfigured()) {
     return;
   }
-  await writeFile(PRODUCTS_FILE, `${JSON.stringify(products, null, 2)}\n`, "utf-8");
+  await writeLocalJsonFile(PRODUCTS_FILE, products);
 }
 
 export async function persistProductsToFileSafe(products: CmsProduct[]) {
+  if (isSupabaseConfigured()) {
+    return;
+  }
   try {
     await persistProductsToFile(products);
   } catch (error) {
-    if (error instanceof Error && /EROFS|read-only file system/i.test(error.message)) {
+    if (
+      error instanceof Error &&
+      /read-only filesystem|Configure Supabase/i.test(error.message)
+    ) {
       return;
     }
     throw error;

@@ -1,7 +1,8 @@
 import "server-only";
 
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 
@@ -57,10 +58,5 @@ export async function writeCmsDocumentData(
     return;
   }
 
-  await mkdir(DATA_DIR, { recursive: true });
-  await writeFile(
-    path.join(DATA_DIR, `${docId}.json`),
-    `${JSON.stringify(data, null, 2)}\n`,
-    "utf-8"
-  );
+  await writeLocalJsonFile(path.join(DATA_DIR, `${docId}.json`), data);
 }

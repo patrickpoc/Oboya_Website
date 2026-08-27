@@ -15,6 +15,7 @@ import {
   PRODUCTS_PAGE_SIZE,
   getCountryByCode,
   getShopCatalog,
+  updateShopCatalog,
 } from "@/lib/shop/catalog";
 import { countActiveFilters, filterProducts, sortProducts } from "@/lib/shop/filters";
 import {
@@ -161,6 +162,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   );
   const [isReady, setIsReady] = useState(false);
   const [shopProducts, setShopProducts] = useState<ShopProduct[]>(() => getShopCatalog().products);
+  const [catalogTick, setCatalogTick] = useState(0);
   const hydratedFromUrl = useRef(false);
   const skipUrlWrite = useRef(false);
   const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -197,9 +199,36 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
     void (async () => {
       try {
-        const response = await fetch("/api/cms/products", { cache: "no-store" });
-        if (!response.ok) throw new Error("Failed to load products");
-        const products = (await response.json()) as CmsProduct[];
+        const [productsRes, filtersRes, currenciesRes] = await Promise.all([
+          fetch("/api/cms/products", { cache: "no-store" }),
+          fetch("/api/cms/marketplace/filters", { cache: "no-store" }),
+          fetch("/api/cms/marketplace/currencies", { cache: "no-store" }),
+        ]);
+        if (!productsRes.ok) throw new Error("Failed to load products");
+
+        if (filtersRes.ok) {
+          const filters = (await filtersRes.json()) as {
+            categories?: ReturnType<typeof getShopCatalog>["categories"];
+            brands?: ReturnType<typeof getShopCatalog>["brands"];
+            filterOptions?: ReturnType<typeof getShopCatalog>["filterOptions"];
+          };
+          updateShopCatalog({
+            categories: filters.categories,
+            brands: filters.brands,
+            filterOptions: filters.filterOptions,
+          });
+        }
+        if (currenciesRes.ok) {
+          const currencies = (await currenciesRes.json()) as {
+            countries?: ReturnType<typeof getShopCatalog>["countries"];
+          };
+          if (currencies.countries) {
+            updateShopCatalog({ countries: currencies.countries });
+          }
+        }
+        setCatalogTick((n) => n + 1);
+
+        const products = (await productsRes.json()) as CmsProduct[];
         const published = products.filter(
           (product) => product.status === "published" && !product.deletedAt
         );
@@ -532,7 +561,10 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     setState((prev) => ({ ...prev, visibleCount: PRODUCTS_PAGE_SIZE }));
   }, []);
 
-  const catalog = getShopCatalog();
+  const catalog = useMemo(() => {
+    void catalogTick;
+    return getShopCatalog();
+  }, [catalogTick]);
 
   const baseProducts = useMemo(
     () => {

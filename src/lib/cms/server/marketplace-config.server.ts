@@ -1,11 +1,12 @@
 import "server-only";
 
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import {
   readCmsDocumentData,
   writeCmsDocumentData,
 } from "@/lib/cms/server/cms-document.server";
+import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { readProducts, saveProduct } from "@/lib/cms/server/products.server";
 import { updateShopCatalog } from "@/lib/shop/catalog";
 import type {
@@ -45,22 +46,6 @@ type CurrenciesPayload = {
 async function readJsonFile<T>(filePath: string): Promise<T> {
   const raw = await readFile(filePath, "utf-8");
   return JSON.parse(raw) as T;
-}
-
-async function writeJsonFileSafe(filePath: string, data: unknown) {
-  try {
-    await writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, "utf-8");
-  } catch (error) {
-    if (
-      error instanceof Error &&
-      /EROFS|read-only file system|EACCES|ENOENT/i.test(error.message)
-    ) {
-      throw new Error(
-        "Cannot write marketplace config on this host. Configure Supabase (cms_documents) for durable saves."
-      );
-    }
-    throw error;
-  }
 }
 
 function isFiltersPayload(value: unknown): value is FiltersPayload {
@@ -111,9 +96,9 @@ export async function saveMarketplaceFilters(
   }
 
   await Promise.all([
-    writeJsonFileSafe(CATEGORIES_FILE, payload.categories),
-    writeJsonFileSafe(BRANDS_FILE, payload.brands),
-    writeJsonFileSafe(FILTER_OPTIONS_FILE, payload.filterOptions),
+    writeLocalJsonFile(CATEGORIES_FILE, payload.categories),
+    writeLocalJsonFile(BRANDS_FILE, payload.brands),
+    writeLocalJsonFile(FILTER_OPTIONS_FILE, payload.filterOptions),
   ]);
   return payload;
 }
@@ -203,8 +188,8 @@ export async function saveMarketplaceCurrencies(payload: {
   );
 
   await Promise.all([
-    writeJsonFileSafe(COUNTRIES_FILE, payload.countries),
-    writeJsonFileSafe(PRODUCTS_FILE, normalizedProducts),
+    writeLocalJsonFile(COUNTRIES_FILE, payload.countries),
+    writeLocalJsonFile(PRODUCTS_FILE, normalizedProducts),
   ]);
 
   updateShopCatalog({
@@ -212,4 +197,18 @@ export async function saveMarketplaceCurrencies(payload: {
     products: normalizedProducts,
   });
   return { countries: payload.countries, products: normalizedProducts };
+}
+
+/** Hydrate in-memory shop catalog from durable marketplace docs (or seed). */
+export async function hydrateShopCatalogDurable() {
+  const [filters, currencies] = await Promise.all([
+    readMarketplaceFilters(),
+    readMarketplaceCurrencies(),
+  ]);
+  updateShopCatalog({
+    categories: filters.categories,
+    brands: filters.brands,
+    filterOptions: filters.filterOptions,
+    countries: currencies.countries,
+  });
 }

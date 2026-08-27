@@ -1,9 +1,10 @@
 import "server-only";
 
-import { readFile, writeFile } from "fs/promises";
+import { readFile } from "fs/promises";
 import path from "path";
 import type { MapLocationsData } from "@/lib/map-locations";
 import { normalizeMapLocations } from "@/lib/map-locations";
+import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 
@@ -17,7 +18,7 @@ async function readMapLocationsFromFile(): Promise<MapLocationsData> {
 
 async function writeMapLocationsToFile(data: MapLocationsData): Promise<void> {
   const normalized = normalizeMapLocations(data);
-  await writeFile(DATA_PATH, `${JSON.stringify(normalized, null, 2)}\n`, "utf-8");
+  await writeLocalJsonFile(DATA_PATH, normalized);
 }
 
 export async function readMapLocations(): Promise<MapLocationsData> {

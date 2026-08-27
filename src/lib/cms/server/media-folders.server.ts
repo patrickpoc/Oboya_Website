@@ -1,6 +1,6 @@
 import "server-only";
 
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { MediaFolder } from "@/lib/cms/types";
 import {
@@ -9,6 +9,7 @@ import {
   replaceMediaFoldersCache,
 } from "@/lib/cms/repositories/media-repository";
 import { LEGACY_WEBSITE_FOLDER_IDS } from "@/lib/cms/media-folder-ids";
+import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 
@@ -101,12 +102,7 @@ async function readFoldersFromDisk(): Promise<MediaFolder[] | null> {
 }
 
 async function writeFoldersToDisk(folders: MediaFolder[]) {
-  await mkdir(path.dirname(FOLDERS_FILE), { recursive: true });
-  await writeFile(
-    FOLDERS_FILE,
-    `${JSON.stringify({ folders }, null, 2)}\n`,
-    "utf-8"
-  );
+  await writeLocalJsonFile(FOLDERS_FILE, { folders });
 }
 
 export async function readMediaFoldersDurable(): Promise<MediaFolder[]> {

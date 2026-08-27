@@ -1,6 +1,6 @@
 import "server-only";
 
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import {
   getHomepageSettings,
@@ -8,6 +8,7 @@ import {
   saveHomepageSettings,
   type HomepageSettings,
 } from "@/lib/cms/repositories/homepage-repository";
+import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 
@@ -104,17 +105,6 @@ export async function saveHomepageSettingsDurable(
     return saved;
   }
 
-  try {
-    await writeFile(HOMEPAGE_FILE, `${JSON.stringify(saved, null, 2)}\n`, "utf-8");
-  } catch (error) {
-    console.error(
-      "Local homepage write failed:",
-      error instanceof Error ? error.message : error
-    );
-    throw new Error(
-      "Could not persist homepage settings. Configure Supabase for production saves."
-    );
-  }
-
+  await writeLocalJsonFile(HOMEPAGE_FILE, saved);
   return saved;
 }
