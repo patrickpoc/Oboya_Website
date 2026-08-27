@@ -24,14 +24,31 @@ export async function GET() {
   }
 
   try {
-    // Always include scanned site assets, even without Supabase.
     const assets = await syncMediaLibraryFromSupabase();
-    return NextResponse.json({ ok: true, assets });
+    return NextResponse.json({
+      ok: true,
+      assets,
+      count: assets.length,
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to load media library";
     console.error("Media library load failed:", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    // Still return baseline so the admin UI is usable.
+    try {
+      const { baselineInUseMediaAssets } = await import(
+        "@/lib/cms/server/in-use-media.server"
+      );
+      const assets = baselineInUseMediaAssets();
+      return NextResponse.json({
+        ok: true,
+        assets,
+        count: assets.length,
+        warning: message,
+      });
+    } catch {
+      return NextResponse.json({ error: message }, { status: 500 });
+    }
   }
 }
 

@@ -9,6 +9,7 @@ import {
 } from "@/lib/cms/repositories/media-repository";
 import {
   assetsFromInUseUrls,
+  baselineInUseMediaAssets,
   collectInUseMediaUrls,
   isUrlInUse,
   normalizeMediaUrl,
@@ -81,33 +82,68 @@ async function readRemoteMedia(): Promise<MediaAsset[]> {
 }
 
 /**
- * Media Library = assets actually wired into site/CMS elements
- * (+ CMS uploads so newly added files remain pickable).
- * Unused files under public/assets and stock fillers are omitted.
+ * Media Library = assets wired into site/CMS elements (+ uploads).
+ * Always returns at least the hardcoded site baseline (Vercel-safe).
  */
 export async function syncMediaLibraryFromSupabase(): Promise<MediaAsset[]> {
-  ensureMediaFolders(SITE_MEDIA_FOLDERS);
+  try {
+    ensureMediaFolders(SITE_MEDIA_FOLDERS);
 
-  const inUse = await collectInUseMediaUrls();
-  const scanned = await scanSiteMediaAssets();
-  const site = scanned.filter((asset) => isUrlInUse(asset.url, inUse));
+    let inUse = new Set<string>();
+    try {
+      inUse = await collectInUseMediaUrls();
+    } catch (error) {
+      console.error("collectInUseMediaUrls failed:", error);
+    }
 
-  const remote = await readRemoteMedia();
-  // Keep uploads always; remote stock-like rows only if referenced.
-  const remoteKept = remote.filter(
-    (asset) =>
-      asset.url.includes("/uploads/") ||
-      asset.url.includes("cms-media") ||
-      asset.tags.includes("upload") ||
-      isUrlInUse(asset.url, inUse)
-  );
+    let site: MediaAsset[] = [];
+    try {
+      const scanned = await scanSiteMediaAssets();
+      site =
+        inUse.size > 0
+          ? scanned.filter((asset) => isUrlInUse(asset.url, inUse))
+          : scanned;
+    } catch (error) {
+      console.error("scanSiteMediaAssets failed:", error);
+    }
 
-  const have = new Set(
-    [...site, ...remoteKept].map((a) => normalizeMediaUrl(a.url))
-  );
-  const synthesized = assetsFromInUseUrls(inUse, have);
+    let remote: MediaAsset[] = [];
+    try {
+      remote = await readRemoteMedia();
+    } catch (error) {
+      console.error("readRemoteMedia failed:", error);
+    }
 
-  replaceMediaAssetsCache([...remoteKept, ...synthesized], site);
+    const remoteKept =
+      inUse.size > 0
+        ? remote.filter(
+            (asset) =>
+              asset.url.includes("/uploads/") ||
+              asset.url.includes("cms-media") ||
+              asset.tags.includes("upload") ||
+              isUrlInUse(asset.url, inUse)
+          )
+        : remote;
+
+    const have = new Set(
+      [...site, ...remoteKept].map((a) => normalizeMediaUrl(a.url))
+    );
+    const synthesized =
+      inUse.size > 0
+        ? assetsFromInUseUrls(inUse, have)
+        : baselineInUseMediaAssets().filter(
+            (a) => !have.has(normalizeMediaUrl(a.url))
+          );
+
+    replaceMediaAssetsCache([...remoteKept, ...synthesized], site);
+    const assets = getMediaAssets();
+    if (assets.length > 0) return assets;
+  } catch (error) {
+    console.error("syncMediaLibraryFromSupabase failed:", error);
+  }
+
+  const baseline = baselineInUseMediaAssets();
+  replaceMediaAssetsCache(baseline);
   return getMediaAssets();
 }
 
