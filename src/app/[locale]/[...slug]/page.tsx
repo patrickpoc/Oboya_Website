@@ -24,7 +24,9 @@ interface PageProps {
 }
 
 export function generateStaticParams() {
-  const slugs = getAllPageSlugs();
+  const slugs = getAllPageSlugs().filter(
+    (slug) => !(slug.length === 1 && slug[0] === "solutions")
+  );
   return routing.locales.flatMap((locale) =>
     slugs.map((slug) => ({ locale, slug }))
   );

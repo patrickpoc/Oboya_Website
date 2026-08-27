@@ -870,5 +870,67 @@
       "title": "5. Contact",
       "body": "For legal inquiries contact legal@oboya.example or your local Oboya office listed on the contact page."
     }
+  },
+  "solutionsPage": {
+    "metaTitle": "Solutions",
+    "heroEyebrow": "Solutions for Every Stage of Horticulture",
+    "heroTitle": "Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth. Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
+    "filters": {
+      "all": "All Crops",
+      "flowers": "Flowers",
+      "vegetables": "Vegetables & Herbs",
+      "fruits": "Fruits"
+    },
+    "categories": {
+      "all": {
+        "title": "Solutions for Every Crop",
+        "description": "Integrated systems for growers, exporters, distributors, and retailers across flowers, vegetables, herbs, and fruit operations."
+      },
+      "flowers": {
+        "title": "Solutions for Floriculture",
+        "description": "Supporting flower growers, exporters, distributors, and retailers from propagation to point of sale."
+      },
+      "vegetables": {
+        "title": "Solutions for Vegetables & Herbs",
+        "description": "Supporting efficient production, handling, packaging, and commercialization for vegetable and herb operations."
+      },
+      "fruits": {
+        "title": "Solutions for Fruits",
+        "description": "Optimizing cultivation, handling, packaging, and distribution across the fruit supply chain."
+      }
+    },
+    "cards": {
+      "propagation": {
+        "title": "Propagation Solutions",
+        "tags": "Seedling Trays, Substrates"
+      },
+      "growing": {
+        "title": "Growing Solutions",
+        "tags": "Seedling Trays, Substrates, Pots, Irrigation System"
+      },
+      "harvest": {
+        "title": "Harvest Solutions",
+        "tags": "Seedling Trays, Substrates, Pots, Irrigation System, Crates"
+      },
+      "postharvest": {
+        "title": "Postharvest Solutions",
+        "tags": "Packaging, Crates"
+      },
+      "transport": {
+        "title": "Transport & Logistics",
+        "tags": "Trolleys, Display"
+      },
+      "retail": {
+        "title": "Retail",
+        "tags": "Trolleys, Display"
+      },
+      "automation": {
+        "title": "Automation & Machinery",
+        "tags": "Packaging, Crates"
+      }
+    },
+    "ctaTitle": "Which Solution is Right for You?",
+    "ctaDescription": "In our work culture, honesty is a priority. We are here to offer you the solution you really need. Find out what it is here.",
+    "ctaButton": "Contact"
   }
 }

@@ -539,7 +539,7 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
       items: (() => {
         const raw = settings.businessSolutions?.items;
         if (!raw?.length) return defaults.businessSolutions.items;
-        const mapped = raw.map((item, i) => {
+        const mapped: HomepageBusinessSolution[] = raw.map((item, i) => {
           const fallback = defaults.businessSolutions.items[i];
           return {
             ...fallback,
@@ -556,7 +556,7 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
           return mapped;
         }
         const seen = new Set(mapped.map((m) => m.id));
-        const padded = [...mapped];
+        const padded: HomepageBusinessSolution[] = [...mapped];
         for (const fallback of defaults.businessSolutions.items) {
           if (padded.length >= defaults.businessSolutions.items.length) break;
           if (seen.has(fallback.id)) continue;
