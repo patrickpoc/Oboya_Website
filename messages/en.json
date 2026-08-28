@@ -549,6 +549,7 @@
     "priceMin": "Min",
     "priceMax": "Max",
     "quickView": "Quick View",
+    "moreInformation": "More information",
     "zoomEnable": "Enable image zoom",
     "zoomDisable": "Disable image zoom",
     "zoomHint": "Move the cursor over the image to zoom",

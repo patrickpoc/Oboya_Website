@@ -101,7 +101,7 @@ export function ProductCard({
               className: "w-full rounded-full",
             })}
           >
-            {t("quickView")}
+            {t("moreInformation")}
           </button>
         </div>
       </motion.article>
@@ -166,7 +166,7 @@ export function ProductCard({
               className: "w-full rounded-full",
             })}
           >
-            {t("quickView")}
+            {t("moreInformation")}
           </button>
         </div>
       </div>

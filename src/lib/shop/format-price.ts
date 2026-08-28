@@ -17,6 +17,8 @@ const CURRENCY_FORMAT_LOCALES: Record<string, string> = {
   AUD: "en-AU",
 };
 
+const SHOP_PRICE_DECIMALS = 3;
+
 export function formatShopPrice(
   amount: number,
   currency: CurrencyCode | string | null | undefined
@@ -29,10 +31,10 @@ export function formatShopPrice(
     return new Intl.NumberFormat(locale, {
       style: "currency",
       currency: code,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: SHOP_PRICE_DECIMALS,
+      maximumFractionDigits: SHOP_PRICE_DECIMALS,
     }).format(value);
   } catch {
-    return `${code} ${value.toFixed(2)}`;
+    return `${code} ${value.toFixed(SHOP_PRICE_DECIMALS)}`;
   }
 }

@@ -541,6 +541,7 @@
     "priceMin": "Min",
     "priceMax": "Max",
     "quickView": "Quick View",
+    "moreInformation": "更多信息",
     "zoomEnable": "启用图片缩放",
     "zoomDisable": "关闭图片缩放",
     "zoomHint": "将光标移到图片上即可放大",

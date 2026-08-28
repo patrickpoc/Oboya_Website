@@ -4,13 +4,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useCallback, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import { BrandLabel } from "@/components/shop/BrandLabel";
 import { useShop } from "@/contexts/ShopContext";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import { useProductName } from "@/lib/shop/use-product-name";
 import { useProductDescription } from "@/lib/shop/use-product-description";
 import { useOverlayA11y } from "@/hooks/use-overlay-a11y";
+import { ProductDescriptionContent } from "@/components/shop/product/ProductDescriptionContent";
 import { ProductGallery } from "@/components/shop/drawers/ProductGallery";
 import { SpecificationTable } from "@/components/shop/drawers/SpecificationTable";
 import { DownloadsList } from "@/components/shop/drawers/DownloadsList";
@@ -33,7 +33,7 @@ export function ProductDrawer() {
     categories,
   } = useShop();
   const getProductName = useProductName();
-  const { getExcerpt } = useProductDescription();
+  const { getDescriptionHtml, getShortDescription } = useProductDescription();
   const panelRef = useRef<HTMLElement>(null);
 
   const product = quickViewProductId
@@ -46,6 +46,11 @@ export function ProductDrawer() {
   const category = product ? categories.find((item) => item.id === product.categoryId) : null;
   const price =
     product && currency ? (product.prices[currency] ?? 0) : 0;
+
+  const descriptionHtml = product ? getDescriptionHtml(product.description) : "";
+  const shortDescription = product
+    ? getShortDescription(product.shortDescription)
+    : "";
 
   const handleClose = useCallback(() => setQuickViewProductId(null), [setQuickViewProductId]);
 
@@ -86,8 +91,8 @@ export function ProductDrawer() {
             ref={panelRef}
             role="dialog"
             aria-modal="true"
-            aria-label={t("quickView")}
-            className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col bg-white shadow-2xl"
+            aria-label={t("moreInformation")}
+            className="absolute inset-y-0 right-0 flex w-full max-w-2xl flex-col bg-white shadow-2xl"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
@@ -95,7 +100,7 @@ export function ProductDrawer() {
           >
             <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
               <h2 className="font-display text-lg font-semibold text-oboya-blue-dark">
-                {t("quickView")}
+                {t("moreInformation")}
               </h2>
               <button
                 type="button"
@@ -137,50 +142,45 @@ export function ProductDrawer() {
                 </p>
               </div>
 
-              {(() => {
-                const excerpt = getExcerpt({
-                  shortDescription: product.shortDescription,
-                  description: product.description,
-                });
-                if (excerpt) {
-                  return (
-                    <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                      {excerpt}
-                    </p>
-                  );
-                }
-                return (
-                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                    {t("productDescriptionFallback")}
-                  </p>
-                );
-              })()}
+              {shortDescription ? (
+                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                  {shortDescription}
+                </p>
+              ) : null}
 
-              <Link
-                href={`/shop/products/${product.id}`}
-                className="mt-3 inline-flex text-sm font-medium text-oboya-green hover:underline"
-                onClick={handleClose}
-              >
-                {t("viewFullDetails")}
-              </Link>
+              {descriptionHtml ? (
+                <div className="mt-6 border-t border-border/60 pt-6">
+                  <ProductDescriptionContent
+                    html={descriptionHtml}
+                    fallbackHtml={product.description.en}
+                    title={t("productInformation")}
+                  />
+                </div>
+              ) : null}
 
-              <div className="mt-6">
-                <h3 className="mb-2 text-sm font-semibold text-oboya-blue-dark">
-                  {t("specifications")}
-                </h3>
-                <SpecificationTable specs={product.specs} />
-              </div>
+              {product.specs.length > 0 ? (
+                <div className="mt-6">
+                  <h3 className="mb-2 text-sm font-semibold text-oboya-blue-dark">
+                    {t("specifications")}
+                  </h3>
+                  <SpecificationTable specs={product.specs} />
+                </div>
+              ) : null}
 
-              <div className="mt-6">
-                <DownloadsList documents={product.documents} />
-              </div>
+              {product.documents.length > 0 ? (
+                <div className="mt-6">
+                  <DownloadsList documents={product.documents} />
+                </div>
+              ) : null}
 
-              <div className="mt-6">
-                <RelatedProducts
-                  ids={product.relatedProductIds}
-                  onSelect={setQuickViewProductId}
-                />
-              </div>
+              {product.relatedProductIds.length > 0 ? (
+                <div className="mt-6">
+                  <RelatedProducts
+                    ids={product.relatedProductIds}
+                    onSelect={setQuickViewProductId}
+                  />
+                </div>
+              ) : null}
             </div>
 
             <div className="border-t border-border/60 px-5 py-4">

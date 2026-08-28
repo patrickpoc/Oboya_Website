@@ -1,4 +1,5 @@
-/** Shared, isomorphic helpers (no HTML sanitization — use .client or .server for that). */
+import "server-only";
+
 export {
   PRODUCT_DESCRIPTION_HTML_MAX_BYTES,
   PRODUCT_DESCRIPTION_MAX_IMAGES,
@@ -7,3 +8,9 @@ export {
   validateProductDescriptionHtml,
   validateProductDescriptions,
 } from "@/lib/cms/sanitize-rich-html.shared";
+
+export {
+  sanitizeRichHtml,
+  sanitizeLocalizedRichHtml,
+  sanitizeLocalizedPlainText,
+} from "@/lib/cms/sanitize-rich-html.server";
