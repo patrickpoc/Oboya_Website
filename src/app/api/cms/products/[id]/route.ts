@@ -15,6 +15,7 @@ import {
   saveProduct,
   softDeleteProduct,
 } from "@/lib/cms/server/products.server";
+import { persistProductWithContent } from "@/lib/cms/server/product-content.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
 
@@ -54,7 +55,8 @@ export async function PUT(
     if (body.id !== id) {
       return NextResponse.json({ error: "ID mismatch" }, { status: 400 });
     }
-    const saved = saveCmsProduct(body);
+    const previous = await readProductById(id);
+    const saved = saveCmsProduct(await persistProductWithContent(body, previous));
 
     if (isSupabaseConfigured()) {
       await saveProduct(saved);
@@ -63,12 +65,9 @@ export async function PUT(
     await persistProductsToFileSafe(getCmsProducts({ includeDeleted: true }));
     return NextResponse.json(saved);
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "Failed to persist product",
-      },
-      { status: 500 }
-    );
+    const message = error instanceof Error ? error.message : "Failed to persist product";
+    const status = /exceeds|too many images/i.test(message) ? 400 : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }
 

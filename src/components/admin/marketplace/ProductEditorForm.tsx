@@ -1,6 +1,7 @@
 "use client";
 
 import { useAdminMarketplaceCatalog } from "@/hooks/use-admin-marketplace-catalog";
+import { ProductDescriptionCard } from "@/components/admin/marketplace/ProductDescriptionCard";
 import { ProductMarketsCard } from "@/components/admin/marketplace/ProductMarketsCard";
 import { ProductPublicationCard } from "@/components/admin/marketplace/ProductPublicationCard";
 import { ProductRegistrationCard } from "@/components/admin/marketplace/ProductRegistrationCard";
@@ -66,6 +67,8 @@ export function ProductEditorForm({ product, onChange }: ProductEditorFormProps)
         currenciesLoading={catalogLoading}
         onUpdate={update}
       />
+
+      <ProductDescriptionCard product={product} onUpdate={update} />
 
       <ProductTaxonomyCard
         product={product}

@@ -16,6 +16,10 @@ import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetT
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { CmsLocale } from "@/lib/cms/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
+import { BrandLabel } from "@/components/shop/BrandLabel";
+import { CountryFlag } from "@/components/ui/country-flag";
+import { useMapLocations } from "@/lib/shop/use-map-locations";
+import { getMapFlagOptions } from "@/lib/shop/map-flag-options";
 import type { FilterOption, ShopBrand, ShopCategory, ShopFilterOptions, ShopLocalizedText } from "@/lib/shop/types";
 
 type OptionGroupKey = keyof ShopFilterOptions;
@@ -109,6 +113,11 @@ export default function MarketplaceFiltersPage() {
   const [confirmDescription, setConfirmDescription] = useState("");
   const [confirmBlocked, setConfirmBlocked] = useState(false);
   const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
+  const { data: mapLocations } = useMapLocations();
+  const mapFlagOptions = useMemo(
+    () => getMapFlagOptions(mapLocations),
+    [mapLocations]
+  );
 
   useEffect(() => {
     void (async () => {
@@ -519,7 +528,10 @@ export default function MarketplaceFiltersPage() {
                   {brands.slice(0, 6).map((brand) => (
                     <label key={`preview-brand-${brand.id}`} className="mb-1 flex items-center gap-2 text-sm text-oboya-blue-dark">
                       <input type="checkbox" disabled />
-                      {pickLocalized(brand.name, brand.nameI18n, editingLocale)}
+                      <BrandLabel
+                        brand={brand}
+                        locale={editingLocale}
+                      />
                     </label>
                   ))}
                 </div>
@@ -566,9 +578,9 @@ export default function MarketplaceFiltersPage() {
                 <div className="max-h-[32rem] space-y-2 overflow-y-auto pr-1">
                   {filteredBrands.map((brand) => (
                     <div key={brand.id} className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left ${selectedBrandId === brand.id ? "border-oboya-green/60 bg-oboya-green/5" : "border-border/60"}`}>
-                      <button type="button" className="flex items-center gap-1.5 text-sm font-medium text-oboya-blue-dark hover:underline" onClick={() => setSelectedBrandId(brand.id)}>
-                        <Tag className="size-3.5 text-muted-foreground" />
-                        {pickLocalized(brand.name, brand.nameI18n, editingLocale)}
+                      <button type="button" className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-oboya-blue-dark hover:underline" onClick={() => setSelectedBrandId(brand.id)}>
+                        <Tag className="size-3.5 shrink-0 text-muted-foreground" />
+                        <BrandLabel brand={brand} locale={editingLocale} />
                       </button>
                       <div className="flex items-center gap-1">
                         <Button
@@ -617,7 +629,7 @@ export default function MarketplaceFiltersPage() {
                 {brands.slice(0, 12).map((brand) => (
                   <label key={`brands-preview-${brand.id}`} className="mb-1 flex items-center gap-2 text-sm text-oboya-blue-dark">
                     <input type="checkbox" disabled />
-                    {pickLocalized(brand.name, brand.nameI18n, editingLocale)}
+                    <BrandLabel brand={brand} locale={editingLocale} />
                   </label>
                 ))}
               </CardContent>
@@ -885,6 +897,45 @@ export default function MarketplaceFiltersPage() {
                     />
                   )}
                 </LocaleFieldTabs>
+                <div className="space-y-1.5">
+                  <Label htmlFor="brand-flag">Country flag</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Options from the Global Presence map. Leave empty to hide the flag in the shop.
+                  </p>
+                  <select
+                    id="brand-flag"
+                    value={selectedBrand.flag ?? ""}
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      setBrands((prev) =>
+                        prev.map((brand) =>
+                          brand.id === selectedBrand.id
+                            ? { ...brand, flag: value || undefined }
+                            : brand
+                        )
+                      );
+                    }}
+                    className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-sm"
+                  >
+                    <option value="">No flag</option>
+                    {mapFlagOptions.map((option) => (
+                      <option key={option.code} value={option.code}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  {selectedBrand.flag ? (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span className="inline-flex h-3.5 w-[21px] overflow-hidden rounded-[2px] border border-border/40">
+                        <CountryFlag
+                          code={selectedBrand.flag}
+                          className="block h-full w-full"
+                        />
+                      </span>
+                      Shop preview
+                    </div>
+                  ) : null}
+                </div>
                 <p className="text-xs text-muted-foreground">Used by {brandUsage[selectedBrand.id] ?? 0} product(s)</p>
               </div>
             )}

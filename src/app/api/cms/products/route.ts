@@ -5,6 +5,7 @@ import {
   saveProduct,
   persistProductsToFileSafe,
 } from "@/lib/cms/server/products.server";
+import { persistProductWithContent } from "@/lib/cms/server/product-content.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
 
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
     }
 
     const body = (await request.json()) as CmsProduct;
-    const saved = saveCmsProduct(body);
+    const saved = saveCmsProduct(await persistProductWithContent(body));
 
     if (isSupabaseConfigured()) {
       await saveProduct(saved);
@@ -48,11 +49,8 @@ export async function POST(request: Request) {
     await persistProductsToFileSafe(getCmsProducts({ includeDeleted: true }));
     return NextResponse.json(saved, { status: 201 });
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "Failed to persist product",
-      },
-      { status: 500 }
-    );
+    const message = error instanceof Error ? error.message : "Failed to persist product";
+    const status = /exceeds|too many images/i.test(message) ? 400 : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }

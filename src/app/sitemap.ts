@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
 import { getAllPageSlugs } from "@/constants/pages";
-import { readBlogPosts } from "@/lib/cms/readers";
+import { readBlogPosts, readProducts } from "@/lib/cms/readers";
 
 const baseUrl = "https://oboya.cc";
 
@@ -39,5 +39,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [index, ...articles];
   });
 
-  return [...homeEntries, ...newsEntries, ...pageEntries];
+  const products = await readProducts();
+  const productEntries = routing.locales.flatMap((locale) =>
+    products.map((product) => ({
+      url: `${baseUrl}/${locale}/shop/products/${product.id}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    }))
+  );
+
+  const shopIndexEntries = routing.locales.map((locale) => ({
+    url: `${baseUrl}/${locale}/shop`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.9,
+  }));
+
+  return [...homeEntries, ...shopIndexEntries, ...productEntries, ...newsEntries, ...pageEntries];
 }

@@ -1,6 +1,7 @@
 import type { MediaAsset, MediaFolder } from "@/lib/cms/types";
 import {
   FOLDER_ECOVASO_PRODUCTS,
+  FOLDER_PRODUCT_DESCRIPTIONS,
   FOLDER_PRODUCTS,
   FOLDER_ROOT,
   FOLDER_WEBSITE_FILES,
@@ -26,6 +27,12 @@ const MOCK_FOLDERS: MediaFolder[] = [
   {
     id: FOLDER_ECOVASO_PRODUCTS,
     name: "Ecovaso Products",
+    parentId: FOLDER_PRODUCTS,
+    createdAt: "2026-01-01T00:00:00.000Z",
+  },
+  {
+    id: FOLDER_PRODUCT_DESCRIPTIONS,
+    name: "Product Descriptions",
     parentId: FOLDER_PRODUCTS,
     createdAt: "2026-01-01T00:00:00.000Z",
   },

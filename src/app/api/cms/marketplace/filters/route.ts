@@ -6,6 +6,7 @@ import {
   saveMarketplaceFilters,
 } from "@/lib/cms/server/marketplace-config.server";
 import { readProducts } from "@/lib/cms/server/products.server";
+import { getCountryCode } from "@/constants/country-flags";
 import type { ShopBrand, ShopCategory, ShopFilterOptions } from "@/lib/shop/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 
@@ -54,6 +55,20 @@ export async function GET() {
   }
 }
 
+function normalizeBrandFlag(flag?: string) {
+  const code = flag?.trim() ? getCountryCode(flag.trim()) : null;
+  return code ?? undefined;
+}
+
+function normalizeBrands(brands: ShopBrand[]): ShopBrand[] {
+  return brands.map((brand) => {
+    const flag = normalizeBrandFlag(brand.flag);
+    if (flag) return { ...brand, flag };
+    const { flag: _removed, ...rest } = brand;
+    return rest;
+  });
+}
+
 export async function PUT(request: Request) {
   try {
     if (isSupabaseConfigured()) {
@@ -65,6 +80,7 @@ export async function PUT(request: Request) {
       brands: ShopBrand[];
       filterOptions: ShopFilterOptions;
     };
+    payload.brands = normalizeBrands(payload.brands);
     const current = await readMarketplaceFilters();
     const products = (await readProducts({ includeDeleted: false })).filter(
       (product) => !product.deletedAt

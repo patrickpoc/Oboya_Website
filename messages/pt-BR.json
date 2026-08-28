@@ -576,6 +576,8 @@
     "moq": "MOQ: {count} unidades",
     "moqMinimumHint": "Quantidade mínima de pedido: {count} unidades",
     "productDescriptionFallback": "Professional-grade horticulture solution designed for commercial growers and distributors. Contact your local office for detailed technical information and market-specific availability.",
+    "productInformation": "Informações do produto",
+    "viewFullDetails": "Ver detalhes completos",
     "contactName": "Contact name",
     "submitting": "Submitting…",
     "continueBrowsing": "Continue browsing",

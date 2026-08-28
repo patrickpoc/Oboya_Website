@@ -32,6 +32,8 @@ export interface ShopBrand {
   id: string;
   name: string;
   nameI18n?: ShopLocalizedText;
+  /** ISO country code from the Global Presence map (e.g. BR, US). */
+  flag?: string;
 }
 
 export interface FilterOption {

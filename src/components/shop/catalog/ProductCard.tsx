@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
-import { Badge } from "@/components/ui/badge";
+import { useLocale, useTranslations } from "next-intl";
+import { BrandLabel } from "@/components/shop/BrandLabel";
 import { buttonVariants } from "@/components/ui/button";
 import { getBrandById, getCategoryById } from "@/lib/shop/catalog";
 import { useProductName } from "@/lib/shop/use-product-name";
+import { useProductDescription } from "@/lib/shop/use-product-description";
 import type { ShopProduct } from "@/lib/shop/types";
+import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import { formatShopPrice } from "@/lib/shop/format-price";
 
 const FALLBACK_IMAGE = "/assets/homepage/greenhouse-technology.webp";
@@ -28,8 +30,13 @@ export function ProductCard({
   onAddToQuote,
 }: ProductCardProps) {
   const t = useTranslations("shop");
+  const locale = useLocale();
   const getProductName = useProductName();
+  const { getShortDescription } = useProductDescription();
   const name = getProductName(product as Parameters<typeof getProductName>[0]);
+  const shortDescription = getShortDescription(
+    (product as CmsProduct).shortDescription
+  );
   const brand = getBrandById(product.brandId);
   const category = getCategoryById(product.categoryId);
   const price = product.prices[currency as keyof typeof product.prices] ?? 0;
@@ -57,8 +64,17 @@ export function ProductCard({
             </p>
           </div>
           <h3 className="mt-1 font-semibold text-oboya-blue-dark">{name}</h3>
-          <p className="text-xs text-muted-foreground">
-            {product.sku} · {brand?.name}
+          {shortDescription ? (
+            <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{shortDescription}</p>
+          ) : null}
+          <p className="mt-1 flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground">
+            <span>{product.sku}</span>
+            {brand ? (
+              <>
+                <span aria-hidden>·</span>
+                <BrandLabel brand={brand} locale={locale} />
+              </>
+            ) : null}
           </p>
           <p className="mt-2 text-sm font-semibold text-oboya-blue-dark">
             {t("estimatedPrice")}: {formatShopPrice(price, currency)}
@@ -112,19 +128,18 @@ export function ProductCard({
           {category?.name}
         </p>
         <h3 className="mt-1 min-h-[2.5rem] line-clamp-2 font-semibold text-oboya-blue-dark">{name}</h3>
-        <p className="mt-1 text-xs text-muted-foreground">
-          {product.sku} · {brand?.name}
+        {shortDescription ? (
+          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{shortDescription}</p>
+        ) : null}
+        <p className="mt-1 flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground">
+          <span>{product.sku}</span>
+          {brand ? (
+            <>
+              <span aria-hidden>·</span>
+              <BrandLabel brand={brand} locale={locale} />
+            </>
+          ) : null}
         </p>
-        {product.tags.length > 0 && (
-          <div className="mt-2 flex min-h-[1.5rem] flex-wrap gap-1">
-            {product.tags.slice(0, 2).map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-[10px]">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        )}
-        {product.tags.length === 0 && <div className="mt-2 min-h-[1.5rem]" />}
         <p className="mt-3 text-sm font-semibold text-oboya-blue-dark">
           {formatShopPrice(price, currency)}
         </p>

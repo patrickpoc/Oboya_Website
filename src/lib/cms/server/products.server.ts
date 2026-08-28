@@ -5,7 +5,7 @@ import path from "node:path";
 import { getCmsProducts, type CmsProduct } from "@/lib/cms/repositories/product-repository";
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createPublicClient } from "@/lib/supabase/server";
 
 const PRODUCTS_FILE = path.join(process.cwd(), "data", "shop", "products.json");
 
@@ -135,14 +135,25 @@ export async function readProducts(options?: { includeDeleted?: boolean }) {
     return getCmsProducts(options);
   }
 
-  const supabase = await createClient();
-  let query = supabase.from("cms_products").select("*").order("updated_at", { ascending: false });
-  if (!options?.includeDeleted) {
-    query = query.is("deleted_at", null);
+  try {
+    const supabase = createPublicClient();
+    let query = supabase
+      .from("cms_products")
+      .select("*")
+      .order("updated_at", { ascending: false });
+    if (!options?.includeDeleted) {
+      query = query.is("deleted_at", null);
+    }
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((row) => rowToProduct(row as ProductRow));
+  } catch (error) {
+    console.error(
+      "cms_products read:",
+      error instanceof Error ? error.message : error
+    );
+    return getCmsProducts(options);
   }
-  const { data, error } = await query;
-  if (error) throw new Error(`Failed to read products: ${error.message}`);
-  return (data ?? []).map((row) => rowToProduct(row as ProductRow));
 }
 
 export async function readProductById(id: string) {

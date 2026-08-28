@@ -576,6 +576,8 @@
     "moq": "MOQ：{count} 件",
     "moqMinimumHint": "最小订购量：{count} 件",
     "productDescriptionFallback": "Professional-grade horticulture solution designed for commercial growers and distributors. Contact your local office for detailed technical information and market-specific availability.",
+    "productInformation": "产品信息",
+    "viewFullDetails": "查看完整详情",
     "contactName": "Contact name",
     "submitting": "Submitting…",
     "continueBrowsing": "Continue browsing",

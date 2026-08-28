@@ -7,22 +7,11 @@ import { useOverlayA11y } from "@/hooks/use-overlay-a11y";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ShopLocalizedText } from "@/lib/shop/types";
+import { BrandLabel } from "@/components/shop/BrandLabel";
+import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 
 function toggleInList(list: string[], id: string) {
   return list.includes(id) ? list.filter((item) => item !== id) : [...list, id];
-}
-
-function pickLocalizedLabel(
-  locale: string,
-  name: string,
-  localized?: ShopLocalizedText
-) {
-  const key = locale as keyof ShopLocalizedText;
-  const value = localized?.[key]?.trim();
-  if (value) return value;
-  const en = localized?.en?.trim();
-  if (en) return en;
-  return name;
 }
 
 function FilterGroup({
@@ -49,7 +38,7 @@ function CheckboxRow({
   onChange,
 }: {
   id: string;
-  label: string;
+  label: React.ReactNode;
   checked: boolean;
   onChange: () => void;
 }) {
@@ -63,9 +52,9 @@ function CheckboxRow({
         type="checkbox"
         checked={checked}
         onChange={onChange}
-        className="size-4 rounded border-border text-oboya-green focus:ring-oboya-green/30"
+        className="size-4 shrink-0 rounded border-border text-oboya-green focus:ring-oboya-green/30"
       />
-      <span>{label}</span>
+      <span className="min-w-0">{label}</span>
     </label>
   );
 }
@@ -164,7 +153,7 @@ export function FilterSidebar({ className }: { className?: string }) {
           <CheckboxRow
             key={brand.id}
             id={`brand-${brand.id}`}
-            label={pickLocalizedLabel(locale, brand.name, brand.nameI18n)}
+            label={<BrandLabel brand={brand} locale={locale} />}
             checked={filters.brandIds.includes(brand.id)}
             onChange={() =>
               updateFilters({

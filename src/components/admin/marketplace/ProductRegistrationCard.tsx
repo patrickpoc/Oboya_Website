@@ -10,7 +10,7 @@ import {
 } from "@/components/admin/media/MediaLibraryDialog";
 import { LocalizedFieldGrid } from "@/components/admin/marketplace/LocalizedFieldGrid";
 import { RegistrationSection } from "@/components/admin/marketplace/RegistrationSection";
-import { PRODUCT_EDITOR_SELECT_CLASS } from "@/components/admin/marketplace/product-editor.constants";
+import { PRODUCT_EDITOR_SELECT_CLASS, PRODUCT_IMAGE_SECTION_DESCRIPTION } from "@/components/admin/marketplace/product-editor.constants";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -296,7 +296,7 @@ export function ProductRegistrationCard({
           </div>
         </RegistrationSection>
 
-        <RegistrationSection title="Images" description="First image is the main catalog image.">
+        <RegistrationSection title="Images" description={PRODUCT_IMAGE_SECTION_DESCRIPTION}>
           <div className="space-y-4">
             <div className="flex flex-wrap gap-2">
               <Button type="button" size="sm" variant="outline" onClick={addImage}>

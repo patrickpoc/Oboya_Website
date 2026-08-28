@@ -3,9 +3,13 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useCallback, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { BrandLabel } from "@/components/shop/BrandLabel";
 import { useShop } from "@/contexts/ShopContext";
+import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import { useProductName } from "@/lib/shop/use-product-name";
+import { useProductDescription } from "@/lib/shop/use-product-description";
 import { useOverlayA11y } from "@/hooks/use-overlay-a11y";
 import { ProductGallery } from "@/components/shop/drawers/ProductGallery";
 import { SpecificationTable } from "@/components/shop/drawers/SpecificationTable";
@@ -18,6 +22,7 @@ const panelEase = [0.22, 1, 0.36, 1] as const;
 
 export function ProductDrawer() {
   const t = useTranslations("shop");
+  const locale = useLocale();
   const {
     quickViewProductId,
     setQuickViewProductId,
@@ -28,10 +33,11 @@ export function ProductDrawer() {
     categories,
   } = useShop();
   const getProductName = useProductName();
+  const { getExcerpt } = useProductDescription();
   const panelRef = useRef<HTMLElement>(null);
 
   const product = quickViewProductId
-    ? getProductById(quickViewProductId)
+    ? (getProductById(quickViewProductId) as CmsProduct | undefined)
     : null;
   const isOpen = Boolean(product && currency);
 
@@ -111,8 +117,14 @@ export function ProductDrawer() {
                 <h3 className="mt-1 text-xl font-semibold text-oboya-blue-dark">
                   {name}
                 </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {product.sku} · {brand?.name}
+                <p className="mt-1 flex flex-wrap items-center gap-x-1 text-sm text-muted-foreground">
+                  <span>{product.sku}</span>
+                  {brand ? (
+                    <>
+                      <span aria-hidden>·</span>
+                      <BrandLabel brand={brand} locale={locale} />
+                    </>
+                  ) : null}
                 </p>
                 <p className="mt-3 text-lg font-semibold text-oboya-blue-dark">
                   {formatShopPrice(price, currency)}
@@ -125,9 +137,32 @@ export function ProductDrawer() {
                 </p>
               </div>
 
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                {t("productDescriptionFallback")}
-              </p>
+              {(() => {
+                const excerpt = getExcerpt({
+                  shortDescription: product.shortDescription,
+                  description: product.description,
+                });
+                if (excerpt) {
+                  return (
+                    <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                      {excerpt}
+                    </p>
+                  );
+                }
+                return (
+                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                    {t("productDescriptionFallback")}
+                  </p>
+                );
+              })()}
+
+              <Link
+                href={`/shop/products/${product.id}`}
+                className="mt-3 inline-flex text-sm font-medium text-oboya-green hover:underline"
+                onClick={handleClose}
+              >
+                {t("viewFullDetails")}
+              </Link>
 
               <div className="mt-6">
                 <h3 className="mb-2 text-sm font-semibold text-oboya-blue-dark">

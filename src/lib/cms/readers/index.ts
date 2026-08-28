@@ -34,6 +34,17 @@ export async function readProducts() {
   return getShopCatalog().products;
 }
 
+export async function readPublishedProductById(id: string) {
+  const { readProducts: readProductsFromStore } = await import(
+    "@/lib/cms/server/products.server"
+  );
+  const product = (await readProductsFromStore()).find((item) => item.id === id);
+  if (!product || product.status !== "published" || product.deletedAt) {
+    return undefined;
+  }
+  return product;
+}
+
 export function readProductById(id: string) {
   const cms = getCmsProductById(id);
   if (cms && cms.status === "published") return cms;
