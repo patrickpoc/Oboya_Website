@@ -50,6 +50,8 @@ export function QuoteCartSheet() {
     open: isCartOpen,
     onClose: handleClose,
     containerRef: panelRef,
+    lockScroll: false,
+    trapFocus: false,
   });
 
   const lineItems = getLineItems();
@@ -63,25 +65,17 @@ export function QuoteCartSheet() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="fixed inset-0 z-50 lg:hidden"
+          className="pointer-events-none fixed inset-x-0 bottom-0 z-50 lg:hidden"
         >
-          <button
-            type="button"
-            className="absolute inset-0 bg-oboya-blue-dark/40"
-            onClick={handleClose}
-            aria-label={t("close")}
-            tabIndex={-1}
-          />
           <motion.div
             ref={panelRef}
-            role="dialog"
-            aria-modal="true"
+            role="region"
             aria-label={t("quoteList")}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={mobileSheetTransition}
-            className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-hidden rounded-t-2xl bg-white shadow-2xl"
+            className="pointer-events-auto max-h-[85vh] overflow-hidden rounded-t-2xl border border-border/60 bg-white shadow-2xl"
           >
             <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-border" />
             <div className="flex items-center justify-between border-b border-border/50 px-4 py-3">

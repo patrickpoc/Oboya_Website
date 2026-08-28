@@ -96,6 +96,36 @@ export function ProductRegistrationCard({
     onUpdate({ images: next });
   };
 
+  const findEmptyImageSlotIndex = () =>
+    product.images.findIndex((image) => !image.trim());
+
+  const openMediaLibrary = (slotIndex?: number) => {
+    const targetIndex = slotIndex ?? findEmptyImageSlotIndex();
+    if (targetIndex < 0) {
+      toast.error("Add an image slot before choosing from the library.");
+      return;
+    }
+    setLibraryTargetIndex(targetIndex);
+    void refreshLibrary().then(() => setLibraryOpen(true));
+  };
+
+  const openImageUpload = (slotIndex?: number) => {
+    if (slotIndex !== undefined) {
+      setUploadTargetIndex(slotIndex);
+      requestAnimationFrame(() => imageUploadRef.current?.click());
+      return;
+    }
+
+    const emptyIndex = findEmptyImageSlotIndex();
+    if (emptyIndex >= 0) {
+      setUploadTargetIndex(emptyIndex);
+    } else {
+      addImage();
+      setUploadTargetIndex(product.images.length);
+    }
+    requestAnimationFrame(() => imageUploadRef.current?.click());
+  };
+
   const addImage = () => onUpdate({ images: [...product.images, ""] });
   const removeImage = (index: number) =>
     onUpdate({ images: product.images.filter((_, i) => i !== index) });
@@ -276,12 +306,7 @@ export function ProductRegistrationCard({
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={() => {
-                  const nextIndex = product.images.length;
-                  addImage();
-                  setUploadTargetIndex(nextIndex);
-                  requestAnimationFrame(() => imageUploadRef.current?.click());
-                }}
+                onClick={() => openImageUpload()}
               >
                 <Upload className="mr-1 size-3.5" /> Upload
               </Button>
@@ -289,12 +314,7 @@ export function ProductRegistrationCard({
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={() => {
-                  const nextIndex = product.images.length;
-                  addImage();
-                  setLibraryTargetIndex(nextIndex);
-                  void refreshLibrary().then(() => setLibraryOpen(true));
-                }}
+                onClick={() => openMediaLibrary()}
               >
                 <ImageIcon className="mr-1 size-3.5" /> Library
               </Button>
@@ -359,12 +379,16 @@ export function ProductRegistrationCard({
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => {
-                      setUploadTargetIndex(index);
-                      imageUploadRef.current?.click();
-                    }}
+                    onClick={() => openImageUpload(index)}
                   >
                     <Upload className="mr-1 size-3.5" /> Upload
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => openMediaLibrary(index)}
+                  >
+                    <ImageIcon className="mr-1 size-3.5" /> Library
                   </Button>
                   <Button
                     type="button"

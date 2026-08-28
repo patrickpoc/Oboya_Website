@@ -24,21 +24,31 @@ export function useOverlayA11y({
   open,
   onClose,
   containerRef,
+  lockScroll = true,
+  trapFocus = true,
 }: {
   open: boolean;
   onClose: () => void;
   containerRef: RefObject<HTMLElement | null>;
+  /** Lock document body scroll while open. Default true. */
+  lockScroll?: boolean;
+  /** Trap Tab focus inside the container. Default true. */
+  trapFocus?: boolean;
 }) {
   useEffect(() => {
     if (!open) return;
 
     const previouslyFocused = document.activeElement as HTMLElement | null;
     const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    if (lockScroll) {
+      document.body.style.overflow = "hidden";
+    }
 
     const container = containerRef.current;
     const focusables = container ? getFocusable(container) : [];
-    focusables[0]?.focus();
+    if (trapFocus) {
+      focusables[0]?.focus();
+    }
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -47,7 +57,7 @@ export function useOverlayA11y({
         return;
       }
 
-      if (event.key !== "Tab" || !container) return;
+      if (!trapFocus || event.key !== "Tab" || !container) return;
 
       const items = getFocusable(container);
       if (items.length === 0) {
@@ -72,9 +82,13 @@ export function useOverlayA11y({
 
     document.addEventListener("keydown", onKeyDown);
     return () => {
-      document.body.style.overflow = prevOverflow;
+      if (lockScroll) {
+        document.body.style.overflow = prevOverflow;
+      }
       document.removeEventListener("keydown", onKeyDown);
-      previouslyFocused?.focus?.();
+      if (trapFocus) {
+        previouslyFocused?.focus?.();
+      }
     };
-  }, [open, onClose, containerRef]);
+  }, [open, onClose, containerRef, lockScroll, trapFocus]);
 }
