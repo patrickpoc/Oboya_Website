@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { AdminPageFooterActions } from "@/components/admin/layout/AdminPageFooterActions";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -76,29 +77,28 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <div>
+    <div className="pb-24">
       <AdminPageHeader
         title={product.name["pt-BR"] || product.name.en || product.id}
         description={`SKU: ${product.sku} · MOQ: ${product.moq}`}
-        actions={
-          <div className="flex gap-2">
-            <Link
-              href="/admin/marketplace/products"
-              className={buttonVariants({ variant: "outline", className: "rounded-full" })}
-            >
-              Back
-            </Link>
-            <Button
-              onClick={handleSave}
-              className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
-            >
-              Save changes
-            </Button>
-          </div>
-        }
       />
 
       <ProductEditorForm product={product} onChange={setProduct} />
+
+      <AdminPageFooterActions>
+        <Link
+          href="/admin/marketplace/products"
+          className={buttonVariants({ variant: "outline", className: "rounded-full" })}
+        >
+          Back
+        </Link>
+        <Button
+          onClick={handleSave}
+          className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
+        >
+          Save changes
+        </Button>
+      </AdminPageFooterActions>
     </div>
   );
 }

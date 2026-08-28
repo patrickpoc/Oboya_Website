@@ -1,3 +1,4 @@
+import { normalizeProductTag } from "@/lib/shop/product-tags";
 import type { ShopProduct } from "@/lib/shop/types";
 import type { CmsStatus, LocalizedString, SeoFields } from "@/lib/cms/types";
 import productsData from "@/../data/shop/products.json";
@@ -171,8 +172,14 @@ export function bulkUpdateBySkus(params: {
   for (const product of products) {
     if (!skuSet.has(product.sku.toLowerCase())) continue;
     const nextTags = new Set(product.tags);
-    (params.addTags ?? []).forEach((tag) => nextTags.add(tag));
-    (params.removeTags ?? []).forEach((tag) => nextTags.delete(tag));
+    (params.addTags ?? []).forEach((tag) => {
+      const normalized = normalizeProductTag(tag);
+      if (normalized) nextTags.add(normalized);
+    });
+    (params.removeTags ?? []).forEach((tag) => {
+      const normalized = normalizeProductTag(tag);
+      if (normalized) nextTags.delete(normalized);
+    });
     const next: CmsProduct = {
       ...product,
       tags: Array.from(nextTags),

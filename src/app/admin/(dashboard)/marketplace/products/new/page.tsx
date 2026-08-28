@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { AdminPageFooterActions } from "@/components/admin/layout/AdminPageFooterActions";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { buttonVariants, Button } from "@/components/ui/button";
-import { getShopCatalog } from "@/lib/shop/catalog";
+import { useAdminMarketplaceCatalog } from "@/hooks/use-admin-marketplace-catalog";
 import { saveCmsProduct } from "@/lib/cms/repositories/product-repository";
+import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import {
   createEmptyCmsProduct,
   ProductEditorForm,
@@ -15,16 +17,22 @@ import {
 
 export default function ProductNewPage() {
   const router = useRouter();
-  const catalog = getShopCatalog();
-  const [product, setProduct] = useState(
-    createEmptyCmsProduct({
-      categoryId: catalog.categories[0]?.id,
-      subcategoryId: catalog.categories[0]?.subcategories[0]?.id,
-      brandId: catalog.brands[0]?.id,
-    })
-  );
+  const { catalog, loading } = useAdminMarketplaceCatalog();
+  const [product, setProduct] = useState<CmsProduct | null>(null);
+
+  useEffect(() => {
+    if (loading || product) return;
+    setProduct(
+      createEmptyCmsProduct({
+        categoryId: catalog.categories[0]?.id,
+        subcategoryId: catalog.categories[0]?.subcategories[0]?.id,
+        brandId: catalog.brands[0]?.id,
+      })
+    );
+  }, [catalog, loading, product]);
 
   const handleSave = () => {
+    if (!product) return;
     void (async () => {
       try {
         saveCmsProduct(product);
@@ -48,31 +56,35 @@ export default function ProductNewPage() {
   };
 
   return (
-    <div>
+    <div className="pb-24">
       <AdminPageHeader
         title="New product"
         description="Create a product with translations, media, countries and prices."
-        actions={
-          <div className="flex gap-2">
-            <Link
-              href="/admin/marketplace/products"
-              className={buttonVariants({
-                variant: "outline",
-                className: "rounded-full",
-              })}
-            >
-              Back
-            </Link>
-            <Button
-              onClick={handleSave}
-              className="rounded-full bg-oboya-green text-white hover:bg-oboya-green/90"
-            >
-              Create product
-            </Button>
-          </div>
-        }
       />
-      <ProductEditorForm product={product} onChange={setProduct} />
+      {product ? (
+        <ProductEditorForm product={product} onChange={setProduct} />
+      ) : (
+        <p className="text-sm text-muted-foreground">Loading product editor…</p>
+      )}
+
+      <AdminPageFooterActions>
+        <Link
+          href="/admin/marketplace/products"
+          className={buttonVariants({
+            variant: "outline",
+            className: "rounded-full",
+          })}
+        >
+          Back
+        </Link>
+        <Button
+          onClick={handleSave}
+          disabled={!product}
+          className="rounded-full bg-oboya-green text-white hover:bg-oboya-green/90"
+        >
+          Create product
+        </Button>
+      </AdminPageFooterActions>
     </div>
   );
 }

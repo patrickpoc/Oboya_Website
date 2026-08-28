@@ -1,8 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
-import { Film, ImageIcon, Link2, Upload, X } from "lucide-react";
+import { Film, ImageIcon, Link2, Upload } from "lucide-react";
+import { VideoThumbnail } from "@/components/admin/media/VideoThumbnail";
+import {
+  MediaLibraryDialog,
+  type MediaLibraryItem,
+} from "@/components/admin/media/MediaLibraryDialog";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,17 +15,13 @@ import { getMediaAssets, saveMediaAsset, replaceMediaAssetsCache } from "@/lib/c
 import { FOLDER_WEBSITE_FILES } from "@/lib/cms/media-folder-ids";
 import { uploadMediaFile } from "@/lib/cms/client/upload-media";
 import type { MediaAsset } from "@/lib/cms/types";
-import { cn } from "@/lib/utils";
 
 type SourceMode = "upload" | "url" | "library";
-export type MediaLibraryItem = {
-  id: string;
-  name: string;
-  url: string;
-  type: MediaAsset["type"];
-};
+export type { MediaLibraryItem };
 /** @deprecated Use MediaLibraryItem */
 export type MediaLibraryImage = MediaLibraryItem;
+
+export { MediaLibraryDialog };
 
 export type MediaFieldAllowedType = "image" | "video";
 
@@ -56,79 +56,6 @@ function fileNameFromUrl(url: string) {
 
 function isVideoUrl(url: string) {
   return /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(url);
-}
-
-/** Seek to a frame so the admin preview shows a real thumbnail, not a blank box. */
-function VideoThumbnailInner({
-  src,
-  className,
-}: {
-  src: string;
-  className?: string;
-}) {
-  const [frame, setFrame] = useState<string | null>(null);
-  const previewSrc = useMemo(() => {
-    const join = src.includes("?") ? "&" : "?";
-    // Cache-bust so a newly uploaded file always reloads its first frame.
-    return `${src}${join}preview=1#t=0.15`;
-  }, [src]);
-
-  return (
-    <div className={cn("relative size-full bg-oboya-blue-dark/10", className)}>
-      {frame ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={frame} alt="" className="size-full object-cover" />
-      ) : (
-        <video
-          src={previewSrc}
-          className="size-full object-cover"
-          muted
-          playsInline
-          preload="auto"
-          crossOrigin="anonymous"
-          onLoadedData={(e) => {
-            const v = e.currentTarget;
-            if (v.currentTime < 0.05) {
-              try {
-                v.currentTime = 0.15;
-              } catch {
-                // Some browsers block seeks until more data arrives.
-              }
-            }
-          }}
-          onSeeked={(e) => {
-            const v = e.currentTarget;
-            if (!v.videoWidth || !v.videoHeight) return;
-            try {
-              const canvas = document.createElement("canvas");
-              const maxW = 480;
-              const scale = Math.min(1, maxW / v.videoWidth);
-              canvas.width = Math.max(1, Math.round(v.videoWidth * scale));
-              canvas.height = Math.max(1, Math.round(v.videoHeight * scale));
-              const ctx = canvas.getContext("2d");
-              if (!ctx) return;
-              ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
-              setFrame(canvas.toDataURL("image/jpeg", 0.72));
-            } catch {
-              // CORS-tainted canvas — keep the seeked <video> frame visible.
-            }
-          }}
-        />
-      )}
-      <span
-        className="pointer-events-none absolute inset-0 flex items-center justify-center"
-        aria-hidden
-      >
-        <span className="flex size-9 items-center justify-center rounded-full bg-black/45 text-white shadow-sm backdrop-blur-[1px]">
-          <Film className="size-4" />
-        </span>
-      </span>
-    </div>
-  );
-}
-
-function VideoThumbnail(props: { src: string; className?: string }) {
-  return <VideoThumbnailInner key={props.src} {...props} />;
 }
 
 export function MediaField({
@@ -360,6 +287,8 @@ export function MediaField({
             name: a.name,
             url: a.url,
             type: a.type,
+            tags: a.tags,
+            folder: a.folder,
           }))}
           selected={value}
           onClose={() => setLibraryOpen(false)}
@@ -377,94 +306,4 @@ export function MediaField({
 /** @deprecated Prefer MediaField — kept for existing image-only editors */
 export function ImageField(props: Omit<MediaFieldProps, "allowedTypes">) {
   return <MediaField {...props} allowedTypes={["image"]} />;
-}
-
-export function MediaLibraryDialog({
-  items,
-  selected,
-  onSelect,
-  onClose,
-}: {
-  items: MediaLibraryItem[];
-  selected?: string;
-  onSelect: (url: string, name: string) => void;
-  onClose: () => void;
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <button
-        type="button"
-        className="absolute inset-0 bg-oboya-blue-dark/40 backdrop-blur-[2px]"
-        aria-label="Close media library"
-        onClick={onClose}
-      />
-      <div
-        role="dialog"
-        aria-modal
-        aria-label="Media library"
-        className="relative z-10 flex max-h-[min(80vh,640px)] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border/60 bg-white shadow-2xl"
-      >
-        <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
-          <div>
-            <h3 className="font-display text-lg font-semibold text-oboya-blue-dark">
-              Media library
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              Choose a file to use in this field
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
-            aria-label="Close"
-          >
-            <X className="size-4" />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-5">
-          {items.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No matching media yet.</p>
-          ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-              {items.map((asset) => {
-                const active = selected === asset.url;
-                return (
-                  <button
-                    key={asset.id}
-                    type="button"
-                    onClick={() => onSelect(asset.url, asset.name)}
-                    className={cn(
-                      "overflow-hidden rounded-xl border bg-oboya-soft-white text-left transition-shadow hover:shadow-md",
-                      active
-                        ? "border-oboya-green ring-2 ring-oboya-green/40"
-                        : "border-border/60"
-                    )}
-                  >
-                    <div className="relative aspect-video bg-muted">
-                      {asset.type === "video" ? (
-                        <VideoThumbnail src={asset.url} />
-                      ) : (
-                        <Image
-                          src={asset.url}
-                          alt={asset.name}
-                          fill
-                          className="object-cover"
-                          unoptimized
-                        />
-                      )}
-                    </div>
-                    <p className="truncate px-2 py-1.5 text-[11px] text-muted-foreground">
-                      {asset.name}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
 }
