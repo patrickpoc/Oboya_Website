@@ -39,7 +39,15 @@ export default function ProductsPage() {
 
   const refresh = async () => {
     const response = await fetch("/api/cms/products?includeDeleted=1", { cache: "no-store" });
+    if (!response.ok) {
+      toast.error("Não foi possível carregar os produtos.");
+      return;
+    }
     const all = (await response.json()) as CmsProduct[];
+    if (!Array.isArray(all)) {
+      toast.error("Não foi possível carregar os produtos.");
+      return;
+    }
     setProducts(all.filter((p) => !p.deletedAt));
     setDeletedProducts(all.filter((p) => Boolean(p.deletedAt)));
     setSelected([]);

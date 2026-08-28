@@ -5,20 +5,20 @@ import {
   saveProduct,
   persistProductsToFileSafe,
 } from "@/lib/cms/server/products.server";
-import { persistProductWithContent } from "@/lib/cms/server/product-content.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
 
 export async function GET(request: Request) {
   try {
     const includeDeleted = new URL(request.url).searchParams.get("includeDeleted") === "1";
-    if (includeDeleted && isSupabaseConfigured()) {
+    const asAdmin = includeDeleted && isSupabaseConfigured();
+    if (asAdmin) {
       const user = await requireAdminUser();
       if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
     }
-    const products = await readProducts({ includeDeleted });
+    const products = await readProducts({ includeDeleted, asAdmin });
     return NextResponse.json(products);
   } catch (error) {
     return NextResponse.json(
@@ -40,6 +40,9 @@ export async function POST(request: Request) {
     }
 
     const body = (await request.json()) as CmsProduct;
+    const { persistProductWithContent } = await import(
+      "@/lib/cms/server/product-content.server"
+    );
     const saved = saveCmsProduct(await persistProductWithContent(body));
 
     if (isSupabaseConfigured()) {

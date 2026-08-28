@@ -15,7 +15,6 @@ import {
   saveProduct,
   softDeleteProduct,
 } from "@/lib/cms/server/products.server";
-import { persistProductWithContent } from "@/lib/cms/server/product-content.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
 
@@ -25,8 +24,15 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const product = await readProductById(id);
+    const adminUser = isSupabaseConfigured() ? await requireAdminUser() : null;
+    const product = await readProductById(id, { asAdmin: Boolean(adminUser) });
     if (!product) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (
+      !adminUser &&
+      (product.status !== "published" || product.deletedAt)
+    ) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
     return NextResponse.json(product);
   } catch (error) {
     return NextResponse.json(
@@ -55,7 +61,10 @@ export async function PUT(
     if (body.id !== id) {
       return NextResponse.json({ error: "ID mismatch" }, { status: 400 });
     }
-    const previous = await readProductById(id);
+    const previous = await readProductById(id, { asAdmin: true });
+    const { persistProductWithContent } = await import(
+      "@/lib/cms/server/product-content.server"
+    );
     const saved = saveCmsProduct(await persistProductWithContent(body, previous));
 
     if (isSupabaseConfigured()) {

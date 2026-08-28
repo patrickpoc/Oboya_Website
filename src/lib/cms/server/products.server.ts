@@ -130,13 +130,22 @@ function productToRow(product: CmsProduct): ProductRow {
   };
 }
 
-export async function readProducts(options?: { includeDeleted?: boolean }) {
+export async function readProducts(options?: {
+  includeDeleted?: boolean;
+  /** Cookie-backed client for admin reads (drafts, trash). */
+  asAdmin?: boolean;
+}) {
   if (!isSupabaseConfigured()) {
     return getCmsProducts(options);
   }
 
+  const fallback = () => getCmsProducts(options);
+
   try {
-    const supabase = createPublicClient();
+    const supabase = options?.asAdmin
+      ? await createClient()
+      : createPublicClient();
+
     let query = supabase
       .from("cms_products")
       .select("*")
@@ -144,20 +153,40 @@ export async function readProducts(options?: { includeDeleted?: boolean }) {
     if (!options?.includeDeleted) {
       query = query.is("deleted_at", null);
     }
-    const { data, error } = await query;
+
+    const result = await Promise.race([
+      query,
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Supabase products timeout")), 5000)
+      ),
+    ]);
+
+    const { data, error } = result;
     if (error) throw new Error(error.message);
-    return (data ?? []).map((row) => rowToProduct(row as ProductRow));
+
+    const products = (data ?? []).map((row) => rowToProduct(row as ProductRow));
+    if (products.length === 0) {
+      const seed = fallback();
+      if (seed.length > 0) return seed;
+    }
+    return products;
   } catch (error) {
     console.error(
       "cms_products read:",
       error instanceof Error ? error.message : error
     );
-    return getCmsProducts(options);
+    return fallback();
   }
 }
 
-export async function readProductById(id: string) {
-  const products = await readProducts({ includeDeleted: true });
+export async function readProductById(
+  id: string,
+  options?: { asAdmin?: boolean }
+) {
+  const products = await readProducts({
+    includeDeleted: true,
+    asAdmin: options?.asAdmin,
+  });
   return products.find((product) => product.id === id);
 }
 
