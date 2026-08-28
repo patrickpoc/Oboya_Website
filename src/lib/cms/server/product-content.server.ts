@@ -6,7 +6,7 @@ import {
   sanitizeLocalizedPlainText,
   sanitizeLocalizedRichHtml,
   validateProductDescriptions,
-} from "@/lib/cms/sanitize-rich-html";
+} from "@/lib/cms/sanitize-rich-html.server";
 
 export function sanitizeProductContent(product: CmsProduct): CmsProduct {
   const shortDescription = sanitizeLocalizedPlainText(product.shortDescription);

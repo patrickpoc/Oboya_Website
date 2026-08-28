@@ -6,7 +6,7 @@ import { SiteLayout } from "@/components/layouts/SiteLayout";
 import { ProductDetailView } from "@/components/shop/product/ProductDetailView";
 import { readPublishedProductById } from "@/lib/cms/readers";
 import { pickLocalized } from "@/lib/cms/utils";
-import { stripHtmlToPlainText } from "@/lib/cms/sanitize-rich-html";
+import { stripHtmlToPlainText } from "@/lib/cms/sanitize-rich-html.shared";
 import { routing } from "@/i18n/routing";
 
 type Props = { params: Promise<{ locale: string; id: string }> };

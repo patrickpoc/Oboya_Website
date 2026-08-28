@@ -4,7 +4,7 @@ import { useLocale } from "next-intl";
 import { useCallback } from "react";
 import { pickLocalized } from "@/lib/cms/utils";
 import type { LocalizedString } from "@/lib/cms/types";
-import { stripHtmlToPlainText } from "@/lib/cms/sanitize-rich-html";
+import { stripHtmlToPlainText } from "@/lib/cms/sanitize-rich-html.shared";
 
 type LocalizedDescription = Partial<Record<"en" | "pt-BR" | "es" | "zh-CN", string>>;
 
