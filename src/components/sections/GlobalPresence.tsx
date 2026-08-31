@@ -5,15 +5,21 @@ import { motion } from "framer-motion";
 import { Container } from "@/components/ui/container";
 import { InteractiveWorldMap } from "@/components/sections/InteractiveWorldMap";
 import { fadeInUp } from "@/lib/animations";
-import type { ResolvedMapLocation } from "@/lib/map-locations";
+import type { MapConnection, ResolvedMapLocation } from "@/lib/map-locations";
 
 interface GlobalPresenceProps {
   locations: ResolvedMapLocation[];
+  connections?: MapConnection[];
   mapAlt: string;
   title?: string;
 }
 
-export function GlobalPresence({ locations, mapAlt, title }: GlobalPresenceProps) {
+export function GlobalPresence({
+  locations,
+  connections,
+  mapAlt,
+  title,
+}: GlobalPresenceProps) {
   const t = useTranslations("globalPresence");
   const heading = title ?? t("title");
 
@@ -41,6 +47,7 @@ export function GlobalPresence({ locations, mapAlt, title }: GlobalPresenceProps
         >
           <InteractiveWorldMap
             locations={locations}
+            connections={connections}
             mapAlt={mapAlt}
           />
         </motion.div>

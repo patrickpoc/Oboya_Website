@@ -1,0 +1,27 @@
+---
+description: Oboya brand color palette — use these HEX tokens for UI, accents, and marketing surfaces
+alwaysApply: true
+---
+
+# Oboya Brand Palette
+
+Official brand colors (Brand Guidelines). Prefer CSS tokens in `src/styles/tokens.css` / Tailwind `oboya-*` utilities over raw HEX in components.
+
+| Name | HEX | Token / class | Notes |
+|------|-----|---------------|--------|
+| Orange Red | `#ea5744` | `--oboya-orange` / `oboya-orange` | Accent, alerts, destructive |
+| Main Blue | `#004F7C` | `--oboya-blue` / `oboya-blue` | Primary brand blue |
+| Light Blue | `#009CD4` | `--oboya-blue-light` / `oboya-blue-light` | Highlights, links, sky accents |
+| Main Green | `#4DAF4E` | `--oboya-green` / `oboya-green` | Primary brand green |
+| Light Green | `#75C566` | `--oboya-green-light` / `oboya-green-light` | Soft green accents |
+| Dark Blue | `#01203F` | `--oboya-blue-dark` / `oboya-blue-dark` | Text, dark sections, navy |
+| Light Yellow | `#DBE64C` | `--oboya-yellow-light` / `oboya-yellow-light` | Bright lime accent |
+| Dark Yellow | `#909B03` | `--oboya-yellow-dark` / `oboya-yellow-dark` | Olive / chart accent |
+| Soft White | `#F1F5F1` | `--oboya-soft-white` / `oboya-soft-white` | Page / section backgrounds |
+
+## Usage
+
+- Do **not** invent alternate purples, creams, or off-brand gradients when a palette color fits.
+- Collapsed / accent strips (e.g. Numbers squeeze) should cycle **main** palette colors — not Soft White alone.
+- Prefer dark navy (`oboya-blue-dark`) or white text for contrast on saturated fills; Soft White and Light Yellow need dark text.
+- RGB / HSB / CMYK print refs live in brand docs; web work uses HEX + CSS tokens above.

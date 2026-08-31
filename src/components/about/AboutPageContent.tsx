@@ -1,6 +1,7 @@
 import { readAboutPageSettings } from "@/lib/cms/readers";
 import { AboutHero } from "@/components/about/AboutHero";
 import { AboutTimeline } from "@/components/about/AboutTimeline";
+import { AboutImpact } from "@/components/about/AboutImpact";
 import { AboutCallout } from "@/components/about/AboutCallout";
 import { AboutCorporateCulture } from "@/components/about/AboutCorporateCulture";
 import { AboutMission } from "@/components/about/AboutMission";
@@ -38,6 +39,9 @@ export async function AboutPageContent({
         )}
       {!afterTimeline && about.sections.timeline.enabled && (
         <AboutTimeline data={about.timeline} locale={locale} />
+      )}
+      {about.sections.impact.enabled && (
+        <AboutImpact data={about.impact} locale={locale} />
       )}
       {about.sections.callout.enabled && (
         <AboutCallout data={about.callout} locale={locale} />

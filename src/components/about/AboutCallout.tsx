@@ -26,7 +26,7 @@ export function AboutCallout({ data, locale }: AboutCalloutProps) {
           viewport={{ once: true, amount: 0.35 }}
           variants={fadeInUp}
         >
-          <p className="font-body text-sm font-medium leading-relaxed text-white/85 md:text-[0.9375rem]">
+          <p className="font-body text-sm font-semibold leading-relaxed text-white/85 md:text-[0.9375rem]">
             {data.segments.map((segment, index) => {
               const text = pickLocalized(segment.text, locale);
               const className =

@@ -17,6 +17,7 @@ import {
   MAP_COUNTRY_FIELDS,
   MAP_OFFICE_FIELDS,
   normalizeMapLocations,
+  pruneConnectionsForLocation,
   resolveMapLocationsForLocale,
   type MapLocation,
   type MapLocationsData,
@@ -219,7 +220,11 @@ export function MapLocationEditor() {
     const nextLocations = data.locations.filter(
       (location) => location.id !== selectedId
     );
-    setData({ ...data, locations: nextLocations });
+    setData({
+      ...data,
+      locations: nextLocations,
+      connections: pruneConnectionsForLocation(data.connections, selectedId),
+    });
     const next = nextLocations[0] ?? null;
     setSelectedId(next?.id ?? null);
     setSelectedOfficeId(next?.offices[0]?.id ?? null);
@@ -353,6 +358,7 @@ export function MapLocationEditor() {
               </div>
               <InteractiveWorldMap
                 locations={previewLocations}
+                connections={data?.connections}
                 mapAlt="Admin map editor"
                 editable
                 selectedId={selectedId}
@@ -495,6 +501,50 @@ export function MapLocationEditor() {
                         ))}
                       </div>
                     </div>
+                  </Field>
+
+                  <Field label="Has factories">
+                    <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={selectedLocation.hasFactories}
+                        onChange={(event) =>
+                          updateLocation(selectedLocation.id, (location) => ({
+                            ...location,
+                            hasFactories: event.target.checked,
+                          }))
+                        }
+                        className="size-4 rounded border-border text-oboya-green focus:ring-oboya-green"
+                      />
+                      <span>
+                        Map arrows originate from this country
+                        <span className="mt-0.5 block text-xs text-muted-foreground">
+                          Marks this location as a factory hub that can send arrows
+                        </span>
+                      </span>
+                    </label>
+                  </Field>
+
+                  <Field label="Send only">
+                    <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground">
+                      <input
+                        type="checkbox"
+                        checked={selectedLocation.sendOnly}
+                        onChange={(event) =>
+                          updateLocation(selectedLocation.id, (location) => ({
+                            ...location,
+                            sendOnly: event.target.checked,
+                          }))
+                        }
+                        className="size-4 rounded border-border text-oboya-green focus:ring-oboya-green"
+                      />
+                      <span>
+                        Does not receive arrows — only sends
+                        <span className="mt-0.5 block text-xs text-muted-foreground">
+                          Other hubs will never draw arrows into this country
+                        </span>
+                      </span>
+                    </label>
                   </Field>
 
                   {MAP_COUNTRY_FIELDS.map((field) => (

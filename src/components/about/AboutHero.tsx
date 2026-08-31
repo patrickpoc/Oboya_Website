@@ -33,7 +33,7 @@ export function AboutHero({
             animate="visible"
             variants={fadeInUp}
           >
-            <p className="font-body text-sm font-medium leading-relaxed text-oboya-blue-dark/85 md:text-[0.9375rem]">
+            <p className="font-body text-sm font-semibold leading-relaxed text-oboya-blue-dark/85 md:text-[0.9375rem]">
               {eyebrow}
             </p>
             <div

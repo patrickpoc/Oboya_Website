@@ -35,18 +35,21 @@ export async function readMapLocations(): Promise<MapLocationsData> {
       .eq("id", MAP_CONFIG_ID)
       .maybeSingle();
 
-    // Avoid hanging the homepage when Supabase is unreachable.
+    // Match products.server timeout — 1.5s was too aggressive on cold starts.
     const result = await Promise.race([
       query,
       new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Supabase map locations timeout")), 1500)
+        setTimeout(
+          () => reject(new Error("Supabase map locations timeout")),
+          5000
+        )
       ),
     ]);
 
     const { data, error } = result;
 
     if (error) {
-      console.error(
+      console.warn(
         "Supabase read map locations failed; falling back to local file:",
         error.message ?? error
       );
@@ -61,7 +64,7 @@ export async function readMapLocations(): Promise<MapLocationsData> {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unknown Supabase read error";
-    console.error(
+    console.warn(
       "Supabase read map locations failed; falling back to local file:",
       message
     );

@@ -112,7 +112,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     },
     {
       "id": "mexico",
@@ -180,7 +182,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     },
     {
       "id": "ecuador",
@@ -244,7 +248,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     },
     {
       "id": "colombia",
@@ -308,7 +314,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": true,
+      "sendOnly": false
     },
     {
       "id": "peru",
@@ -372,7 +380,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     },
     {
       "id": "chile",
@@ -436,7 +446,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     },
     {
       "id": "brazil",
@@ -546,7 +558,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": true,
+      "sendOnly": false
     },
     {
       "id": "argentina",
@@ -610,7 +624,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     },
     {
       "id": "norway",
@@ -678,7 +694,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     },
     {
       "id": "sweden",
@@ -742,7 +760,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     },
     {
       "id": "england",
@@ -810,7 +830,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     },
     {
       "id": "poland",
@@ -874,7 +896,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     },
     {
       "id": "ethiopia",
@@ -938,7 +962,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     },
     {
       "id": "kenya",
@@ -1002,7 +1028,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     },
     {
       "id": "southAfrica",
@@ -1066,7 +1094,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     },
     {
       "id": "uae",
@@ -1130,7 +1160,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     },
     {
       "id": "india",
@@ -1194,7 +1226,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     },
     {
       "id": "china",
@@ -1262,7 +1296,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": true,
+      "sendOnly": false
     },
     {
       "id": "hongKong",
@@ -1326,7 +1362,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     },
     {
       "id": "singapore",
@@ -1390,7 +1428,9 @@
             }
           }
         }
-      ]
+      ],
+      "hasFactories": false,
+      "sendOnly": false
     }
   ]
 }

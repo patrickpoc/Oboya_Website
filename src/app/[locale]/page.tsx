@@ -56,6 +56,7 @@ export default async function Home({ params }: Props) {
         <HomePageContent
           locale={locale}
           locations={locations}
+          connections={mapData.connections}
           mapAlt={t("mapAlt")}
           homepage={homepage}
         />

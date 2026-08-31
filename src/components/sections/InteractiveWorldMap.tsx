@@ -1,9 +1,22 @@
 "use client";
 
-import { Mouse, MousePointerClick } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
-import { MAP_VIEWBOX, type ResolvedMapLocation } from "@/lib/map-locations";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  MAP_VIEWBOX,
+  type MapConnection,
+  type ResolvedMapLocation,
+} from "@/lib/map-locations";
+import {
+  connectionPairKey,
+  getConnectionPhaseDelayMs,
+  getConnectionRestartJitterMs,
+  type ConnectionSlot,
+  pickNextConnection,
+  resolveConnectionPath,
+  seedDiverseConnections,
+  VISIBLE_CONNECTION_COUNT,
+} from "@/lib/map-connections";
+import { AnimatedMapConnection } from "@/components/sections/AnimatedMapConnection";
 import { MapLocationInfoPanel } from "@/components/sections/MapLocationInfoPanel";
 import { CountryFlag } from "@/components/ui/country-flag";
 import { screenToSvg } from "@/lib/svg-coords";
@@ -21,6 +34,7 @@ const FLAG_MAX_WIDTH_PX = 28;
 export interface InteractiveWorldMapProps {
   locations: ResolvedMapLocation[];
   mapAlt: string;
+  connections?: MapConnection[];
   editable?: boolean;
   selectedId?: string | null;
   onSelect?: (id: string) => void;
@@ -31,13 +45,13 @@ export interface InteractiveWorldMapProps {
 export function InteractiveWorldMap({
   locations,
   mapAlt,
+  connections,
   editable = false,
   selectedId = null,
   onSelect,
   onMove,
   onMapClick,
 }: InteractiveWorldMapProps) {
-  const t = useTranslations("globalPresence");
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -47,9 +61,133 @@ export function InteractiveWorldMap({
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [mapSize, setMapSize] = useState({ width: 0, height: 0 });
+  const [connectionSlots, setConnectionSlots] = useState<ConnectionSlot[]>([]);
+  const [connectionDelays, setConnectionDelays] = useState<Record<number, number>>(
+    {}
+  );
+  const locationsRef = useRef(locations);
+  locationsRef.current = locations;
 
   const highlightedId = editable ? selectedId : activeId;
   const autoPlayEnabled = !editable && !manualMode && !prefersReducedMotion;
+  /** Connection draw/erase runs independently of country hover/auto-cycle. */
+  const connectionAnimationEnabled = !editable && !prefersReducedMotion;
+
+  const locationIdsKey = useMemo(
+    () => locations.map((location) => location.id).join(","),
+    [locations]
+  );
+
+  const connectionsKey = useMemo(
+    () =>
+      connections?.map((connection) => `${connection.from}:${connection.to}`).join("|") ??
+      "",
+    [connections]
+  );
+
+  const factoriesKey = useMemo(
+    () =>
+      locations
+        .map(
+          (location) =>
+            `${location.id}:${location.hasFactories ? 1 : 0}:${location.sendOnly ? 1 : 0}`
+        )
+        .join(","),
+    [locations]
+  );
+
+  useEffect(() => {
+    const currentLocations = locationsRef.current;
+
+    if (currentLocations.length < 2) {
+      setConnectionSlots([]);
+      setConnectionDelays({});
+      return;
+    }
+
+    const seeded = seedDiverseConnections(
+      currentLocations,
+      VISIBLE_CONNECTION_COUNT,
+      connections
+    );
+
+    const slots: ConnectionSlot[] = seeded.map((connection, index) => ({
+      slotId: index,
+      from: connection.from,
+      to: connection.to,
+      cycle: 0,
+    }));
+
+    setConnectionSlots(slots);
+    setConnectionDelays(
+      Object.fromEntries(
+        slots.map((slot) => [
+          slot.slotId,
+          getConnectionPhaseDelayMs(slot.slotId, slots.length),
+        ])
+      )
+    );
+  }, [locationIdsKey, connectionsKey, connections, factoriesKey]);
+
+  const handleConnectionCycleComplete = useCallback(
+    (slotId: number) => {
+      setConnectionSlots((current) => {
+        const slot = current.find((item) => item.slotId === slotId);
+        if (!slot) return current;
+
+        const occupiedDestinations = new Set<string>();
+        for (const item of current) {
+          if (item.slotId === slotId) continue;
+          occupiedDestinations.add(item.to);
+        }
+
+        const next = pickNextConnection(locationsRef.current, {
+          occupiedDestinations,
+          avoidPairKey: connectionPairKey(slot.from, slot.to),
+          preferHubId: slot.from,
+          connections,
+        });
+
+        if (!next) return current;
+
+        return current.map((item) =>
+          item.slotId === slotId
+            ? {
+                ...item,
+                from: next.from,
+                to: next.to,
+                cycle: item.cycle + 1,
+              }
+            : item
+        );
+      });
+
+      // Keep phases desynced with a short organic pause — never restart all at 0.
+      setConnectionDelays((current) => ({
+        ...current,
+        [slotId]: getConnectionRestartJitterMs(),
+      }));
+    },
+    [connections]
+  );
+
+  const renderedConnections = useMemo(() => {
+    return connectionSlots.flatMap((slot) => {
+      const pathD = resolveConnectionPath(
+        { from: slot.from, to: slot.to },
+        locations,
+        MAP_VIEWBOX
+      );
+      if (!pathD) return [];
+      return [
+        {
+          ...slot,
+          pathD,
+          delayMs: connectionDelays[slot.slotId] ?? 0,
+        },
+      ];
+    });
+  }, [connectionSlots, connectionDelays, locations]);
 
   const flagWidth =
     mapSize.width > 0
@@ -234,6 +372,26 @@ export function InteractiveWorldMap({
           pointerEvents="none"
         />
 
+        {renderedConnections.length > 0 && (
+          <g className="map-connections" pointerEvents="none" aria-hidden>
+            {renderedConnections.map((connection) => (
+              <AnimatedMapConnection
+                key={`${connection.slotId}-${connection.cycle}-${connection.from}-${connection.to}`}
+                pathD={connection.pathD}
+                animate={connectionAnimationEnabled}
+                delayMs={
+                  connectionAnimationEnabled ? connection.delayMs : 0
+                }
+                onCycleComplete={
+                  connectionAnimationEnabled
+                    ? () => handleConnectionCycleComplete(connection.slotId)
+                    : undefined
+                }
+              />
+            ))}
+          </g>
+        )}
+
         {locations.map((location) => {
           const isActive = highlightedId === location.id;
           const isDragging = draggingId === location.id;
@@ -335,25 +493,6 @@ export function InteractiveWorldMap({
           </div>
         );
       })}
-
-      {!editable && (
-        <div className="pointer-events-none absolute right-2 bottom-2 z-[3] flex items-center gap-1.5 rounded-full border border-border/50 bg-white/95 px-3 py-1.5 text-xs font-medium text-oboya-blue-dark shadow-sm backdrop-blur-sm">
-          <MousePointerClick
-            className="size-3.5 shrink-0 text-oboya-green [@media(hover:hover)_and_(pointer:fine)]:hidden"
-            aria-hidden
-          />
-          <Mouse
-            className="hidden size-3.5 shrink-0 text-oboya-green [@media(hover:hover)_and_(pointer:fine)]:block"
-            aria-hidden
-          />
-          <span className="[@media(hover:hover)_and_(pointer:fine)]:hidden">
-            {t("interactiveHintTouch")}
-          </span>
-          <span className="hidden [@media(hover:hover)_and_(pointer:fine)]:inline">
-            {t("interactiveHint")}
-          </span>
-        </div>
-      )}
       </div>
 
       {!editable && activeLocation && (

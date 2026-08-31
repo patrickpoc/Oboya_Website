@@ -1,32 +1,36 @@
-import { Link } from "@/i18n/navigation";
-import { SiteLayout } from "@/components/layouts/SiteLayout";
-import { Container } from "@/components/ui/container";
-import { buttonVariants } from "@/components/ui/button";
+import { NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import { SiteLayout } from "@/components/layouts/SiteLayout";
+import { AppProviders } from "@/components/providers/AppProviders";
+import { Container } from "@/components/ui/container";
+import { NotFoundPage } from "@/components/ui/not-found-page";
+import { routing } from "@/i18n/routing";
+import { fontVariables } from "@/lib/fonts";
+import { cn } from "@/lib/utils";
 
-export default async function NotFound() {
-  const t = await getTranslations("common");
+export default async function GlobalNotFound() {
+  const locale = routing.defaultLocale;
+  const messages = (await import(`../../messages/${locale}.json`)).default;
+  const t = await getTranslations({ locale, namespace: "common" });
 
   return (
-    <SiteLayout>
-      <Container className="flex min-h-[60vh] flex-col items-center justify-center py-20 text-center">
-        <p className="mb-4 text-sm font-medium tracking-[0.2em] text-oboya-green uppercase">
-          404
-        </p>
-        <h1 className="mb-4 font-display text-4xl font-black text-oboya-blue-dark">
-          {t("notFoundTitle")}
-        </h1>
-        <p className="mb-8 max-w-md text-muted-foreground">{t("notFoundDesc")}</p>
-        <Link
-          href="/"
-          className={buttonVariants({
-            size: "cta",
-            className: "bg-oboya-green text-white hover:bg-oboya-green/90",
-          })}
-        >
-          {t("backHome")}
-        </Link>
-      </Container>
-    </SiteLayout>
+    <html lang={locale} className={cn(fontVariables, "h-full scroll-smooth")}>
+      <body className="flex min-h-full flex-col font-body antialiased">
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <AppProviders>
+            <SiteLayout>
+              <Container className="flex min-h-[60vh] items-center justify-center py-20">
+                <NotFoundPage
+                  title={t("notFoundTitle")}
+                  description={t("notFoundDesc")}
+                  backHomeLabel={t("backHome")}
+                  homeHref={`/${locale}`}
+                />
+              </Container>
+            </SiteLayout>
+          </AppProviders>
+        </NextIntlClientProvider>
+      </body>
+    </html>
   );
 }

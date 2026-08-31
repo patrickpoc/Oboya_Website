@@ -10,11 +10,12 @@ import { Testimonials } from "@/components/sections/Testimonials";
 import { readBlogPosts } from "@/lib/cms/readers";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
-import type { ResolvedMapLocation } from "@/lib/map-locations";
+import type { MapConnection, ResolvedMapLocation } from "@/lib/map-locations";
 
 interface HomePageContentProps {
   locale: string;
   locations: ResolvedMapLocation[];
+  connections?: MapConnection[];
   mapAlt: string;
   homepage: HomepageSettings;
 }
@@ -22,6 +23,7 @@ interface HomePageContentProps {
 export async function HomePageContent({
   locale,
   locations,
+  connections,
   mapAlt,
   homepage,
 }: HomePageContentProps) {
@@ -57,6 +59,7 @@ export async function HomePageContent({
       {homepage.sections.globalPresence.enabled && (
         <GlobalPresence
           locations={locations}
+          connections={connections}
           mapAlt={mapAlt}
           title={pickLocalized(homepage.globalPresence.title, locale)}
         />

@@ -73,13 +73,30 @@ export type MapLocation = {
   x: number;
   y: number;
   flag: string;
+  /** When true, map arrows can originate from this location (factories/hubs). */
+  hasFactories: boolean;
+  /** When true, this location only sends arrows and never receives them. */
+  sendOnly: boolean;
   translations: Record<Locale, MapCountryTranslation>;
   offices: MapOffice[];
+};
+
+/** Default factory hubs when legacy data omits `hasFactories`. */
+export const DEFAULT_FACTORY_HUB_IDS = new Set([
+  "brazil",
+  "china",
+  "colombia",
+]);
+
+export type MapConnection = {
+  from: string;
+  to: string;
 };
 
 export type MapLocationsData = {
   viewBox: { width: number; height: number };
   locations: MapLocation[];
+  connections?: MapConnection[];
 };
 
 export type ResolvedMapOffice = {
@@ -93,6 +110,8 @@ export type ResolvedMapLocation = {
   y: number;
   flag: string;
   country: string;
+  hasFactories: boolean;
+  sendOnly: boolean;
   offices: ResolvedMapOffice[];
 };
 
@@ -154,6 +173,8 @@ export function createEmptyLocation(existingIds: string[]): MapLocation {
     x: MAP_VIEWBOX.width / 2,
     y: MAP_VIEWBOX.height / 2,
     flag: "",
+    hasFactories: false,
+    sendOnly: false,
     translations,
     offices: [createEmptyOffice(id, [])],
   };
@@ -300,9 +321,29 @@ export function normalizeMapLocation(location: unknown): MapLocation | null {
     x: item.x,
     y: item.y,
     flag: item.flag,
+    hasFactories:
+      typeof item.hasFactories === "boolean"
+        ? item.hasFactories
+        : DEFAULT_FACTORY_HUB_IDS.has(item.id),
+    sendOnly: item.sendOnly === true,
     translations: countryTranslations,
     offices,
   };
+}
+
+export function normalizeMapConnection(connection: unknown): MapConnection | null {
+  if (!connection || typeof connection !== "object") return null;
+
+  const item = connection as Record<string, unknown>;
+  if (typeof item.from !== "string" || typeof item.to !== "string") {
+    return null;
+  }
+
+  const from = item.from.trim();
+  const to = item.to.trim();
+  if (!from || !to || from === to) return null;
+
+  return { from, to };
 }
 
 export function normalizeMapLocations(data: unknown): MapLocationsData {
@@ -315,6 +356,12 @@ export function normalizeMapLocations(data: unknown): MapLocationsData {
 
   const payload = data as Record<string, unknown>;
   const viewBoxRaw = payload.viewBox as Record<string, unknown> | undefined;
+
+  const connections = Array.isArray(payload.connections)
+    ? payload.connections
+        .map((connection) => normalizeMapConnection(connection))
+        .filter((connection): connection is MapConnection => connection !== null)
+    : undefined;
 
   return {
     viewBox: {
@@ -332,6 +379,7 @@ export function normalizeMapLocations(data: unknown): MapLocationsData {
           .map((location) => normalizeMapLocation(location))
           .filter((location): location is MapLocation => location !== null)
       : [],
+    ...(connections && connections.length > 0 ? { connections } : {}),
   };
 }
 
@@ -407,7 +455,39 @@ export function validateMapLocations(data: unknown): string[] {
     }
   }
 
+  const locationIds = new Set(normalized.locations.map((location) => location.id));
+
+  if (payload.connections !== undefined) {
+    if (!Array.isArray(payload.connections)) {
+      errors.push("connections must be an array when provided");
+    } else if (normalized.connections) {
+      for (const [index, connection] of normalized.connections.entries()) {
+        const prefix = `connections[${index}]`;
+
+        if (!locationIds.has(connection.from)) {
+          errors.push(`${prefix}.from "${connection.from}" is not a valid location id`);
+        }
+        if (!locationIds.has(connection.to)) {
+          errors.push(`${prefix}.to "${connection.to}" is not a valid location id`);
+        }
+      }
+    }
+  }
+
   return errors;
+}
+
+export function pruneConnectionsForLocation(
+  connections: MapConnection[] | undefined,
+  locationId: string
+): MapConnection[] | undefined {
+  if (!connections?.length) return connections;
+
+  const pruned = connections.filter(
+    (connection) => connection.from !== locationId && connection.to !== locationId
+  );
+
+  return pruned.length > 0 ? pruned : undefined;
 }
 
 export function resolveMapLocationsForLocale(
@@ -424,6 +504,8 @@ export function resolveMapLocationsForLocale(
       y: location.y,
       flag: getCountryCode(location.flag) || location.flag,
       country: countryTranslation.country,
+      hasFactories: location.hasFactories,
+      sendOnly: location.sendOnly,
       offices: location.offices.map((office) => {
         const translation =
           office.translations[locale] ?? office.translations.en;

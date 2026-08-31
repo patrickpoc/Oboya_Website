@@ -1,11 +1,12 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Container } from "@/components/ui/container";
-import { AnimatedCounter } from "@/components/ui/animated-counter";
-import { fadeInUp, staggerContainer } from "@/lib/animations";
+import { NumbersSqueezeCarousel } from "@/components/about/NumbersSqueezeCarousel";
+import { fadeInUp } from "@/lib/animations";
 import { pickLocalized } from "@/lib/cms/utils";
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
+import { cn } from "@/lib/utils";
 
 interface AboutImpactProps {
   data: AboutPageSettings["impact"];
@@ -13,62 +14,61 @@ interface AboutImpactProps {
 }
 
 export function AboutImpact({ data, locale }: AboutImpactProps) {
+  const reduceMotion = useReducedMotion();
+  const title = pickLocalized(data.title, locale);
+  const description = pickLocalized(data.description, locale);
+  const eyebrow = data.eyebrow
+    ? pickLocalized(data.eyebrow, locale)
+    : null;
+
+  const reveal = reduceMotion
+    ? undefined
+    : ({
+        initial: "hidden" as const,
+        whileInView: "visible" as const,
+        viewport: { once: true, margin: "-80px" },
+      } as const);
+
   return (
-    <section className="bg-white py-[clamp(5rem,12vw,9rem)]">
+    <section className="border-t border-oboya-green/35 bg-white py-[clamp(4.5rem,10vw,8rem)]">
       <Container>
         <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          variants={staggerContainer}
-          className="mx-auto max-w-3xl text-center"
+          {...(reveal ?? {})}
+          initial={reveal ? "hidden" : false}
+          variants={reduceMotion ? undefined : fadeInUp}
+          className="mx-auto mb-10 max-w-3xl text-center md:mb-12"
         >
-          <motion.p
-            variants={fadeInUp}
-            className="font-body text-[0.8125rem] font-medium tracking-[0.04em] text-oboya-green md:text-sm"
+          {eyebrow ? (
+            <p className="font-body text-[0.8125rem] font-medium tracking-[0.04em] text-oboya-green md:text-sm">
+              {eyebrow}
+            </p>
+          ) : null}
+          <h2
+            className={cn(
+              "font-display text-[clamp(1.75rem,3.2vw,2.75rem)] font-semibold tracking-[-0.02em] text-oboya-blue-dark text-balance",
+              eyebrow && "mt-4"
+            )}
           >
-            {pickLocalized(data.eyebrow, locale)}
-          </motion.p>
-          <motion.h2
-            variants={fadeInUp}
-            className="mt-4 font-display text-[clamp(1.75rem,3.2vw,2.75rem)] font-semibold tracking-[-0.02em] text-oboya-blue-dark text-balance"
-          >
-            {pickLocalized(data.title, locale)}
-          </motion.h2>
-          <motion.p
-            variants={fadeInUp}
-            className="mt-4 font-body text-[1.0625rem] leading-relaxed text-oboya-blue-dark/60"
-          >
-            {pickLocalized(data.description, locale)}
-          </motion.p>
+            {title}
+          </h2>
         </motion.div>
 
-        <motion.ul
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          variants={staggerContainer}
-          className="mt-14 grid gap-8 sm:grid-cols-2 lg:mt-20 lg:grid-cols-4"
+        <motion.div
+          {...(reveal ?? {})}
+          initial={reveal ? "hidden" : false}
+          variants={reduceMotion ? undefined : fadeInUp}
         >
-          {data.stats.map((stat) => (
-            <motion.li
-              key={stat.id}
-              variants={fadeInUp}
-              className="text-center"
-            >
-              <p className="font-display text-[clamp(2.5rem,5vw,3.75rem)] font-light leading-none tracking-tight text-oboya-blue-dark">
-                <AnimatedCounter
-                  value={stat.value}
-                  suffix={stat.suffix}
-                  duration={2.4}
-                />
-              </p>
-              <p className="mt-3 font-body text-sm text-oboya-blue-dark/55 md:text-base">
-                {pickLocalized(stat.label, locale)}
-              </p>
-            </motion.li>
-          ))}
-        </motion.ul>
+          <NumbersSqueezeCarousel stats={data.stats} locale={locale} />
+        </motion.div>
+
+        <motion.p
+          {...(reveal ?? {})}
+          initial={reveal ? "hidden" : false}
+          variants={reduceMotion ? undefined : fadeInUp}
+          className="mx-auto mt-10 max-w-3xl text-center font-body text-[0.9375rem] leading-relaxed text-oboya-blue-dark/65 md:mt-12 md:text-base"
+        >
+          {description}
+        </motion.p>
       </Container>
     </section>
   );

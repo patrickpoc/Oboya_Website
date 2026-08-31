@@ -57,6 +57,9 @@ export interface AboutValueItem {
   id: string;
   title: LocalizedString;
   description: LocalizedString;
+  image: AboutMediaImage;
+  /** CSS object-position for the value image, e.g. "center 40%". */
+  objectPosition?: string;
 }
 
 export interface AboutHonorItem {
@@ -66,11 +69,29 @@ export interface AboutHonorItem {
   href?: string;
 }
 
+export type AboutImpactStatIcon =
+  | "globe"
+  | "factory"
+  | "building"
+  | "users"
+  | "handshake"
+  | "package"
+  | "calendar";
+
 export interface AboutImpactStat {
   id: string;
   value: number;
   suffix: string;
   label: LocalizedString;
+  icon: AboutImpactStatIcon;
+  /** When true, show placeholder instead of counting (unverified). */
+  pending?: boolean;
+  /** Photography for the Numbers squeeze panel. */
+  image: AboutMediaImage;
+  /** CSS object-position for the panel image. */
+  objectPosition?: string;
+  /** Collapsed-panel brand fill (HEX from Oboya palette). */
+  accentColor: string;
 }
 
 export interface AboutPerson {
@@ -101,7 +122,8 @@ export interface AboutPageSettings {
     nextLabel: LocalizedString;
   };
   impact: {
-    eyebrow: LocalizedString;
+    /** Optional small label above the title. */
+    eyebrow?: LocalizedString;
     title: LocalizedString;
     description: LocalizedString;
     stats: AboutImpactStat[];
@@ -151,7 +173,7 @@ const defaultSettings = (): AboutPageSettings => ({
     hero: { enabled: true },
     institutionalImage: { enabled: true },
     timeline: { enabled: true },
-    impact: { enabled: false },
+    impact: { enabled: true },
     people: { enabled: false },
     callout: { enabled: true },
     culture: { enabled: true },
@@ -259,62 +281,182 @@ const defaultSettings = (): AboutPageSettings => ({
     ],
   },
   impact: {
-    eyebrow: loc("Impact", "Impacto", "Impacto", "影响力"),
     title: loc(
-      "Growing with purpose worldwide",
-      "Crescendo com propósito no mundo",
-      "Creciendo con propósito en el mundo",
-      "以使命推动全球增长"
+      "Oboya Horticulture in Numbers",
+      "Oboya Horticulture em Números",
+      "Oboya Horticulture en Números",
+      "Oboya Horticulture 数据一览"
     ),
     description: loc(
-      "Decades of partnership with growers, measured in reach, trust, and sustainable progress.",
-      "Décadas de parceria com produtores, medidas em alcance, confiança e progresso sustentável.",
-      "Décadas de partnership con productores, medidas en alcance, confianza y progreso sostenible.",
-      "与种植者数十年的合作，体现在覆盖、信任与可持续进步。"
+      "Our combination of global manufacturing, strategic sourcing, and local support lets us respond quickly to customer needs while maintaining high-quality standards across multiple markets.",
+      "Nossa combinação de manufatura global, sourcing estratégico e suporte local nos permite responder rapidamente às necessidades dos clientes, mantendo altos padrões de qualidade em múltiplos mercados.",
+      "Nuestra combinación de manufactura global, sourcing estratégico y soporte local nos permite responder con rapidez a las necesidades de los clientes, manteniendo altos estándares de calidad en múltiples mercados.",
+      "凭借全球制造、战略采购与本地支持的结合，我们能快速响应客户需求，并在多个市场保持高品质标准。"
     ),
     stats: [
       {
         id: "countries",
         value: 80,
         suffix: "+",
+        icon: "globe",
+        accentColor: "#004F7C",
+        objectPosition: "center 40%",
+        image: {
+          src: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1400&auto=format&fit=crop",
+          alt: loc(
+            "Earth from space representing global markets",
+            "Terra vista do espaço representando mercados globais",
+            "Tierra vista desde el espacio representando mercados globales",
+            "从太空看地球，象征全球市场"
+          ),
+        },
         label: loc(
-          "Countries served",
-          "Países atendidos",
-          "Países atendidos",
+          "Countries Served",
+          "Países Atendidos",
+          "Países Atendidos",
           "服务国家"
+        ),
+      },
+      {
+        id: "manufacturing",
+        value: 0,
+        suffix: "",
+        icon: "factory",
+        pending: true,
+        accentColor: "#4DAF4E",
+        objectPosition: "center 35%",
+        image: {
+          src: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1400&auto=format&fit=crop",
+          alt: loc(
+            "Technician in a manufacturing and production environment",
+            "Técnico em ambiente de manufatura e produção",
+            "Técnico en un entorno de manufactura y producción",
+            "技术人员在制造与生产环境中工作"
+          ),
+        },
+        label: loc(
+          "Manufacturing Facilities",
+          "Unidades de Manufatura",
+          "Instalaciones de Manufactura",
+          "制造工厂"
+        ),
+      },
+      {
+        id: "offices",
+        value: 0,
+        suffix: "",
+        icon: "building",
+        pending: true,
+        accentColor: "#009CD4",
+        objectPosition: "center 30%",
+        image: {
+          src: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1400&auto=format&fit=crop",
+          alt: loc(
+            "Modern regional office interior with workstations",
+            "Interior de escritório regional moderno com estações de trabalho",
+            "Interior de oficina regional moderna con estaciones de trabajo",
+            "现代化区域办公室内的工位"
+          ),
+        },
+        label: loc(
+          "Regional Offices",
+          "Escritórios Regionais",
+          "Oficinas Regionales",
+          "区域办事处"
+        ),
+      },
+      {
+        id: "employees",
+        value: 1400,
+        suffix: "+",
+        icon: "users",
+        accentColor: "#01203F",
+        objectPosition: "center 30%",
+        image: {
+          src: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1400&auto=format&fit=crop",
+          alt: loc(
+            "Diverse team collaborating around a shared workspace",
+            "Equipe diversa colaborando em um espaço de trabalho compartilhado",
+            "Equipo diverso colaborando en un espacio de trabajo compartido",
+            "多元化团队在共享工作空间中协作"
+          ),
+        },
+        label: loc(
+          "Employees Worldwide",
+          "Colaboradores no Mundo",
+          "Empleados en el Mundo",
+          "全球员工"
+        ),
+      },
+      {
+        id: "clients",
+        value: 0,
+        suffix: "",
+        icon: "handshake",
+        pending: true,
+        accentColor: "#ea5744",
+        objectPosition: "center 30%",
+        image: {
+          src: "https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1400&auto=format&fit=crop",
+          alt: loc(
+            "Partners shaking hands after a successful agreement",
+            "Parceiros apertando as mãos após um acordo bem-sucedido",
+            "Socios estrechándose la mano tras un acuerdo exitoso",
+            "合作伙伴在达成协议后握手"
+          ),
+        },
+        label: loc(
+          "Clients Served",
+          "Clientes Atendidos",
+          "Clientes Atendidos",
+          "服务客户"
+        ),
+      },
+      {
+        id: "products",
+        value: 0,
+        suffix: "",
+        icon: "package",
+        pending: true,
+        accentColor: "#75C566",
+        objectPosition: "center 45%",
+        image: {
+          src: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=1400&auto=format&fit=crop",
+          alt: loc(
+            "Horticulture products and plants arranged in a greenhouse",
+            "Produtos de horticultura e plantas organizados em uma estufa",
+            "Productos de horticultura y plantas organizados en un invernadero",
+            "温室中排列的园艺产品与植物"
+          ),
+        },
+        label: loc(
+          "Product Categories",
+          "Categorias de Produto",
+          "Categorías de Producto",
+          "产品类别"
         ),
       },
       {
         id: "years",
         value: 20,
         suffix: "+",
+        icon: "calendar",
+        accentColor: "#909B03",
+        objectPosition: "center 40%",
+        image: {
+          src: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=1400&auto=format&fit=crop",
+          alt: loc(
+            "Cultivated field reflecting decades of horticulture experience",
+            "Campo cultivado refletindo décadas de experiência em horticultura",
+            "Campo cultivado que refleja décadas de experiencia en horticultura",
+            "农田景象，象征数十年园艺经验"
+          ),
+        },
         label: loc(
-          "Years of industry experience",
-          "Anos de experiência",
-          "Años de experiencia",
-          "行业经验年数"
-        ),
-      },
-      {
-        id: "facilities",
-        value: 12,
-        suffix: "",
-        label: loc(
-          "Production & sales hubs",
-          "Hubs de produção e vendas",
-          "Hubs de producción y ventas",
-          "生产与销售中心"
-        ),
-      },
-      {
-        id: "team",
-        value: 1400,
-        suffix: "+",
-        label: loc(
-          "People behind Oboya",
-          "Pessoas por trás da Oboya",
-          "Personas detrás de Oboya",
-          "Oboya 团队成员"
+          "Years Supporting Horticulture",
+          "Anos Apoiando a Horticultura",
+          "Años Apoyando la Horticultura",
+          "服务园艺行业年数"
         ),
       },
     ],
@@ -618,6 +760,16 @@ const defaultSettings = (): AboutPageSettings => ({
           "Mejoramos continuamente materiales, sistemas y servicios para que los negocios hortícolas se mantengan a la vanguardia.",
           "我们持续改进材料、系统与服务，使园艺企业走在变化前列。"
         ),
+        image: {
+          src: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1400&auto=format&fit=crop",
+          alt: loc(
+            "Modern greenhouse with rows of growing plants",
+            "Estufa moderna com fileiras de plantas em crescimento",
+            "Invernadero moderno con filas de plantas en crecimiento",
+            "现代化温室中成排生长的植物"
+          ),
+        },
+        objectPosition: "center 45%",
       },
       {
         id: "integrity",
@@ -628,6 +780,16 @@ const defaultSettings = (): AboutPageSettings => ({
           "Alianzas honestas y compromisos transparentes guían cómo fabricamos, vendemos y apoyamos a cada cliente.",
           "诚实的伙伴关系与透明的承诺指引我们如何制造、销售并支持每位客户。"
         ),
+        image: {
+          src: "https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1400&auto=format&fit=crop",
+          alt: loc(
+            "Business partners shaking hands in agreement",
+            "Parceiros de negócios apertando as mãos em acordo",
+            "Socios comerciales estrechandose la mano en acuerdo",
+            "商业伙伴握手达成协议"
+          ),
+        },
+        objectPosition: "center 30%",
       },
       {
         id: "customer-oriented",
@@ -643,6 +805,16 @@ const defaultSettings = (): AboutPageSettings => ({
           "Escuchamos de cerca a productores y socios, moldeando soluciones en torno a necesidades reales del mercado y el éxito a largo plazo.",
           "我们密切倾听种植者与合作伙伴，围绕真实市场需求与长期成功打造方案。"
         ),
+        image: {
+          src: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=1400&auto=format&fit=crop",
+          alt: loc(
+            "Grower inspecting crops in a cultivated field",
+            "Produtor inspecionando cultivos em um campo cultivado",
+            "Productor inspeccionando cultivos en un campo cultivado",
+            "种植者在农田中检查作物"
+          ),
+        },
+        objectPosition: "center 40%",
       },
       {
         id: "professional",
@@ -653,6 +825,16 @@ const defaultSettings = (): AboutPageSettings => ({
           "Experiencia, disciplina y cuidado en cada producto, proceso y conversación — de la planta al estante.",
           "每一件产品、每一道流程、每一次沟通都体现专业、纪律与用心——从工厂到货架。"
         ),
+        image: {
+          src: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1400&auto=format&fit=crop",
+          alt: loc(
+            "Technician working carefully in a production environment",
+            "Técnico trabalhando com cuidado em ambiente de produção",
+            "Técnico trabajando con cuidado en un entorno de producción",
+            "技术人员在生产环境中细致工作"
+          ),
+        },
+        objectPosition: "center 35%",
       },
       {
         id: "responsibility",
@@ -668,6 +850,16 @@ const defaultSettings = (): AboutPageSettings => ({
           "Actuamos con respeto por las personas, las comunidades y el medio ambiente en cada mercado que servimos.",
           "我们在所服务的每个市场中尊重人、社区与环境。"
         ),
+        image: {
+          src: "https://images.unsplash.com/photo-1470058869958-2a77ade41c02?q=80&w=1400&auto=format&fit=crop",
+          alt: loc(
+            "Lush green plants growing in a sustainable environment",
+            "Plantas verdes exuberantes crescendo em ambiente sustentável",
+            "Plantas verdes exuberantes creciendo en un entorno sostenible",
+            "可持续环境中茂盛生长的绿色植物"
+          ),
+        },
+        objectPosition: "center 40%",
       },
     ],
   },
@@ -702,8 +894,255 @@ const defaultSettings = (): AboutPageSettings => ({
 });
 
 let cache: AboutPageSettings | null = null;
-const CONTENT_REVISION = 12;
+const CONTENT_REVISION = 16;
 let cacheRevision = 0;
+
+const VALUE_IMAGE_FALLBACKS: Record<
+  string,
+  { image: AboutMediaImage; objectPosition?: string }
+> = {
+  innovation: {
+    image: {
+      src: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1400&auto=format&fit=crop",
+      alt: loc(
+        "Modern greenhouse with rows of growing plants",
+        "Estufa moderna com fileiras de plantas em crescimento",
+        "Invernadero moderno con filas de plantas en crecimiento",
+        "现代化温室中成排生长的植物"
+      ),
+    },
+    objectPosition: "center 45%",
+  },
+  integrity: {
+    image: {
+      src: "https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1400&auto=format&fit=crop",
+      alt: loc(
+        "Business partners shaking hands in agreement",
+        "Parceiros de negócios apertando as mãos em acordo",
+        "Socios comerciales estrechandose la mano en acuerdo",
+        "商业伙伴握手达成协议"
+      ),
+    },
+    objectPosition: "center 30%",
+  },
+  "customer-oriented": {
+    image: {
+      src: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=1400&auto=format&fit=crop",
+      alt: loc(
+        "Grower inspecting crops in a cultivated field",
+        "Produtor inspecionando cultivos em um campo cultivado",
+        "Productor inspeccionando cultivos en un campo cultivado",
+        "种植者在农田中检查作物"
+      ),
+    },
+    objectPosition: "center 40%",
+  },
+  professional: {
+    image: {
+      src: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1400&auto=format&fit=crop",
+      alt: loc(
+        "Technician working carefully in a production environment",
+        "Técnico trabalhando com cuidado em ambiente de produção",
+        "Técnico trabajando con cuidado en un entorno de producción",
+        "技术人员在生产环境中细致工作"
+      ),
+    },
+    objectPosition: "center 35%",
+  },
+  responsibility: {
+    image: {
+      src: "https://images.unsplash.com/photo-1470058869958-2a77ade41c02?q=80&w=1400&auto=format&fit=crop",
+      alt: loc(
+        "Lush green plants growing in a sustainable environment",
+        "Plantas verdes exuberantes crescendo em ambiente sustentável",
+        "Plantas verdes exuberantes creciendo en un entorno sostenible",
+        "可持续环境中茂盛生长的绿色植物"
+      ),
+    },
+    objectPosition: "center 40%",
+  },
+};
+
+function fallbackValueImage(id: string): {
+  image: AboutMediaImage;
+  objectPosition?: string;
+} {
+  return (
+    VALUE_IMAGE_FALLBACKS[id] ?? {
+      image: {
+        src: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=1400&auto=format&fit=crop",
+        alt: loc(
+          "Horticulture greenhouse interior",
+          "Interior de estufa de horticultura",
+          "Interior de invernadero de horticultura",
+          "园艺温室内部"
+        ),
+      },
+      objectPosition: "center center",
+    }
+  );
+}
+
+const IMPACT_STAT_DEFAULTS: AboutImpactStat[] = defaultSettings().impact.stats;
+
+const IMPACT_ICON_BY_ID: Record<string, AboutImpactStatIcon> = {
+  countries: "globe",
+  manufacturing: "factory",
+  offices: "building",
+  employees: "users",
+  team: "users",
+  clients: "handshake",
+  products: "package",
+  years: "calendar",
+  facilities: "factory",
+};
+
+const IMPACT_ACCENT_BY_ID: Record<string, string> = {
+  countries: "#004F7C",
+  manufacturing: "#4DAF4E",
+  offices: "#009CD4",
+  employees: "#01203F",
+  team: "#01203F",
+  clients: "#ea5744",
+  products: "#75C566",
+  years: "#909B03",
+  facilities: "#4DAF4E",
+};
+
+function fallbackImpactMedia(id: string): Pick<
+  AboutImpactStat,
+  "image" | "objectPosition" | "accentColor"
+> {
+  const fromDefaults = IMPACT_STAT_DEFAULTS.find((stat) => stat.id === id);
+  if (fromDefaults) {
+    return {
+      image: fromDefaults.image,
+      objectPosition: fromDefaults.objectPosition,
+      accentColor: fromDefaults.accentColor,
+    };
+  }
+  return {
+    accentColor: IMPACT_ACCENT_BY_ID[id] ?? "#4DAF4E",
+    objectPosition: "center center",
+    image: {
+      src: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=1400&auto=format&fit=crop",
+      alt: loc(
+        "Horticulture greenhouse interior",
+        "Interior de estufa de horticultura",
+        "Interior de invernadero de horticultura",
+        "园艺温室内部"
+      ),
+    },
+  };
+}
+
+function normalizeImpactStats(stats: AboutImpactStat[]): AboutImpactStat[] {
+  if (!Array.isArray(stats) || stats.length === 0) {
+    return IMPACT_STAT_DEFAULTS;
+  }
+
+  const byId = new Map(stats.map((stat) => [stat.id, stat]));
+  const required = [
+    "countries",
+    "manufacturing",
+    "offices",
+    "employees",
+    "clients",
+    "products",
+    "years",
+  ];
+
+  // Preserve incoming order; append any missing required stats from defaults
+  // (do not wipe custom values when a legacy doc is incomplete).
+  const orderedIds: string[] = [];
+  const seen = new Set<string>();
+  for (const stat of stats) {
+    if (!stat?.id || seen.has(stat.id)) continue;
+    seen.add(stat.id);
+    orderedIds.push(stat.id);
+  }
+  for (const id of required) {
+    if (seen.has(id)) continue;
+    seen.add(id);
+    orderedIds.push(id);
+  }
+
+  return orderedIds.map((id) => {
+    const fromDefaults = IMPACT_STAT_DEFAULTS.find((stat) => stat.id === id);
+    const stat = byId.get(id) ?? fromDefaults;
+    if (!stat) {
+      return IMPACT_STAT_DEFAULTS[0];
+    }
+    const media = fallbackImpactMedia(id);
+    const src = stat.image?.src ?? "";
+    return {
+      ...fromDefaults,
+      ...stat,
+      id,
+      icon: stat.icon ?? IMPACT_ICON_BY_ID[id] ?? fromDefaults?.icon ?? "globe",
+      pending: stat.pending === true,
+      accentColor:
+        stat.accentColor ??
+        IMPACT_ACCENT_BY_ID[id] ??
+        media.accentColor,
+      objectPosition: stat.objectPosition ?? media.objectPosition,
+      image: src
+        ? {
+            src,
+            alt: stat.image?.alt ?? media.image.alt,
+          }
+        : media.image,
+    };
+  });
+}
+
+/** Ensure durable / legacy CMS docs have value images and Numbers stats. */
+export function normalizeAboutPageSettings(
+  settings: AboutPageSettings
+): AboutPageSettings {
+  const defaults = defaultSettings();
+
+  return {
+    ...settings,
+    sections: {
+      ...defaults.sections,
+      ...settings.sections,
+      impact: {
+        enabled: settings.sections?.impact?.enabled ?? true,
+      },
+    },
+    impact: {
+      title: settings.impact?.title ?? defaults.impact.title,
+      description: settings.impact?.description ?? defaults.impact.description,
+      eyebrow: settings.impact?.eyebrow,
+      stats: normalizeImpactStats(settings.impact?.stats ?? []),
+    },
+    values: {
+      ...settings.values,
+      items: (settings.values?.items ?? []).map((item) => {
+        const fallback = fallbackValueImage(item.id);
+        const src = item.image?.src ?? "";
+        const needsImage =
+          !src ||
+          (item.id === "responsibility" &&
+            src.includes("photo-1466692476867-a0881dfc0648"));
+
+        if (!needsImage) {
+          return {
+            ...item,
+            objectPosition: item.objectPosition ?? "center center",
+          };
+        }
+
+        return {
+          ...item,
+          image: fallback.image,
+          objectPosition: item.objectPosition ?? fallback.objectPosition,
+        };
+      }),
+    },
+  };
+}
 
 export function getAboutPageSettings(): AboutPageSettings {
   if (!cache || cacheRevision !== CONTENT_REVISION) {
@@ -714,14 +1153,17 @@ export function getAboutPageSettings(): AboutPageSettings {
 }
 
 export function replaceAboutPageSettingsCache(settings: AboutPageSettings) {
-  cache = settings;
+  cache = normalizeAboutPageSettings(settings);
   cacheRevision = CONTENT_REVISION;
 }
 
 export function saveAboutPageSettings(
   settings: AboutPageSettings
 ): AboutPageSettings {
-  const updated = { ...settings, updatedAt: new Date().toISOString() };
+  const updated = normalizeAboutPageSettings({
+    ...settings,
+    updatedAt: new Date().toISOString(),
+  });
   cache = updated;
   return updated;
 }
