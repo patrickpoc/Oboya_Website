@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { Container } from "@/components/ui/container";
 import { cn } from "@/lib/utils";
@@ -29,8 +30,27 @@ interface SolutionsCatalogProps {
   cards: SolutionsCardData[];
 }
 
+function isCategoryId(value: string | null): value is SolutionsCategoryId {
+  return (
+    value === "all" ||
+    value === "flowers" ||
+    value === "vegetables" ||
+    value === "fruits"
+  );
+}
+
 export function SolutionsCatalog({ categories, cards }: SolutionsCatalogProps) {
-  const [active, setActive] = useState<SolutionsCategoryId>("flowers");
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
+  const [active, setActive] = useState<SolutionsCategoryId>(() =>
+    isCategoryId(categoryParam) ? categoryParam : "flowers"
+  );
+
+  useEffect(() => {
+    if (isCategoryId(categoryParam)) {
+      setActive(categoryParam);
+    }
+  }, [categoryParam]);
 
   const category = useMemo(
     () => categories.find((item) => item.id === active) ?? categories[0],

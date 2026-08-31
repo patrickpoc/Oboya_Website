@@ -289,7 +289,7 @@ const defaultSettings = (): HomepageSettings => ({
         ),
         image:
           "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
-        href: "/solutions/flowers",
+        href: "/solutions?category=flowers",
         ctaLabel: loc("Explore Solutions"),
       },
       {
@@ -300,7 +300,7 @@ const defaultSettings = (): HomepageSettings => ({
         ),
         image:
           "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
-        href: "/solutions/vegetables",
+        href: "/solutions?category=vegetables",
         ctaLabel: loc("Explore Solutions"),
       },
       {
@@ -311,7 +311,7 @@ const defaultSettings = (): HomepageSettings => ({
         ),
         image:
           "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
-        href: "/solutions/fruits",
+        href: "/solutions?category=fruits",
         ctaLabel: loc("Explore Solutions"),
       },
       {
@@ -457,7 +457,7 @@ const defaultSettings = (): HomepageSettings => ({
 });
 
 let cache: HomepageSettings | null = null;
-const CONTENT_REVISION = "home-capabilities-images-2026-08-27";
+const CONTENT_REVISION = "home-solutions-category-hrefs-2026-08-31";
 let appliedRevision: string | null = null;
 
 function migrateSettings(settings: HomepageSettings): HomepageSettings {

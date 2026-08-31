@@ -39,8 +39,9 @@ function placeArrowAtDistance(
 }
 
 /**
- * Maps animation progress (0–1) to visible tip distance along the path,
- * matching the stroke-dashoffset keyframes (draw → hold → erase).
+ * Maps animation progress (0–1) to tip distance along the path.
+ * Draw → hold at destination → erase from origin toward destination
+ * (tail retracts; tip stays until the stroke is gone).
  */
 function tipStateForProgress(
   progress: number,
@@ -48,6 +49,7 @@ function tipStateForProgress(
 ): { distance: number; opacity: number } {
   const p = Math.max(0, Math.min(1, progress));
 
+  // Draw
   if (p < 0.38) {
     const distance = (p / 0.38) * length;
     return {
@@ -56,15 +58,18 @@ function tipStateForProgress(
     };
   }
 
+  // Hold at destination
   if (p < 0.52) {
     return { distance: length, opacity: MAP_CONNECTION_STYLE.opacity };
   }
 
+  // Erase: stroke retracts from origin → tip; arrow stays on remaining tip
   if (p < 0.92) {
     const eraseT = (p - 0.52) / (0.92 - 0.52);
+    // Tip of remaining visible segment still ends at destination until gone
     return {
       distance: length,
-      opacity: MAP_CONNECTION_STYLE.opacity * (1 - eraseT),
+      opacity: MAP_CONNECTION_STYLE.opacity * (1 - eraseT * 0.15),
     };
   }
 
@@ -96,6 +101,11 @@ export function AnimatedMapConnection({
     if (!path || !glow || !arrow) return;
 
     const length = path.getTotalLength();
+    if (length <= 0) return;
+
+    // dash + equal gap so offset animation cleanly reveals/hides the stroke
+    const dash = `${length}`;
+    const gap = `${length}`;
 
     if (!animate) {
       path.style.strokeDasharray = "4 6";
@@ -106,18 +116,22 @@ export function AnimatedMapConnection({
       return;
     }
 
-    path.style.strokeDasharray = String(length);
+    path.style.strokeDasharray = `${dash} ${gap}`;
     path.style.strokeDashoffset = String(length);
-    glow.style.strokeDasharray = String(length);
+    glow.style.strokeDasharray = `${dash} ${gap}`;
     glow.style.strokeDashoffset = String(length);
     placeArrowAtDistance(path, arrow, 0, 0);
 
+    // Draw: offset length → 0 (reveal from origin)
+    // Hold
+    // Erase: offset 0 → length (hide from origin toward destination)
+    // Negative offset erase looked like "arrive then pop" in some browsers.
     const keyframes: Keyframe[] = [
       { strokeDashoffset: length, offset: 0 },
       { strokeDashoffset: 0, offset: 0.38 },
       { strokeDashoffset: 0, offset: 0.52 },
-      { strokeDashoffset: -length, offset: 0.92 },
-      { strokeDashoffset: -length, offset: 1 },
+      { strokeDashoffset: length, offset: 0.92 },
+      { strokeDashoffset: length, offset: 1 },
     ];
 
     const timing: KeyframeAnimationOptions = {

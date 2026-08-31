@@ -7,14 +7,11 @@ import {
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
-  type ReactNode,
 } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   Building2,
   CalendarDays,
-  ChevronLeft,
-  ChevronRight,
   Factory,
   Globe2,
   Handshake,
@@ -34,6 +31,7 @@ import { cn } from "@/lib/utils";
 const SWIPE_THRESHOLD = 48;
 const EASE = [...easeOutExpo] as [number, number, number, number];
 const BANNER_TRANSITION_S = 0.5;
+const AUTOPLAY_MS = 4200;
 
 /** Soft White / Light Yellow / Light Green — need dark type on solid fills. */
 const LIGHT_ACCENTS = new Set(
@@ -73,27 +71,6 @@ function useIsDesktopSqueeze() {
 
 function isLightAccent(hex: string) {
   return LIGHT_ACCENTS.has(hex.trim().toLowerCase());
-}
-
-function NavButton({
-  label,
-  onClick,
-  children,
-}: {
-  label: string;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      onClick={onClick}
-      className="inline-flex size-9 items-center justify-center rounded-lg border border-oboya-blue-dark/15 bg-white text-oboya-blue-dark shadow-[var(--shadow-subtle)] transition-colors hover:border-oboya-green/40 hover:text-oboya-green focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-green/50"
-    >
-      {children}
-    </button>
-  );
 }
 
 function MetricValue({
@@ -136,6 +113,7 @@ export function NumbersSqueezeCarousel({
   locale,
 }: NumbersSqueezeCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
   const reduceMotion = useReducedMotion();
   const isDesktop = useIsDesktopSqueeze();
   const pointerStartX = useRef<number | null>(null);
@@ -168,6 +146,15 @@ export function NumbersSqueezeCarousel({
     });
   }, [activeIndex, isDesktop, reduceMotion]);
 
+  // Autoplay — pause on hover/focus and when reduced motion is preferred
+  useEffect(() => {
+    if (reduceMotion || paused || count < 2) return;
+    const id = window.setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % count);
+    }, AUTOPLAY_MS);
+    return () => window.clearInterval(id);
+  }, [count, paused, reduceMotion]);
+
   const onPointerDown = (event: ReactPointerEvent) => {
     if (isDesktop) return;
     pointerStartX.current = event.clientX;
@@ -196,24 +183,25 @@ export function NumbersSqueezeCarousel({
     : { duration: BANNER_TRANSITION_S, ease: EASE };
 
   return (
-    <div className="relative">
-      <div className="mb-4 flex items-center justify-end gap-2 md:mb-5">
-        <NavButton label="Previous metric" onClick={goPrev}>
-          <ChevronLeft className="size-4" aria-hidden />
-        </NavButton>
-        <NavButton label="Next metric" onClick={goNext}>
-          <ChevronRight className="size-4" aria-hidden />
-        </NavButton>
-      </div>
-
+    <div
+      className="relative w-full"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setPaused(false);
+        }
+      }}
+    >
       <p className="sr-only" aria-live="polite">
         {pickLocalized(activeStat.label, locale)}
       </p>
 
-      {/* Desktop / tablet squeeze */}
+      {/* Desktop / tablet squeeze — proportional grow fills wide monitors */}
       <div
         className={cn(
-          "hidden md:flex md:h-[min(24rem,52vh)] md:min-h-[19rem] md:gap-2.5 lg:gap-3",
+          "hidden w-full md:flex md:h-[min(24rem,52vh)] md:min-h-[19rem] md:gap-2.5 lg:gap-3",
           "focus-within:outline-none"
         )}
         onKeyDown={(event) => {
@@ -246,15 +234,17 @@ export function NumbersSqueezeCarousel({
               onClick={() => goTo(index)}
               initial={false}
               animate={{
-                flexGrow: isActive ? 1 : 0,
-                flexBasis: isActive ? "0%" : "4.75rem",
+                flexGrow: isActive ? 7 : 1,
+                flexBasis: 0,
               }}
               transition={bannerTransition}
               className={cn(
                 "group relative min-w-0 overflow-hidden rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-green/60 focus-visible:ring-offset-2",
-                isActive ? "cursor-default" : "cursor-pointer"
+                isActive
+                  ? "min-w-[12rem] cursor-default"
+                  : "min-w-[3.75rem] cursor-pointer"
               )}
-              style={{ flexShrink: 0 }}
+              style={{ flexShrink: 1 }}
             >
               <div className="absolute inset-0 bg-oboya-soft-white">
                 <Image
@@ -277,7 +267,6 @@ export function NumbersSqueezeCarousel({
                 />
               </div>
 
-              {/* Collapsed: brand palette wash (photo still faintly readable) */}
               <div
                 aria-hidden
                 className={cn(
@@ -287,7 +276,6 @@ export function NumbersSqueezeCarousel({
                 style={{ backgroundColor: accent }}
               />
 
-              {/* Expanded: light bottom veil only (bar carries the frost) */}
               <div
                 className={cn(
                   "absolute inset-0 bg-gradient-to-t from-oboya-blue-dark/25 to-transparent transition-opacity duration-300",
@@ -295,7 +283,6 @@ export function NumbersSqueezeCarousel({
                 )}
               />
 
-              {/* Collapsed chrome: accent icon + vertical number */}
               <div
                 className={cn(
                   "absolute inset-0 z-[2] flex flex-col items-center justify-between px-1.5 py-5 transition-opacity duration-300",
@@ -323,7 +310,6 @@ export function NumbersSqueezeCarousel({
                 />
               </div>
 
-              {/* Expanded: badge icon fades; frost bar is full-strength when active (no mid-fade) */}
               <div
                 className={cn(
                   "pointer-events-none absolute left-0 top-0 z-[2] p-6 transition-opacity md:p-7 lg:p-8",
@@ -350,12 +336,6 @@ export function NumbersSqueezeCarousel({
                 </span>
               </div>
 
-              {/*
-                Full-bleed frost — tinted with the closed-card accent. Solid
-                translucent fill (no backdrop-blur) snaps on/off so frost
-                density never animates. Inner type keeps fixed width to avoid
-                reflow.
-              */}
               <div
                 className={cn(
                   "pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-6 py-5 md:px-7 md:py-6 lg:px-8",

@@ -13,6 +13,26 @@ import { pickLocalized } from "@/lib/cms/utils";
 const SWIPE_THRESHOLD = 48;
 const GAP = 20;
 
+const CROP_CATEGORY_IDS = new Set(["flowers", "vegetables", "fruits"]);
+
+/** Map placeholder /solutions/{crop} URLs onto the real Solutions catalog filter. */
+function resolveBusinessSolutionHref(href: string | undefined, itemId: string) {
+  const raw = (href || "").trim();
+  const cropFromPath = raw.match(
+    /^\/solutions\/(flowers|vegetables|fruits)\/?$/i
+  );
+  if (cropFromPath) {
+    return `/solutions?category=${cropFromPath[1].toLowerCase()}`;
+  }
+  if (
+    (!raw || raw === "/solutions") &&
+    CROP_CATEGORY_IDS.has(itemId.toLowerCase())
+  ) {
+    return `/solutions?category=${itemId.toLowerCase()}`;
+  }
+  return raw || "/solutions";
+}
+
 function cardsPerView(width: number) {
   if (width < 640) return 1.15;
   if (width < 1024) return 2.2;
@@ -86,6 +106,8 @@ export function BusinessSolutions({
 
   const onPointerDown = (event: React.PointerEvent) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
+    // Don't capture when interacting with links — otherwise clicks never fire.
+    if ((event.target as HTMLElement | null)?.closest?.("a")) return;
     pointerStartX.current = event.clientX;
     pointerDeltaX.current = 0;
     (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
@@ -152,7 +174,9 @@ export function BusinessSolutions({
                 item.ctaLabel != null
                   ? pickLocalized(item.ctaLabel, locale)
                   : "Explore Solutions";
-              const href = item.href || "/solutions";
+              // Legacy /solutions/{crop} catch-all pages are placeholders —
+              // route crop cards to the real Solutions page with a category filter.
+              const href = resolveBusinessSolutionHref(item.href, item.id);
 
               return (
                 <article

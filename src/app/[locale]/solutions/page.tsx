@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SiteLayout } from "@/components/layouts/SiteLayout";
 import { SolutionsPageContent } from "@/components/solutions/SolutionsPageContent";
@@ -37,7 +38,9 @@ export default async function SolutionsPage({ params }: Props) {
 
   return (
     <SiteLayout>
-      <SolutionsPageContent />
+      <Suspense fallback={null}>
+        <SolutionsPageContent />
+      </Suspense>
     </SiteLayout>
   );
 }
