@@ -4,7 +4,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
-import { fadeInUp } from "@/lib/animations";
+import { fadeInUp, revealViewport } from "@/lib/animations";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
 
@@ -63,7 +63,7 @@ export function Partners({
         <motion.div
           initial={motionInitial}
           whileInView={motionWhileInView}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={revealViewport}
           variants={fadeInUp}
           className="flex flex-col items-center gap-8 md:gap-14"
         >

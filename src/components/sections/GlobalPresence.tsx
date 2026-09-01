@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { Container } from "@/components/ui/container";
 import { InteractiveWorldMap } from "@/components/sections/InteractiveWorldMap";
-import { fadeInUp } from "@/lib/animations";
+import { fadeInUp, revealViewport } from "@/lib/animations";
 import type { MapConnection, ResolvedMapLocation } from "@/lib/map-locations";
 
 interface GlobalPresenceProps {
@@ -29,7 +29,7 @@ export function GlobalPresence({
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={revealViewport}
           variants={fadeInUp}
           className="mb-10 md:mb-14"
         >
@@ -41,7 +41,7 @@ export function GlobalPresence({
         <motion.div
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={revealViewport}
           variants={fadeInUp}
           className="relative mx-auto w-full max-w-3xl md:max-w-4xl"
         >

@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
-import { fadeInUp } from "@/lib/animations";
+import { fadeInUp, carouselSnapTransition, revealViewport } from "@/lib/animations";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
 import { cn } from "@/lib/utils";
@@ -186,7 +186,7 @@ export function BusinessSolutions({
         <motion.div
           initial={animationsEnabled ? "hidden" : false}
           whileInView={animationsEnabled ? "visible" : undefined}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={revealViewport}
           variants={fadeInUp}
           className="mb-8 md:mb-12"
         >
@@ -201,28 +201,34 @@ export function BusinessSolutions({
           </h2>
         </motion.div>
 
-        <div
-          ref={viewportRef}
-          className={cn(
-            "overflow-hidden",
-            isDragging ? "cursor-grabbing" : "cursor-grab"
-          )}
+        <motion.div
+          initial={animationsEnabled ? "hidden" : false}
+          whileInView={animationsEnabled ? "visible" : undefined}
+          viewport={revealViewport}
+          variants={fadeInUp}
         >
-          <motion.div
-            className="flex touch-none select-none"
-            style={{ gap: GAP, width: "max-content" }}
-            animate={{ x: -scrollOffset + dragDelta }}
-            transition={
-              isDragging || !animateSnap || !animationsEnabled
-                ? { duration: 0 }
-                : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }
-            }
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={finishDrag}
-            onPointerCancel={finishDrag}
-            onClickCapture={onClickCapture}
+          <div
+            ref={viewportRef}
+            className={cn(
+              "overflow-hidden",
+              isDragging ? "cursor-grabbing" : "cursor-grab"
+            )}
           >
+            <motion.div
+              className="flex touch-none select-none"
+              style={{ gap: GAP, width: "max-content" }}
+              animate={{ x: -scrollOffset + dragDelta }}
+              transition={
+                isDragging || !animateSnap || !animationsEnabled
+                  ? { duration: 0 }
+                  : carouselSnapTransition
+              }
+              onPointerDown={onPointerDown}
+              onPointerMove={onPointerMove}
+              onPointerUp={finishDrag}
+              onPointerCancel={finishDrag}
+              onClickCapture={onClickCapture}
+            >
             {items.map((item) => {
               const title = pickLocalized(item.title, locale);
               const description = pickLocalized(item.description, locale);
@@ -272,8 +278,9 @@ export function BusinessSolutions({
                 </article>
               );
             })}
-          </motion.div>
-        </div>
+            </motion.div>
+          </div>
+        </motion.div>
 
         <div className="mt-8 flex justify-end gap-2.5 md:mt-10">
           <button

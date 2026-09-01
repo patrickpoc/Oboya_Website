@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
-import { fadeInUp, staggerContainer } from "@/lib/animations";
+import { fadeInUp, staggerContainer, revealViewport } from "@/lib/animations";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
 import { pickLocalized } from "@/lib/cms/utils";
@@ -33,7 +33,7 @@ export function HomeLatestNews({
         <motion.div
           initial={motionInitial}
           whileInView={motionWhileInView}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={revealViewport}
           variants={fadeInUp}
           className="mb-7 md:mb-9"
         >
@@ -52,7 +52,7 @@ export function HomeLatestNews({
           variants={staggerContainer}
           initial={motionInitial}
           whileInView={motionWhileInView}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={revealViewport}
           className="grid gap-5 md:grid-cols-2 md:gap-6"
         >
           {items.map((post) => (
@@ -67,7 +67,7 @@ export function HomeLatestNews({
                       src={post.featuredImage}
                       alt={pickLocalized(post.title, locale)}
                       fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                       sizes="(max-width: 768px) 100vw, 50vw"
                     />
                   ) : (

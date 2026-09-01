@@ -17,7 +17,7 @@ export function AnimatedCounter({
   active: activeProp,
 }: AnimatedCounterProps) {
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const isInView = useInView(ref, { once: true, margin: "-48px", amount: 0.2 });
   const active = activeProp ?? isInView;
   const [count, setCount] = useState(0);
 
@@ -33,7 +33,7 @@ export function AnimatedCounter({
     const tick = (now: number) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / durationMs, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
+      const eased = 1 - Math.pow(1 - progress, 4);
       setCount(Math.round(eased * value));
       if (progress < 1) requestAnimationFrame(tick);
     };

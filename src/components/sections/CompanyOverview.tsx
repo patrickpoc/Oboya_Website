@@ -1,5 +1,7 @@
 "use client";
 
+import { useRef } from "react";
+import { useInView } from "framer-motion";
 import { Container } from "@/components/ui/container";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { TypewriterText } from "@/components/ui/typewriter-text";
@@ -39,16 +41,21 @@ export function CompanyOverview({
         ];
 
   const stats = data.stats.slice(0, 3);
+  const sectionRef = useRef<HTMLElement>(null);
+  const inView = useInView(sectionRef, { once: true, margin: "-48px", amount: 0.2 });
 
   return (
-    <section className="relative bg-oboya-blue-dark py-14 md:py-16 lg:py-20">
+    <section
+      ref={sectionRef}
+      className="relative bg-oboya-blue-dark py-14 md:py-16 lg:py-20"
+    >
       <Container>
         <h2 className="mx-auto max-w-4xl text-center font-display text-[clamp(1.55rem,3.4vw,2.65rem)] leading-[1.28] font-light tracking-[-0.02em]">
           {animationsEnabled ? (
             <TypewriterText
               segments={headlineSegments}
-              active
-              duration={3}
+              active={inView}
+              duration={2.4}
             />
           ) : (
             headlineSegments.map((segment, index) => (
@@ -72,8 +79,8 @@ export function CompanyOverview({
                     <AnimatedCounter
                       value={stat.value}
                       suffix={stat.suffix}
-                      active
-                      duration={2.2}
+                      active={inView}
+                      duration={1.8}
                     />
                   ) : (
                     <>

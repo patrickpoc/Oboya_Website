@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { fadeInUp } from "@/lib/animations";
+import { fadeInUp, carouselSnapTransition, revealViewport } from "@/lib/animations";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
 import { cn } from "@/lib/utils";
@@ -160,7 +160,7 @@ export function Testimonials({
         <motion.div
           initial={animationsEnabled ? "hidden" : false}
           whileInView={animationsEnabled ? "visible" : undefined}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={revealViewport}
           variants={fadeInUp}
           className="mb-7 md:mb-9"
         >
@@ -184,9 +184,7 @@ export function Testimonials({
           className="testimonials-track flex touch-pan-y gap-3 md:gap-4"
           animate={{ x: -x }}
           transition={
-            animationsEnabled
-              ? { duration: 0.45, ease: [0.22, 1, 0.36, 1] }
-              : { duration: 0 }
+            animationsEnabled ? carouselSnapTransition : { duration: 0 }
           }
           style={{ width: "max-content" }}
           onPointerDown={onPointerDown}

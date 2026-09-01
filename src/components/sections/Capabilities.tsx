@@ -5,7 +5,12 @@ import { useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { fadeInUp } from "@/lib/animations";
+import {
+  fadeInUp,
+  crossfadeTransition,
+  contentSwapTransition,
+  revealViewport,
+} from "@/lib/animations";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
 
@@ -44,7 +49,7 @@ export function Capabilities({
         <motion.div
           initial={animationsEnabled ? "hidden" : false}
           whileInView={animationsEnabled ? "visible" : undefined}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={revealViewport}
           variants={fadeInUp}
           className="mb-8 md:mb-10"
         >
@@ -68,9 +73,7 @@ export function Capabilities({
                   initial={false}
                   animate={{ opacity: active ? 1 : 0 }}
                   transition={
-                    animationsEnabled
-                      ? { duration: 0.7, ease: [0.22, 1, 0.36, 1] }
-                      : { duration: 0 }
+                    animationsEnabled ? crossfadeTransition : { duration: 0 }
                   }
                   style={{ zIndex: active ? 1 : 0 }}
                   aria-hidden={!active}
@@ -96,10 +99,10 @@ export function Capabilities({
               <AnimatePresence mode="wait">
                 <motion.h2
                   key={`${slide.id}-title`}
-                  initial={animationsEnabled ? { opacity: 0, y: 8 } : false}
+                  initial={animationsEnabled ? { opacity: 0, y: 10 } : false}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={animationsEnabled ? { opacity: 0, y: -6 } : undefined}
-                  transition={{ duration: 0.35 }}
+                  exit={animationsEnabled ? { opacity: 0, y: -8 } : undefined}
+                  transition={animationsEnabled ? contentSwapTransition : { duration: 0 }}
                   className="font-display text-[clamp(1.65rem,3.8vw,2.85rem)] font-bold leading-tight tracking-tight text-white text-balance"
                 >
                   {title}
@@ -112,10 +115,14 @@ export function Capabilities({
               <AnimatePresence mode="wait">
                 <motion.p
                   key={`${slide.id}-desc`}
-                  initial={animationsEnabled ? { opacity: 0, y: 8 } : false}
+                  initial={animationsEnabled ? { opacity: 0, y: 10 } : false}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={animationsEnabled ? { opacity: 0, y: -6 } : undefined}
-                  transition={{ duration: 0.35, delay: 0.04 }}
+                  exit={animationsEnabled ? { opacity: 0, y: -8 } : undefined}
+                  transition={
+                    animationsEnabled
+                      ? { ...contentSwapTransition, delay: 0.06 }
+                      : { duration: 0 }
+                  }
                   className="font-body text-base leading-relaxed text-white/92 sm:text-lg md:text-[1.25rem] md:leading-[1.6]"
                 >
                   {description}
