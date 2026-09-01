@@ -46,7 +46,7 @@ export async function CaseStudiesPageContent({
               {t("emptyState")}
             </p>
           ) : (
-            <div className="flex flex-col gap-[clamp(4.5rem,11vw,8.5rem)]">
+            <div className="mx-auto flex w-full min-w-0 flex-col gap-[clamp(4.05rem,9.9vw,7.65rem)] lg:w-[90%]">
               {featured.map((study, index) => {
                 const title = pickLocalized(study.title, locale);
                 const paragraphs = [

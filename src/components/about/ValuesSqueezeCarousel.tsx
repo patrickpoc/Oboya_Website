@@ -7,10 +7,8 @@ import {
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
-  type ReactNode,
 } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { easeOutExpo } from "@/lib/animations";
 import type { AboutValueItem } from "@/lib/cms/repositories/about-page-repository";
 import { pickLocalized } from "@/lib/cms/utils";
@@ -18,8 +16,9 @@ import { cn } from "@/lib/utils";
 
 const SWIPE_THRESHOLD = 48;
 const EASE = [...easeOutExpo] as [number, number, number, number];
-/** Matches banner expand duration so copy fades in with the image. */
-const BANNER_TRANSITION_S = 0.5;
+const BANNER_TRANSITION_S = 0.58;
+const COLLAPSED_BASIS = "4.25rem";
+const AUTOPLAY_MS = 4600;
 
 export interface ValuesSqueezeCarouselProps {
   items: AboutValueItem[];
@@ -40,32 +39,12 @@ function useIsDesktopSqueeze() {
   return isDesktop;
 }
 
-function NavButton({
-  label,
-  onClick,
-  children,
-}: {
-  label: string;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      onClick={onClick}
-      className="inline-flex size-9 items-center justify-center rounded-lg border border-oboya-blue-dark/15 bg-white text-oboya-blue-dark shadow-[var(--shadow-subtle)] transition-colors hover:border-oboya-green/40 hover:text-oboya-green focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-green/50"
-    >
-      {children}
-    </button>
-  );
-}
-
 export function ValuesSqueezeCarousel({
   items,
   locale,
 }: ValuesSqueezeCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
   const reduceMotion = useReducedMotion();
   const isDesktop = useIsDesktopSqueeze();
   const pointerStartX = useRef<number | null>(null);
@@ -98,6 +77,14 @@ export function ValuesSqueezeCarousel({
     });
   }, [activeIndex, isDesktop, reduceMotion]);
 
+  useEffect(() => {
+    if (reduceMotion || paused || count < 2) return;
+    const id = window.setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % count);
+    }, AUTOPLAY_MS);
+    return () => window.clearInterval(id);
+  }, [count, paused, reduceMotion]);
+
   const onPointerDown = (event: ReactPointerEvent) => {
     if (isDesktop) return;
     pointerStartX.current = event.clientX;
@@ -125,22 +112,26 @@ export function ValuesSqueezeCarousel({
     ? { duration: 0 }
     : { duration: BANNER_TRANSITION_S, ease: EASE };
 
-  return (
-    <div className="relative">
-      <div className="mb-4 flex items-center justify-end gap-2 md:mb-5">
-        <NavButton label="Previous value" onClick={goPrev}>
-          <ChevronLeft className="size-4" aria-hidden />
-        </NavButton>
-        <NavButton label="Next value" onClick={goNext}>
-          <ChevronRight className="size-4" aria-hidden />
-        </NavButton>
-      </div>
+  const overlayTransitionClass = reduceMotion
+    ? ""
+    : "transition-opacity duration-[580ms] ease-[cubic-bezier(0.22,1,0.36,1)]";
 
+  return (
+    <div
+      className="relative w-full"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setPaused(false);
+        }
+      }}
+    >
       <p className="sr-only" aria-live="polite">
         {pickLocalized(activeItem.title, locale)}
       </p>
 
-      {/* Desktop / tablet squeeze */}
       <div
         className={cn(
           "hidden md:flex md:h-[min(28rem,55vh)] md:min-h-[22rem] md:gap-2.5 lg:gap-3",
@@ -172,40 +163,41 @@ export function ValuesSqueezeCarousel({
               initial={false}
               animate={{
                 flexGrow: isActive ? 1 : 0,
-                flexBasis: isActive ? "0%" : "4.25rem",
+                flexBasis: isActive ? "0%" : COLLAPSED_BASIS,
               }}
               transition={bannerTransition}
               className={cn(
-                "group relative min-w-0 overflow-hidden rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-green/60 focus-visible:ring-offset-2",
+                "group relative min-w-0 overflow-hidden rounded-2xl text-left [contain:layout_paint] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-green/60 focus-visible:ring-offset-2",
                 isActive ? "cursor-default" : "cursor-pointer"
               )}
               style={{ flexShrink: 0 }}
             >
-              <div className="absolute inset-0 bg-oboya-soft-white">
-                <Image
-                  src={item.image.src}
-                  alt={pickLocalized(item.image.alt, locale)}
-                  fill
-                  priority={index === 0}
-                  sizes={
-                    isActive
-                      ? "(max-width: 1024px) 70vw, 55vw"
-                      : "(max-width: 1024px) 12vw, 8vw"
-                  }
-                  className={cn(
-                    "object-cover transition-transform duration-500 ease-out",
-                    !isActive &&
-                      !reduceMotion &&
-                      "group-hover:scale-[1.04] [@media(hover:none)]:group-hover:scale-100"
-                  )}
-                  style={{ objectPosition: item.objectPosition ?? "center" }}
-                />
+              <div className="absolute inset-0 overflow-hidden bg-oboya-soft-white">
+                <div className="absolute inset-y-0 left-0 h-full w-[max(100%,var(--container-max,80rem))]">
+                  <Image
+                    src={item.image.src}
+                    alt={pickLocalized(item.image.alt, locale)}
+                    fill
+                    priority={index === 0}
+                    sizes="(max-width: 1280px) 80vw, 80rem"
+                    className={cn(
+                      "object-cover",
+                      !isActive &&
+                        !reduceMotion &&
+                        "transition-transform duration-500 ease-out group-hover:scale-[1.04] [@media(hover:none)]:group-hover:scale-100"
+                    )}
+                    style={{ objectPosition: item.objectPosition ?? "center" }}
+                  />
+                </div>
               </div>
 
               <div
                 className={cn(
-                  "absolute inset-0 bg-gradient-to-t from-oboya-blue-dark/85 via-oboya-blue-dark/25 to-transparent transition-opacity duration-300",
-                  isActive ? "opacity-100" : "opacity-40 group-hover:opacity-55"
+                  "absolute inset-0 bg-gradient-to-t from-oboya-blue-dark/85 via-oboya-blue-dark/25 to-transparent",
+                  overlayTransitionClass,
+                  isActive
+                    ? "opacity-100"
+                    : "opacity-40 group-hover:opacity-55"
                 )}
               />
 
@@ -234,7 +226,6 @@ export function ValuesSqueezeCarousel({
         })}
       </div>
 
-      {/* Mobile snap carousel */}
       <div
         ref={mobileTrackRef}
         className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden"

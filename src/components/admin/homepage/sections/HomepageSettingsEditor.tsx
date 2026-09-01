@@ -14,7 +14,6 @@ const VISIBILITY_SECTION_IDS: HomepageSectionId[] = [
   "businessSolutions",
   "globalPresence",
   "testimonials",
-  "featuredProducts",
   "latestNews",
   "partners",
 ];

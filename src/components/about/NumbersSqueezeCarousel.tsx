@@ -30,8 +30,10 @@ import { cn } from "@/lib/utils";
 
 const SWIPE_THRESHOLD = 48;
 const EASE = [...easeOutExpo] as [number, number, number, number];
-const BANNER_TRANSITION_S = 0.5;
-const AUTOPLAY_MS = 4200;
+/** Layout + content share one curve — same model as ValuesSqueezeCarousel. */
+const BANNER_TRANSITION_S = 0.58;
+const COLLAPSED_BASIS = "4.25rem";
+const AUTOPLAY_MS = 4600;
 
 /** Soft White / Light Yellow / Light Green — need dark type on solid fills. */
 const LIGHT_ACCENTS = new Set(
@@ -77,11 +79,13 @@ function MetricValue({
   stat,
   label,
   reduceMotion,
+  animate = false,
   className,
 }: {
   stat: ImpactStat;
   label: string;
   reduceMotion: boolean;
+  animate?: boolean;
   className?: string;
 }) {
   if (stat.pending) {
@@ -92,7 +96,7 @@ function MetricValue({
     );
   }
 
-  if (reduceMotion) {
+  if (reduceMotion || !animate) {
     return (
       <span className={className}>
         {stat.value}
@@ -103,7 +107,12 @@ function MetricValue({
 
   return (
     <span className={className}>
-      <AnimatedCounter value={stat.value} suffix={stat.suffix} duration={2.2} />
+      <AnimatedCounter
+        value={stat.value}
+        suffix={stat.suffix}
+        duration={1.4}
+        active={animate}
+      />
     </span>
   );
 }
@@ -113,6 +122,7 @@ export function NumbersSqueezeCarousel({
   locale,
 }: NumbersSqueezeCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [counterReadyIndex, setCounterReadyIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const reduceMotion = useReducedMotion();
   const isDesktop = useIsDesktopSqueeze();
@@ -134,6 +144,20 @@ export function NumbersSqueezeCarousel({
   const goPrev = useCallback(() => goTo(activeIndex - 1), [activeIndex, goTo]);
   const goNext = useCallback(() => goTo(activeIndex + 1), [activeIndex, goTo]);
 
+  // Defer counter until the panel expand finishes — avoids layout + rAF contention.
+  useEffect(() => {
+    if (reduceMotion) {
+      setCounterReadyIndex(activeIndex);
+      return;
+    }
+    setCounterReadyIndex(-1);
+    const id = window.setTimeout(
+      () => setCounterReadyIndex(activeIndex),
+      BANNER_TRANSITION_S * 1000
+    );
+    return () => window.clearTimeout(id);
+  }, [activeIndex, reduceMotion]);
+
   useEffect(() => {
     if (isDesktop || !mobileTrackRef.current) return;
     const el = mobileTrackRef.current.children[activeIndex] as
@@ -146,7 +170,6 @@ export function NumbersSqueezeCarousel({
     });
   }, [activeIndex, isDesktop, reduceMotion]);
 
-  // Autoplay — pause on hover/focus and when reduced motion is preferred
   useEffect(() => {
     if (reduceMotion || paused || count < 2) return;
     const id = window.setInterval(() => {
@@ -182,6 +205,10 @@ export function NumbersSqueezeCarousel({
     ? { duration: 0 }
     : { duration: BANNER_TRANSITION_S, ease: EASE };
 
+  const overlayTransitionClass = reduceMotion
+    ? ""
+    : "transition-opacity duration-[580ms] ease-[cubic-bezier(0.22,1,0.36,1)]";
+
   return (
     <div
       className="relative w-full"
@@ -198,7 +225,6 @@ export function NumbersSqueezeCarousel({
         {pickLocalized(activeStat.label, locale)}
       </p>
 
-      {/* Desktop / tablet squeeze — proportional grow fills wide monitors */}
       <div
         className={cn(
           "hidden w-full md:flex md:h-[min(24rem,52vh)] md:min-h-[19rem] md:gap-2.5 lg:gap-3",
@@ -224,6 +250,8 @@ export function NumbersSqueezeCarousel({
           const collapsedInk = onLight
             ? "text-oboya-blue-dark"
             : "text-white";
+          const showCounter =
+            isActive && (reduceMotion || counterReadyIndex === index);
 
           return (
             <motion.button
@@ -234,43 +262,44 @@ export function NumbersSqueezeCarousel({
               onClick={() => goTo(index)}
               initial={false}
               animate={{
-                flexGrow: isActive ? 7 : 1,
-                flexBasis: 0,
+                flexGrow: isActive ? 1 : 0,
+                flexBasis: isActive ? "0%" : COLLAPSED_BASIS,
               }}
               transition={bannerTransition}
               className={cn(
-                "group relative min-w-0 overflow-hidden rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-green/60 focus-visible:ring-offset-2",
-                isActive
-                  ? "min-w-[12rem] cursor-default"
-                  : "min-w-[3.75rem] cursor-pointer"
+                "group relative min-w-0 overflow-hidden rounded-2xl text-left [contain:layout_paint] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-green/60 focus-visible:ring-offset-2",
+                isActive ? "cursor-default" : "cursor-pointer"
               )}
-              style={{ flexShrink: 1 }}
+              style={{ flexShrink: 0 }}
             >
-              <div className="absolute inset-0 bg-oboya-soft-white">
-                <Image
-                  src={stat.image.src}
-                  alt={pickLocalized(stat.image.alt, locale)}
-                  fill
-                  priority={index === 0}
-                  sizes={
-                    isActive
-                      ? "(max-width: 1024px) 70vw, 55vw"
-                      : "(max-width: 1024px) 12vw, 8vw"
-                  }
-                  className={cn(
-                    "object-cover transition-transform duration-500 ease-out",
-                    !isActive &&
-                      !reduceMotion &&
-                      "group-hover:scale-[1.04] [@media(hover:none)]:group-hover:scale-100"
-                  )}
-                  style={{ objectPosition: stat.objectPosition ?? "center" }}
-                />
+              {/*
+                Fixed-width image layer — parent clips via overflow:hidden so the
+                photo is revealed instead of rescaled during flex animation.
+              */}
+              <div className="absolute inset-0 overflow-hidden bg-oboya-soft-white">
+                <div className="absolute inset-y-0 left-0 h-full w-[max(100%,var(--container-max,80rem))]">
+                  <Image
+                    src={stat.image.src}
+                    alt={pickLocalized(stat.image.alt, locale)}
+                    fill
+                    priority={index === 0}
+                    sizes="(max-width: 1280px) 80vw, 80rem"
+                    className={cn(
+                      "object-cover",
+                      !isActive &&
+                        !reduceMotion &&
+                        "transition-transform duration-500 ease-out group-hover:scale-[1.04] [@media(hover:none)]:group-hover:scale-100"
+                    )}
+                    style={{ objectPosition: stat.objectPosition ?? "center" }}
+                  />
+                </div>
               </div>
 
               <div
                 aria-hidden
                 className={cn(
-                  "absolute inset-0 transition-opacity duration-300",
+                  "absolute inset-0",
+                  overlayTransitionClass,
                   isActive ? "opacity-0" : "opacity-[0.92]"
                 )}
                 style={{ backgroundColor: accent }}
@@ -278,14 +307,16 @@ export function NumbersSqueezeCarousel({
 
               <div
                 className={cn(
-                  "absolute inset-0 bg-gradient-to-t from-oboya-blue-dark/25 to-transparent transition-opacity duration-300",
+                  "absolute inset-0 bg-gradient-to-t from-oboya-blue-dark/25 to-transparent",
+                  overlayTransitionClass,
                   isActive ? "opacity-100" : "opacity-0"
                 )}
               />
 
               <div
                 className={cn(
-                  "absolute inset-0 z-[2] flex flex-col items-center justify-between px-1.5 py-5 transition-opacity duration-300",
+                  "absolute inset-0 z-[2] flex flex-col items-center justify-between px-1.5 py-5",
+                  overlayTransitionClass,
                   isActive ? "pointer-events-none opacity-0" : "opacity-100"
                 )}
               >
@@ -303,6 +334,7 @@ export function NumbersSqueezeCarousel({
                   stat={stat}
                   label={label}
                   reduceMotion={Boolean(reduceMotion)}
+                  animate={false}
                   className={cn(
                     "font-display text-[clamp(1.05rem,1.6vw,1.35rem)] font-light leading-none tracking-tight [writing-mode:vertical-rl] rotate-180",
                     collapsedInk
@@ -310,61 +342,52 @@ export function NumbersSqueezeCarousel({
                 />
               </div>
 
-              <div
-                className={cn(
-                  "pointer-events-none absolute left-0 top-0 z-[2] p-6 transition-opacity md:p-7 lg:p-8",
-                  isActive ? "opacity-100" : "opacity-0"
-                )}
-                style={{
-                  width: "min(32rem, 52vw)",
-                  transitionDuration: reduceMotion
-                    ? "0ms"
-                    : `${BANNER_TRANSITION_S * 1000}ms`,
-                  transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
-                }}
+              <motion.div
+                initial={false}
+                animate={{ opacity: isActive ? 1 : 0 }}
+                transition={bannerTransition}
+                className="pointer-events-none absolute inset-0 z-[2]"
                 aria-hidden={!isActive}
               >
-                <span
-                  className="flex size-8 items-center justify-center rounded-full bg-white/95 shadow-sm sm:size-9"
-                  aria-hidden
-                >
-                  <Icon
-                    className="size-4 sm:size-5"
-                    strokeWidth={1.6}
-                    style={{ color: accent }}
-                  />
-                </span>
-              </div>
-
-              <div
-                className={cn(
-                  "pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-6 py-5 md:px-7 md:py-6 lg:px-8",
-                  isActive ? "opacity-100" : "opacity-0"
-                )}
-                style={{ backgroundColor: `${accent}99` }}
-                aria-hidden={!isActive}
-              >
-                <div
-                  className="flex items-end gap-x-4"
-                  style={{ width: "min(28rem, 52vw)" }}
-                >
-                  <MetricValue
-                    stat={stat}
-                    label={label}
-                    reduceMotion={Boolean(reduceMotion)}
-                    className="shrink-0 font-display text-[clamp(2.5rem,5vw,3.75rem)] font-light leading-none tracking-tight text-white"
-                  />
-                  <p className="w-[11rem] shrink-0 pb-1 font-body text-sm leading-snug text-white md:text-[0.9375rem]">
-                    {label}
-                  </p>
+                <div className="absolute left-0 top-0 p-6 md:p-7 lg:p-8">
+                  <span
+                    className="flex size-8 items-center justify-center rounded-full bg-white/95 shadow-sm sm:size-9"
+                    aria-hidden
+                  >
+                    <Icon
+                      className="size-4 sm:size-5"
+                      strokeWidth={1.6}
+                      style={{ color: accent }}
+                    />
+                  </span>
                 </div>
-              </div>
+
+                <div
+                  className="absolute inset-x-0 bottom-0 px-6 py-5 md:px-7 md:py-6 lg:px-8"
+                  style={{ backgroundColor: `${accent}99` }}
+                >
+                  <div
+                    className="flex items-end gap-x-4"
+                    style={{ width: "min(28rem, 52vw)" }}
+                  >
+                    <MetricValue
+                      stat={stat}
+                      label={label}
+                      reduceMotion={Boolean(reduceMotion)}
+                      animate={showCounter}
+                      className="shrink-0 font-display text-[clamp(2.5rem,5vw,3.75rem)] font-light leading-none tracking-tight text-white"
+                    />
+                    <p className="w-[11rem] shrink-0 pb-1 font-body text-sm leading-snug text-white md:text-[0.9375rem]">
+                      {label}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
             </motion.button>
           );
         })}
       </div>
 
-      {/* Mobile snap carousel */}
       <div
         ref={mobileTrackRef}
         className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden"

@@ -1,14 +1,13 @@
 import { BusinessSolutions } from "@/components/sections/BusinessSolutions";
 import { Capabilities } from "@/components/sections/Capabilities";
 import { CompanyOverview } from "@/components/sections/CompanyOverview";
-import { FeaturedProducts } from "@/components/sections/FeaturedProducts";
 import { GlobalPresence } from "@/components/sections/GlobalPresence";
 import { Hero } from "@/components/sections/Hero";
 import { HomeLatestNews } from "@/components/sections/HomeLatestNews";
 import { Partners } from "@/components/sections/Partners";
 import { Testimonials } from "@/components/sections/Testimonials";
-import { readBlogPosts } from "@/lib/cms/readers";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
+import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
 import { pickLocalized } from "@/lib/cms/utils";
 import type { MapConnection, ResolvedMapLocation } from "@/lib/map-locations";
 
@@ -18,16 +17,17 @@ interface HomePageContentProps {
   connections?: MapConnection[];
   mapAlt: string;
   homepage: HomepageSettings;
+  posts: CmsBlogPost[];
 }
 
-export async function HomePageContent({
+export function HomePageContent({
   locale,
   locations,
   connections,
   mapAlt,
   homepage,
+  posts,
 }: HomePageContentProps) {
-  const posts = await readBlogPosts();
   const animationsEnabled = homepage.animations?.enabled !== false;
 
   return (
@@ -67,13 +67,6 @@ export async function HomePageContent({
       {homepage.sections.testimonials.enabled && (
         <Testimonials
           data={homepage.testimonials}
-          locale={locale}
-          animationsEnabled={animationsEnabled}
-        />
-      )}
-      {homepage.sections.featuredProducts.enabled && (
-        <FeaturedProducts
-          data={homepage.featuredProducts}
           locale={locale}
           animationsEnabled={animationsEnabled}
         />

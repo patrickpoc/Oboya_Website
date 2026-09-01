@@ -9,27 +9,17 @@ import { Link } from "@/i18n/navigation";
 import { fadeInUp } from "@/lib/animations";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
+import { isSolutionCategoryId } from "@/lib/solutions/category-stages";
 
 const SWIPE_THRESHOLD = 48;
 const GAP = 20;
 
-const CROP_CATEGORY_IDS = new Set(["flowers", "vegetables", "fruits"]);
-
-/** Map placeholder /solutions/{crop} URLs onto the real Solutions catalog filter. */
+/** Route homepage segment cards to their dedicated Solutions category page. */
 function resolveBusinessSolutionHref(href: string | undefined, itemId: string) {
+  if (isSolutionCategoryId(itemId)) {
+    return `/solutions/${itemId}`;
+  }
   const raw = (href || "").trim();
-  const cropFromPath = raw.match(
-    /^\/solutions\/(flowers|vegetables|fruits)\/?$/i
-  );
-  if (cropFromPath) {
-    return `/solutions?category=${cropFromPath[1].toLowerCase()}`;
-  }
-  if (
-    (!raw || raw === "/solutions") &&
-    CROP_CATEGORY_IDS.has(itemId.toLowerCase())
-  ) {
-    return `/solutions?category=${itemId.toLowerCase()}`;
-  }
   return raw || "/solutions";
 }
 

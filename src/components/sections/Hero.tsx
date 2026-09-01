@@ -8,7 +8,8 @@ import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { cn } from "@/lib/utils";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
-import { HeroMedia } from "@/components/sections/HeroMedia";
+import { HeroMedia, HeroMediaGradients } from "@/components/sections/HeroMedia";
+import { useHomeScrollBackdrop } from "@/components/sections/HomePageBackdrop";
 
 interface HeroProps {
   data: HomepageSettings["hero"];
@@ -32,18 +33,28 @@ export function Hero({
   const primaryLabel = pickLocalized(data.ctaPrimary.label, locale);
   const secondaryLabel = pickLocalized(data.ctaSecondary.label, locale);
   const alt = title;
+  const useScrollBackdrop = useHomeScrollBackdrop();
 
   return (
     <section
       id="hero"
-      className="relative flex min-h-[100svh] flex-col overflow-hidden bg-oboya-blue-dark"
+      className={cn(
+        "relative flex min-h-[100svh] flex-col overflow-hidden",
+        useScrollBackdrop ? "bg-transparent" : "bg-oboya-blue-dark"
+      )}
     >
-      <HeroMedia
-        mediaType={data.mediaType ?? "image"}
-        imageSrc={data.backgroundImage}
-        videoSrc={data.backgroundVideo}
-        alt={alt}
-      />
+      {!useScrollBackdrop ? (
+        <HeroMedia
+          mediaType={data.mediaType ?? "image"}
+          imageSrc={data.backgroundImage}
+          videoSrc={data.backgroundVideo}
+          alt={alt}
+        />
+      ) : (
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          <HeroMediaGradients />
+        </div>
+      )}
 
       <Container className="relative z-10 flex flex-1 flex-col pt-20 md:pt-24">
         <div className="flex flex-1 flex-col items-center justify-center px-2 pb-16 pt-8 text-center md:pb-20">

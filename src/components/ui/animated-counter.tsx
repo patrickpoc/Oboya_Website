@@ -22,7 +22,10 @@ export function AnimatedCounter({
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    if (!active) return;
+    if (!active) {
+      setCount(0);
+      return;
+    }
 
     const startTime = performance.now();
     const durationMs = duration * 1000;

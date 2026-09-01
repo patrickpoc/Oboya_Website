@@ -31,13 +31,12 @@ interface HomeIntroGateProps {
   waitForHero?: boolean;
 }
 
-const UNLOCK_TIMEOUT_MS = 10000;
+const UNLOCK_TIMEOUT_MS = 5000;
 
 export function HomeIntroGate({
   children,
   waitForHero = true,
 }: HomeIntroGateProps) {
-  const [windowReady, setWindowReady] = useState(false);
   const [heroReady, setHeroReady] = useState(!waitForHero);
   const [gone, setGone] = useState(false);
   const heroMarked = useRef(!waitForHero);
@@ -56,26 +55,13 @@ export function HomeIntroGate({
   }, [waitForHero]);
 
   useEffect(() => {
-    const markWindow = () => setWindowReady(true);
+    if (!waitForHero) return;
 
-    if (document.readyState === "complete") {
-      markWindow();
-    } else {
-      window.addEventListener("load", markWindow);
-    }
+    const timeout = window.setTimeout(markHeroReady, UNLOCK_TIMEOUT_MS);
+    return () => window.clearTimeout(timeout);
+  }, [waitForHero, markHeroReady]);
 
-    const timeout = window.setTimeout(() => {
-      setWindowReady(true);
-      markHeroReady();
-    }, UNLOCK_TIMEOUT_MS);
-
-    return () => {
-      window.removeEventListener("load", markWindow);
-      window.clearTimeout(timeout);
-    };
-  }, [markHeroReady]);
-
-  const ready = windowReady && heroReady;
+  const ready = heroReady;
 
   useEffect(() => {
     if (gone) return;

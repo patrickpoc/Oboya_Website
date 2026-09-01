@@ -1,11 +1,13 @@
 import { Footer } from "@/components/layouts/Footer";
 import { Navbar } from "@/components/layouts/Navbar";
 import { HomeIntroGate } from "@/components/layout/HomeIntroGate";
+import { HomePageBackdrop } from "@/components/sections/HomePageBackdrop";
 import { HomePageContent } from "@/components/sections/HomePageContent";
 import { routing, type Locale } from "@/i18n/routing";
 import { resolveMapLocationsForLocale } from "@/lib/map-locations";
 import { readMapLocations } from "@/lib/map-locations.server";
-import { readHomepageSettings } from "@/lib/cms/readers";
+import { readBlogPosts, readHomepageSettings } from "@/lib/cms/readers";
+import { pickLocalized } from "@/lib/cms/utils";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
@@ -32,10 +34,11 @@ export default async function Home({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [mapData, t, homepage] = await Promise.all([
+  const [mapData, t, homepage, posts] = await Promise.all([
     readMapLocations(),
     getTranslations({ locale, namespace: "globalPresence" }),
     readHomepageSettings(),
+    readBlogPosts(),
   ]);
 
   const locations = resolveMapLocationsForLocale(
@@ -49,17 +52,32 @@ export default async function Home({ params }: Props) {
       ? Boolean(homepage.hero.backgroundVideo)
       : Boolean(homepage.hero.backgroundImage));
 
+  const heroAlt = pickLocalized(homepage.hero.title, locale)
+    .replace(/\n/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/!$/, "");
+
   return (
     <HomeIntroGate waitForHero={waitForHero}>
       <Navbar transparent variant="minimal" />
       <main>
-        <HomePageContent
-          locale={locale}
-          locations={locations}
-          connections={mapData.connections}
-          mapAlt={t("mapAlt")}
-          homepage={homepage}
-        />
+        <HomePageBackdrop
+          enabled={homepage.sections.hero.enabled}
+          mediaType={homepage.hero.mediaType ?? "image"}
+          imageSrc={homepage.hero.backgroundImage}
+          videoSrc={homepage.hero.backgroundVideo}
+          alt={heroAlt}
+        >
+          <HomePageContent
+            locale={locale}
+            locations={locations}
+            connections={mapData.connections}
+            mapAlt={t("mapAlt")}
+            homepage={homepage}
+            posts={posts}
+          />
+        </HomePageBackdrop>
       </main>
       <Footer />
     </HomeIntroGate>

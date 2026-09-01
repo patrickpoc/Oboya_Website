@@ -7,7 +7,6 @@ export type HomepageSectionId =
   | "businessSolutions"
   | "globalPresence"
   | "testimonials"
-  | "featuredProducts"
   | "latestNews"
   | "partners";
 
@@ -67,21 +66,6 @@ export interface HomepageTestimonial {
   role: LocalizedString;
 }
 
-/** Featured Innovations card (legacy `categoryId` optional for migration). */
-export interface HomepageInnovation {
-  id: string;
-  title: LocalizedString;
-  description: LocalizedString;
-  image: string;
-  ctaLabel?: LocalizedString;
-  ctaHref?: string;
-  /** @deprecated Shop category link — ignored on public innovations UI */
-  categoryId?: string;
-}
-
-/** @deprecated Use HomepageInnovation */
-export type HomepageFeaturedCategory = HomepageInnovation;
-
 export interface HomepagePartnerLogo {
   id: string;
   name: string;
@@ -131,13 +115,6 @@ export interface HomepageSettings {
     eyebrow: LocalizedString;
     items: HomepageTestimonial[];
   };
-  featuredProducts: {
-    eyebrow: LocalizedString;
-    title: LocalizedString;
-    ctaLabel: LocalizedString;
-    ctaHref: string;
-    items: HomepageInnovation[];
-  };
   latestNews: {
     eyebrow: LocalizedString;
     headline: LocalizedString;
@@ -173,7 +150,6 @@ const defaultSettings = (): HomepageSettings => ({
     businessSolutions: { enabled: true },
     globalPresence: { enabled: true },
     testimonials: { enabled: true },
-    featuredProducts: { enabled: true },
     latestNews: { enabled: true },
     partners: { enabled: true },
   },
@@ -289,7 +265,7 @@ const defaultSettings = (): HomepageSettings => ({
         ),
         image:
           "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
-        href: "/solutions?category=flowers",
+        href: "/solutions/flowers",
         ctaLabel: loc("Explore Solutions"),
       },
       {
@@ -300,7 +276,7 @@ const defaultSettings = (): HomepageSettings => ({
         ),
         image:
           "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
-        href: "/solutions?category=vegetables",
+        href: "/solutions/vegetables",
         ctaLabel: loc("Explore Solutions"),
       },
       {
@@ -311,7 +287,7 @@ const defaultSettings = (): HomepageSettings => ({
         ),
         image:
           "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
-        href: "/solutions?category=fruits",
+        href: "/solutions/fruits",
         ctaLabel: loc("Explore Solutions"),
       },
       {
@@ -321,7 +297,7 @@ const defaultSettings = (): HomepageSettings => ({
           "Systems that improve product movement, merchandising, and point-of-sale presentation."
         ),
         image: "/assets/homepage/solutions-logistics.jpg",
-        href: "/solutions/distribution",
+        href: "/solutions/logistics-display",
         ctaLabel: loc("Explore Solutions"),
       },
       {
@@ -331,7 +307,7 @@ const defaultSettings = (): HomepageSettings => ({
           "Technology that increases efficiency, consistency, and scalability as operations grow."
         ),
         image: "/assets/homepage/greenhouse-technology.webp",
-        href: "/solutions",
+        href: "/solutions/machinery-automation",
         ctaLabel: loc("Explore Solutions"),
       },
     ],
@@ -394,49 +370,6 @@ const defaultSettings = (): HomepageSettings => ({
       },
     ],
   },
-  featuredProducts: {
-    eyebrow: loc("Featured Innovations"),
-    title: loc(
-      "At OBOYA, we go beyond supplying products, we deliver integrated horticulture solutions designed to improve efficiency, optimize operations, and support long-term growth across the global supply chain."
-    ),
-    ctaLabel: loc("See all products"),
-    ctaHref: "/shop",
-    items: [
-      {
-        id: "innov-ecovaso",
-        title: loc("Oboya Ecovaso"),
-        description: loc(
-          "Sustainable growing containers engineered for healthier roots and cleaner retail presentation."
-        ),
-        image:
-          "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
-        ctaLabel: loc("Learn More"),
-        ctaHref: "/shop",
-      },
-      {
-        id: "innov-bioglitter",
-        title: loc("Bioglitter"),
-        description: loc(
-          "Decorative finishes that add shelf impact while supporting more responsible material choices."
-        ),
-        image:
-          "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
-        ctaLabel: loc("Learn More"),
-        ctaHref: "/shop",
-      },
-      {
-        id: "innov-display",
-        title: loc("Retail Display Systems"),
-        description: loc(
-          "Display and handling solutions that protect product quality from greenhouse floor to store shelf."
-        ),
-        image:
-          "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
-        ctaLabel: loc("Learn More"),
-        ctaHref: "/shop",
-      },
-    ],
-  },
   latestNews: {
     eyebrow: loc("Latest News"),
     headline: loc(
@@ -457,12 +390,14 @@ const defaultSettings = (): HomepageSettings => ({
 });
 
 let cache: HomepageSettings | null = null;
-const CONTENT_REVISION = "home-solutions-category-hrefs-2026-08-31";
+const CONTENT_REVISION = "home-remove-featured-innovations-2026-09-01";
 let appliedRevision: string | null = null;
 
 function migrateSettings(settings: HomepageSettings): HomepageSettings {
   const defaults = defaultSettings();
-  const rawHero = settings.hero as HomepageSettings["hero"] & {
+  const { featuredProducts: _legacyFeatured, ...withoutLegacy } =
+    settings as HomepageSettings & { featuredProducts?: unknown };
+  const rawHero = withoutLegacy.hero as HomepageSettings["hero"] & {
     ctaPrimary?: HomepageHeroCta;
     ctaSecondary?: HomepageHeroCta;
     mediaType?: "image" | "video";
@@ -476,16 +411,16 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
 
   return {
     ...defaults,
-    ...settings,
+    ...withoutLegacy,
     animations: {
-      enabled: settings.animations?.enabled ?? defaults.animations.enabled,
+      enabled: withoutLegacy.animations?.enabled ?? defaults.animations.enabled,
     },
     hero: {
       ...defaults.hero,
-      ...settings.hero,
+      ...withoutLegacy.hero,
       mediaType,
       backgroundImage:
-        settings.hero?.backgroundImage || defaults.hero.backgroundImage,
+        withoutLegacy.hero?.backgroundImage || defaults.hero.backgroundImage,
       backgroundVideo:
         rawHero?.backgroundVideo !== undefined
           ? rawHero.backgroundVideo
@@ -504,28 +439,28 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
         label: rawHero?.ctaSecondary?.label ?? defaults.hero.ctaSecondary.label,
         href: rawHero?.ctaSecondary?.href ?? defaults.hero.ctaSecondary.href,
       },
-      pills: settings.hero?.pills?.length
-        ? settings.hero.pills
+      pills: withoutLegacy.hero?.pills?.length
+        ? withoutLegacy.hero.pills
         : defaults.hero.pills,
     },
     companyOverview: {
       ...defaults.companyOverview,
-      ...settings.companyOverview,
+      ...withoutLegacy.companyOverview,
       segments:
-        settings.companyOverview?.segments?.length > 0
-          ? settings.companyOverview.segments
+        withoutLegacy.companyOverview?.segments?.length > 0
+          ? withoutLegacy.companyOverview.segments
           : defaults.companyOverview.segments,
       stats: (
-        settings.companyOverview?.stats?.length > 0
-          ? settings.companyOverview.stats
+        withoutLegacy.companyOverview?.stats?.length > 0
+          ? withoutLegacy.companyOverview.stats
           : defaults.companyOverview.stats
       ).slice(0, 3),
     },
     capabilities: {
       ...defaults.capabilities,
-      ...settings.capabilities,
-      items: settings.capabilities?.items?.length
-        ? settings.capabilities.items.map((item, i) => ({
+      ...withoutLegacy.capabilities,
+      items: withoutLegacy.capabilities?.items?.length
+        ? withoutLegacy.capabilities.items.map((item, i) => ({
             ...defaults.capabilities.items[i],
             ...item,
             ctaLabel:
@@ -535,9 +470,9 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
     },
     businessSolutions: {
       ...defaults.businessSolutions,
-      ...settings.businessSolutions,
+      ...withoutLegacy.businessSolutions,
       items: (() => {
-        const raw = settings.businessSolutions?.items;
+        const raw = withoutLegacy.businessSolutions?.items;
         if (!raw?.length) return defaults.businessSolutions.items;
         const mapped: HomepageBusinessSolution[] = raw.map((item, i) => {
           const fallback = defaults.businessSolutions.items[i];
@@ -566,58 +501,56 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
         return padded;
       })(),
     },
-    globalPresence: { ...defaults.globalPresence, ...settings.globalPresence },
-    testimonials: { ...defaults.testimonials, ...settings.testimonials },
-    featuredProducts: {
-      ...defaults.featuredProducts,
-      ...settings.featuredProducts,
-      items: (() => {
-        const raw = settings.featuredProducts?.items;
-        if (!raw?.length) return defaults.featuredProducts.items;
-        const mapped: HomepageInnovation[] = raw.map((item, i) => {
-          const fallback = defaults.featuredProducts.items[i];
-          const title =
-            item.title && Object.values(item.title).some(Boolean)
-              ? item.title
-              : fallback?.title ?? emptyLoc();
-          const description =
-            item.description && Object.values(item.description).some(Boolean)
-              ? item.description
-              : fallback?.description ?? emptyLoc();
-          return {
-            id: item.id ?? fallback?.id ?? `innov-${i}`,
-            title,
-            description,
-            image: item.image || fallback?.image || "",
-            ctaLabel: item.ctaLabel ?? fallback?.ctaLabel,
-            ctaHref: item.ctaHref ?? fallback?.ctaHref,
-            categoryId: item.categoryId,
-          };
-        });
-        // Always keep a full 3-card innovations row when CMS has fewer items
-        if (mapped.length >= defaults.featuredProducts.items.length) {
-          return mapped;
-        }
-        const seen = new Set(mapped.map((m) => m.id));
-        const padded: HomepageInnovation[] = [...mapped];
-        for (const fallback of defaults.featuredProducts.items) {
-          if (padded.length >= defaults.featuredProducts.items.length) break;
-          if (seen.has(fallback.id)) continue;
-          padded.push(fallback);
-          seen.add(fallback.id);
-        }
-        return padded;
-      })(),
+    globalPresence: {
+      ...defaults.globalPresence,
+      ...withoutLegacy.globalPresence,
     },
-    latestNews: { ...defaults.latestNews, ...settings.latestNews },
-    partners: { ...defaults.partners, ...settings.partners },
+    testimonials: {
+      ...defaults.testimonials,
+      ...withoutLegacy.testimonials,
+    },
+    latestNews: { ...defaults.latestNews, ...withoutLegacy.latestNews },
+    partners: { ...defaults.partners, ...withoutLegacy.partners },
     sections: {
       ...defaults.sections,
-      ...settings.sections,
+      hero: {
+        enabled:
+          withoutLegacy.sections?.hero?.enabled ?? defaults.sections.hero.enabled,
+      },
+      companyOverview: {
+        enabled:
+          withoutLegacy.sections?.companyOverview?.enabled ??
+          defaults.sections.companyOverview.enabled,
+      },
+      capabilities: {
+        enabled:
+          withoutLegacy.sections?.capabilities?.enabled ??
+          defaults.sections.capabilities.enabled,
+      },
       businessSolutions: {
         enabled:
-          settings.sections?.businessSolutions?.enabled ??
+          withoutLegacy.sections?.businessSolutions?.enabled ??
           defaults.sections.businessSolutions.enabled,
+      },
+      globalPresence: {
+        enabled:
+          withoutLegacy.sections?.globalPresence?.enabled ??
+          defaults.sections.globalPresence.enabled,
+      },
+      testimonials: {
+        enabled:
+          withoutLegacy.sections?.testimonials?.enabled ??
+          defaults.sections.testimonials.enabled,
+      },
+      latestNews: {
+        enabled:
+          withoutLegacy.sections?.latestNews?.enabled ??
+          defaults.sections.latestNews.enabled,
+      },
+      partners: {
+        enabled:
+          withoutLegacy.sections?.partners?.enabled ??
+          defaults.sections.partners.enabled,
       },
     },
   };

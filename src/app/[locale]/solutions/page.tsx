@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title,
-    description: t("heroTitle"),
+    description: t("heroBody"),
     alternates: {
       languages: Object.fromEntries(
         routing.locales.map((loc) => [loc, `/${loc}/solutions`])
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     openGraph: {
       title: `${title} | ${siteConfig.name}`,
-      description: t("heroEyebrow"),
+      description: t("heroHeadline"),
     },
   };
 }

@@ -10,7 +10,6 @@ import { CapabilitiesSectionEditor } from "./sections/CapabilitiesSectionEditor"
 import { BusinessSolutionsSectionEditor } from "./sections/BusinessSolutionsSectionEditor";
 import { GlobalPresenceSectionEditor } from "./sections/GlobalPresenceSectionEditor";
 import { TestimonialsSectionEditor } from "./sections/TestimonialsSectionEditor";
-import { FeaturedCategoriesSectionEditor } from "./sections/FeaturedCategoriesSectionEditor";
 import { LatestNewsSectionEditor } from "./sections/LatestNewsSectionEditor";
 import { PartnersSectionEditor } from "./sections/PartnersSectionEditor";
 import { HomepageSettingsEditor } from "./sections/HomepageSettingsEditor";
@@ -22,7 +21,6 @@ const SECTION_EDITORS: Record<HomepageSectionSlug, ComponentType<HomepageSection
   businessSolutions: BusinessSolutionsSectionEditor,
   globalPresence: GlobalPresenceSectionEditor,
   testimonials: TestimonialsSectionEditor,
-  featuredProducts: FeaturedCategoriesSectionEditor,
   latestNews: LatestNewsSectionEditor,
   partners: PartnersSectionEditor,
   settings: HomepageSettingsEditor,

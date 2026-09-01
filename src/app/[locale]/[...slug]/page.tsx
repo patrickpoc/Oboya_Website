@@ -18,15 +18,22 @@ import {
 } from "@/constants/pages";
 import { routing } from "@/i18n/routing";
 import { siteConfig } from "@/constants/site";
+import { SOLUTION_CATEGORY_IDS } from "@/lib/solutions/category-stages";
+
+const solutionCategoryPaths = new Set(
+  SOLUTION_CATEGORY_IDS.map((id) => `solutions/${id}`)
+);
 
 interface PageProps {
   params: Promise<{ locale: string; slug: string[] }>;
 }
 
 export function generateStaticParams() {
-  const slugs = getAllPageSlugs().filter(
-    (slug) => !(slug.length === 1 && slug[0] === "solutions")
-  );
+  const slugs = getAllPageSlugs().filter((slug) => {
+    if (slug.length === 1 && slug[0] === "solutions") return false;
+    if (solutionCategoryPaths.has(slug.join("/"))) return false;
+    return true;
+  });
   return routing.locales.flatMap((locale) =>
     slugs.map((slug) => ({ locale, slug }))
   );

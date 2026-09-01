@@ -11,7 +11,7 @@ export async function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-oboya-soft-white pt-20 pb-10">
+    <footer className="relative z-20 bg-oboya-soft-white pt-20 pb-10">
       <Container>
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-6 lg:gap-10">
           <div className="lg:col-span-2">

@@ -63,17 +63,6 @@
     "panelContactOffice": "Contact this Office",
     "panelOfficeCount": "{count, plural, one {# office} other {# offices}}"
   },
-  "featuredProducts": {
-    "eyebrow": "Featured Products",
-    "title": "Integrated horticulture solutions designed for efficiency, quality, and sustainability across the entire supply chain.",
-    "viewAll": "View all products",
-    "strawberryTitle": "Strawberry Retail Packaging",
-    "strawberryCategory": "Packaging",
-    "growingMediaTitle": "Premium Growing Media",
-    "growingMediaCategory": "Substrates",
-    "flowerTrolleyTitle": "Flower Display Trolley",
-    "flowerTrolleyCategory": "Equipment"
-  },
   "solutions": {
     "eyebrow": "Solutions",
     "title": "End-to-end systems for modern horticulture",
@@ -884,8 +873,13 @@
   },
   "solutionsPage": {
     "metaTitle": "Solutions",
+    "heroHeadline": "Solutions for Every Stage of Horticulture",
+    "heroTagline": "Different crops.\nDifferent markets.\nDifferent operational realities.",
+    "heroBody": "Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth.",
+    "heroAccent": "Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
     "heroEyebrow": "Solutions for Every Stage of Horticulture",
     "heroTitle": "Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth. Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
+    "backToSolutions": "All Solutions",
     "filters": {
       "all": "All Crops",
       "flowers": "Flowers",
@@ -908,6 +902,73 @@
       "fruits": {
         "title": "Solutions for Fruits",
         "description": "Optimizing cultivation, handling, packaging, and distribution across the fruit supply chain."
+      },
+      "logistics-display": {
+        "title": "Solutions for Logistics & Display",
+        "description": "Systems that improve product movement, merchandising, and point-of-sale presentation."
+      },
+      "machinery-automation": {
+        "title": "Solutions for Machinery & Automation",
+        "description": "Technology that increases efficiency, consistency, and scalability as operations grow."
+      }
+    },
+    "challengesLabel": "Challenges We Help Address",
+    "stagesLabel": "Solutions Across the Value Chain",
+    "links": {
+      "featuredCaseStudy": "Featured Case Study",
+      "relatedInsights": "Related Insights",
+      "requestQuote": "Request a Quote"
+    },
+    "blocks": {
+      "flowers": {
+        "challenges": [
+          "Product protection",
+          "Post-harvest handling",
+          "Packaging efficiency",
+          "Logistics performance",
+          "Labor productivity",
+          "Retail presentation"
+        ]
+      },
+      "vegetables": {
+        "challenges": [
+          "Crop consistency",
+          "Harvest handling",
+          "Packaging throughput",
+          "Cold chain integrity",
+          "Labor efficiency",
+          "Retail-ready presentation"
+        ]
+      },
+      "fruits": {
+        "challenges": [
+          "Shelf-life management",
+          "Gentle handling",
+          "Export packaging",
+          "Distribution reliability",
+          "Seasonal labor peaks",
+          "Point-of-sale appeal"
+        ]
+      },
+      "logistics-display": {
+        "challenges": [
+          "Warehouse flow",
+          "Load stability",
+          "In-store merchandising",
+          "Trolley utilization",
+          "Last-mile handling",
+          "Display refresh cycles"
+        ]
+      },
+      "machinery-automation": {
+        "challenges": [
+          "Line throughput",
+          "Process consistency",
+          "Integration with existing lines",
+          "Downtime reduction",
+          "Operator safety",
+          "Scalable automation"
+        ]
       }
     },
     "cards": {

@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { SolutionsHero } from "@/components/solutions/SolutionsHero";
+import { SolutionsPageBackdrop } from "@/components/solutions/SolutionsPageBackdrop";
 import {
   SolutionsCatalog,
   type SolutionsCardData,
@@ -7,6 +8,10 @@ import {
   type SolutionsCategoryId,
 } from "@/components/solutions/SolutionsCatalog";
 import { SolutionsCta } from "@/components/solutions/SolutionsCta";
+import {
+  SOLUTIONS_HERO_IMAGES,
+  uniqueSolutionImages,
+} from "@/lib/solutions/hero-images";
 
 const CARD_META: {
   id: string;
@@ -52,7 +57,7 @@ const CARD_META: {
   },
   {
     id: "automation",
-    href: "/solutions",
+    href: "/solutions/machinery-automation",
     image: "/assets/homepage/greenhouse-technology.webp",
     categories: ["all", "flowers", "vegetables", "fruits"],
   },
@@ -81,16 +86,28 @@ export async function SolutionsPageContent() {
     tags: t(`cards.${card.id}.tags`),
   }));
 
+  const heroImages = uniqueSolutionImages([
+    ...SOLUTIONS_HERO_IMAGES,
+    ...CARD_META.map((card) => card.image),
+  ]);
+
   return (
-    <>
-      <SolutionsHero eyebrow={t("heroEyebrow")} title={t("heroTitle")} />
+    <SolutionsPageBackdrop images={heroImages} alt={t("heroHeadline")}>
+      <SolutionsHero
+        headline={t("heroHeadline")}
+        tagline={t("heroTagline")}
+        body={t("heroBody")}
+        accent={t("heroAccent")}
+        images={heroImages}
+        usePageBackdrop
+      />
       <SolutionsCatalog categories={categories} cards={cards} />
       <SolutionsCta
         title={t("ctaTitle")}
         description={t("ctaDescription")}
         buttonLabel={t("ctaButton")}
-        imageSrc="/assets/homepage/solutions-integrated.jpg"
+        sharedBackdrop
       />
-    </>
+    </SolutionsPageBackdrop>
   );
 }

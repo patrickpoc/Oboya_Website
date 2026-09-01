@@ -27,28 +27,28 @@ export function CaseStudyContentBlock({
   const imageLeft = imagePosition === "left";
 
   return (
-    <article className="grid items-center gap-10 lg:grid-cols-12 lg:gap-14 xl:gap-16">
+    <article className="grid items-center gap-9 lg:grid-cols-12 lg:gap-[3.15rem] xl:gap-[3.6rem]">
       <div
         className={cn(
           "flex flex-col lg:col-span-5",
           imageLeft ? "order-2 lg:order-2 lg:col-start-8" : "order-2 lg:order-1 lg:col-start-1"
         )}
       >
-        <h3 className="max-w-md font-display text-[clamp(1.5rem,2.6vw,2.125rem)] font-semibold leading-[1.2] tracking-[-0.02em] text-oboya-blue-dark">
+        <h3 className="max-w-[25.2rem] font-display text-[clamp(1.35rem,2.35vw,1.9rem)] font-semibold leading-[1.2] tracking-[-0.02em] text-oboya-blue-dark">
           {title}
         </h3>
-        <div className="mt-6 flex max-w-md flex-col gap-4 font-body text-[0.9375rem] leading-[1.7] text-oboya-blue-dark/55 md:text-base">
+        <div className="mt-[1.35rem] flex max-w-[25.2rem] flex-col gap-3.5 font-body text-[0.84375rem] leading-[1.7] text-oboya-blue-dark/55 md:text-[0.9rem]">
           {paragraphs.filter(Boolean).map((paragraph, index) => (
             <p key={index}>{paragraph}</p>
           ))}
         </div>
         <Link
           href={href}
-          className="group mt-8 inline-flex items-center gap-3 self-start pt-2 text-sm font-semibold tracking-[0.08em] text-oboya-blue-dark uppercase transition-colors hover:text-oboya-blue"
+          className="group mt-7 inline-flex items-center gap-2.5 self-start pt-1.5 text-sm font-semibold tracking-[0.08em] text-oboya-blue-dark uppercase transition-colors hover:text-oboya-blue"
         >
           <span
             aria-hidden
-            className="flex size-8 shrink-0 items-center justify-center rounded-full border border-oboya-blue-dark/35 text-oboya-blue-dark transition-colors group-hover:border-oboya-green group-hover:bg-oboya-green group-hover:text-white"
+            className="flex size-7 shrink-0 items-center justify-center rounded-full border border-oboya-blue-dark/35 text-oboya-blue-dark transition-colors group-hover:border-oboya-green group-hover:bg-oboya-green group-hover:text-white"
           >
             <ArrowRight className="size-3.5" />
           </span>
@@ -68,8 +68,8 @@ export function CaseStudyContentBlock({
           className={cn(
             "absolute inset-0 bg-[#e8ebe9]",
             imageLeft
-              ? "-translate-x-3 translate-y-3 sm:-translate-x-5 sm:translate-y-5 md:-translate-x-6 md:translate-y-6"
-              : "translate-x-3 translate-y-3 sm:translate-x-5 sm:translate-y-5 md:translate-x-6 md:translate-y-6"
+              ? "-translate-x-2.5 translate-y-2.5 sm:-translate-x-[1.125rem] sm:translate-y-[1.125rem] md:-translate-x-[1.35rem] md:translate-y-[1.35rem]"
+              : "translate-x-2.5 translate-y-2.5 sm:translate-x-[1.125rem] sm:translate-y-[1.125rem] md:translate-x-[1.35rem] md:translate-y-[1.35rem]"
           )}
           aria-hidden
         />
@@ -79,7 +79,7 @@ export function CaseStudyContentBlock({
             alt={imageAlt}
             fill
             className="object-cover"
-            sizes="(max-width: 1024px) 100vw, 48vw"
+            sizes="(max-width: 1024px) 90vw, 43vw"
           />
         </div>
       </div>

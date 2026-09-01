@@ -9,6 +9,16 @@ interface HeroMediaProps {
   imageSrc: string;
   videoSrc: string | null;
   alt: string;
+  includeGradients?: boolean;
+}
+
+export function HeroMediaGradients() {
+  return (
+    <>
+      <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/25 to-oboya-blue-dark/92" />
+      <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-b from-transparent to-oboya-blue-dark" />
+    </>
+  );
 }
 
 function usePrefersReducedMotion() {
@@ -30,6 +40,7 @@ function HeroMediaInner({
   imageSrc,
   videoSrc,
   alt,
+  includeGradients = true,
 }: HeroMediaProps) {
   const intro = useHomeIntro();
   const markHeroReady = intro?.markHeroReady;
@@ -49,9 +60,7 @@ function HeroMediaInner({
   }, [markHeroReady]);
 
   useEffect(() => {
-    if (wantsVideo) return;
-
-    if (mediaType === "image" && imageSrc) {
+    if (imageSrc) {
       let cancelled = false;
       const img = new window.Image();
       const done = () => {
@@ -66,8 +75,32 @@ function HeroMediaInner({
       };
     }
 
-    notifyReady();
-  }, [wantsVideo, mediaType, imageSrc, notifyReady]);
+    if (!wantsVideo) {
+      notifyReady();
+    }
+  }, [imageSrc, wantsVideo, notifyReady]);
+
+  useEffect(() => {
+    if (!wantsVideo || !videoSrc || imageSrc) return;
+    const el = videoRef.current;
+    if (!el) return;
+
+    let cancelled = false;
+    const onData = () => {
+      if (!cancelled) notifyReady();
+    };
+
+    if (el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      onData();
+    } else {
+      el.addEventListener("loadeddata", onData, { once: true });
+    }
+
+    return () => {
+      cancelled = true;
+      el.removeEventListener("loadeddata", onData);
+    };
+  }, [wantsVideo, videoSrc, imageSrc, notifyReady]);
 
   useEffect(() => {
     if (!wantsVideo || !videoSrc) return;
@@ -75,42 +108,37 @@ function HeroMediaInner({
     if (!el) return;
 
     let cancelled = false;
-    let finished = false;
 
-    const finish = async () => {
-      if (cancelled || finished) return;
-      finished = true;
-      try {
-        el.muted = true;
-        await el.play();
-        if (cancelled) return;
-        setShowVideo(true);
-        notifyReady();
-      } catch {
-        if (cancelled) return;
-        setVideoFailed(true);
-        setShowVideo(false);
-        notifyReady();
-      }
+    const tryPlay = () => {
+      if (cancelled) return;
+      el.muted = true;
+      void el.play().then(
+        () => {
+          if (!cancelled) setShowVideo(true);
+        },
+        () => {
+          if (cancelled) return;
+          setVideoFailed(true);
+          setShowVideo(false);
+        }
+      );
     };
 
-    if (el.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
-      void finish();
+    if (el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      tryPlay();
     } else {
-      el.addEventListener("canplaythrough", finish);
-      el.addEventListener("canplay", finish);
+      el.addEventListener("loadeddata", tryPlay, { once: true });
     }
 
     return () => {
       cancelled = true;
-      el.removeEventListener("canplaythrough", finish);
-      el.removeEventListener("canplay", finish);
+      el.removeEventListener("loadeddata", tryPlay);
     };
-  }, [wantsVideo, videoSrc, notifyReady]);
+  }, [wantsVideo, videoSrc]);
 
   const showImage =
-    (mediaType === "image" || reducedMotion || videoFailed || !videoSrc) &&
-    Boolean(imageSrc);
+    Boolean(imageSrc) &&
+    (mediaType === "image" || !wantsVideo || !showVideo);
 
   return (
     <div className="absolute inset-0 bg-oboya-blue-dark">
@@ -122,7 +150,6 @@ function HeroMediaInner({
           priority
           className="object-cover object-[center_40%]"
           sizes="100vw"
-          onLoadingComplete={notifyReady}
         />
       ) : null}
 
@@ -137,23 +164,18 @@ function HeroMediaInner({
           loop
           playsInline
           autoPlay
-          preload="auto"
+          preload="metadata"
           aria-hidden
           tabIndex={-1}
-          onPlaying={() => {
-            setShowVideo(true);
-            notifyReady();
-          }}
+          onPlaying={() => setShowVideo(true)}
           onError={() => {
             setVideoFailed(true);
             setShowVideo(false);
-            notifyReady();
           }}
         />
       ) : null}
 
-      <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/25 to-oboya-blue-dark/92" />
-      <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-b from-transparent to-oboya-blue-dark" />
+      {includeGradients ? <HeroMediaGradients /> : null}
     </div>
   );
 }

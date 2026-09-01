@@ -63,17 +63,6 @@
     "panelContactOffice": "联系该办事处",
     "panelOfficeCount": "{count, plural, other {# 个办事处}}"
   },
-  "featuredProducts": {
-    "eyebrow": "精选产品",
-    "title": "为整个供应链的效率、质量和可持续性而设计的综合园艺解决方案。",
-    "viewAll": "查看所有产品",
-    "strawberryTitle": "草莓零售包装",
-    "strawberryCategory": "包装",
-    "growingMediaTitle": "优质栽培基质",
-    "growingMediaCategory": "基质",
-    "flowerTrolleyTitle": "花卉展示手推车",
-    "flowerTrolleyCategory": "设备"
-  },
   "solutions": {
     "eyebrow": "解决方案",
     "title": "现代园艺的端到端系统",
@@ -876,8 +865,13 @@
   },
   "solutionsPage": {
     "metaTitle": "Solutions",
+    "heroHeadline": "Solutions for Every Stage of Horticulture",
+    "heroTagline": "Different crops.\nDifferent markets.\nDifferent operational realities.",
+    "heroBody": "Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth.",
+    "heroAccent": "Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
     "heroEyebrow": "Solutions for Every Stage of Horticulture",
     "heroTitle": "Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth. Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
+    "backToSolutions": "全部解决方案",
     "filters": {
       "all": "All Crops",
       "flowers": "Flowers",
@@ -900,6 +894,73 @@
       "fruits": {
         "title": "Solutions for Fruits",
         "description": "Optimizing cultivation, handling, packaging, and distribution across the fruit supply chain."
+      },
+      "logistics-display": {
+        "title": "物流与陈列解决方案",
+        "description": "改善产品流转、陈列与终端销售呈现的系统。"
+      },
+      "machinery-automation": {
+        "title": "机械与自动化解决方案",
+        "description": "随着业务规模增长，提升效率、一致性与可扩展性的技术。"
+      }
+    },
+    "challengesLabel": "我们协助应对的挑战",
+    "stagesLabel": "全价值链解决方案",
+    "links": {
+      "featuredCaseStudy": "精选案例",
+      "relatedInsights": "相关洞察",
+      "requestQuote": "获取报价"
+    },
+    "blocks": {
+      "flowers": {
+        "challenges": [
+          "产品保护",
+          "采后处理",
+          "包装效率",
+          "物流表现",
+          "劳动生产率",
+          "零售陈列"
+        ]
+      },
+      "vegetables": {
+        "challenges": [
+          "作物一致性",
+          "采收处理",
+          "包装产能",
+          "冷链完整性",
+          "人工效率",
+          "零售就绪呈现"
+        ]
+      },
+      "fruits": {
+        "challenges": [
+          "货架期管理",
+          "轻柔搬运",
+          "出口包装",
+          "配送可靠性",
+          "季节性用工高峰",
+          "终端吸引力"
+        ]
+      },
+      "logistics-display": {
+        "challenges": [
+          "仓库流转",
+          "装载稳定性",
+          "店内陈列",
+          "台车利用率",
+          "末端配送搬运",
+          "陈列更新周期"
+        ]
+      },
+      "machinery-automation": {
+        "challenges": [
+          "产线产能",
+          "工艺一致性",
+          "与现有产线集成",
+          "减少停机",
+          "操作安全",
+          "可扩展自动化"
+        ]
       }
     },
     "cards": {

@@ -63,17 +63,6 @@
     "panelContactOffice": "Contatar este escritório",
     "panelOfficeCount": "{count, plural, one {# escritório} other {# escritórios}}"
   },
-  "featuredProducts": {
-    "eyebrow": "Produtos em Destaque",
-    "title": "Soluções integradas de horticultura projetadas para eficiência, qualidade e sustentabilidade em toda a cadeia de suprimentos.",
-    "viewAll": "Ver todos os produtos",
-    "strawberryTitle": "Embalagem de Morango para Varejo",
-    "strawberryCategory": "Embalagens",
-    "growingMediaTitle": "Substratos Premium",
-    "growingMediaCategory": "Substratos",
-    "flowerTrolleyTitle": "Carrinho de Exposição de Flores",
-    "flowerTrolleyCategory": "Equipamentos"
-  },
   "solutions": {
     "eyebrow": "Soluções",
     "title": "Sistemas completos para a horticultura moderna",
@@ -876,8 +865,13 @@
   },
   "solutionsPage": {
     "metaTitle": "Solutions",
+    "heroHeadline": "Solutions for Every Stage of Horticulture",
+    "heroTagline": "Different crops.\nDifferent markets.\nDifferent operational realities.",
+    "heroBody": "Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth.",
+    "heroAccent": "Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
     "heroEyebrow": "Solutions for Every Stage of Horticulture",
     "heroTitle": "Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth. Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
+    "backToSolutions": "Todas as Soluções",
     "filters": {
       "all": "All Crops",
       "flowers": "Flowers",
@@ -900,6 +894,73 @@
       "fruits": {
         "title": "Solutions for Fruits",
         "description": "Optimizing cultivation, handling, packaging, and distribution across the fruit supply chain."
+      },
+      "logistics-display": {
+        "title": "Soluções para Logística e Exposição",
+        "description": "Sistemas que melhoram o movimento de produtos, merchandising e apresentação no ponto de venda."
+      },
+      "machinery-automation": {
+        "title": "Soluções para Maquinário e Automação",
+        "description": "Tecnologia que aumenta eficiência, consistência e escalabilidade conforme as operações crescem."
+      }
+    },
+    "challengesLabel": "Desafios que Ajudamos a Resolver",
+    "stagesLabel": "Soluções em Toda a Cadeia de Valor",
+    "links": {
+      "featuredCaseStudy": "Case em Destaque",
+      "relatedInsights": "Insights Relacionados",
+      "requestQuote": "Solicitar Orçamento"
+    },
+    "blocks": {
+      "flowers": {
+        "challenges": [
+          "Proteção do produto",
+          "Manuseio pós-colheita",
+          "Eficiência de embalagem",
+          "Desempenho logístico",
+          "Produtividade da mão de obra",
+          "Apresentação no varejo"
+        ]
+      },
+      "vegetables": {
+        "challenges": [
+          "Consistência da cultura",
+          "Manuseio na colheita",
+          "Throughput de embalagem",
+          "Integridade da cadeia fria",
+          "Eficiência de mão de obra",
+          "Apresentação pronta para varejo"
+        ]
+      },
+      "fruits": {
+        "challenges": [
+          "Gestão de shelf-life",
+          "Manuseio delicado",
+          "Embalagem para exportação",
+          "Confiabilidade na distribuição",
+          "Picos sazonais de mão de obra",
+          "Apelo no ponto de venda"
+        ]
+      },
+      "logistics-display": {
+        "challenges": [
+          "Fluxo no armazém",
+          "Estabilidade de carga",
+          "Merchandising na loja",
+          "Utilização de carrinhos",
+          "Manuseio na última milha",
+          "Ciclos de renovação de exposição"
+        ]
+      },
+      "machinery-automation": {
+        "challenges": [
+          "Throughput da linha",
+          "Consistência de processo",
+          "Integração com linhas existentes",
+          "Redução de paradas",
+          "Segurança do operador",
+          "Automação escalável"
+        ]
       }
     },
     "cards": {

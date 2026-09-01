@@ -24,9 +24,6 @@ export const pageRegistry: Record<string, PageConfig> = {
   sustainability: { messageKey: "sustainability" },
 
   solutions: { messageKey: "solutions", template: "listing" },
-  "solutions/vegetables": { messageKey: "solutionsVegetables", parent: "solutions" },
-  "solutions/flowers": { messageKey: "solutionsFlowers", parent: "solutions" },
-  "solutions/fruits": { messageKey: "solutionsFruits", parent: "solutions" },
   "solutions/propagation": { messageKey: "solutionsPropagation", parent: "solutions" },
   "solutions/packaging": { messageKey: "solutionsPackaging", parent: "solutions" },
   "solutions/sustainability": { messageKey: "solutionsSustainability", parent: "solutions" },

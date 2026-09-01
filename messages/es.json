@@ -63,17 +63,6 @@
     "panelContactOffice": "Contactar esta oficina",
     "panelOfficeCount": "{count, plural, one {# oficina} other {# oficinas}}"
   },
-  "featuredProducts": {
-    "eyebrow": "Productos Destacados",
-    "title": "Soluciones integrales de horticultura diseñadas para eficiencia, calidad y sostenibilidad en toda la cadena de suministro.",
-    "viewAll": "Ver todos los productos",
-    "strawberryTitle": "Empaquetado de Fresa para Retail",
-    "strawberryCategory": "Empaquetado",
-    "growingMediaTitle": "Sustratos Premium",
-    "growingMediaCategory": "Sustratos",
-    "flowerTrolleyTitle": "Carro de Exposición de Flores",
-    "flowerTrolleyCategory": "Equipamiento"
-  },
   "solutions": {
     "eyebrow": "Soluciones",
     "title": "Sistemas integrales para la horticultura moderna",
@@ -876,8 +865,13 @@
   },
   "solutionsPage": {
     "metaTitle": "Solutions",
+    "heroHeadline": "Solutions for Every Stage of Horticulture",
+    "heroTagline": "Different crops.\nDifferent markets.\nDifferent operational realities.",
+    "heroBody": "Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth.",
+    "heroAccent": "Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
     "heroEyebrow": "Solutions for Every Stage of Horticulture",
     "heroTitle": "Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth. Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
+    "backToSolutions": "Todas las Soluciones",
     "filters": {
       "all": "All Crops",
       "flowers": "Flowers",
@@ -900,6 +894,73 @@
       "fruits": {
         "title": "Solutions for Fruits",
         "description": "Optimizing cultivation, handling, packaging, and distribution across the fruit supply chain."
+      },
+      "logistics-display": {
+        "title": "Soluciones para Logística y Exhibición",
+        "description": "Sistemas que mejoran el movimiento de productos, merchandising y presentación en el punto de venta."
+      },
+      "machinery-automation": {
+        "title": "Soluciones para Maquinaria y Automatización",
+        "description": "Tecnología que aumenta la eficiencia, consistencia y escalabilidad a medida que crecen las operaciones."
+      }
+    },
+    "challengesLabel": "Desafíos que Ayudamos a Resolver",
+    "stagesLabel": "Soluciones en Toda la Cadena de Valor",
+    "links": {
+      "featuredCaseStudy": "Caso Destacado",
+      "relatedInsights": "Insights Relacionados",
+      "requestQuote": "Solicitar Cotización"
+    },
+    "blocks": {
+      "flowers": {
+        "challenges": [
+          "Protección del producto",
+          "Manejo postcosecha",
+          "Eficiencia de empaquetado",
+          "Rendimiento logístico",
+          "Productividad laboral",
+          "Presentación en retail"
+        ]
+      },
+      "vegetables": {
+        "challenges": [
+          "Consistencia del cultivo",
+          "Manejo en cosecha",
+          "Rendimiento de empaquetado",
+          "Integridad de cadena de frío",
+          "Eficiencia laboral",
+          "Presentación lista para retail"
+        ]
+      },
+      "fruits": {
+        "challenges": [
+          "Gestión de vida útil",
+          "Manejo delicado",
+          "Empaquetado de exportación",
+          "Fiabilidad en distribución",
+          "Picos estacionales de mano de obra",
+          "Atractivo en punto de venta"
+        ]
+      },
+      "logistics-display": {
+        "challenges": [
+          "Flujo en almacén",
+          "Estabilidad de carga",
+          "Merchandising en tienda",
+          "Utilización de carros",
+          "Manejo de última milla",
+          "Ciclos de renovación de exhibición"
+        ]
+      },
+      "machinery-automation": {
+        "challenges": [
+          "Rendimiento de línea",
+          "Consistencia de proceso",
+          "Integración con líneas existentes",
+          "Reducción de paradas",
+          "Seguridad del operador",
+          "Automatización escalable"
+        ]
       }
     },
     "cards": {

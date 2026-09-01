@@ -5,7 +5,6 @@ export const HOMEPAGE_SECTION_SLUGS = [
   "businessSolutions",
   "globalPresence",
   "testimonials",
-  "featuredProducts",
   "latestNews",
   "partners",
   "settings",
@@ -40,10 +39,6 @@ export const HOMEPAGE_SECTION_META: Record<
   testimonials: {
     title: "Testimonials",
     description: "Customer quotes, authors, and roles.",
-  },
-  featuredProducts: {
-    title: "Featured Innovations",
-    description: "Innovation cards with image, copy, and learn-more links.",
   },
   latestNews: {
     title: "Latest News",
