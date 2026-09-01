@@ -9,9 +9,10 @@ import { Link } from "@/i18n/navigation";
 import { fadeInUp } from "@/lib/animations";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
+import { cn } from "@/lib/utils";
 import { isSolutionCategoryId } from "@/lib/solutions/category-stages";
 
-const SWIPE_THRESHOLD = 48;
+const DRAG_CLICK_THRESHOLD = 8;
 const GAP = 20;
 
 /** Route homepage segment cards to their dedicated Solutions category page. */
@@ -29,6 +30,10 @@ function cardsPerView(width: number) {
   return 3.15;
 }
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
 interface BusinessSolutionsProps {
   data: HomepageSettings["businessSolutions"];
   locale: string;
@@ -41,12 +46,16 @@ export function BusinessSolutions({
   animationsEnabled = true,
 }: BusinessSolutionsProps) {
   const items = data.items;
-  const [index, setIndex] = useState(0);
   const [perView, setPerView] = useState(3.15);
   const [cardWidth, setCardWidth] = useState(0);
+  const [scrollOffset, setScrollOffset] = useState(0);
+  const [dragDelta, setDragDelta] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [animateSnap, setAnimateSnap] = useState(false);
   const viewportRef = useRef<HTMLDivElement>(null);
   const pointerStartX = useRef<number | null>(null);
   const pointerDeltaX = useRef(0);
+  const suppressClick = useRef(false);
 
   const count = items.length;
 
@@ -56,6 +65,9 @@ export function BusinessSolutions({
     const fullyVisible = Math.max(1, Math.floor(perView));
     return Math.max(0, count - fullyVisible);
   }, [count, perView]);
+
+  const step = cardWidth + GAP;
+  const maxScroll = maxIndex * step;
 
   const measure = useCallback(() => {
     const viewport = viewportRef.current;
@@ -77,49 +89,96 @@ export function BusinessSolutions({
   }, [measure]);
 
   useEffect(() => {
-    setIndex((prev) => Math.min(prev, maxIndex));
-  }, [maxIndex]);
+    setScrollOffset((prev) => clamp(prev, 0, maxScroll));
+  }, [maxScroll]);
 
   const go = useCallback(
     (direction: -1 | 1) => {
-      if (count < 1 || maxIndex < 0) return;
-      setIndex((prev) => {
+      if (count < 1 || step <= 0) return;
+
+      setAnimateSnap(true);
+      setScrollOffset((prev) => {
+        const currentIndex = Math.round(prev / step);
+        let nextIndex = currentIndex + direction;
         if (maxIndex === 0) return 0;
-        const next = prev + direction;
-        if (next > maxIndex) return 0;
-        if (next < 0) return maxIndex;
-        return next;
+        if (nextIndex > maxIndex) nextIndex = 0;
+        if (nextIndex < 0) nextIndex = maxIndex;
+        return nextIndex * step;
       });
     },
-    [count, maxIndex]
+    [count, maxIndex, step]
   );
+
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const onWheel = (event: WheelEvent) => {
+      let delta = 0;
+      if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+        delta = event.deltaX;
+      } else if (event.shiftKey && event.deltaY !== 0) {
+        delta = event.deltaY;
+      }
+      if (delta === 0) return;
+
+      const rect = viewport.getBoundingClientRect();
+      const inView = rect.top < window.innerHeight && rect.bottom > 0;
+      if (!inView) return;
+
+      event.preventDefault();
+      setAnimateSnap(false);
+      setScrollOffset((prev) => clamp(prev + delta, 0, maxScroll));
+    };
+
+    viewport.addEventListener("wheel", onWheel, { passive: false });
+    return () => viewport.removeEventListener("wheel", onWheel);
+  }, [maxScroll]);
 
   const onPointerDown = (event: React.PointerEvent) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
-    // Don't capture when interacting with links — otherwise clicks never fire.
-    if ((event.target as HTMLElement | null)?.closest?.("a")) return;
+    if ((event.target as HTMLElement | null)?.closest?.("button")) return;
+
+    setAnimateSnap(false);
     pointerStartX.current = event.clientX;
     pointerDeltaX.current = 0;
-    (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
+    setDragDelta(0);
+    setIsDragging(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const onPointerMove = (event: React.PointerEvent) => {
     if (pointerStartX.current == null) return;
-    pointerDeltaX.current = event.clientX - pointerStartX.current;
+    const delta = event.clientX - pointerStartX.current;
+    pointerDeltaX.current = delta;
+    setDragDelta(delta);
   };
 
-  const onPointerUp = () => {
+  const finishDrag = () => {
     if (pointerStartX.current == null) return;
+
     const delta = pointerDeltaX.current;
     pointerStartX.current = null;
     pointerDeltaX.current = 0;
-    if (Math.abs(delta) < SWIPE_THRESHOLD) return;
-    go(delta < 0 ? 1 : -1);
+    setIsDragging(false);
+    setDragDelta(0);
+
+    if (Math.abs(delta) > DRAG_CLICK_THRESHOLD) {
+      suppressClick.current = true;
+    }
+
+    setAnimateSnap(false);
+    setScrollOffset((prev) => clamp(prev - delta, 0, maxScroll));
+  };
+
+  const onClickCapture = (event: React.MouseEvent) => {
+    if (!suppressClick.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+    suppressClick.current = false;
   };
 
   if (count === 0) return null;
-
-  const x = index * (cardWidth + GAP);
 
   return (
     <section className="overflow-x-hidden bg-oboya-soft-white py-[var(--section-y)]">
@@ -142,20 +201,27 @@ export function BusinessSolutions({
           </h2>
         </motion.div>
 
-        <div ref={viewportRef} className="overflow-hidden">
+        <div
+          ref={viewportRef}
+          className={cn(
+            "overflow-hidden",
+            isDragging ? "cursor-grabbing" : "cursor-grab"
+          )}
+        >
           <motion.div
-            className="flex touch-pan-y"
+            className="flex touch-none select-none"
             style={{ gap: GAP, width: "max-content" }}
-            animate={{ x: -x }}
+            animate={{ x: -scrollOffset + dragDelta }}
             transition={
-              animationsEnabled
-                ? { duration: 0.45, ease: [0.22, 1, 0.36, 1] }
-                : { duration: 0 }
+              isDragging || !animateSnap || !animationsEnabled
+                ? { duration: 0 }
+                : { duration: 0.45, ease: [0.22, 1, 0.36, 1] }
             }
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
-            onPointerUp={onPointerUp}
-            onPointerCancel={onPointerUp}
+            onPointerUp={finishDrag}
+            onPointerCancel={finishDrag}
+            onClickCapture={onClickCapture}
           >
             {items.map((item) => {
               const title = pickLocalized(item.title, locale);
@@ -164,8 +230,6 @@ export function BusinessSolutions({
                 item.ctaLabel != null
                   ? pickLocalized(item.ctaLabel, locale)
                   : "Explore Solutions";
-              // Legacy /solutions/{crop} catch-all pages are placeholders —
-              // route crop cards to the real Solutions page with a category filter.
               const href = resolveBusinessSolutionHref(item.href, item.id);
 
               return (

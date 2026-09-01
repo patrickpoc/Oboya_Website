@@ -13,6 +13,8 @@ interface HomePageBackdropProps {
   videoSrc: string | null;
   alt: string;
   children: ReactNode;
+  /** Rendered after the scroll-backdrop sentinel (solid sections, e.g. Partners). */
+  afterBackdrop?: ReactNode;
 }
 
 export function HomePageBackdrop({
@@ -22,6 +24,7 @@ export function HomePageBackdrop({
   videoSrc,
   alt,
   children,
+  afterBackdrop,
 }: HomePageBackdropProps) {
   const endRef = useRef<HTMLDivElement>(null);
   const [showBackdrop, setShowBackdrop] = useState(true);
@@ -69,6 +72,9 @@ export function HomePageBackdrop({
           {children}
           <div ref={endRef} className="h-px w-full" aria-hidden />
         </div>
+        {afterBackdrop ? (
+          <div className="relative z-10">{afterBackdrop}</div>
+        ) : null}
       </div>
     </HomeScrollBackdropContext.Provider>
   );

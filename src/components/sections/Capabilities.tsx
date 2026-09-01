@@ -123,7 +123,7 @@ export function Capabilities({
               </AnimatePresence>
             </div>
 
-            {/* Prev outline / Next solid — bottom right */}
+            {/* Carousel controls — bottom right */}
             <div className="absolute right-4 bottom-4 z-20 flex items-center gap-2.5 sm:right-6 sm:bottom-6 md:right-8 md:bottom-8">
               <button
                 type="button"
@@ -137,7 +137,7 @@ export function Capabilities({
                 type="button"
                 onClick={() => go(1)}
                 aria-label="Next slide"
-                className="flex size-10 items-center justify-center rounded-full bg-white text-oboya-blue-dark transition-colors hover:bg-white/90 sm:size-11"
+                className="flex size-10 items-center justify-center rounded-full border border-white/70 bg-transparent text-white transition-colors hover:bg-white/10 sm:size-11"
               >
                 <ChevronRight className="size-4" />
               </button>

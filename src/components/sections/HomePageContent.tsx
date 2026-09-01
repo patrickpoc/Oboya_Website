@@ -4,7 +4,6 @@ import { CompanyOverview } from "@/components/sections/CompanyOverview";
 import { GlobalPresence } from "@/components/sections/GlobalPresence";
 import { Hero } from "@/components/sections/Hero";
 import { HomeLatestNews } from "@/components/sections/HomeLatestNews";
-import { Partners } from "@/components/sections/Partners";
 import { Testimonials } from "@/components/sections/Testimonials";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
@@ -75,13 +74,6 @@ export function HomePageContent({
         <HomeLatestNews
           data={homepage.latestNews}
           posts={posts}
-          locale={locale}
-          animationsEnabled={animationsEnabled}
-        />
-      )}
-      {homepage.sections.partners.enabled && (
-        <Partners
-          data={homepage.partners}
           locale={locale}
           animationsEnabled={animationsEnabled}
         />

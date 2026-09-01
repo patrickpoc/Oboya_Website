@@ -3,6 +3,7 @@ import { Navbar } from "@/components/layouts/Navbar";
 import { HomeIntroGate } from "@/components/layout/HomeIntroGate";
 import { HomePageBackdrop } from "@/components/sections/HomePageBackdrop";
 import { HomePageContent } from "@/components/sections/HomePageContent";
+import { Partners } from "@/components/sections/Partners";
 import { routing, type Locale } from "@/i18n/routing";
 import { resolveMapLocationsForLocale } from "@/lib/map-locations";
 import { readMapLocations } from "@/lib/map-locations.server";
@@ -58,6 +59,8 @@ export default async function Home({ params }: Props) {
     .trim()
     .replace(/!$/, "");
 
+  const animationsEnabled = homepage.animations?.enabled !== false;
+
   return (
     <HomeIntroGate waitForHero={waitForHero}>
       <Navbar transparent variant="minimal" />
@@ -68,6 +71,15 @@ export default async function Home({ params }: Props) {
           imageSrc={homepage.hero.backgroundImage}
           videoSrc={homepage.hero.backgroundVideo}
           alt={heroAlt}
+          afterBackdrop={
+            homepage.sections.partners.enabled ? (
+              <Partners
+                data={homepage.partners}
+                locale={locale}
+                animationsEnabled={animationsEnabled}
+              />
+            ) : null
+          }
         >
           <HomePageContent
             locale={locale}

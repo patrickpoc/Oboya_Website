@@ -60,6 +60,8 @@ function HeroMediaInner({
   }, [markHeroReady]);
 
   useEffect(() => {
+    if (wantsVideo) return;
+
     if (imageSrc) {
       let cancelled = false;
       const img = new window.Image();
@@ -75,32 +77,8 @@ function HeroMediaInner({
       };
     }
 
-    if (!wantsVideo) {
-      notifyReady();
-    }
-  }, [imageSrc, wantsVideo, notifyReady]);
-
-  useEffect(() => {
-    if (!wantsVideo || !videoSrc || imageSrc) return;
-    const el = videoRef.current;
-    if (!el) return;
-
-    let cancelled = false;
-    const onData = () => {
-      if (!cancelled) notifyReady();
-    };
-
-    if (el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-      onData();
-    } else {
-      el.addEventListener("loadeddata", onData, { once: true });
-    }
-
-    return () => {
-      cancelled = true;
-      el.removeEventListener("loadeddata", onData);
-    };
-  }, [wantsVideo, videoSrc, imageSrc, notifyReady]);
+    notifyReady();
+  }, [wantsVideo, imageSrc, notifyReady]);
 
   useEffect(() => {
     if (!wantsVideo || !videoSrc) return;
@@ -108,37 +86,42 @@ function HeroMediaInner({
     if (!el) return;
 
     let cancelled = false;
+    let finished = false;
 
-    const tryPlay = () => {
-      if (cancelled) return;
-      el.muted = true;
-      void el.play().then(
-        () => {
-          if (!cancelled) setShowVideo(true);
-        },
-        () => {
-          if (cancelled) return;
-          setVideoFailed(true);
-          setShowVideo(false);
-        }
-      );
+    const finish = async () => {
+      if (cancelled || finished) return;
+      finished = true;
+      try {
+        el.muted = true;
+        await el.play();
+        if (cancelled) return;
+        setShowVideo(true);
+        notifyReady();
+      } catch {
+        if (cancelled) return;
+        setVideoFailed(true);
+        setShowVideo(false);
+        notifyReady();
+      }
     };
 
-    if (el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-      tryPlay();
+    if (el.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+      void finish();
     } else {
-      el.addEventListener("loadeddata", tryPlay, { once: true });
+      el.addEventListener("canplaythrough", finish, { once: true });
+      el.addEventListener("canplay", finish, { once: true });
     }
 
     return () => {
       cancelled = true;
-      el.removeEventListener("loadeddata", tryPlay);
+      el.removeEventListener("canplaythrough", finish);
+      el.removeEventListener("canplay", finish);
     };
-  }, [wantsVideo, videoSrc]);
+  }, [wantsVideo, videoSrc, notifyReady]);
 
   const showImage =
     Boolean(imageSrc) &&
-    (mediaType === "image" || !wantsVideo || !showVideo);
+    (mediaType === "image" || reducedMotion || videoFailed || !wantsVideo || !showVideo);
 
   return (
     <div className="absolute inset-0 bg-oboya-blue-dark">
@@ -164,13 +147,17 @@ function HeroMediaInner({
           loop
           playsInline
           autoPlay
-          preload="metadata"
+          preload="auto"
           aria-hidden
           tabIndex={-1}
-          onPlaying={() => setShowVideo(true)}
+          onPlaying={() => {
+            setShowVideo(true);
+            notifyReady();
+          }}
           onError={() => {
             setVideoFailed(true);
             setShowVideo(false);
+            notifyReady();
           }}
         />
       ) : null}
