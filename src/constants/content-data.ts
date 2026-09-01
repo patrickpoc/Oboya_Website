@@ -75,28 +75,28 @@ export const blogPosts = [
 
 export const caseStudies = [
   {
-    slug: "netherlands-greenhouse",
+    slug: "lvg-plants-pot-wrapping",
     messageKey: "case1",
-    industry: "Greenhouses",
-    country: "Netherlands",
+    industry: "Ornamental Horticulture & Orchid Production",
+    country: "South Africa",
   },
   {
-    slug: "brazil-berry-packaging",
+    slug: "elite-flowers-integrated-logistics",
     messageKey: "case2",
-    industry: "Berries",
-    country: "Brazil",
+    industry: "Grower and Exporter",
+    country: "Colombia",
   },
   {
-    slug: "mexico-distribution",
+    slug: "elite-flowers-rfid-agv-pilot",
     messageKey: "case3",
-    industry: "Distribution",
-    country: "Mexico",
+    industry: "Grower and Exporter",
+    country: "Colombia",
   },
   {
-    slug: "china-growing-media",
+    slug: "flor-de-azama-inclusive-automation",
     messageKey: "case4",
-    industry: "Growing Media",
-    country: "China",
+    industry: "Rose and Summer Flower Production",
+    country: "Ecuador",
   },
 ] as const;
 

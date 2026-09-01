@@ -652,7 +652,7 @@
   "caseStudies": {
     "eyebrow": "案例研究",
     "title": "全球验证的成果——助力种植、物流与零售规模化发展的合作伙伴关系。",
-    "description": "精选项目，展示 Oboya 在不同市场与作物类型中的解决方案。",
+    "description": "南非、哥伦比亚和厄瓜多尔的合作伙伴关系——涵盖盆栽自动包装、集成采后物流、RFID 与 AGV 试点以及包容性花束设备。",
     "heroEyebrow": "真实挑战。可衡量的成果。",
     "heroTitle": "了解种植者、出口商、分销商与零售商如何与 Oboya 合作，提升效率、强化供应链，并实现切实的业务成果。",
     "introTitle": "每项运营都有其独特挑战。",
@@ -683,32 +683,32 @@
     "clientPerspective": "客户视角",
     "items": {
       "case1": {
-        "title": "Scaling greenhouse logistics in the Netherlands",
-        "excerpt": "A commercial greenhouse group needed consistent tray and trolley flows across sites.",
-        "challenge": "Inconsistent logistics hardware slowed transplanting and dispatch cycles.",
-        "solution": "Oboya standardized trolley formats and propagation trays across three facilities.",
-        "result": "Handling time dropped 18% and dispatch accuracy improved across peak season."
+        "title": "Automating Efficiency in Ornamental Horticulture",
+        "excerpt": "LVG Plants 与 Oboya Horticulture 南非合作，实现盆栽自动包装。",
+        "challenge": "人工包装劳动密集，限制了每日发货能力。",
+        "solution": "四台自动盆栽包装机，分阶段安装至 2026 年。",
+        "result": "预期提高产能与一致性，并降低包装成本。"
       },
       "case2": {
-        "title": "Berry packaging program in Brazil",
-        "excerpt": "A berry exporter required retail-ready packs for multiple supermarket chains.",
-        "challenge": "Existing packs failed shelf-life targets for export programs.",
-        "solution": "Custom clamshell formats and palletization support were deployed with local partners.",
-        "result": "Waste claims fell 22% while maintaining premium shelf presentation."
+        "title": "Improving Post-Harvest Efficiency Through Integrated Logistics",
+        "excerpt": "Elite Flowers Colombia 通过手推车、水桶和拖拉机优化内部物流。",
+        "challenge": "过多的茎秆和物料人工搬运拖慢了采后作业。",
+        "solution": "自 2020 年起采用 Oboya Horticulture 手推车与水桶，2025 年新增拖拉机。",
+        "result": "运输更快、疲劳更少、工作流程更顺畅。"
       },
       "case3": {
-        "title": "Distribution hub modernization in Mexico",
-        "excerpt": "A regional distributor needed faster replenishment for greenhouse clients.",
-        "challenge": "Fragmented inventory and long lead times affected grower planning.",
-        "solution": "Oboya implemented a hub-and-spoke model with localized SKU assortments.",
-        "result": "Average replenishment lead time improved from 11 to 6 days."
+        "title": "Advancing Traceability with RFID and AGV Automation",
+        "excerpt": "Elite Flowers Colombia 与 Oboya 试点 RFID 追踪与 AGV 托盘系统。",
+        "challenge": "人工登记和托盘搬运限制了可追溯性与效率。",
+        "solution": "试点项目评估 RFID 追踪系统与 AGV 托盘系统。",
+        "result": "识别更快、可追溯性提升，并为未来部署提供数据支持。"
       },
       "case4": {
-        "title": "Growing media supply in China",
-        "excerpt": "A nursery network sought consistent substrate quality across provinces.",
-        "challenge": "Variable substrate batches affected rooting uniformity.",
-        "solution": "Premium growing media blends were qualified and supplied through regional partners.",
-        "result": "Rooting consistency improved and rework rates declined across propagation lines."
+        "title": "Improving Productivity Through Inclusive Automation",
+        "excerpt": "Flor de Azama Farm 通过花束扎带自动化实现 70% 生产力提升。",
+        "challenge": "人工固定营养袋导致不适并限制采后产出。",
+        "solution": "自动花束扎带机，并提供技术支持与实施跟进。",
+        "result": "生产力提升 70%，人体工学改善，工作场所更具包容性。"
       }
     },
     "hubTitle": "来自全球种植者、包装商与分销商的实证",

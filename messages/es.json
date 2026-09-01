@@ -652,7 +652,7 @@
   "caseStudies": {
     "eyebrow": "Case Studies",
     "title": "Resultados comprobados en todo el mundo — alianzas que escalan producción, logística y retail.",
-    "description": "Proyectos seleccionados que muestran soluciones Oboya en distintos mercados y cultivos.",
+    "description": "Alianzas en Sudáfrica, Colombia y Ecuador — desde la automatización de envoltura de macetas y logística poscosecha integrada hasta pilotos RFID y AGV y equipos inclusivos para ramos.",
     "heroEyebrow": "Retos reales. Resultados medibles.",
     "heroTitle": "Descubra cómo productores, exportadores, distribuidores y retailers se han asociado con Oboya para mejorar la eficiencia, fortalecer las cadenas de suministro y lograr resultados de negocio significativos.",
     "introTitle": "Cada operación tiene sus propios retos.",
@@ -683,32 +683,32 @@
     "clientPerspective": "Perspectiva del cliente",
     "items": {
       "case1": {
-        "title": "Scaling greenhouse logistics in the Netherlands",
-        "excerpt": "A commercial greenhouse group needed consistent tray and trolley flows across sites.",
-        "challenge": "Inconsistent logistics hardware slowed transplanting and dispatch cycles.",
-        "solution": "Oboya standardized trolley formats and propagation trays across three facilities.",
-        "result": "Handling time dropped 18% and dispatch accuracy improved across peak season."
+        "title": "Automating Efficiency in Ornamental Horticulture",
+        "excerpt": "LVG Plants se asoció con Oboya Horticulture Sudáfrica para automatizar la envoltura de macetas.",
+        "challenge": "La envoltura manual era intensiva en mano de obra y limitaba la capacidad diaria de despacho.",
+        "solution": "Cuatro máquinas automáticas de envoltura de macetas, con instalación por fases hasta 2026.",
+        "result": "Mayor capacidad, consistencia y reducción de costos de empaque esperados."
       },
       "case2": {
-        "title": "Berry packaging program in Brazil",
-        "excerpt": "A berry exporter required retail-ready packs for multiple supermarket chains.",
-        "challenge": "Existing packs failed shelf-life targets for export programs.",
-        "solution": "Custom clamshell formats and palletization support were deployed with local partners.",
-        "result": "Waste claims fell 22% while maintaining premium shelf presentation."
+        "title": "Improving Post-Harvest Efficiency Through Integrated Logistics",
+        "excerpt": "Elite Flowers Colombia optimizó la logística interna con carros, cubetas y tractores.",
+        "challenge": "El movimiento manual excesivo de tallos y materiales ralentizaba las operaciones poscosecha.",
+        "solution": "Carros y cubetas Oboya Horticulture desde 2020, con tractores añadidos en 2025.",
+        "result": "Transporte más rápido, menos fatiga y un flujo de trabajo más fluido."
       },
       "case3": {
-        "title": "Distribution hub modernization in Mexico",
-        "excerpt": "A regional distributor needed faster replenishment for greenhouse clients.",
-        "challenge": "Fragmented inventory and long lead times affected grower planning.",
-        "solution": "Oboya implemented a hub-and-spoke model with localized SKU assortments.",
-        "result": "Average replenishment lead time improved from 11 to 6 days."
+        "title": "Advancing Traceability with RFID and AGV Automation",
+        "excerpt": "Elite Flowers Colombia pilota sistemas RFID y AGV para palés con Oboya.",
+        "challenge": "El registro manual y la manipulación de palés limitaban la trazabilidad y la eficiencia.",
+        "solution": "Programa piloto que evalúa sistemas de seguimiento RFID y palés AGV.",
+        "result": "Identificación más rápida, trazabilidad mejorada y datos para futura implementación."
       },
       "case4": {
-        "title": "Growing media supply in China",
-        "excerpt": "A nursery network sought consistent substrate quality across provinces.",
-        "challenge": "Variable substrate batches affected rooting uniformity.",
-        "solution": "Premium growing media blends were qualified and supplied through regional partners.",
-        "result": "Rooting consistency improved and rework rates declined across propagation lines."
+        "title": "Improving Productivity Through Inclusive Automation",
+        "excerpt": "Flor de Azama Farm logró un 70% más de productividad con automatización de atado de ramos.",
+        "challenge": "La fijación manual de sobres causaba molestias y limitaba la producción poscosecha.",
+        "solution": "Máquina automática de atado de ramos con soporte técnico y seguimiento.",
+        "result": "70% más productividad con ergonomía mejorada e inclusión en el lugar de trabajo."
       }
     },
     "hubTitle": "Prueba de growers, packers y distribuidores en todo el mundo",

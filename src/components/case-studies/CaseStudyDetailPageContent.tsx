@@ -43,6 +43,7 @@ export async function CaseStudyDetailPageContent({
       <CaseStudyDetailHero
         title={title}
         intro={intro}
+        backLabel={t("backToHub")}
         clientLabel={t("factClient")}
         client={study.client}
         industryLabel={t("factIndustry")}

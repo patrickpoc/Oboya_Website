@@ -4,6 +4,7 @@ import { CaseStudiesHero } from "@/components/case-studies/CaseStudiesHero";
 import { CaseStudiesIntro } from "@/components/case-studies/CaseStudiesIntro";
 import { CaseStudyContentBlock } from "@/components/case-studies/CaseStudyContentBlock";
 import { pickLocalized } from "@/lib/cms/utils";
+import { splitCaseStudyExcerpt } from "@/lib/case-studies/excerpt";
 import type { CmsCaseStudy } from "@/lib/cms/repositories/case-studies-repository";
 
 interface CaseStudiesPageContentProps {
@@ -11,7 +12,6 @@ interface CaseStudiesPageContentProps {
   locale: string;
 }
 
-const FEATURED_COUNT = 2;
 const FALLBACK_COVER = "/assets/homepage/greenhouse-technology.webp";
 
 function coverSrc(url: string) {
@@ -29,7 +29,6 @@ export async function CaseStudiesPageContent({
 }: CaseStudiesPageContentProps) {
   const t = await getTranslations("caseStudies");
   const published = studies.filter((s) => s.status === "published");
-  const featured = published.slice(0, FEATURED_COUNT);
 
   return (
     <>
@@ -41,29 +40,23 @@ export async function CaseStudiesPageContent({
         aria-label={t("showcaseTitle")}
       >
         <Container>
-          {featured.length === 0 ? (
+          {published.length === 0 ? (
             <p className="font-body text-base text-oboya-blue-dark/55">
               {t("emptyState")}
             </p>
           ) : (
             <div className="mx-auto flex w-full min-w-0 flex-col gap-[clamp(4.05rem,9.9vw,7.65rem)] lg:w-[90%]">
-              {featured.map((study, index) => {
+              {published.map((study, index) => {
                 const title = pickLocalized(study.title, locale);
-                const paragraphs = [
-                  pickLocalized(study.challenge, locale),
-                  pickLocalized(study.solution, locale),
-                  pickLocalized(study.results, locale),
-                ].filter(Boolean);
+                const paragraphs = splitCaseStudyExcerpt(
+                  pickLocalized(study.excerpt, locale)
+                );
 
                 return (
                   <CaseStudyContentBlock
                     key={study.id}
                     title={title}
-                    paragraphs={
-                      paragraphs.length > 0
-                        ? paragraphs
-                        : [pickLocalized(study.excerpt, locale)].filter(Boolean)
-                    }
+                    paragraphs={paragraphs}
                     imageSrc={coverSrc(study.coverImage)}
                     imageAlt={title}
                     href={`/case-studies/${study.slug}`}

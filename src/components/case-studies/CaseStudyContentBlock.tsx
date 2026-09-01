@@ -39,7 +39,9 @@ export function CaseStudyContentBlock({
         </h3>
         <div className="mt-[1.35rem] flex max-w-[25.2rem] flex-col gap-3.5 font-body text-[0.84375rem] leading-[1.7] text-oboya-blue-dark/55 md:text-[0.9rem]">
           {paragraphs.filter(Boolean).map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
+            <p key={index} className="line-clamp-5">
+              {paragraph}
+            </p>
           ))}
         </div>
         <Link

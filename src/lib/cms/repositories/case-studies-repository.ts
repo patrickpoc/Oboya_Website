@@ -75,143 +75,143 @@ type SeedEntry = {
 
 const seedContent: Record<string, SeedEntry> = {
   case1: {
-    title: loc("Scaling greenhouse logistics in the Netherlands"),
+    title: loc("Automating Efficiency in Ornamental Horticulture"),
     excerpt: loc(
-      "A commercial greenhouse group needed consistent tray and trolley flows across sites to keep transplanting and dispatch cycles predictable through peak season."
+      "LVG Plants relied on a manual pot plant wrapping process that was labor-intensive and limited how many plants could be prepared for dispatch each day.\n\nOboya Horticulture South Africa proposed an automatic wrapping solution with four machines, phased installation, and staff training through 2026.\n\nExpected outcomes include higher wrapping capacity, greater consistency, reduced labor dependency, and faster dispatch preparation."
     ),
-    metric: loc("−18% handling time"),
+    metric: loc("Higher wrapping capacity"),
     challenge: loc(
-      "Inconsistent logistics hardware slowed transplanting and dispatch cycles across three facilities. Teams spent too much time adapting to mismatched tray and trolley formats."
+      "LVG Plants relied on a manual wrapping process for pot plants. The process was labor-intensive, time-consuming, and limited how many plants could be prepared for dispatch each day."
     ),
     solution: loc(
-      "Oboya standardized trolley formats and propagation trays across sites, aligning hardware with existing workflows and local handling standards."
+      "Oboya Horticulture's South African branch proposed an automatic pot plant wrapping solution to improve speed, consistency, and operational efficiency. The project includes installing four wrapping machines, scheduled for completion by the end of 2026."
     ),
     implementation: loc(
-      "Rollout began with a pilot line, then expanded facility by facility with on-site training and SKU rationalization so crews could adopt the new system without disrupting harvest windows."
+      "The implementation plan includes phased installation, operational integration, and staff training to ensure seamless adoption."
     ),
     results: loc(
-      "Handling time dropped 18% and dispatch accuracy improved across peak season, freeing capacity for higher throughput."
+      "Expected benefits include higher wrapping capacity, greater consistency, reduced labor dependency, lower packing costs, faster dispatch preparation, and increased operational efficiency."
     ),
-    client: "Westland Growers Collective",
-    timeline: loc("18 months"),
+    client: "LVG Plants",
+    timeline: loc("Through 2026"),
     coverImage:
       "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=1600&h=700&q=75",
     images: [
       "https://images.unsplash.com/photo-1466692476867-a0881dfc0648?auto=format&fit=crop&w=1000&h=1200&q=75",
-      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=1000&h=1200&q=75",
+      "/assets/homepage/capabilities-value-chain.jpg",
     ],
-    region: "europe",
+    region: "other",
     testimonial: {
       quote: loc(
-        "Standardizing trays and trolleys with Oboya removed daily friction from our transplanting lines. We finally have one system that works across every site."
+        "Thank you, Oboya Horticulture, for your hard work and your quick responses, consistent follow-up, and commitment to finding the right solution."
       ),
-      author: "Anna de Vries",
-      company: "Westland Growers Collective",
+      author: "Procurement Manager",
+      company: "LVG Plants",
     },
   },
   case2: {
-    title: loc("Berry packaging program in Brazil"),
+    title: loc("Improving Post-Harvest Efficiency Through Integrated Logistics"),
     excerpt: loc(
-      "A berry exporter required retail-ready packs for multiple supermarket chains while protecting shelf life on long export routes."
+      "Elite Flowers sought to improve post-harvest productivity and reduce handling time across its operations in Colombia.\n\nSince 2020, the grower has deployed Oboya Horticulture trolleys and buckets, adding tractors in 2025 to move equipment between operational areas.\n\nThe rollout strengthened internal transportation, reduced worker fatigue, and delivered smoother workflow performance across post-harvest."
     ),
-    metric: loc("−22% waste claims"),
+    metric: loc("Faster internal transportation"),
     challenge: loc(
-      "Existing packs failed shelf-life targets for export programs and created inconsistent presentation across retail partners."
+      "Elite Flowers sought to improve post-harvest productivity and reduce handling time. Existing processes required excessive manual movement of stems and materials, increasing labor requirements and slowing operations."
     ),
     solution: loc(
-      "Custom clamshell formats and palletization support were deployed with local partners to match chain specifications and cold-chain realities."
+      "Beginning in 2020, Elite Flowers implemented Oboya Horticulture trolleys and buckets to optimize internal logistics. In 2025, tractors were incorporated to transport equipment between operational areas, further improving mobility and reducing transport times."
     ),
     implementation: loc(
-      "Pack formats were validated in trial shipments, then scaled through regional packing houses with shared tooling and quality checkpoints."
+      "The new equipment was introduced progressively across post-harvest operations. Teams were trained to standardize workflows while maintaining uninterrupted daily production."
     ),
     results: loc(
-      "Waste claims fell 22% while maintaining premium shelf presentation for key supermarket programs."
+      "Increased post-harvest productivity.\n\nFaster internal transportation.\n\nReduced workers' fatigue.\n\nImproved handling consistency.\n\nEnhanced operational efficiency.\n\nSmoother workflow performance."
     ),
-    client: "Serra Berry Exports",
-    timeline: loc("12 months"),
-    coverImage:
-      "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?auto=format&fit=crop&w=1600&h=700&q=75",
-    images: [
-      "/assets/homepage/asia-pacific-expansion.webp",
-      "/assets/homepage/greenhouse-technology.webp",
-    ],
-    region: "americas",
-    testimonial: {
-      quote: loc(
-        "The packaging program gave us confidence with retailers. Claims dropped and our fruit arrives looking the way it should."
-      ),
-      author: "Carlos Mendes",
-      company: "Serra Berry Exports",
-    },
-  },
-  case3: {
-    title: loc("Distribution hub modernization in Mexico"),
-    excerpt: loc(
-      "A regional distributor needed faster replenishment for greenhouse clients without expanding warehouse footprint."
-    ),
-    metric: loc("11 → 6 day lead time"),
-    challenge: loc(
-      "Fragmented inventory and long lead times affected grower planning and created stockouts during peak demand."
-    ),
-    solution: loc(
-      "Oboya implemented a hub-and-spoke model with localized SKU assortments tailored to greenhouse customers."
-    ),
-    implementation: loc(
-      "Inventory policies, pick paths, and partner replenishment cadences were redesigned, then staged live over two seasons."
-    ),
-    results: loc(
-      "Average replenishment lead time improved from 11 to 6 days across the core assortment."
-    ),
-    client: "Bajío Horticulture Supply",
-    timeline: loc("2023–2024"),
+    client: "Elite Flowers Colombia",
+    timeline: loc("2020–2025"),
     coverImage:
       "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1600&h=700&q=75",
     images: [
-      "/assets/homepage/greenhouse-technology.webp",
-      "/assets/homepage/solutions-logistics.jpg",
+      "/assets/homepage/capabilities-global-local.jpg",
+      "/assets/homepage/capabilities-partnerships.jpg",
     ],
     region: "americas",
     testimonial: {
       quote: loc(
-        "Lead times that used to stretch past a week now land in days. Our growers plan with confidence again."
+        "The project demonstrates how integrated logistics solutions can help flower growers improve productivity while strengthening operational performance across post-harvest activities."
       ),
-      author: "María López",
-      company: "Bajío Horticulture Supply",
+      author: "Operations Team",
+      company: "Elite Flowers Colombia",
+    },
+  },
+  case3: {
+    title: loc("Advancing Traceability with RFID and AGV Automation"),
+    excerpt: loc(
+      "Elite Flowers is exploring better traceability, automation, and material flow across its Colombian operations.\n\nOboya Horticulture partnered on a pilot evaluating RFID tracking systems and AGV pallet systems for workflow integration and scalability.\n\nEarly results point to faster identification, reduced manual registration, and stronger data for future deployment decisions."
+    ),
+    metric: loc("Improved traceability"),
+    challenge: loc(
+      "Elite Flowers is exploring new ways to improve traceability, automation, and material flow across its operations. Manual registration and pallet handling processes created opportunities for greater efficiency and visibility."
+    ),
+    solution: loc(
+      "Oboya Horticulture partnered with Elite Flowers in a pilot program evaluating RFID Tracking Systems and AGV Pallet Systems. The objective is to assess operational feasibility, workflow integration, and future scalability."
+    ),
+    implementation: loc(
+      "Pilot activities include RFID identification testing, route simulations, AGV trials, user training, and operational performance evaluations."
+    ),
+    results: loc(
+      "Initial observations indicate faster identification and tracking, reduced manual registration, improved traceability, potential for more efficient pallet movement, and valuable data for future deployment decisions."
+    ),
+    client: "Elite Flowers Colombia",
+    timeline: loc("Pilot program"),
+    coverImage:
+      "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1600&h=700&q=75",
+    images: [
+      "/assets/homepage/capabilities-value-chain.jpg",
+      "/assets/homepage/capabilities-global-local.jpg",
+    ],
+    region: "americas",
+    testimonial: {
+      quote: loc(
+        "The pilot with Oboya Horticulture RFID and AGV systems is giving us valuable insights. We can already see the potential for better traceability and more efficient pallet movement once fully implemented."
+      ),
+      author: "Operations Team",
+      company: "Elite Flowers Colombia",
     },
   },
   case4: {
-    title: loc("Growing media supply in China"),
+    title: loc("Improving Productivity Through Inclusive Automation"),
     excerpt: loc(
-      "A propagation network sought consistent substrate performance at scale across provinces."
+      "Flor de Azama Farm needed safer, more ergonomic post-harvest operations while supporting employees with disabilities and medical restrictions.\n\nOboya Horticulture supplied an automatic bouquet-tying machine to attach nutritional sachets, with technical support and implementation follow-up.\n\nProductivity rose roughly 70%, from 180–200 bouquets per operator to 330–340, with improved ergonomics and workplace inclusion."
     ),
-    metric: loc("Lower rework rates"),
+    metric: loc("70% higher productivity"),
     challenge: loc(
-      "Variable media quality created uneven rooting and higher scrap across nursery lines."
+      "The farm aimed to improve productivity in post-harvest operations while creating a safer, more ergonomic work environment. The manual process of attaching nutritional sachets involved repetitive hand movements, leading to employee discomfort and limited efficiency. They also needed a solution that supported employees with disabilities and medical restrictions."
     ),
     solution: loc(
-      "Premium growing media blends were qualified and supplied through regional partners with clear specs."
+      "Oboya Horticulture provided an automatic bouquet-tying machine to automate the attachment of nutritional sachets. This solution aimed to reduce manual labor, improve ergonomics, increase speed, and create a safer workstation. Oboya also provided technical support and implementation follow-up."
     ),
     implementation: loc(
-      "Batch qualification, logistics routing, and nursery onboarding were coordinated so every site received consistent media."
+      "The machine was integrated into post-harvest lines with operator training and ongoing technical support to ensure smooth adoption across shifts."
     ),
     results: loc(
-      "Rooting consistency improved and rework rates declined across propagation lines."
+      "70% higher productivity — output increased from approximately 180–200 bouquets per operator to 330–340 bouquets per operator.\n\nImproved ergonomics through reduction in repetitive hand movements and physical strain.\n\nGreater workplace inclusion with a safer environment suitable for employees with disabilities and medical restrictions.\n\nIncreased efficiency with faster, more consistent operations and less reliance on manual repetitive tasks."
     ),
-    client: "GreenRoot Nurseries",
-    timeline: loc("24 months"),
+    client: "Flor de Azama Farm – Falcon Farms",
+    timeline: loc("Post-harvest operations"),
     coverImage:
-      "https://images.unsplash.com/photo-1466692476867-a0881dfc0648?auto=format&fit=crop&w=1600&h=700&q=75",
+      "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?auto=format&fit=crop&w=1600&h=700&q=75",
     images: [
-      "/assets/homepage/greenhouse-technology.webp",
-      "/assets/homepage/asia-pacific-expansion.webp",
+      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=1000&h=1200&q=75",
+      "/assets/homepage/capabilities-partnerships.jpg",
     ],
-    region: "asia",
+    region: "americas",
     testimonial: {
       quote: loc(
-        "Consistent media quality changed our rooting outcomes overnight. Rework is down and crews trust every batch."
+        "The machine has helped me tremendously. Before, we used rubber bands and tape, which could cause discomfort and even injuries to our hands. Today, the process is faster, more comfortable, and much safer. For me, this machine is a blessing."
       ),
-      author: "Wei Chen",
-      company: "GreenRoot Nurseries",
+      author: "Betty Mesa",
+      company: "Flor de Azama Farm – Falcon Farms",
     },
   },
 };

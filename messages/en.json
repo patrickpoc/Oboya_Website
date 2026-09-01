@@ -660,7 +660,7 @@
   "caseStudies": {
     "eyebrow": "Case Studies",
     "title": "Proven results worldwide — partnerships that scale growers, logistics, and retail outcomes.",
-    "description": "Selected projects demonstrating Oboya solutions across markets and crop types.",
+    "description": "Partnerships across South Africa, Colombia, and Ecuador — from pot plant wrapping automation and integrated post-harvest logistics to RFID and AGV pilots and inclusive bouquet equipment.",
     "heroEyebrow": "Real Challenges. Measurable Results.",
     "heroTitle": "Discover how growers, exporters, distributors, and retailers have partnered with Oboya to improve efficiency, strengthen supply chains, and achieve meaningful business outcomes.",
     "introTitle": "Every Operation Has Its Own Challenges.",
@@ -710,32 +710,32 @@
     "clientPerspective": "Client Perspective",
     "items": {
       "case1": {
-        "title": "Scaling greenhouse logistics in the Netherlands",
-        "excerpt": "A commercial greenhouse group needed consistent tray and trolley flows across sites.",
-        "challenge": "Inconsistent logistics hardware slowed transplanting and dispatch cycles.",
-        "solution": "Oboya standardized trolley formats and propagation trays across three facilities.",
-        "result": "Handling time dropped 18% and dispatch accuracy improved across peak season."
+        "title": "Automating Efficiency in Ornamental Horticulture",
+        "excerpt": "LVG Plants partnered with Oboya Horticulture South Africa to automate pot plant wrapping.",
+        "challenge": "Manual wrapping was labor-intensive and limited daily dispatch capacity.",
+        "solution": "Four automatic pot plant wrapping machines, with phased installation through 2026.",
+        "result": "Expected higher capacity, consistency, and lower packing costs."
       },
       "case2": {
-        "title": "Berry packaging program in Brazil",
-        "excerpt": "A berry exporter required retail-ready packs for multiple supermarket chains.",
-        "challenge": "Existing packs failed shelf-life targets for export programs.",
-        "solution": "Custom clamshell formats and palletization support were deployed with local partners.",
-        "result": "Waste claims fell 22% while maintaining premium shelf presentation."
+        "title": "Improving Post-Harvest Efficiency Through Integrated Logistics",
+        "excerpt": "Elite Flowers Colombia optimized internal logistics with trolleys, buckets, and tractors.",
+        "challenge": "Excessive manual movement of stems and materials slowed post-harvest operations.",
+        "solution": "Oboya Horticulture trolleys and buckets from 2020, with tractors added in 2025.",
+        "result": "Faster transportation, less fatigue, and smoother workflow performance."
       },
       "case3": {
-        "title": "Distribution hub modernization in Mexico",
-        "excerpt": "A regional distributor needed faster replenishment for greenhouse clients.",
-        "challenge": "Fragmented inventory and long lead times affected grower planning.",
-        "solution": "Oboya implemented a hub-and-spoke model with localized SKU assortments.",
-        "result": "Average replenishment lead time improved from 11 to 6 days."
+        "title": "Advancing Traceability with RFID and AGV Automation",
+        "excerpt": "Elite Flowers Colombia pilots RFID tracking and AGV pallet systems with Oboya.",
+        "challenge": "Manual registration and pallet handling limited traceability and efficiency.",
+        "solution": "Pilot program evaluating RFID Tracking Systems and AGV Pallet Systems.",
+        "result": "Faster identification, improved traceability, and data for future deployment."
       },
       "case4": {
-        "title": "Growing media supply in China",
-        "excerpt": "A nursery network sought consistent substrate quality across provinces.",
-        "challenge": "Variable substrate batches affected rooting uniformity.",
-        "solution": "Premium growing media blends were qualified and supplied through regional partners.",
-        "result": "Rooting consistency improved and rework rates declined across propagation lines."
+        "title": "Improving Productivity Through Inclusive Automation",
+        "excerpt": "Flor de Azama Farm achieved a 70% productivity gain with bouquet-tying automation.",
+        "challenge": "Manual sachet attachment caused discomfort and limited post-harvest output.",
+        "solution": "Automatic bouquet-tying machine with technical support and follow-up.",
+        "result": "70% higher productivity with improved ergonomics and workplace inclusion."
       }
     }
   },
