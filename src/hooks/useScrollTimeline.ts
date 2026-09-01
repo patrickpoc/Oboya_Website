@@ -220,7 +220,8 @@ export function useScrollTimeline({
     const trigger = ScrollTrigger.create({
       trigger: pin,
       start: "top top",
-      end: () => `+=${Math.round(window.innerHeight)}`,
+      end: () =>
+        `+=${Math.round(window.visualViewport?.height ?? window.innerHeight)}`,
       pin: true,
       pinSpacing: true,
       anticipatePin: 1,
@@ -293,7 +294,7 @@ export function useScrollTimeline({
       if (!triggerRef.current?.isActive) return;
       const endY = event.changedTouches[0]?.clientY ?? touchStartY;
       const delta = touchStartY - endY;
-      if (Math.abs(delta) < 40) return;
+      if (Math.abs(delta) < 24) return;
       const direction: 1 | -1 = delta > 0 ? 1 : -1;
       if (direction < 0 && indexRef.current <= 0) return;
       stepBy(direction);

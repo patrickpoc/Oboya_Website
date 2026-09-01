@@ -40,15 +40,28 @@ export function useOverlayA11y({
 
     const previouslyFocused = document.activeElement as HTMLElement | null;
     const prevOverflow = document.body.style.overflow;
+    const prevPosition = document.body.style.position;
+    const prevTop = document.body.style.top;
+    const prevWidth = document.body.style.width;
+    const scrollY = window.scrollY;
+
     if (lockScroll) {
       document.body.style.overflow = "hidden";
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
     }
 
-    const container = containerRef.current;
-    const focusables = container ? getFocusable(container) : [];
-    if (trapFocus) {
-      focusables[0]?.focus();
-    }
+    const focusContainer = () => {
+      const container = containerRef.current;
+      if (!container) return;
+      const focusables = getFocusable(container);
+      if (trapFocus) {
+        focusables[0]?.focus();
+      }
+    };
+
+    const rafId = window.requestAnimationFrame(focusContainer);
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -57,8 +70,9 @@ export function useOverlayA11y({
         return;
       }
 
-      if (!trapFocus || event.key !== "Tab" || !container) return;
+      if (!trapFocus || event.key !== "Tab" || !containerRef.current) return;
 
+      const container = containerRef.current;
       const items = getFocusable(container);
       if (items.length === 0) {
         event.preventDefault();
@@ -82,8 +96,13 @@ export function useOverlayA11y({
 
     document.addEventListener("keydown", onKeyDown);
     return () => {
+      window.cancelAnimationFrame(rafId);
       if (lockScroll) {
         document.body.style.overflow = prevOverflow;
+        document.body.style.position = prevPosition;
+        document.body.style.top = prevTop;
+        document.body.style.width = prevWidth;
+        window.scrollTo(0, scrollY);
       }
       document.removeEventListener("keydown", onKeyDown);
       if (trapFocus) {

@@ -46,8 +46,14 @@ export function QuantityInput({
     onChange(clampQuantity(value + delta, moq));
   };
 
-  const buttonSize = size === "sm" ? "size-6 text-xs" : "size-8 text-sm";
-  const inputSize = size === "sm" ? "h-7 w-14 text-xs" : "h-8 w-16 text-sm";
+  const buttonSize =
+    size === "sm"
+      ? "size-6 text-xs sm:size-6"
+      : "min-h-11 min-w-11 text-base sm:size-8 sm:text-sm";
+  const inputSize =
+    size === "sm"
+      ? "h-7 w-14 text-xs"
+      : "h-11 w-20 text-base sm:h-8 sm:w-16 sm:text-sm";
 
   return (
     <div className={cn("space-y-2", className)}>

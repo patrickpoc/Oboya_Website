@@ -50,8 +50,8 @@ export function QuoteCartSheet() {
     open: isCartOpen,
     onClose: handleClose,
     containerRef: panelRef,
-    lockScroll: false,
-    trapFocus: false,
+    lockScroll: true,
+    trapFocus: true,
   });
 
   const lineItems = getLineItems();
@@ -65,19 +65,26 @@ export function QuoteCartSheet() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="pointer-events-none fixed inset-x-0 bottom-0 z-50 lg:hidden"
+          className="fixed inset-0 z-50 lg:hidden"
         >
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/40"
+            aria-label={t("minimizeQuoteList")}
+            onClick={handleClose}
+          />
           <motion.div
             ref={panelRef}
-            role="region"
+            role="dialog"
+            aria-modal="true"
             aria-label={t("quoteList")}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={mobileSheetTransition}
-            className="pointer-events-auto max-h-[85vh] overflow-hidden rounded-t-2xl border border-border/60 bg-white shadow-2xl"
+            className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-hidden rounded-t-2xl border border-border/60 bg-white pb-[env(safe-area-inset-bottom)] shadow-2xl"
           >
-            <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-border" />
+            <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-border" aria-hidden />
             <div className="flex items-center justify-between border-b border-border/50 px-4 py-3">
               <h2 className="font-semibold text-oboya-blue-dark">{t("quoteList")}</h2>
               <div className="flex items-center gap-3">
@@ -87,7 +94,7 @@ export function QuoteCartSheet() {
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
+                  className="flex min-h-11 min-w-11 items-center justify-center rounded-full p-2 text-muted-foreground hover:bg-muted"
                   aria-label={t("minimizeQuoteList")}
                 >
                   <ChevronDown className="size-4" aria-hidden />
@@ -129,7 +136,7 @@ export function QuoteCartSheet() {
                   }}
                   className={buttonVariants({
                     className:
-                      "mt-4 w-full rounded-full bg-oboya-green text-white hover:bg-oboya-green/90",
+                      "mt-4 min-h-11 w-full rounded-full bg-oboya-green text-white hover:bg-oboya-green/90",
                   })}
                 >
                   {t("requestQuotation")}

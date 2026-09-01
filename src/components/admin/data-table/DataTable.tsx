@@ -19,6 +19,8 @@ export interface DataTableColumn<T> {
   cell: (row: T) => React.ReactNode;
   sortable?: boolean;
   className?: string;
+  /** Label for mobile card layout (defaults to header) */
+  mobileLabel?: string;
 }
 
 interface DataTableProps<T> {
@@ -32,6 +34,8 @@ interface DataTableProps<T> {
   onSelectionChange?: (ids: string[]) => void;
   getRowId?: (row: T) => string;
   emptyMessage?: string;
+  /** Stacked cards on viewports below md */
+  mobileLayout?: "table" | "cards";
 }
 
 export function DataTable<T>({
@@ -45,6 +49,7 @@ export function DataTable<T>({
   onSelectionChange,
   getRowId,
   emptyMessage = "No records found.",
+  mobileLayout = "cards",
 }: DataTableProps<T>) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
@@ -103,6 +108,35 @@ export function DataTable<T>({
     );
   };
 
+  const pagination = totalPages > 1 && (
+    <div className="flex items-center justify-between text-xs text-muted-foreground">
+      <span>
+        {filtered.length} record{filtered.length !== 1 ? "s" : ""}
+      </span>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          disabled={page === 0}
+          onClick={() => setPage(page - 1)}
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border p-2 disabled:opacity-40"
+        >
+          <ChevronLeft className="size-3.5" />
+        </button>
+        <span>
+          {page + 1} / {totalPages}
+        </span>
+        <button
+          type="button"
+          disabled={page >= totalPages - 1}
+          onClick={() => setPage(page + 1)}
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border p-2 disabled:opacity-40"
+        >
+          <ChevronRight className="size-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-3">
       {searchKey && (
@@ -115,12 +149,64 @@ export function DataTable<T>({
               setPage(0);
             }}
             placeholder={searchPlaceholder}
-            className="h-8 pl-8 text-sm"
+            className="h-11 pl-8 text-base md:h-8 md:text-sm"
           />
         </div>
       )}
 
-      <div className="overflow-hidden rounded-xl border border-border/60 bg-white">
+      {mobileLayout === "cards" && (
+        <div className="space-y-3 md:hidden">
+          {paged.length === 0 ? (
+            <p className="rounded-xl border border-border/60 bg-white py-8 text-center text-muted-foreground">
+              {emptyMessage}
+            </p>
+          ) : (
+            paged.map((row, i) => {
+              const rowId = getRowId?.(row);
+              return (
+                <article
+                  key={rowId ?? i}
+                  className={cn(
+                    "rounded-xl border border-border/60 bg-white p-4 shadow-sm",
+                    onRowClick && "cursor-pointer active:bg-muted/30"
+                  )}
+                  onClick={() => onRowClick?.(row)}
+                >
+                  {onSelectionChange && rowId && (
+                    <div className="mb-3" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(rowId)}
+                        onChange={() => toggleRow(rowId)}
+                      />
+                    </div>
+                  )}
+                  <dl className="space-y-2">
+                    {columns.map((col) => (
+                      <div key={col.key} className="flex flex-col gap-0.5">
+                        <dt className="text-xs font-medium text-muted-foreground">
+                          {col.mobileLabel ?? col.header}
+                        </dt>
+                        <dd className="text-sm text-oboya-blue-dark">
+                          {col.cell(row)}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </article>
+              );
+            })
+          )}
+          {pagination}
+        </div>
+      )}
+
+      <div
+        className={cn(
+          "overflow-x-auto rounded-xl border border-border/60 bg-white -mx-4 px-4 sm:mx-0 sm:px-0",
+          mobileLayout === "cards" && "hidden md:block"
+        )}
+      >
         <Table>
           <TableHeader>
             <TableRow>
@@ -139,7 +225,10 @@ export function DataTable<T>({
               {columns.map((col) => (
                 <TableHead
                   key={col.key}
-                  className={cn(col.sortable && "cursor-pointer select-none", col.className)}
+                  className={cn(
+                    col.sortable && "cursor-pointer touch-manipulation select-none",
+                    col.className
+                  )}
                   onClick={col.sortable ? () => toggleSort(col.key) : undefined}
                 >
                   {col.header}
@@ -189,33 +278,9 @@ export function DataTable<T>({
         </Table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>
-            {filtered.length} record{filtered.length !== 1 ? "s" : ""}
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled={page === 0}
-              onClick={() => setPage(page - 1)}
-              className="rounded-md border border-border p-1 disabled:opacity-40"
-            >
-              <ChevronLeft className="size-3.5" />
-            </button>
-            <span>
-              {page + 1} / {totalPages}
-            </span>
-            <button
-              type="button"
-              disabled={page >= totalPages - 1}
-              onClick={() => setPage(page + 1)}
-              className="rounded-md border border-border p-1 disabled:opacity-40"
-            >
-              <ChevronRight className="size-3.5" />
-            </button>
-          </div>
-        </div>
+      {mobileLayout !== "cards" && pagination}
+      {mobileLayout === "cards" && (
+        <div className="hidden md:block">{pagination}</div>
       )}
     </div>
   );

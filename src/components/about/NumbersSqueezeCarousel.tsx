@@ -1,14 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
+import { LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import {
   Building2,
   CalendarDays,
@@ -20,7 +14,18 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
-import { easeOutExpo } from "@/lib/animations";
+import {
+  SQUEEZE_BANNER_S,
+  SQUEEZE_CARD_SURFACE_CLASS,
+  SQUEEZE_MEDIA_LAYER_CLASS,
+  squeezeCardTransition,
+  squeezeCardZIndex,
+  squeezeCollapsedPanelOpacity,
+  squeezeExpandedPanelOpacity,
+  squeezeLayerTransition,
+  squeezeLayoutTransition,
+  squeezePanelTransition,
+} from "@/lib/squeeze-carousel-motion";
 import type {
   AboutImpactStatIcon,
   AboutPageSettings,
@@ -28,11 +33,17 @@ import type {
 import { pickLocalized } from "@/lib/cms/utils";
 import { cn } from "@/lib/utils";
 
-const SWIPE_THRESHOLD = 48;
-const EASE = [...easeOutExpo] as [number, number, number, number];
-/** Layout + content share one curve — same model as ValuesSqueezeCarousel. */
-const BANNER_TRANSITION_S = 0.58;
+const BANNER_TRANSITION_S = SQUEEZE_BANNER_S;
 const COLLAPSED_BASIS = "4.25rem";
+const MOBILE_COLLAPSED_BASIS = "2.75rem";
+const MOBILE_EXPANDED_BASIS = "16rem";
+const ICON_BUBBLE_REM = 2; // size-8
+/** Centers the icon bubble vertically within the collapsed mobile strip. */
+const MOBILE_ICON_PAD_TOP = `calc((${MOBILE_COLLAPSED_BASIS} - ${ICON_BUBBLE_REM}rem) / 2)`;
+const DESKTOP_ICON_PAD = "1.25rem";
+const DESKTOP_ICON_PAD_X_EXPANDED = "1.5rem";
+const DESKTOP_ICON_PAD_X_COLLAPSED = "0.375rem";
+const MOBILE_ICON_PAD_X = "1rem";
 const AUTOPLAY_MS = 4600;
 
 /** Soft White / Light Yellow / Light Green — need dark type on solid fills. */
@@ -57,22 +68,30 @@ export interface NumbersSqueezeCarouselProps {
   locale: string;
 }
 
-function useIsDesktopSqueeze() {
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
-    const update = () => setIsDesktop(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-
-  return isDesktop;
-}
-
 function isLightAccent(hex: string) {
   return LIGHT_ACCENTS.has(hex.trim().toLowerCase());
+}
+
+/** Desktop: icon top inset is constant; only axis orientation changes between states. */
+function iconMotionDesktop(isActive: boolean) {
+  return {
+    justifyContent: isActive ? "flex-start" : "space-between",
+    alignItems: isActive ? "flex-start" : "center",
+    paddingTop: DESKTOP_ICON_PAD,
+    paddingBottom: DESKTOP_ICON_PAD,
+    paddingLeft: isActive ? DESKTOP_ICON_PAD_X_EXPANDED : DESKTOP_ICON_PAD_X_COLLAPSED,
+    paddingRight: isActive ? DESKTOP_ICON_PAD_X_EXPANDED : DESKTOP_ICON_PAD_X_COLLAPSED,
+  };
+}
+
+/** Mobile: same top/left inset open or closed; row alignment handles orientation. */
+function iconMotionMobile() {
+  return {
+    paddingTop: MOBILE_ICON_PAD_TOP,
+    paddingBottom: 0,
+    paddingLeft: MOBILE_ICON_PAD_X,
+    paddingRight: MOBILE_ICON_PAD_X,
+  };
 }
 
 function MetricValue({
@@ -125,20 +144,16 @@ export function NumbersSqueezeCarousel({
   const [counterReadyIndex, setCounterReadyIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const reduceMotion = useReducedMotion();
-  const isDesktop = useIsDesktopSqueeze();
-  const pointerStartX = useRef<number | null>(null);
-  const pointerDeltaX = useRef(0);
-  const mobileTrackRef = useRef<HTMLDivElement>(null);
 
   const count = stats.length;
   const activeStat = stats[activeIndex] ?? stats[0];
 
   const goTo = useCallback(
     (index: number) => {
-      if (count === 0) return;
+      if (count === 0 || index === activeIndex) return;
       setActiveIndex(((index % count) + count) % count);
     },
-    [count]
+    [activeIndex, count]
   );
 
   const goPrev = useCallback(() => goTo(activeIndex - 1), [activeIndex, goTo]);
@@ -159,18 +174,6 @@ export function NumbersSqueezeCarousel({
   }, [activeIndex, reduceMotion]);
 
   useEffect(() => {
-    if (isDesktop || !mobileTrackRef.current) return;
-    const el = mobileTrackRef.current.children[activeIndex] as
-      | HTMLElement
-      | undefined;
-    el?.scrollIntoView({
-      behavior: reduceMotion ? "auto" : "smooth",
-      inline: "center",
-      block: "nearest",
-    });
-  }, [activeIndex, isDesktop, reduceMotion]);
-
-  useEffect(() => {
     if (reduceMotion || paused || count < 2) return;
     const id = window.setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % count);
@@ -178,36 +181,12 @@ export function NumbersSqueezeCarousel({
     return () => window.clearInterval(id);
   }, [count, paused, reduceMotion]);
 
-  const onPointerDown = (event: ReactPointerEvent) => {
-    if (isDesktop) return;
-    pointerStartX.current = event.clientX;
-    pointerDeltaX.current = 0;
-  };
-
-  const onPointerMove = (event: ReactPointerEvent) => {
-    if (pointerStartX.current == null) return;
-    pointerDeltaX.current = event.clientX - pointerStartX.current;
-  };
-
-  const onPointerUp = () => {
-    if (pointerStartX.current == null) return;
-    const delta = pointerDeltaX.current;
-    pointerStartX.current = null;
-    pointerDeltaX.current = 0;
-    if (Math.abs(delta) < SWIPE_THRESHOLD) return;
-    if (delta < 0) goNext();
-    else goPrev();
-  };
-
   if (count === 0 || !activeStat) return null;
 
-  const bannerTransition = reduceMotion
-    ? { duration: 0 }
-    : { duration: BANNER_TRANSITION_S, ease: EASE };
-
-  const overlayTransitionClass = reduceMotion
-    ? ""
-    : "transition-opacity duration-[580ms] ease-[cubic-bezier(0.22,1,0.36,1)]";
+  const reduce = Boolean(reduceMotion);
+  const cardTransition = squeezeCardTransition(reduce);
+  const layerTransition = squeezeLayerTransition(reduce);
+  const iconTransition = squeezeLayoutTransition(reduce);
 
   return (
     <div
@@ -225,6 +204,7 @@ export function NumbersSqueezeCarousel({
         {pickLocalized(activeStat.label, locale)}
       </p>
 
+      <LayoutGroup id="numbers-squeeze-desktop">
       <div
         className={cn(
           "hidden w-full md:flex md:h-[min(24rem,52vh)] md:min-h-[19rem] md:gap-2.5 lg:gap-3",
@@ -265,60 +245,58 @@ export function NumbersSqueezeCarousel({
                 flexGrow: isActive ? 1 : 0,
                 flexBasis: isActive ? "0%" : COLLAPSED_BASIS,
               }}
-              transition={bannerTransition}
+              transition={cardTransition}
               className={cn(
-                "group relative min-w-0 overflow-hidden rounded-2xl text-left [contain:layout_paint] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-green/60 focus-visible:ring-offset-2",
+                "group relative min-w-0 overflow-hidden rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-green/60 focus-visible:ring-offset-2",
+                SQUEEZE_CARD_SURFACE_CLASS,
                 isActive ? "cursor-default" : "cursor-pointer"
               )}
-              style={{ flexShrink: 0 }}
+              style={{ flexShrink: 0, zIndex: squeezeCardZIndex(isActive) }}
             >
-              {/*
-                Fixed-width image layer — parent clips via overflow:hidden so the
-                photo is revealed instead of rescaled during flex animation.
-              */}
-              <div className="absolute inset-0 overflow-hidden bg-oboya-soft-white">
-                <div className="absolute inset-y-0 left-0 h-full w-[max(100%,var(--container-max,80rem))]">
-                  <Image
-                    src={stat.image.src}
-                    alt={pickLocalized(stat.image.alt, locale)}
-                    fill
-                    priority={index === 0}
-                    sizes="(max-width: 1280px) 80vw, 80rem"
-                    className={cn(
-                      "object-cover",
-                      !isActive &&
-                        !reduceMotion &&
-                        "transition-transform duration-500 ease-out group-hover:scale-[1.04] [@media(hover:none)]:group-hover:scale-100"
-                    )}
-                    style={{ objectPosition: stat.objectPosition ?? "center" }}
-                  />
-                </div>
+              <div
+                className={cn(
+                  "absolute inset-0 overflow-hidden bg-oboya-soft-white",
+                  SQUEEZE_MEDIA_LAYER_CLASS
+                )}
+              >
+                <Image
+                  src={stat.image.src}
+                  alt={pickLocalized(stat.image.alt, locale)}
+                  fill
+                  priority={index === 0}
+                  sizes="(max-width: 1280px) 50vw, 33vw"
+                  className={cn(
+                    "object-cover",
+                    !isActive &&
+                      !reduceMotion &&
+                      "transition-transform duration-500 ease-out group-hover:scale-[1.04] [@media(hover:none)]:group-hover:scale-100"
+                  )}
+                  style={{ objectPosition: stat.objectPosition ?? "center" }}
+                />
               </div>
 
-              <div
+              <motion.div
                 aria-hidden
-                className={cn(
-                  "absolute inset-0",
-                  overlayTransitionClass,
-                  isActive ? "opacity-0" : "opacity-[0.92]"
-                )}
+                initial={false}
+                animate={{ opacity: isActive ? 0 : 0.92 }}
+                transition={layerTransition}
+                className="absolute inset-0"
                 style={{ backgroundColor: accent }}
               />
 
-              <div
-                className={cn(
-                  "absolute inset-0 bg-gradient-to-t from-oboya-blue-dark/25 to-transparent",
-                  overlayTransitionClass,
-                  isActive ? "opacity-100" : "opacity-0"
-                )}
+              <motion.div
+                aria-hidden
+                initial={false}
+                animate={{ opacity: isActive ? 1 : 0 }}
+                transition={layerTransition}
+                className="absolute inset-0 bg-gradient-to-t from-oboya-blue-dark/25 to-transparent"
               />
 
-              <div
-                className={cn(
-                  "absolute inset-0 z-[2] flex flex-col items-center justify-between px-1.5 py-5",
-                  overlayTransitionClass,
-                  isActive ? "pointer-events-none opacity-0" : "opacity-100"
-                )}
+              <motion.div
+                className="pointer-events-none absolute inset-0 z-[3] flex flex-col"
+                initial={false}
+                animate={iconMotionDesktop(isActive)}
+                transition={iconTransition}
               >
                 <span
                   className="flex size-8 items-center justify-center rounded-full bg-white/95 shadow-sm sm:size-9"
@@ -330,139 +308,198 @@ export function NumbersSqueezeCarousel({
                     style={{ color: accent }}
                   />
                 </span>
-                <MetricValue
-                  stat={stat}
-                  label={label}
-                  reduceMotion={Boolean(reduceMotion)}
-                  animate={false}
-                  className={cn(
-                    "font-display text-[clamp(1.05rem,1.6vw,1.35rem)] font-light leading-none tracking-tight [writing-mode:vertical-rl] rotate-180",
-                    collapsedInk
-                  )}
-                />
-              </div>
+                <motion.div
+                  initial={false}
+                  animate={squeezeCollapsedPanelOpacity(isActive)}
+                  transition={squeezePanelTransition(reduce, !isActive)}
+                  className={cn(isActive && "pointer-events-none")}
+                  aria-hidden={isActive}
+                >
+                  <MetricValue
+                    stat={stat}
+                    label={label}
+                    reduceMotion={reduce}
+                    animate={false}
+                    className={cn(
+                      "font-display text-[clamp(1.05rem,1.6vw,1.35rem)] font-light leading-none tracking-tight [writing-mode:vertical-rl] rotate-180",
+                      collapsedInk
+                    )}
+                  />
+                </motion.div>
+              </motion.div>
 
               <motion.div
+                className="pointer-events-none absolute inset-x-0 bottom-0 z-[2]"
                 initial={false}
-                animate={{ opacity: isActive ? 1 : 0 }}
-                transition={bannerTransition}
-                className="pointer-events-none absolute inset-0 z-[2]"
+                animate={squeezeExpandedPanelOpacity(isActive)}
+                transition={squeezePanelTransition(reduce, isActive)}
                 aria-hidden={!isActive}
               >
-                <div className="absolute left-0 top-0 p-6 md:p-7 lg:p-8">
-                  <span
-                    className="flex size-8 items-center justify-center rounded-full bg-white/95 shadow-sm sm:size-9"
-                    aria-hidden
-                  >
-                    <Icon
-                      className="size-4 sm:size-5"
-                      strokeWidth={1.6}
-                      style={{ color: accent }}
-                    />
-                  </span>
-                </div>
-
                 <div
-                  className="absolute inset-x-0 bottom-0 px-6 py-5 md:px-7 md:py-6 lg:px-8"
+                  className="flex w-full items-center gap-x-4 px-6 py-5 md:gap-x-5 md:px-7 md:py-6 lg:px-8"
                   style={{ backgroundColor: `${accent}99` }}
                 >
-                  <div
-                    className="flex items-end gap-x-4"
-                    style={{ width: "min(28rem, 52vw)" }}
-                  >
-                    <MetricValue
-                      stat={stat}
-                      label={label}
-                      reduceMotion={Boolean(reduceMotion)}
-                      animate={showCounter}
-                      className="shrink-0 font-display text-[clamp(2.5rem,5vw,3.75rem)] font-light leading-none tracking-tight text-white"
-                    />
-                    <p className="w-[11rem] shrink-0 pb-1 font-body text-sm leading-snug text-white md:text-[0.9375rem]">
-                      {label}
-                    </p>
-                  </div>
+                  <p className="min-w-0 flex-1 overflow-hidden font-body text-sm leading-snug text-white md:text-[0.9375rem]">
+                    {label}
+                  </p>
+                  <MetricValue
+                    stat={stat}
+                    label={label}
+                    reduceMotion={reduce}
+                    animate={showCounter}
+                    className="shrink-0 text-right font-display text-[clamp(2.5rem,5vw,3.75rem)] font-light leading-none tracking-tight text-white tabular-nums"
+                  />
                 </div>
               </motion.div>
             </motion.button>
           );
         })}
       </div>
+      </LayoutGroup>
 
+      <LayoutGroup id="numbers-squeeze-mobile">
       <div
-        ref={mobileTrackRef}
-        className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
+        className={cn(
+          "flex h-[min(42rem,80svh)] flex-col gap-2 md:hidden",
+          "focus-within:outline-none"
+        )}
+        style={{
+          minHeight: `calc(${MOBILE_EXPANDED_BASIS} + ${MOBILE_COLLAPSED_BASIS} * ${Math.max(0, count - 1)})`,
+        }}
       >
         {stats.map((stat, index) => {
           const isActive = index === activeIndex;
           const label = pickLocalized(stat.label, locale);
           const Icon = ICON_MAP[stat.icon] ?? Globe2;
           const accent = stat.accentColor || "#4DAF4E";
+          const showCounter =
+            isActive && (reduceMotion || counterReadyIndex === index);
 
           return (
-            <button
+            <motion.button
               key={stat.id}
               type="button"
               aria-label={`${label}: ${stat.pending ? "XX" : `${stat.value}${stat.suffix}`}`}
-              aria-pressed={isActive}
+              aria-expanded={isActive}
               onClick={() => goTo(index)}
+              initial={false}
+              animate={{
+                flexGrow: isActive ? 1 : 0,
+                flexBasis: isActive ? MOBILE_EXPANDED_BASIS : MOBILE_COLLAPSED_BASIS,
+              }}
+              transition={cardTransition}
               className={cn(
-                "relative aspect-[4/5] w-[78%] shrink-0 snap-center overflow-hidden rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-green/60 focus-visible:ring-offset-2",
-                !isActive && "opacity-95"
+                "relative min-h-0 w-full overflow-hidden rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-green/60 focus-visible:ring-offset-2",
+                SQUEEZE_CARD_SURFACE_CLASS,
+                isActive ? "min-h-[16rem] cursor-default" : "cursor-pointer"
               )}
+              style={{ flexShrink: 0, zIndex: squeezeCardZIndex(isActive) }}
             >
-              <Image
-                src={stat.image.src}
-                alt={pickLocalized(stat.image.alt, locale)}
-                fill
-                priority={index === 0}
-                sizes="92vw"
-                className="object-cover"
-                style={{ objectPosition: stat.objectPosition ?? "center" }}
-              />
               <div
-                className="absolute inset-0 opacity-35"
-                style={{ backgroundColor: accent }}
+                className={cn(
+                  "absolute inset-0 overflow-hidden bg-oboya-soft-white",
+                  SQUEEZE_MEDIA_LAYER_CLASS
+                )}
+              >
+                <Image
+                  src={stat.image.src}
+                  alt={pickLocalized(stat.image.alt, locale)}
+                  fill
+                  priority={index === 0}
+                  sizes="100vw"
+                  className="object-cover"
+                  style={{ objectPosition: stat.objectPosition ?? "center" }}
+                />
+              </div>
+
+              <motion.div
                 aria-hidden
+                initial={false}
+                animate={{ opacity: isActive ? 0 : 0.92 }}
+                transition={layerTransition}
+                className="absolute inset-0"
+                style={{ backgroundColor: accent }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-oboya-blue-dark/50 via-transparent to-transparent" />
-              <div className="absolute inset-0 flex flex-col">
-                <div className="p-5">
-                  <span
-                    className="flex size-9 items-center justify-center rounded-full bg-white/95 shadow-sm"
-                    aria-hidden
-                  >
-                    <Icon
-                      className="size-5"
-                      strokeWidth={1.6}
-                      style={{ color: accent }}
-                    />
-                  </span>
-                </div>
+
+              <motion.div
+                aria-hidden
+                initial={false}
+                animate={{ opacity: isActive ? 1 : 0 }}
+                transition={layerTransition}
+                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-oboya-blue-dark/50 via-transparent to-transparent"
+              />
+
+              <motion.div
+                className="pointer-events-none absolute inset-x-0 bottom-0 z-[2]"
+                initial={false}
+                animate={squeezeExpandedPanelOpacity(isActive)}
+                transition={squeezePanelTransition(reduce, isActive)}
+                aria-hidden={!isActive}
+              >
                 <div
-                  className="mt-auto px-5 py-4"
+                  className="flex w-full items-center gap-3 px-4 py-4"
                   style={{ backgroundColor: `${accent}99` }}
                 >
-                  <div className="flex items-end gap-x-3">
-                    <MetricValue
-                      stat={stat}
-                      label={label}
-                      reduceMotion={Boolean(reduceMotion)}
-                      className="shrink-0 font-display text-[clamp(2.25rem,10vw,3rem)] font-light leading-none tracking-tight text-white"
-                    />
-                    <p className="w-[9.5rem] shrink-0 pb-1 font-body text-sm leading-snug text-white">
-                      {label}
-                    </p>
-                  </div>
+                  <p className="min-w-0 flex-1 font-body text-sm leading-snug text-white">
+                    {label}
+                  </p>
+                  <MetricValue
+                    stat={stat}
+                    label={label}
+                    reduceMotion={reduce}
+                    animate={showCounter}
+                    className="shrink-0 text-right font-display text-[clamp(2rem,10vw,2.75rem)] font-light leading-none tracking-tight text-white tabular-nums"
+                  />
                 </div>
-              </div>
-            </button>
+              </motion.div>
+
+              <motion.div
+                className="pointer-events-none absolute inset-0 z-[3] flex items-start gap-3"
+                initial={false}
+                animate={iconMotionMobile()}
+                transition={iconTransition}
+              >
+                <div className="flex w-full min-w-0 items-center gap-3">
+                <span
+                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/95 shadow-sm"
+                  aria-hidden
+                >
+                  <Icon
+                    className="size-4"
+                    strokeWidth={1.6}
+                    style={{ color: accent }}
+                  />
+                </span>
+                <motion.div
+                  className={cn(
+                    "flex min-w-0 flex-1 items-center gap-3 overflow-hidden",
+                    isActive && "pointer-events-none !w-0 !min-w-0 !flex-[0]"
+                  )}
+                  initial={false}
+                  animate={squeezeCollapsedPanelOpacity(isActive)}
+                  transition={squeezePanelTransition(reduce, !isActive)}
+                  aria-hidden={isActive}
+                >
+                  <p
+                    className="min-w-0 flex-1 truncate font-body text-sm font-medium leading-snug text-white"
+                  >
+                    {label}
+                  </p>
+                  <MetricValue
+                    stat={stat}
+                    label={label}
+                    reduceMotion={Boolean(reduceMotion)}
+                    animate={false}
+                    className="shrink-0 font-display text-lg font-light leading-none tracking-tight text-white"
+                  />
+                </motion.div>
+                </div>
+              </motion.div>
+            </motion.button>
           );
         })}
       </div>
+      </LayoutGroup>
     </div>
   );
 }

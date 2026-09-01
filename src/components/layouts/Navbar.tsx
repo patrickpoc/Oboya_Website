@@ -235,7 +235,7 @@ function HeroMenuButton({
       </SheetTrigger>
       <SheetContent
         side="left"
-        className="w-full max-w-sm overflow-y-auto px-6 pt-14 pb-8 sm:px-8"
+        className="w-full max-w-sm overflow-y-auto px-6 pt-14 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8"
       >
         <SheetTitle className="sr-only">{t("nav.menuTitle")}</SheetTitle>
         <div className="flex flex-col">
@@ -368,7 +368,7 @@ export function Navbar({
               </SheetTrigger>
               <SheetContent
                 side="right"
-                className="w-full max-w-sm overflow-y-auto px-6 pt-14 pb-8 sm:px-8"
+                className="w-full max-w-sm overflow-y-auto px-6 pt-14 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8"
               >
                 <SheetTitle className="sr-only">
                   {t("nav.menuTitle")}
@@ -478,7 +478,7 @@ export function Navbar({
                       </SheetTrigger>
                       <SheetContent
                         side="right"
-                        className="w-full max-w-sm overflow-y-auto px-6 pt-14 pb-8 sm:px-8"
+                        className="w-full max-w-sm overflow-y-auto px-6 pt-14 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8"
                       >
                         <SheetTitle className="sr-only">
                           {t("nav.menuTitle")}
@@ -538,10 +538,10 @@ export function Navbar({
               className="pointer-events-none fixed inset-x-0 top-0 z-50 bg-transparent"
             >
               <nav
-                className="pointer-events-auto grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-3 sm:px-5 md:h-[4.5rem] md:px-8 lg:px-10"
+                className="pointer-events-auto grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-[var(--nav-padding-x)] md:h-[4.5rem] md:px-8 lg:px-10"
                 aria-label={t("nav.mainNav")}
               >
-                <div className="justify-self-start">
+                <div className="min-w-0 justify-self-start">
                   <HeroMenuButton
                     open={mobileOpen}
                     onOpenChange={setMobileOpen}
@@ -554,17 +554,18 @@ export function Navbar({
                   priority
                   className="col-start-2 justify-self-center"
                 />
-                <div className="justify-self-end">
+                <div className="min-w-0 justify-self-end">
                   <Link
                     href="/contact"
                     className={buttonVariants({
                       size: "cta",
                       variant: "outline",
                       className:
-                        "border-white bg-transparent text-white hover:bg-white/10 hover:text-white",
+                        "max-sm:h-8 max-sm:min-h-8 max-sm:px-2.5 max-sm:text-[0.625rem] max-sm:tracking-[0.08em] border-white bg-transparent text-white hover:bg-white/10 hover:text-white",
                     })}
                   >
-                    {contactLabel}
+                    <span className="sm:hidden">{t("footer.contact")}</span>
+                    <span className="hidden sm:inline">{contactLabel}</span>
                   </Link>
                 </div>
               </nav>
@@ -653,7 +654,7 @@ export function Navbar({
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-full max-w-sm overflow-y-auto px-6 pt-14 pb-8 sm:px-8"
+              className="w-full max-w-sm overflow-y-auto px-6 pt-14 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8"
             >
               <SheetTitle className="sr-only">{t("nav.menuTitle")}</SheetTitle>
               <div className="flex flex-col">

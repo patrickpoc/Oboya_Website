@@ -37,7 +37,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
   });
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-12">
+    <div className="mx-auto max-w-6xl px-[var(--container-padding)] py-8 md:py-12">
       <div className="mb-6">
         <Link href="/shop" className="text-sm text-oboya-green hover:underline">
           ← {t("continueBrowsing")}

@@ -69,7 +69,8 @@ export function InteractiveWorldMap({
   locationsRef.current = locations;
 
   const highlightedId = editable ? selectedId : activeId;
-  const autoPlayEnabled = !editable && !manualMode && !prefersReducedMotion;
+  const autoPlayEnabled =
+    !editable && !manualMode && !prefersReducedMotion && !isTouch;
   /** Connection draw/erase runs independently of country hover/auto-cycle. */
   const connectionAnimationEnabled = !editable && !prefersReducedMotion;
 
@@ -434,9 +435,9 @@ export function InteractiveWorldMap({
               <circle
                 cx={location.x}
                 cy={location.y}
-                r={editable ? 16 : 14}
+                r={editable ? 22 : 20}
                 fill="transparent"
-                className="pointer-events-auto"
+                className="pointer-events-auto touch-manipulation"
               />
               <circle
                 cx={location.x}

@@ -57,7 +57,7 @@ export function Hero({
       )}
 
       <Container className="relative z-10 flex flex-1 flex-col pt-20 md:pt-24">
-        <div className="flex flex-1 flex-col items-center justify-center px-2 pb-16 pt-8 text-center md:pb-20">
+        <div className="flex flex-1 flex-col items-center justify-center px-2 pb-20 pt-10 text-center md:pb-20">
           <motion.div
             variants={staggerContainer}
             initial={animationsEnabled ? "hidden" : false}
@@ -66,7 +66,7 @@ export function Hero({
           >
             <motion.h1
               variants={fadeInUp}
-              className="font-display text-[clamp(2.35rem,6.5vw,4.5rem)] leading-[1.05] font-black tracking-[-0.02em] text-white"
+              className="font-display text-[clamp(2rem,6.5vw,4.5rem)] leading-[1.05] font-black tracking-[-0.02em] text-white text-balance"
             >
               {title}
             </motion.h1>
@@ -83,7 +83,7 @@ export function Hero({
             {eyebrow ? (
               <motion.p
                 variants={fadeInUp}
-                className="mt-5 text-center text-sm font-semibold tracking-[0.18em] text-[#DBE64C] uppercase md:mt-6 md:text-[0.9375rem]"
+                className="mt-5 text-balance text-center text-sm font-semibold tracking-[0.18em] text-oboya-yellow-light uppercase md:mt-6 md:text-[0.9375rem]"
               >
                 {eyebrow}
               </motion.p>
@@ -96,8 +96,8 @@ export function Hero({
               <Link
                 href={data.ctaPrimary.href || "/contact"}
                 className={cn(
-                  buttonVariants({ size: "cta" }),
-                  "rounded-full bg-oboya-green px-8 text-white hover:bg-oboya-green/90"
+                  buttonVariants({ size: "cta-lg" }),
+                  "rounded-full bg-oboya-green text-white hover:bg-oboya-green/90"
                 )}
               >
                 {primaryLabel}
@@ -108,8 +108,8 @@ export function Hero({
               <Link
                 href={data.ctaSecondary.href || "/solutions"}
                 className={cn(
-                  buttonVariants({ size: "cta" }),
-                  "rounded-full bg-white px-8 text-oboya-green hover:bg-white/90"
+                  buttonVariants({ size: "cta-lg" }),
+                  "rounded-full bg-white text-oboya-green hover:bg-white/90"
                 )}
               >
                 {secondaryLabel}

@@ -6,13 +6,13 @@ import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
-import { fadeInUp, carouselSnapTransition, revealViewport } from "@/lib/animations";
+import { fadeInUp, revealViewport } from "@/lib/animations";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
 import { cn } from "@/lib/utils";
 import { isSolutionCategoryId } from "@/lib/solutions/category-stages";
+import { useHorizontalCarousel } from "@/hooks/useHorizontalCarousel";
 
-const DRAG_CLICK_THRESHOLD = 8;
 const GAP = 20;
 
 /** Route homepage segment cards to their dedicated Solutions category page. */
@@ -30,10 +30,6 @@ function cardsPerView(width: number) {
   return 3.15;
 }
 
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value));
-}
-
 interface BusinessSolutionsProps {
   data: HomepageSettings["businessSolutions"];
   locale: string;
@@ -48,18 +44,10 @@ export function BusinessSolutions({
   const items = data.items;
   const [perView, setPerView] = useState(3.15);
   const [cardWidth, setCardWidth] = useState(0);
-  const [scrollOffset, setScrollOffset] = useState(0);
-  const [dragDelta, setDragDelta] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [animateSnap, setAnimateSnap] = useState(false);
   const viewportRef = useRef<HTMLDivElement>(null);
-  const pointerStartX = useRef<number | null>(null);
-  const pointerDeltaX = useRef(0);
-  const suppressClick = useRef(false);
 
   const count = items.length;
 
-  /** Furthest index that still fills the viewport — no empty trailing space */
   const maxIndex = useMemo(() => {
     if (count <= 0) return 0;
     const fullyVisible = Math.max(1, Math.floor(perView));
@@ -88,95 +76,14 @@ export function BusinessSolutions({
     };
   }, [measure]);
 
-  useEffect(() => {
-    setScrollOffset((prev) => clamp(prev, 0, maxScroll));
-  }, [maxScroll]);
-
-  const go = useCallback(
-    (direction: -1 | 1) => {
-      if (count < 1 || step <= 0) return;
-
-      setAnimateSnap(true);
-      setScrollOffset((prev) => {
-        const currentIndex = Math.round(prev / step);
-        let nextIndex = currentIndex + direction;
-        if (maxIndex === 0) return 0;
-        if (nextIndex > maxIndex) nextIndex = 0;
-        if (nextIndex < 0) nextIndex = maxIndex;
-        return nextIndex * step;
-      });
-    },
-    [count, maxIndex, step]
-  );
-
-  useEffect(() => {
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-
-    const onWheel = (event: WheelEvent) => {
-      let delta = 0;
-      if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
-        delta = event.deltaX;
-      } else if (event.shiftKey && event.deltaY !== 0) {
-        delta = event.deltaY;
-      }
-      if (delta === 0) return;
-
-      const rect = viewport.getBoundingClientRect();
-      const inView = rect.top < window.innerHeight && rect.bottom > 0;
-      if (!inView) return;
-
-      event.preventDefault();
-      setAnimateSnap(false);
-      setScrollOffset((prev) => clamp(prev + delta, 0, maxScroll));
-    };
-
-    viewport.addEventListener("wheel", onWheel, { passive: false });
-    return () => viewport.removeEventListener("wheel", onWheel);
-  }, [maxScroll]);
-
-  const onPointerDown = (event: React.PointerEvent) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
-    if ((event.target as HTMLElement | null)?.closest?.("button")) return;
-
-    setAnimateSnap(false);
-    pointerStartX.current = event.clientX;
-    pointerDeltaX.current = 0;
-    setDragDelta(0);
-    setIsDragging(true);
-    event.currentTarget.setPointerCapture(event.pointerId);
-  };
-
-  const onPointerMove = (event: React.PointerEvent) => {
-    if (pointerStartX.current == null) return;
-    const delta = event.clientX - pointerStartX.current;
-    pointerDeltaX.current = delta;
-    setDragDelta(delta);
-  };
-
-  const finishDrag = () => {
-    if (pointerStartX.current == null) return;
-
-    const delta = pointerDeltaX.current;
-    pointerStartX.current = null;
-    pointerDeltaX.current = 0;
-    setIsDragging(false);
-    setDragDelta(0);
-
-    if (Math.abs(delta) > DRAG_CLICK_THRESHOLD) {
-      suppressClick.current = true;
-    }
-
-    setAnimateSnap(false);
-    setScrollOffset((prev) => clamp(prev - delta, 0, maxScroll));
-  };
-
-  const onClickCapture = (event: React.MouseEvent) => {
-    if (!suppressClick.current) return;
-    event.preventDefault();
-    event.stopPropagation();
-    suppressClick.current = false;
-  };
+  const carousel = useHorizontalCarousel({
+    viewportRef,
+    maxScroll,
+    step,
+    maxIndex,
+    animationsEnabled,
+    snapOnDragEnd: true,
+  });
 
   if (count === 0) return null;
 
@@ -209,25 +116,17 @@ export function BusinessSolutions({
         >
           <div
             ref={viewportRef}
-            className={cn(
-              "overflow-hidden",
-              isDragging ? "cursor-grabbing" : "cursor-grab"
-            )}
+            className={cn("overflow-hidden", carousel.viewportClassName)}
           >
             <motion.div
-              className="flex touch-none select-none"
-              style={{ gap: GAP, width: "max-content" }}
-              animate={{ x: -scrollOffset + dragDelta }}
-              transition={
-                isDragging || !animateSnap || !animationsEnabled
-                  ? { duration: 0 }
-                  : carouselSnapTransition
-              }
-              onPointerDown={onPointerDown}
-              onPointerMove={onPointerMove}
-              onPointerUp={finishDrag}
-              onPointerCancel={finishDrag}
-              onClickCapture={onClickCapture}
+              className={cn(
+                "flex select-none",
+                carousel.trackClassName
+              )}
+              style={{ gap: GAP, width: "max-content", ...carousel.trackStyle }}
+              animate={{ x: carousel.motionX }}
+              transition={carousel.transition}
+              {...carousel.trackHandlers}
             >
             {items.map((item) => {
               const title = pickLocalized(item.title, locale);
@@ -285,7 +184,7 @@ export function BusinessSolutions({
         <div className="mt-8 flex justify-end gap-2.5 md:mt-10">
           <button
             type="button"
-            onClick={() => go(-1)}
+            onClick={() => carousel.go(-1)}
             aria-label="Previous solutions"
             className="flex size-10 items-center justify-center rounded-full border border-oboya-blue-dark/40 text-oboya-blue-dark transition-colors hover:border-oboya-blue-dark hover:bg-oboya-blue-dark/5"
           >
@@ -293,7 +192,7 @@ export function BusinessSolutions({
           </button>
           <button
             type="button"
-            onClick={() => go(1)}
+            onClick={() => carousel.go(1)}
             aria-label="Next solutions"
             className="flex size-10 items-center justify-center rounded-full border border-oboya-blue-dark/40 text-oboya-blue-dark transition-colors hover:border-oboya-blue-dark hover:bg-oboya-blue-dark/5"
           >

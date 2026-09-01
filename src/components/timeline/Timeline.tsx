@@ -48,6 +48,7 @@ function useMediaQuery(query: string) {
  */
 export function Timeline({ events, labels }: TimelineProps) {
   const isMobile = useMediaQuery("(max-width: 767px)");
+  const isTouchTablet = useMediaQuery("(max-width: 1024px) and (hover: none)");
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
 
   const pinRef = useRef<HTMLElement | null>(null);
@@ -65,9 +66,11 @@ export function Timeline({ events, labels }: TimelineProps) {
     prevIndexRef.current = activeIndex;
   }, [activeIndex]);
 
+  const scrollPinEnabled = !isMobile && !isTouchTablet && !reducedMotion;
+
   const { scrollToIndex, releaseToNextSection } = useScrollTimeline({
     count,
-    enabled: !isMobile && !reducedMotion,
+    enabled: scrollPinEnabled,
     reducedMotion,
     onIndexChange: setActiveIndex,
     onProgressChange: setScrollProgress,
@@ -75,9 +78,9 @@ export function Timeline({ events, labels }: TimelineProps) {
   });
 
   useEffect(() => {
-    if (!isMobile && !reducedMotion) return;
+    if (!isMobile && !isTouchTablet && !reducedMotion) return;
     setScrollProgress(count <= 1 ? 0 : activeIndex / (count - 1));
-  }, [isMobile, reducedMotion, activeIndex, count]);
+  }, [isMobile, isTouchTablet, reducedMotion, activeIndex, count]);
 
   const goToIndex = useCallback(
     (index: number, dir?: SlideDirection) => {
@@ -86,7 +89,7 @@ export function Timeline({ events, labels }: TimelineProps) {
 
       directionRef.current = dir ?? (next > activeIndex ? "forward" : "back");
 
-      if (isMobile || reducedMotion) {
+      if (isMobile || isTouchTablet || reducedMotion) {
         setActiveIndex(next);
         setScrollProgress(count <= 1 ? 0 : next / (count - 1));
         return;
@@ -94,7 +97,7 @@ export function Timeline({ events, labels }: TimelineProps) {
 
       scrollToIndex(next);
     },
-    [activeIndex, count, isMobile, reducedMotion, setActiveIndex, scrollToIndex]
+    [activeIndex, count, isMobile, isTouchTablet, reducedMotion, setActiveIndex, scrollToIndex]
   );
 
   const handleSelect = useCallback(

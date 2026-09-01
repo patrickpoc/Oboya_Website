@@ -1,5 +1,7 @@
 import type { CmsStatus, LocalizedString, SeoFields } from "@/lib/cms/types";
 import { blogPosts } from "@/constants/content-data";
+import { BLOG_SEED_I18N, type BlogSeedCopy } from "@/lib/cms/blog-i18n";
+import { mergeLocalized } from "@/lib/cms/utils";
 
 export interface CmsBlogPost {
   id: string;
@@ -21,55 +23,37 @@ export interface CmsBlogPost {
 
 const emptyLoc = (): LocalizedString => ({ en: "", "pt-BR": "", es: "", "zh-CN": "" });
 
-const seedTitles: Record<string, { title: string; excerpt: string }> = {
-  post1: {
-    title: "2025 Exhibition Overview: OBOYA Invites You to Join Us at Major Industry Events",
-    excerpt: "Discover where to meet the Oboya team at leading horticulture exhibitions worldwide.",
-  },
-  post2: {
-    title: "Sustainable packaging trends in fresh produce",
-    excerpt: "How retailers and growers are aligning packaging with circular economy goals.",
-  },
-  post3: {
-    title: "Greenhouse innovation in 2026",
-    excerpt: "Climate control, substrates, and logistics are converging in modern greenhouse design.",
-  },
-  post4: {
-    title: "Berry category growth in retail",
-    excerpt: "Packaging and display solutions supporting premium berry programs.",
-  },
-  post5: {
-    title: "Expanding our footprint in Asia-Pacific markets",
-    excerpt: "New distribution partnerships strengthen local support across the region.",
-  },
-  post6: {
-    title: "Next-generation greenhouse technology for sustainable production",
-    excerpt: "Integrated systems helping growers optimize yield and resource efficiency.",
-  },
-  post7: {
-    title: "Circular packaging program launches in Europe",
-    excerpt: "Recyclable formats piloted with retail partners across key markets.",
-  },
-  post8: {
-    title: "Retail display innovation for premium produce",
-    excerpt: "New trolley and packaging concepts improve shelf visibility and handling.",
-  },
-  post9: {
-    title: "Global partner summit highlights integrated solutions",
-    excerpt: "Growers and distributors explore end-to-end horticulture systems.",
-  },
-};
+function migrateBlogPost(post: CmsBlogPost, seedCopy?: BlogSeedCopy): CmsBlogPost {
+  if (!seedCopy) return post;
+  return {
+    ...post,
+    title: mergeLocalized(post.title, seedCopy.title),
+    excerpt: mergeLocalized(post.excerpt, seedCopy.excerpt),
+  };
+}
 
 function seed(): CmsBlogPost[] {
   return blogPosts.map((p) => {
-    const copy = seedTitles[p.messageKey];
-    const title = copy?.title ?? p.slug.replace(/-/g, " ");
-    const excerpt = copy?.excerpt ?? "";
+    const copy = BLOG_SEED_I18N[p.messageKey];
+    const titleEn = copy?.title.en ?? p.slug.replace(/-/g, " ");
+    const excerptEn = copy?.excerpt.en ?? "";
+    const title = copy?.title ?? {
+      en: titleEn,
+      "pt-BR": titleEn,
+      es: titleEn,
+      "zh-CN": titleEn,
+    };
+    const excerpt = copy?.excerpt ?? {
+      en: excerptEn,
+      "pt-BR": excerptEn,
+      es: excerptEn,
+      "zh-CN": excerptEn,
+    };
     return {
       id: p.slug,
       slug: p.slug,
-      title: { en: title, "pt-BR": title, es: title, "zh-CN": title },
-      excerpt: { en: excerpt, "pt-BR": excerpt, es: excerpt, "zh-CN": excerpt },
+      title,
+      excerpt,
       body: emptyLoc(),
       author: p.author,
       categoryId: p.categoryId,
@@ -86,9 +70,16 @@ function seed(): CmsBlogPost[] {
 
 let cache: CmsBlogPost[] | null = null;
 
+const seedKeyBySlug = Object.fromEntries(
+  blogPosts.map((p) => [p.slug, p.messageKey])
+);
+
 export function getBlogPosts(): CmsBlogPost[] {
   if (!cache) cache = seed();
-  return cache;
+  return cache.map((post) => {
+    const seedCopy = BLOG_SEED_I18N[seedKeyBySlug[post.slug] ?? ""];
+    return migrateBlogPost(post, seedCopy);
+  });
 }
 
 export function replaceBlogPostsCache(posts: CmsBlogPost[]) {

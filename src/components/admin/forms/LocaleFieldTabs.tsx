@@ -20,7 +20,7 @@ export function LocaleFieldTabs({ value, onChange, children }: LocaleFieldTabsPr
       <div
         role="tablist"
         aria-label="Language"
-        className="inline-flex h-9 flex-wrap items-center gap-1 rounded-lg border border-border/60 bg-muted/40 p-1"
+        className="sticky top-14 z-10 -mx-1 inline-flex h-auto min-h-11 flex-wrap items-center gap-1 rounded-lg border border-border/60 bg-muted/40 p-1 backdrop-blur-sm"
       >
         {CMS_LOCALES.map((loc) => {
           const active = value === loc.value;
@@ -32,7 +32,7 @@ export function LocaleFieldTabs({ value, onChange, children }: LocaleFieldTabsPr
               aria-selected={active}
               onClick={() => onChange(loc.value)}
               className={cn(
-                "inline-flex items-center justify-center rounded-md px-3 py-1 text-xs font-medium transition-colors",
+                "inline-flex min-h-11 items-center justify-center rounded-md px-3 py-2 text-xs font-medium transition-colors sm:py-1",
                 active
                   ? "bg-white text-oboya-blue-dark shadow-sm"
                   : "text-muted-foreground hover:text-foreground"

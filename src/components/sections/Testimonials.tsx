@@ -1,15 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
-import { fadeInUp, carouselSnapTransition, revealViewport } from "@/lib/animations";
+import { fadeInUp, revealViewport } from "@/lib/animations";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
 import { cn } from "@/lib/utils";
 
-const SWIPE_THRESHOLD = 48;
+import { useHorizontalCarousel } from "@/hooks/useHorizontalCarousel";
+
+const GAP_MOBILE = 12;
+const GAP_DESKTOP = 16;
 
 function QuoteMark({ className }: { className?: string }) {
   return (
@@ -42,57 +45,80 @@ export function Testimonials({
   animationsEnabled = true,
 }: TestimonialsProps) {
   const items = data.items;
-  const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(1);
   const [cardWidth, setCardWidth] = useState(0);
+  const [contentWidth, setContentWidth] = useState(0);
+  const [gap, setGap] = useState(GAP_MOBILE);
   const [padLeft, setPadLeft] = useState(0);
-  const [offsets, setOffsets] = useState<number[]>([]);
-  const trackRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
   const alignRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
-  const pointerStartX = useRef<number | null>(null);
-  const pointerDeltaX = useRef(0);
 
   const count = items.length;
-  const pageCount = Math.max(1, Math.ceil(count / perPage));
   const isMobileLayout = perPage === 1;
+  const step = cardWidth + gap;
+
+  const pageOffsets = useMemo(() => {
+    if (count < 1 || step <= 0 || contentWidth <= 0) return [0];
+
+    const trackWidth = cardWidth * count + gap * Math.max(0, count - 1);
+    const maxScroll = Math.max(0, trackWidth - contentWidth);
+    const pageStep = step * perPage;
+    const pageCount = Math.max(1, Math.ceil(count / perPage));
+
+    return Array.from({ length: pageCount }, (_, i) => {
+      if (i === pageCount - 1) return maxScroll;
+      return Math.min(i * pageStep, maxScroll);
+    });
+  }, [cardWidth, contentWidth, count, gap, perPage, step]);
+
+  const pageCount = pageOffsets.length;
+  const maxScroll = pageOffsets[pageCount - 1] ?? 0;
+
+  const carousel = useHorizontalCarousel({
+    viewportRef,
+    maxScroll,
+    step,
+    snapOffsets: pageOffsets,
+    animationsEnabled,
+    snapOnDragEnd: true,
+  });
+
+  const activePage = useMemo(() => {
+    if (pageOffsets.length === 0) return 0;
+    let closest = 0;
+    let minDist = Infinity;
+    for (let i = 0; i < pageOffsets.length; i++) {
+      const dist = Math.abs(pageOffsets[i] - carousel.scrollOffset);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = i;
+      }
+    }
+    return closest;
+  }, [carousel.scrollOffset, pageOffsets]);
 
   const measure = useCallback(() => {
-    const track = trackRef.current;
     const align = alignRef.current;
-    if (!track || !align) return;
+    if (!align) return;
 
     const nextPerPage = cardsPerView(window.innerWidth);
-    const styles = window.getComputedStyle(track);
-    const nextGap =
-      Number.parseFloat(styles.columnGap || styles.gap || "16") || 16;
-
+    const nextGap = window.innerWidth >= 768 ? GAP_DESKTOP : GAP_MOBILE;
     const alignRect = align.getBoundingClientRect();
-    const contentWidth = alignRect.width;
+    const nextContentWidth = alignRect.width;
     const nextPadLeft = Math.max(0, alignRect.left);
 
-    const peek = nextPerPage > 1 ? Math.min(40, contentWidth * 0.035) : 0;
-    const usable = Math.max(0, contentWidth - peek);
+    const peek = nextPerPage > 1 ? Math.min(40, nextContentWidth * 0.035) : 0;
+    const usable = Math.max(0, nextContentWidth - peek);
     const nextCardWidth =
       (usable - nextGap * Math.max(0, nextPerPage - 1)) / nextPerPage;
 
-    const trackWidth =
-      nextCardWidth * count + nextGap * Math.max(0, count - 1);
-    const maxTranslate = Math.max(0, trackWidth - contentWidth);
-    const pageStep = (nextCardWidth + nextGap) * nextPerPage;
-    const nextPageCount = Math.max(1, Math.ceil(count / nextPerPage));
-
-    const nextOffsets = Array.from({ length: nextPageCount }, (_, i) => {
-      if (i === nextPageCount - 1) return maxTranslate;
-      return Math.min(i * pageStep, maxTranslate);
-    });
-
     setPerPage(nextPerPage);
+    setGap(nextGap);
     setCardWidth(nextCardWidth);
+    setContentWidth(nextContentWidth);
     setPadLeft(nextPadLeft);
-    setOffsets(nextOffsets);
-    setPage((prev) => Math.min(prev, Math.max(0, nextOffsets.length - 1)));
-  }, [count]);
+  }, []);
 
   useEffect(() => {
     measure();
@@ -104,57 +130,28 @@ export function Testimonials({
     };
   }, [measure]);
 
-  const go = useCallback(
-    (direction: -1 | 1) => {
-      setPage((prev) => (prev + direction + pageCount) % pageCount);
-    },
-    [pageCount]
-  );
-
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
       const section = sectionRef.current;
       if (!section) return;
       const rect = section.getBoundingClientRect();
-      const inView = rect.top < window.innerHeight * 0.7 && rect.bottom > window.innerHeight * 0.3;
+      const inView =
+        rect.top < window.innerHeight * 0.7 && rect.bottom > window.innerHeight * 0.3;
       if (!inView) return;
-      if (event.key === "ArrowLeft") go(-1);
-      if (event.key === "ArrowRight") go(1);
+      if (event.key === "ArrowLeft") carousel.go(-1);
+      if (event.key === "ArrowRight") carousel.go(1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [go]);
-
-  const onPointerDown = (event: React.PointerEvent) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
-    pointerStartX.current = event.clientX;
-    pointerDeltaX.current = 0;
-    (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
-  };
-
-  const onPointerMove = (event: React.PointerEvent) => {
-    if (pointerStartX.current == null) return;
-    pointerDeltaX.current = event.clientX - pointerStartX.current;
-  };
-
-  const onPointerUp = () => {
-    if (pointerStartX.current == null) return;
-    const delta = pointerDeltaX.current;
-    pointerStartX.current = null;
-    pointerDeltaX.current = 0;
-    if (Math.abs(delta) < SWIPE_THRESHOLD) return;
-    go(delta < 0 ? 1 : -1);
-  };
+  }, [carousel.go]);
 
   if (count === 0) return null;
-
-  const x = offsets[page] ?? 0;
 
   return (
     <section
       ref={sectionRef}
-      className="overflow-x-hidden bg-oboya-blue-dark py-12 md:py-16 lg:py-20"
+      className="overflow-x-hidden bg-oboya-blue-dark py-[var(--section-y)]"
     >
       <Container>
         <motion.div
@@ -176,21 +173,19 @@ export function Testimonials({
       </Container>
 
       <div
-        className="overflow-hidden pl-[var(--container-padding)]"
+        ref={viewportRef}
+        className={cn(
+          "overflow-hidden pl-[var(--container-padding)]",
+          carousel.viewportClassName
+        )}
         style={padLeft > 0 ? { paddingLeft: padLeft } : undefined}
       >
         <motion.div
-          ref={trackRef}
-          className="testimonials-track flex touch-pan-y gap-3 md:gap-4"
-          animate={{ x: -x }}
-          transition={
-            animationsEnabled ? carouselSnapTransition : { duration: 0 }
-          }
-          style={{ width: "max-content" }}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerUp}
+          className={cn("flex select-none", carousel.trackClassName)}
+          style={{ gap, width: "max-content", ...carousel.trackStyle }}
+          animate={{ x: carousel.motionX }}
+          transition={carousel.transition}
+          {...carousel.trackHandlers}
         >
           {items.map((item) => (
             <blockquote
@@ -198,9 +193,7 @@ export function Testimonials({
               data-testimonial-card
               className={cn(
                 "relative flex shrink-0 flex-col items-start bg-oboya-blue p-4 md:p-5",
-                isMobileLayout
-                  ? "min-h-[18rem] aspect-auto"
-                  : "aspect-square"
+                isMobileLayout ? "min-h-[18rem] aspect-auto" : "aspect-square"
               )}
               style={{
                 width: cardWidth > 0 ? cardWidth : "min(100%, 20rem)",
@@ -238,7 +231,7 @@ export function Testimonials({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => go(-1)}
+              onClick={() => carousel.go(-1)}
               aria-label="Previous testimonials"
               className="flex size-9 items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:border-white hover:bg-white/5"
             >
@@ -246,7 +239,7 @@ export function Testimonials({
             </button>
             <button
               type="button"
-              onClick={() => go(1)}
+              onClick={() => carousel.go(1)}
               aria-label="Next testimonials"
               className="flex size-9 items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:border-white hover:bg-white/5"
             >
@@ -257,7 +250,7 @@ export function Testimonials({
           <div
             className="flex h-px flex-1 gap-0"
             role="progressbar"
-            aria-valuenow={page + 1}
+            aria-valuenow={activePage + 1}
             aria-valuemin={1}
             aria-valuemax={pageCount}
             aria-label="Testimonial page"
@@ -267,7 +260,7 @@ export function Testimonials({
                 key={i}
                 className={cn(
                   "h-full flex-1 transition-colors duration-300",
-                  i === page ? "bg-oboya-green" : "bg-white/15"
+                  i === activePage ? "bg-oboya-green" : "bg-white/15"
                 )}
               />
             ))}

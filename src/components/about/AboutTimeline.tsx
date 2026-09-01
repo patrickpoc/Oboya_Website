@@ -12,11 +12,9 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import gsap from "gsap";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Container } from "@/components/ui/container";
 import { pickLocalized } from "@/lib/cms/utils";
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
 import { getItemAngle } from "@/hooks/useTimelineRotation";
-import { cn } from "@/lib/utils";
 
 interface AboutTimelineProps {
   data: AboutPageSettings["timeline"];
@@ -25,7 +23,6 @@ interface AboutTimelineProps {
 
 type TimelineEvent = AboutPageSettings["timeline"]["events"][number];
 
-const arcEase = [0.22, 1, 0.36, 1] as const;
 /** Neighbors sit at half the true rim spacing (closer to the apex). */
 const NEIGHBOR_SPREAD = 0.5;
 
@@ -84,34 +81,36 @@ export function AboutTimeline({ data, locale }: AboutTimelineProps) {
 
   if (events.length === 0) return null;
 
-  const current = events[active];
   const prevLabel = pickLocalized(data.prevLabel, locale);
   const nextLabel = pickLocalized(data.nextLabel, locale);
 
   const nav = (
-    <div className="relative z-20 flex items-center justify-center gap-0">
+    <div className="relative z-20 flex flex-wrap items-center justify-center gap-2 sm:gap-0">
       <button
         type="button"
         onClick={() => go(active - 1)}
-        className="group relative z-20 flex items-center gap-3 px-4 font-body text-[1.125rem] font-normal tracking-[0.14em] text-oboya-blue-dark uppercase transition-colors hover:text-oboya-green md:px-6"
+        className="group relative z-20 flex items-center gap-2 px-2 font-body text-sm font-normal tracking-[0.12em] text-oboya-blue-dark uppercase transition-colors hover:text-oboya-green sm:gap-3 sm:px-4 sm:text-[1.125rem] sm:tracking-[0.14em] md:px-6"
         aria-label={prevLabel}
       >
-        <span className="flex h-8 w-8 items-center justify-center rounded-full border border-oboya-green/70 text-oboya-green transition-colors group-hover:border-oboya-green group-hover:bg-oboya-green/10">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-oboya-green/70 text-oboya-green transition-colors group-hover:border-oboya-green group-hover:bg-oboya-green/10">
           <ChevronLeft className="h-4 w-4" aria-hidden />
         </span>
-        {prevLabel}
+        <span className="max-[359px]:sr-only">{prevLabel}</span>
       </button>
 
-      <span className="h-5 w-px shrink-0 bg-oboya-blue-dark/20" aria-hidden />
+      <span
+        className="hidden h-5 w-px shrink-0 bg-oboya-blue-dark/20 sm:block"
+        aria-hidden
+      />
 
       <button
         type="button"
         onClick={() => go(active + 1)}
-        className="group relative z-20 flex items-center gap-3 px-4 font-body text-[1.125rem] font-normal tracking-[0.14em] text-oboya-blue-dark uppercase transition-colors hover:text-oboya-green md:px-6"
+        className="group relative z-20 flex items-center gap-2 px-2 font-body text-sm font-normal tracking-[0.12em] text-oboya-blue-dark uppercase transition-colors hover:text-oboya-green sm:gap-3 sm:px-4 sm:text-[1.125rem] sm:tracking-[0.14em] md:px-6"
         aria-label={nextLabel}
       >
-        {nextLabel}
-        <span className="flex h-8 w-8 items-center justify-center rounded-full border border-oboya-green/70 text-oboya-green transition-colors group-hover:border-oboya-green group-hover:bg-oboya-green/10">
+        <span className="max-[359px]:sr-only">{nextLabel}</span>
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-oboya-green/70 text-oboya-green transition-colors group-hover:border-oboya-green group-hover:bg-oboya-green/10">
           <ChevronRight className="h-4 w-4" aria-hidden />
         </span>
       </button>
@@ -127,46 +126,14 @@ export function AboutTimeline({ data, locale }: AboutTimelineProps) {
         Timeline
       </h2>
 
-      <div className="hidden md:block">
-        <RotatingRimTimeline
-          events={events}
-          active={active}
-          onSelect={setActive}
-          locale={locale}
-          reduceMotion={!!reduceMotion}
-          nav={nav}
-        />
-      </div>
-
-      <div className="md:hidden">
-        <Container>
-          <MobileTimeline
-            events={events}
-            active={active}
-            onSelect={setActive}
-          />
-          <div className="relative mx-auto mt-6 min-h-[10.5rem] max-w-lg">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={current.id}
-                initial={reduceMotion ? false : { opacity: 0, y: -12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={reduceMotion ? undefined : { opacity: 0, y: 8 }}
-                transition={{ duration: 0.4, ease: arcEase }}
-                className="absolute inset-x-0 top-0 text-center"
-              >
-                <p className="font-display text-2xl font-semibold text-oboya-blue-dark">
-                  {current.year}
-                </p>
-                <p className="mt-3 font-body text-[1.375rem] font-medium leading-relaxed text-oboya-blue-dark/55">
-                  {pickLocalized(current.description, locale)}
-                </p>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-          <div className="mt-20">{nav}</div>
-        </Container>
-      </div>
+      <RotatingRimTimeline
+        events={events}
+        active={active}
+        onSelect={setActive}
+        locale={locale}
+        reduceMotion={!!reduceMotion}
+        nav={nav}
+      />
     </section>
   );
 }
@@ -189,6 +156,7 @@ function RotatingRimTimeline({
   const frameRef = useRef<HTMLDivElement>(null);
   const focusProxy = useRef({ angle: 0 });
   const prevActive = useRef(active);
+  const touchStartX = useRef<number | null>(null);
   const [width, setWidth] = useState(1200);
   const [focusAngle, setFocusAngle] = useState(0);
   const count = events.length;
@@ -225,8 +193,8 @@ function RotatingRimTimeline({
     const height = apexPad + rise + 4;
     const visualStepRad = (visualStep * Math.PI) / 180;
     const neighborY = apexPad + radius * (1 - Math.cos(visualStepRad));
-    // Stem + year + copy + nav breathing room
-    const frameHeight = Math.max(height, neighborY + 48) + 320;
+    const contentReserve = w < 640 ? 260 : 320;
+    const frameHeight = Math.max(height, neighborY + 48) + contentReserve;
 
     return {
       width: w,
@@ -289,11 +257,26 @@ function RotatingRimTimeline({
 
   const current = events[active];
 
+  const handleTouchStart = (event: React.TouchEvent) => {
+    touchStartX.current = event.touches[0]?.clientX ?? null;
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent) => {
+    if (touchStartX.current == null) return;
+    const endX = event.changedTouches[0]?.clientX ?? touchStartX.current;
+    const delta = endX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(delta) < 48) return;
+    onSelect(wrapIndex(active + (delta < 0 ? 1 : -1), count));
+  };
+
   return (
     <div
       ref={frameRef}
-      className="relative w-full overflow-visible"
+      className="relative w-full touch-pan-y overflow-visible"
       style={{ height: frameHeight }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Static green bowl — endpoints on screen edges */}
       <svg
@@ -344,7 +327,7 @@ function RotatingRimTimeline({
 
       {/* Apex column: drip stack (nav pinned to 2006 layout position) */}
       <div
-        className="pointer-events-none absolute left-1/2 z-10 flex w-[min(92vw,36rem)] -translate-x-1/2 flex-col items-center px-6"
+        className="pointer-events-none absolute left-1/2 z-10 flex w-[min(92vw,36rem)] -translate-x-1/2 flex-col items-center px-4 sm:px-6"
         style={{ top: apexPad }}
       >
         {/* Invisible spacer matching rim tip footprint so stem stays under apex */}
@@ -354,7 +337,7 @@ function RotatingRimTimeline({
         />
 
         {/* Fixed-height slot = 2006 copy footprint so nav never shifts */}
-        <div className="relative w-full min-h-[16.75rem] md:min-h-[17.5rem]">
+        <div className="relative w-full min-h-[13.5rem] sm:min-h-[16.75rem] md:min-h-[17.5rem]">
           <AnimatePresence mode="wait">
             {current ? (
               <motion.div
@@ -385,7 +368,7 @@ function RotatingRimTimeline({
               >
                 <motion.span
                   aria-hidden
-                  className="mt-5 block h-20 w-px shrink-0 origin-top bg-oboya-green md:mt-6 md:h-24"
+                  className="mt-4 block h-14 w-px shrink-0 origin-top bg-oboya-green sm:mt-5 md:mt-6 md:h-24"
                   variants={
                     reduceMotion
                       ? undefined
@@ -411,7 +394,7 @@ function RotatingRimTimeline({
                 />
 
                 <motion.p
-                  className="mt-3 font-display text-[clamp(1.75rem,3vw,2.35rem)] leading-none font-semibold tabular-nums tracking-tight text-oboya-blue-dark"
+                  className="mt-2 font-display text-[clamp(1.5rem,5vw,2.35rem)] leading-none font-semibold tabular-nums tracking-tight text-oboya-blue-dark sm:mt-3"
                   variants={
                     reduceMotion
                       ? undefined
@@ -437,7 +420,7 @@ function RotatingRimTimeline({
                 </motion.p>
 
                 <motion.p
-                  className="mt-4 max-w-lg text-center font-body text-[1.375rem] font-medium leading-relaxed text-oboya-blue-dark/55 md:mt-5"
+                  className="mt-3 max-w-lg px-1 text-center font-body text-base font-medium leading-relaxed text-oboya-blue-dark/55 sm:mt-4 sm:text-[1.25rem] md:mt-5 md:text-[1.375rem]"
                   variants={
                     reduceMotion
                       ? undefined
@@ -466,7 +449,7 @@ function RotatingRimTimeline({
           </AnimatePresence>
         </div>
 
-        <div className="pointer-events-auto mt-20 shrink-0 md:mt-24">{nav}</div>
+        <div className="pointer-events-auto mt-12 shrink-0 sm:mt-16 md:mt-20 lg:mt-24">{nav}</div>
       </div>
     </div>
   );
@@ -538,68 +521,12 @@ function RimYear({
         />
         {/* Side years only — hide label as the tip nears the apex */}
         <span
-          className="mt-5 whitespace-nowrap font-display text-base font-medium tabular-nums tracking-wide text-oboya-blue-dark/50 transition-opacity duration-300 md:text-lg"
+          className="mt-4 whitespace-nowrap font-display text-sm font-medium tabular-nums tracking-wide text-oboya-blue-dark/50 transition-opacity duration-300 sm:mt-5 sm:text-base md:text-lg"
           style={{ opacity: visible && !isNearApex ? 1 : 0 }}
         >
           {event.year}
         </span>
       </button>
     </li>
-  );
-}
-
-function MobileTimeline({
-  events,
-  active,
-  onSelect,
-}: {
-  events: TimelineEvent[];
-  active: number;
-  onSelect: (index: number) => void;
-}) {
-  return (
-    <div className="-mx-[var(--container-padding)] overflow-x-auto px-[var(--container-padding)] pb-4">
-      <ul className="flex min-w-max items-end gap-0" role="list">
-        {events.map((event, index) => {
-          const isActive = index === active;
-          return (
-            <li key={event.id} className="flex items-center">
-              {index > 0 && (
-                <span
-                  className="mx-0.5 mb-3 h-px w-5 border-t border-dashed border-oboya-blue-dark/25 sm:w-8"
-                  aria-hidden
-                />
-              )}
-              <button
-                type="button"
-                onClick={() => onSelect(index)}
-                className={cn(
-                  "flex flex-col items-center gap-2 px-1.5 py-2",
-                  isActive ? "text-oboya-blue-dark" : "text-oboya-blue-dark/35"
-                )}
-                aria-current={isActive ? "true" : undefined}
-              >
-                <span
-                  className={cn(
-                    "font-display font-semibold tabular-nums",
-                    isActive ? "text-base" : "text-xs"
-                  )}
-                >
-                  {event.year}
-                </span>
-                <span
-                  className={cn(
-                    "rounded-full",
-                    isActive
-                      ? "h-2.5 w-2.5 bg-oboya-green"
-                      : "h-2 w-2 bg-oboya-green/50"
-                  )}
-                />
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
   );
 }

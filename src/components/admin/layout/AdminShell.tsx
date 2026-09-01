@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
 import { AdminSidebar } from "@/components/admin/layout/AdminSidebar";
 import { AdminTopbar } from "@/components/admin/layout/AdminTopbar";
@@ -7,6 +8,7 @@ import { AdminPageTransition } from "@/components/admin/layout/AdminPageTransiti
 
 function AdminShellFrame({ children }: { children: React.ReactNode }) {
   const { loading } = useAdmin();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (loading) {
     return (
@@ -23,10 +25,21 @@ function AdminShellFrame({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-oboya-soft-white">
-      <AdminSidebar />
-      <div className="pl-64">
-        <AdminTopbar />
-        <main className="p-6">
+      {sidebarOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          aria-label="Close navigation"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <AdminSidebar
+        mobileOpen={sidebarOpen}
+        onNavigate={() => setSidebarOpen(false)}
+      />
+      <div className="lg:pl-64">
+        <AdminTopbar onMenuClick={() => setSidebarOpen(true)} />
+        <main className="p-4 sm:p-6">
           <AdminPageTransition>{children}</AdminPageTransition>
         </main>
       </div>

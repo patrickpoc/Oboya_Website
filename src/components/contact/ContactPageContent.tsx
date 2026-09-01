@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 const SUBJECTS = ["general", "products", "partnership", "support"] as const;
 
 const underlineField =
-  "w-full border-0 border-b border-oboya-blue-dark/20 bg-transparent px-0 py-2 text-sm text-oboya-blue-dark outline-none transition-colors placeholder:text-oboya-blue-dark/35 focus:border-oboya-blue-dark";
+  "w-full border-0 border-b border-oboya-blue-dark/20 bg-transparent px-0 py-2 text-base text-oboya-blue-dark outline-none transition-colors placeholder:text-oboya-blue-dark/35 focus:border-oboya-blue-dark md:text-sm";
 
 export function ContactPageContent() {
   const t = useTranslations("contact");
@@ -82,10 +82,10 @@ export function ContactPageContent() {
         </Container>
       </section>
 
-      <section className="relative -mt-28 pb-20 md:-mt-36 md:pb-28">
+      <section className="relative -mt-20 pb-20 md:-mt-36 md:pb-28">
         <Container size="wide">
           <div className="grid overflow-hidden rounded-sm bg-white shadow-[var(--shadow-card)] md:grid-cols-[minmax(240px,0.38fr)_1fr]">
-            <aside className="flex flex-col gap-8 bg-oboya-soft-white px-8 py-10 md:px-10 md:py-12">
+            <aside className="flex flex-col gap-8 bg-oboya-soft-white px-4 py-8 sm:px-8 md:px-10 md:py-12">
               <h2 className="font-display text-xl font-semibold text-oboya-blue-dark md:text-2xl">
                 {t("sidebarTitle")}
               </h2>
@@ -300,7 +300,7 @@ export function ContactPageContent() {
                     <textarea
                       id="message"
                       name="message"
-                      rows={2}
+                      rows={4}
                       required
                       placeholder={t("messagePlaceholder")}
                       className={cn(underlineField, "resize-none")}
@@ -313,11 +313,11 @@ export function ContactPageContent() {
                     </p>
                   )}
 
-                  <div className="flex justify-end">
+                  <div className="flex flex-col sm:flex-row sm:justify-end">
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="rounded-full border border-oboya-blue-dark px-8 py-2.5 text-xs font-semibold tracking-wider text-oboya-blue-dark uppercase transition-colors hover:bg-oboya-blue-dark hover:text-white disabled:opacity-60"
+                      className="min-h-11 w-full rounded-full border border-oboya-blue-dark px-8 py-2.5 text-sm font-semibold tracking-wider text-oboya-blue-dark uppercase transition-colors hover:bg-oboya-blue-dark hover:text-white disabled:opacity-60 sm:w-auto"
                     >
                       {submitting ? t("submitting") : t("submit")}
                     </button>

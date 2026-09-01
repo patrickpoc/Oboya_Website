@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
@@ -13,6 +13,8 @@ import {
 } from "@/lib/animations";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
+
+const SWIPE_THRESHOLD = 48;
 
 interface CapabilitiesProps {
   data: HomepageSettings["capabilities"];
@@ -27,6 +29,7 @@ export function Capabilities({
 }: CapabilitiesProps) {
   const items = data.items;
   const [index, setIndex] = useState(0);
+  const pointerStartX = useRef<number | null>(null);
   const count = items.length;
   const slide = items[index];
 
@@ -37,6 +40,18 @@ export function Capabilities({
     },
     [count]
   );
+
+  const onPointerDown = (event: React.PointerEvent) => {
+    pointerStartX.current = event.clientX;
+  };
+
+  const onPointerUp = (event: React.PointerEvent) => {
+    if (pointerStartX.current == null) return;
+    const delta = event.clientX - pointerStartX.current;
+    pointerStartX.current = null;
+    if (Math.abs(delta) < SWIPE_THRESHOLD) return;
+    go(delta < 0 ? 1 : -1);
+  };
 
   if (!slide) return null;
 
@@ -61,7 +76,12 @@ export function Capabilities({
           </div>
         </motion.div>
 
-        <div className="relative overflow-hidden rounded-2xl">
+        <div
+          className="relative overflow-hidden rounded-2xl touch-pan-y"
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+        >
           <div className="relative aspect-[16/10] min-h-[20rem] w-full sm:aspect-[21/9] sm:min-h-[24rem]">
             {/* Crossfade: all slides stacked — outgoing image stays until new is opaque */}
             {items.map((item, i) => {
@@ -111,7 +131,7 @@ export function Capabilities({
             </div>
 
             {/* Description — bottom / mid-right */}
-            <div className="absolute right-0 bottom-16 z-10 max-w-[min(100%,30rem)] p-6 text-right sm:bottom-20 sm:p-8 md:bottom-24 md:max-w-xl md:p-10 lg:bottom-28 lg:p-12">
+            <div className="absolute right-0 bottom-[max(1rem,env(safe-area-inset-bottom))] left-auto z-10 max-w-[min(100%,30rem)] p-6 text-left sm:bottom-20 sm:p-8 md:bottom-24 md:max-w-xl md:p-10 md:text-right lg:bottom-28 lg:p-12">
               <AnimatePresence mode="wait">
                 <motion.p
                   key={`${slide.id}-desc`}
@@ -131,7 +151,7 @@ export function Capabilities({
             </div>
 
             {/* Carousel controls — bottom right */}
-            <div className="absolute right-4 bottom-4 z-20 flex items-center gap-2.5 sm:right-6 sm:bottom-6 md:right-8 md:bottom-8">
+            <div className="absolute right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-20 flex items-center gap-2.5 sm:right-6 sm:bottom-6 md:right-8 md:bottom-8">
               <button
                 type="button"
                 onClick={() => go(-1)}

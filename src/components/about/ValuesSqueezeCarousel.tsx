@@ -1,42 +1,53 @@
 "use client";
 
 import Image from "next/image";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { easeOutExpo } from "@/lib/animations";
+import { useCallback, useEffect, useState } from "react";
+import { LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import type { AboutValueItem } from "@/lib/cms/repositories/about-page-repository";
 import { pickLocalized } from "@/lib/cms/utils";
+import {
+  SQUEEZE_BANNER_S,
+  SQUEEZE_CARD_SURFACE_CLASS,
+  SQUEEZE_MEDIA_LAYER_CLASS,
+  squeezeCardTransition,
+  squeezeCardZIndex,
+  squeezeCollapsedPanelOpacity,
+  squeezeExpandedPanelOpacity,
+  squeezeLayerTransition,
+  squeezePanelTransition,
+} from "@/lib/squeeze-carousel-motion";
 import { cn } from "@/lib/utils";
 
-const SWIPE_THRESHOLD = 48;
-const EASE = [...easeOutExpo] as [number, number, number, number];
-const BANNER_TRANSITION_S = 0.58;
-const COLLAPSED_BASIS = "4.25rem";
+const BANNER_TRANSITION_S = SQUEEZE_BANNER_S;
+const COLLAPSED_BASIS = "2.75rem";
+const EXPANDED_BASIS = "18rem";
 const AUTOPLAY_MS = 4600;
+
+const VALUE_ACCENTS = [
+  "#004F7C",
+  "#4DAF4E",
+  "#009CD4",
+  "#01203F",
+  "#ea5744",
+  "#75C566",
+  "#909B03",
+] as const;
+
+const LIGHT_ACCENTS = new Set(
+  ["#f1f5f1", "#dbe64c", "#75c566"].map((c) => c.toLowerCase())
+);
 
 export interface ValuesSqueezeCarouselProps {
   items: AboutValueItem[];
   locale: string;
 }
 
-function useIsDesktopSqueeze() {
-  const [isDesktop, setIsDesktop] = useState(false);
+function isLightAccent(hex: string) {
+  return LIGHT_ACCENTS.has(hex.trim().toLowerCase());
+}
 
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
-    const update = () => setIsDesktop(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-
-  return isDesktop;
+function anchorMotion(isActive: boolean) {
+  return { top: isActive ? "100%" : "50%", y: isActive ? "-100%" : "-50%" };
 }
 
 export function ValuesSqueezeCarousel({
@@ -46,36 +57,20 @@ export function ValuesSqueezeCarousel({
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const reduceMotion = useReducedMotion();
-  const isDesktop = useIsDesktopSqueeze();
-  const pointerStartX = useRef<number | null>(null);
-  const pointerDeltaX = useRef(0);
-  const mobileTrackRef = useRef<HTMLDivElement>(null);
 
   const count = items.length;
   const activeItem = items[activeIndex] ?? items[0];
 
   const goTo = useCallback(
     (index: number) => {
-      if (count === 0) return;
+      if (count === 0 || index === activeIndex) return;
       setActiveIndex(((index % count) + count) % count);
     },
-    [count]
+    [activeIndex, count]
   );
 
   const goPrev = useCallback(() => goTo(activeIndex - 1), [activeIndex, goTo]);
   const goNext = useCallback(() => goTo(activeIndex + 1), [activeIndex, goTo]);
-
-  useEffect(() => {
-    if (isDesktop || !mobileTrackRef.current) return;
-    const el = mobileTrackRef.current.children[activeIndex] as
-      | HTMLElement
-      | undefined;
-    el?.scrollIntoView({
-      behavior: reduceMotion ? "auto" : "smooth",
-      inline: "center",
-      block: "nearest",
-    });
-  }, [activeIndex, isDesktop, reduceMotion]);
 
   useEffect(() => {
     if (reduceMotion || paused || count < 2) return;
@@ -85,36 +80,11 @@ export function ValuesSqueezeCarousel({
     return () => window.clearInterval(id);
   }, [count, paused, reduceMotion]);
 
-  const onPointerDown = (event: ReactPointerEvent) => {
-    if (isDesktop) return;
-    pointerStartX.current = event.clientX;
-    pointerDeltaX.current = 0;
-  };
-
-  const onPointerMove = (event: ReactPointerEvent) => {
-    if (pointerStartX.current == null) return;
-    pointerDeltaX.current = event.clientX - pointerStartX.current;
-  };
-
-  const onPointerUp = () => {
-    if (pointerStartX.current == null) return;
-    const delta = pointerDeltaX.current;
-    pointerStartX.current = null;
-    pointerDeltaX.current = 0;
-    if (Math.abs(delta) < SWIPE_THRESHOLD) return;
-    if (delta < 0) goNext();
-    else goPrev();
-  };
-
   if (count === 0 || !activeItem) return null;
 
-  const bannerTransition = reduceMotion
-    ? { duration: 0 }
-    : { duration: BANNER_TRANSITION_S, ease: EASE };
-
-  const overlayTransitionClass = reduceMotion
-    ? ""
-    : "transition-opacity duration-[580ms] ease-[cubic-bezier(0.22,1,0.36,1)]";
+  const reduce = Boolean(reduceMotion);
+  const cardTransition = squeezeCardTransition(reduce);
+  const layerTransition = squeezeLayerTransition(reduce);
 
   return (
     <div
@@ -132,158 +102,137 @@ export function ValuesSqueezeCarousel({
         {pickLocalized(activeItem.title, locale)}
       </p>
 
-      <div
-        className={cn(
-          "hidden md:flex md:h-[min(28rem,55vh)] md:min-h-[22rem] md:gap-2.5 lg:gap-3",
-          "focus-within:outline-none"
-        )}
-        onKeyDown={(event) => {
-          if (event.key === "ArrowLeft") {
-            event.preventDefault();
-            goPrev();
-          }
-          if (event.key === "ArrowRight") {
-            event.preventDefault();
-            goNext();
-          }
-        }}
-      >
-        {items.map((item, index) => {
-          const isActive = index === activeIndex;
-          const title = pickLocalized(item.title, locale);
-          const description = pickLocalized(item.description, locale);
+      <LayoutGroup id="values-squeeze">
+        <div
+          className={cn(
+            "flex h-[min(44rem,82svh)] flex-col gap-2 md:h-[min(52rem,68vh)] md:gap-3",
+            "focus-within:outline-none"
+          )}
+          style={{
+            minHeight: `calc(${EXPANDED_BASIS} + ${COLLAPSED_BASIS} * ${Math.max(0, count - 1)})`,
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "ArrowUp") {
+              event.preventDefault();
+              goPrev();
+            }
+            if (event.key === "ArrowDown") {
+              event.preventDefault();
+              goNext();
+            }
+          }}
+        >
+          {items.map((item, index) => {
+            const isActive = index === activeIndex;
+            const title = pickLocalized(item.title, locale);
+            const description = pickLocalized(item.description, locale);
+            const accent = VALUE_ACCENTS[index % VALUE_ACCENTS.length];
+            const onLight = isLightAccent(accent);
+            const collapsedInk = onLight ? "text-oboya-blue-dark" : "text-white";
 
-          return (
-            <motion.button
-              key={item.id}
-              type="button"
-              aria-label={title}
-              aria-pressed={isActive}
-              onClick={() => goTo(index)}
-              initial={false}
-              animate={{
-                flexGrow: isActive ? 1 : 0,
-                flexBasis: isActive ? "0%" : COLLAPSED_BASIS,
-              }}
-              transition={bannerTransition}
-              className={cn(
-                "group relative min-w-0 overflow-hidden rounded-2xl text-left [contain:layout_paint] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-green/60 focus-visible:ring-offset-2",
-                isActive ? "cursor-default" : "cursor-pointer"
-              )}
-              style={{ flexShrink: 0 }}
-            >
-              <div className="absolute inset-0 overflow-hidden bg-oboya-soft-white">
-                <div className="absolute inset-y-0 left-0 h-full w-[max(100%,var(--container-max,80rem))]">
+            return (
+              <motion.button
+                key={item.id}
+                type="button"
+                aria-label={title}
+                aria-expanded={isActive}
+                onClick={() => goTo(index)}
+                initial={false}
+                animate={{
+                  flexGrow: isActive ? 1 : 0,
+                  flexBasis: isActive ? EXPANDED_BASIS : COLLAPSED_BASIS,
+                }}
+                transition={cardTransition}
+                className={cn(
+                  "relative min-h-0 w-full overflow-hidden rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-green/60 focus-visible:ring-offset-2",
+                  SQUEEZE_CARD_SURFACE_CLASS,
+                  isActive
+                    ? "min-h-[18rem] cursor-default md:min-h-[22rem]"
+                    : "cursor-pointer"
+                )}
+                style={{ flexShrink: 0, zIndex: squeezeCardZIndex(isActive) }}
+              >
+                <div
+                  className={cn(
+                    "absolute inset-0 overflow-hidden bg-oboya-soft-white",
+                    SQUEEZE_MEDIA_LAYER_CLASS
+                  )}
+                >
                   <Image
                     src={item.image.src}
                     alt={pickLocalized(item.image.alt, locale)}
                     fill
                     priority={index === 0}
-                    sizes="(max-width: 1280px) 80vw, 80rem"
-                    className={cn(
-                      "object-cover",
-                      !isActive &&
-                        !reduceMotion &&
-                        "transition-transform duration-500 ease-out group-hover:scale-[1.04] [@media(hover:none)]:group-hover:scale-100"
-                    )}
+                    sizes="100vw"
+                    className="object-cover"
                     style={{ objectPosition: item.objectPosition ?? "center" }}
                   />
                 </div>
-              </div>
 
-              <div
-                className={cn(
-                  "absolute inset-0 bg-gradient-to-t from-oboya-blue-dark/85 via-oboya-blue-dark/25 to-transparent",
-                  overlayTransitionClass,
-                  isActive
-                    ? "opacity-100"
-                    : "opacity-40 group-hover:opacity-55"
-                )}
-              />
+                <motion.div
+                  aria-hidden
+                  initial={false}
+                  animate={{ opacity: isActive ? 0 : 0.92 }}
+                  transition={layerTransition}
+                  className="absolute inset-0"
+                  style={{ backgroundColor: accent }}
+                />
 
-              {/*
-                Fixed copy width (not 100% of the panel) so the text layout
-                never reflows while the banner flex-grows — only opacity fades
-                in sync with the expand animation.
-              */}
-              <motion.div
-                aria-hidden={!isActive}
-                initial={false}
-                animate={{ opacity: isActive ? 1 : 0 }}
-                transition={bannerTransition}
-                className="pointer-events-none absolute bottom-0 left-0 z-[1] p-6 md:p-7 lg:p-8"
-                style={{ width: "min(32rem, 52vw)" }}
-              >
-                <h3 className="font-display text-[clamp(1.35rem,2.2vw,1.85rem)] font-semibold tracking-tight text-white">
-                  {title}
-                </h3>
-                <p className="mt-2 font-body text-sm leading-relaxed text-white/85 md:text-[0.9375rem]">
-                  {description}
-                </p>
-              </motion.div>
-            </motion.button>
-          );
-        })}
-      </div>
-
-      <div
-        ref={mobileTrackRef}
-        className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-      >
-        {items.map((item, index) => {
-          const isActive = index === activeIndex;
-          const title = pickLocalized(item.title, locale);
-          const description = pickLocalized(item.description, locale);
-
-          return (
-            <button
-              key={item.id}
-              type="button"
-              aria-label={title}
-              aria-pressed={isActive}
-              onClick={() => goTo(index)}
-              className={cn(
-                "relative aspect-[4/5] w-[88%] shrink-0 snap-center overflow-hidden rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-green/60 focus-visible:ring-offset-2",
-                !isActive && "opacity-90"
-              )}
-            >
-              <Image
-                src={item.image.src}
-                alt={pickLocalized(item.image.alt, locale)}
-                fill
-                priority={index === 0}
-                sizes="92vw"
-                className="object-cover"
-                style={{ objectPosition: item.objectPosition ?? "center" }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-oboya-blue-dark/90 via-oboya-blue-dark/35 to-transparent" />
-              <motion.div
-                aria-hidden={!isActive}
-                initial={false}
-                animate={{ opacity: isActive ? 1 : 0.85 }}
-                transition={bannerTransition}
-                className="absolute inset-x-0 bottom-0 p-5"
-              >
-                <h3 className="font-display text-xl font-semibold tracking-tight text-white">
-                  {title}
-                </h3>
-                <motion.p
+                <motion.div
+                  aria-hidden
                   initial={false}
                   animate={{ opacity: isActive ? 1 : 0 }}
-                  transition={bannerTransition}
-                  className="mt-2 font-body text-sm leading-relaxed text-white/85"
+                  transition={layerTransition}
+                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-oboya-blue-dark/50 via-transparent to-transparent"
+                />
+
+                <motion.div
+                  className="pointer-events-none absolute inset-x-0 bottom-0 z-[2]"
+                  initial={false}
+                  animate={squeezeExpandedPanelOpacity(isActive)}
+                  transition={squeezePanelTransition(reduce, isActive)}
+                  aria-hidden={!isActive}
                 >
-                  {description}
-                </motion.p>
-              </motion.div>
-            </button>
-          );
-        })}
-      </div>
+                  <div className="w-full bg-gradient-to-t from-oboya-blue-dark/80 via-oboya-blue-dark/40 to-transparent px-4 pb-4 pt-16 md:px-6 md:pb-6 md:pt-20 lg:px-8 lg:pb-8 lg:pt-24">
+                    <h3 className="font-display text-lg font-semibold tracking-tight text-white sm:text-xl md:text-2xl">
+                      {title}
+                    </h3>
+                    <p className="overflow-hidden font-body text-sm leading-relaxed text-white/90 md:text-base">
+                      {description}
+                    </p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="pointer-events-none absolute inset-x-0 z-[3]"
+                  initial={false}
+                  animate={{
+                    ...anchorMotion(isActive),
+                    ...squeezeCollapsedPanelOpacity(isActive),
+                  }}
+                  transition={{
+                    opacity: squeezePanelTransition(reduce, !isActive),
+                    top: layerTransition,
+                    y: layerTransition,
+                  }}
+                  aria-hidden={isActive}
+                >
+                  <div className="w-full px-4 md:px-5">
+                    <h3
+                      className={cn(
+                        "truncate font-display text-sm font-semibold tracking-tight md:text-base",
+                        collapsedInk
+                      )}
+                    >
+                      {title}
+                    </h3>
+                  </div>
+                </motion.div>
+              </motion.button>
+            );
+          })}
+        </div>
+      </LayoutGroup>
     </div>
   );
 }

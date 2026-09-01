@@ -88,7 +88,7 @@ export function TimelineYearsRail({
         <ChevronUpIcon className="size-4" />
       </button>
 
-      <div className="relative flex min-h-0 w-full flex-1 flex-col items-center px-1">
+      <div className="relative flex min-h-0 w-full flex-1 flex-col items-center px-2 sm:px-1">
         <div
           className="pointer-events-none absolute top-1 bottom-1 left-1/2 w-px -translate-x-1/2 bg-white/20"
           aria-hidden
@@ -111,7 +111,7 @@ export function TimelineYearsRail({
                   onClick={() => onSelect(index)}
                   aria-label={`${event.year}: ${event.title}`}
                   aria-current={isActive ? "true" : undefined}
-                  className="group relative flex flex-col items-center outline-none"
+                  className="group relative flex min-h-11 min-w-11 flex-col items-center justify-center outline-none"
                 >
                   <span
                     className={cn(
@@ -126,9 +126,9 @@ export function TimelineYearsRail({
 
                   <span
                     className={cn(
-                      "mt-1.5 whitespace-nowrap font-display text-[0.6875rem] font-semibold tabular-nums tracking-wide transition-all duration-300 ease-out md:text-xs",
+                      "mt-1.5 whitespace-nowrap font-display text-xs font-semibold tabular-nums tracking-wide transition-all duration-300 ease-out md:text-xs",
                       isActive
-                        ? "rounded-full bg-oboya-green px-2 py-0.5 text-[10px] font-bold text-white shadow-[0_2px_10px_rgba(77,175,78,0.4)] md:text-[11px]"
+                        ? "rounded-full bg-oboya-green px-2.5 py-0.5 text-xs font-bold text-white shadow-[0_2px_10px_rgba(77,175,78,0.4)] md:text-[11px]"
                         : isPast
                           ? "text-white/55"
                           : "text-white/35 group-hover:text-white/60"

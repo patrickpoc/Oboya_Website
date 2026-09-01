@@ -18,7 +18,30 @@ export function LanguageSwitcher({ light, className }: LanguageSwitcherProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [isTouchUi, setIsTouchUi] = useState(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: none)");
+    const update = () => setIsTouchUi(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (!open || !isTouchUi) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [isTouchUi, open]);
 
   const handleChange = (nextLocale: Locale) => {
     router.replace(pathname, { locale: nextLocale });
@@ -26,6 +49,7 @@ export function LanguageSwitcher({ light, className }: LanguageSwitcherProps) {
   };
 
   const handleMouseEnter = () => {
+    if (isTouchUi) return;
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current);
       closeTimerRef.current = null;
@@ -34,7 +58,13 @@ export function LanguageSwitcher({ light, className }: LanguageSwitcherProps) {
   };
 
   const handleMouseLeave = () => {
+    if (isTouchUi) return;
     closeTimerRef.current = setTimeout(() => setOpen(false), 200);
+  };
+
+  const handleToggle = () => {
+    if (!isTouchUi) return;
+    setOpen((prev) => !prev);
   };
 
   useEffect(() => {
@@ -45,12 +75,14 @@ export function LanguageSwitcher({ light, className }: LanguageSwitcherProps) {
 
   return (
     <div
+      ref={rootRef}
       className={cn("relative", className)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <button
         type="button"
+        onClick={handleToggle}
         className={cn(
           "flex size-9 items-center justify-center rounded-full transition-colors",
           light

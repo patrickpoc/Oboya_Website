@@ -11,9 +11,9 @@ export async function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative z-20 bg-oboya-soft-white pt-20 pb-10">
+    <footer className="relative z-20 bg-oboya-soft-white pt-12 pb-8 md:pt-20 md:pb-10">
       <Container>
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-6 lg:gap-10">
+        <div className="grid gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-6 lg:gap-10">
           <div className="lg:col-span-2">
             <Logo className="mb-6" />
             <p className="max-w-xs text-sm leading-relaxed text-oboya-blue-dark/60">
@@ -24,7 +24,7 @@ export async function Footer() {
             <div className="mt-6 flex gap-4">
               <Link
                 href={siteConfig.social.linkedin}
-                className="text-sm font-medium text-oboya-blue-dark/70 transition-colors hover:text-oboya-green"
+                className="inline-flex min-h-11 items-center text-sm font-medium text-oboya-blue-dark/70 transition-colors hover:text-oboya-green"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -32,7 +32,7 @@ export async function Footer() {
               </Link>
               <Link
                 href={siteConfig.social.facebook}
-                className="text-sm font-medium text-oboya-blue-dark/70 transition-colors hover:text-oboya-green"
+                className="inline-flex min-h-11 items-center text-sm font-medium text-oboya-blue-dark/70 transition-colors hover:text-oboya-green"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -50,7 +50,7 @@ export async function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-oboya-blue-dark/55 transition-colors hover:text-oboya-green"
+                    className="inline-flex min-h-11 items-center text-sm text-oboya-blue-dark/55 transition-colors hover:text-oboya-green"
                   >
                     {link.label}
                   </Link>
@@ -68,7 +68,7 @@ export async function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-oboya-blue-dark/55 transition-colors hover:text-oboya-green"
+                    className="inline-flex min-h-11 items-center text-sm text-oboya-blue-dark/55 transition-colors hover:text-oboya-green"
                   >
                     {link.label}
                   </Link>
@@ -86,7 +86,7 @@ export async function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-oboya-blue-dark/55 transition-colors hover:text-oboya-green"
+                    className="inline-flex min-h-11 items-center text-sm text-oboya-blue-dark/55 transition-colors hover:text-oboya-green"
                   >
                     {link.label}
                   </Link>
@@ -100,17 +100,25 @@ export async function Footer() {
           <p className="text-xs text-oboya-blue-dark/50">
             &copy; {currentYear} {siteConfig.name}. {t("footer.rights")}
           </p>
-          <ul className="flex gap-6">
+          <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 sm:justify-end">
             {footerNavigation.legal.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="text-xs text-oboya-green transition-colors hover:text-oboya-blue"
+                  className="inline-flex min-h-11 items-center text-xs text-oboya-green transition-colors hover:text-oboya-blue"
                 >
                   {link.label}
                 </Link>
               </li>
             ))}
+            <li>
+              <a
+                href="/admin/login"
+                className="inline-flex min-h-11 items-center text-xs text-oboya-blue-dark/55 transition-colors hover:text-oboya-green"
+              >
+                {t("footer.adminLogin")}
+              </a>
+            </li>
           </ul>
         </div>
       </Container>

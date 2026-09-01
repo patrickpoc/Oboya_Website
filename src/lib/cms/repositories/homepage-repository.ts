@@ -1,4 +1,6 @@
 import type { LocalizedString } from "@/lib/cms/types";
+import { HOME_I18N } from "@/lib/cms/homepage-i18n";
+import { mergeLocalized } from "@/lib/cms/utils";
 
 export type HomepageSectionId =
   | "hero"
@@ -127,19 +129,14 @@ export interface HomepageSettings {
   updatedAt: string;
 }
 
-const loc = (en: string): LocalizedString => ({
-  en,
-  "pt-BR": en,
-  es: en,
-  "zh-CN": en,
-});
-
 const emptyLoc = (): LocalizedString => ({
   en: "",
   "pt-BR": "",
   es: "",
   "zh-CN": "",
 });
+
+const H = HOME_I18N;
 
 const defaultSettings = (): HomepageSettings => ({
   animations: { enabled: true },
@@ -157,228 +154,186 @@ const defaultSettings = (): HomepageSettings => ({
     mediaType: "video",
     backgroundImage: "/assets/homepage/hero-vineyard.jpg",
     backgroundVideo: "/assets/homepage/hero-hands-herbs.mp4",
-    eyebrow: loc("Solutions that work, value that grows."),
-    title: loc("Your one-stop partner for horticulture"),
-    description: loc(
-      "Helping Horticulture Perform Better.\nFrom propagation to point of sale, Oboya helps growers and partners improve performance, protect quality, and strengthen supply chains — with global capability and local support."
-    ),
+    eyebrow: H.hero.eyebrow,
+    title: H.hero.title,
+    description: H.hero.description,
     ctaPrimary: {
-      label: loc("Request a quote"),
+      label: H.hero.ctaPrimary,
       href: "/contact",
     },
     ctaSecondary: {
-      label: loc("Explore solutions"),
+      label: H.hero.ctaSecondary,
       href: "/solutions",
     },
     pills: [],
   },
   companyOverview: {
-    headlineGreen: loc("Delivering solutions to horticultural businesses"),
-    headlineWhite: loc(
-      "around the world through a combination of global capabilities and local expertise."
-    ),
+    headlineGreen: H.companyOverview.headlineGreen,
+    headlineWhite: H.companyOverview.headlineWhite,
     segments: [
       {
-        text: loc("Delivering solutions to horticultural businesses"),
+        text: H.companyOverview.segmentGreen,
         tone: "green",
         breakBefore: false,
       },
       {
-        text: loc(
-          " around the world through a combination of global capabilities and local expertise."
-        ),
+        text: H.companyOverview.segmentWhite,
         tone: "white",
         breakBefore: false,
       },
     ],
     image: "/assets/homepage/company-overview.webp",
-    imageAlt: loc("Workers in a modern greenhouse facility"),
+    imageAlt: H.companyOverview.imageAlt,
     stats: [
       {
         id: "employees",
         value: 600,
         suffix: "+",
-        label: loc("Employees Across Global Operations"),
+        label: H.companyOverview.statEmployees,
       },
       {
         id: "countries",
         value: 80,
         suffix: "+",
-        label: loc("Countries Served Worldwide"),
+        label: H.companyOverview.statCountries,
       },
       {
         id: "experience",
         value: 20,
         suffix: "+",
-        label: loc("Years Supporting Horticulture"),
+        label: H.companyOverview.statExperience,
       },
     ],
   },
   capabilities: {
-    eyebrow: loc("Why Oboya Horticulture?"),
-    title: loc(
-      "Stories and strengths that define how we partner with growers worldwide."
-    ),
-    ctaLabel: loc("Learn more"),
+    eyebrow: H.capabilities.eyebrow,
+    title: H.capabilities.title,
+    ctaLabel: H.capabilities.ctaLabel,
     ctaHref: "/about",
     items: [
       {
         id: "built-challenges",
-        title: loc("One Partner Across the Entire Value Chain"),
-        description: loc(
-          "From cultivation to commercialization, we help businesses improve performance, protect quality, and stay competitive across every stage of their operation."
-        ),
+        title: H.capabilities.item1Title,
+        description: H.capabilities.item1Desc,
         image: "/assets/homepage/capabilities-value-chain.jpg",
         href: "/about",
       },
       {
         id: "global-local",
-        title: loc("Global Capabilities. Local Understanding."),
-        description: loc(
-          "A global network backed by international manufacturing, product development, and sourcing capabilities — with local responsiveness and deep horticulture expertise."
-        ),
+        title: H.capabilities.item2Title,
+        description: H.capabilities.item2Desc,
         image: "/assets/homepage/capabilities-global-local.jpg",
         href: "/about",
       },
       {
         id: "integrated-chain",
-        title: loc("Partnerships Built for the Long Term"),
-        description: loc(
-          "Working alongside customers over time to support growth, adaptation, and lasting business performance."
-        ),
+        title: H.capabilities.item3Title,
+        description: H.capabilities.item3Desc,
         image: "/assets/homepage/capabilities-partnerships.jpg",
         href: "/about",
       },
     ],
   },
   businessSolutions: {
-    eyebrow: loc("Solutions Built Around Your Business"),
-    title: loc(
-      "Every crop, operation, and supply chain has unique requirements — explore the solutions, expertise, and support designed for your sector."
-    ),
+    eyebrow: H.businessSolutions.eyebrow,
+    title: H.businessSolutions.title,
     items: [
       {
         id: "flowers",
-        title: loc("Flowers"),
-        description: loc(
-          "End-to-end solutions for floriculture operations — from propagation and packaging through to retail."
-        ),
+        title: H.businessSolutions.flowersTitle,
+        description: H.businessSolutions.flowersDesc,
         image:
           "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
         href: "/solutions/flowers",
-        ctaLabel: loc("Explore Solutions"),
+        ctaLabel: H.businessSolutions.cta,
       },
       {
         id: "vegetables",
-        title: loc("Vegetables & Herbs"),
-        description: loc(
-          "Integrated solutions that support efficient production, handling, packaging, and commercialization."
-        ),
+        title: H.businessSolutions.vegetablesTitle,
+        description: H.businessSolutions.vegetablesDesc,
         image:
           "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
         href: "/solutions/vegetables",
-        ctaLabel: loc("Explore Solutions"),
+        ctaLabel: H.businessSolutions.cta,
       },
       {
         id: "fruits",
-        title: loc("Fruits"),
-        description: loc(
-          "Solutions that optimize cultivation, handling, packaging, and distribution across the fruit supply chain."
-        ),
+        title: H.businessSolutions.fruitsTitle,
+        description: H.businessSolutions.fruitsDesc,
         image:
           "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
         href: "/solutions/fruits",
-        ctaLabel: loc("Explore Solutions"),
+        ctaLabel: H.businessSolutions.cta,
       },
       {
         id: "logistics-display",
-        title: loc("Logistics & Display"),
-        description: loc(
-          "Systems that improve product movement, merchandising, and point-of-sale presentation."
-        ),
+        title: H.businessSolutions.logisticsTitle,
+        description: H.businessSolutions.logisticsDesc,
         image: "/assets/homepage/solutions-logistics.jpg",
         href: "/solutions/logistics-display",
-        ctaLabel: loc("Explore Solutions"),
+        ctaLabel: H.businessSolutions.cta,
       },
       {
         id: "machinery-automation",
-        title: loc("Machinery & Automation"),
-        description: loc(
-          "Technology that increases efficiency, consistency, and scalability as operations grow."
-        ),
+        title: H.businessSolutions.machineryTitle,
+        description: H.businessSolutions.machineryDesc,
         image: "/assets/homepage/greenhouse-technology.webp",
         href: "/solutions/machinery-automation",
-        ctaLabel: loc("Explore Solutions"),
+        ctaLabel: H.businessSolutions.cta,
       },
     ],
   },
   globalPresence: {
-    title: loc(
-      "We operate in 25 countries, with production hubs in Asia, South America and Europe, as well as support teams worldwide."
-    ),
+    title: H.globalPresence.title,
   },
   testimonials: {
-    eyebrow: loc("Testimonials"),
+    eyebrow: H.testimonials.eyebrow,
     items: [
       {
         id: "t1",
-        quote: loc(
-          "Oboya helped us unify packaging and logistics across our greenhouse network. Delivery reliability improved within the first season."
-        ),
-        author: loc("Maria Jensen"),
-        role: loc("Nordic Growers"),
+        quote: H.testimonials.t1Quote,
+        author: H.testimonials.t1Author,
+        role: H.testimonials.t1Role,
       },
       {
         id: "t2",
-        quote: loc(
-          "Their local teams understood our retail requirements and delivered display solutions that lifted shelf presence without slowing operations."
-        ),
-        author: loc("Carlos Mendes"),
-        role: loc("Fresh Retail Group"),
+        quote: H.testimonials.t2Quote,
+        author: H.testimonials.t2Author,
+        role: H.testimonials.t2Role,
       },
       {
         id: "t3",
-        quote: loc(
-          "From substrates to retail-ready packaging, Oboya has become a long-term partner for our berry programs across Asia Pacific."
-        ),
-        author: loc("Li Wei"),
-        role: loc("Asia Pacific Berries"),
+        quote: H.testimonials.t3Quote,
+        author: H.testimonials.t3Author,
+        role: H.testimonials.t3Role,
       },
       {
         id: "t4",
-        quote: loc(
-          "We needed one partner for cultivation support and outbound logistics. Oboya connected both ends of the chain with clear accountability."
-        ),
-        author: loc("Elena Rossi"),
-        role: loc("MediFlora Cooperative"),
+        quote: H.testimonials.t4Quote,
+        author: H.testimonials.t4Author,
+        role: H.testimonials.t4Role,
       },
       {
         id: "t5",
-        quote: loc(
-          "Scale and local expertise rarely come together. With Oboya, we get global manufacturing strength and on-the-ground support where we grow."
-        ),
-        author: loc("James Okonkwo"),
-        role: loc("GreenHorizon Farms"),
+        quote: H.testimonials.t5Quote,
+        author: H.testimonials.t5Author,
+        role: H.testimonials.t5Role,
       },
       {
         id: "t6",
-        quote: loc(
-          "Switching to Oboya's integrated solutions cut complexity for our growers and gave our buyers a more consistent product experience."
-        ),
-        author: loc("Sophie Dubois"),
-        role: loc("EuroFresh Alliance"),
+        quote: H.testimonials.t6Quote,
+        author: H.testimonials.t6Author,
+        role: H.testimonials.t6Role,
       },
     ],
   },
   latestNews: {
-    eyebrow: loc("Latest News"),
-    headline: loc(
-      "Learn more about our latest developments and stories from the field in our Latest News section."
-    ),
+    eyebrow: H.latestNews.eyebrow,
+    headline: H.latestNews.headline,
     postCount: 2,
   },
   partners: {
-    title: loc("Our collaborations"),
+    title: H.partners.title,
     logos: [
       { id: "brcgs", name: "BRCGS", image: "/assets/homepage/cert-brcgs.png", href: "" },
       { id: "sedex-smeta", name: "Sedex | SMETA", image: "/assets/homepage/cert-sedex-smeta.png", href: "" },
@@ -390,8 +345,170 @@ const defaultSettings = (): HomepageSettings => ({
 });
 
 let cache: HomepageSettings | null = null;
-const CONTENT_REVISION = "home-remove-featured-innovations-2026-09-01";
+const CONTENT_REVISION = "home-i18n-2026-09-02";
 let appliedRevision: string | null = null;
+
+function mergeHomepageLocales(
+  current: HomepageSettings,
+  defaults: HomepageSettings
+): HomepageSettings {
+  return {
+    ...current,
+    hero: {
+      ...current.hero,
+      eyebrow: mergeLocalized(current.hero.eyebrow, defaults.hero.eyebrow),
+      title: mergeLocalized(current.hero.title, defaults.hero.title),
+      description: mergeLocalized(
+        current.hero.description,
+        defaults.hero.description
+      ),
+      ctaPrimary: {
+        ...current.hero.ctaPrimary,
+        label: mergeLocalized(
+          current.hero.ctaPrimary.label,
+          defaults.hero.ctaPrimary.label
+        ),
+      },
+      ctaSecondary: {
+        ...current.hero.ctaSecondary,
+        label: mergeLocalized(
+          current.hero.ctaSecondary.label,
+          defaults.hero.ctaSecondary.label
+        ),
+      },
+    },
+    companyOverview: {
+      ...current.companyOverview,
+      headlineGreen: mergeLocalized(
+        current.companyOverview.headlineGreen,
+        defaults.companyOverview.headlineGreen
+      ),
+      headlineWhite: mergeLocalized(
+        current.companyOverview.headlineWhite,
+        defaults.companyOverview.headlineWhite
+      ),
+      imageAlt: mergeLocalized(
+        current.companyOverview.imageAlt,
+        defaults.companyOverview.imageAlt
+      ),
+      segments: current.companyOverview.segments.map((segment, i) => ({
+        ...segment,
+        text: mergeLocalized(
+          segment.text,
+          defaults.companyOverview.segments[i]?.text ?? segment.text
+        ),
+      })),
+      stats: current.companyOverview.stats.map((stat, i) => ({
+        ...stat,
+        label: mergeLocalized(
+          stat.label,
+          defaults.companyOverview.stats[i]?.label ?? stat.label
+        ),
+      })),
+    },
+    capabilities: {
+      ...current.capabilities,
+      eyebrow: mergeLocalized(
+        current.capabilities.eyebrow,
+        defaults.capabilities.eyebrow
+      ),
+      title: mergeLocalized(current.capabilities.title, defaults.capabilities.title),
+      ctaLabel: mergeLocalized(
+        current.capabilities.ctaLabel,
+        defaults.capabilities.ctaLabel
+      ),
+      items: current.capabilities.items.map((item, i) => ({
+        ...item,
+        title: mergeLocalized(
+          item.title,
+          defaults.capabilities.items[i]?.title ?? item.title
+        ),
+        description: mergeLocalized(
+          item.description,
+          defaults.capabilities.items[i]?.description ?? item.description
+        ),
+        ctaLabel: item.ctaLabel
+          ? mergeLocalized(
+              item.ctaLabel,
+              defaults.capabilities.items[i]?.ctaLabel ?? item.ctaLabel
+            )
+          : item.ctaLabel,
+      })),
+    },
+    businessSolutions: {
+      ...current.businessSolutions,
+      eyebrow: mergeLocalized(
+        current.businessSolutions.eyebrow,
+        defaults.businessSolutions.eyebrow
+      ),
+      title: mergeLocalized(
+        current.businessSolutions.title,
+        defaults.businessSolutions.title
+      ),
+      items: current.businessSolutions.items.map((item, i) => ({
+        ...item,
+        title: mergeLocalized(
+          item.title,
+          defaults.businessSolutions.items[i]?.title ?? item.title
+        ),
+        description: mergeLocalized(
+          item.description,
+          defaults.businessSolutions.items[i]?.description ?? item.description
+        ),
+        ctaLabel: item.ctaLabel
+          ? mergeLocalized(
+              item.ctaLabel,
+              defaults.businessSolutions.items[i]?.ctaLabel ?? item.ctaLabel
+            )
+          : item.ctaLabel,
+      })),
+    },
+    globalPresence: {
+      ...current.globalPresence,
+      title: mergeLocalized(
+        current.globalPresence.title,
+        defaults.globalPresence.title
+      ),
+    },
+    testimonials: {
+      ...current.testimonials,
+      eyebrow: mergeLocalized(
+        current.testimonials.eyebrow,
+        defaults.testimonials.eyebrow
+      ),
+      items: current.testimonials.items.map((item, i) => ({
+        ...item,
+        quote: mergeLocalized(
+          item.quote,
+          defaults.testimonials.items[i]?.quote ?? item.quote
+        ),
+        author: mergeLocalized(
+          item.author,
+          defaults.testimonials.items[i]?.author ?? item.author
+        ),
+        role: mergeLocalized(
+          item.role,
+          defaults.testimonials.items[i]?.role ?? item.role
+        ),
+      })),
+    },
+    latestNews: {
+      ...current.latestNews,
+      eyebrow: mergeLocalized(
+        current.latestNews.eyebrow,
+        defaults.latestNews.eyebrow
+      ),
+      headline: mergeLocalized(
+        current.latestNews.headline,
+        defaults.latestNews.headline
+      ),
+    },
+    partners: {
+      ...current.partners,
+      title: mergeLocalized(current.partners.title, defaults.partners.title),
+    },
+  };
+}
 
 function migrateSettings(settings: HomepageSettings): HomepageSettings {
   const defaults = defaultSettings();
@@ -409,7 +526,7 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
       ? rawHero.mediaType
       : "image";
 
-  return {
+  const migrated: HomepageSettings = {
     ...defaults,
     ...withoutLegacy,
     animations: {
@@ -554,6 +671,7 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
       },
     },
   };
+  return mergeHomepageLocales(migrated, defaults);
 }
 
 export function getHomepageSettings(): HomepageSettings {

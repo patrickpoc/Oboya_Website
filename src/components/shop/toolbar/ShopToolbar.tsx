@@ -24,8 +24,14 @@ export function ShopToolbar() {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
     const observer = new IntersectionObserver(
-      ([entry]) => setCollapsed(!entry.isIntersecting),
-      { threshold: 0, rootMargin: "-80px 0px 0px 0px" }
+      ([entry]) => {
+        if (window.innerWidth < 768) {
+          setCollapsed(false);
+          return;
+        }
+        setCollapsed(!entry.isIntersecting);
+      },
+      { threshold: 0, rootMargin: "-64px 0px 0px 0px" }
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
@@ -41,7 +47,7 @@ export function ShopToolbar() {
           <div className="flex flex-col gap-4">
             {/* Controls that hide on mobile scroll */}
             <div
-              className={`flex flex-col gap-3 transition-all duration-300 md:!max-h-none md:!opacity-100 md:!overflow-visible lg:flex-row lg:items-end lg:gap-4 ${
+              className={`flex flex-col gap-3 transition-all duration-300 max-md:!max-h-none max-md:!opacity-100 max-md:!overflow-visible md:!max-h-none md:!opacity-100 md:!overflow-visible lg:flex-row lg:items-end lg:gap-4 ${
                 collapsed
                   ? "max-h-0 opacity-0 overflow-hidden !py-0 !gap-0 !mt-0 !mb-0"
                   : "max-h-[500px] opacity-100"
@@ -67,7 +73,7 @@ export function ShopToolbar() {
                 disabled={!countryCode}
                 className={buttonVariants({
                   variant: "outline",
-                  className: "h-10 shrink-0 rounded-lg border-border",
+                  className: "h-11 min-h-11 shrink-0 rounded-lg border-border max-sm:px-2.5",
                 })}
               >
                 <SlidersHorizontal className="mr-2 size-4" />
