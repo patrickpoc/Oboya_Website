@@ -39,7 +39,7 @@ export function Hero({
     <section
       id="hero"
       className={cn(
-        "relative flex min-h-[100svh] flex-col overflow-hidden",
+        "relative flex min-h-hero-viewport flex-col overflow-hidden",
         useScrollBackdrop ? "bg-transparent" : "bg-oboya-blue-dark"
       )}
     >

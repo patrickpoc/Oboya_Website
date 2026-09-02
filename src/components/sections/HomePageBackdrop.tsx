@@ -61,7 +61,7 @@ export function HomePageBackdrop({
     <HomeScrollBackdropContext.Provider value={true}>
       <div className="relative">
         {showBackdrop ? (
-          <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
+          <div className="hero-fixed-backdrop" aria-hidden>
             <HeroMedia
               mediaType={mediaType}
               imageSrc={imageSrc}

@@ -124,14 +124,14 @@ function HeroMediaInner({
     (mediaType === "image" || reducedMotion || videoFailed || !wantsVideo || !showVideo);
 
   return (
-    <div className="absolute inset-0 bg-oboya-blue-dark">
+    <div className="absolute inset-0 size-full min-h-full bg-oboya-blue-dark">
       {showImage ? (
         <Image
           src={imageSrc}
           alt={alt}
           fill
           priority
-          className="object-cover object-[center_40%]"
+          className="size-full object-cover object-center"
           sizes="100vw"
         />
       ) : null}
@@ -139,7 +139,7 @@ function HeroMediaInner({
       {wantsVideo && videoSrc ? (
         <video
           ref={videoRef}
-          className={`absolute inset-0 size-full object-cover object-[center_40%] transition-opacity duration-500 ${
+          className={`absolute inset-0 size-full object-cover object-center transition-opacity duration-500 ${
             showVideo ? "opacity-100" : "opacity-0"
           }`}
           src={videoSrc}
