@@ -28,11 +28,10 @@ export async function PUT(request: Request) {
     const body = (await request.json()) as AboutPageSettings;
     const saved = await saveAboutPageSettingsDurable(body);
 
-    // Bust ISR/cache so /about and /about-v2 pick up live cms_documents.
+    // Bust ISR/cache so /about picks up live cms_documents.
     revalidatePath("/", "layout");
     for (const locale of LOCALES) {
       revalidatePath(`/${locale}/about`);
-      revalidatePath(`/${locale}/about-v2`);
     }
 
     return NextResponse.json(saved);

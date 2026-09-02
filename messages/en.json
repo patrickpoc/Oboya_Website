@@ -24,6 +24,10 @@
     "solutionsFlowersDesc": "Complete solutions for floriculture and ornamental growers.",
     "solutionsFruits": "Fruits & Berries",
     "solutionsFruitsDesc": "Specialized systems for berry and fruit cultivation.",
+    "solutionsLogistics": "Logistics & Display",
+    "solutionsLogisticsDesc": "Systems that improve product movement, merchandising, and point-of-sale presentation.",
+    "solutionsMachinery": "Machinery & Automation",
+    "solutionsMachineryDesc": "Technology that increases efficiency, consistency, and scalability as operations grow.",
     "productsGrowingMedia": "Growing Media",
     "productsGrowingMediaDesc": "Substrates and soil solutions for optimal plant health.",
     "productsPackaging": "Packaging",
@@ -131,6 +135,11 @@
     "description": "Connect with our global team to discover integrated solutions tailored to your production needs.",
     "primary": "Get in Touch",
     "secondary": "View Case Studies"
+  },
+  "homeCta": {
+    "title": "Let's find the right solution for your business",
+    "description": "From cultivation to retail, our global team helps growers and partners improve performance, protect quality, and grow with confidence.",
+    "button": "Get in Touch"
   },
   "footer": {
     "company": "Company",

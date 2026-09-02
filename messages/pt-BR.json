@@ -20,6 +20,10 @@
     "solutionsFlowersDesc": "Soluções completas para floricultura e cultivo ornamental.",
     "solutionsFruits": "Frutas e Bagas",
     "solutionsFruitsDesc": "Sistemas especializados para cultivo de frutas vermelhas e frutíferas.",
+    "solutionsLogistics": "Logística e Exposição",
+    "solutionsLogisticsDesc": "Sistemas que melhoram o movimento do produto, merchandising e apresentação no ponto de venda.",
+    "solutionsMachinery": "Maquinário e Automação",
+    "solutionsMachineryDesc": "Tecnologia que aumenta eficiência, consistência e escalabilidade conforme as operações crescem.",
     "productsGrowingMedia": "Substratos",
     "productsGrowingMediaDesc": "Substratos e soluções de solo para saúde ideal das plantas.",
     "productsPackaging": "Embalagens",
@@ -131,6 +135,11 @@
     "description": "Conecte-se com nossa equipe global para descobrir soluções integradas adaptadas às suas necessidades de produção.",
     "primary": "Entre em Contato",
     "secondary": "Ver Cases"
+  },
+  "homeCta": {
+    "title": "Vamos encontrar a solução certa para o seu negócio",
+    "description": "Do cultivo ao varejo, nossa equipe global ajuda produtores e parceiros a melhorar o desempenho, proteger a qualidade e crescer com confiança.",
+    "button": "Entre em Contato"
   },
   "footer": {
     "company": "Empresa",

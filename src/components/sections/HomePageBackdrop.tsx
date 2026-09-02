@@ -13,6 +13,8 @@ interface HomePageBackdropProps {
   videoSrc: string | null;
   alt: string;
   children: ReactNode;
+  /** Closing CTA over the hero scroll-backdrop (before Partners / solid sections). */
+  cta?: ReactNode;
   /** Rendered after the scroll-backdrop sentinel (solid sections, e.g. Partners). */
   afterBackdrop?: ReactNode;
 }
@@ -24,6 +26,7 @@ export function HomePageBackdrop({
   videoSrc,
   alt,
   children,
+  cta,
   afterBackdrop,
 }: HomePageBackdropProps) {
   const endRef = useRef<HTMLDivElement>(null);
@@ -70,6 +73,7 @@ export function HomePageBackdrop({
         ) : null}
         <div className="relative z-10">
           {children}
+          {cta}
           <div ref={endRef} className="h-px w-full" aria-hidden />
         </div>
         {afterBackdrop ? (

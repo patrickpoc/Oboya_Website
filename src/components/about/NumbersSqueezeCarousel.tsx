@@ -42,7 +42,7 @@ const ICON_BUBBLE_REM = 2; // size-8
 const MOBILE_ICON_PAD_TOP = `calc((${MOBILE_COLLAPSED_BASIS} - ${ICON_BUBBLE_REM}rem) / 2)`;
 const DESKTOP_ICON_PAD = "1.25rem";
 const DESKTOP_ICON_PAD_X_EXPANDED = "1.5rem";
-const DESKTOP_ICON_PAD_X_COLLAPSED = "0.375rem";
+const DESKTOP_COLLAPSED_METRIC_PAD = "1.25rem";
 const MOBILE_ICON_PAD_X = "1rem";
 const AUTOPLAY_MS = 4600;
 
@@ -75,12 +75,10 @@ function isLightAccent(hex: string) {
 /** Desktop: icon top inset is constant; only axis orientation changes between states. */
 function iconMotionDesktop(isActive: boolean) {
   return {
-    justifyContent: isActive ? "flex-start" : "space-between",
-    alignItems: isActive ? "flex-start" : "center",
+    justifyContent: isActive ? "flex-start" : "center",
     paddingTop: DESKTOP_ICON_PAD,
-    paddingBottom: DESKTOP_ICON_PAD,
-    paddingLeft: isActive ? DESKTOP_ICON_PAD_X_EXPANDED : DESKTOP_ICON_PAD_X_COLLAPSED,
-    paddingRight: isActive ? DESKTOP_ICON_PAD_X_EXPANDED : DESKTOP_ICON_PAD_X_COLLAPSED,
+    paddingLeft: isActive ? DESKTOP_ICON_PAD_X_EXPANDED : 0,
+    paddingRight: isActive ? DESKTOP_ICON_PAD_X_EXPANDED : 0,
   };
 }
 
@@ -293,7 +291,7 @@ export function NumbersSqueezeCarousel({
               />
 
               <motion.div
-                className="pointer-events-none absolute inset-0 z-[3] flex flex-col"
+                className="pointer-events-none absolute inset-x-0 top-0 z-[3] flex"
                 initial={false}
                 animate={iconMotionDesktop(isActive)}
                 transition={iconTransition}
@@ -308,24 +306,26 @@ export function NumbersSqueezeCarousel({
                     style={{ color: accent }}
                   />
                 </span>
-                <motion.div
-                  initial={false}
-                  animate={squeezeCollapsedPanelOpacity(isActive)}
-                  transition={squeezePanelTransition(reduce, !isActive)}
-                  className={cn(isActive && "pointer-events-none")}
-                  aria-hidden={isActive}
-                >
-                  <MetricValue
-                    stat={stat}
-                    label={label}
-                    reduceMotion={reduce}
-                    animate={false}
-                    className={cn(
-                      "font-display text-[clamp(1.05rem,1.6vw,1.35rem)] font-light leading-none tracking-tight [writing-mode:vertical-rl] rotate-180",
-                      collapsedInk
-                    )}
-                  />
-                </motion.div>
+              </motion.div>
+
+              <motion.div
+                className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] flex justify-center"
+                style={{ paddingBottom: DESKTOP_COLLAPSED_METRIC_PAD }}
+                initial={false}
+                animate={squeezeCollapsedPanelOpacity(isActive)}
+                transition={squeezePanelTransition(reduce, !isActive)}
+                aria-hidden={isActive}
+              >
+                <MetricValue
+                  stat={stat}
+                  label={label}
+                  reduceMotion={reduce}
+                  animate={false}
+                  className={cn(
+                    "font-display text-[clamp(1.05rem,1.6vw,1.35rem)] font-light leading-none tracking-tight tabular-nums [writing-mode:vertical-rl] rotate-180",
+                    collapsedInk
+                  )}
+                />
               </motion.div>
 
               <motion.div

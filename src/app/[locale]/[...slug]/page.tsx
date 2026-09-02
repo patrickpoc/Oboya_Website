@@ -93,7 +93,7 @@ export default async function InnerPage({ params }: PageProps) {
   if (config.template === "about") {
     return (
       <SiteLayout>
-        <AboutPageContent locale={locale} mode="full" />
+        <AboutPageContent locale={locale} />
       </SiteLayout>
     );
   }

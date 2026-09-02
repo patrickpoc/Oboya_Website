@@ -20,6 +20,10 @@
     "solutionsFlowersDesc": "花卉栽培和观赏植物种植的完整解决方案。",
     "solutionsFruits": "水果与浆果",
     "solutionsFruitsDesc": "浆果和水果种植的专业系统。",
+    "solutionsLogistics": "物流与陈列",
+    "solutionsLogisticsDesc": "改善产品流转、陈列营销与终端展示的系统。",
+    "solutionsMachinery": "机械与自动化",
+    "solutionsMachineryDesc": "随运营规模增长提升效率、一致性与可扩展性的技术。",
     "productsGrowingMedia": "栽培基质",
     "productsGrowingMediaDesc": "为植物健康提供最佳土壤和基质解决方案。",
     "productsPackaging": "包装",
@@ -131,6 +135,11 @@
     "description": "与我们的全球团队联系，发现适合您生产需求的综合解决方案。",
     "primary": "联系我们",
     "secondary": "查看案例研究"
+  },
+  "homeCta": {
+    "title": "为您的业务找到合适的解决方案",
+    "description": "从种植到零售，我们的全球团队帮助种植者与合作伙伴提升绩效、保障品质、自信成长。",
+    "button": "联系我们"
   },
   "footer": {
     "company": "公司",

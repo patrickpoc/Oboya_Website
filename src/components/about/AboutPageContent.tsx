@@ -11,33 +11,25 @@ import { AboutHonors } from "@/components/about/AboutHonors";
 
 interface AboutPageContentProps {
   locale: string;
-  /**
-   * `full` — classic /about page
-   * `afterTimeline` — rest of About after the about-v2 circle experience
-   */
-  mode?: "full" | "afterTimeline";
 }
 
 export async function AboutPageContent({
   locale,
-  mode = "full",
 }: AboutPageContentProps) {
   const about = await readAboutPageSettings();
-  const afterTimeline = mode === "afterTimeline";
 
   return (
     <>
-      {!afterTimeline &&
-        (about.sections.hero.enabled ||
-          about.sections.institutionalImage.enabled) && (
-          <AboutHero
-            data={about.hero}
-            image={about.institutionalImage}
-            locale={locale}
-            showImage={about.sections.institutionalImage.enabled}
-          />
-        )}
-      {!afterTimeline && about.sections.timeline.enabled && (
+      {(about.sections.hero.enabled ||
+        about.sections.institutionalImage.enabled) && (
+        <AboutHero
+          data={about.hero}
+          image={about.institutionalImage}
+          locale={locale}
+          showImage={about.sections.institutionalImage.enabled}
+        />
+      )}
+      {about.sections.timeline.enabled && (
         <AboutTimeline data={about.timeline} locale={locale} />
       )}
       {about.sections.impact.enabled && (

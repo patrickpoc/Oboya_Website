@@ -5,6 +5,10 @@ type Translator = (key: string) => string;
 export function getMainNavigation(t: Translator): NavItem[] {
   return [
     {
+      label: t("nav.solutions"),
+      href: "/solutions",
+    },
+    {
       label: t("nav.about"),
       href: "/about",
     },

@@ -2,6 +2,7 @@ import { Footer } from "@/components/layouts/Footer";
 import { Navbar } from "@/components/layouts/Navbar";
 import { HomeIntroGate } from "@/components/layout/HomeIntroGate";
 import { HomePageBackdrop } from "@/components/sections/HomePageBackdrop";
+import { HomeCta } from "@/components/sections/HomeCta";
 import { HomePageContent } from "@/components/sections/HomePageContent";
 import { Partners } from "@/components/sections/Partners";
 import { routing, type Locale } from "@/i18n/routing";
@@ -35,9 +36,10 @@ export default async function Home({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [mapData, t, homepage, posts] = await Promise.all([
+  const [mapData, t, tHomeCta, homepage, posts] = await Promise.all([
     readMapLocations(),
     getTranslations({ locale, namespace: "globalPresence" }),
+    getTranslations({ locale, namespace: "homeCta" }),
     readHomepageSettings(),
     readBlogPosts(),
   ]);
@@ -71,6 +73,13 @@ export default async function Home({ params }: Props) {
           imageSrc={homepage.hero.backgroundImage}
           videoSrc={homepage.hero.backgroundVideo}
           alt={heroAlt}
+          cta={
+            <HomeCta
+              title={tHomeCta("title")}
+              description={tHomeCta("description")}
+              buttonLabel={tHomeCta("button")}
+            />
+          }
           afterBackdrop={
             homepage.sections.partners.enabled ? (
               <Partners

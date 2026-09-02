@@ -28,7 +28,7 @@ export function HomeLatestNews({
   const motionWhileInView = animationsEnabled ? "visible" : undefined;
 
   return (
-    <section className="bg-oboya-blue-dark py-12 md:py-16 lg:py-20">
+    <section className="bg-oboya-soft-white py-12 md:py-16 lg:py-20">
       <Container>
         <motion.div
           initial={motionInitial}
@@ -38,12 +38,12 @@ export function HomeLatestNews({
           className="mb-7 md:mb-9"
         >
           <div className="mb-6 flex flex-col gap-3">
-            <p className="text-sm font-medium tracking-wide text-white">
+            <p className="text-sm font-medium tracking-wide text-oboya-green">
               {pickLocalized(data.eyebrow, locale)}
             </p>
-            <div className="h-px w-full bg-white/35" aria-hidden />
+            <div className="h-px w-full bg-oboya-blue-dark/15" aria-hidden />
           </div>
-          <h2 className="max-w-4xl font-display text-[clamp(1.45rem,2.6vw,2.15rem)] leading-[1.35] font-light tracking-tight text-white text-balance">
+          <h2 className="max-w-4xl font-display text-[clamp(1.45rem,2.6vw,2.15rem)] leading-[1.35] font-light tracking-tight text-oboya-blue-dark text-balance">
             {pickLocalized(data.headline, locale)}
           </h2>
         </motion.div>
@@ -61,7 +61,7 @@ export function HomeLatestNews({
                 href={`/news/${post.slug}`}
                 className="group block"
               >
-                <div className="relative aspect-[16/10] overflow-hidden">
+                <div className="relative aspect-[16/10] overflow-hidden rounded-2xl">
                   {post.featuredImage ? (
                     <Image
                       src={post.featuredImage}
@@ -71,15 +71,15 @@ export function HomeLatestNews({
                       sizes="(max-width: 768px) 100vw, 50vw"
                     />
                   ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-oboya-blue/40 to-oboya-green/30" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-oboya-blue/20 to-oboya-green/20" />
                   )}
                 </div>
                 <div className="mt-4 flex items-center justify-between gap-4">
-                  <h3 className="min-w-0 flex-1 text-base font-semibold leading-snug text-white md:text-lg">
+                  <h3 className="min-w-0 flex-1 text-base font-semibold leading-snug text-oboya-blue-dark transition-colors group-hover:text-oboya-green md:text-lg">
                     {pickLocalized(post.title, locale)}
                   </h3>
                   <span
-                    className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/50 text-white transition-colors group-hover:border-white group-hover:bg-white/10"
+                    className="flex size-9 shrink-0 items-center justify-center rounded-full border border-oboya-blue-dark/25 text-oboya-blue-dark transition-colors group-hover:border-oboya-green group-hover:bg-oboya-green/10 group-hover:text-oboya-green"
                     aria-hidden
                   >
                     <ChevronRight className="size-4" />
