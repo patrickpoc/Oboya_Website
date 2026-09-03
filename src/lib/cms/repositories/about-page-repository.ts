@@ -111,6 +111,8 @@ export interface AboutPageSettings {
   hero: {
     eyebrow: LocalizedString;
     title: LocalizedString;
+    /** Supporting paragraph under the hero title. */
+    body?: LocalizedString;
   };
   institutionalImage: {
     src: string;
@@ -142,6 +144,8 @@ export interface AboutPageSettings {
     body?: LocalizedString;
   };
   culture: {
+    /** Section heading (e.g. What Makes Oboya Different) */
+    title?: LocalizedString;
     eyebrow: LocalizedString;
     items: AboutCultureItem[];
   };
@@ -194,10 +198,16 @@ const defaultSettings = (): AboutPageSettings => ({
   hero: {
     eyebrow: loc("Who We Are", "Quem somos", "Quiénes somos", "我们是谁"),
     title: loc(
+      "Helping Horticulture Perform Better",
+      "Ajudando a horticultura a performar melhor",
+      "Ayudando a la horticultura a rendir mejor",
+      "助力园艺卓越表现"
+    ),
+    body: loc(
       "Oboya Horticulture supports growers, exporters, distributors, retailers, research centers, and industry partners through solutions designed for every stage of the horticultural journey, backed by global manufacturing, sourcing, and product development capabilities. Helping strengthen performance across the value chain.",
-      "A Oboya Horticulture é um fornecedor One-Stop Shopping líder para produtores de flores e vegetais, empresas de embalagem e atacadistas em mais de 60 países.",
-      "Oboya Horticulture es un proveedor One-Stop Shopping líder para productores de flores y vegetales, empresas de packaging y mayoristas en más de 60 países.",
-      "Oboya Horticulture 是面向花卉与蔬菜种植者、包装企业及批发商的领先一站式采购供应商，业务覆盖全球 60 多个国家。"
+      "A Oboya Horticulture apoia produtores, exportadores, distribuidores, varejistas, centros de pesquisa e parceiros do setor com soluções para cada etapa da jornada hortícola, com manufatura global, sourcing e desenvolvimento de produtos. Fortalecendo o desempenho em toda a cadeia de valor.",
+      "Oboya Horticulture apoya a productores, exportadores, distribuidores, minoristas, centros de investigación y socios del sector con soluciones para cada etapa del recorrido hortícola, respaldadas por manufactura global, sourcing y desarrollo de productos. Fortaleciendo el rendimiento en toda la cadena de valor.",
+      "Oboya Horticulture 为种植者、出口商、分销商、零售商、研究中心及行业伙伴提供覆盖园艺全旅程的解决方案，依托全球制造、采购与产品开发能力，助力提升整条价值链表现。"
     ),
   },
   institutionalImage: {
@@ -219,63 +229,83 @@ const defaultSettings = (): AboutPageSettings => ({
     nextLabel: loc("Next year", "Próximo ano", "Próximo año", "下一年"),
     events: [
       {
-        id: "1998",
-        year: "1998",
+        id: "2005",
+        year: "2005",
         description: loc(
-          "Oboya Horticulture was founded in 1998. The company has grown from a small family business to a large-scale international group.",
-          "A Oboya Horticulture foi fundada em 1998. A empresa cresceu de um pequeno negócio familiar a um grupo internacional de grande escala.",
-          "Oboya Horticulture fue fundada en 1998. La empresa ha crecido de un pequeño negocio familiar a un grupo internacional a gran escala.",
-          "Oboya Horticulture 成立于 1998 年。公司已从小家庭企业成长为大型国际集团。"
-        ),
-      },
-      {
-        id: "2006",
-        year: "2006",
-        description: loc(
-          "Oboya expands manufacturing and sales capabilities focused on horticulture packaging and grower supplies.",
-          "A Oboya amplia capacidade de manufatura e vendas focada em embalagens e suprimentos para horticultura.",
-          "Oboya amplía capacidad de manufactura y ventas enfocada en packaging y suministros hortícolas.",
-          "Oboya 扩展以园艺包装与种植者供应为核心的制造与销售能力。"
+          "Founded in 2005, we manufacture harvest carts, trolleys, and support equipment exported to more than 80 countries.",
+          "Fundada em 2005, fabricamos carrinhos de colheita, trolleys e equipamentos de apoio exportados para mais de 80 países.",
+          "Fundada en 2005, fabricamos carros de cosecha, trolleys y equipos de apoyo exportados a más de 80 países.",
+          "成立于 2005 年，生产采收推车、运输车及配套设备，产品出口 80 多个国家。"
         ),
       },
       {
         id: "2011",
         year: "2011",
         description: loc(
-          "International growth accelerates as Oboya deepens presence across key horticulture markets.",
-          "O crescimento internacional acelera à medida que a Oboya aprofunda a presença em mercados-chave de horticultura.",
-          "El crecimiento internacional se acelera a medida que Oboya profundiza su presencia en mercados clave de horticultura.",
-          "随着 Oboya 深耕重点园艺市场，国际扩张加速。"
+          "QXAuto is founded, combining R&D, production, and sales of electric steps, lifters, and welfare products.",
+          "A QXAuto é fundada, reunindo P&D, produção e vendas de degraus elétricos, elevadores e produtos de bem-estar.",
+          "Se funda QXAuto, integrando I+D, producción y ventas de peldaños eléctricos, elevadores y productos de bienestar.",
+          "QXAuto 成立，集研发、生产与销售于一体，主营电动踏步、升降机及福祉产品。"
         ),
       },
       {
-        id: "2016",
-        year: "2016",
+        id: "2012",
+        year: "2012",
         description: loc(
-          "Own companies and regional offices expand across Europe, Africa and Latin America.",
-          "Empresas próprias e escritórios regionais se expandem na Europa, África e América Latina.",
-          "Empresas propias y oficinas regionales se expanden en Europa, África y América Latina.",
-          "自有公司与区域办事处扩展至欧洲、非洲与拉丁美洲。"
+          "Qingdao OBOYA Metal Product Co. Ltd. launches turnkey solutions for retailers, warehouses, and unmanned stores — from design to export.",
+          "A Qingdao OBOYA Metal Product Co. Ltd. lança soluções turnkey para varejo, armazéns e lojas autônomas — do design à exportação.",
+          "Qingdao OBOYA Metal Product Co. Ltd. lanza soluciones llave en mano para retail, almacenes y tiendas autónomas — del diseño a la exportación.",
+          "青岛欧博雅金属制品有限公司成立，为零售、仓储及无人店提供从设计到出口的交钥匙方案。"
         ),
       },
       {
-        id: "2021",
-        year: "2021",
+        id: "2013",
+        year: "2013",
         description: loc(
-          "Certification programs and sustainable packaging initiatives scale across facilities.",
-          "Programas de certificação e iniciativas de embalagem sustentável se expandem nas unidades.",
-          "Programas de certificación e iniciativas de packaging sostenible se escalan en las plantas.",
-          "认证项目与可持续包装举措在各工厂扩展。"
+          "We open in Kenya, one of the world’s top cut-flower markets, offering African customers one-stop support from substrate to transport.",
+          "Abrimos no Quênia, um dos principais mercados de flores de corte do mundo, com suporte completo da África — do substrato ao transporte.",
+          "Abrimos en Kenia, uno de los principales mercados de flor cortada del mundo, con servicio integral en África — del sustrato al transporte.",
+          "在肯尼亚设立业务，服务全球四大切花市场之一，为非洲客户提供从基质到包装与运输的一站式支持。"
         ),
       },
       {
-        id: "2025",
-        year: "2025",
+        id: "2014",
+        year: "2014",
         description: loc(
-          "Digital channels connect buyers to local Oboya teams for faster quotation and market-ready support.",
-          "Canais digitais conectam compradores às equipes locais Oboya para cotação mais rápida e suporte no mercado.",
-          "Canales digitales conectan compradores con equipos locales Oboya para cotización más rápida y soporte en mercado.",
-          "数字渠道连接买家与本地 Oboya 团队，实现更快询价与市场支持。"
+          "In China, we provide one-stop agricultural service from substrate to transport, with regional offices for timely after-sales support.",
+          "Na China, oferecemos serviço agrícola completo do substrato ao transporte, com escritórios regionais para pós-venda ágil.",
+          "En China, ofrecemos servicio agrícola integral del sustrato al transporte, con oficinas regionales para un posventa ágil.",
+          "面向中国农业客户提供从基质到包装与运输的一站式服务，并在各地设立销售网点以及时售后。"
+        ),
+      },
+      {
+        id: "2019",
+        year: "2019",
+        description: loc(
+          "A base in Yunnan — the world’s cut-flower capital — supplies packaging to local markets, nearby cities, and Southeast Asia.",
+          "Uma base em Yunnan — capital mundial das flores de corte — fornece embalagens ao mercado local, cidades vizinhas e o Sudeste Asiático.",
+          "Una base en Yunnan — capital mundial de la flor cortada — abastece packaging al mercado local, ciudades vecinas y el Sudeste Asiático.",
+          "落户世界著名鲜切花之都云南，向本地、周边城市及东南亚供应包装材料。"
+        ),
+      },
+      {
+        id: "2020",
+        year: "2020",
+        description: loc(
+          "A new sales company is formed, covering metal goods, machinery, healthcare, horticulture, furniture, and software.",
+          "Uma nova empresa de vendas é criada, abrangendo metais, maquinário, saúde, horticultura, mobiliário e software.",
+          "Se crea una nueva empresa comercial que cubre metales, maquinaria, salud, horticultura, mobiliario y software.",
+          "新销售公司成立，经营金属制品、机械、医疗与健康、园艺、家具及软件产品。"
+        ),
+      },
+      {
+        id: "2023",
+        year: "2023",
+        description: loc(
+          "High-speed injection molding in Yunnan supplies pots, buckets, and related products to local and Southeast Asian markets.",
+          "A injeção de alta velocidade em Yunnan fornece vasos, baldes e produtos correlatos aos mercados local e do Sudeste Asiático.",
+          "La inyección de alta velocidad en Yunnan abastece macetas, cubos y productos afines a los mercados local y del Sudeste Asiático.",
+          "云南高速注塑产线投产，向本地、周边及东南亚供应注塑花盆、水桶等产品。"
         ),
       },
     ],
@@ -578,25 +608,34 @@ const defaultSettings = (): AboutPageSettings => ({
       },
     ],
     body: loc(
-      "Many suppliers focus on individual categories. Oboya Horticulture takes a wider perspective.\n\nBy offering solutions across multiple stages of the horticultural journey, we help customers improve efficiency, protect quality, optimize resources, and create long-term value throughout their operations."
+      "Many suppliers focus on individual categories. Oboya Horticulture takes a wider perspective.\n\nBy offering solutions across multiple stages of the horticultural journey, we help customers improve efficiency, protect\nquality, optimize resources, and create long-term value throughout their operations.",
+      "Muitos fornecedores focam em categorias individuais. A Oboya Horticulture tem uma perspectiva mais ampla.\n\nAo oferecer soluções em múltiplas etapas da jornada hortícola, ajudamos os clientes a melhorar a eficiência, proteger\na qualidade, otimizar recursos e criar valor de longo prazo em suas operações.",
+      "Muchos proveedores se centran en categorías individuales. Oboya Horticulture adopta una perspectiva más amplia.\n\nAl ofrecer soluciones en múltiples etapas del recorrido hortícola, ayudamos a los clientes a mejorar la eficiencia, proteger\nla calidad, optimizar recursos y crear valor a largo plazo en sus operaciones.",
+      "许多供应商专注于单一品类。Oboya Horticulture 拥有更广阔的视角。\n\n通过在园艺旅程的多个阶段提供解决方案，我们帮助客户提升效率、保障\n品质、优化资源，并在运营中创造长期价值。"
     ),
   },
   culture: {
+    title: loc(
+      "What Makes Oboya Horticulture Different",
+      "O que torna a Oboya Horticulture diferente",
+      "Qué hace diferente a Oboya Horticulture",
+      "Oboya Horticulture 的与众不同之处"
+    ),
     eyebrow: loc(""),
     items: [
       {
-        id: "integrated",
+        id: "one-stop",
         title: loc(
-          "Integrated Solutions",
-          "Soluções integradas",
-          "Soluciones integradas",
-          "一体化解决方案"
+          "Your one-stop partner for horticulture",
+          "Seu parceiro one-stop para horticultura",
+          "Tu socio one-stop para horticultura",
+          "您的一站式园艺合作伙伴"
         ),
         description: loc(
-          "From propagation and growing systems to packaging, logistics, and retail display — Oboya connects every stage so growers work with one trusted partner.",
-          "Da propagação e sistemas de cultivo à embalagem, logística e display no varejo — a Oboya conecta cada etapa para que produtores trabalhem com um parceiro de confiança.",
-          "Desde propagación y sistemas de cultivo hasta packaging, logística y display retail — Oboya conecta cada etapa para que los productores trabajen con un socio de confianza.",
-          "从育苗与栽培系统到包装、物流与零售陈列——Oboya 串联每一环节，让种植者与值得信赖的伙伴合作。"
+          "From propagation to point of sale, customers can access solutions for multiple stages of their operation through a single trusted partner.",
+          "Da propagação ao ponto de venda, os clientes acessam soluções para várias etapas da operação por meio de um único parceiro de confiança.",
+          "Desde la propagación hasta el punto de venta, los clientes acceden a soluciones para múltiples etapas de su operación a través de un solo socio de confianza.",
+          "从育苗到销售终端，客户可通过单一可信伙伴获得覆盖运营多阶段的解决方案。"
         ),
         image:
           "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop",
@@ -607,48 +646,22 @@ const defaultSettings = (): AboutPageSettings => ({
           "Oboya 团队协作推进一体化园艺方案"
         ),
         imageSide: "right",
-        ctaLabel: loc("Learn More", "Saiba mais", "Saber más", "了解更多"),
-        ctaHref: "/solutions",
-      },
-      {
-        id: "performance",
-        title: loc(
-          "Performance Driven Approach",
-          "Abordagem orientada a desempenho",
-          "Enfoque orientado al rendimiento",
-          "以绩效为导向的方法"
-        ),
-        description: loc(
-          "We design products and processes around measurable grower outcomes — quality, efficiency, and reliability from greenhouse floor to market.",
-          "Projetamos produtos e processos em torno de resultados mensuráveis para o produtor — qualidade, eficiência e confiabilidade da estufa ao mercado.",
-          "Diseñamos productos y procesos en torno a resultados medibles para el productor — calidad, eficiencia y fiabilidad del invernadero al mercado.",
-          "我们围绕可衡量的种植者成果设计产品与流程——从温室到市场的质量、效率与可靠性。"
-        ),
-        image:
-          "https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=1200&auto=format&fit=crop",
-        imageAlt: loc(
-          "Growers working in a horticulture greenhouse",
-          "Produtores trabalhando em estufa de horticultura",
-          "Productores trabajando en un invernadero de horticultura",
-          "种植者在园艺温室作业"
-        ),
-        imageSide: "left",
-        ctaLabel: loc("Learn More", "Saiba mais", "Saber más", "了解更多"),
+        ctaLabel: loc("Learn more", "Saiba mais", "Saber más", "了解更多"),
         ctaHref: "/solutions",
       },
       {
         id: "global-local",
         title: loc(
-          "Global Capabilities, Local Support",
-          "Capacidade global, suporte local",
-          "Capacidad global, soporte local",
-          "全球能力，本地支持"
+          "Global Reach. Local Understanding.",
+          "Alcance global. Entendimento local.",
+          "Alcance global. Comprensión local.",
+          "全球覆盖。本地洞察。"
         ),
         description: loc(
-          "Worldwide manufacturing and supply are backed by regional teams who understand local crops, seasons, and commercial realities.",
-          "Manufatura e supply chain globais são sustentadas por equipes regionais que entendem culturas, safras e realidades comerciais locais.",
-          "La manufactura y la cadena de suministro globales se respaldan con equipos regionales que entienden cultivos, temporadas y realidades comerciales locales.",
-          "全球制造与供应由了解本地作物、季节与商业现实的区域团队支持。"
+          "International manufacturing, sourcing, and product development capabilities combined with local expertise and support.",
+          "Capacidades internacionais de manufatura, sourcing e desenvolvimento de produtos combinadas com expertise e suporte locais.",
+          "Capacidades internacionales de manufactura, sourcing y desarrollo de productos combinadas con expertise y soporte locales.",
+          "国际制造、采购与产品开发能力，结合本地专长与支持。"
         ),
         image:
           "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200&auto=format&fit=crop",
@@ -658,23 +671,59 @@ const defaultSettings = (): AboutPageSettings => ({
           "Equipo uniendo las manos en colaboración",
           "团队携手协作"
         ),
+        imageSide: "left",
+        ctaLabel: loc(
+          "See results",
+          "Ver resultados",
+          "Ver resultados",
+          "查看成果"
+        ),
+        ctaHref: "/case-studies",
+      },
+      {
+        id: "practical",
+        title: loc(
+          "Practical Solutions",
+          "Soluções práticas",
+          "Soluciones prácticas",
+          "务实方案"
+        ),
+        description: loc(
+          "Focused on solving real operational challenges and creating measurable value.",
+          "Focadas em resolver desafios operacionais reais e criar valor mensurável.",
+          "Enfocadas en resolver desafíos operativos reales y crear valor medible.",
+          "专注解决真实运营挑战并创造可衡量的价值。"
+        ),
+        image:
+          "https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=1200&auto=format&fit=crop",
+        imageAlt: loc(
+          "Growers working in a horticulture greenhouse",
+          "Produtores trabalhando em estufa de horticultura",
+          "Productores trabajando en un invernadero de horticultura",
+          "种植者在园艺温室作业"
+        ),
         imageSide: "right",
-        ctaLabel: loc("Learn More", "Saiba mais", "Saber más", "了解更多"),
-        ctaHref: "/about",
+        ctaLabel: loc(
+          "See our solutions",
+          "Ver nossas soluções",
+          "Ver nuestras soluciones",
+          "查看我们的方案"
+        ),
+        ctaHref: "/solutions",
       },
       {
         id: "partnership",
         title: loc(
-          "Long-Term Partnership",
-          "Parceria de longo prazo",
-          "Alianza a largo plazo",
+          "Long-term Partnerships",
+          "Parcerias de longo prazo",
+          "Alianzas a largo plazo",
           "长期合作伙伴关系"
         ),
         description: loc(
-          "We invest in lasting relationships — aligning production, service, and innovation with the growers and wholesalers who grow with us.",
-          "Investimos em relações duradouras — alinhando produção, serviço e inovação com os produtores e atacadistas que crescem conosco.",
-          "Invertimos en relaciones duraderas — alineando producción, servicio e innovación con los productores y mayoristas que crecen con nosotros.",
-          "我们投资于长久关系——与共同成长的种植者与批发商对齐生产、服务与创新。"
+          "Relationships built on trust, collaboration and reliability.",
+          "Relações construídas sobre confiança, colaboração e confiabilidade.",
+          "Relaciones construidas sobre confianza, colaboración y fiabilidad.",
+          "建立在信任、协作与可靠之上的关系。"
         ),
         image:
           "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=1200&auto=format&fit=crop",
@@ -685,7 +734,12 @@ const defaultSettings = (): AboutPageSettings => ({
           "商业伙伴在战略会议中"
         ),
         imageSide: "left",
-        ctaLabel: loc("Learn More", "Saiba mais", "Saber más", "了解更多"),
+        ctaLabel: loc(
+          "Contact us",
+          "Fale conosco",
+          "Contáctanos",
+          "联系我们"
+        ),
         ctaHref: "/contact",
       },
     ],
@@ -894,7 +948,7 @@ const defaultSettings = (): AboutPageSettings => ({
 });
 
 let cache: AboutPageSettings | null = null;
-const CONTENT_REVISION = 16;
+const CONTENT_REVISION = 22;
 let cacheRevision = 0;
 
 const VALUE_IMAGE_FALLBACKS: Record<
@@ -1102,6 +1156,39 @@ export function normalizeAboutPageSettings(
 ): AboutPageSettings {
   const defaults = defaultSettings();
 
+  const currentEvents = settings.timeline?.events ?? [];
+  const years = new Set(currentEvents.map((event) => event.year));
+  const isLegacyTimeline =
+    currentEvents.length === 0 ||
+    years.has("1998") ||
+    years.has("2006") ||
+    years.has("2016") ||
+    years.has("2021") ||
+    years.has("2025") ||
+    !years.has("2005") ||
+    !years.has("2013") ||
+    !years.has("2023");
+
+  const currentCalloutBody = settings.callout?.body?.en ?? "";
+  const isLegacyCallout =
+    !currentCalloutBody ||
+    currentCalloutBody.includes("Most suppliers specialize") ||
+    !currentCalloutBody.includes("protect\nquality");
+
+  const currentHeroTitle = settings.hero?.title?.en ?? "";
+  const isLegacyHero =
+    !currentHeroTitle ||
+    currentHeroTitle.includes("Oboya Horticulture supports growers") ||
+    !settings.hero?.body?.en;
+
+  const cultureItems = settings.culture?.items ?? [];
+  const cultureFirstTitle = cultureItems[0]?.title?.en ?? "";
+  const isLegacyCulture =
+    cultureItems.length === 0 ||
+    cultureFirstTitle === "Integrated Solutions" ||
+    cultureItems.some((item) => item.id === "integrated" || item.id === "performance") ||
+    !settings.culture?.title?.en;
+
   return {
     ...settings,
     sections: {
@@ -1111,6 +1198,40 @@ export function normalizeAboutPageSettings(
         enabled: settings.sections?.impact?.enabled ?? true,
       },
     },
+    hero: isLegacyHero
+      ? defaults.hero
+      : {
+          ...defaults.hero,
+          ...settings.hero,
+          body: settings.hero?.body ?? defaults.hero.body,
+        },
+    timeline: {
+      ...defaults.timeline,
+      ...settings.timeline,
+      prevLabel: settings.timeline?.prevLabel ?? defaults.timeline.prevLabel,
+      nextLabel: settings.timeline?.nextLabel ?? defaults.timeline.nextLabel,
+      events: isLegacyTimeline ? defaults.timeline.events : currentEvents,
+    },
+    callout: {
+      ...defaults.callout,
+      ...settings.callout,
+      segments:
+        settings.callout?.segments?.length
+          ? settings.callout.segments
+          : defaults.callout.segments,
+      body: isLegacyCallout
+        ? defaults.callout.body
+        : (settings.callout?.body ?? defaults.callout.body),
+    },
+    culture: isLegacyCulture
+      ? defaults.culture
+      : {
+          ...defaults.culture,
+          ...settings.culture,
+          title: settings.culture?.title ?? defaults.culture.title,
+          eyebrow: settings.culture?.eyebrow ?? defaults.culture.eyebrow,
+          items: cultureItems.length ? cultureItems : defaults.culture.items,
+        },
     impact: {
       title: settings.impact?.title ?? defaults.impact.title,
       description: settings.impact?.description ?? defaults.impact.description,

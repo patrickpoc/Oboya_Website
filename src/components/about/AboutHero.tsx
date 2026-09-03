@@ -1,71 +1,47 @@
 "use client";
 
-import Image from "next/image";
-import { motion } from "framer-motion";
-import { Container } from "@/components/ui/container";
+import { motion, useReducedMotion } from "framer-motion";
 import { fadeInUp } from "@/lib/animations";
 import { pickLocalized } from "@/lib/cms/utils";
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
 
 interface AboutHeroProps {
   data: AboutPageSettings["hero"];
-  image: AboutPageSettings["institutionalImage"];
   locale: string;
-  showImage?: boolean;
 }
 
-export function AboutHero({
-  data,
-  image,
-  locale,
-  showImage = true,
-}: AboutHeroProps) {
-  const eyebrow = pickLocalized(data.eyebrow, locale);
+export function AboutHero({ data, locale }: AboutHeroProps) {
+  const reduceMotion = useReducedMotion();
   const title = pickLocalized(data.title, locale);
-  const alt = pickLocalized(image.alt, locale);
+  const body = data.body
+    ? pickLocalized(data.body, locale)
+    : pickLocalized(data.title, locale);
 
   return (
-    <section className="bg-white">
-      <div className="pt-[clamp(2.25rem,5vw,3.75rem)] pb-[clamp(2rem,4.5vw,3.25rem)]">
-        <Container>
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeInUp}
+    <section
+      className="relative w-full min-h-[calc(100dvh-4rem)] md:min-h-[calc(100dvh-5rem)]"
+      aria-labelledby="about-hero-heading"
+    >
+      <motion.div
+        className="relative z-10 flex h-full min-h-[inherit] flex-col justify-center px-[var(--container-padding)] py-10 md:py-12 lg:py-14"
+        initial={reduceMotion ? false : "hidden"}
+        animate={reduceMotion ? undefined : "visible"}
+        variants={reduceMotion ? undefined : fadeInUp}
+      >
+        <div className="mx-auto w-full max-w-[var(--container-max)]">
+          <h1
+            id="about-hero-heading"
+            className="max-w-4xl font-display text-[clamp(2rem,4vw,3.25rem)] font-bold leading-[1.1] tracking-[-0.02em] text-white text-balance"
           >
-            <p className="font-body text-sm font-semibold leading-relaxed text-oboya-blue-dark/85 md:text-[0.9375rem]">
-              {eyebrow}
+            {title}
+          </h1>
+          {body ? (
+            <p className="mt-5 max-w-3xl font-body text-[clamp(0.95rem,1.5vw,1.125rem)] font-normal leading-[1.55] text-white/92 md:mt-6 md:leading-[1.6] lg:max-w-[58%]">
+              {body}
             </p>
-            <div
-              className="mt-3 h-px w-full bg-oboya-blue-dark/20 md:mt-4"
-              aria-hidden
-            />
-            <h1 className="mt-4 max-w-2xl font-display text-[clamp(1.125rem,2vw,1.625rem)] font-light leading-[1.35] tracking-[-0.02em] text-oboya-blue-dark text-pretty md:mt-5 lg:max-w-[52%]">
-              {title}
-            </h1>
-          </motion.div>
-        </Container>
-      </div>
-
-      {showImage && (
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-8%" }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="relative aspect-[2.35/1] min-h-[200px] w-full overflow-hidden md:min-h-[340px] lg:min-h-[440px]"
-          aria-label={alt}
-        >
-          <Image
-            src={image.src}
-            alt={alt}
-            fill
-            priority
-            className="object-cover object-center"
-            sizes="100vw"
-          />
-        </motion.div>
-      )}
+          ) : null}
+        </div>
+      </motion.div>
     </section>
   );
 }

@@ -74,7 +74,7 @@ export function HomePageBackdrop({
         <div className="relative z-10">
           {children}
           {cta}
-          <div ref={endRef} className="h-px w-full" aria-hidden />
+          <div ref={endRef} className="h-0 w-full" aria-hidden />
         </div>
         {afterBackdrop ? (
           <div className="relative z-10">{afterBackdrop}</div>

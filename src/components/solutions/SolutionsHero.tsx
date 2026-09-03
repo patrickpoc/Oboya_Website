@@ -1,8 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Container } from "@/components/ui/container";
 import { SolutionsHeroCarousel } from "@/components/solutions/SolutionsHeroCarousel";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { cn } from "@/lib/utils";
@@ -31,17 +30,20 @@ export type SolutionsHeroProps =
 const HERO_SECTION_CLASS =
   "relative min-h-[calc(100svh-4rem)] overflow-hidden md:min-h-[calc(100svh-5rem)]";
 
-/** Mini hero band — vertically centered, height follows content + padding. */
-const HERO_BAND_CLASS =
-  "absolute top-1/2 right-0 left-0 z-10 w-full -translate-y-1/2";
+function splitTaglineLines(tagline: string): string[] {
+  return tagline
+    .split(/\n+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
 
-function HeroBandOverlay({ usePageBackdrop }: { usePageBackdrop?: boolean }) {
+function HeroOverlay({ usePageBackdrop }: { usePageBackdrop?: boolean }) {
   return (
     <>
       <div
         className={cn(
           "absolute inset-0",
-          usePageBackdrop ? "bg-black/55" : "bg-oboya-blue-dark"
+          usePageBackdrop ? "bg-black/55" : "bg-oboya-blue-dark/70"
         )}
         aria-hidden
       />
@@ -65,36 +67,42 @@ function IndexHeroContent({
   accent: string;
   reduceMotion: boolean | null;
 }) {
+  const lines = useMemo(() => splitTaglineLines(tagline), [tagline]);
+
   return (
     <motion.div
       variants={staggerContainer}
       initial={reduceMotion ? false : "hidden"}
       animate={reduceMotion ? undefined : "visible"}
-      className="mx-auto flex w-full max-w-3xl flex-col items-center text-center"
+      className="mx-auto flex h-full min-h-[inherit] w-full max-w-[var(--container-max)] flex-col px-[var(--container-padding)] py-[clamp(3rem,8vw,5rem)] text-left"
     >
-      <motion.h1
-        variants={fadeInUp}
-        className="max-w-2xl font-display text-[clamp(1.75rem,3.8vw,2.5rem)] font-semibold leading-[1.12] tracking-[-0.02em] text-white text-balance"
-      >
-        {headline}
-      </motion.h1>
-      <motion.p
-        variants={fadeInUp}
-        className="mt-3 max-w-lg whitespace-pre-line font-display text-[clamp(1.05rem,1.75vw,1.25rem)] font-light leading-[1.35] tracking-[-0.01em] text-white/95 md:mt-4"
-      >
-        {tagline}
-      </motion.p>
+      <div className="flex w-full max-w-3xl flex-1 flex-col justify-between">
+        <motion.h1
+          variants={fadeInUp}
+          className="whitespace-nowrap font-display text-[clamp(1.25rem,4.2vw,3rem)] font-bold leading-[1.15] tracking-[-0.02em] text-white"
+        >
+          {headline}
+        </motion.h1>
 
-      <div className="mt-4 flex max-w-2xl flex-col gap-3 md:mt-5">
+        <motion.div
+          variants={fadeInUp}
+          className="space-y-0.5 font-body text-[clamp(1.05rem,1.8vw,1.25rem)] font-normal leading-[1.45] text-white/95"
+        >
+          {lines.map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+        </motion.div>
+
         <motion.p
           variants={fadeInUp}
-          className="font-body text-[0.9375rem] leading-[1.65] text-white/85 md:text-base md:leading-[1.6]"
+          className="max-w-2xl font-body text-[0.9375rem] font-medium leading-[1.6] text-white/90 md:text-base md:leading-[1.65]"
         >
           {body}
         </motion.p>
+
         <motion.p
           variants={fadeInUp}
-          className="font-body text-[0.9375rem] font-bold leading-[1.6] text-oboya-yellow-light md:text-base"
+          className="max-w-2xl font-body text-[0.9375rem] font-bold leading-[1.6] text-white md:text-base md:leading-[1.65]"
         >
           {accent}
         </motion.p>
@@ -103,7 +111,7 @@ function IndexHeroContent({
   );
 }
 
-function CenteredHeroBand({
+function FullHeroShell({
   usePageBackdrop,
   children,
 }: {
@@ -111,11 +119,11 @@ function CenteredHeroBand({
   children: ReactNode;
 }) {
   return (
-    <div className={cn("relative", HERO_BAND_CLASS)}>
-      <HeroBandOverlay usePageBackdrop={usePageBackdrop} />
-      <Container className="relative z-10 w-full px-[var(--container-padding)] py-[clamp(1.25rem,3vw,2rem)] md:py-[clamp(1.5rem,3.5vw,2.25rem)]">
+    <div className="relative z-10 flex min-h-[inherit] w-full flex-col justify-center">
+      <HeroOverlay usePageBackdrop={usePageBackdrop} />
+      <div className="relative z-10 flex min-h-[inherit] w-full flex-col">
         {children}
-      </Container>
+      </div>
     </div>
   );
 }
@@ -130,18 +138,18 @@ export function SolutionsHero(props: SolutionsHeroProps) {
         <div className="absolute inset-0">
           <SolutionsHeroCarousel images={props.images} alt={alt} />
         </div>
-        <CenteredHeroBand>
+        <FullHeroShell>
           <motion.div
             initial={reduceMotion ? false : "hidden"}
             animate={reduceMotion ? undefined : "visible"}
             variants={reduceMotion ? undefined : fadeInUp}
-            className="mx-auto max-w-3xl text-center"
+            className="mx-auto flex min-h-[inherit] w-full max-w-[var(--container-max)] items-center px-[var(--container-padding)] py-[clamp(3rem,8vw,5rem)] text-left"
           >
-            <h1 className="font-display text-[clamp(1.35rem,2.5vw,1.875rem)] font-light leading-[1.2] tracking-[-0.02em] text-white text-pretty">
+            <h1 className="max-w-3xl font-display text-[clamp(1.75rem,3.5vw,2.5rem)] font-bold leading-[1.2] tracking-[-0.02em] text-white text-pretty">
               {props.title}
             </h1>
           </motion.div>
-        </CenteredHeroBand>
+        </FullHeroShell>
       </section>
     );
   }
@@ -156,7 +164,7 @@ export function SolutionsHero(props: SolutionsHeroProps) {
         </div>
       ) : null}
 
-      <CenteredHeroBand usePageBackdrop={usePageBackdrop}>
+      <FullHeroShell usePageBackdrop={usePageBackdrop}>
         <IndexHeroContent
           headline={props.headline}
           tagline={props.tagline}
@@ -164,7 +172,7 @@ export function SolutionsHero(props: SolutionsHeroProps) {
           accent={props.accent}
           reduceMotion={reduceMotion}
         />
-      </CenteredHeroBand>
+      </FullHeroShell>
     </section>
   );
 }

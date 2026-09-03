@@ -3,23 +3,21 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import type { HomepageSectionId } from "@/lib/cms/repositories/homepage-repository";
+import type { HomepageSectionSlug } from "@/lib/cms/homepage-sections";
 import { HOMEPAGE_SECTION_META } from "@/lib/cms/homepage-sections";
 import type { HomepageSectionEditorProps } from "../shared";
 
-const VISIBILITY_SECTION_IDS: HomepageSectionId[] = [
+const VISIBILITY_SECTION_IDS = [
   "hero",
-  "companyOverview",
   "capabilities",
   "businessSolutions",
-  "globalPresence",
   "testimonials",
   "latestNews",
   "partners",
-];
+] as const satisfies readonly HomepageSectionSlug[];
 
 export function HomepageSettingsEditor({ settings, setSettings }: HomepageSectionEditorProps) {
-  const toggleSection = (id: HomepageSectionId) => {
+  const toggleSection = (id: (typeof VISIBILITY_SECTION_IDS)[number]) => {
     setSettings((prev) => ({
       ...prev,
       sections: {

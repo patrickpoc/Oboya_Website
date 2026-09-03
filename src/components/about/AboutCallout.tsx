@@ -1,56 +1,82 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Container } from "@/components/ui/container";
+import { motion, useReducedMotion } from "framer-motion";
 import { fadeInUp } from "@/lib/animations";
 import { pickLocalized } from "@/lib/cms/utils";
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
+import { cn } from "@/lib/utils";
 
 interface AboutCalloutProps {
   data: AboutPageSettings["callout"];
   locale: string;
+  /** Same institutional image used by the About hero. */
+  imageSrc?: string | null;
 }
 
-export function AboutCallout({ data, locale }: AboutCalloutProps) {
-  const eyebrow = data.segments
+export function AboutCallout({ data, locale, imageSrc }: AboutCalloutProps) {
+  const reduceMotion = useReducedMotion();
+  const title = data.segments
     .map((segment) => pickLocalized(segment.text, locale))
-    .join("");
+    .join("")
+    .trim();
   const body = data.body ? pickLocalized(data.body, locale) : "";
+  const paragraphs = body
+    .split(/\n\n+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const backgroundSrc =
+    imageSrc || "/assets/about/institutional.png";
+
+  if (!title && paragraphs.length === 0) return null;
 
   return (
-    <section className="bg-oboya-blue-dark pt-[clamp(2.25rem,5vw,3.75rem)] pb-[clamp(2rem,4.5vw,3.25rem)]">
-      <Container>
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.35 }}
-          variants={fadeInUp}
-        >
-          <p className="font-body text-sm font-semibold leading-relaxed text-white/85 md:text-[0.9375rem]">
-            {data.segments.map((segment, index) => {
-              const text = pickLocalized(segment.text, locale);
-              const className =
-                segment.tone === "green" ? "text-oboya-green" : "text-white/85";
-              return (
-                <span key={`${text}-${index}`} className={className}>
-                  {segment.breakBefore ? <br /> : null}
-                  {text}
-                </span>
-              );
-            })}
-          </p>
-          <div className="mt-3 h-px w-full bg-white/25 md:mt-4" aria-hidden />
-          {body ? (
-            <h2 className="mt-4 max-w-2xl whitespace-pre-line font-display text-[clamp(1.125rem,2vw,1.625rem)] font-light leading-[1.35] tracking-[-0.02em] text-white text-pretty md:mt-5 lg:max-w-[52%]">
-              {body}
-            </h2>
-          ) : eyebrow ? (
-            <h2 className="mt-4 max-w-2xl font-display text-[clamp(1.125rem,2vw,1.625rem)] font-light leading-[1.35] tracking-[-0.02em] text-white text-pretty md:mt-5 lg:max-w-[52%]">
-              {eyebrow}
+    <section
+      className={cn(
+        "relative overflow-hidden",
+        "min-h-[min(54.6vw,20.8rem)] md:min-h-[23.4rem] lg:min-h-[26rem]"
+      )}
+      aria-labelledby={title ? "about-callout-heading" : undefined}
+    >
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-fixed"
+        style={{
+          backgroundImage: `url(${backgroundSrc})`,
+        }}
+        aria-hidden
+      />
+      <div className="absolute inset-0 bg-black/50" aria-hidden />
+
+      <motion.div
+        className="relative z-10 flex min-h-[inherit] flex-col justify-center px-[var(--container-padding)] py-[3.25rem] text-left md:py-[3.9rem] lg:py-[4.55rem]"
+        initial={reduceMotion ? false : "hidden"}
+        whileInView={reduceMotion ? undefined : "visible"}
+        viewport={{ once: true, margin: "-80px" }}
+        variants={reduceMotion ? undefined : fadeInUp}
+      >
+        <div className="mx-auto w-full max-w-[var(--container-max)]">
+          {title ? (
+            <h2
+              id="about-callout-heading"
+              className="max-w-4xl font-display text-[clamp(2rem,3.6vw,2.75rem)] font-semibold leading-[1.1] tracking-[-0.02em] text-white text-balance"
+            >
+              {title}
             </h2>
           ) : null}
-        </motion.div>
-      </Container>
+
+          {paragraphs.length > 0 ? (
+            <div className="mt-6 max-w-4xl space-y-5 md:mt-8 md:space-y-6">
+              {paragraphs.map((paragraph, index) => (
+                <p
+                  key={`${index}-${paragraph.slice(0, 24)}`}
+                  className="whitespace-pre-line font-body text-[clamp(0.95rem,1.5vw,1.125rem)] font-normal leading-[1.55] text-white/92 md:leading-[1.6]"
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </motion.div>
     </section>
   );
 }

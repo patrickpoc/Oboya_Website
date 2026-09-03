@@ -5,10 +5,8 @@ import type { HomepageSectionSlug } from "@/lib/cms/homepage-sections";
 import type { HomepageSectionEditorProps } from "./shared";
 import { HomepageSectionShell } from "./HomepageSectionShell";
 import { HeroSectionEditor } from "./sections/HeroSectionEditor";
-import { CompanyOverviewSectionEditor } from "./sections/CompanyOverviewSectionEditor";
 import { CapabilitiesSectionEditor } from "./sections/CapabilitiesSectionEditor";
 import { BusinessSolutionsSectionEditor } from "./sections/BusinessSolutionsSectionEditor";
-import { GlobalPresenceSectionEditor } from "./sections/GlobalPresenceSectionEditor";
 import { TestimonialsSectionEditor } from "./sections/TestimonialsSectionEditor";
 import { LatestNewsSectionEditor } from "./sections/LatestNewsSectionEditor";
 import { PartnersSectionEditor } from "./sections/PartnersSectionEditor";
@@ -16,10 +14,8 @@ import { HomepageSettingsEditor } from "./sections/HomepageSettingsEditor";
 
 const SECTION_EDITORS: Record<HomepageSectionSlug, ComponentType<HomepageSectionEditorProps>> = {
   hero: HeroSectionEditor,
-  companyOverview: CompanyOverviewSectionEditor,
   capabilities: CapabilitiesSectionEditor,
   businessSolutions: BusinessSolutionsSectionEditor,
-  globalPresence: GlobalPresenceSectionEditor,
   testimonials: TestimonialsSectionEditor,
   latestNews: LatestNewsSectionEditor,
   partners: PartnersSectionEditor,

@@ -23,7 +23,7 @@ export function AboutValues({ data, locale }: AboutValuesProps) {
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
           variants={fadeInUp}
-          className="mb-10 text-center font-display text-[clamp(2.25rem,5vw,3.5rem)] font-light tracking-[-0.02em] text-oboya-blue-dark md:mb-12"
+          className="mb-10 font-display text-[clamp(2.25rem,5vw,3.75rem)] font-light tracking-[-0.02em] text-oboya-blue-dark md:mb-12"
         >
           {title}
         </motion.h2>

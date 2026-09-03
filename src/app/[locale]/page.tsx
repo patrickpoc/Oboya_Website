@@ -5,9 +5,7 @@ import { HomePageBackdrop } from "@/components/sections/HomePageBackdrop";
 import { HomeCta } from "@/components/sections/HomeCta";
 import { HomePageContent } from "@/components/sections/HomePageContent";
 import { Partners } from "@/components/sections/Partners";
-import { routing, type Locale } from "@/i18n/routing";
-import { resolveMapLocationsForLocale } from "@/lib/map-locations";
-import { readMapLocations } from "@/lib/map-locations.server";
+import { routing } from "@/i18n/routing";
 import { readBlogPosts, readHomepageSettings } from "@/lib/cms/readers";
 import { pickLocalized } from "@/lib/cms/utils";
 import type { Metadata } from "next";
@@ -36,18 +34,11 @@ export default async function Home({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [mapData, t, tHomeCta, homepage, posts] = await Promise.all([
-    readMapLocations(),
-    getTranslations({ locale, namespace: "globalPresence" }),
+  const [tHomeCta, homepage, posts] = await Promise.all([
     getTranslations({ locale, namespace: "homeCta" }),
     readHomepageSettings(),
     readBlogPosts(),
   ]);
-
-  const locations = resolveMapLocationsForLocale(
-    mapData.locations,
-    locale as Locale
-  );
 
   const waitForHero =
     homepage.sections.hero.enabled &&
@@ -92,9 +83,6 @@ export default async function Home({ params }: Props) {
         >
           <HomePageContent
             locale={locale}
-            locations={locations}
-            connections={mapData.connections}
-            mapAlt={t("mapAlt")}
             homepage={homepage}
             posts={posts}
           />

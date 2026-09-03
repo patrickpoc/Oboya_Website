@@ -15,8 +15,8 @@ interface HeroMediaProps {
 export function HeroMediaGradients() {
   return (
     <>
-      <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/25 to-oboya-blue-dark/92" />
-      <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-b from-transparent to-oboya-blue-dark" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/25 to-oboya-soft-white/92" />
+      <div className="absolute inset-x-0 bottom-0 h-[14%] bg-gradient-to-b from-transparent to-oboya-soft-white" />
     </>
   );
 }

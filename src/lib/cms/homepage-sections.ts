@@ -1,9 +1,7 @@
 export const HOMEPAGE_SECTION_SLUGS = [
   "hero",
-  "companyOverview",
   "capabilities",
   "businessSolutions",
-  "globalPresence",
   "testimonials",
   "latestNews",
   "partners",
@@ -20,10 +18,6 @@ export const HOMEPAGE_SECTION_META: Record<
     title: "Hero",
     description: "Background image, headline, and primary / secondary CTAs.",
   },
-  companyOverview: {
-    title: "Statistics & Mission",
-    description: "Scroll-telling headline, pinned image, and animated stats.",
-  },
   capabilities: {
     title: "Why Oboya Horticulture",
     description: "Image carousel slides with title and description overlays.",
@@ -31,10 +25,6 @@ export const HOMEPAGE_SECTION_META: Record<
   businessSolutions: {
     title: "Solutions Tailored",
     description: "Numbered solution cards in a testimonials-style carousel.",
-  },
-  globalPresence: {
-    title: "Global Presence",
-    description: "Section title only — the interactive map is fixed.",
   },
   testimonials: {
     title: "Testimonials",

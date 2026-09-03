@@ -53,6 +53,8 @@ export function SolutionsCta({
         )}
         aria-hidden
       />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-1 bg-gradient-to-b from-oboya-soft-white to-transparent" aria-hidden />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-1 bg-gradient-to-t from-white to-transparent" aria-hidden />
       <div
         className={cn(
           "relative z-10 flex min-h-[inherit] flex-col items-center justify-center px-[var(--container-padding)] text-center",
@@ -71,9 +73,10 @@ export function SolutionsCta({
         >
           <h2
             className={cn(
-              "max-w-3xl font-display font-light leading-[1.15] tracking-[-0.02em] text-white text-balance",
+              "font-display font-semibold leading-[1.15] tracking-[-0.02em] text-white text-balance",
+              compact ? "max-w-none" : "max-w-3xl",
               compact
-                ? "text-[clamp(1.75rem,3.08vw,2.45rem)]"
+                ? "text-[clamp(2.1rem,3.8vw,3rem)]"
                 : "text-[clamp(1.5rem,2.9vw,2.375rem)]"
             )}
           >
@@ -83,7 +86,7 @@ export function SolutionsCta({
             className={cn(
               "max-w-xl font-body leading-[1.55] text-oboya-soft-white",
               compact
-                ? "text-[1.225rem] font-light md:text-[1.3125rem] md:leading-[1.5]"
+                ? "text-base leading-relaxed text-white/92 sm:text-lg md:text-[1.25rem] md:leading-[1.6]"
                 : "text-[0.9375rem] md:text-lg md:leading-[1.45]"
             )}
           >
