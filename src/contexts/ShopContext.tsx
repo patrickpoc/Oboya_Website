@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { useSearchParams } from "next/navigation";
+import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import {
   PRODUCTS_PAGE_SIZE,
@@ -27,6 +28,17 @@ import {
   getProductMaxQuantity,
   getProductMoq,
 } from "@/lib/shop/quantity";
+import {
+  getActiveVariant,
+  getVariantDisplayName,
+  hasColorVariants,
+  normalizeColorVariants,
+  normalizeImageColorIds,
+  normalizeLocalizedColorName,
+  resolveVariantImage,
+  resolveVariantPrice,
+  resolveVariantSku,
+} from "@/lib/shop/color-variants";
 import type {
   CartItem,
   CurrencyCode,
@@ -69,9 +81,13 @@ interface ShopContextValue extends ShopState {
   setFilters: (filters: ShopFilters) => void;
   updateFilters: (patch: Partial<ShopFilters>) => void;
   clearFilters: () => void;
-  addItem: (productId: string, quantity?: number) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
-  removeItem: (productId: string) => void;
+  addItem: (productId: string, quantity?: number, variantId?: string | null) => void;
+  updateQuantity: (
+    productId: string,
+    quantity: number,
+    variantId?: string | null
+  ) => void;
+  removeItem: (productId: string, variantId?: string | null) => void;
   clearCart: () => void;
   setCartOpen: (open: boolean) => void;
   setQuickViewProductId: (productId: string | null) => void;
@@ -82,10 +98,13 @@ interface ShopContextValue extends ShopState {
   submitRfq: (payload: Omit<RfqPayload, "items" | "estimatedTotal" | "countryCode" | "currency" | "officeId">, officeId?: string | null) => Promise<string>;
   resetRfqStatus: () => void;
   addToQuoteProductId: string | null;
-  openAddToQuoteDialog: (productId: string) => void;
+  addToQuoteVariantId: string | null;
+  openAddToQuoteDialog: (productId: string, variantId?: string | null) => void;
   closeAddToQuoteDialog: () => void;
   getLineItems: () => Array<{
     productId: string;
+    variantId: string | null;
+    variantName: string | null;
     quantity: number;
     unitPrice: number;
     lineTotal: number;
@@ -99,6 +118,17 @@ interface ShopContextValue extends ShopState {
 
 const ShopContext = createContext<ShopContextValue | null>(null);
 
+function sameCartLine(
+  item: CartItem,
+  productId: string,
+  variantId?: string | null
+) {
+  return (
+    item.productId === productId &&
+    (item.variantId ?? null) === (variantId ?? null)
+  );
+}
+
 function sanitizeCartItems(items: unknown): CartItem[] {
   if (!Array.isArray(items)) return [];
   return items
@@ -108,8 +138,13 @@ function sanitizeCartItems(items: unknown): CartItem[] {
       if (typeof row.productId !== "string" || !row.productId.trim()) return null;
       const quantity = Number(row.quantity);
       if (!Number.isFinite(quantity) || quantity <= 0) return null;
+      const variantId =
+        typeof row.variantId === "string" && row.variantId.trim()
+          ? row.variantId.trim()
+          : null;
       return {
         productId: row.productId.trim(),
+        variantId,
         quantity: clampQuantity(quantity, 1),
       };
     })
@@ -156,8 +191,12 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const locale = useLocale();
   const [state, setState] = useState<ShopState>(defaultState);
   const [addToQuoteProductId, setAddToQuoteProductId] = useState<string | null>(
+    null
+  );
+  const [addToQuoteVariantId, setAddToQuoteVariantId] = useState<string | null>(
     null
   );
   const [isReady, setIsReady] = useState(false);
@@ -165,10 +204,10 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const [catalogTick, setCatalogTick] = useState(0);
   const hydratedFromUrl = useRef(false);
   const skipUrlWrite = useRef(false);
-  const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSyncedQuery = useRef<string | null>(null);
   const wasOnShop = useRef(false);
   const softOpenTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const urlWriteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isShopRoute = pathname === "/shop" || pathname.endsWith("/shop");
 
@@ -229,9 +268,22 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         setCatalogTick((n) => n + 1);
 
         const products = (await productsRes.json()) as CmsProduct[];
-        const published = products.filter(
-          (product) => product.status === "published" && !product.deletedAt
-        );
+        const published = products
+          .filter(
+            (product) => product.status === "published" && !product.deletedAt
+          )
+          .map((product) => ({
+            ...product,
+            defaultColor: product.defaultColor ?? "",
+            defaultColorName: normalizeLocalizedColorName(
+              product.defaultColorName
+            ),
+            imageColorIds: normalizeImageColorIds(
+              product.imageColorIds,
+              (product.images ?? []).length
+            ),
+            colorVariants: normalizeColorVariants(product.colorVariants),
+          }));
         if (cancelled) return;
         if (published.length > 0) {
           setShopProducts(published);
@@ -282,7 +334,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
     const urlState = parseShopUrlState(searchParams);
     const pendingProduct = urlState.product;
-    // On first entry: apply search first, open product detail after a beat
+    // Legacy ?product= deep-links redirect to the product detail page.
     const softOpen = enteringShop && Boolean(pendingProduct);
 
     if (softOpenTimer.current) {
@@ -299,7 +351,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       sort: urlState.sort,
       viewMode: urlState.view,
       filters: urlState.filters,
-      quickViewProductId: softOpen ? null : pendingProduct,
+      quickViewProductId: null,
       isCartOpen: urlState.cart,
       isQuoteModalOpen: urlState.quote,
       visibleCount: PRODUCTS_PAGE_SIZE,
@@ -307,15 +359,11 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     hydratedFromUrl.current = true;
 
     if (softOpen && pendingProduct) {
-      // Keep URL intact while the catalog settles, then open the drawer
       softOpenTimer.current = setTimeout(() => {
-        setState((prev) => ({
-          ...prev,
-          quickViewProductId: pendingProduct,
-        }));
         softOpenTimer.current = null;
         skipUrlWrite.current = false;
-      }, 650);
+        router.replace(`/shop/products/${pendingProduct}`);
+      }, 100);
     } else {
       queueMicrotask(() => {
         skipUrlWrite.current = false;
@@ -328,7 +376,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         softOpenTimer.current = null;
       }
     };
-  }, [isReady, isShopRoute, searchParams]);
+  }, [isReady, isShopRoute, router, searchParams]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -340,7 +388,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   }, [state.countryCode, state.currency, state.items, isReady]);
 
-  // Only write shop state back to the URL while on the shop route
+  // Only write shop state back to the URL while on the shop route.
+  // Debounce to avoid router.replace thrashing on each search keystroke.
   useEffect(() => {
     if (
       !isShopRoute ||
@@ -367,8 +416,19 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     const current = searchParams.toString();
     if (next === current) return;
 
-    lastSyncedQuery.current = next;
-    router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
+    if (urlWriteTimer.current) clearTimeout(urlWriteTimer.current);
+    urlWriteTimer.current = setTimeout(() => {
+      lastSyncedQuery.current = next;
+      router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
+      urlWriteTimer.current = null;
+    }, 400);
+
+    return () => {
+      if (urlWriteTimer.current) {
+        clearTimeout(urlWriteTimer.current);
+        urlWriteTimer.current = null;
+      }
+    };
   }, [
     isReady,
     isShopRoute,
@@ -428,15 +488,14 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setSearch = useCallback((search: string) => {
-    if (searchDebounce.current) clearTimeout(searchDebounce.current);
-    searchDebounce.current = setTimeout(() => {
-      setState((prev) => ({
+    setState((prev) => {
+      if (prev.search === search) return prev;
+      return {
         ...prev,
         search,
         visibleCount: PRODUCTS_PAGE_SIZE,
-      }));
-      searchDebounce.current = null;
-    }, 300);
+      };
+    });
   }, []);
 
   const setSort = useCallback((sort: SortOption) => {
@@ -467,49 +526,72 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
-  const addItem = useCallback((productId: string, quantity = 1) => {
-    const product = getProductByIdFromState(productId);
-    const moq = getProductMoq(product);
-    const maxQty = getProductMaxQuantity(product);
-    const normalizedQuantity = clampQuantity(quantity, moq, maxQty);
+  const addItem = useCallback(
+    (productId: string, quantity = 1, variantId: string | null = null) => {
+      const product = getProductByIdFromState(productId);
+      const moq = getProductMoq(product);
+      const maxQty = getProductMaxQuantity(product);
+      const normalizedQuantity = clampQuantity(quantity, moq, maxQty);
+      const normalizedVariantId = variantId || null;
 
-    setState((prev) => {
-      const existing = prev.items.find((item) => item.productId === productId);
-      const nextQuantity = existing
-        ? clampQuantity(existing.quantity + normalizedQuantity, moq, maxQty)
-        : normalizedQuantity;
-      const items = existing
-        ? prev.items.map((item) =>
-            item.productId === productId
-              ? { ...item, quantity: nextQuantity }
-              : item
-          )
-        : [...prev.items, { productId, quantity: nextQuantity }];
-      return { ...prev, items, isCartOpen: true };
-    });
-  }, [getProductByIdFromState]);
+      setState((prev) => {
+        const existing = prev.items.find((item) =>
+          sameCartLine(item, productId, normalizedVariantId)
+        );
+        const nextQuantity = existing
+          ? clampQuantity(existing.quantity + normalizedQuantity, moq, maxQty)
+          : normalizedQuantity;
+        const items = existing
+          ? prev.items.map((item) =>
+              sameCartLine(item, productId, normalizedVariantId)
+                ? { ...item, quantity: nextQuantity }
+                : item
+            )
+          : [
+              ...prev.items,
+              {
+                productId,
+                variantId: normalizedVariantId,
+                quantity: nextQuantity,
+              },
+            ];
+        return { ...prev, items, isCartOpen: true };
+      });
+    },
+    [getProductByIdFromState]
+  );
 
-  const updateQuantity = useCallback((productId: string, quantity: number) => {
-    const product = getProductByIdFromState(productId);
-    const moq = getProductMoq(product);
-    const maxQty = getProductMaxQuantity(product);
+  const updateQuantity = useCallback(
+    (productId: string, quantity: number, variantId: string | null = null) => {
+      const product = getProductByIdFromState(productId);
+      const moq = getProductMoq(product);
+      const maxQty = getProductMaxQuantity(product);
+      const normalizedVariantId = variantId || null;
 
-    setState((prev) => ({
-      ...prev,
-      items: prev.items.map((item) =>
-        item.productId === productId
-          ? { ...item, quantity: clampQuantity(quantity, moq, maxQty) }
-          : item
-      ),
-    }));
-  }, [getProductByIdFromState]);
+      setState((prev) => ({
+        ...prev,
+        items: prev.items.map((item) =>
+          sameCartLine(item, productId, normalizedVariantId)
+            ? { ...item, quantity: clampQuantity(quantity, moq, maxQty) }
+            : item
+        ),
+      }));
+    },
+    [getProductByIdFromState]
+  );
 
-  const removeItem = useCallback((productId: string) => {
-    setState((prev) => ({
-      ...prev,
-      items: prev.items.filter((item) => item.productId !== productId),
-    }));
-  }, []);
+  const removeItem = useCallback(
+    (productId: string, variantId: string | null = null) => {
+      const normalizedVariantId = variantId || null;
+      setState((prev) => ({
+        ...prev,
+        items: prev.items.filter(
+          (item) => !sameCartLine(item, productId, normalizedVariantId)
+        ),
+      }));
+    },
+    []
+  );
 
   const clearCart = useCallback(() => {
     setState((prev) => ({ ...prev, items: [] }));
@@ -542,12 +624,17 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     setState((prev) => ({ ...prev, isFilterDrawerOpen: open }));
   }, []);
 
-  const openAddToQuoteDialog = useCallback((productId: string) => {
-    setAddToQuoteProductId(productId);
-  }, []);
+  const openAddToQuoteDialog = useCallback(
+    (productId: string, variantId: string | null = null) => {
+      setAddToQuoteProductId(productId);
+      setAddToQuoteVariantId(variantId);
+    },
+    []
+  );
 
   const closeAddToQuoteDialog = useCallback(() => {
     setAddToQuoteProductId(null);
+    setAddToQuoteVariantId(null);
   }, []);
 
   const loadMoreProducts = useCallback(() => {
@@ -605,14 +692,34 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       .map((item) => {
         const product = getProductByIdFromState(item.productId);
         if (!product) return null;
-        const unitPrice = product.prices[state.currency!] ?? 0;
+        const resolvedVariant =
+          item.variantId || hasColorVariants(product)
+            ? getActiveVariant(product, item.variantId)
+            : null;
+        // Only attach a color label when the product has color options.
+        const colorLabel =
+          resolvedVariant && hasColorVariants(product)
+            ? getVariantDisplayName(resolvedVariant, locale)
+            : null;
+        const unitPrice = resolveVariantPrice(
+          product,
+          item.variantId ? resolvedVariant : null,
+          state.currency!
+        );
         return {
           productId: item.productId,
+          variantId: item.variantId ?? null,
+          variantName: colorLabel,
           quantity: item.quantity,
           unitPrice,
           lineTotal: unitPrice * item.quantity,
-          sku: product.sku,
-          image: product.images[0] ?? "",
+          sku: resolveVariantSku(product, resolvedVariant),
+          image: resolveVariantImage(
+            product,
+            item.variantId || hasColorVariants(product)
+              ? resolvedVariant
+              : null
+          ),
           categoryId: product.categoryId,
           brandId: product.brandId,
           stockStatus: product.stockStatus,
@@ -621,7 +728,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       .filter(Boolean) as ShopContextValue["getLineItems"] extends () => infer R
       ? R
       : never;
-  }, [getProductByIdFromState, state.currency, state.items]);
+  }, [getProductByIdFromState, locale, state.currency, state.items]);
 
   const estimatedTotal = useMemo(
     () => getLineItems().reduce((sum, item) => sum + item.lineTotal, 0),
@@ -676,6 +783,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         officeId,
         items: lineItems.map((item) => ({
           productId: item.productId,
+          variantId: item.variantId,
+          variantName: item.variantName,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
         })),
@@ -749,6 +858,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       submitRfq,
       resetRfqStatus,
       addToQuoteProductId,
+      addToQuoteVariantId,
       openAddToQuoteDialog,
       closeAddToQuoteDialog,
       getLineItems,
@@ -784,6 +894,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       submitRfq,
       resetRfqStatus,
       addToQuoteProductId,
+      addToQuoteVariantId,
       openAddToQuoteDialog,
       closeAddToQuoteDialog,
       getLineItems,

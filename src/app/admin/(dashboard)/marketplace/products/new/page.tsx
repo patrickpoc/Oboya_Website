@@ -14,6 +14,7 @@ import {
   createEmptyCmsProduct,
   ProductEditorForm,
 } from "@/components/admin/marketplace/ProductEditorForm";
+import { validateColorVariants } from "@/lib/shop/color-variants";
 
 export default function ProductNewPage() {
   const router = useRouter();
@@ -33,6 +34,14 @@ export default function ProductNewPage() {
 
   const handleSave = () => {
     if (!product) return;
+    const variantError = validateColorVariants(product.colorVariants, {
+      defaultColor: product.defaultColor,
+      defaultColorName: product.defaultColorName,
+    });
+    if (variantError) {
+      toast.error(variantError);
+      return;
+    }
     void (async () => {
       try {
         saveCmsProduct(product);

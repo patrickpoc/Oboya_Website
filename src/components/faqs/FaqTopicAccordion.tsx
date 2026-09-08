@@ -39,7 +39,9 @@ export function FaqTopicAccordion({ items, locale }: FaqTopicAccordionProps) {
             <FaqPlusMinusIcon />
           </AccordionTrigger>
           <AccordionContent className="pb-6 text-base font-normal leading-relaxed text-oboya-blue-dark/60 normal-case tracking-normal sm:pb-7 sm:text-[1.0625rem] sm:leading-[1.7]">
-            {pickLocalized(faq.answer, locale)}
+            <div className="space-y-3 whitespace-pre-line">
+              {pickLocalized(faq.answer, locale)}
+            </div>
           </AccordionContent>
         </AccordionItem>
       ))}

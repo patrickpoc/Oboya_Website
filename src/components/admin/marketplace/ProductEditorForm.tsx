@@ -1,7 +1,9 @@
 "use client";
 
 import { useAdminMarketplaceCatalog } from "@/hooks/use-admin-marketplace-catalog";
+import { ProductColorVariantsCard } from "@/components/admin/marketplace/ProductColorVariantsCard";
 import { ProductDescriptionCard } from "@/components/admin/marketplace/ProductDescriptionCard";
+import { ProductImagesCard } from "@/components/admin/marketplace/ProductImagesCard";
 import { ProductMarketsCard } from "@/components/admin/marketplace/ProductMarketsCard";
 import { ProductPublicationCard } from "@/components/admin/marketplace/ProductPublicationCard";
 import { ProductRegistrationCard } from "@/components/admin/marketplace/ProductRegistrationCard";
@@ -27,6 +29,7 @@ export function createEmptyCmsProduct(seed?: {
     categoryId: seed?.categoryId ?? "",
     subcategoryId: seed?.subcategoryId ?? "",
     images: [""],
+    imageColorIds: [[]],
     tags: [],
     availability: {},
     enabledCountries: {},
@@ -41,6 +44,9 @@ export function createEmptyCmsProduct(seed?: {
     specs: [],
     documents: [],
     relatedProductIds: [],
+    defaultColor: "",
+    defaultColorName: { en: "", "pt-BR": "", es: "", "zh-CN": "" },
+    colorVariants: [],
     name: { en: "", "pt-BR": "", es: "", "zh-CN": "" },
     shortDescription: { en: "", "pt-BR": "", es: "", "zh-CN": "" },
     description: { en: "", "pt-BR": "", es: "", "zh-CN": "" },
@@ -67,6 +73,15 @@ export function ProductEditorForm({ product, onChange }: ProductEditorFormProps)
         currenciesLoading={catalogLoading}
         onUpdate={update}
       />
+
+      <ProductColorVariantsCard
+        product={product}
+        currencies={currencies}
+        currenciesLoading={catalogLoading}
+        onUpdate={update}
+      />
+
+      <ProductImagesCard product={product} onUpdate={update} />
 
       <ProductDescriptionCard product={product} onUpdate={update} />
 

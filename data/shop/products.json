@@ -89,7 +89,19 @@
       }
     },
     "deletedAt": null,
-    "purgeAt": null
+    "purgeAt": null,
+    "colorVariants": [],
+    "defaultColor": "",
+    "defaultColorName": {
+      "en": "",
+      "pt-BR": "",
+      "es": "",
+      "zh-CN": ""
+    },
+    "imageColorIds": [
+      [],
+      []
+    ]
   },
   {
     "id": "produto-demo-copy-1787157507059",
@@ -181,6 +193,18 @@
       }
     },
     "deletedAt": null,
-    "purgeAt": null
+    "purgeAt": null,
+    "colorVariants": [],
+    "defaultColor": "",
+    "defaultColorName": {
+      "en": "",
+      "pt-BR": "",
+      "es": "",
+      "zh-CN": ""
+    },
+    "imageColorIds": [
+      [],
+      []
+    ]
   }
 ]

@@ -141,6 +141,28 @@
     "description": "Ya sea que busque mejorar el cultivo, el empaque, el transporte, la presentación en retail o el rendimiento operacional general, nuestros especialistas están listos para ayudar.",
     "button": "Póngase en Contacto"
   },
+  "homeEcosystem": {
+    "ariaLabel": "Ecosistema hortícola Oboya",
+    "title": "De la Propagación al Punto de Venta",
+    "body": {
+      "p1": "El éxito en la horticultura depende de más que un solo producto.",
+      "p2": "Depende de cómo el cultivo, el empaque, la logística, la presentación en retail y las operaciones diarias trabajan juntos.",
+      "p3": "Oboya Horticulture acompaña cada etapa de ese recorrido — para que acceda a los productos y la experiencia que necesita a través de un único socio de confianza."
+    },
+    "closingLine1": "Un Socio. Un Ecosistema.",
+    "closingLine2": "Oportunidades Infinitas para Rendir Mejor.",
+    "prev": "Etapa anterior",
+    "next": "Siguiente etapa",
+    "restart": "Reiniciar desde Propagación",
+    "stages": {
+      "propagation": "Propagación",
+      "growing": "Cultivo",
+      "packaging": "Empaque",
+      "logistics": "Logística",
+      "retail": "Exhibición en Retail",
+      "pos": "Punto de Venta"
+    }
+  },
   "footer": {
     "company": "Empresa",
     "solutions": "Soluciones",
@@ -190,6 +212,10 @@
     "emailPlaceholder": "su@email.com",
     "phone": "Teléfono",
     "phonePlaceholder": "+52 55 0000 0000",
+    "phoneCountry": "Código de país",
+    "phoneLocalPlaceholder": "55 0000 0000",
+    "phoneCountrySearch": "Buscar país o código",
+    "phoneCountryEmpty": "No se encontraron países",
     "company": "Empresa",
     "companyPlaceholder": "Nombre de la empresa",
     "message": "Mensaje",
@@ -199,7 +225,9 @@
     "country": "País",
     "countryPlaceholder": "Seleccione su país",
     "countryOther": "Otro",
-    "subject": "¿Seleccionar asunto?",
+    "countrySearch": "Buscar país",
+    "countryEmpty": "No se encontraron países",
+    "subject": "Asunto",
     "subjectPlaceholder": "¿Cómo podemos ayudar?",
     "subjects": {
       "general": "Consulta general",
@@ -523,9 +551,12 @@
     "viewGrid": "Grid view",
     "viewList": "List view",
     "filters": "Filters",
+    "expandToolbar": "Mostrar más opciones",
+    "collapseToolbar": "Ocultar opciones",
     "clearFilters": "Clear all filters",
     "closeFilters": "Close filters",
     "close": "Close",
+    "back": "Volver",
     "filterCategories": "Categories",
     "allCategories": "All categories",
     "filterSubcategories": "Subcategories",
@@ -541,6 +572,8 @@
     "priceMax": "Max",
     "quickView": "Quick View",
     "moreInformation": "Más información",
+    "colorLabel": "Color",
+    "selectedColor": "Color seleccionado",
     "zoomEnable": "Activar zoom de la imagen",
     "zoomDisable": "Desactivar zoom de la imagen",
     "zoomHint": "Mueva el cursor sobre la imagen para ampliar",

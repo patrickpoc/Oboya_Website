@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
@@ -12,6 +11,7 @@ interface SolutionsCtaProps {
   description: string;
   buttonLabel: string;
   imageSrc?: string;
+  /** When true, skip local image and rely on a page-level scroll backdrop. */
   sharedBackdrop?: boolean;
   size?: "default" | "compact";
 }
@@ -32,39 +32,30 @@ export function SolutionsCta({
       className={cn(
         "relative overflow-hidden",
         compact
-          ? "min-h-[min(49vw,18.2rem)] md:min-h-[21rem] lg:min-h-[23.8rem]"
-          : "min-h-[min(70vw,26rem)] md:min-h-[30rem] lg:min-h-[34rem]"
+          ? "min-h-[min(68vw,19rem)] sm:min-h-[20rem] md:min-h-[21rem] lg:min-h-[23.8rem]"
+          : "min-h-[min(78vw,24rem)] sm:min-h-[26rem] md:min-h-[30rem] lg:min-h-[34rem]"
       )}
     >
       {!sharedBackdrop && imageSrc ? (
-        <Image
-          src={imageSrc}
-          alt=""
-          fill
-          className="object-cover"
-          sizes="100vw"
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-fixed"
+          style={{ backgroundImage: `url(${imageSrc})` }}
           aria-hidden
         />
       ) : null}
-      <div
-        className={cn(
-          "absolute inset-0",
-          sharedBackdrop ? "bg-black/55" : "bg-black/50"
-        )}
-        aria-hidden
-      />
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-1 bg-gradient-to-b from-oboya-soft-white to-transparent" aria-hidden />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-1 bg-gradient-to-t from-white to-transparent" aria-hidden />
+      <div className="absolute inset-0 bg-black/55" aria-hidden />
       <div
         className={cn(
           "relative z-10 flex min-h-[inherit] flex-col items-center justify-center px-[var(--container-padding)] text-center",
-          compact ? "py-[2.8rem] md:py-14" : "py-16 md:py-20"
+          compact
+            ? "py-10 sm:py-12 md:py-14"
+            : "py-12 sm:py-14 md:py-20"
         )}
       >
         <motion.div
           className={cn(
             "flex w-full max-w-[var(--container-max)] flex-col items-center",
-            compact ? "gap-[1.4rem] md:gap-7" : "gap-6 md:gap-7"
+            compact ? "gap-4 sm:gap-5 md:gap-7" : "gap-5 sm:gap-6 md:gap-7"
           )}
           initial={reduceMotion ? false : "hidden"}
           whileInView={reduceMotion ? undefined : "visible"}
@@ -76,18 +67,18 @@ export function SolutionsCta({
               "font-display font-semibold leading-[1.15] tracking-[-0.02em] text-white text-balance",
               compact ? "max-w-none" : "max-w-3xl",
               compact
-                ? "text-[clamp(2.1rem,3.8vw,3rem)]"
-                : "text-[clamp(1.5rem,2.9vw,2.375rem)]"
+                ? "text-[clamp(1.5rem,5.2vw,3rem)]"
+                : "text-[clamp(1.35rem,4.2vw,2.375rem)]"
             )}
           >
             {title}
           </h2>
           <p
             className={cn(
-              "max-w-xl font-body leading-[1.55] text-oboya-soft-white",
+              "max-w-xl font-body text-oboya-soft-white text-pretty",
               compact
-                ? "text-base leading-relaxed text-white/92 sm:text-lg md:text-[1.25rem] md:leading-[1.6]"
-                : "text-[0.9375rem] md:text-lg md:leading-[1.45]"
+                ? "text-[clamp(0.9375rem,2.8vw,1.25rem)] leading-[1.55] text-white/92 md:leading-[1.6]"
+                : "text-[clamp(0.9rem,2.4vw,1.125rem)] leading-[1.55] md:leading-[1.45]"
             )}
           >
             {description}

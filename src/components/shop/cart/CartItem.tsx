@@ -12,6 +12,7 @@ const FALLBACK_IMAGE = "/assets/homepage/greenhouse-technology.webp";
 
 interface CartItemProps {
   productId: string;
+  variantName?: string | null;
   quantity: number;
   unitPrice: number;
   currency: string;
@@ -23,6 +24,7 @@ interface CartItemProps {
 
 export function CartItemRow({
   productId,
+  variantName,
   quantity,
   unitPrice,
   currency,
@@ -54,6 +56,11 @@ export function CartItemRow({
           {getProductName(product ?? productId)}
         </h4>
         <p className="text-[11px] text-muted-foreground">{sku}</p>
+        {variantName ? (
+          <p className="text-[11px] text-oboya-blue-dark/80">
+            {t("colorLabel")}: {variantName}
+          </p>
+        ) : null}
         <p className="text-[10px] text-oboya-green">{t("moq", { count: moq })}</p>
         <p className="mt-1 text-xs font-medium text-oboya-blue-dark">
           {formatShopPrice(unitPrice * quantity, currency)}

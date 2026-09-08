@@ -141,6 +141,28 @@
     "description": "无论您希望改善种植、包装、运输、零售展示还是整体运营绩效，我们的专家团队随时准备为您提供帮助。",
     "button": "联系我们"
   },
+  "homeEcosystem": {
+    "ariaLabel": "Oboya 园艺生态系统",
+    "title": "从育苗繁殖到销售终端",
+    "body": {
+      "p1": "园艺成功不只取决于单一产品。",
+      "p2": "它取决于种植、包装、物流、零售陈列与日常运营如何协同发挥作用。",
+      "p3": "Oboya Horticulture 覆盖这一旅程的每个阶段——让您通过一个可信赖的伙伴，获得所需的产品与专业支持。"
+    },
+    "closingLine1": "一个伙伴。一个生态系统。",
+    "closingLine2": "无限机遇，成就更佳表现。",
+    "prev": "上一阶段",
+    "next": "下一阶段",
+    "restart": "从育苗繁殖重新开始",
+    "stages": {
+      "propagation": "育苗繁殖",
+      "growing": "种植生长",
+      "packaging": "包装",
+      "logistics": "物流",
+      "retail": "零售陈列",
+      "pos": "销售终端"
+    }
+  },
   "footer": {
     "company": "公司",
     "solutions": "解决方案",
@@ -190,6 +212,10 @@
     "emailPlaceholder": "your@email.com",
     "phone": "电话",
     "phonePlaceholder": "+86 138 0000 0000",
+    "phoneCountry": "国家区号",
+    "phoneLocalPlaceholder": "138 0000 0000",
+    "phoneCountrySearch": "搜索国家或区号",
+    "phoneCountryEmpty": "未找到国家",
     "company": "公司",
     "companyPlaceholder": "公司名称",
     "message": "留言",
@@ -199,7 +225,9 @@
     "country": "国家",
     "countryPlaceholder": "请选择国家",
     "countryOther": "其他",
-    "subject": "选择主题？",
+    "countrySearch": "搜索国家",
+    "countryEmpty": "未找到国家",
+    "subject": "主题",
     "subjectPlaceholder": "我们能如何帮助您？",
     "subjects": {
       "general": "一般咨询",
@@ -523,9 +551,12 @@
     "viewGrid": "Grid view",
     "viewList": "List view",
     "filters": "Filters",
+    "expandToolbar": "显示更多选项",
+    "collapseToolbar": "隐藏选项",
     "clearFilters": "Clear all filters",
     "closeFilters": "Close filters",
     "close": "Close",
+    "back": "返回",
     "filterCategories": "Categories",
     "allCategories": "All categories",
     "filterSubcategories": "Subcategories",
@@ -541,6 +572,8 @@
     "priceMax": "Max",
     "quickView": "Quick View",
     "moreInformation": "更多信息",
+    "colorLabel": "颜色",
+    "selectedColor": "已选颜色",
     "zoomEnable": "启用图片缩放",
     "zoomDisable": "关闭图片缩放",
     "zoomHint": "将光标移到图片上即可放大",

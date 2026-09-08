@@ -106,12 +106,16 @@ export function QuoteModal() {
                   </h3>
                   <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
                     {lineItems.map((item) => (
-                      <li key={item.productId} className="flex justify-between gap-2">
+                      <li
+                        key={`${item.productId}-${item.variantId ?? "base"}`}
+                        className="flex justify-between gap-2"
+                      >
                         <span className="truncate">
                           {getProductName(
                             getProductById(item.productId) ?? item.productId
-                          )}{" "}
-                          × {item.quantity}
+                          )}
+                          {item.variantName ? ` (${item.variantName})` : ""} ×{" "}
+                          {item.quantity}
                         </span>
                         <span className="shrink-0">
                           {formatShopPrice(item.lineTotal, currency)}

@@ -15,6 +15,8 @@ import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repositor
 import { pickLocalized } from "@/lib/cms/utils";
 
 const SWIPE_THRESHOLD = 48;
+const AUTOPLAY_MS = 3500;
+const RESUME_AFTER_MS = 10000;
 
 interface CapabilitiesProps {
   data: HomepageSettings["capabilities"];
@@ -29,17 +31,45 @@ export function Capabilities({
 }: CapabilitiesProps) {
   const items = data.items;
   const [index, setIndex] = useState(0);
+  const [autoplayPaused, setAutoplayPaused] = useState(false);
   const pointerStartX = useRef<number | null>(null);
+  const resumeTimerRef = useRef<number | null>(null);
   const count = items.length;
   const slide = items[index];
 
+  const pauseAutoplay = useCallback(() => {
+    setAutoplayPaused(true);
+    if (resumeTimerRef.current != null) {
+      window.clearTimeout(resumeTimerRef.current);
+    }
+    resumeTimerRef.current = window.setTimeout(() => {
+      setAutoplayPaused(false);
+      resumeTimerRef.current = null;
+    }, RESUME_AFTER_MS);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (resumeTimerRef.current != null) {
+        window.clearTimeout(resumeTimerRef.current);
+      }
+    };
+  }, []);
+
   const go = useCallback(
-    (dir: -1 | 1) => {
+    (dir: -1 | 1, fromUser = false) => {
       if (count < 1) return;
+      if (fromUser) pauseAutoplay();
       setIndex((prev) => (prev + dir + count) % count);
     },
-    [count]
+    [count, pauseAutoplay]
   );
+
+  useEffect(() => {
+    if (autoplayPaused || count < 2) return;
+    const id = window.setTimeout(() => go(1, false), AUTOPLAY_MS);
+    return () => window.clearTimeout(id);
+  }, [index, autoplayPaused, count, go]);
 
   const onPointerDown = (event: React.PointerEvent) => {
     pointerStartX.current = event.clientX;
@@ -50,7 +80,7 @@ export function Capabilities({
     const delta = event.clientX - pointerStartX.current;
     pointerStartX.current = null;
     if (Math.abs(delta) < SWIPE_THRESHOLD) return;
-    go(delta < 0 ? 1 : -1);
+    go(delta < 0 ? 1 : -1, true);
   };
 
   if (!slide) return null;
@@ -154,7 +184,7 @@ export function Capabilities({
             <div className="absolute right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-20 flex items-center gap-2.5 sm:right-6 sm:bottom-6 md:right-8 md:bottom-8">
               <button
                 type="button"
-                onClick={() => go(-1)}
+                onClick={() => go(-1, true)}
                 aria-label="Previous slide"
                 className="flex size-10 items-center justify-center rounded-full border border-white/70 bg-transparent text-white transition-colors hover:bg-white/10 sm:size-11"
               >
@@ -162,7 +192,7 @@ export function Capabilities({
               </button>
               <button
                 type="button"
-                onClick={() => go(1)}
+                onClick={() => go(1, true)}
                 aria-label="Next slide"
                 className="flex size-10 items-center justify-center rounded-full border border-white/70 bg-transparent text-white transition-colors hover:bg-white/10 sm:size-11"
               >

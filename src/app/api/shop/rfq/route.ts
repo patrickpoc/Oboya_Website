@@ -2,6 +2,14 @@ import { NextResponse } from "next/server";
 import { addFormSubmissionDurable } from "@/lib/cms/server/forms.server";
 import { readProducts } from "@/lib/cms/server/products.server";
 import { clampQuantity, getProductMoq, MAX_QUANTITY } from "@/lib/shop/quantity";
+import {
+  getActiveVariant,
+  getVariantDisplayName,
+  hasColorVariants,
+  resolveVariantPrice,
+  resolveVariantSku,
+  sortedColorVariants,
+} from "@/lib/shop/color-variants";
 import type { RfqPayload } from "@/lib/shop/types";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -52,6 +60,8 @@ export async function POST(request: Request) {
 
     const validatedItems: Array<{
       productId: string;
+      variantId: string | null;
+      variantName: string | null;
       sku: string;
       name: string;
       quantity: number;
@@ -76,8 +86,32 @@ export async function POST(request: Request) {
         );
       }
 
-      const unitPrice = product.prices[currency];
-      if (unitPrice === undefined || unitPrice <= 0) {
+      const variantId =
+        typeof item.variantId === "string" && item.variantId.trim()
+          ? item.variantId.trim()
+          : null;
+      const variant = variantId
+        ? sortedColorVariants(product).find((entry) => entry.id === variantId) ??
+          null
+        : null;
+      if (variantId && !variant) {
+        return NextResponse.json(
+          { error: `Color variant not available for ${product.sku}` },
+          { status: 400 }
+        );
+      }
+
+      const displayVariant =
+        variant ??
+        (hasColorVariants(product)
+          ? getActiveVariant(product, null)
+          : null);
+      const variantName = displayVariant
+        ? getVariantDisplayName(displayVariant, "en")
+        : null;
+
+      const unitPrice = resolveVariantPrice(product, variant, currency);
+      if (unitPrice <= 0) {
         return NextResponse.json(
           { error: `No price for product ${product.sku} in ${currency}` },
           { status: 400 }
@@ -126,8 +160,13 @@ export async function POST(request: Request) {
 
       validatedItems.push({
         productId: product.id,
-        sku: product.sku,
-        name,
+        variantId,
+        variantName: hasColorVariants(product) ? variantName : null,
+        sku: resolveVariantSku(product, displayVariant),
+        name:
+          hasColorVariants(product) && variantName
+            ? `${name} (${variantName})`
+            : name,
         quantity,
         unitPrice,
         lineTotal: unitPrice * quantity,

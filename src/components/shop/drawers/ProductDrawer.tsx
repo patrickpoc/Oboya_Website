@@ -28,6 +28,7 @@ export function ProductDrawer() {
     setQuickViewProductId,
     currency,
     openAddToQuoteDialog,
+    addToQuoteProductId,
     getProductById,
     brands,
     categories,
@@ -40,6 +41,7 @@ export function ProductDrawer() {
     ? (getProductById(quickViewProductId) as CmsProduct | undefined)
     : null;
   const isOpen = Boolean(product && currency);
+  const addDialogOpen = Boolean(addToQuoteProductId);
 
   const name = product ? getProductName(product as Parameters<typeof getProductName>[0]) : "";
   const brand = product ? brands.find((item) => item.id === product.brandId) : null;
@@ -58,6 +60,8 @@ export function ProductDrawer() {
     open: isOpen,
     onClose: handleClose,
     containerRef: panelRef,
+    trapFocus: !addDialogOpen,
+    closeOnEscape: !addDialogOpen,
   });
 
   const handleAdd = () => {
@@ -70,7 +74,7 @@ export function ProductDrawer() {
       {isOpen && product && currency && (
         <motion.div
           key="product-quick-view"
-          className="fixed inset-0 z-50"
+          className="fixed inset-0 z-[60]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -92,13 +96,13 @@ export function ProductDrawer() {
             role="dialog"
             aria-modal="true"
             aria-label={t("moreInformation")}
-            className="absolute inset-y-0 right-0 flex w-full max-w-2xl flex-col bg-white shadow-2xl"
+            className="absolute inset-y-0 right-0 flex w-full max-w-2xl flex-col bg-white pt-[env(safe-area-inset-top)] shadow-2xl"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ duration: 0.42, ease: panelEase }}
           >
-            <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
+            <div className="flex shrink-0 items-center justify-between border-b border-border/60 px-5 py-4">
               <h2 className="font-display text-lg font-semibold text-oboya-blue-dark">
                 {t("moreInformation")}
               </h2>
@@ -106,7 +110,7 @@ export function ProductDrawer() {
                 type="button"
                 onClick={handleClose}
                 aria-label={t("close")}
-                className="rounded-full p-2 text-muted-foreground hover:bg-muted"
+                className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border/70 bg-white text-oboya-blue-dark shadow-sm"
               >
                 <X className="size-5" aria-hidden />
               </button>
@@ -183,7 +187,7 @@ export function ProductDrawer() {
               ) : null}
             </div>
 
-            <div className="border-t border-border/60 px-5 py-4">
+            <div className="shrink-0 space-y-2 border-t border-border/60 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
               <button
                 type="button"
                 onClick={handleAdd}
@@ -193,6 +197,17 @@ export function ProductDrawer() {
                 })}
               >
                 {t("addToQuote")}
+              </button>
+              <button
+                type="button"
+                onClick={handleClose}
+                className={buttonVariants({
+                  variant: "outline",
+                  className:
+                    "w-full rounded-full border-oboya-blue-dark/30 bg-white text-oboya-blue-dark hover:bg-oboya-soft-white hover:text-oboya-blue-dark lg:hidden",
+                })}
+              >
+                {t("back")}
               </button>
             </div>
           </motion.aside>

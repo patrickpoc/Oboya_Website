@@ -23,7 +23,6 @@ export function ProductCatalog() {
     loadMoreProducts,
     status,
     openAddToQuoteDialog,
-    setQuickViewProductId,
   } = useShop();
 
   if (!countryCode || !currency) {
@@ -55,8 +54,9 @@ export function ProductCatalog() {
               product={product}
               currency={currency}
               viewMode="grid"
-              onQuickView={() => setQuickViewProductId(product.id)}
-              onAddToQuote={() => openAddToQuoteDialog(product.id)}
+              onAddToQuote={(variantId) =>
+                openAddToQuoteDialog(product.id, variantId)
+              }
             />
           ))}
         </div>
@@ -68,8 +68,9 @@ export function ProductCatalog() {
               product={product}
               currency={currency}
               viewMode="list"
-              onQuickView={() => setQuickViewProductId(product.id)}
-              onAddToQuote={() => openAddToQuoteDialog(product.id)}
+              onAddToQuote={(variantId) =>
+                openAddToQuoteDialog(product.id, variantId)
+              }
             />
           ))}
         </div>

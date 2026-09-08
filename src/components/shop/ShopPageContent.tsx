@@ -1,17 +1,12 @@
 "use client";
 
-import { ShopHeroBanner } from "@/components/shop/ShopHeroBanner";
 import { Container } from "@/components/ui/container";
 import { useShop } from "@/contexts/ShopContext";
 import { ShopToolbar } from "@/components/shop/toolbar/ShopToolbar";
 import { OfficeCard } from "@/components/shop/OfficeCard";
 import { FilterSidebar, FilterDrawer } from "@/components/shop/catalog/FilterSidebar";
 import { ProductCatalog } from "@/components/shop/catalog/ProductCatalog";
-import { ProductDrawer } from "@/components/shop/drawers/ProductDrawer";
-import { QuoteCart } from "@/components/shop/cart/QuoteCart";
-import { QuoteCartFab, QuoteCartSheet } from "@/components/shop/cart/QuoteCartSheet";
-import { QuoteModal } from "@/components/shop/quote/QuoteModal";
-import { AddToQuoteDialog } from "@/components/shop/quote/AddToQuoteDialog";
+import { ShopOverlays } from "@/components/shop/ShopOverlays";
 import {
   ErrorState,
   OfflineBanner,
@@ -22,8 +17,6 @@ export function ShopPageContent() {
 
   return (
     <>
-      <ShopHeroBanner />
-
       {status === "offline" && <OfflineBanner />}
 
       <ShopToolbar />
@@ -48,12 +41,7 @@ export function ShopPageContent() {
       </section>
 
       <FilterDrawer />
-      <ProductDrawer />
-      <QuoteCart />
-      <QuoteCartFab />
-      <QuoteCartSheet />
-      <QuoteModal />
-      <AddToQuoteDialog />
+      <ShopOverlays />
     </>
   );
 }

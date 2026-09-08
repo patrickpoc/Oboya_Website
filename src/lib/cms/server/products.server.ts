@@ -6,6 +6,7 @@ import { getCmsProducts, type CmsProduct } from "@/lib/cms/repositories/product-
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
+import { normalizeColorVariants, normalizeImageColorIds, normalizeLocalizedColorName } from "@/lib/shop/color-variants";
 
 const PRODUCTS_FILE = path.join(process.cwd(), "data", "shop", "products.json");
 
@@ -17,6 +18,7 @@ type ProductRow = {
   category_id: string;
   subcategory_id: string;
   images: unknown;
+  image_color_ids?: unknown;
   tags: unknown;
   availability: unknown;
   enabled_countries: unknown;
@@ -31,6 +33,9 @@ type ProductRow = {
   specs: unknown;
   documents: unknown;
   related_product_ids: unknown;
+  default_color?: unknown;
+  default_color_name?: unknown;
+  color_variants: unknown;
   name: unknown;
   short_description: unknown;
   description: unknown;
@@ -59,7 +64,14 @@ function rowToProduct(row: ProductRow): CmsProduct {
     brandId: row.brand_id,
     categoryId: row.category_id,
     subcategoryId: row.subcategory_id,
-    images: parseArray<string>(row.images),
+    images: (() => {
+      const list = parseArray<string>(row.images);
+      return list.length > 0 ? list : [""];
+    })(),
+    imageColorIds: normalizeImageColorIds(
+      row.image_color_ids,
+      (parseArray<string>(row.images).length || 1)
+    ),
     tags: parseArray<string>(row.tags),
     availability: parseObject<Record<string, boolean>>(row.availability, {}),
     enabledCountries: parseObject<Record<string, boolean>>(row.enabled_countries, {}),
@@ -74,6 +86,9 @@ function rowToProduct(row: ProductRow): CmsProduct {
     specs: parseArray<CmsProduct["specs"][number]>(row.specs),
     documents: parseArray<CmsProduct["documents"][number]>(row.documents),
     relatedProductIds: parseArray<string>(row.related_product_ids),
+    defaultColor: typeof row.default_color === "string" ? row.default_color : "",
+    defaultColorName: normalizeLocalizedColorName(row.default_color_name),
+    colorVariants: normalizeColorVariants(row.color_variants),
     name: parseObject<CmsProduct["name"]>(row.name, { en: "", "pt-BR": "", es: "", "zh-CN": "" }),
     shortDescription: parseObject<CmsProduct["shortDescription"]>(row.short_description, {
       en: "",
@@ -106,6 +121,10 @@ function productToRow(product: CmsProduct): ProductRow {
     category_id: product.categoryId,
     subcategory_id: product.subcategoryId,
     images: product.images ?? [],
+    image_color_ids: normalizeImageColorIds(
+      product.imageColorIds,
+      (product.images ?? []).length
+    ),
     tags: product.tags ?? [],
     availability: product.availability ?? {},
     enabled_countries: product.enabledCountries ?? {},
@@ -120,6 +139,14 @@ function productToRow(product: CmsProduct): ProductRow {
     specs: product.specs ?? [],
     documents: product.documents ?? [],
     related_product_ids: product.relatedProductIds ?? [],
+    default_color: product.defaultColor ?? "",
+    default_color_name: product.defaultColorName ?? {
+      en: "",
+      "pt-BR": "",
+      es: "",
+      "zh-CN": "",
+    },
+    color_variants: product.colorVariants ?? [],
     name: product.name,
     short_description: product.shortDescription,
     description: product.description,

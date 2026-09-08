@@ -141,6 +141,28 @@
     "description": "Whether you are looking to improve cultivation, packaging, transport, retail presentation, or overall operational performance, our specialists are ready to help.",
     "button": "Get in Touch"
   },
+  "homeEcosystem": {
+    "ariaLabel": "Oboya horticulture ecosystem",
+    "title": "From Propagation to Point of Sale",
+    "body": {
+      "p1": "Success in horticulture depends on more than any single product.",
+      "p2": "It depends on how growing, packaging, logistics, retail presentation, and day-to-day operations work together.",
+      "p3": "Oboya Horticulture supports every stage of that journey — so you can access the products and expertise you need through one trusted partner."
+    },
+    "closingLine1": "One Partner. One Ecosystem.",
+    "closingLine2": "Endless Opportunities to Perform Better.",
+    "prev": "Previous stage",
+    "next": "Next stage",
+    "restart": "Restart from Propagation",
+    "stages": {
+      "propagation": "Propagation",
+      "growing": "Growing",
+      "packaging": "Packaging",
+      "logistics": "Logistics",
+      "retail": "Retail Display",
+      "pos": "Point of Sale"
+    }
+  },
   "footer": {
     "company": "Company",
     "solutions": "Solutions",
@@ -190,6 +212,10 @@
     "emailPlaceholder": "lorem@ipsum.com",
     "phone": "Phone Number",
     "phonePlaceholder": "+1 555 000 0000",
+    "phoneCountry": "Country code",
+    "phoneLocalPlaceholder": "555 000 0000",
+    "phoneCountrySearch": "Search country or code",
+    "phoneCountryEmpty": "No countries found",
     "company": "Company",
     "companyPlaceholder": "Vestibulum tempor",
     "message": "Message",
@@ -199,7 +225,9 @@
     "country": "Country",
     "countryPlaceholder": "Select your country",
     "countryOther": "Other",
-    "subject": "Select Subject?",
+    "countrySearch": "Search country",
+    "countryEmpty": "No countries found",
+    "subject": "Subject",
     "subjectPlaceholder": "How can we help?",
     "subjects": {
       "general": "General Inquiry",
@@ -531,9 +559,12 @@
     "viewGrid": "Grid view",
     "viewList": "List view",
     "filters": "Filters",
+    "expandToolbar": "Show more options",
+    "collapseToolbar": "Hide options",
     "clearFilters": "Clear all filters",
     "closeFilters": "Close filters",
     "close": "Close",
+    "back": "Back",
     "filterCategories": "Categories",
     "allCategories": "All categories",
     "filterSubcategories": "Subcategories",
@@ -549,6 +580,8 @@
     "priceMax": "Max",
     "quickView": "Quick View",
     "moreInformation": "More information",
+    "colorLabel": "Color",
+    "selectedColor": "Selected color",
     "zoomEnable": "Enable image zoom",
     "zoomDisable": "Disable image zoom",
     "zoomHint": "Move the cursor over the image to zoom",

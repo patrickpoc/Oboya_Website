@@ -160,6 +160,37 @@ const defaultFaqs = (): CmsFaqItem[] => [
     status: "published",
   },
   {
+    id: "products-5",
+    categoryId: "products",
+    question: loc("Why are Solutions Organized by Crop?"),
+    answer: loc(
+      "Because customers typically start with their crop, market and operational requirements.\n\nThe needs of a flower grower differ significantly from those of a fruit exporter, vegetable producer, distributor, or retailer. Organizing solutions by crop helps customers quickly find the products, systems, and expertise most relevant to their business."
+    ),
+    keywords: ["crop", "solutions", "flowers", "fruit", "vegetables"],
+    order: 5,
+    status: "published",
+  },
+  {
+    id: "products-6",
+    categoryId: "products",
+    question: loc(
+      "Can Oboya Horticulture support multiple stages of my operation?"
+    ),
+    answer: loc(
+      "Yes.\n\nOur solutions support cultivation, packaging, transportation, logistics, merchandising, retail presentation, machinery, automation and technical advisory.\n\nThis broad portfolio helps customers improve efficiency, consistency, and coordination throughout the supply chain."
+    ),
+    keywords: [
+      "stages",
+      "cultivation",
+      "packaging",
+      "logistics",
+      "automation",
+      "supply chain",
+    ],
+    order: 6,
+    status: "published",
+  },
+  {
     id: "shipping-1",
     categoryId: "shipping",
     question: loc(
@@ -369,6 +400,25 @@ const defaultFaqs = (): CmsFaqItem[] => [
     status: "published",
   },
   {
+    id: "support-4",
+    categoryId: "support",
+    question: loc(
+      "Does Oboya Horticulture provide technical support and advisory services?"
+    ),
+    answer: loc(
+      "Yes.\n\nOur specialists help customers evaluate operational obstacles and identify opportunities for improvement across production, packaging, logistics, transportation, automation, merchandising and supply chain performance.\n\nBecause sometimes the challenge is not finding a product. It's finding the right solution."
+    ),
+    keywords: [
+      "technical support",
+      "advisory",
+      "specialists",
+      "automation",
+      "supply chain",
+    ],
+    order: 4,
+    status: "published",
+  },
+  {
     id: "about-1",
     categoryId: "about",
     question: loc(
@@ -404,6 +454,127 @@ const defaultFaqs = (): CmsFaqItem[] => [
     ),
     keywords: ["case studies", "growers", "projects"],
     order: 2,
+    status: "published",
+  },
+  {
+    id: "about-3",
+    categoryId: "about",
+    question: loc(
+      "What makes Oboya Horticulture different from other horticultural partners?"
+    ),
+    answer: loc(
+      "Many suppliers focus on a single category or stage of production.\n\nOboya Horticulture takes a wider perspective.\n\nBy offering solutions across growing, packaging, logistics, transport systems, retail display, machinery, automation, and technical expertise, we help customers improve performance across their operation rather than managing challenges in isolation."
+    ),
+    keywords: [
+      "different",
+      "partner",
+      "one-stop",
+      "portfolio",
+      "growing",
+      "packaging",
+      "logistics",
+    ],
+    order: 3,
+    status: "published",
+  },
+  {
+    id: "about-4",
+    categoryId: "about",
+    question: loc(
+      'What does "Your One-Stop Partner for Horticulture" mean?'
+    ),
+    answer: loc(
+      "It means customers can access a broad portfolio of products, solutions, and expertise through a single trusted partner.\n\nOur approach is meant to simplify complexity, improve coordination, and create value across all stages of the horticultural value chain."
+    ),
+    keywords: [
+      "one-stop",
+      "partner",
+      "portfolio",
+      "value chain",
+      "tagline",
+    ],
+    order: 4,
+    status: "published",
+  },
+  {
+    id: "about-5",
+    categoryId: "about",
+    question: loc("Who does Oboya Horticulture serve?"),
+    answer: loc(
+      "We support organizations across the horticultural ecosystem, including flower growers, fruit producers, vegetable and herb producers, exporters, distributors and wholesalers, retailers, agricultural institutions and research centers.\n\nEach segment faces different challenges, which is why our solutions are designed to adapt to different operational circumstances and market requirements."
+    ),
+    keywords: [
+      "customers",
+      "growers",
+      "exporters",
+      "retailers",
+      "distributors",
+      "segments",
+    ],
+    order: 5,
+    status: "published",
+  },
+  {
+    id: "about-6",
+    categoryId: "about",
+    question: loc("Does Oboya Horticulture offer customized solutions?"),
+    answer: loc(
+      "Yes.\n\nNo two horticultural operations are exactly alike.\n\nOur teams work closely with customers to understand their objectives, business challenges, market requirements, and business goals before recommending solutions customized to their needs."
+    ),
+    keywords: ["custom", "tailored", "bespoke", "advisory"],
+    order: 6,
+    status: "published",
+  },
+  {
+    id: "about-7",
+    categoryId: "about",
+    question: loc(
+      "How does Oboya Horticulture help customers improve performance?"
+    ),
+    answer: loc(
+      "Performance is influenced by decisions made throughout the value chain.\n\nOur role is to help customers improve efficiency, optimize resources, strengthen logistics, protect product quality, enhance product presentation, and sustain long-term growth."
+    ),
+    keywords: [
+      "performance",
+      "efficiency",
+      "quality",
+      "logistics",
+      "growth",
+    ],
+    order: 7,
+    status: "published",
+  },
+  {
+    id: "about-8",
+    categoryId: "about",
+    question: loc("How does Oboya Horticulture approach innovation?"),
+    answer: loc(
+      "We firmly believe innovation should solve real challenges and create measurable value.\n\nThrough new materials, improved designs, automation technologies, or operational improvements, our focus is on helping customers perform more effectively in real-life conditions."
+    ),
+    keywords: ["innovation", "materials", "automation", "design"],
+    order: 8,
+    status: "published",
+  },
+  {
+    id: "about-9",
+    categoryId: "about",
+    question: loc('What does "Innovation together with purpose" mean?'),
+    answer: loc(
+      "It means innovation guided by customer needs, industry realities, and long-term value creation.\n\nOur objective is not innovation for its own sake, but innovation that helps growers, exporters, distributors, retailers, and other horticultural businesses achieve better outcomes."
+    ),
+    keywords: ["innovation", "purpose", "value", "customers"],
+    order: 9,
+    status: "published",
+  },
+  {
+    id: "about-10",
+    categoryId: "about",
+    question: loc("Does Oboya Horticulture operate internationally?"),
+    answer: loc(
+      "Yes.\n\nOur business combines global capabilities with local understanding and service, allowing us to support customers across multiple markets while remaining responsive to regional needs and industry realities."
+    ),
+    keywords: ["international", "global", "local", "markets"],
+    order: 10,
     status: "published",
   },
   {
@@ -445,6 +616,40 @@ const defaultFaqs = (): CmsFaqItem[] => [
     status: "published",
   },
   {
+    id: "sustainability-3",
+    categoryId: "sustainability",
+    question: loc("How does Oboya Horticulture approach sustainability?"),
+    answer: loc(
+      "We believe sustainability should be treated with honesty, openness and consistent improvement.\n\nRather than making broad claims, we focus on practical initiatives such as certified materials, renewable energy projects, carbon footprint assessment programs, process efficiencies and innovative product development."
+    ),
+    keywords: [
+      "sustainability",
+      "certified",
+      "renewable",
+      "carbon",
+      "honest",
+    ],
+    order: 3,
+    status: "published",
+  },
+  {
+    id: "sustainability-4",
+    categoryId: "sustainability",
+    question: loc("What are Oboya Ecovaso® and Bioglitter™?"),
+    answer: loc(
+      "They are examples of our commitment to practical innovation and honest sustainability.\n\nOboya Ecovaso® was developed to support evolving material solutions for horticulture, while Bioglitter™ provides a biodegradable alternative for commercial and decorative applications."
+    ),
+    keywords: [
+      "ecovaso",
+      "bioglitter",
+      "biodegradable",
+      "materials",
+      "innovation",
+    ],
+    order: 4,
+    status: "published",
+  },
+  {
     id: "careers-1",
     categoryId: "careers",
     question: loc(
@@ -483,6 +688,14 @@ const defaultFaqs = (): CmsFaqItem[] => [
     status: "published",
   },
 ];
+
+export function getDefaultFaqCategories(): CmsFaqCategory[] {
+  return defaultCategories();
+}
+
+export function getDefaultFaqItems(): CmsFaqItem[] {
+  return defaultFaqs();
+}
 
 let categoriesCache: CmsFaqCategory[] | null = null;
 let faqsCache: CmsFaqItem[] | null = null;

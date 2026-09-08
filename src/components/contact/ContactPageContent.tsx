@@ -1,50 +1,410 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Check, Mail, MapPin, Phone } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/constants/site";
-import { getShopCatalog, getCountryByCode } from "@/lib/shop/catalog";
+import {
+  WORLD_COUNTRIES,
+  getWorldCountryByCode,
+  type WorldCountry,
+} from "@/lib/contact/world-countries";
 import { cn } from "@/lib/utils";
 
-const SUBJECTS = ["general", "products", "partnership", "support"] as const;
+const SUBJECT_MAX = 50;
+const MESSAGE_MAX = 500;
+const OTHER_COUNTRY_CODE = "OTHER";
 
 const underlineField =
   "w-full border-0 border-b border-oboya-blue-dark/20 bg-transparent px-0 py-2 text-base text-oboya-blue-dark outline-none transition-colors placeholder:text-oboya-blue-dark/35 focus:border-oboya-blue-dark md:text-sm";
 
+function CharCount({ remaining }: { remaining: number }) {
+  return (
+    <p
+      className={cn(
+        "mt-1 text-right text-[11px] tabular-nums text-oboya-blue-dark/40",
+        remaining <= 10 && "text-oboya-orange"
+      )}
+      aria-live="polite"
+    >
+      {remaining}
+    </p>
+  );
+}
+
+function useSearchableMenu(open: boolean, onClose: () => void) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) onClose();
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, onClose]);
+
+  useEffect(() => {
+    if (!open) return;
+    const id = window.requestAnimationFrame(() => {
+      searchRef.current?.focus();
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [open]);
+
+  return { rootRef, searchRef };
+}
+
+function PhoneCountrySelect({
+  value,
+  onChange,
+  label,
+  searchPlaceholder,
+  emptyLabel,
+}: {
+  value: string;
+  onChange: (code: string) => void;
+  label: string;
+  searchPlaceholder: string;
+  emptyLabel: string;
+}) {
+  const listId = useId();
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const close = () => {
+    setOpen(false);
+    setQuery("");
+  };
+  const { rootRef, searchRef } = useSearchableMenu(open, close);
+
+  const selected = useMemo(
+    () => getWorldCountryByCode(value) ?? WORLD_COUNTRIES[0],
+    [value]
+  );
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return WORLD_COUNTRIES;
+    return WORLD_COUNTRIES.filter((country) => {
+      return (
+        country.name.toLowerCase().includes(q) ||
+        country.dial.toLowerCase().includes(q) ||
+        country.code.toLowerCase().includes(q) ||
+        country.dial.replace("+", "").includes(q.replace("+", ""))
+      );
+    });
+  }, [query]);
+
+  const pick = (country: WorldCountry) => {
+    onChange(country.code);
+    close();
+  };
+
+  return (
+    <div ref={rootRef} className="relative w-fit shrink-0">
+      <span className="sr-only" id={`${listId}-label`}>
+        {label}
+      </span>
+      <button
+        type="button"
+        id="phoneCountry"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-labelledby={`${listId}-label`}
+        aria-controls={listId}
+        onClick={() =>
+          setOpen((prev) => {
+            if (prev) setQuery("");
+            return !prev;
+          })
+        }
+        className={cn(
+          underlineField,
+          "inline-flex w-auto min-w-0 items-center gap-0.5 whitespace-nowrap pr-0 text-left"
+        )}
+      >
+        <span className="tabular-nums">{selected.dial}</span>
+        <ChevronDown
+          className={cn(
+            "size-3 shrink-0 text-oboya-blue-dark/45 transition-transform",
+            open && "rotate-180"
+          )}
+          aria-hidden
+        />
+      </button>
+      {open ? (
+        <div className="absolute left-0 top-[calc(100%+0.25rem)] z-20 w-[min(18rem,calc(100vw-3rem))] overflow-hidden rounded-md border border-border/70 bg-white shadow-[var(--shadow-card)]">
+          <div className="border-b border-border/60 p-2">
+            <input
+              ref={searchRef}
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={searchPlaceholder}
+              autoComplete="off"
+              className="h-9 w-full rounded-md border border-border/70 bg-oboya-soft-white/60 px-2.5 text-sm text-oboya-blue-dark outline-none placeholder:text-oboya-blue-dark/40 focus:border-oboya-blue-dark/40 [&::-webkit-search-cancel-button]:hidden"
+            />
+          </div>
+          <ul
+            id={listId}
+            role="listbox"
+            aria-labelledby={`${listId}-label`}
+            className="max-h-52 overflow-y-auto py-1"
+          >
+            {filtered.length === 0 ? (
+              <li className="px-3 py-2 text-sm text-oboya-blue-dark/50">
+                {emptyLabel}
+              </li>
+            ) : (
+              filtered.map((country) => {
+                const isSelected = country.code === selected.code;
+                return (
+                  <li
+                    key={country.code}
+                    role="option"
+                    aria-selected={isSelected}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => pick(country)}
+                      className={cn(
+                        "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm text-oboya-blue-dark hover:bg-oboya-soft-white",
+                        isSelected && "bg-oboya-soft-white font-medium"
+                      )}
+                    >
+                      <span>{country.name}</span>
+                      <span className="tabular-nums text-oboya-blue-dark/55">
+                        {country.dial}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })
+            )}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function CountrySelect({
+  value,
+  onChange,
+  label,
+  placeholder,
+  otherLabel,
+  searchPlaceholder,
+  emptyLabel,
+}: {
+  value: string;
+  onChange: (code: string) => void;
+  label: string;
+  placeholder: string;
+  otherLabel: string;
+  searchPlaceholder: string;
+  emptyLabel: string;
+}) {
+  const listId = useId();
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const close = () => {
+    setOpen(false);
+    setQuery("");
+  };
+  const { rootRef, searchRef } = useSearchableMenu(open, close);
+
+  const selectedName = useMemo(() => {
+    if (!value) return null;
+    if (value === OTHER_COUNTRY_CODE) return otherLabel;
+    return getWorldCountryByCode(value)?.name ?? value;
+  }, [value, otherLabel]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const countries = !q
+      ? WORLD_COUNTRIES
+      : WORLD_COUNTRIES.filter(
+          (country) =>
+            country.name.toLowerCase().includes(q) ||
+            country.code.toLowerCase().includes(q)
+        );
+    const showOther =
+      !q ||
+      otherLabel.toLowerCase().includes(q) ||
+      OTHER_COUNTRY_CODE.toLowerCase().includes(q);
+    return { countries, showOther };
+  }, [query, otherLabel]);
+
+  const pick = (code: string) => {
+    onChange(code);
+    close();
+  };
+
+  return (
+    <div ref={rootRef} className="relative w-full">
+      <span className="sr-only" id={`${listId}-label`}>
+        {label}
+      </span>
+      <button
+        type="button"
+        id="countryCode"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-labelledby={`${listId}-label`}
+        aria-controls={listId}
+        aria-required
+        onClick={() =>
+          setOpen((prev) => {
+            if (prev) setQuery("");
+            return !prev;
+          })
+        }
+        className={cn(
+          underlineField,
+          "flex items-center justify-between gap-2 text-left",
+          !selectedName && "text-oboya-blue-dark/35"
+        )}
+      >
+        <span className="min-w-0 truncate">
+          {selectedName ?? placeholder}
+        </span>
+        <ChevronDown
+          className={cn(
+            "size-3.5 shrink-0 text-oboya-blue-dark/45 transition-transform",
+            open && "rotate-180"
+          )}
+          aria-hidden
+        />
+      </button>
+      {/* Native required field for form validation */}
+      <input type="hidden" name="countryCode" value={value} required />
+      {open ? (
+        <div className="absolute left-0 top-[calc(100%+0.25rem)] z-20 w-full overflow-hidden rounded-md border border-border/70 bg-white shadow-[var(--shadow-card)]">
+          <div className="border-b border-border/60 p-2">
+            <input
+              ref={searchRef}
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={searchPlaceholder}
+              autoComplete="off"
+              className="h-9 w-full rounded-md border border-border/70 bg-oboya-soft-white/60 px-2.5 text-sm text-oboya-blue-dark outline-none placeholder:text-oboya-blue-dark/40 focus:border-oboya-blue-dark/40 [&::-webkit-search-cancel-button]:hidden"
+            />
+          </div>
+          <ul
+            id={listId}
+            role="listbox"
+            aria-labelledby={`${listId}-label`}
+            className="max-h-52 overflow-y-auto py-1"
+          >
+            {filtered.countries.length === 0 && !filtered.showOther ? (
+              <li className="px-3 py-2 text-sm text-oboya-blue-dark/50">
+                {emptyLabel}
+              </li>
+            ) : (
+              <>
+                {filtered.countries.map((country) => {
+                  const isSelected = country.code === value;
+                  return (
+                    <li
+                      key={country.code}
+                      role="option"
+                      aria-selected={isSelected}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => pick(country.code)}
+                        className={cn(
+                          "flex w-full items-center px-3 py-2 text-left text-sm text-oboya-blue-dark hover:bg-oboya-soft-white",
+                          isSelected && "bg-oboya-soft-white font-medium"
+                        )}
+                      >
+                        {country.name}
+                      </button>
+                    </li>
+                  );
+                })}
+                {filtered.showOther ? (
+                  <li role="option" aria-selected={value === OTHER_COUNTRY_CODE}>
+                    <button
+                      type="button"
+                      onClick={() => pick(OTHER_COUNTRY_CODE)}
+                      className={cn(
+                        "flex w-full items-center px-3 py-2 text-left text-sm text-oboya-blue-dark hover:bg-oboya-soft-white",
+                        value === OTHER_COUNTRY_CODE &&
+                          "bg-oboya-soft-white font-medium"
+                      )}
+                    >
+                      {otherLabel}
+                    </button>
+                  </li>
+                ) : null}
+              </>
+            )}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function ContactPageContent() {
   const t = useTranslations("contact");
   const tPages = useTranslations("pages.contact");
-  const countries = useMemo(() => getShopCatalog().countries, []);
 
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [subject, setSubject] = useState<(typeof SUBJECTS)[number]>("general");
+  const [countryCode, setCountryCode] = useState("");
+  const [phoneCountryCode, setPhoneCountryCode] = useState("US");
+  const [phoneLocal, setPhoneLocal] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+
+  const dialCode = useMemo(() => {
+    return getWorldCountryByCode(phoneCountryCode)?.dial ?? "+1";
+  }, [phoneCountryCode]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+
+    if (!countryCode) {
+      setError(t("countryPlaceholder"));
+      return;
+    }
+
     setSubmitting(true);
 
     const form = event.currentTarget;
     const formData = new FormData(form);
-    const countryCode = String(formData.get("countryCode") ?? "");
     const country =
-      countryCode === "OTHER"
-        ? { code: "OTHER", name: t("countryOther") }
-        : getCountryByCode(countryCode);
+      countryCode === OTHER_COUNTRY_CODE
+        ? { code: OTHER_COUNTRY_CODE, name: t("countryOther") }
+        : getWorldCountryByCode(countryCode);
+
+    const local = phoneLocal.trim().replace(/^0+/, "");
+    const phone = local ? `${dialCode} ${local}` : "";
 
     const payload = {
       firstName: String(formData.get("firstName") ?? "").trim(),
       lastName: String(formData.get("lastName") ?? "").trim(),
       email: String(formData.get("email") ?? "").trim(),
-      phone: String(formData.get("phone") ?? "").trim(),
+      phone,
       countryCode: country?.code ?? countryCode,
       countryName: country?.name ?? countryCode,
-      subject,
-      message: String(formData.get("message") ?? "").trim(),
+      subject: subject.trim(),
+      message: message.trim(),
     };
 
     try {
@@ -90,41 +450,7 @@ export function ContactPageContent() {
                 {t("sidebarTitle")}
               </h2>
 
-              <ul className="flex flex-col gap-5 text-sm text-oboya-blue-dark">
-                <li className="flex items-start gap-3">
-                  <Phone
-                    className="mt-0.5 size-4 shrink-0 text-oboya-green"
-                    aria-hidden
-                  />
-                  <a
-                    href={`tel:${siteConfig.company.phone.replace(/\s/g, "")}`}
-                    className="hover:text-oboya-green"
-                  >
-                    {siteConfig.company.phone}
-                  </a>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Mail
-                    className="mt-0.5 size-4 shrink-0 text-oboya-green"
-                    aria-hidden
-                  />
-                  <a
-                    href={`mailto:${siteConfig.company.email}`}
-                    className="hover:text-oboya-green"
-                  >
-                    {siteConfig.company.email}
-                  </a>
-                </li>
-                <li className="flex items-start gap-3">
-                  <MapPin
-                    className="mt-0.5 size-4 shrink-0 text-oboya-green"
-                    aria-hidden
-                  />
-                  <span>{t("location")}</span>
-                </li>
-              </ul>
-
-              <div className="mt-auto flex items-center gap-4 pt-4">
+              <div className="flex items-center gap-4">
                 <a
                   href={siteConfig.social.linkedin}
                   target="_blank"
@@ -215,14 +541,25 @@ export function ContactPageContent() {
                       >
                         {t("phone")}
                       </label>
-                      <input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        autoComplete="tel"
-                        placeholder={t("phonePlaceholder")}
-                        className={underlineField}
-                      />
+                      <div className="flex items-end gap-3">
+                        <PhoneCountrySelect
+                          value={phoneCountryCode}
+                          onChange={setPhoneCountryCode}
+                          label={t("phoneCountry")}
+                          searchPlaceholder={t("phoneCountrySearch")}
+                          emptyLabel={t("phoneCountryEmpty")}
+                        />
+                        <input
+                          id="phone"
+                          type="tel"
+                          inputMode="tel"
+                          autoComplete="tel-national"
+                          value={phoneLocal}
+                          onChange={(event) => setPhoneLocal(event.target.value)}
+                          placeholder={t("phoneLocalPlaceholder")}
+                          className={underlineField}
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -233,62 +570,37 @@ export function ContactPageContent() {
                     >
                       {t("country")}
                     </label>
-                    <select
-                      id="countryCode"
-                      name="countryCode"
-                      required
-                      defaultValue=""
-                      className={cn(underlineField, "cursor-pointer appearance-none")}
-                    >
-                      <option value="" disabled>
-                        {t("countryPlaceholder")}
-                      </option>
-                      {countries.map((country) => (
-                        <option key={country.code} value={country.code}>
-                          {country.name}
-                        </option>
-                      ))}
-                      <option value="OTHER">{t("countryOther")}</option>
-                    </select>
+                    <CountrySelect
+                      value={countryCode}
+                      onChange={setCountryCode}
+                      label={t("country")}
+                      placeholder={t("countryPlaceholder")}
+                      otherLabel={t("countryOther")}
+                      searchPlaceholder={t("countrySearch")}
+                      emptyLabel={t("countryEmpty")}
+                    />
                   </div>
 
-                  <fieldset className="flex flex-col gap-4">
-                    <legend className="text-sm font-semibold text-oboya-blue-dark">
+                  <div className="flex flex-col gap-2">
+                    <label
+                      htmlFor="subject"
+                      className="text-sm font-semibold text-oboya-blue-dark"
+                    >
                       {t("subject")}
-                    </legend>
-                    <div className="flex flex-wrap gap-x-6 gap-y-3">
-                      {SUBJECTS.map((key) => {
-                        const selected = subject === key;
-                        return (
-                          <label
-                            key={key}
-                            className="flex cursor-pointer items-center gap-2 text-sm text-oboya-blue-dark"
-                          >
-                            <input
-                              type="radio"
-                              name="subject"
-                              value={key}
-                              checked={selected}
-                              onChange={() => setSubject(key)}
-                              className="sr-only"
-                            />
-                            <span
-                              className={cn(
-                                "flex size-4 items-center justify-center rounded-full border",
-                                selected
-                                  ? "border-oboya-blue-dark bg-oboya-blue-dark text-white"
-                                  : "border-oboya-blue-dark/40 bg-white"
-                              )}
-                              aria-hidden
-                            >
-                              {selected && <Check className="size-2.5" strokeWidth={3} />}
-                            </span>
-                            {t(`subjects.${key}`)}
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </fieldset>
+                    </label>
+                    <input
+                      id="subject"
+                      name="subject"
+                      type="text"
+                      required
+                      maxLength={SUBJECT_MAX}
+                      value={subject}
+                      onChange={(event) => setSubject(event.target.value)}
+                      placeholder={t("subjectPlaceholder")}
+                      className={underlineField}
+                    />
+                    <CharCount remaining={SUBJECT_MAX - subject.length} />
+                  </div>
 
                   <div className="flex flex-col gap-2">
                     <label
@@ -302,9 +614,13 @@ export function ContactPageContent() {
                       name="message"
                       rows={4}
                       required
+                      maxLength={MESSAGE_MAX}
+                      value={message}
+                      onChange={(event) => setMessage(event.target.value)}
                       placeholder={t("messagePlaceholder")}
                       className={cn(underlineField, "resize-none")}
                     />
+                    <CharCount remaining={MESSAGE_MAX - message.length} />
                   </div>
 
                   {error && (

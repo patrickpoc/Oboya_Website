@@ -1,0 +1,548 @@
+"use client";
+
+import { useMemo, useRef, useState } from "react";
+import Image from "next/image";
+import {
+  ArrowDown,
+  ArrowUp,
+  ImageIcon,
+  Plus,
+  Trash2,
+  Upload,
+} from "lucide-react";
+import {
+  MediaLibraryDialog,
+  type MediaLibraryItem,
+} from "@/components/admin/media/MediaLibraryDialog";
+import { LocalizedFieldGrid } from "@/components/admin/marketplace/LocalizedFieldGrid";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  getMediaAssets,
+  getMediaFolders,
+  replaceMediaAssetsCache,
+  saveMediaAsset,
+} from "@/lib/cms/repositories/media-repository";
+import { uploadMediaFile } from "@/lib/cms/client/upload-media";
+import { FOLDER_ECOVASO_PRODUCTS } from "@/lib/cms/media-folder-ids";
+import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
+import type { CmsLocale, LocalizedString } from "@/lib/cms/types";
+import type { ProductColorVariant } from "@/lib/shop/types";
+import {
+  createEmptyColorVariant,
+  normalizeLocalizedColorName,
+} from "@/lib/shop/color-variants";
+import { toast } from "sonner";
+
+interface ProductColorVariantsCardProps {
+  product: CmsProduct;
+  currencies: string[];
+  currenciesLoading?: boolean;
+  onUpdate: (patch: Partial<CmsProduct>) => void;
+}
+
+function toLocalizedString(
+  value: ReturnType<typeof normalizeLocalizedColorName>
+): LocalizedString {
+  return {
+    en: value.en ?? "",
+    "pt-BR": value["pt-BR"] ?? "",
+    es: value.es ?? "",
+    "zh-CN": value["zh-CN"] ?? "",
+  };
+}
+
+export function ProductColorVariantsCard({
+  product,
+  currencies,
+  currenciesLoading = false,
+  onUpdate,
+}: ProductColorVariantsCardProps) {
+  const imageUploadRef = useRef<HTMLInputElement>(null);
+  const [uploadVariantId, setUploadVariantId] = useState<string | null>(null);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [libraryVariantId, setLibraryVariantId] = useState<string | null>(null);
+  const [libraryTick, setLibraryTick] = useState(0);
+
+  const variants = product.colorVariants ?? [];
+  const defaultColorName = toLocalizedString(
+    normalizeLocalizedColorName(product.defaultColorName)
+  );
+
+  const refreshLibrary = async () => {
+    try {
+      const response = await fetch("/api/cms/media");
+      if (!response.ok) return;
+      const data = (await response.json()) as { assets?: { id: string }[] };
+      if (data.assets) {
+        replaceMediaAssetsCache(
+          data.assets as Parameters<typeof replaceMediaAssetsCache>[0]
+        );
+        setLibraryTick((n) => n + 1);
+      }
+    } catch {
+      // Keep local cache.
+    }
+  };
+
+  const folderNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const folder of getMediaFolders()) {
+      map.set(folder.id, folder.name);
+    }
+    return map;
+  }, []);
+
+  const mediaLibraryImages = useMemo<MediaLibraryItem[]>(
+    () =>
+      getMediaAssets()
+        .filter((asset) => asset.type === "image")
+        .map((asset) => ({
+          id: asset.id,
+          name: asset.name,
+          url: asset.url,
+          type: asset.type,
+          tags: asset.tags,
+          folder: asset.folder,
+          folderName: folderNameById.get(asset.folder),
+        })),
+    [folderNameById, libraryTick]
+  );
+
+  const setVariants = (next: ProductColorVariant[]) => {
+    onUpdate({
+      colorVariants: next.map((variant, index) => ({
+        ...variant,
+        sortOrder: index,
+      })),
+    });
+  };
+
+  const updateVariant = (
+    id: string,
+    patch: Partial<ProductColorVariant>
+  ) => {
+    setVariants(
+      variants.map((variant) =>
+        variant.id === id ? { ...variant, ...patch } : variant
+      )
+    );
+  };
+
+  const addVariant = () => {
+    setVariants([
+      ...variants,
+      createEmptyColorVariant(variants.length, currencies),
+    ]);
+  };
+
+  const removeVariant = (id: string) => {
+    setVariants(variants.filter((variant) => variant.id !== id));
+  };
+
+  const moveVariant = (id: string, direction: -1 | 1) => {
+    const index = variants.findIndex((variant) => variant.id === id);
+    if (index < 0) return;
+    const target = index + direction;
+    if (target < 0 || target >= variants.length) return;
+    const next = [...variants];
+    const [item] = next.splice(index, 1);
+    next.splice(target, 0, item);
+    setVariants(next);
+  };
+
+  const openImageUpload = (variantId: string) => {
+    setUploadVariantId(variantId);
+    requestAnimationFrame(() => imageUploadRef.current?.click());
+  };
+
+  const openMediaLibrary = (variantId: string) => {
+    setLibraryVariantId(variantId);
+    void refreshLibrary().then(() => setLibraryOpen(true));
+  };
+
+  const uploadImage = (variantId: string, file: File) => {
+    void (async () => {
+      try {
+        const asset = await uploadMediaFile(file, {
+          folder: FOLDER_ECOVASO_PRODUCTS,
+        });
+        saveMediaAsset(asset);
+        updateVariant(variantId, { image: asset.url });
+        toast.success("Variant image uploaded");
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Upload failed");
+      }
+    })();
+  };
+
+  return (
+    <Card>
+      <CardHeader className="pb-4">
+        <CardTitle>Color variations</CardTitle>
+        <CardDescription>
+          The product default color is always the first swatch in the shop.
+          Additional colors appear after it. Leave additional colors empty for
+          products without options.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
+        <input
+          ref={imageUploadRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            const variantId = uploadVariantId;
+            event.target.value = "";
+            setUploadVariantId(null);
+            if (file && variantId) uploadImage(variantId, file);
+          }}
+        />
+
+        <div className="rounded-xl border border-oboya-blue/20 bg-oboya-blue/[0.03] p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <span
+              className="size-8 shrink-0 rounded-full border border-border/70 shadow-sm"
+              style={{
+                backgroundColor: /^#[0-9A-Fa-f]{6}$/.test(product.defaultColor)
+                  ? product.defaultColor
+                  : "#888888",
+              }}
+              aria-hidden
+            />
+            <div>
+              <p className="text-sm font-semibold text-oboya-blue-dark">
+                Default product color
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Uses the product gallery image, base prices, and product SKU.
+                Shown first when additional colors exist.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="default-color-hex">Swatch color</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="default-color-hex"
+                  type="color"
+                  value={
+                    /^#[0-9A-Fa-f]{6}$/.test(product.defaultColor)
+                      ? product.defaultColor
+                      : "#000000"
+                  }
+                  onChange={(event) =>
+                    onUpdate({ defaultColor: event.target.value })
+                  }
+                  className="h-10 w-14 cursor-pointer p-1"
+                />
+                <Input
+                  value={product.defaultColor ?? ""}
+                  onChange={(event) =>
+                    onUpdate({ defaultColor: event.target.value })
+                  }
+                  placeholder="#000000"
+                  className="flex-1"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <LocalizedFieldGrid
+              label="Default color name"
+              value={defaultColorName}
+              onChange={(locale: CmsLocale, nextValue: string) => {
+                const next = { ...defaultColorName, [locale]: nextValue };
+                onUpdate({
+                  defaultColorName: next,
+                });
+              }}
+              placeholder="e.g. Black / Preto"
+            />
+            <p className="mt-2 text-xs text-muted-foreground">
+              Default color SKU:{" "}
+              <span className="font-medium text-oboya-blue-dark">
+                {product.sku || "—"}
+              </span>{" "}
+              (from product registration)
+            </p>
+          </div>
+        </div>
+
+        {variants.length === 0 ? (
+          <p className="rounded-lg border border-dashed border-border/70 bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
+            No additional colors yet. Add colors (e.g. Terracotta) to appear
+            after the default swatch.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            <p className="text-sm font-medium text-oboya-blue-dark">
+              Additional colors
+            </p>
+            {variants.map((variant, index) => {
+              const nameI18n = toLocalizedString(
+                normalizeLocalizedColorName(variant.nameI18n, variant.name)
+              );
+              return (
+                <div
+                  key={variant.id}
+                  className="rounded-xl border border-border/60 bg-muted/20 p-4"
+                >
+                  <div className="flex flex-wrap items-start gap-4">
+                    <div className="flex items-center gap-2 pt-1">
+                      <span
+                        className="size-8 shrink-0 rounded-full border border-border/70 shadow-sm"
+                        style={{ backgroundColor: variant.color || "#888" }}
+                        aria-hidden
+                      />
+                      <div className="flex flex-col gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          disabled={index === 0}
+                          onClick={() => moveVariant(variant.id, -1)}
+                          aria-label="Move color up"
+                        >
+                          <ArrowUp className="size-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          disabled={index === variants.length - 1}
+                          onClick={() => moveVariant(variant.id, 1)}
+                          aria-label="Move color down"
+                        >
+                          <ArrowDown className="size-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="min-w-0 flex-1 space-y-3">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`color-sku-${variant.id}`}>SKU</Label>
+                          <Input
+                            id={`color-sku-${variant.id}`}
+                            value={variant.sku ?? ""}
+                            onChange={(event) =>
+                              updateVariant(variant.id, {
+                                sku: event.target.value,
+                              })
+                            }
+                            placeholder={`${product.sku || "SKU"}-COLOR`}
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`color-hex-${variant.id}`}>
+                            Swatch color
+                          </Label>
+                          <div className="flex gap-2">
+                            <Input
+                              id={`color-hex-${variant.id}`}
+                              type="color"
+                              value={
+                                /^#[0-9A-Fa-f]{6}$/.test(variant.color)
+                                  ? variant.color
+                                  : "#4DAF4E"
+                              }
+                              onChange={(event) =>
+                                updateVariant(variant.id, {
+                                  color: event.target.value,
+                                })
+                              }
+                              className="h-10 w-14 cursor-pointer p-1"
+                            />
+                            <Input
+                              value={variant.color}
+                              onChange={(event) =>
+                                updateVariant(variant.id, {
+                                  color: event.target.value,
+                                })
+                              }
+                              placeholder="#4DAF4E"
+                              className="flex-1"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => removeVariant(variant.id)}
+                      aria-label={`Remove ${variant.name || "color"}`}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+
+                  <div className="mt-4">
+                    <LocalizedFieldGrid
+                      label="Color name"
+                      value={nameI18n}
+                      onChange={(locale: CmsLocale, nextValue: string) => {
+                        const next = { ...nameI18n, [locale]: nextValue };
+                        updateVariant(variant.id, {
+                          nameI18n: next,
+                          name: next.en || nextValue,
+                        });
+                      }}
+                      placeholder="e.g. Terracotta"
+                    />
+                  </div>
+
+                  <div className="mt-4 grid gap-4 lg:grid-cols-[11rem_1fr]">
+                    <div className="space-y-2">
+                      <Label>Product image</Label>
+                      <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-border/60 bg-white">
+                        {variant.image ? (
+                          <Image
+                            src={variant.image}
+                            alt={variant.name || "Color variant"}
+                            fill
+                            className="object-cover"
+                            sizes="176px"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-muted-foreground">
+                            <ImageIcon className="size-8" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openImageUpload(variant.id)}
+                        >
+                          <Upload className="size-3.5" />
+                          Upload
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openMediaLibrary(variant.id)}
+                        >
+                          Library
+                        </Button>
+                      </div>
+                      <Input
+                        value={variant.image}
+                        onChange={(event) =>
+                          updateVariant(variant.id, {
+                            image: event.target.value,
+                          })
+                        }
+                        placeholder="Image URL"
+                        className="text-xs"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Prices</Label>
+                      {currenciesLoading ? (
+                        <p className="text-sm text-muted-foreground">
+                          Loading currencies…
+                        </p>
+                      ) : currencies.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          Configure currencies in Marketplace → Currencies.
+                        </p>
+                      ) : (
+                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                          {currencies.map((currency) => (
+                            <div key={currency} className="space-y-1.5">
+                              <Label
+                                htmlFor={`variant-price-${variant.id}-${currency}`}
+                              >
+                                {currency}
+                              </Label>
+                              <Input
+                                id={`variant-price-${variant.id}-${currency}`}
+                                type="number"
+                                min={0}
+                                step="0.001"
+                                value={variant.prices[currency] ?? ""}
+                                onChange={(event) => {
+                                  const value = event.target.value;
+                                  const nextPrices = { ...variant.prices };
+                                  if (value.trim() === "") {
+                                    delete nextPrices[currency];
+                                  } else {
+                                    nextPrices[currency] = Number(value);
+                                  }
+                                  updateVariant(variant.id, {
+                                    prices: nextPrices,
+                                  });
+                                }}
+                                placeholder="0"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        Empty or 0 falls back to the product base price for that
+                        currency.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <Button type="button" variant="outline" onClick={addVariant}>
+          <Plus className="size-4" />
+          Add color
+        </Button>
+
+        {libraryOpen ? (
+          <MediaLibraryDialog
+            items={mediaLibraryImages}
+            selected={
+              libraryVariantId
+                ? variants.find((variant) => variant.id === libraryVariantId)
+                    ?.image
+                : undefined
+            }
+            onClose={() => {
+              setLibraryOpen(false);
+              setLibraryVariantId(null);
+            }}
+            onSelect={(url) => {
+              if (libraryVariantId) {
+                updateVariant(libraryVariantId, { image: url });
+              }
+              setLibraryOpen(false);
+              setLibraryVariantId(null);
+            }}
+            defaultFolderId={FOLDER_ECOVASO_PRODUCTS}
+          />
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}

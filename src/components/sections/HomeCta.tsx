@@ -14,7 +14,7 @@ export function HomeCta({ title, description, buttonLabel }: HomeCtaProps) {
       title={title}
       description={description}
       buttonLabel={buttonLabel}
-      sharedBackdrop
+      imageSrc="/assets/homepage/solutions-integrated.jpg"
       size="compact"
     />
   );

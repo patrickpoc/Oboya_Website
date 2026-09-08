@@ -77,15 +77,18 @@ export function QuoteCart() {
             ) : (
               lineItems.map((item) => (
                 <CartItemRow
-                  key={item.productId}
+                  key={`${item.productId}-${item.variantId ?? "base"}`}
                   productId={item.productId}
+                  variantName={item.variantName}
                   quantity={item.quantity}
                   unitPrice={item.unitPrice}
                   currency={currency}
                   image={item.image}
                   sku={item.sku}
-                  onUpdateQuantity={(qty) => updateQuantity(item.productId, qty)}
-                  onRemove={() => removeItem(item.productId)}
+                  onUpdateQuantity={(qty) =>
+                    updateQuantity(item.productId, qty, item.variantId)
+                  }
+                  onRemove={() => removeItem(item.productId, item.variantId)}
                 />
               ))
             )}

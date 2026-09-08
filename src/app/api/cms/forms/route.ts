@@ -8,12 +8,8 @@ import type { FormSubmission, FormSubmissionStatus } from "@/lib/cms/types";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
 
-const CONTACT_SUBJECTS = new Set([
-  "general",
-  "products",
-  "partnership",
-  "support",
-]);
+const CONTACT_SUBJECT_MAX = 50;
+const CONTACT_MESSAGE_MAX = 500;
 
 export async function GET(request: Request) {
   if (isSupabaseConfigured()) {
@@ -86,19 +82,26 @@ export async function POST(request: Request) {
     const subject = String(body.subject ?? "").trim();
     const message = String(body.message ?? "").trim();
 
-    if (!firstName || !lastName || !email || !countryCode || !message) {
+    if (!firstName || !lastName || !email || !countryCode || !subject || !message) {
       return NextResponse.json(
         {
           error:
-            "First name, last name, email, country and message are required",
+            "First name, last name, email, country, subject and message are required",
         },
         { status: 400 }
       );
     }
 
-    if (!CONTACT_SUBJECTS.has(subject)) {
+    if (subject.length > CONTACT_SUBJECT_MAX) {
       return NextResponse.json(
-        { error: "Invalid subject" },
+        { error: `Subject must be at most ${CONTACT_SUBJECT_MAX} characters` },
+        { status: 400 }
+      );
+    }
+
+    if (message.length > CONTACT_MESSAGE_MAX) {
+      return NextResponse.json(
+        { error: `Message must be at most ${CONTACT_MESSAGE_MAX} characters` },
         { status: 400 }
       );
     }

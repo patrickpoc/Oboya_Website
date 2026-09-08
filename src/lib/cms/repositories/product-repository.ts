@@ -1,4 +1,9 @@
 import { normalizeProductTag } from "@/lib/shop/product-tags";
+import {
+  normalizeColorVariants,
+  normalizeImageColorIds,
+  normalizeLocalizedColorName,
+} from "@/lib/shop/color-variants";
 import type { ShopProduct } from "@/lib/shop/types";
 import type { CmsStatus, LocalizedString, SeoFields } from "@/lib/cms/types";
 import productsData from "@/../data/shop/products.json";
@@ -37,6 +42,21 @@ function withDefaults(p: ShopProduct): CmsProduct {
     enabledCountries: p.enabledCountries ?? { ...p.availability },
     stockQuantity: p.stockQuantity ?? null,
     unlimitedStock: p.unlimitedStock ?? true,
+    images: Array.isArray(p.images) && p.images.length > 0 ? p.images : [""],
+    imageColorIds: normalizeImageColorIds(
+      existing.imageColorIds ?? p.imageColorIds,
+      (Array.isArray(p.images) && p.images.length > 0 ? p.images : [""]).length
+    ),
+    defaultColor:
+      typeof existing.defaultColor === "string"
+        ? existing.defaultColor
+        : typeof p.defaultColor === "string"
+          ? p.defaultColor
+          : "",
+    defaultColorName: normalizeLocalizedColorName(
+      existing.defaultColorName ?? p.defaultColorName
+    ),
+    colorVariants: normalizeColorVariants(p.colorVariants ?? existing.colorVariants),
     name: existing.name ?? normalizeLocalizedById(p.id),
     shortDescription: existing.shortDescription ?? emptyLocalizedString(),
     description: existing.description ?? emptyLocalizedString(),
@@ -94,6 +114,14 @@ export function saveCmsProduct(product: CmsProduct): CmsProduct {
   const normalized = {
     ...product,
     enabledCountries: product.enabledCountries ?? { ...product.availability },
+    defaultColor: product.defaultColor ?? "",
+    defaultColorName: normalizeLocalizedColorName(product.defaultColorName),
+    images: product.images?.length ? product.images : [""],
+    imageColorIds: normalizeImageColorIds(
+      product.imageColorIds,
+      (product.images?.length ? product.images : [""]).length
+    ),
+    colorVariants: normalizeColorVariants(product.colorVariants),
     deletedAt: null,
     purgeAt: null,
   };

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef } from "react";
+import { X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useShop } from "@/contexts/ShopContext";
 import { useOverlayA11y } from "@/hooks/use-overlay-a11y";
@@ -316,7 +317,7 @@ export function FilterDrawer() {
   if (!isFilterDrawerOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 lg:hidden">
+    <div className="fixed inset-0 z-[60] lg:hidden">
       <button
         type="button"
         className="absolute inset-0 bg-oboya-blue-dark/40"
@@ -329,19 +330,35 @@ export function FilterDrawer() {
         role="dialog"
         aria-modal="true"
         aria-label={t("filters")}
-        className="absolute inset-y-0 left-0 w-full max-w-sm overflow-y-auto bg-white p-4 shadow-xl"
+        className="absolute inset-y-0 left-0 flex w-full max-w-sm flex-col bg-white pt-[env(safe-area-inset-top)] shadow-xl"
       >
-        <div className="mb-4 flex items-center justify-between">
+        <div className="flex shrink-0 items-center justify-between border-b border-border/60 px-4 py-3">
           <h2 className="font-semibold text-oboya-blue-dark">{t("filters")}</h2>
           <button
             type="button"
             onClick={handleClose}
-            className={buttonVariants({ variant: "ghost", size: "sm" })}
+            aria-label={t("close")}
+            className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border/70 bg-white text-oboya-blue-dark shadow-sm"
+          >
+            <X className="size-5" aria-hidden />
+          </button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+          <FilterSidebar className="border-0 p-0 shadow-none" />
+        </div>
+        <div className="shrink-0 border-t border-border/60 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <button
+            type="button"
+            onClick={handleClose}
+            className={buttonVariants({
+              variant: "outline",
+              className:
+                "w-full rounded-full border-oboya-blue-dark/30 bg-white text-oboya-blue-dark hover:bg-oboya-soft-white hover:text-oboya-blue-dark",
+            })}
           >
             {t("close")}
           </button>
         </div>
-        <FilterSidebar className="border-0 p-0 shadow-none" />
       </div>
     </div>
   );

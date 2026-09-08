@@ -22,44 +22,40 @@ export function CaseStudyStorySection({
   return (
     <section className="overflow-x-clip bg-white py-[clamp(3rem,7vw,5.5rem)]">
       <Container>
-        <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-14 xl:gap-16">
+        <div className="mx-auto grid w-full min-w-0 grid-cols-12 items-center gap-x-4 sm:gap-x-6 md:gap-x-9 lg:w-[90%] lg:gap-x-[3.15rem] xl:gap-x-[3.6rem]">
           <div
             className={cn(
-              "flex flex-col gap-10 lg:col-span-5",
-              imageLeft
-                ? "order-2 lg:order-2 lg:col-start-8"
-                : "order-2 lg:order-1 lg:col-start-1"
-            )}
-          >
-            {children}
-          </div>
-
-          <div
-            className={cn(
-              "relative w-full max-w-full lg:col-span-6",
-              imageLeft
-                ? "order-1 lg:order-1 lg:col-start-1"
-                : "order-1 lg:order-2 lg:col-start-7"
+              "relative col-span-6 min-w-0",
+              imageLeft ? "col-start-1" : "col-start-7"
             )}
           >
             <div
               className={cn(
-                "absolute inset-0 bg-[#e8ebe9]",
+                "pointer-events-none absolute inset-0 bg-[#e8ebe9]",
                 imageLeft
-                  ? "-translate-x-3 -translate-y-3 sm:-translate-x-5 sm:-translate-y-5"
-                  : "translate-x-3 translate-y-3 sm:translate-x-5 sm:translate-y-5"
+                  ? "translate-x-[-0.4rem] translate-y-[0.4rem] sm:translate-x-[-0.75rem] sm:translate-y-[0.75rem] md:translate-x-[-1.1rem] md:translate-y-[1.1rem]"
+                  : "translate-x-[0.4rem] translate-y-[0.4rem] sm:translate-x-[0.75rem] sm:translate-y-[0.75rem] md:translate-x-[1.1rem] md:translate-y-[1.1rem]"
               )}
               aria-hidden
             />
-            <div className="relative aspect-[4/5] w-full overflow-hidden bg-oboya-soft-white sm:aspect-[5/6]">
+            <div className="relative aspect-[4/5] w-full overflow-hidden bg-oboya-soft-white">
               <Image
                 src={imageSrc}
                 alt={imageAlt}
                 fill
                 className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 48vw"
+                sizes="(max-width: 1024px) 45vw, 43vw"
               />
             </div>
+          </div>
+
+          <div
+            className={cn(
+              "flex min-w-0 flex-col gap-6 sm:gap-8 md:gap-10 col-span-6",
+              imageLeft ? "col-start-7" : "col-start-1 row-start-1"
+            )}
+          >
+            {children}
           </div>
         </div>
       </Container>

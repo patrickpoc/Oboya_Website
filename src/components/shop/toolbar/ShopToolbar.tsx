@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { SlidersHorizontal } from "lucide-react";
+import { useEffect, useId, useState } from "react";
+import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Container } from "@/components/ui/container";
 import { useShop } from "@/contexts/ShopContext";
@@ -11,83 +11,112 @@ import { SearchBar } from "@/components/shop/toolbar/SearchBar";
 import { SortDropdown } from "@/components/shop/toolbar/SortDropdown";
 import { ViewSwitcher } from "@/components/shop/toolbar/ViewSwitcher";
 import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+function useIsLargeScreen() {
+  const [isLarge, setIsLarge] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsLarge(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  return isLarge;
+}
 
 export function ShopToolbar() {
   const t = useTranslations("shop");
   const { activeFilterCount, setFilterDrawerOpen, countryCode } = useShop();
+  const panelId = useId();
+  const isLarge = useIsLargeScreen();
+  const [mobileExpanded, setMobileExpanded] = useState(false);
 
-  const [collapsed, setCollapsed] = useState(false);
-  const sentinelRef = useRef<HTMLDivElement>(null);
-  const toolbarRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (window.innerWidth < 768) {
-          setCollapsed(false);
-          return;
-        }
-        setCollapsed(!entry.isIntersecting);
-      },
-      { threshold: 0, rootMargin: "-64px 0px 0px 0px" }
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, []);
+  const searchField = (
+    <div className={cn(isLarge ? "min-w-[14rem] flex-1" : "min-w-0 flex-1")}>
+      <SearchBar />
+    </div>
+  );
 
   return (
-    <>
-      {/* Sentinel: collapse triggers when this scrolls behind the sticky navbar */}
-      <div ref={sentinelRef} className="pointer-events-none h-px" aria-hidden />
-
-      <div ref={toolbarRef} className="sticky top-16 z-30 border-b border-border/60 bg-white/95 shadow-sm backdrop-blur-md md:top-20">
-        <Container className="py-4">
-          <div className="flex flex-col gap-4">
-            {/* Controls that hide on mobile scroll */}
-            <div
-              className={`flex flex-col gap-3 transition-all duration-300 max-md:!max-h-none max-md:!opacity-100 max-md:!overflow-visible md:!max-h-none md:!opacity-100 md:!overflow-visible lg:flex-row lg:items-end lg:gap-4 ${
-                collapsed
-                  ? "max-h-0 opacity-0 overflow-hidden !py-0 !gap-0 !mt-0 !mb-0"
-                  : "max-h-[500px] opacity-100"
-              }`}
-            >
-              <CountrySelector className="lg:w-48" />
-              <CurrencySelector className="lg:w-32" />
-              <div className="hidden min-w-[14rem] flex-1 lg:block">
-                <SearchBar />
-              </div>
-              <SortDropdown className="lg:w-44" />
-              <ViewSwitcher className="lg:w-28" />
-            </div>
-
-            {/* Search bar + Filters button — always visible on mobile */}
-            <div className="flex gap-2 lg:hidden">
-              <div className="flex-1">
-                <SearchBar />
-              </div>
+    <div className="sticky top-16 z-30 border-b border-border/60 bg-white/95 shadow-sm backdrop-blur-md md:top-20">
+      <Container className="py-3 sm:py-4">
+        {isLarge ? (
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
+            <CountrySelector className="lg:w-48" />
+            <CurrencySelector className="lg:w-32" />
+            {searchField}
+            <SortDropdown className="lg:w-44" />
+            <ViewSwitcher className="lg:w-28" />
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <div className="flex gap-2">
+              {searchField}
               <button
                 type="button"
                 onClick={() => setFilterDrawerOpen(true)}
                 disabled={!countryCode}
                 className={buttonVariants({
                   variant: "outline",
-                  className: "h-11 min-h-11 shrink-0 rounded-lg border-border max-sm:px-2.5",
+                  className:
+                    "h-10 min-h-10 shrink-0 rounded-lg border-border px-2.5 sm:px-3",
                 })}
               >
-                <SlidersHorizontal className="mr-2 size-4" />
-                {t("filters")}
+                <SlidersHorizontal className="size-4 sm:mr-2" />
+                <span className="hidden sm:inline">{t("filters")}</span>
                 {activeFilterCount > 0 && (
                   <span className="ml-1.5 rounded-full bg-oboya-green px-1.5 text-[10px] font-semibold text-white">
                     {activeFilterCount}
                   </span>
                 )}
               </button>
+              <button
+                type="button"
+                onClick={() => setMobileExpanded((open) => !open)}
+                className={buttonVariants({
+                  variant: "outline",
+                  className:
+                    "h-10 min-h-10 shrink-0 rounded-lg border-border px-2.5",
+                })}
+                aria-expanded={mobileExpanded}
+                aria-controls={panelId}
+                aria-label={
+                  mobileExpanded ? t("collapseToolbar") : t("expandToolbar")
+                }
+              >
+                <ChevronDown
+                  className={cn(
+                    "size-4 transition-transform duration-200",
+                    mobileExpanded && "rotate-180"
+                  )}
+                />
+              </button>
+            </div>
+
+            <div
+              id={panelId}
+              className={cn(
+                "grid transition-[grid-template-rows,opacity] duration-300 ease-out",
+                mobileExpanded
+                  ? "grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0"
+              )}
+            >
+              <div className="overflow-hidden">
+                <div className="flex flex-col gap-3 pb-1 pt-0.5">
+                  <CountrySelector />
+                  <CurrencySelector />
+                  <SortDropdown />
+                  <ViewSwitcher />
+                </div>
+              </div>
             </div>
           </div>
-        </Container>
-      </div>
-    </>
+        )}
+      </Container>
+    </div>
   );
 }

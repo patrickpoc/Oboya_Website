@@ -7,6 +7,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const ZOOM_SCALE = 1.8;
+/** Fallback while natural size loads (portrait-ish). */
+const FALLBACK_RATIO = 3 / 4;
+const MAX_FRAME_HEIGHT = "min(85vh, 52rem)";
 
 interface ProductGalleryProps {
   images: string[];
@@ -18,15 +21,43 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
   const [active, setActive] = useState(0);
   const [zoomOn, setZoomOn] = useState(false);
   const [origin, setOrigin] = useState({ x: 50, y: 50 });
+  /** width / height of the active image */
+  const [ratio, setRatio] = useState<number | null>(null);
   const frameRef = useRef<HTMLDivElement>(null);
 
   const list = images.length > 0 ? images : ["/assets/world-map.svg"];
-  const src = list[active] ?? list[0];
+  const src = list[Math.min(active, list.length - 1)] ?? list[0];
+  const aspect = ratio && ratio > 0 ? ratio : FALLBACK_RATIO;
+
+  useEffect(() => {
+    setActive(0);
+    setZoomOn(false);
+    setOrigin({ x: 50, y: 50 });
+  }, [images]);
 
   useEffect(() => {
     setZoomOn(false);
     setOrigin({ x: 50, y: 50 });
   }, [active]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setRatio(null);
+    const probe = new window.Image();
+    probe.onload = () => {
+      if (cancelled) return;
+      const w = probe.naturalWidth;
+      const h = probe.naturalHeight;
+      if (w > 0 && h > 0) setRatio(w / h);
+    };
+    probe.onerror = () => {
+      if (!cancelled) setRatio(FALLBACK_RATIO);
+    };
+    probe.src = src;
+    return () => {
+      cancelled = true;
+    };
+  }, [src]);
 
   const updateOrigin = useCallback((clientX: number, clientY: number) => {
     const frame = frameRef.current;
@@ -43,9 +74,14 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
       <div
         ref={frameRef}
         className={cn(
-          "relative aspect-[4/3] overflow-hidden rounded-lg bg-oboya-soft-white",
+          "relative mx-auto w-full overflow-hidden rounded-lg bg-oboya-soft-white transition-[aspect-ratio] duration-200",
           zoomOn && "cursor-crosshair"
         )}
+        style={{
+          aspectRatio: String(aspect),
+          maxHeight: MAX_FRAME_HEIGHT,
+          maxWidth: `min(100%, calc(${MAX_FRAME_HEIGHT} * ${aspect}))`,
+        }}
         onPointerMove={(event) => {
           if (!zoomOn) return;
           updateOrigin(event.clientX, event.clientY);
@@ -56,7 +92,7 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
           alt={alt}
           fill
           sizes="(max-width: 640px) 100vw, 36rem"
-          className="object-cover transition-transform duration-150 ease-out will-change-transform"
+          className="object-contain object-center transition-transform duration-150 ease-out will-change-transform"
           style={
             zoomOn
               ? {
@@ -100,14 +136,14 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
       </div>
 
       {list.length > 1 && (
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {list.map((imageSrc, index) => (
             <button
-              key={imageSrc}
+              key={`${imageSrc}-${index}`}
               type="button"
               onClick={() => setActive(index)}
               className={cn(
-                "relative size-14 overflow-hidden rounded-md border-2 transition-colors",
+                "relative size-14 shrink-0 overflow-hidden rounded-md border-2 bg-oboya-soft-white transition-colors",
                 active === index
                   ? "border-oboya-green"
                   : "border-transparent opacity-70 hover:opacity-100"
@@ -117,7 +153,7 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
                 src={imageSrc}
                 alt=""
                 fill
-                className="object-cover"
+                className="object-contain object-center"
                 sizes="56px"
               />
             </button>

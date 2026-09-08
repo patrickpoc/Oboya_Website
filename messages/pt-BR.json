@@ -141,6 +141,28 @@
     "description": "Seja para melhorar o cultivo, embalagem, transporte, apresentação no varejo ou o desempenho operacional geral, nossos especialistas estão prontos para ajudar.",
     "button": "Entre em Contato"
   },
+  "homeEcosystem": {
+    "ariaLabel": "Ecossistema hortícola Oboya",
+    "title": "Da Propagação ao Ponto de Venda",
+    "body": {
+      "p1": "O sucesso na horticultura depende de mais do que um único produto.",
+      "p2": "Depende de como cultivo, embalagem, logística, apresentação no varejo e operações do dia a dia trabalham juntos.",
+      "p3": "A Oboya Horticulture apoia cada etapa dessa jornada — para que você acesse os produtos e a expertise de que precisa por meio de um único parceiro de confiança."
+    },
+    "closingLine1": "Um Parceiro. Um Ecossistema.",
+    "closingLine2": "Oportunidades Infinitas para Performar Melhor.",
+    "prev": "Etapa anterior",
+    "next": "Próxima etapa",
+    "restart": "Recomeçar pela Propagação",
+    "stages": {
+      "propagation": "Propagação",
+      "growing": "Cultivo",
+      "packaging": "Embalagem",
+      "logistics": "Logística",
+      "retail": "Exposição no Varejo",
+      "pos": "Ponto de Venda"
+    }
+  },
   "footer": {
     "company": "Empresa",
     "solutions": "Soluções",
@@ -190,6 +212,10 @@
     "emailPlaceholder": "seu@email.com",
     "phone": "Telefone",
     "phonePlaceholder": "+55 11 0000 0000",
+    "phoneCountry": "Código do país",
+    "phoneLocalPlaceholder": "11 0000 0000",
+    "phoneCountrySearch": "Buscar país ou código",
+    "phoneCountryEmpty": "Nenhum país encontrado",
     "company": "Empresa",
     "companyPlaceholder": "Nome da empresa",
     "message": "Mensagem",
@@ -199,7 +225,9 @@
     "country": "País",
     "countryPlaceholder": "Selecione seu país",
     "countryOther": "Outro",
-    "subject": "Selecione o assunto?",
+    "countrySearch": "Buscar país",
+    "countryEmpty": "Nenhum país encontrado",
+    "subject": "Assunto",
     "subjectPlaceholder": "Como podemos ajudar?",
     "subjects": {
       "general": "Consulta geral",
@@ -523,9 +551,12 @@
     "viewGrid": "Grid view",
     "viewList": "List view",
     "filters": "Filters",
+    "expandToolbar": "Mostrar mais opções",
+    "collapseToolbar": "Ocultar opções",
     "clearFilters": "Clear all filters",
     "closeFilters": "Close filters",
     "close": "Close",
+    "back": "Voltar",
     "filterCategories": "Categories",
     "allCategories": "All categories",
     "filterSubcategories": "Subcategories",
@@ -541,6 +572,8 @@
     "priceMax": "Max",
     "quickView": "Quick View",
     "moreInformation": "Mais informações",
+    "colorLabel": "Cor",
+    "selectedColor": "Cor selecionada",
     "zoomEnable": "Ativar zoom da imagem",
     "zoomDisable": "Desativar zoom da imagem",
     "zoomHint": "Mova o cursor sobre a imagem para ampliar",

@@ -4,6 +4,7 @@ import type {
   ShopProduct,
   SortOption,
 } from "@/lib/shop/types";
+import { resolveCatalogPrice } from "@/lib/shop/color-variants";
 
 function matchesSearch(product: ShopProduct, query: string): boolean {
   if (!query.trim()) return true;
@@ -24,6 +25,9 @@ function matchesSearch(product: ShopProduct, query: string): boolean {
     product.id.toLowerCase().includes(qAsId) ||
     idAsWords.includes(q) ||
     product.sku.toLowerCase().includes(q) ||
+    (product.colorVariants ?? []).some((variant) =>
+      (variant.sku || "").toLowerCase().includes(q)
+    ) ||
     product.tags.some((tag) => tag.toLowerCase().includes(q)) ||
     product.categoryId.toLowerCase().includes(q) ||
     nameValues.some((name) => name.includes(q))
@@ -89,8 +93,8 @@ function isVisibleByBusinessRules(
   if (!countryCode || !currency) return true;
   const enabledMap = product.enabledCountries ?? product.availability;
   if (!enabledMap[countryCode]) return false;
-  const price = product.prices[currency];
-  if (price === undefined || price <= 0) return false;
+  const price = resolveCatalogPrice(product, currency);
+  if (price <= 0) return false;
   if (!product.unlimitedStock && (product.stockQuantity ?? 0) <= 0) return false;
   return true;
 }
@@ -102,8 +106,8 @@ function matchesPriceRange(
   priceMax: number | null
 ): boolean {
   if (!currency || (priceMin === null && priceMax === null)) return true;
-  const price = product.prices[currency];
-  if (price === undefined) return false;
+  const price = resolveCatalogPrice(product, currency);
+  if (price <= 0) return false;
   if (priceMin !== null && price < priceMin) return false;
   if (priceMax !== null && price > priceMax) return false;
   return true;
@@ -158,12 +162,14 @@ export function sortProducts(
     case "price_asc":
       return list.sort(
         (a, b) =>
-          (a.prices[currency ?? "USD"] ?? 0) - (b.prices[currency ?? "USD"] ?? 0)
+          resolveCatalogPrice(a, currency ?? "USD") -
+          resolveCatalogPrice(b, currency ?? "USD")
       );
     case "price_desc":
       return list.sort(
         (a, b) =>
-          (b.prices[currency ?? "USD"] ?? 0) - (a.prices[currency ?? "USD"] ?? 0)
+          resolveCatalogPrice(b, currency ?? "USD") -
+          resolveCatalogPrice(a, currency ?? "USD")
       );
     case "availability":
       return list.sort((a, b) => {

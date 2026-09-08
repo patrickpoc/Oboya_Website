@@ -2,6 +2,7 @@ import { BusinessSolutions } from "@/components/sections/BusinessSolutions";
 import { HomeChallenges } from "@/components/sections/HomeChallenges";
 import { Capabilities } from "@/components/sections/Capabilities";
 import { Hero } from "@/components/sections/Hero";
+import { HomeEcosystemSection } from "@/components/sections/HomeEcosystemSection";
 import { HomeLatestNews } from "@/components/sections/HomeLatestNews";
 import { Testimonials } from "@/components/sections/Testimonials";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
@@ -24,6 +25,7 @@ export function HomePageContent({
       {homepage.sections.hero.enabled && (
         <Hero data={homepage.hero} locale={locale} animationsEnabled={animationsEnabled} />
       )}
+      <HomeEcosystemSection />
       {homepage.sections.capabilities.enabled && (
         <Capabilities
           data={homepage.capabilities}

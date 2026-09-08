@@ -19,6 +19,7 @@ function getFocusable(container: HTMLElement) {
 
 /**
  * Escape to close, focus trap, body scroll lock, and restore focus on unmount.
+ * Uses overflow lock (not position:fixed) to avoid scroll jump on open/close.
  */
 export function useOverlayA11y({
   open,
@@ -26,6 +27,7 @@ export function useOverlayA11y({
   containerRef,
   lockScroll = true,
   trapFocus = true,
+  closeOnEscape = true,
 }: {
   open: boolean;
   onClose: () => void;
@@ -34,22 +36,26 @@ export function useOverlayA11y({
   lockScroll?: boolean;
   /** Trap Tab focus inside the container. Default true. */
   trapFocus?: boolean;
+  /** Close on Escape. Default true. */
+  closeOnEscape?: boolean;
 }) {
   useEffect(() => {
     if (!open) return;
 
     const previouslyFocused = document.activeElement as HTMLElement | null;
-    const prevOverflow = document.body.style.overflow;
-    const prevPosition = document.body.style.position;
-    const prevTop = document.body.style.top;
-    const prevWidth = document.body.style.width;
-    const scrollY = window.scrollY;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    const prevBodyPaddingRight = body.style.paddingRight;
 
     if (lockScroll) {
-      document.body.style.overflow = "hidden";
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = "100%";
+      const scrollbarWidth = window.innerWidth - html.clientWidth;
+      html.style.overflow = "hidden";
+      body.style.overflow = "hidden";
+      if (scrollbarWidth > 0) {
+        body.style.paddingRight = `${scrollbarWidth}px`;
+      }
     }
 
     const focusContainer = () => {
@@ -57,7 +63,7 @@ export function useOverlayA11y({
       if (!container) return;
       const focusables = getFocusable(container);
       if (trapFocus) {
-        focusables[0]?.focus();
+        focusables[0]?.focus({ preventScroll: true });
       }
     };
 
@@ -65,6 +71,7 @@ export function useOverlayA11y({
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        if (!closeOnEscape) return;
         event.preventDefault();
         onClose();
         return;
@@ -86,11 +93,11 @@ export function useOverlayA11y({
       if (event.shiftKey) {
         if (active === first || !container.contains(active)) {
           event.preventDefault();
-          last.focus();
+          last.focus({ preventScroll: true });
         }
       } else if (active === last || !container.contains(active)) {
         event.preventDefault();
-        first.focus();
+        first.focus({ preventScroll: true });
       }
     };
 
@@ -98,16 +105,14 @@ export function useOverlayA11y({
     return () => {
       window.cancelAnimationFrame(rafId);
       if (lockScroll) {
-        document.body.style.overflow = prevOverflow;
-        document.body.style.position = prevPosition;
-        document.body.style.top = prevTop;
-        document.body.style.width = prevWidth;
-        window.scrollTo(0, scrollY);
+        html.style.overflow = prevHtmlOverflow;
+        body.style.overflow = prevBodyOverflow;
+        body.style.paddingRight = prevBodyPaddingRight;
       }
       document.removeEventListener("keydown", onKeyDown);
       if (trapFocus) {
-        previouslyFocused?.focus?.();
+        previouslyFocused?.focus?.({ preventScroll: true });
       }
     };
-  }, [open, onClose, containerRef, lockScroll, trapFocus]);
+  }, [open, onClose, containerRef, lockScroll, trapFocus, closeOnEscape]);
 }

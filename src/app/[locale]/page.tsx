@@ -64,21 +64,21 @@ export default async function Home({ params }: Props) {
           imageSrc={homepage.hero.backgroundImage}
           videoSrc={homepage.hero.backgroundVideo}
           alt={heroAlt}
-          cta={
-            <HomeCta
-              title={tHomeCta("title")}
-              description={tHomeCta("description")}
-              buttonLabel={tHomeCta("button")}
-            />
-          }
           afterBackdrop={
-            homepage.sections.partners.enabled ? (
-              <Partners
-                data={homepage.partners}
-                locale={locale}
-                animationsEnabled={animationsEnabled}
+            <>
+              <HomeCta
+                title={tHomeCta("title")}
+                description={tHomeCta("description")}
+                buttonLabel={tHomeCta("button")}
               />
-            ) : null
+              {homepage.sections.partners.enabled ? (
+                <Partners
+                  data={homepage.partners}
+                  locale={locale}
+                  animationsEnabled={animationsEnabled}
+                />
+              ) : null}
+            </>
           }
         >
           <HomePageContent

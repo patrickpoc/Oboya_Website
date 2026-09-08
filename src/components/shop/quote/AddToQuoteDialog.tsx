@@ -2,10 +2,19 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useShop } from "@/contexts/ShopContext";
 import { useProductName } from "@/lib/shop/use-product-name";
 import { getProductMoq } from "@/lib/shop/quantity";
+import {
+  getActiveVariant,
+  getVariantDisplayName,
+  hasColorVariants,
+  resolveVariantImage,
+  resolveVariantPrice,
+  resolveVariantSku,
+  toCartVariantId,
+} from "@/lib/shop/color-variants";
 import { formatShopPrice } from "@/lib/shop/format-price";
 import { QuantityInput } from "@/components/shop/QuantityInput";
 import { buttonVariants } from "@/components/ui/button";
@@ -21,8 +30,10 @@ import { Label } from "@/components/ui/label";
 
 export function AddToQuoteDialog() {
   const t = useTranslations("shop");
+  const locale = useLocale();
   const {
     addToQuoteProductId,
+    addToQuoteVariantId,
     closeAddToQuoteDialog,
     addItem,
     currency,
@@ -35,6 +46,10 @@ export function AddToQuoteDialog() {
     ? getProductById(addToQuoteProductId)
     : null;
   const moq = getProductMoq(product);
+  const activeVariant =
+    product && hasColorVariants(product)
+      ? getActiveVariant(product, addToQuoteVariantId)
+      : null;
 
   useEffect(() => {
     if (!addToQuoteProductId) return;
@@ -54,10 +69,14 @@ export function AddToQuoteDialog() {
   }
 
   const name = getProductName(product as Parameters<typeof getProductName>[0]);
-  const unitPrice = currency ? (product.prices[currency] ?? 0) : 0;
+  const unitPrice = currency
+    ? resolveVariantPrice(product, activeVariant, currency)
+    : 0;
+  const imageSrc = resolveVariantImage(product, activeVariant);
+  const displaySku = resolveVariantSku(product, activeVariant);
 
   const handleConfirm = () => {
-    addItem(product.id, quantity);
+    addItem(product.id, quantity, toCartVariantId(addToQuoteVariantId));
     closeAddToQuoteDialog();
   };
 
@@ -75,7 +94,7 @@ export function AddToQuoteDialog() {
         <div className="flex gap-4">
           <div className="relative size-20 shrink-0 overflow-hidden rounded-lg bg-oboya-soft-white">
             <Image
-              src={product.images[0]}
+              src={imageSrc}
               alt={name}
               fill
               className="object-cover"
@@ -83,7 +102,12 @@ export function AddToQuoteDialog() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-oboya-blue-dark">{name}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{product.sku}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{displaySku}</p>
+            {activeVariant ? (
+              <p className="mt-1 text-xs text-oboya-blue-dark">
+                {t("colorLabel")}: {getVariantDisplayName(activeVariant, locale)}
+              </p>
+            ) : null}
             <p className="mt-2 text-xs font-medium text-oboya-green">
               {t("moq", { count: moq })}
             </p>

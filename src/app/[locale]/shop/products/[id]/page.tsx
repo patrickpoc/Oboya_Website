@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { SiteLayout } from "@/components/layouts/SiteLayout";
 import { ProductDetailView } from "@/components/shop/product/ProductDetailView";
+import { ShopOverlays } from "@/components/shop/ShopOverlays";
 import { readPublishedProductById } from "@/lib/cms/readers";
 import { pickLocalized } from "@/lib/cms/utils";
 import { stripHtmlToPlainText } from "@/lib/cms/sanitize-rich-html.shared";
@@ -54,6 +55,7 @@ export default async function ProductDetailPage({ params }: Props) {
     <SiteLayout>
       <Suspense>
         <ProductDetailView product={product} />
+        <ShopOverlays />
       </Suspense>
     </SiteLayout>
   );

@@ -1,32 +1,40 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { memo, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { BrandLabel } from "@/components/shop/BrandLabel";
+import { ColorSwatchGroup } from "@/components/shop/ColorSwatchGroup";
 import { buttonVariants } from "@/components/ui/button";
 import { getBrandById, getCategoryById } from "@/lib/shop/catalog";
+import {
+  DEFAULT_COLOR_VARIANT_ID,
+  getActiveVariant,
+  getDisplayColorVariants,
+  hasColorVariants,
+  resolveVariantImage,
+  resolveVariantPrice,
+  resolveVariantSku,
+  toCartVariantId,
+} from "@/lib/shop/color-variants";
 import { useProductName } from "@/lib/shop/use-product-name";
 import { useProductDescription } from "@/lib/shop/use-product-description";
 import type { ShopProduct } from "@/lib/shop/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import { formatShopPrice } from "@/lib/shop/format-price";
 
-const FALLBACK_IMAGE = "/assets/homepage/greenhouse-technology.webp";
-
 interface ProductCardProps {
   product: ShopProduct;
   currency: string;
   viewMode?: "grid" | "list";
-  onQuickView: () => void;
-  onAddToQuote: () => void;
+  onAddToQuote: (variantId?: string | null) => void;
 }
 
-export function ProductCard({
+function ProductCardComponent({
   product,
   currency,
   viewMode = "grid",
-  onQuickView,
   onAddToQuote,
 }: ProductCardProps) {
   const t = useTranslations("shop");
@@ -39,21 +47,29 @@ export function ProductCard({
   );
   const brand = getBrandById(product.brandId);
   const category = getCategoryById(product.categoryId);
-  const price = product.prices[currency as keyof typeof product.prices] ?? 0;
-  const imageSrc = product.images[0] || FALLBACK_IMAGE;
+  const variants = useMemo(() => getDisplayColorVariants(product), [product]);
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
+    () => (variants[0]?.id ?? null)
+  );
+  const activeVariant = getActiveVariant(product, selectedVariantId);
+  const price = resolveVariantPrice(product, activeVariant, currency);
+  const imageSrc = resolveVariantImage(product, activeVariant);
+  const displaySku = resolveVariantSku(product, activeVariant);
+  const showSwatches = hasColorVariants(product);
+  const cartVariantId = toCartVariantId(activeVariant?.id);
+  const detailHref = `/shop/products/${product.id}${
+    cartVariantId ? `?variant=${encodeURIComponent(cartVariantId)}` : ""
+  }`;
 
   if (viewMode === "list") {
     return (
-      <motion.article
-        layout
-        className="flex flex-col gap-4 rounded-xl border border-border/60 bg-white p-4 shadow-[var(--shadow-card)] transition-shadow hover:shadow-md sm:flex-row"
-      >
+      <article className="flex flex-col gap-4 rounded-xl border border-border/60 bg-white p-4 shadow-[var(--shadow-card)] transition-shadow hover:shadow-md sm:flex-row">
         <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-lg bg-oboya-soft-white sm:aspect-auto sm:size-24">
           <Image
             src={imageSrc}
             alt={name}
             fill
-            className="object-cover"
+            className="object-cover transition-opacity duration-200"
             sizes="(max-width: 640px) 100vw, 96px"
           />
         </div>
@@ -63,12 +79,25 @@ export function ProductCard({
               {category?.name}
             </p>
           </div>
-          <h3 className="mt-1 font-semibold text-oboya-blue-dark">{name}</h3>
+          <h3 className="mt-0.5 leading-snug font-semibold text-oboya-blue-dark">
+            {name}
+          </h3>
+          {showSwatches ? (
+            <ColorSwatchGroup
+              className="mt-1.5"
+              variants={variants}
+              selectedId={activeVariant?.id ?? DEFAULT_COLOR_VARIANT_ID}
+              onSelect={setSelectedVariantId}
+              currency={currency}
+            />
+          ) : null}
           {shortDescription ? (
-            <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{shortDescription}</p>
+            <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+              {shortDescription}
+            </p>
           ) : null}
           <p className="mt-1 flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground">
-            <span>{product.sku}</span>
+            <span>{displaySku}</span>
             {brand ? (
               <>
                 <span aria-hidden>·</span>
@@ -79,12 +108,14 @@ export function ProductCard({
           <p className="mt-2 text-sm font-semibold text-oboya-blue-dark">
             {t("estimatedPrice")}: {formatShopPrice(price, currency)}
           </p>
-          <p className="text-[11px] text-oboya-green">{t("moq", { count: product.moq })}</p>
+          <p className="text-[11px] text-oboya-green">
+            {t("moq", { count: product.moq })}
+          </p>
         </div>
         <div className="flex shrink-0 flex-col justify-center gap-2 sm:min-w-[10rem]">
           <button
             type="button"
-            onClick={onAddToQuote}
+            onClick={() => onAddToQuote(cartVariantId)}
             className={buttonVariants({
               size: "cta",
               className: "w-full bg-oboya-green text-white hover:bg-oboya-green/90",
@@ -92,9 +123,8 @@ export function ProductCard({
           >
             {t("addToQuote")}
           </button>
-          <button
-            type="button"
-            onClick={onQuickView}
+          <Link
+            href={detailHref}
             className={buttonVariants({
               variant: "outline",
               size: "sm",
@@ -102,24 +132,21 @@ export function ProductCard({
             })}
           >
             {t("moreInformation")}
-          </button>
+          </Link>
         </div>
-      </motion.article>
+      </article>
     );
   }
 
   return (
-    <motion.article
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.2 }}
-      className="group flex flex-col overflow-hidden rounded-xl border border-border/60 bg-white shadow-[var(--shadow-card)] transition-shadow hover:shadow-md"
-    >
+    <article className="group flex flex-col overflow-hidden rounded-xl border border-border/60 bg-white shadow-[var(--shadow-card)] transition-shadow hover:-translate-y-0.5 hover:shadow-md">
       <div className="relative aspect-[4/3] bg-oboya-soft-white">
         <Image
+          key={imageSrc}
           src={imageSrc}
           alt={name}
           fill
-          className="object-cover"
+          className="object-cover transition-opacity duration-200"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
       </div>
@@ -127,12 +154,25 @@ export function ProductCard({
         <p className="text-xs font-medium uppercase tracking-wide text-oboya-green">
           {category?.name}
         </p>
-        <h3 className="mt-1 min-h-[2.5rem] line-clamp-2 font-semibold text-oboya-blue-dark">{name}</h3>
+        <h3 className="mt-0.5 leading-snug line-clamp-2 font-semibold text-oboya-blue-dark">
+          {name}
+        </h3>
+        {showSwatches ? (
+          <ColorSwatchGroup
+            className="mt-1.5"
+            variants={variants}
+            selectedId={activeVariant?.id ?? DEFAULT_COLOR_VARIANT_ID}
+            onSelect={setSelectedVariantId}
+            currency={currency}
+          />
+        ) : null}
         {shortDescription ? (
-          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{shortDescription}</p>
+          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+            {shortDescription}
+          </p>
         ) : null}
         <p className="mt-1 flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground">
-          <span>{product.sku}</span>
+          <span>{displaySku}</span>
           {brand ? (
             <>
               <span aria-hidden>·</span>
@@ -144,11 +184,13 @@ export function ProductCard({
           {formatShopPrice(price, currency)}
         </p>
         <p className="text-[11px] text-muted-foreground">{t("estimatedPrice")}</p>
-        <p className="text-[11px] text-oboya-green">{t("moq", { count: product.moq })}</p>
+        <p className="text-[11px] text-oboya-green">
+          {t("moq", { count: product.moq })}
+        </p>
         <div className="mt-auto flex flex-col gap-2 pt-4">
           <button
             type="button"
-            onClick={onAddToQuote}
+            onClick={() => onAddToQuote(cartVariantId)}
             className={buttonVariants({
               size: "cta",
               className:
@@ -157,9 +199,8 @@ export function ProductCard({
           >
             {t("addToQuote")}
           </button>
-          <button
-            type="button"
-            onClick={onQuickView}
+          <Link
+            href={detailHref}
             className={buttonVariants({
               variant: "outline",
               size: "sm",
@@ -167,9 +208,11 @@ export function ProductCard({
             })}
           >
             {t("moreInformation")}
-          </button>
+          </Link>
         </div>
       </div>
-    </motion.article>
+    </article>
   );
 }
+
+export const ProductCard = memo(ProductCardComponent);

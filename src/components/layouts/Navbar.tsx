@@ -183,11 +183,11 @@ function MobileNavLink({
   onNavigate: () => void;
 }) {
   return (
-    <div className="border-b border-border/60 py-4 first:pt-0">
+    <div className="border-b border-border/60 py-4">
       <Link
         href={item.href}
         onClick={onNavigate}
-        className="block text-lg font-semibold text-oboya-blue-dark"
+        className="block text-lg leading-snug font-semibold text-oboya-blue-dark"
       >
         {item.label}
       </Link>
@@ -206,6 +206,55 @@ function MobileNavLink({
         </div>
       )}
     </div>
+  );
+}
+
+function MobileNavSheetContent({
+  side = "right",
+  mainNavigation,
+  contactLabel,
+  contactClassName,
+  onNavigate,
+  menuTitle,
+}: {
+  side?: "left" | "right";
+  mainNavigation: NavItem[];
+  contactLabel: string;
+  contactClassName: string;
+  onNavigate: () => void;
+  menuTitle: string;
+}) {
+  return (
+    <SheetContent
+      side={side}
+      className="w-full max-w-sm gap-0 overflow-hidden p-0"
+    >
+      <SheetTitle className="sr-only">{menuTitle}</SheetTitle>
+      <div className="flex h-full min-h-0 flex-col bg-white">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-14 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8">
+          <nav className="flex flex-col" aria-label={menuTitle}>
+            {mainNavigation.map((item) => (
+              <MobileNavLink
+                key={item.href}
+                item={item}
+                onNavigate={onNavigate}
+              />
+            ))}
+            <LanguageSwitcherMobile onNavigate={onNavigate} />
+            <Link
+              href="/contact"
+              onClick={onNavigate}
+              className={buttonVariants({
+                size: "cta",
+                className: cn("mt-6 w-full", contactClassName),
+              })}
+            >
+              {contactLabel}
+            </Link>
+          </nav>
+        </div>
+      </div>
+    </SheetContent>
   );
 }
 
@@ -233,33 +282,14 @@ function HeroMenuButton({
           <span className="h-px w-full bg-white" />
         </span>
       </SheetTrigger>
-      <SheetContent
+      <MobileNavSheetContent
         side="left"
-        className="w-full max-w-sm overflow-y-auto px-6 pt-14 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8"
-      >
-        <SheetTitle className="sr-only">{t("nav.menuTitle")}</SheetTitle>
-        <div className="flex flex-col">
-          {mainNavigation.map((item) => (
-            <MobileNavLink
-              key={item.href}
-              item={item}
-              onNavigate={() => onOpenChange(false)}
-            />
-          ))}
-          <LanguageSwitcherMobile onNavigate={() => onOpenChange(false)} />
-          <Link
-            href="/contact"
-            onClick={() => onOpenChange(false)}
-            className={buttonVariants({
-              size: "cta",
-              className:
-                "mt-6 w-full bg-oboya-blue-dark text-white hover:bg-oboya-blue",
-            })}
-          >
-            {contactLabel}
-          </Link>
-        </div>
-      </SheetContent>
+        mainNavigation={mainNavigation}
+        contactLabel={contactLabel}
+        contactClassName="bg-oboya-blue-dark text-white hover:bg-oboya-blue"
+        onNavigate={() => onOpenChange(false)}
+        menuTitle={t("nav.menuTitle")}
+      />
     </Sheet>
   );
 }
@@ -366,37 +396,14 @@ export function Navbar({
               >
                 <Menu className="size-5" />
               </SheetTrigger>
-              <SheetContent
+              <MobileNavSheetContent
                 side="right"
-                className="w-full max-w-sm overflow-y-auto px-6 pt-14 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8"
-              >
-                <SheetTitle className="sr-only">
-                  {t("nav.menuTitle")}
-                </SheetTitle>
-                <div className="flex flex-col">
-                  {mainNavigation.map((item) => (
-                    <MobileNavLink
-                      key={item.href}
-                      item={item}
-                      onNavigate={() => setMobileOpen(false)}
-                    />
-                  ))}
-                  <LanguageSwitcherMobile
-                    onNavigate={() => setMobileOpen(false)}
-                  />
-                  <Link
-                    href="/contact"
-                    onClick={() => setMobileOpen(false)}
-                    className={buttonVariants({
-                      size: "cta",
-                      className:
-                        "mt-6 w-full bg-oboya-blue-dark text-white hover:bg-oboya-blue",
-                    })}
-                  >
-                    {contactLabel}
-                  </Link>
-                </div>
-              </SheetContent>
+                mainNavigation={mainNavigation}
+                contactLabel={contactLabel}
+                contactClassName="bg-oboya-blue-dark text-white hover:bg-oboya-blue"
+                onNavigate={() => setMobileOpen(false)}
+                menuTitle={t("nav.menuTitle")}
+              />
             </Sheet>
           </div>
         </div>
@@ -476,37 +483,14 @@ export function Navbar({
                       >
                         <Menu className="size-5" />
                       </SheetTrigger>
-                      <SheetContent
+                      <MobileNavSheetContent
                         side="right"
-                        className="w-full max-w-sm overflow-y-auto px-6 pt-14 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8"
-                      >
-                        <SheetTitle className="sr-only">
-                          {t("nav.menuTitle")}
-                        </SheetTitle>
-                        <div className="flex flex-col">
-                          {mainNavigation.map((item) => (
-                            <MobileNavLink
-                              key={item.href}
-                              item={item}
-                              onNavigate={() => setMobileOpen(false)}
-                            />
-                          ))}
-                          <LanguageSwitcherMobile
-                            onNavigate={() => setMobileOpen(false)}
-                          />
-                          <Link
-                            href="/contact"
-                            onClick={() => setMobileOpen(false)}
-                            className={buttonVariants({
-                              size: "cta",
-                              className:
-                                "mt-6 w-full bg-oboya-blue-dark text-white hover:bg-oboya-blue",
-                            })}
-                          >
-                            {contactLabel}
-                          </Link>
-                        </div>
-                      </SheetContent>
+                        mainNavigation={mainNavigation}
+                        contactLabel={contactLabel}
+                        contactClassName="bg-oboya-blue-dark text-white hover:bg-oboya-blue"
+                        onNavigate={() => setMobileOpen(false)}
+                        menuTitle={t("nav.menuTitle")}
+                      />
                     </Sheet>
                   </div>
                 </div>
@@ -652,35 +636,14 @@ export function Navbar({
             >
               <Menu className="size-5" />
             </SheetTrigger>
-            <SheetContent
+            <MobileNavSheetContent
               side="right"
-              className="w-full max-w-sm overflow-y-auto px-6 pt-14 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8"
-            >
-              <SheetTitle className="sr-only">{t("nav.menuTitle")}</SheetTitle>
-              <div className="flex flex-col">
-                {mainNavigation.map((item) => (
-                  <MobileNavLink
-                    key={item.href}
-                    item={item}
-                    onNavigate={() => setMobileOpen(false)}
-                  />
-                ))}
-                <LanguageSwitcherMobile
-                  onNavigate={() => setMobileOpen(false)}
-                />
-                <Link
-                  href="/contact"
-                  onClick={() => setMobileOpen(false)}
-                  className={buttonVariants({
-                    size: "cta",
-                    className:
-                      "mt-6 w-full bg-oboya-green text-white hover:bg-oboya-green/90",
-                  })}
-                >
-                  {contactLabel}
-                </Link>
-              </div>
-            </SheetContent>
+              mainNavigation={mainNavigation}
+              contactLabel={contactLabel}
+              contactClassName="bg-oboya-green text-white hover:bg-oboya-green/90"
+              onNavigate={() => setMobileOpen(false)}
+              menuTitle={t("nav.menuTitle")}
+            />
           </Sheet>
         </div>
       </nav>

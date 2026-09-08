@@ -60,6 +60,20 @@ export interface ProductDocument {
   type: string;
 }
 
+export interface ProductColorVariant {
+  id: string;
+  /** English / fallback label. Prefer `nameI18n` for storefront. */
+  name: string;
+  /** Localized color names (en, pt-BR, es, zh-CN). */
+  nameI18n?: ShopLocalizedText;
+  /** Per-color SKU. Empty falls back to product base SKU. */
+  sku: string;
+  color: string;
+  image: string;
+  prices: Partial<Record<CurrencyCode, number>>;
+  sortOrder: number;
+}
+
 export interface ShopProduct {
   id: string;
   sku: string;
@@ -68,6 +82,11 @@ export interface ShopProduct {
   categoryId: string;
   subcategoryId: string;
   images: string[];
+  /**
+   * Parallel to `images[]`. Each entry lists color ids that slot belongs to
+   * (`__default__` + additional variant ids). Empty array = show for all colors.
+   */
+  imageColorIds: string[][];
   tags: string[];
   availability: Record<string, boolean>;
   prices: Partial<Record<CurrencyCode, number>>;
@@ -82,6 +101,15 @@ export interface ShopProduct {
   specs: ProductSpec[];
   documents: ProductDocument[];
   relatedProductIds: string[];
+  /**
+   * Hex for the product’s standard / base color swatch (shown first when
+   * additional `colorVariants` exist).
+   */
+  defaultColor: string;
+  /** Localized labels for the base/default color (e.g. Black / Preto). */
+  defaultColorName: ShopLocalizedText;
+  /** Additional color options after the default. Empty = no color selection UI. */
+  colorVariants: ProductColorVariant[];
 }
 
 export interface ShopCatalog {
@@ -94,6 +122,8 @@ export interface ShopCatalog {
 
 export interface CartItem {
   productId: string;
+  /** Selected color variant id, or null/undefined for base product. */
+  variantId?: string | null;
   quantity: number;
 }
 
@@ -154,7 +184,13 @@ export interface RfqPayload {
   countryCode: string;
   currency: CurrencyCode;
   officeId: string | null;
-  items: { productId: string; quantity: number; unitPrice: number }[];
+  items: {
+    productId: string;
+    variantId?: string | null;
+    variantName?: string | null;
+    quantity: number;
+    unitPrice: number;
+  }[];
   estimatedTotal: number;
 }
 
