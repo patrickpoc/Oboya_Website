@@ -42,7 +42,6 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
 
   useEffect(() => {
     let cancelled = false;
-    setRatio(null);
     const probe = new window.Image();
     probe.onload = () => {
       if (cancelled) return;
@@ -74,7 +73,7 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
       <div
         ref={frameRef}
         className={cn(
-          "relative mx-auto w-full overflow-hidden rounded-lg bg-oboya-soft-white transition-[aspect-ratio] duration-200",
+          "relative mx-auto w-full overflow-hidden rounded-lg bg-oboya-soft-white",
           zoomOn && "cursor-crosshair"
         )}
         style={{
@@ -92,14 +91,15 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
           alt={alt}
           fill
           sizes="(max-width: 640px) 100vw, 36rem"
-          className="object-contain object-center transition-transform duration-150 ease-out will-change-transform"
+          className="object-contain object-center will-change-transform"
           style={
             zoomOn
               ? {
                   transform: `scale(${ZOOM_SCALE})`,
                   transformOrigin: `${origin.x}% ${origin.y}%`,
+                  transition: "transform 150ms ease-out",
                 }
-              : undefined
+              : { transition: "none" }
           }
           draggable={false}
         />

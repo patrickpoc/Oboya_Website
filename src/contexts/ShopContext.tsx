@@ -209,7 +209,11 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const softOpenTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const urlWriteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const isShopRoute = pathname === "/shop" || pathname.endsWith("/shop");
+  const isShopListingRoute =
+    pathname === "/shop" || pathname.endsWith("/shop");
+  /** Catalog + cart overlays: listing, PDP, cart, checkout. */
+  const isShopAreaRoute =
+    isShopListingRoute || /(?:^|\/)shop\//.test(pathname);
 
   // Persist cart/country from localStorage once
   useEffect(() => {
@@ -227,9 +231,9 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  // Fetch catalog only on shop routes to avoid site-wide product API load.
+  // Fetch catalog on shop listing + PDP so color variants are live off-listing.
   useEffect(() => {
-    if (!isShopRoute) return;
+    if (!isShopAreaRoute) return;
 
     let cancelled = false;
     setState((prev) =>
@@ -310,13 +314,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [isShopRoute]);
+  }, [isShopAreaRoute]);
 
-  // Keep shop UI in sync with URL when entering / navigating within shop
+  // Keep shop UI in sync with URL when entering / navigating within shop listing
   useEffect(() => {
     if (!isReady) return;
 
-    if (!isShopRoute) {
+    if (!isShopListingRoute) {
       wasOnShop.current = false;
       if (softOpenTimer.current) {
         clearTimeout(softOpenTimer.current);
@@ -376,7 +380,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         softOpenTimer.current = null;
       }
     };
-  }, [isReady, isShopRoute, router, searchParams]);
+  }, [isReady, isShopListingRoute, router, searchParams]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -388,11 +392,11 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   }, [state.countryCode, state.currency, state.items, isReady]);
 
-  // Only write shop state back to the URL while on the shop route.
+  // Only write shop state back to the URL while on the shop listing route.
   // Debounce to avoid router.replace thrashing on each search keystroke.
   useEffect(() => {
     if (
-      !isShopRoute ||
+      !isShopListingRoute ||
       !isReady ||
       !hydratedFromUrl.current ||
       skipUrlWrite.current
@@ -431,7 +435,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     };
   }, [
     isReady,
-    isShopRoute,
+    isShopListingRoute,
     pathname,
     router,
     searchParams,

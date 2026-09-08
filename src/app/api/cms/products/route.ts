@@ -50,6 +50,13 @@ export async function POST(request: Request) {
     }
 
     await persistProductsToFileSafe(getCmsProducts({ includeDeleted: true }));
+    try {
+      const { revalidatePath } = await import("next/cache");
+      revalidatePath("/[locale]/shop", "page");
+      revalidatePath("/[locale]/shop/products/[id]", "page");
+    } catch {
+      // Ignore when revalidation is unavailable.
+    }
     return NextResponse.json(saved, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to persist product";

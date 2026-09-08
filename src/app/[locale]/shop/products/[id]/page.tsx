@@ -12,6 +12,9 @@ import { routing } from "@/i18n/routing";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
 
+/** Always read fresh product data (color variants, prices, images). */
+export const dynamic = "force-dynamic";
+
 export async function generateStaticParams() {
   const { readProducts: readProductsFromStore } = await import(
     "@/lib/cms/server/products.server"

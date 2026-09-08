@@ -33,12 +33,38 @@ interface ProductDetailViewProps {
   product: CmsProduct;
 }
 
-export function ProductDetailView({ product }: ProductDetailViewProps) {
+export function ProductDetailView({ product: initialProduct }: ProductDetailViewProps) {
   const t = useTranslations("shop");
   const searchParams = useSearchParams();
-  const { currency, brands, categories, openAddToQuoteDialog } = useShop();
+  const {
+    currency,
+    brands,
+    categories,
+    openAddToQuoteDialog,
+    getProductById,
+  } = useShop();
   const getProductName = useProductName();
   const { getDescriptionHtml, getExcerpt, locale } = useProductDescription();
+
+  // Prefer live catalog product (includes colorVariants from API) over SSG props.
+  const liveProduct = getProductById(initialProduct.id) as CmsProduct | undefined;
+  const product = useMemo(() => {
+    if (
+      liveProduct &&
+      Array.isArray(liveProduct.colorVariants) &&
+      liveProduct.colorVariants.length > 0
+    ) {
+      return {
+        ...initialProduct,
+        ...liveProduct,
+        name: initialProduct.name,
+        shortDescription: initialProduct.shortDescription,
+        description: initialProduct.description,
+        seo: initialProduct.seo,
+      } as CmsProduct;
+    }
+    return initialProduct;
+  }, [initialProduct, liveProduct]);
 
   const variants = useMemo(() => getDisplayColorVariants(product), [product]);
   const initialVariantId =

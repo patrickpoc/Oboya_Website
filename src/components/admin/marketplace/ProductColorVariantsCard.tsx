@@ -15,6 +15,7 @@ import {
   type MediaLibraryItem,
 } from "@/components/admin/media/MediaLibraryDialog";
 import { LocalizedFieldGrid } from "@/components/admin/marketplace/LocalizedFieldGrid";
+import { ColorHexField } from "@/components/admin/marketplace/ColorHexField";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -235,29 +236,13 @@ export function ProductColorVariantsCard({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="default-color-hex">Swatch color</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="default-color-hex"
-                  type="color"
-                  value={
-                    /^#[0-9A-Fa-f]{6}$/.test(product.defaultColor)
-                      ? product.defaultColor
-                      : "#000000"
-                  }
-                  onChange={(event) =>
-                    onUpdate({ defaultColor: event.target.value })
-                  }
-                  className="h-10 w-14 cursor-pointer p-1"
-                />
-                <Input
-                  value={product.defaultColor ?? ""}
-                  onChange={(event) =>
-                    onUpdate({ defaultColor: event.target.value })
-                  }
-                  placeholder="#000000"
-                  className="flex-1"
-                />
-              </div>
+              <ColorHexField
+                id="default-color-hex"
+                value={product.defaultColor ?? ""}
+                onChange={(next) => onUpdate({ defaultColor: next })}
+                fallback="#000000"
+                placeholder="#000000"
+              />
             </div>
           </div>
 
@@ -352,33 +337,15 @@ export function ProductColorVariantsCard({
                           <Label htmlFor={`color-hex-${variant.id}`}>
                             Swatch color
                           </Label>
-                          <div className="flex gap-2">
-                            <Input
-                              id={`color-hex-${variant.id}`}
-                              type="color"
-                              value={
-                                /^#[0-9A-Fa-f]{6}$/.test(variant.color)
-                                  ? variant.color
-                                  : "#4DAF4E"
-                              }
-                              onChange={(event) =>
-                                updateVariant(variant.id, {
-                                  color: event.target.value,
-                                })
-                              }
-                              className="h-10 w-14 cursor-pointer p-1"
-                            />
-                            <Input
-                              value={variant.color}
-                              onChange={(event) =>
-                                updateVariant(variant.id, {
-                                  color: event.target.value,
-                                })
-                              }
-                              placeholder="#4DAF4E"
-                              className="flex-1"
-                            />
-                          </div>
+                          <ColorHexField
+                            id={`color-hex-${variant.id}`}
+                            value={variant.color}
+                            onChange={(next) =>
+                              updateVariant(variant.id, { color: next })
+                            }
+                            fallback="#4DAF4E"
+                            placeholder="#4DAF4E"
+                          />
                         </div>
                       </div>
                     </div>
