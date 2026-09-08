@@ -220,7 +220,13 @@ export function normalizeImageColorIds(
 /**
  * Gallery URLs for a selected color.
  * Order: color’s primary image (variant / default) first, then product gallery
- * slots assigned to that color. Empty colorIds on a slot = all colors (legacy).
+ * slots assigned to that color.
+ *
+ * Assignment rules when the product has color variants:
+ * - Slot tagged with a color id → only that color
+ * - Slot with empty tags → shared (all colors), only when no tags exist on any
+ *   slot OR as filler for colors that have no explicit slots
+ * - Never show another color’s tagged slot on a different color
  */
 export function getGalleryImagesForVariant(
   product: Pick<
@@ -257,18 +263,23 @@ export function getGalleryImagesForVariant(
   const activeVariant = getActiveVariant(product, activeId);
   const primary = activeVariant?.image?.trim() || "";
 
-  // Prefer slots explicitly tagged for this color. Unassigned slots (empty
-  // colorIds) only fill in when this color has no explicit gallery images.
+  const anyAssignments = filled.some((entry) => entry.colorIds.length > 0);
   const explicit = filled.filter((entry) =>
     entry.colorIds.includes(activeId)
   );
   const unassigned = filled.filter((entry) => entry.colorIds.length === 0);
-  let secondary =
-    explicit.length > 0
-      ? explicit.map((entry) => entry.url)
-      : unassigned.map((entry) => entry.url);
-  if (secondary.length === 0) {
+
+  let secondary: string[];
+  if (explicit.length > 0) {
+    // Only slots tagged for this color.
+    secondary = explicit.map((entry) => entry.url);
+  } else if (!anyAssignments) {
+    // Legacy: nothing tagged → entire gallery for every color.
     secondary = filled.map((entry) => entry.url);
+  } else {
+    // Other colors have tags; this color only gets shared (untagged) slots.
+    // Do not leak slots tagged for a different color.
+    secondary = unassigned.map((entry) => entry.url);
   }
 
   // Primary color image first; gallery slots follow (deduped).

@@ -344,7 +344,9 @@ export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps)
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">
                       Show for colors
-                      {assigned.size === 0 ? " (all colors if none tagged)" : ""}
+                      {assigned.size === 0
+                        ? " (untagged — shared only if no other slots are tagged)"
+                        : ""}
                     </Label>
                     <div className="flex flex-wrap gap-2">
                       {colorOptions.map((option) => {

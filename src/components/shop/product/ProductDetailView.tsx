@@ -46,24 +46,28 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
   const getProductName = useProductName();
   const { getDescriptionHtml, getExcerpt, locale } = useProductDescription();
 
-  // Prefer live catalog product (includes colorVariants from API) over SSG props.
+  // Prefer live catalog product (colorVariants + imageColorIds) over SSG props.
   const liveProduct = getProductById(initialProduct.id) as CmsProduct | undefined;
   const product = useMemo(() => {
-    if (
-      liveProduct &&
-      Array.isArray(liveProduct.colorVariants) &&
-      liveProduct.colorVariants.length > 0
-    ) {
-      return {
-        ...initialProduct,
-        ...liveProduct,
-        name: initialProduct.name,
-        shortDescription: initialProduct.shortDescription,
-        description: initialProduct.description,
-        seo: initialProduct.seo,
-      } as CmsProduct;
-    }
-    return initialProduct;
+    if (!liveProduct) return initialProduct;
+    return {
+      ...initialProduct,
+      ...liveProduct,
+      // Keep localized CMS fields from the server render when present.
+      name: initialProduct.name ?? liveProduct.name,
+      shortDescription:
+        initialProduct.shortDescription ?? liveProduct.shortDescription,
+      description: initialProduct.description ?? liveProduct.description,
+      seo: initialProduct.seo ?? liveProduct.seo,
+      colorVariants: liveProduct.colorVariants ?? initialProduct.colorVariants,
+      imageColorIds: liveProduct.imageColorIds ?? initialProduct.imageColorIds,
+      defaultColor: liveProduct.defaultColor ?? initialProduct.defaultColor,
+      defaultColorName:
+        liveProduct.defaultColorName ?? initialProduct.defaultColorName,
+      images: liveProduct.images?.length
+        ? liveProduct.images
+        : initialProduct.images,
+    } as CmsProduct;
   }, [initialProduct, liveProduct]);
 
   const variants = useMemo(() => getDisplayColorVariants(product), [product]);
