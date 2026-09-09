@@ -244,7 +244,7 @@ const defaultSettings = (): HomepageSettings => ({
         description: H.businessSolutions.flowersDesc,
         image:
           "https://images.unsplash.com/photo-1490750967868-88aa4486c946?q=80&w=800&auto=format&fit=crop",
-        href: "/solutions/flowers",
+        href: "/solutions?area=flowers",
         ctaLabel: H.businessSolutions.cta,
       },
       {
@@ -253,7 +253,7 @@ const defaultSettings = (): HomepageSettings => ({
         description: H.businessSolutions.vegetablesDesc,
         image:
           "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800&auto=format&fit=crop",
-        href: "/solutions/vegetables",
+        href: "/solutions?area=vegetables",
         ctaLabel: H.businessSolutions.cta,
       },
       {
@@ -262,7 +262,7 @@ const defaultSettings = (): HomepageSettings => ({
         description: H.businessSolutions.fruitsDesc,
         image:
           "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?q=80&w=800&auto=format&fit=crop",
-        href: "/solutions/fruits",
+        href: "/solutions?area=fruits",
         ctaLabel: H.businessSolutions.cta,
       },
       {
@@ -270,7 +270,7 @@ const defaultSettings = (): HomepageSettings => ({
         title: H.businessSolutions.logisticsTitle,
         description: H.businessSolutions.logisticsDesc,
         image: "/assets/homepage/solutions-logistics.jpg",
-        href: "/solutions/logistics-display",
+        href: "/solutions?area=logistics-display",
         ctaLabel: H.businessSolutions.cta,
       },
       {
@@ -278,7 +278,7 @@ const defaultSettings = (): HomepageSettings => ({
         title: H.businessSolutions.machineryTitle,
         description: H.businessSolutions.machineryDesc,
         image: "/assets/homepage/greenhouse-technology.webp",
-        href: "/solutions/machinery-automation",
+        href: "/solutions?area=machinery-automation",
         ctaLabel: H.businessSolutions.cta,
       },
     ],

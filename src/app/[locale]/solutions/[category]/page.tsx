@@ -1,14 +1,10 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import { SiteLayout } from "@/components/layouts/SiteLayout";
-import { SolutionCategoryPageContent } from "@/components/solutions/SolutionCategoryPageContent";
-import { routing } from "@/i18n/routing";
-import { siteConfig } from "@/constants/site";
+import { redirect } from "next/navigation";
+import { setRequestLocale } from "next-intl/server";
 import {
   isSolutionCategoryId,
   SOLUTION_CATEGORY_IDS,
 } from "@/lib/solutions/category-stages";
+import { routing } from "@/i18n/routing";
 
 type Props = { params: Promise<{ locale: string; category: string }> };
 
@@ -18,42 +14,17 @@ export function generateStaticParams() {
   );
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale, category } = await params;
-  if (!isSolutionCategoryId(category)) {
-    return { title: "Not Found" };
-  }
-
-  const t = await getTranslations({ locale, namespace: "solutionsPage" });
-  const title = t(`categories.${category}.title`);
-  const description = t(`categories.${category}.description`);
-
-  return {
-    title,
-    description,
-    alternates: {
-      languages: Object.fromEntries(
-        routing.locales.map((loc) => [loc, `/${loc}/solutions/${category}`])
-      ),
-    },
-    openGraph: {
-      title: `${title} | ${siteConfig.name}`,
-      description,
-    },
-  };
-}
-
+/**
+ * Category subroutes redirect into the one-page Solutions experience.
+ * Uses `?area=` (not hash) so the server redirect remains reliable.
+ */
 export default async function SolutionCategoryPage({ params }: Props) {
   const { locale, category } = await params;
   setRequestLocale(locale);
 
   if (!isSolutionCategoryId(category)) {
-    notFound();
+    redirect(`/${locale}/solutions`);
   }
 
-  return (
-    <SiteLayout>
-      <SolutionCategoryPageContent categoryId={category} locale={locale} />
-    </SiteLayout>
-  );
+  redirect(`/${locale}/solutions?area=${category}`);
 }

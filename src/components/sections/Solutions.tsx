@@ -20,11 +20,11 @@ export function Solutions() {
   const t = useTranslations("solutions");
 
   const items = [
-    { title: t("propagationTitle"), description: t("propagationDesc"), icon: Sprout, href: "/solutions/propagation" },
-    { title: t("packagingTitle"), description: t("packagingDesc"), icon: Package, href: "/solutions/packaging" },
-    { title: t("sustainableTitle"), description: t("sustainableDesc"), icon: Leaf, href: "/solutions/sustainability" },
-    { title: t("distributionTitle"), description: t("distributionDesc"), icon: Truck, href: "/solutions/distribution" },
-    { title: t("circularTitle"), description: t("circularDesc"), icon: Recycle, href: "/solutions/circular-economy" },
+    { title: t("propagationTitle"), description: t("propagationDesc"), icon: Sprout, href: "/solutions" },
+    { title: t("packagingTitle"), description: t("packagingDesc"), icon: Package, href: "/solutions" },
+    { title: t("sustainableTitle"), description: t("sustainableDesc"), icon: Leaf, href: "/solutions" },
+    { title: t("distributionTitle"), description: t("distributionDesc"), icon: Truck, href: "/solutions?area=logistics-display" },
+    { title: t("circularTitle"), description: t("circularDesc"), icon: Recycle, href: "/solutions" },
   ];
 
   return (

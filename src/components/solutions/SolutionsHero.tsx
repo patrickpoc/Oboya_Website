@@ -74,19 +74,19 @@ function IndexHeroContent({
       variants={staggerContainer}
       initial={reduceMotion ? false : "hidden"}
       animate={reduceMotion ? undefined : "visible"}
-      className="mx-auto flex h-full min-h-[inherit] w-full max-w-[var(--container-max)] flex-col px-[var(--container-padding)] py-[clamp(3rem,8vw,5rem)] text-left"
+      className="relative z-10 flex h-full min-h-[inherit] flex-col justify-center px-[var(--container-padding)] py-10 md:py-12 lg:py-14"
     >
-      <div className="flex w-full max-w-3xl flex-1 flex-col justify-between">
+      <div className="mx-auto w-full max-w-[var(--container-max)]">
         <motion.h1
           variants={fadeInUp}
-          className="whitespace-nowrap font-display text-[clamp(1.25rem,4.2vw,3rem)] font-bold leading-[1.15] tracking-[-0.02em] text-white"
+          className="max-w-4xl font-display text-[clamp(2rem,4vw,3.25rem)] font-bold leading-[1.1] tracking-[-0.02em] text-white text-balance"
         >
           {headline}
         </motion.h1>
 
         <motion.div
           variants={fadeInUp}
-          className="space-y-0.5 font-body text-[clamp(1.05rem,1.8vw,1.25rem)] font-normal leading-[1.45] text-white/95"
+          className="mt-5 space-y-0.5 font-body text-[clamp(1.05rem,1.8vw,1.25rem)] font-normal leading-[1.45] text-white/95 md:mt-6"
         >
           {lines.map((line) => (
             <p key={line}>{line}</p>
@@ -95,14 +95,14 @@ function IndexHeroContent({
 
         <motion.p
           variants={fadeInUp}
-          className="max-w-2xl font-body text-[0.9375rem] font-medium leading-[1.6] text-white/90 md:text-base md:leading-[1.65]"
+          className="mt-5 max-w-3xl font-body text-[clamp(0.95rem,1.5vw,1.125rem)] font-normal leading-[1.55] text-white/92 md:mt-6 md:leading-[1.6] lg:max-w-[58%]"
         >
           {body}
         </motion.p>
 
         <motion.p
           variants={fadeInUp}
-          className="max-w-2xl font-body text-[0.9375rem] font-bold leading-[1.6] text-white md:text-base md:leading-[1.65]"
+          className="mt-5 max-w-3xl font-body text-[clamp(0.95rem,1.5vw,1.125rem)] font-semibold leading-[1.55] text-white md:mt-6 md:leading-[1.6] lg:max-w-[58%]"
         >
           {accent}
         </motion.p>

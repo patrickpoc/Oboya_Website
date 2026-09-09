@@ -28,13 +28,13 @@ export interface SolutionStageMeta {
 }
 
 export const SOLUTION_STAGES: SolutionStageMeta[] = [
-  { id: "propagation", href: "/solutions/propagation" },
-  { id: "growing", href: "/solutions/propagation" },
-  { id: "harvest", href: "/solutions/packaging" },
-  { id: "postharvest", href: "/solutions/packaging" },
-  { id: "transport", href: "/solutions/distribution" },
-  { id: "retail", href: "/solutions/distribution" },
-  { id: "automation", href: "/solutions/machinery-automation" },
+  { id: "propagation", href: "/solutions" },
+  { id: "growing", href: "/solutions" },
+  { id: "harvest", href: "/solutions" },
+  { id: "postharvest", href: "/solutions" },
+  { id: "transport", href: "/solutions" },
+  { id: "retail", href: "/solutions" },
+  { id: "automation", href: "/solutions?area=machinery-automation" },
 ];
 
 const CROP_STAGE_IDS: SolutionStageId[] = [

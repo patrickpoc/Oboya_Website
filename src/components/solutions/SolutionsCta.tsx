@@ -84,7 +84,7 @@ export function SolutionsCta({
             {description}
           </p>
           <Link
-            href="/contact"
+            href="/shop"
             className={cn(
               buttonVariants({ size: "cta" }),
               "border border-white bg-transparent text-white hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"

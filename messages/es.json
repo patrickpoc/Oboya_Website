@@ -1036,8 +1036,230 @@
         "tags": "Packaging, Crates"
       }
     },
-    "ctaTitle": "Which Solution is Right for You?",
-    "ctaDescription": "In our work culture, honesty is a priority. We are here to offer you the solution you really need. Find out what it is here.",
-    "ctaButton": "Contact"
+    "ctaTitle": "¿Listo para encontrar los productos adecuados?",
+    "ctaDescription": "Pasa de las soluciones a la Tienda con filtros aplicados, o habla con nuestro equipo sobre tu operación.",
+    "ctaButton": "Ir a la Tienda",
+    "explorer": {
+      "eyebrow": "Explora nuestras soluciones",
+      "title": "Soluciones para cada sector de la horticultura",
+      "description": "Descubre cómo Oboya apoya cada etapa de las operaciones hortícolas — y abre los productos relacionados directamente en la Shop.",
+      "headingAll": "Soluciones para todos los cultivos",
+      "headingFor": "Soluciones para {sector}",
+      "navLabel": "Filtros de cultivo",
+      "filters": {
+        "all": "Todos los cultivos",
+        "flowers": "Flores",
+        "vegetables": "Hortalizas y hierbas",
+        "fruits": "Frutas"
+      },
+      "stages": {
+        "propagation": {
+          "title": "Soluciones de Propagación"
+        },
+        "growing": {
+          "title": "Soluciones de Cultivo"
+        },
+        "harvest": {
+          "title": "Soluciones de Cosecha"
+        },
+        "postharvest": {
+          "title": "Soluciones de Poscosecha"
+        },
+        "transportLogistics": {
+          "title": "Transporte y Logística"
+        },
+        "retail": {
+          "title": "Retail"
+        },
+        "automation": {
+          "title": "Automatización y Maquinaria"
+        }
+      },
+      "areas": {
+        "flowers": {
+          "short": "Flores",
+          "title": "Floricultura",
+          "description": "Apoyando a productores, exportadores, distribuidores y retailers de flores desde la propagación hasta el punto de venta.",
+          "cta": "Explorar soluciones para flores"
+        },
+        "fruits": {
+          "short": "Frutas",
+          "title": "Frutas",
+          "description": "Optimizando cultivo, manipulación, embalaje y distribución a lo largo de la cadena de frutas.",
+          "cta": "Explorar soluciones para frutas"
+        },
+        "vegetables": {
+          "short": "Hortalizas y Hierbas",
+          "title": "Hortalizas y Hierbas",
+          "description": "Apoyando producción eficiente, manipulación, embalaje y comercialización de hortalizas y hierbas.",
+          "cta": "Explorar soluciones para hortalizas"
+        },
+        "logisticsDisplay": {
+          "short": "Logística y Exhibición",
+          "title": "Logística y Exhibición",
+          "description": "Sistemas que mejoran el movimiento del producto, el merchandising y la presentación en el punto de venta.",
+          "cta": "Explorar soluciones de logística"
+        },
+        "machineryAutomation": {
+          "short": "Maquinaria y Automatización",
+          "title": "Maquinaria y Automatización",
+          "description": "Tecnología que aumenta eficiencia, consistencia y escalabilidad a medida que crece la operación.",
+          "cta": "Explorar soluciones de automatización"
+        }
+      },
+      "items": {
+        "floriculture": "Floricultura",
+        "pottedPlants": "Plantas en maceta",
+        "cutFlowers": "Flores de corte",
+        "propagation": "Propagación",
+        "growing": "Cultivo",
+        "harvest": "Cosecha",
+        "postharvest": "Poscosecha",
+        "packaging": "Embalaje",
+        "berries": "Frutos rojos",
+        "strawberry": "Fresa",
+        "blueberry": "Arándano",
+        "avocado": "Aguacate",
+        "banana": "Banana",
+        "tomato": "Tomate",
+        "cucumber": "Pepino",
+        "pepper": "Pimiento",
+        "herbs": "Hierbas",
+        "irrigation": "Sistemas de riego",
+        "rollingContainers": "Contenedores con ruedas",
+        "logisticsTrolleys": "Carros logísticos",
+        "warehouse": "Equipos de almacén",
+        "transportSystems": "Sistemas de transporte",
+        "displaySystems": "Sistemas de exhibición",
+        "merchandising": "Soluciones de merchandising",
+        "posDisplays": "Displays para PDV",
+        "automationSystems": "Sistemas de automatización",
+        "agvRobotics": "Robótica AGV",
+        "productionMachines": "Máquinas de producción",
+        "intelligentHandling": "Sistemas inteligentes de movimiento",
+        "greenhouseTech": "Tecnología para invernaderos",
+        "seedlingTrays": "Bandejas para plantines",
+        "propagationSystems": "Sistemas de propagación",
+        "growingBenches": "Mesas de cultivo",
+        "growingMedia": "Medios de cultivo",
+        "pots": "Maceta",
+        "containers": "Contenedores",
+        "substrates": "Sustratos",
+        "crates": "Cajas",
+        "transportTrays": "Bandejas de transporte",
+        "harvestCarts": "Carros de cosecha",
+        "flowerBuckets": "Cubos para flores",
+        "protectivePackaging": "Embalajes protectores",
+        "flowerSleeves": "Fundas para flores",
+        "retailPackaging": "Embalajes para retail",
+        "packagingAccessories": "Accesorios de embalaje",
+        "tobacco": "Tabaco",
+        "greenhouses": "Invernaderos",
+        "cultivationSystems": "Sistemas de cultivo",
+        "trolleys": "Carros",
+        "display": "Display"
+      }
+    },
+    "valueChain": {
+      "eyebrow": "Soluciones completas",
+      "title": "Soluciones Agrícolas Completas",
+      "description": "Soluciones integradas en toda la cadena de valor agrícola.",
+      "wheelLabel": "Áreas de solución",
+      "stageNavLabel": "Etapas de la solución",
+      "footerCta": "Explorar",
+      "segments": {
+        "flowers": {
+          "title": "Flores",
+          "label": "Flores",
+          "body": "Apoyando a productores, exportadores, distribuidores y retailers de flores desde la propagación hasta el punto de venta."
+        },
+        "fruits": {
+          "title": "Frutas",
+          "label": "Frutas",
+          "body": "Optimizando cultivo, manipulación, embalaje y distribución en toda la cadena de frutas."
+        },
+        "vegetables": {
+          "title": "Hortalizas y hierbas",
+          "label": "Hortalizas\ny hierbas",
+          "body": "Apoyando una producción, manipulación, embalaje y comercialización eficientes de hortalizas y hierbas."
+        },
+        "logisticsDisplay": {
+          "title": "Logística y Display",
+          "label": "Logística\ny Display",
+          "body": "Sistemas que mejoran el movimiento del producto, el merchandising y la presentación en el punto de venta."
+        },
+        "machineryAutomation": {
+          "title": "Maquinaria y Automatización",
+          "label": "Maquinaria\ny Automatización",
+          "body": "Tecnología que aumenta la eficiencia, la consistencia y la escalabilidad a medida que crecen las operaciones."
+        }
+      },
+      "stageLinks": {
+        "propagation": "Soluciones de Propagación",
+        "growing": "Soluciones de Cultivo",
+        "harvest": "Soluciones de Cosecha",
+        "postharvest": "Soluciones de Poscosecha",
+        "transportLogistics": "Transporte y Logística",
+        "retail": "Retail",
+        "automation": "Automatización y Maquinaria"
+      },
+      "footerLinks": {
+        "caseStudy": "Case Study Destacado",
+        "insights": "Insights Relacionados",
+        "quote": "Solicitar Cotización"
+      },
+      "items": {
+        "floriculture": "Floricultura",
+        "pottedPlants": "Plantas en maceta",
+        "cutFlowers": "Flores de corte",
+        "propagation": "Propagación",
+        "growing": "Cultivo",
+        "harvest": "Cosecha",
+        "postharvest": "Poscosecha",
+        "packaging": "Embalaje",
+        "berries": "Frutos rojos",
+        "strawberry": "Fresa",
+        "blueberry": "Arándano",
+        "avocado": "Aguacate",
+        "banana": "Banana",
+        "tomato": "Tomate",
+        "cucumber": "Pepino",
+        "pepper": "Pimiento",
+        "herbs": "Hierbas",
+        "irrigation": "Sistemas de riego",
+        "rollingContainers": "Contenedores con ruedas",
+        "logisticsTrolleys": "Carros logísticos",
+        "warehouse": "Equipos de almacén",
+        "transportSystems": "Sistemas de transporte",
+        "displaySystems": "Sistemas de exhibición",
+        "merchandising": "Soluciones de merchandising",
+        "posDisplays": "Displays para PDV",
+        "automationSystems": "Sistemas de automatización",
+        "agvRobotics": "Robótica AGV",
+        "productionMachines": "Máquinas de producción",
+        "intelligentHandling": "Sistemas inteligentes de movimiento",
+        "greenhouseTech": "Tecnología para invernaderos",
+        "seedlingTrays": "Bandejas para plantines",
+        "propagationSystems": "Sistemas de propagación",
+        "growingBenches": "Mesas de cultivo",
+        "growingMedia": "Medios de cultivo",
+        "pots": "Maceta",
+        "containers": "Contenedores",
+        "substrates": "Sustratos",
+        "crates": "Cajas",
+        "transportTrays": "Bandejas de transporte",
+        "harvestCarts": "Carros de cosecha",
+        "flowerBuckets": "Cubos para flores",
+        "protectivePackaging": "Embalajes protectores",
+        "flowerSleeves": "Fundas para flores",
+        "retailPackaging": "Embalajes para retail",
+        "packagingAccessories": "Accesorios de embalaje",
+        "tobacco": "Tabaco",
+        "greenhouses": "Invernaderos",
+        "cultivationSystems": "Sistemas de cultivo",
+        "trolleys": "Carros",
+        "display": "Display"
+      }
+    }
   }
 }

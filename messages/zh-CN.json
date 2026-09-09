@@ -1036,8 +1036,230 @@
         "tags": "Packaging, Crates"
       }
     },
-    "ctaTitle": "Which Solution is Right for You?",
-    "ctaDescription": "In our work culture, honesty is a priority. We are here to offer you the solution you really need. Find out what it is here.",
-    "ctaButton": "Contact"
+    "ctaTitle": "准备好找到合适的产品了吗？",
+    "ctaDescription": "从解决方案进入商城（筛选条件已应用），或与我们的团队讨论您的运营需求。",
+    "ctaButton": "前往商城",
+    "explorer": {
+      "eyebrow": "探索我们的解决方案",
+      "title": "覆盖园艺各领域的解决方案",
+      "description": "了解 Oboya 如何支持园艺运营的每个阶段——并在商城中直接打开相关产品。",
+      "headingAll": "适用于所有作物的解决方案",
+      "headingFor": "{sector}解决方案",
+      "navLabel": "作物筛选",
+      "filters": {
+        "all": "全部作物",
+        "flowers": "花卉",
+        "vegetables": "蔬菜与香草",
+        "fruits": "水果"
+      },
+      "stages": {
+        "propagation": {
+          "title": "繁育解决方案"
+        },
+        "growing": {
+          "title": "种植解决方案"
+        },
+        "harvest": {
+          "title": "采收解决方案"
+        },
+        "postharvest": {
+          "title": "采后解决方案"
+        },
+        "transportLogistics": {
+          "title": "运输与物流"
+        },
+        "retail": {
+          "title": "零售"
+        },
+        "automation": {
+          "title": "自动化与机械"
+        }
+      },
+      "areas": {
+        "flowers": {
+          "short": "花卉",
+          "title": "花卉",
+          "description": "从繁殖到销售终端，支持花卉种植者、出口商、分销商与零售商。",
+          "cta": "探索花卉解决方案"
+        },
+        "fruits": {
+          "short": "水果",
+          "title": "水果",
+          "description": "优化水果供应链中的种植、处理、包装与配送。",
+          "cta": "探索水果解决方案"
+        },
+        "vegetables": {
+          "short": "蔬菜与香草",
+          "title": "蔬菜与香草",
+          "description": "支持蔬菜与香草业务的高效生产、处理、包装与商业化。",
+          "cta": "探索蔬菜解决方案"
+        },
+        "logisticsDisplay": {
+          "short": "物流与陈列",
+          "title": "物流与陈列",
+          "description": "改善产品流转、陈列销售与终端呈现的系统方案。",
+          "cta": "探索物流解决方案"
+        },
+        "machineryAutomation": {
+          "short": "机械与自动化",
+          "title": "机械与自动化",
+          "description": "提升效率、一致性与可扩展性的技术，支撑业务持续成长。",
+          "cta": "探索自动化解决方案"
+        }
+      },
+      "items": {
+        "floriculture": "花卉栽培",
+        "pottedPlants": "盆栽植物",
+        "cutFlowers": "切花",
+        "propagation": "繁殖",
+        "growing": "栽培",
+        "harvest": "采收",
+        "postharvest": "采后",
+        "packaging": "包装",
+        "berries": "浆果",
+        "strawberry": "草莓",
+        "blueberry": "蓝莓",
+        "avocado": "牛油果",
+        "banana": "香蕉",
+        "tomato": "番茄",
+        "cucumber": "黄瓜",
+        "pepper": "甜椒",
+        "herbs": "香草",
+        "irrigation": "灌溉系统",
+        "rollingContainers": "带轮容器",
+        "logisticsTrolleys": "物流推车",
+        "warehouse": "仓储设备",
+        "transportSystems": "运输系统",
+        "displaySystems": "陈列系统",
+        "merchandising": "陈列销售方案",
+        "posDisplays": "终端陈列",
+        "automationSystems": "自动化系统",
+        "agvRobotics": "AGV 机器人",
+        "productionMachines": "生产设备",
+        "intelligentHandling": "智能搬运系统",
+        "greenhouseTech": "温室技术",
+        "seedlingTrays": "育苗盘",
+        "propagationSystems": "繁殖系统",
+        "growingBenches": "栽培台",
+        "growingMedia": "栽培介质",
+        "pots": "花盆",
+        "containers": "容器",
+        "substrates": "基质",
+        "crates": "周转箱",
+        "transportTrays": "运输托盘",
+        "harvestCarts": "采收推车",
+        "flowerBuckets": "花桶",
+        "protectivePackaging": "防护包装",
+        "flowerSleeves": "花套",
+        "retailPackaging": "零售包装",
+        "packagingAccessories": "包装配件",
+        "tobacco": "烟草",
+        "greenhouses": "温室",
+        "cultivationSystems": "栽培系统",
+        "trolleys": "推车",
+        "display": "陈列"
+      }
+    },
+    "valueChain": {
+      "eyebrow": "完整解决方案",
+      "title": "完整农业解决方案",
+      "description": "贯穿整个园艺价值链的一体化解决方案。",
+      "wheelLabel": "解决方案领域",
+      "stageNavLabel": "解决方案阶段",
+      "footerCta": "了解更多",
+      "segments": {
+        "flowers": {
+          "title": "花卉",
+          "label": "花卉",
+          "body": "支持花卉种植者、出口商、分销商与零售商，从繁育到销售终端。"
+        },
+        "fruits": {
+          "title": "水果",
+          "label": "水果",
+          "body": "优化水果供应链中的栽培、处理、包装与分销。"
+        },
+        "vegetables": {
+          "title": "蔬菜与香草",
+          "label": "蔬菜\n与香草",
+          "body": "支持蔬菜与香草业务的高效生产、处理、包装与商业化。"
+        },
+        "logisticsDisplay": {
+          "title": "物流与陈列",
+          "label": "物流\n与陈列",
+          "body": "改善产品流转、陈列与销售点呈现的系统。"
+        },
+        "machineryAutomation": {
+          "title": "机械与自动化",
+          "label": "机械\n与自动化",
+          "body": "提升效率、一致性与可扩展性的技术，助力业务成长。"
+        }
+      },
+      "stageLinks": {
+        "propagation": "繁育解决方案",
+        "growing": "种植解决方案",
+        "harvest": "采收解决方案",
+        "postharvest": "采后解决方案",
+        "transportLogistics": "运输与物流",
+        "retail": "零售",
+        "automation": "自动化与机械"
+      },
+      "footerLinks": {
+        "caseStudy": "精选案例",
+        "insights": "相关洞察",
+        "quote": "申请报价"
+      },
+      "items": {
+        "floriculture": "花卉栽培",
+        "pottedPlants": "盆栽植物",
+        "cutFlowers": "切花",
+        "propagation": "繁殖",
+        "growing": "栽培",
+        "harvest": "采收",
+        "postharvest": "采后",
+        "packaging": "包装",
+        "berries": "浆果",
+        "strawberry": "草莓",
+        "blueberry": "蓝莓",
+        "avocado": "牛油果",
+        "banana": "香蕉",
+        "tomato": "番茄",
+        "cucumber": "黄瓜",
+        "pepper": "甜椒",
+        "herbs": "香草",
+        "irrigation": "灌溉系统",
+        "rollingContainers": "带轮容器",
+        "logisticsTrolleys": "物流推车",
+        "warehouse": "仓储设备",
+        "transportSystems": "运输系统",
+        "displaySystems": "陈列系统",
+        "merchandising": "陈列销售方案",
+        "posDisplays": "终端陈列",
+        "automationSystems": "自动化系统",
+        "agvRobotics": "AGV 机器人",
+        "productionMachines": "生产设备",
+        "intelligentHandling": "智能搬运系统",
+        "greenhouseTech": "温室技术",
+        "seedlingTrays": "育苗盘",
+        "propagationSystems": "繁殖系统",
+        "growingBenches": "栽培台",
+        "growingMedia": "栽培介质",
+        "pots": "花盆",
+        "containers": "容器",
+        "substrates": "基质",
+        "crates": "周转箱",
+        "transportTrays": "运输托盘",
+        "harvestCarts": "采收推车",
+        "flowerBuckets": "花桶",
+        "protectivePackaging": "防护包装",
+        "flowerSleeves": "花套",
+        "retailPackaging": "零售包装",
+        "packagingAccessories": "包装配件",
+        "tobacco": "烟草",
+        "greenhouses": "温室",
+        "cultivationSystems": "栽培系统",
+        "trolleys": "推车",
+        "display": "陈列"
+      }
+    }
   }
 }

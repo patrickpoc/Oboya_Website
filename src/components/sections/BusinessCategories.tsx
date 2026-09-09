@@ -13,7 +13,7 @@ const categories = [
     label: "Vegetables & Herbs",
     description:
       "Propagation systems, substrates, and packaging for commercial vegetable and herb production.",
-    href: "/solutions/vegetables",
+    href: "/solutions?area=vegetables",
     icon: Sprout,
     accent: "bg-oboya-green/10 text-oboya-green",
   },
@@ -21,7 +21,7 @@ const categories = [
     label: "Flowers & Ornamentals",
     description:
       "Complete floriculture solutions — from growing media to retail-ready presentation.",
-    href: "/solutions/flowers",
+    href: "/solutions?area=flowers",
     icon: Flower2,
     accent: "bg-oboya-blue/10 text-oboya-blue",
   },
@@ -29,7 +29,7 @@ const categories = [
     label: "Fruits & Berries",
     description:
       "Specialized systems for berry cultivation, fruit packaging, and supply chain efficiency.",
-    href: "/solutions/fruits",
+    href: "/solutions?area=fruits",
     icon: Cherry,
     accent: "bg-oboya-blue-light/10 text-oboya-blue-light",
   },

@@ -69,7 +69,7 @@ export function SolutionsCatalog({ categories, cards }: SolutionsCatalogProps) {
   }, [active, cards]);
 
   const sectorHref =
-    active !== "all" ? `/solutions/${active}` : null;
+    active !== "all" ? `/solutions?area=${active}` : null;
 
   return (
     <section className="bg-white py-[var(--section-y)]">
