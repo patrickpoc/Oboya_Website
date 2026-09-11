@@ -25,13 +25,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon.png", type: "image/png", sizes: "48x48" },
-      { url: "/icon.png", type: "image/png", sizes: "192x192" },
+      { url: "/favicon.ico?v=2", sizes: "any" },
+      { url: "/favicon.svg?v=2", type: "image/svg+xml" },
+      { url: "/favicon.png?v=2", type: "image/png", sizes: "48x48" },
+      { url: "/icon.png?v=2", type: "image/png", sizes: "192x192" },
     ],
-    shortcut: ["/favicon.ico"],
-    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: ["/favicon.ico?v=2"],
+    apple: [{ url: "/apple-icon.png?v=2", sizes: "180x180", type: "image/png" }],
   },
 };
 
