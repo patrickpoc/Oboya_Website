@@ -77,9 +77,9 @@ export function LoadingSkeleton({ viewMode }: { viewMode: "grid" | "list" }) {
   }
 
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <Skeleton key={i} className="aspect-[4/5] w-full rounded-xl" />
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4 xl:gap-5">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <Skeleton key={i} className="aspect-[3/4] w-full rounded-xl" />
       ))}
     </div>
   );

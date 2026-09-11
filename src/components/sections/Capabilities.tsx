@@ -153,7 +153,7 @@ export function Capabilities({
                   animate={{ opacity: 1, y: 0 }}
                   exit={animationsEnabled ? { opacity: 0, y: -8 } : undefined}
                   transition={animationsEnabled ? contentSwapTransition : { duration: 0 }}
-                  className="font-display text-[clamp(1.65rem,3.8vw,2.85rem)] font-bold leading-tight tracking-tight text-white text-balance"
+                  className="font-display text-[clamp(1.65rem,3.2vw,2.65rem)] font-light leading-[1.3] tracking-tight text-white text-balance"
                 >
                   {title}
                 </motion.h2>

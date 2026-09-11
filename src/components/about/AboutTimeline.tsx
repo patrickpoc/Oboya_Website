@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useId,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -19,8 +20,6 @@ import { getItemAngle } from "@/hooks/useTimelineRotation";
 interface AboutTimelineProps {
   data: AboutPageSettings["timeline"];
   locale: string;
-  /** Transparent over hero scroll-backdrop (light type). */
-  overBackdrop?: boolean;
 }
 
 type TimelineEvent = AboutPageSettings["timeline"]["events"][number];
@@ -77,10 +76,8 @@ function shortestAngleDelta(a: number, b: number) {
 export function AboutTimeline({
   data,
   locale,
-  overBackdrop = false,
 }: AboutTimelineProps) {
   const events = data.events;
-  const onDark = overBackdrop;
   const [active, setActive] = useState(0);
   const [hasCompletedLoop, setHasCompletedLoop] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -151,20 +148,10 @@ export function AboutTimeline({
               type="button"
               onClick={() => go(active - 1)}
               disabled={isAnimating}
-              className={`group relative z-20 flex items-center gap-2 px-1 font-body text-sm font-semibold tracking-[0.12em] uppercase transition-colors sm:gap-3 sm:px-2 sm:text-[1.125rem] sm:tracking-[0.14em] md:px-3 ${
-                onDark
-                  ? "text-white hover:text-oboya-green-light"
-                  : "text-oboya-blue-dark hover:text-oboya-green"
-              }`}
+              className="group relative z-20 flex items-center gap-2 px-1 font-body text-sm font-semibold tracking-[0.12em] text-white uppercase transition-colors hover:text-oboya-soft-white sm:gap-3 sm:px-2 sm:text-[1.125rem] sm:tracking-[0.14em] md:px-3"
               aria-label={prevLabel}
             >
-              <span
-                className={`flex size-8 shrink-0 items-center justify-center rounded-full transition-colors ${
-                  onDark
-                    ? "bg-oboya-green text-white group-hover:bg-oboya-green-light"
-                    : "border border-oboya-green/70 text-oboya-green group-hover:border-oboya-green group-hover:bg-oboya-green/10"
-                }`}
-              >
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-oboya-green text-white transition-colors group-hover:bg-oboya-green-light">
                 <ChevronLeft className="h-4 w-4" aria-hidden />
               </span>
               <span className="max-[359px]:sr-only whitespace-nowrap">
@@ -189,23 +176,13 @@ export function AboutTimeline({
           type="button"
           onClick={() => go(active + 1)}
           disabled={isAnimating}
-          className={`group relative z-20 flex shrink-0 items-center gap-2 px-1 font-body text-sm font-semibold tracking-[0.12em] uppercase transition-colors sm:gap-3 sm:px-2 sm:text-[1.125rem] sm:tracking-[0.14em] md:px-3 ${
-            onDark
-              ? "text-white hover:text-oboya-green-light"
-              : "text-oboya-blue-dark hover:text-oboya-green"
-          }`}
+          className="group relative z-20 flex shrink-0 items-center gap-2 px-1 font-body text-sm font-semibold tracking-[0.12em] text-white uppercase transition-colors hover:text-oboya-soft-white sm:gap-3 sm:px-2 sm:text-[1.125rem] sm:tracking-[0.14em] md:px-3"
           aria-label={nextLabel}
         >
           <span className="max-[359px]:sr-only whitespace-nowrap">
             {nextLabel}
           </span>
-          <span
-            className={`flex size-8 shrink-0 items-center justify-center rounded-full transition-colors ${
-              onDark
-                ? "bg-oboya-green text-white group-hover:bg-oboya-green-light"
-                : "border border-oboya-green/70 text-oboya-green group-hover:border-oboya-green group-hover:bg-oboya-green/10"
-            }`}
-          >
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-oboya-green text-white transition-colors group-hover:bg-oboya-green-light">
             <ChevronRight className="h-4 w-4" aria-hidden />
           </span>
         </button>
@@ -213,13 +190,39 @@ export function AboutTimeline({
     </div>
   );
 
+  const grainFilterId = `timeline-grain-${useId().replace(/:/g, "")}`;
+
   return (
     <section
-      className={`relative overflow-x-clip py-[clamp(2.52rem,6.72vw,4.2rem)] ${
-        onDark ? "bg-transparent" : "bg-white"
-      }`}
+      className="relative overflow-x-clip py-[clamp(2.52rem,6.72vw,4.2rem)]"
       aria-labelledby="about-timeline-heading"
     >
+      {/* Soft dome wash — radial from bottom center, like the reference */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 125% 95% at 50% 100%, #75C566 0%, #8FCF88 18%, #B8DFB2 38%, #E4F3E2 58%, #F5FAF5 78%, #FFFFFF 100%)",
+        }}
+      />
+      {/* Fine grain texture */}
+      <svg
+        aria-hidden
+        className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.42] mix-blend-multiply"
+      >
+        <filter id={grainFilterId}>
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.85"
+            numOctaves="4"
+            stitchTiles="stitch"
+          />
+          <feColorMatrix type="saturate" values="0" />
+        </filter>
+        <rect width="100%" height="100%" filter={`url(#${grainFilterId})`} />
+      </svg>
+
       <h2 id="about-timeline-heading" className="sr-only">
         Timeline
       </h2>
@@ -234,7 +237,6 @@ export function AboutTimeline({
         showWrapPrevYear={hasCompletedLoop}
         isAnimating={isAnimating}
         onAnimatingChange={setIsAnimating}
-        onDark={onDark}
       />
     </section>
   );
@@ -250,7 +252,6 @@ function RotatingRimTimeline({
   showWrapPrevYear,
   isAnimating,
   onAnimatingChange,
-  onDark,
 }: {
   events: TimelineEvent[];
   active: number;
@@ -261,7 +262,6 @@ function RotatingRimTimeline({
   showWrapPrevYear: boolean;
   isAnimating: boolean;
   onAnimatingChange: (animating: boolean) => void;
-  onDark: boolean;
 }) {
   const frameRef = useRef<HTMLDivElement>(null);
   const focusProxy = useRef({ angle: 0 });
@@ -396,7 +396,7 @@ function RotatingRimTimeline({
   return (
     <div
       ref={frameRef}
-      className="relative w-full touch-pan-y overflow-visible"
+      className="relative z-10 w-full touch-pan-y overflow-visible"
       style={{ height: frameHeight }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
@@ -411,16 +411,8 @@ function RotatingRimTimeline({
         <path
           d={arcPath}
           fill="none"
-          stroke={onDark ? "#ffffff" : "transparent"}
+          stroke="#4DAF4E"
           strokeWidth="2.2"
-          vectorEffect="non-scaling-stroke"
-          strokeLinecap="round"
-        />
-        <path
-          d={arcPath}
-          fill="none"
-          stroke="#4daf4e"
-          strokeWidth="2"
           vectorEffect="non-scaling-stroke"
           strokeLinecap="round"
         />
@@ -453,7 +445,6 @@ function RotatingRimTimeline({
               onSelect={onSelect}
               showWrapPrevYear={showWrapPrevYear}
               disabled={isAnimating}
-              onDark={onDark}
             />
           ))}
         </ul>
@@ -502,11 +493,7 @@ function RotatingRimTimeline({
               >
                 <motion.span
                   aria-hidden
-                  className={`mt-3.5 block h-12 w-px shrink-0 origin-top bg-oboya-green sm:mt-4 md:mt-5 md:h-[4.8rem] ${
-                    onDark
-                      ? "shadow-[-0.1px_0_0_#fff,0.1px_0_0_#fff]"
-                      : ""
-                  }`}
+                  className="mt-3.5 block h-12 w-px shrink-0 origin-top bg-oboya-green sm:mt-4 md:mt-5 md:h-[4.8rem]"
                   variants={
                     reduceMotion
                       ? undefined
@@ -532,9 +519,7 @@ function RotatingRimTimeline({
                 />
 
                 <motion.p
-                  className={`mt-2 font-display text-[clamp(1.26rem,4.2vw,1.974rem)] leading-none font-semibold tabular-nums tracking-tight sm:mt-2.5 ${
-                    onDark ? "text-white" : "text-oboya-blue-dark"
-                  }`}
+                  className="mt-2 font-display text-[clamp(1.26rem,4.2vw,1.974rem)] leading-none font-bold tabular-nums tracking-tight text-oboya-blue-dark sm:mt-2.5"
                   variants={
                     reduceMotion
                       ? undefined
@@ -560,9 +545,7 @@ function RotatingRimTimeline({
                 </motion.p>
 
                 <motion.p
-                  className={`mt-2.5 max-w-lg px-1 text-center font-body text-[0.9375rem] font-medium leading-relaxed sm:mt-3.5 sm:text-lg md:mt-4 md:text-xl ${
-                    onDark ? "text-white" : "text-oboya-blue-dark/55"
-                  }`}
+                  className="mt-2.5 max-w-lg px-1 text-center font-body text-[0.9375rem] font-medium leading-relaxed text-oboya-blue-dark sm:mt-3.5 sm:text-lg md:mt-4 md:text-xl"
                   variants={
                     reduceMotion
                       ? undefined
@@ -610,7 +593,6 @@ function RimYear({
   onSelect,
   showWrapPrevYear,
   disabled,
-  onDark,
 }: {
   event: TimelineEvent;
   index: number;
@@ -622,7 +604,6 @@ function RimYear({
   onSelect: (index: number) => void;
   showWrapPrevYear: boolean;
   disabled: boolean;
-  onDark: boolean;
 }) {
   const itemAngle = getItemAngle(index, count);
   const delta = shortestAngleDelta(itemAngle, focusAngle);
@@ -676,9 +657,7 @@ function RimYear({
         />
         {/* Side years only — hide label as the tip nears the apex */}
         <span
-          className={`mt-4 whitespace-nowrap font-display text-sm font-semibold tabular-nums tracking-wide transition-opacity duration-300 sm:mt-5 sm:text-base md:text-lg ${
-            onDark ? "text-white" : "text-oboya-blue-dark/50"
-          }`}
+          className="mt-4 whitespace-nowrap font-display text-sm font-bold tabular-nums tracking-wide text-oboya-blue-dark transition-opacity duration-300 sm:mt-5 sm:text-base md:text-lg"
           style={{ opacity: visible && !isNearApex ? 1 : 0 }}
         >
           {event.year}

@@ -5,6 +5,7 @@ import {
   readBlogCategoriesDurable,
   saveBlogCategoryDurable,
 } from "@/lib/cms/server/blog-categories.server";
+import { revalidateBlogPages } from "@/lib/cms/revalidate-site";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
 
@@ -26,6 +27,7 @@ export async function POST(request: Request) {
   }
   const body = (await request.json()) as BlogCategory;
   const saved = await saveBlogCategoryDurable(body);
+  revalidateBlogPages();
   return NextResponse.json(saved, { status: 201 });
 }
 
@@ -39,5 +41,6 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
   }
   await deleteBlogCategoryDurable(id);
+  revalidateBlogPages();
   return NextResponse.json({ ok: true });
 }

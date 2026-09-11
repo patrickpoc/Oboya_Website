@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { readAboutPageSettings, readHomepageSettings } from "@/lib/cms/readers";
 import { pickLocalized } from "@/lib/cms/utils";
 import { AboutHero } from "@/components/about/AboutHero";
-import { AboutPageBackdrop } from "@/components/about/AboutPageBackdrop";
+import { AboutInstitutionalImage } from "@/components/about/AboutInstitutionalImage";
 import { AboutTimeline } from "@/components/about/AboutTimeline";
 import { AboutImpact } from "@/components/about/AboutImpact";
 import { AboutCallout } from "@/components/about/AboutCallout";
@@ -29,22 +29,29 @@ export async function AboutPageContent({
     readHomepageSettings(),
     getTranslations({ locale, namespace: "globalPresence" }),
   ]);
-  const showHero =
-    about.sections.hero.enabled ||
-    about.sections.institutionalImage.enabled;
-  const imageSrc = about.sections.institutionalImage.enabled
-    ? about.institutionalImage.src
-    : null;
-  const imageAlt = pickLocalized(about.institutionalImage.alt, locale);
-  const showTimeline = about.sections.timeline.enabled;
-  const overBackdrop = showHero;
+
   const mapLocations = resolveMapLocationsForLocale(
     mapData.locations,
     locale as Locale
   );
 
-  const afterBackdrop = (
+  return (
     <>
+      {about.sections.hero.enabled ? (
+        <AboutHero data={about.hero} locale={locale} />
+      ) : null}
+
+      {about.sections.institutionalImage.enabled ? (
+        <AboutInstitutionalImage
+          data={about.institutionalImage}
+          locale={locale}
+        />
+      ) : null}
+
+      {about.sections.timeline.enabled ? (
+        <AboutTimeline data={about.timeline} locale={locale} />
+      ) : null}
+
       {about.sections.impact.enabled && (
         <AboutImpact data={about.impact} locale={locale} />
       )}
@@ -77,40 +84,5 @@ export async function AboutPageContent({
         <AboutHonors data={about.honors} locale={locale} />
       )}
     </>
-  );
-
-  if (!showHero) {
-    return (
-      <>
-        {showTimeline ? (
-          <AboutTimeline data={about.timeline} locale={locale} />
-        ) : null}
-        {afterBackdrop}
-      </>
-    );
-  }
-
-  return (
-    <AboutPageBackdrop
-      imageSrc={imageSrc}
-      alt={imageAlt}
-      afterBackdrop={afterBackdrop}
-    >
-      {about.sections.hero.enabled ? (
-        <AboutHero data={about.hero} locale={locale} />
-      ) : (
-        <div
-          className="min-h-[calc(100dvh-4rem)] md:min-h-[calc(100dvh-5rem)]"
-          aria-hidden
-        />
-      )}
-      {showTimeline ? (
-        <AboutTimeline
-          data={about.timeline}
-          locale={locale}
-          overBackdrop={overBackdrop}
-        />
-      ) : null}
-    </AboutPageBackdrop>
   );
 }

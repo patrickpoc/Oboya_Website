@@ -906,13 +906,13 @@
     }
   },
   "solutionsPage": {
-    "metaTitle": "Solutions",
-    "heroHeadline": "Solutions for Every Stage of Horticulture",
-    "heroTagline": "Different crops.\nDifferent markets.\nDifferent operational realities.",
-    "heroBody": "Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth.",
-    "heroAccent": "Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
-    "heroEyebrow": "Solutions for Every Stage of Horticulture",
-    "heroTitle": "Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth. Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
+    "metaTitle": "Soluciones",
+    "heroHeadline": "Soluciones para Cada Etapa de la Horticultura",
+    "heroTagline": "Cultivos diferentes.\nMercados diferentes.\nRealidades operativas diferentes.",
+    "heroBody": "Cultivos diferentes, mercados diferentes, realidades operativas diferentes. Cada negocio enfrenta retos únicos, pero el objetivo sigue siendo el mismo: mejorar el rendimiento, proteger la calidad y respaldar un crecimiento sostenible. Explore soluciones adaptadas a su sector y diseñadas para apoyar cada etapa de su operación hortícola.",
+    "heroAccent": "Explore soluciones adaptadas a su sector y diseñadas para apoyar cada etapa de su operación hortícola.",
+    "heroEyebrow": "Soluciones para Cada Etapa de la Horticultura",
+    "heroTitle": "Cultivos diferentes, mercados diferentes, realidades operativas diferentes. Cada negocio enfrenta retos únicos, pero el objetivo sigue siendo el mismo: mejorar el rendimiento, proteger la calidad y respaldar un crecimiento sostenible. Explore soluciones adaptadas a su sector y diseñadas para apoyar cada etapa de su operación hortícola.",
     "backToSolutions": "Todas las Soluciones",
     "filters": {
       "all": "All Crops",

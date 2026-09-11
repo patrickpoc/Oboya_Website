@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
 import {
   readAboutPageSettingsDurable,
   saveAboutPageSettingsDurable,
 } from "@/lib/cms/server/about-page.server";
+import { revalidateAboutPages } from "@/lib/cms/revalidate-site";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
-
-const LOCALES = ["en", "pt-BR", "es", "zh-CN"] as const;
 
 async function assertAdmin() {
   if (!isSupabaseConfigured()) return true;
@@ -27,13 +25,7 @@ export async function PUT(request: Request) {
   try {
     const body = (await request.json()) as AboutPageSettings;
     const saved = await saveAboutPageSettingsDurable(body);
-
-    // Bust ISR/cache so /about picks up live cms_documents.
-    revalidatePath("/", "layout");
-    for (const locale of LOCALES) {
-      revalidatePath(`/${locale}/about`);
-    }
-
+    revalidateAboutPages();
     return NextResponse.json(saved);
   } catch (error) {
     const message =

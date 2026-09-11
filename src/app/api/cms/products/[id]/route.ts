@@ -73,9 +73,8 @@ export async function PUT(
 
     await persistProductsToFileSafe(getCmsProducts({ includeDeleted: true }));
     try {
-      const { revalidatePath } = await import("next/cache");
-      revalidatePath("/[locale]/shop", "page");
-      revalidatePath("/[locale]/shop/products/[id]", "page");
+      const { revalidateShopPages } = await import("@/lib/cms/revalidate-site");
+      revalidateShopPages(saved.id);
     } catch {
       // Ignore when revalidation is unavailable.
     }
@@ -113,6 +112,12 @@ export async function DELETE(
     }
 
     await persistProductsToFileSafe(getCmsProducts({ includeDeleted: true }));
+    try {
+      const { revalidateShopPages } = await import("@/lib/cms/revalidate-site");
+      revalidateShopPages(id);
+    } catch {
+      // Ignore when revalidation is unavailable.
+    }
     return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json(
@@ -148,6 +153,12 @@ export async function POST(
       await restoreProduct(id);
     }
     await persistProductsToFileSafe(getCmsProducts({ includeDeleted: true }));
+    try {
+      const { revalidateShopPages } = await import("@/lib/cms/revalidate-site");
+      revalidateShopPages(id);
+    } catch {
+      // Ignore when revalidation is unavailable.
+    }
     return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json(

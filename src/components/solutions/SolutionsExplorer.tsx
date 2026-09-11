@@ -91,7 +91,7 @@ export function SolutionsExplorer() {
         >
           <h1
             id="solutions-explorer-heading"
-            className="font-display text-[clamp(1.85rem,4vw,3rem)] font-semibold leading-[1.12] tracking-[-0.02em] text-oboya-blue-dark text-balance"
+            className="font-display text-[clamp(1.85rem,4vw,3rem)] font-light leading-[1.12] tracking-[-0.02em] text-oboya-blue-dark text-balance"
           >
             {heading}
           </h1>

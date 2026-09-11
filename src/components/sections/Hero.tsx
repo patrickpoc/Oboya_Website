@@ -83,7 +83,7 @@ export function Hero({
             {eyebrow ? (
               <motion.p
                 variants={fadeInUp}
-                className="mt-5 text-balance text-center text-sm font-semibold tracking-[0.18em] text-oboya-yellow-light uppercase md:mt-6 md:text-[0.9375rem]"
+                className="mt-5 text-balance text-center text-sm font-medium tracking-[0.18em] text-oboya-yellow-light uppercase md:mt-6 md:text-[0.9375rem]"
               >
                 {eyebrow}
               </motion.p>
@@ -97,7 +97,7 @@ export function Hero({
                 href={data.ctaPrimary.href || "/contact"}
                 className={cn(
                   buttonVariants({ size: "cta-lg" }),
-                  "rounded-full bg-oboya-green text-white hover:bg-oboya-green/90"
+                  "rounded-full bg-oboya-green font-semibold normal-case tracking-normal text-white hover:bg-oboya-green/90 sm:tracking-normal"
                 )}
               >
                 {primaryLabel}
@@ -109,7 +109,7 @@ export function Hero({
                 href={data.ctaSecondary.href || "/solutions"}
                 className={cn(
                   buttonVariants({ size: "cta-lg" }),
-                  "rounded-full bg-white text-oboya-green hover:bg-white/90"
+                  "rounded-full bg-white font-semibold normal-case tracking-normal text-oboya-green hover:bg-white/90 sm:tracking-normal"
                 )}
               >
                 {secondaryLabel}

@@ -64,7 +64,7 @@ export function SolutionsCta({
         >
           <h2
             className={cn(
-              "font-display font-semibold leading-[1.15] tracking-[-0.02em] text-white text-balance",
+              "font-display font-light leading-[1.15] tracking-[-0.02em] text-white text-balance",
               compact ? "max-w-none" : "max-w-3xl",
               compact
                 ? "text-[clamp(1.5rem,5.2vw,3rem)]"

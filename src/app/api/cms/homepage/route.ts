@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import {
   readHomepageSettingsDurable,
   saveHomepageSettingsDurable,
 } from "@/lib/cms/server/homepage.server";
+import { revalidateHomePages } from "@/lib/cms/revalidate-site";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
 
@@ -31,10 +31,7 @@ export async function PUT(request: Request) {
   try {
     const body = (await request.json()) as HomepageSettings;
     const saved = await saveHomepageSettingsDurable(body);
-    revalidatePath("/", "layout");
-    for (const locale of ["en", "pt-BR", "es", "zh-CN"]) {
-      revalidatePath(`/${locale}`);
-    }
+    revalidateHomePages();
     return NextResponse.json(saved);
   } catch (error) {
     const message =

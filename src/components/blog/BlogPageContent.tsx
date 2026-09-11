@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Container } from "@/components/ui/container";
+import { PageIntroBanner } from "@/components/ui/PageIntroBanner";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { BlogFeaturedHero } from "@/components/blog/BlogFeaturedHero";
 import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
@@ -51,22 +52,10 @@ export function BlogPageContent({ posts, categories, locale }: BlogPageContentPr
 
   return (
     <>
-      <section className="bg-oboya-blue-dark text-white">
-        <Container className="py-12 md:py-16 lg:py-20">
-          <div className="max-w-5xl">
-            <p className="text-sm font-medium tracking-[0.2em] text-white/70 uppercase">
-              {t("eyebrow")}
-            </p>
-            <div className="mt-4 h-px w-full max-w-4xl bg-oboya-blue/60" />
-            <h1 className="mt-8 font-display text-3xl leading-tight font-black tracking-tight text-balance md:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
-              {t("title")}
-            </h1>
-            <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/75 md:text-lg">
-              {t("description")}
-            </p>
-          </div>
-        </Container>
-      </section>
+      <PageIntroBanner
+        title={t("title")}
+        body={t("description")}
+      />
 
       <section className="bg-oboya-soft-white py-12 md:py-16 lg:py-20">
         <Container>

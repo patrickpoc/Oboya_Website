@@ -10,6 +10,7 @@ import type {
   CmsFaqCategory,
   CmsFaqItem,
 } from "@/lib/cms/repositories/faqs-repository";
+import { revalidateFaqPages } from "@/lib/cms/revalidate-site";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
 
@@ -34,11 +35,13 @@ export async function PUT(request: Request) {
 
   if (body.type === "category") {
     const saved = await saveFaqCategoryDurable(body.data as CmsFaqCategory);
+    revalidateFaqPages();
     return NextResponse.json(saved);
   }
 
   if (body.type === "faq") {
     const saved = await saveFaqItemDurable(body.data as CmsFaqItem);
+    revalidateFaqPages();
     return NextResponse.json(saved);
   }
 
@@ -60,11 +63,13 @@ export async function DELETE(request: Request) {
 
   if (type === "category") {
     await deleteFaqCategoryDurable(id);
+    revalidateFaqPages();
     return NextResponse.json({ ok: true });
   }
 
   if (type === "faq") {
     await deleteFaqItemDurable(id);
+    revalidateFaqPages();
     return NextResponse.json({ ok: true });
   }
 

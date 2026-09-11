@@ -27,8 +27,8 @@ export function ShopPageContent() {
           {status === "error" ? (
             <ErrorState />
           ) : (
-            <div className="flex gap-6 lg:gap-8">
-              <div className="hidden w-64 shrink-0 lg:block">
+            <div className="flex gap-5 lg:gap-6">
+              <div className="hidden w-56 shrink-0 xl:w-60 lg:block">
                 {countryCode && <FilterSidebar />}
               </div>
 

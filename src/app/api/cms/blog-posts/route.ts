@@ -5,6 +5,7 @@ import {
   readBlogPostsDurable,
   saveBlogPostDurable,
 } from "@/lib/cms/server/blog-posts.server";
+import { revalidateBlogPages } from "@/lib/cms/revalidate-site";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
 
@@ -26,6 +27,7 @@ export async function POST(request: Request) {
   }
   const body = (await request.json()) as CmsBlogPost;
   const saved = await saveBlogPostDurable(body);
+  revalidateBlogPages(saved.slug);
   return NextResponse.json(saved, { status: 201 });
 }
 
@@ -38,6 +40,8 @@ export async function DELETE(request: Request) {
   if (!id) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
   }
+  const existing = (await readBlogPostsDurable()).find((post) => post.id === id);
   await deleteBlogPostDurable(id);
+  revalidateBlogPages(existing?.slug);
   return NextResponse.json({ ok: true });
 }

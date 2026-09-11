@@ -50,7 +50,7 @@ export function HomeChallenges() {
         viewport={{ once: true, margin: "-80px" }}
         variants={reduceMotion ? undefined : fadeInUp}
       >
-        <h2 className="max-w-3xl font-display text-[clamp(1.5rem,5.2vw,3rem)] font-semibold leading-[1.15] tracking-[-0.02em] text-white text-balance">
+        <h2 className="max-w-3xl font-display text-[clamp(1.5rem,5.2vw,3rem)] font-light leading-[1.15] tracking-[-0.02em] text-white text-balance">
           Built Around the Challenges Facing Horticulture Today
         </h2>
 

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
 import { Container } from "@/components/ui/container";
+import { PageIntroBanner } from "@/components/ui/PageIntroBanner";
 import { Input } from "@/components/ui/input";
 import { FaqTopicAccordion } from "@/components/faqs/FaqTopicAccordion";
 import { matchesFaqSearch } from "@/lib/faq-search";
@@ -64,20 +65,7 @@ export function FaqsPageView({ locale, categories, faqs }: FaqsPageViewProps) {
 
   return (
     <>
-      <section className="bg-oboya-blue-dark pt-[clamp(3.5rem,8vw,5.5rem)] pb-12 md:pb-16">
-        <Container>
-          <div className="max-w-4xl">
-            <div className="mb-5 h-px w-16 bg-white/35" aria-hidden />
-            <p className="font-body text-base font-normal leading-relaxed text-white/75 md:text-lg">
-              {t("heroSubtitle")}
-            </p>
-            <h1 className="mt-5 font-display text-[clamp(3.25rem,10vw,6.5rem)] font-light leading-none tracking-[-0.03em] text-white">
-              {t("heroTitle")}
-            </h1>
-          </div>
-        </Container>
-        <div className="mt-10 h-px w-full bg-white/15" aria-hidden />
-      </section>
+      <PageIntroBanner title={t("heroTitle")} body={t("heroSubtitle")} />
 
       <section className="bg-white py-[clamp(2.5rem,6vw,4.5rem)]">
         <Container size="wide">

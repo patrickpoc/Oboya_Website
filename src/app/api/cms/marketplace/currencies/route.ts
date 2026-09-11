@@ -78,6 +78,12 @@ export async function PUT(request: Request) {
       countries: normalizedCountries,
       currencies: uniqueCurrencies,
     });
+    try {
+      const { revalidateShopPages } = await import("@/lib/cms/revalidate-site");
+      revalidateShopPages();
+    } catch {
+      // Ignore when revalidation is unavailable.
+    }
     return NextResponse.json(saved);
   } catch (error) {
     if (error instanceof ValidationError) {

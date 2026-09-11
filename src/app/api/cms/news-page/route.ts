@@ -4,6 +4,7 @@ import {
   readNewsPageSettingsDurable,
   saveNewsPageSettingsDurable,
 } from "@/lib/cms/server/news-page.server";
+import { revalidateNewsPages } from "@/lib/cms/revalidate-site";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requireAdminUser } from "@/lib/map-locations.server";
 
@@ -22,5 +23,6 @@ export async function PUT(request: Request) {
   }
   const body = (await request.json()) as NewsPageSettings;
   const saved = await saveNewsPageSettingsDurable(body);
+  revalidateNewsPages();
   return NextResponse.json(saved);
 }

@@ -1,8 +1,8 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useShop } from "@/contexts/ShopContext";
-import { buttonVariants } from "@/components/ui/button";
 import { ProductCard } from "@/components/shop/catalog/ProductCard";
 import { FilterChips } from "@/components/shop/catalog/FilterChips";
 import {
@@ -24,6 +24,24 @@ export function ProductCatalog() {
     status,
     openAddToQuoteDialog,
   } = useShop();
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const node = loadMoreRef.current;
+    if (!node || !hasMoreProducts) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          loadMoreProducts();
+        }
+      },
+      { rootMargin: "320px 0px", threshold: 0 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMoreProducts, loadMoreProducts, displayedProducts.length]);
 
   if (!countryCode || !currency) {
     return <SelectCountryPrompt />;
@@ -47,7 +65,7 @@ export function ProductCatalog() {
       <FilterChips />
 
       {viewMode === "grid" ? (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4 xl:gap-5">
           {displayedProducts.map((product) => (
             <ProductCard
               key={product.id}
@@ -76,20 +94,20 @@ export function ProductCatalog() {
         </div>
       )}
 
-      {hasMoreProducts && (
-        <div className="mt-8 text-center">
-          <button
-            type="button"
-            onClick={loadMoreProducts}
-            className={buttonVariants({
-              variant: "outline",
-              size: "cta",
-            })}
-          >
-            {t("loadMore")}
-          </button>
+      {hasMoreProducts ? (
+        <div
+          ref={loadMoreRef}
+          className="mt-8 flex items-center justify-center gap-2 py-2"
+          aria-busy="true"
+          aria-live="polite"
+        >
+          <span
+            className="size-5 animate-spin rounded-full border-2 border-oboya-green/25 border-t-oboya-green"
+            aria-hidden
+          />
+          <span className="text-sm text-muted-foreground">{t("loadMore")}</span>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

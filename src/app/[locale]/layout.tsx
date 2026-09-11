@@ -5,21 +5,29 @@ import { notFound } from "next/navigation";
 import { Analytics } from "@vercel/analytics/next";
 import { fontVariables, notoSansSC } from "@/lib/fonts";
 import { routing } from "@/i18n/routing";
+import { SITE_REVALIDATE_SECONDS } from "@/lib/cms/revalidate-site";
+import { siteConfig } from "@/constants/site";
 import { cn } from "@/lib/utils";
 import { AppProviders } from "@/components/providers/AppProviders";
 import "../globals.css";
+
+/** Safety ISR fallback; CMS writes still bust cache via revalidatePath. */
+export const revalidate = SITE_REVALIDATE_SECONDS;
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://oboya.cc"),
+  metadataBase: new URL(siteConfig.url),
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "any" },
       { url: "/favicon.svg", type: "image/svg+xml" },
       { url: "/favicon.png", type: "image/png", sizes: "48x48" },
+      { url: "/icon.png", type: "image/png", sizes: "192x192" },
     ],
+    shortcut: ["/favicon.ico"],
     apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
 };

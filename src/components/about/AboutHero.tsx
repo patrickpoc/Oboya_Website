@@ -19,28 +19,26 @@ export function AboutHero({ data, locale }: AboutHeroProps) {
 
   return (
     <section
-      className="relative w-full min-h-[calc(100dvh-4rem)] md:min-h-[calc(100dvh-5rem)]"
+      className="relative w-full bg-white py-[clamp(3.5rem,8vw,6.5rem)]"
       aria-labelledby="about-hero-heading"
     >
       <motion.div
-        className="relative z-10 flex h-full min-h-[inherit] flex-col justify-center px-[var(--container-padding)] py-10 md:py-12 lg:py-14"
+        className="relative z-10 mx-auto flex w-full max-w-[var(--container-max)] flex-col items-center px-[var(--container-padding)] text-center"
         initial={reduceMotion ? false : "hidden"}
         animate={reduceMotion ? undefined : "visible"}
         variants={reduceMotion ? undefined : fadeInUp}
       >
-        <div className="mx-auto w-full max-w-[var(--container-max)]">
-          <h1
-            id="about-hero-heading"
-            className="max-w-4xl font-display text-[clamp(2rem,4vw,3.25rem)] font-bold leading-[1.1] tracking-[-0.02em] text-white text-balance"
-          >
-            {title}
-          </h1>
-          {body ? (
-            <p className="mt-5 max-w-3xl font-body text-[clamp(0.95rem,1.5vw,1.125rem)] font-normal leading-[1.55] text-white/92 md:mt-6 md:leading-[1.6] lg:max-w-[58%]">
-              {body}
-            </p>
-          ) : null}
-        </div>
+        <h1
+          id="about-hero-heading"
+          className="max-w-3xl font-display text-[clamp(0.95rem,1.6vw,1.125rem)] font-bold leading-snug tracking-[-0.01em] text-oboya-blue-dark text-balance"
+        >
+          {title}
+        </h1>
+        {body ? (
+          <p className="mt-5 max-w-5xl font-display text-[clamp(1.35rem,3.2vw,2.35rem)] font-light leading-[1.35] tracking-[-0.02em] text-oboya-blue-dark text-balance md:mt-7">
+            {body}
+          </p>
+        ) : null}
       </motion.div>
     </section>
   );

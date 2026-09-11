@@ -906,13 +906,13 @@
     }
   },
   "solutionsPage": {
-    "metaTitle": "Solutions",
-    "heroHeadline": "Solutions for Every Stage of Horticulture",
-    "heroTagline": "Different crops.\nDifferent markets.\nDifferent operational realities.",
-    "heroBody": "Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth.",
-    "heroAccent": "Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
-    "heroEyebrow": "Solutions for Every Stage of Horticulture",
-    "heroTitle": "Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth. Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
+    "metaTitle": "解决方案",
+    "heroHeadline": "覆盖园艺全流程的解决方案",
+    "heroTagline": "不同作物。\n不同市场。\n不同运营现实。",
+    "heroBody": "不同作物、不同市场、不同运营现实。每家企业都面临独特挑战，但目标始终如一：提升表现、守护品质、支持可持续增长。探索针对您所在行业量身打造、并覆盖园艺运营每一阶段的解决方案。",
+    "heroAccent": "探索针对您所在行业量身打造、并覆盖园艺运营每一阶段的解决方案。",
+    "heroEyebrow": "覆盖园艺全流程的解决方案",
+    "heroTitle": "不同作物、不同市场、不同运营现实。每家企业都面临独特挑战，但目标始终如一：提升表现、守护品质、支持可持续增长。探索针对您所在行业量身打造、并覆盖园艺运营每一阶段的解决方案。",
     "backToSolutions": "全部解决方案",
     "filters": {
       "all": "All Crops",

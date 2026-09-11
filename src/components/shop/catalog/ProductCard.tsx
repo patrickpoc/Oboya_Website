@@ -140,61 +140,59 @@ function ProductCardComponent({
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-xl border border-border/60 bg-white shadow-[var(--shadow-card)] transition-shadow hover:-translate-y-0.5 hover:shadow-md">
-      <div className="relative aspect-[4/3] bg-oboya-soft-white">
+      <Link href={detailHref} className="relative aspect-[5/4] bg-oboya-soft-white">
         <Image
           key={imageSrc}
           src={imageSrc}
           alt={name}
           fill
-          className="object-cover transition-opacity duration-200"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover transition-opacity duration-200 group-hover:opacity-95"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
         />
-      </div>
-      <div className="flex flex-1 flex-col p-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-oboya-green">
-          {category?.name}
-        </p>
-        <h3 className="mt-0.5 leading-snug line-clamp-2 font-semibold text-oboya-blue-dark">
-          {name}
+      </Link>
+      <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-3.5">
+        {category ? (
+          <p className="text-[10px] font-medium uppercase tracking-wide text-oboya-green">
+            {category.name}
+          </p>
+        ) : null}
+        <h3 className="line-clamp-2 text-sm leading-snug font-semibold text-oboya-blue-dark sm:text-[0.9375rem]">
+          <Link href={detailHref} className="hover:text-oboya-blue">
+            {name}
+          </Link>
         </h3>
+        {(brand || displaySku) && (
+          <p className="truncate text-[11px] text-muted-foreground">
+            {brand ? <BrandLabel brand={brand} locale={locale} /> : null}
+            {brand && displaySku ? <span aria-hidden> · </span> : null}
+            {displaySku ? <span>{displaySku}</span> : null}
+          </p>
+        )}
         {showSwatches ? (
           <ColorSwatchGroup
-            className="mt-1.5"
+            className="mt-0.5"
             variants={variants}
             selectedId={activeVariant?.id ?? DEFAULT_COLOR_VARIANT_ID}
             onSelect={setSelectedVariantId}
             currency={currency}
           />
         ) : null}
-        {shortDescription ? (
-          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-            {shortDescription}
+        <div className="mt-auto space-y-0.5 pt-2">
+          <p className="text-base font-semibold tabular-nums text-oboya-blue-dark">
+            {formatShopPrice(price, currency)}
           </p>
-        ) : null}
-        <p className="mt-1 flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground">
-          <span>{displaySku}</span>
-          {brand ? (
-            <>
-              <span aria-hidden>·</span>
-              <BrandLabel brand={brand} locale={locale} />
-            </>
-          ) : null}
-        </p>
-        <p className="mt-3 text-sm font-semibold text-oboya-blue-dark">
-          {formatShopPrice(price, currency)}
-        </p>
-        <p className="text-[11px] text-muted-foreground">{t("estimatedPrice")}</p>
-        <p className="text-[11px] text-oboya-green">
-          {t("moq", { count: product.moq })}
-        </p>
-        <div className="mt-auto flex flex-col gap-2 pt-4">
+          <p className="text-[11px] leading-tight text-oboya-green">
+            {t("moq", { count: product.moq })}
+          </p>
+        </div>
+        <div className="flex flex-col gap-1.5 pt-2.5">
           <button
             type="button"
             onClick={() => onAddToQuote(cartVariantId)}
             className={buttonVariants({
-              size: "cta",
+              size: "sm",
               className:
-                "w-full rounded-full bg-oboya-green font-semibold text-white hover:bg-oboya-green/90",
+                "h-8 w-full rounded-full bg-oboya-green text-xs font-semibold text-white hover:bg-oboya-green/90",
             })}
           >
             {t("addToQuote")}
@@ -203,8 +201,8 @@ function ProductCardComponent({
             href={detailHref}
             className={buttonVariants({
               variant: "outline",
-              size: "sm",
-              className: "w-full rounded-full",
+              size: "xs",
+              className: "h-7 w-full rounded-full text-[11px]",
             })}
           >
             {t("moreInformation")}

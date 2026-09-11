@@ -1,4 +1,3 @@
-import { locales } from "@/i18n/routing";
 import {
   validateMapLocations,
   type MapLocationsData,
@@ -9,7 +8,7 @@ import {
   writeMapLocations,
 } from "@/lib/map-locations.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { revalidatePath } from "next/cache";
+import { revalidateMapPages } from "@/lib/cms/revalidate-site";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -42,10 +41,7 @@ export async function PUT(request: Request) {
     }
 
     await writeMapLocations(body);
-
-    for (const locale of locales) {
-      revalidatePath(`/${locale}`);
-    }
+    revalidateMapPages();
 
     return NextResponse.json({ ok: true });
   } catch (error) {

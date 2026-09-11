@@ -46,7 +46,7 @@ export async function SolutionCategoryPageContent({
       <SolutionsHero
         variant="category"
         title={title}
-        images={[item?.image || FALLBACK_IMAGE]}
+        image={item?.image || FALLBACK_IMAGE}
       />
 
       <section
