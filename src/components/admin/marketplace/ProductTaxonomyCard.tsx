@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import {
   Accordion,
@@ -13,7 +14,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { PRODUCT_EDITOR_SELECT_CLASS } from "@/components/admin/marketplace/product-editor.constants";
+import { useAdminLocale } from "@/contexts/AdminLocaleContext";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
+import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 import type { FilterOption, ShopBrand, ShopCategory, ShopFilterOptions } from "@/lib/shop/types";
 import { cn } from "@/lib/utils";
 
@@ -22,27 +25,31 @@ const SELECT_CLASS = PRODUCT_EDITOR_SELECT_CLASS;
 const MULTI_FILTER_GROUPS: Array<{
   key: keyof Pick<ShopFilterOptions, "applications" | "cultures" | "certifications">;
   accordionValue: string;
-  label: string;
+  labelKey: "application" | "cultures" | "certifications";
   productField: "application" | "cultures" | "certifications";
 }> = [
-  { key: "applications", accordionValue: "applications", label: "Application", productField: "application" },
-  { key: "cultures", accordionValue: "cultures", label: "Crop / culture", productField: "cultures" },
+  {
+    key: "applications",
+    accordionValue: "applications",
+    labelKey: "application",
+    productField: "application",
+  },
+  {
+    key: "cultures",
+    accordionValue: "cultures",
+    labelKey: "cultures",
+    productField: "cultures",
+  },
   {
     key: "certifications",
     accordionValue: "certifications",
-    label: "Certifications",
+    labelKey: "certifications",
     productField: "certifications",
   },
 ];
 
 function toggleInList(list: string[], id: string) {
   return list.includes(id) ? list.filter((item) => item !== id) : [...list, id];
-}
-
-function pickAdminFilterLabel(option: FilterOption) {
-  const fromEn = option.nameI18n?.en?.trim();
-  if (fromEn) return fromEn;
-  return option.name;
 }
 
 interface ProductTaxonomyCardProps {
@@ -62,6 +69,12 @@ export function ProductTaxonomyCard({
   loading = false,
   onUpdate,
 }: ProductTaxonomyCardProps) {
+  const t = useTranslations("admin.taxonomy");
+  const { locale } = useAdminLocale();
+
+  const labelFor = (option: Pick<FilterOption, "name" | "nameI18n">) =>
+    pickLocalizedLabel(locale, option.name, option.nameI18n);
+
   const selectedCategory = useMemo(
     () => categories.find((category) => category.id === product.categoryId),
     [categories, product.categoryId]
@@ -85,7 +98,7 @@ export function ProductTaxonomyCard({
         if (option) {
           chips.push({
             id: option.id,
-            label: pickAdminFilterLabel(option),
+            label: pickLocalizedLabel(locale, option.name, option.nameI18n),
             group: group.productField,
           });
         }
@@ -99,14 +112,14 @@ export function ProductTaxonomyCard({
       if (country) {
         chips.push({
           id: country.id,
-          label: pickAdminFilterLabel(country),
+          label: pickLocalizedLabel(locale, country.name, country.nameI18n),
           group: "countryOfOrigin",
         });
       }
     }
 
     return chips;
-  }, [filterOptions, product]);
+  }, [filterOptions, locale, product]);
 
   const toggleMultiFilter = (
     field: "application" | "cultures" | "certifications",
@@ -130,10 +143,8 @@ export function ProductTaxonomyCard({
   return (
     <Card>
       <CardHeader className="pb-4">
-        <CardTitle>Filters & classification</CardTitle>
-        <CardDescription>
-          Category, brand and shop filter attributes.
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">
@@ -142,14 +153,16 @@ export function ProductTaxonomyCard({
             className="flex flex-wrap items-center gap-1.5 rounded-md border border-dashed border-border/60 bg-muted/20 p-3"
             aria-live="polite"
           >
-            <span className="mr-1 text-xs font-medium text-muted-foreground">Shop filters:</span>
+            <span className="mr-1 text-xs font-medium text-muted-foreground">
+              {t("shopFilters")}
+            </span>
             {discoverySummary.map((chip) => (
               <Badge key={`${chip.group}-${chip.id}`} variant="secondary" className="gap-1 pr-1">
                 {chip.label}
                 <button
                   type="button"
                   className="rounded-sm p-0.5 hover:bg-muted"
-                  aria-label={`Remove ${chip.label}`}
+                  aria-label={t("removeChip", { label: chip.label })}
                   onClick={() => removeDiscoveryChip(chip.group, chip.id)}
                 >
                   <X className="size-3" />
@@ -162,17 +175,15 @@ export function ProductTaxonomyCard({
         <section aria-labelledby="classification-heading" className="space-y-4">
           <div>
             <h3 id="classification-heading" className="text-sm font-semibold text-oboya-blue-dark">
-              Classification
+              {t("classification")}
             </h3>
-            <p className="text-xs text-muted-foreground">
-              Where this product belongs in the catalog.
-            </p>
+            <p className="text-xs text-muted-foreground">{t("classificationHint")}</p>
           </div>
 
           <div className="space-y-4 rounded-lg bg-muted/30 p-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="product-category">Category</Label>
+                <Label htmlFor="product-category">{t("category")}</Label>
                 <select
                   id="product-category"
                   value={product.categoryId}
@@ -189,14 +200,14 @@ export function ProductTaxonomyCard({
                 >
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
-                      {category.name}
+                      {labelFor(category)}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="product-subcategory">Subcategory</Label>
+                <Label htmlFor="product-subcategory">{t("subcategory")}</Label>
                 <select
                   id="product-subcategory"
                   value={product.subcategoryId}
@@ -206,29 +217,29 @@ export function ProductTaxonomyCard({
                   aria-describedby="subcategory-hint"
                 >
                   {!selectedCategory ? (
-                    <option value="">Select a category first</option>
+                    <option value="">{t("selectCategoryFirst")}</option>
                   ) : (
                     selectedCategory.subcategories.map((subcategory) => (
                       <option key={subcategory.id} value={subcategory.id}>
-                        {subcategory.name}
+                        {labelFor(subcategory)}
                       </option>
                     ))
                   )}
                 </select>
                 <p id="subcategory-hint" className="text-xs text-muted-foreground">
-                  Options depend on the selected category.
+                  {t("subcategoryHint")}
                 </p>
               </div>
             </div>
 
             {selectedCategory && selectedSubcategory && (
               <p className="text-xs text-muted-foreground">
-                {selectedCategory.name} › {selectedSubcategory.name}
+                {labelFor(selectedCategory)} › {labelFor(selectedSubcategory)}
               </p>
             )}
 
             <div className="space-y-1.5 sm:max-w-md">
-              <Label htmlFor="product-brand">Brand</Label>
+              <Label htmlFor="product-brand">{t("brand")}</Label>
               <select
                 id="product-brand"
                 value={product.brandId}
@@ -238,12 +249,14 @@ export function ProductTaxonomyCard({
               >
                 {brands.map((brand) => (
                   <option key={brand.id} value={brand.id}>
-                    {brand.name}
+                    {labelFor(brand)}
                   </option>
                 ))}
               </select>
               {selectedBrand && (
-                <p className="text-xs text-muted-foreground">Manufacturer: {selectedBrand.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("manufacturer", { name: labelFor(selectedBrand) })}
+                </p>
               )}
             </div>
           </div>
@@ -256,22 +269,20 @@ export function ProductTaxonomyCard({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h3 id="shop-filters-heading" className="text-sm font-semibold text-oboya-blue-dark">
-                Shop filter attributes
+                {t("shopFilterAttributes")}
               </h3>
-              <p className="text-xs text-muted-foreground">
-                Shown to buyers in the catalog filter sidebar.
-              </p>
+              <p className="text-xs text-muted-foreground">{t("shopFilterHint")}</p>
             </div>
             <Link
               href="/admin/marketplace/filters"
               className="text-xs text-oboya-green underline-offset-2 hover:underline"
             >
-              Manage options
+              {t("manageOptions")}
             </Link>
           </div>
 
           {loading ? (
-            <p className="text-sm text-muted-foreground">Loading filter options…</p>
+            <p className="text-sm text-muted-foreground">{t("loadingOptions")}</p>
           ) : (
             <>
               <Accordion
@@ -283,6 +294,7 @@ export function ProductTaxonomyCard({
                   const options = filterOptions[group.key];
                   const selectedIds = product[group.productField];
                   const selectedCount = selectedIds.length;
+                  const groupLabel = t(group.labelKey);
 
                   return (
                     <AccordionItem
@@ -292,7 +304,7 @@ export function ProductTaxonomyCard({
                     >
                       <AccordionTrigger className="py-3 hover:no-underline">
                         <span className="flex items-center gap-2">
-                          {group.label}
+                          {groupLabel}
                           {selectedCount > 0 && (
                             <Badge variant="secondary" className="text-[10px]">
                               {selectedCount}
@@ -303,18 +315,16 @@ export function ProductTaxonomyCard({
                       <AccordionContent className="pb-4">
                         {options.length === 0 ? (
                           <p className="text-xs text-muted-foreground">
-                            No options configured.{" "}
                             <Link
                               href="/admin/marketplace/filters"
                               className="text-oboya-green underline-offset-2 hover:underline"
                             >
-                              Add them in Filters
+                              {t("manageOptions")}
                             </Link>
-                            .
                           </p>
                         ) : (
                           <fieldset className="space-y-3">
-                            <legend className="sr-only">{group.label}</legend>
+                            <legend className="sr-only">{groupLabel}</legend>
 
                             {selectedCount > 0 && (
                               <div className="flex flex-wrap gap-1.5">
@@ -327,12 +337,16 @@ export function ProductTaxonomyCard({
                                       variant="secondary"
                                       className="gap-1 pr-1"
                                     >
-                                      {pickAdminFilterLabel(option)}
+                                      {labelFor(option)}
                                       <button
                                         type="button"
                                         className="rounded-sm p-0.5 hover:bg-muted"
-                                        aria-label={`Remove ${pickAdminFilterLabel(option)}`}
-                                        onClick={() => toggleMultiFilter(group.productField, optionId)}
+                                        aria-label={t("removeChip", {
+                                          label: labelFor(option),
+                                        })}
+                                        onClick={() =>
+                                          toggleMultiFilter(group.productField, optionId)
+                                        }
                                       >
                                         <X className="size-3" />
                                       </button>
@@ -361,7 +375,7 @@ export function ProductTaxonomyCard({
                                         toggleMultiFilter(group.productField, option.id)
                                       }
                                     />
-                                    <span>{pickAdminFilterLabel(option)}</span>
+                                    <span>{labelFor(option)}</span>
                                   </label>
                                 );
                               })}
@@ -373,7 +387,7 @@ export function ProductTaxonomyCard({
                                 className="text-xs text-muted-foreground hover:text-foreground"
                                 onClick={() => clearMultiFilter(group.productField)}
                               >
-                                Clear all
+                                {t("clearAll")}
                               </button>
                             )}
                           </fieldset>
@@ -385,23 +399,20 @@ export function ProductTaxonomyCard({
               </Accordion>
 
               <div className="space-y-1.5 sm:max-w-md">
-                <Label htmlFor="country-of-manufacture">Country of manufacture</Label>
+                <Label htmlFor="country-of-manufacture">{t("countryOfOrigin")}</Label>
                 <select
                   id="country-of-manufacture"
                   value={product.countryOfOrigin}
                   onChange={(e) => onUpdate({ countryOfOrigin: e.target.value })}
                   className={SELECT_CLASS}
                 >
-                  <option value="">Not specified</option>
+                  <option value="">{t("notSpecified")}</option>
                   {filterOptions.countriesOfOrigin.map((option) => (
                     <option key={option.id} value={option.id}>
-                      {pickAdminFilterLabel(option)}
+                      {labelFor(option)}
                     </option>
                   ))}
                 </select>
-                <p className="text-xs text-muted-foreground">
-                  Single value shown in the shop origin filter.
-                </p>
               </div>
             </>
           )}

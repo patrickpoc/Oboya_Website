@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { ChevronDown, ChevronRight, X } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/brand/Logo";
@@ -17,6 +18,7 @@ interface AdminSidebarProps {
 export function AdminSidebar({ mobileOpen = false, onNavigate }: AdminSidebarProps) {
   const pathname = usePathname();
   const { can } = useAdmin();
+  const t = useTranslations("admin");
 
   return (
     <aside
@@ -28,12 +30,14 @@ export function AdminSidebar({ mobileOpen = false, onNavigate }: AdminSidebarPro
       <div className="flex h-14 items-center justify-between border-b border-border/60 px-4">
         <div className="flex items-center gap-2">
           <Logo className="h-7 w-auto" href="/admin/dashboard" intl={false} />
-          <span className="text-xs font-semibold text-muted-foreground">Admin</span>
+          <span className="text-xs font-semibold text-muted-foreground">
+            {t("common.admin")}
+          </span>
         </div>
         <button
           type="button"
           className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted lg:hidden"
-          aria-label="Close navigation"
+          aria-label={t("common.closeNav")}
           onClick={onNavigate}
         >
           <X className="size-5" />
@@ -48,7 +52,7 @@ export function AdminSidebar({ mobileOpen = false, onNavigate }: AdminSidebarPro
             if (!item.children) {
               const active = pathname === item.href;
               return (
-                <li key={item.label}>
+                <li key={item.labelKey}>
                   <Link
                     href={item.href ?? "#"}
                     prefetch
@@ -61,7 +65,7 @@ export function AdminSidebar({ mobileOpen = false, onNavigate }: AdminSidebarPro
                     )}
                   >
                     {item.icon && <item.icon className="size-4 shrink-0" />}
-                    {item.label}
+                    {t(`nav.${item.labelKey}`)}
                   </Link>
                 </li>
               );
@@ -69,7 +73,7 @@ export function AdminSidebar({ mobileOpen = false, onNavigate }: AdminSidebarPro
 
             return (
               <NavGroup
-                key={item.label}
+                key={item.labelKey}
                 item={item}
                 pathname={pathname}
                 onNavigate={onNavigate}
@@ -91,6 +95,7 @@ function NavGroup({
   pathname: string;
   onNavigate?: () => void;
 }) {
+  const t = useTranslations("admin.nav");
   const isChildActive = item.children?.some(
     (c) => c.href && (pathname === c.href || pathname.startsWith(c.href + "/"))
   );
@@ -109,7 +114,7 @@ function NavGroup({
         )}
       >
         {item.icon && <item.icon className="size-4 shrink-0" />}
-        <span className="flex-1 text-left">{item.label}</span>
+        <span className="flex-1 text-left">{t(item.labelKey)}</span>
         {open ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
       </button>
       {open && (
@@ -119,7 +124,7 @@ function NavGroup({
               child.href &&
               (pathname === child.href || pathname.startsWith(child.href + "/"));
             return (
-              <li key={child.label}>
+              <li key={child.labelKey}>
                 <Link
                   href={child.href ?? "#"}
                   prefetch
@@ -131,7 +136,7 @@ function NavGroup({
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  {child.label}
+                  {t(child.labelKey)}
                 </Link>
               </li>
             );

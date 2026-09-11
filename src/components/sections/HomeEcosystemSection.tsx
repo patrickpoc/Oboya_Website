@@ -311,22 +311,34 @@ export function HomeEcosystemSection() {
     [reduceMotion]
   );
 
-  const bodyParagraphs = [t("body.p1"), t("body.p2"), t("body.p3")];
+  const bodyParagraphs = [t("body.p1"), t("body.p2")];
 
   return (
     <section
       aria-label={t("ariaLabel")}
       className="relative z-10 overflow-x-clip bg-oboya-blue-dark py-[var(--section-y)]"
     >
-      <div className="mx-auto w-full max-w-[var(--container-max)] px-[var(--container-padding)] text-center">
-        <h2 className="mx-auto max-w-4xl font-display text-[clamp(1.65rem,3.6vw,2.75rem)] font-semibold leading-[1.15] tracking-[-0.02em] text-white text-balance">
-          {t("title")}
-        </h2>
+      <div className="mx-auto w-full max-w-[var(--container-max)] px-[var(--container-padding)]">
+        <div className="grid gap-6 md:grid-cols-2 md:items-start md:gap-10 lg:gap-16">
+          <h2 className="max-w-xl whitespace-pre-line font-display text-[clamp(1.45rem,2.8vw,2.25rem)] font-light leading-[1.3] tracking-tight text-white text-balance">
+            {t("title")}
+          </h2>
+          <div className="flex flex-col gap-4 md:pt-1">
+            {bodyParagraphs.map((paragraph) => (
+              <p
+                key={paragraph.slice(0, 24)}
+                className="font-body text-[clamp(0.975rem,1.4vw,1.125rem)] font-light leading-[1.65] text-white/90 text-pretty"
+              >
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div
         ref={frameRef}
-        className="relative mx-auto mt-6 w-full touch-pan-y overflow-x-clip overflow-y-visible sm:mt-8 md:mt-10 md:overflow-visible"
+        className="relative mx-auto mt-8 w-full touch-pan-y overflow-x-clip overflow-y-visible sm:mt-10 md:mt-12 md:overflow-visible"
         style={{
           height: metrics.ready ? metrics.wheelHeight : undefined,
           minHeight: metrics.ready ? undefined : 240,
@@ -625,30 +637,11 @@ export function HomeEcosystemSection() {
         ) : null}
       </div>
 
-      {/* Soft fade bridging the wheel chord into the copy below */}
+      {/* Soft fade bridging the wheel chord into the section end */}
       <div
         className="pointer-events-none relative z-[15] -mt-20 h-20 bg-gradient-to-b from-transparent to-oboya-blue-dark sm:-mt-24 sm:h-24 md:-mt-28 md:h-28"
         aria-hidden
       />
-
-      <div className="relative z-10 mx-auto mt-6 w-full max-w-[var(--container-max)] px-[var(--container-padding)] text-center sm:mt-8 md:mt-10">
-        <div className="mx-auto flex max-w-3xl flex-col gap-4">
-          {bodyParagraphs.map((paragraph) => (
-            <p
-              key={paragraph.slice(0, 24)}
-              className="font-body text-[clamp(1rem,1.5vw,1.125rem)] font-light leading-[1.65] text-white/90 text-pretty"
-            >
-              {paragraph}
-            </p>
-          ))}
-        </div>
-
-        <p className="mx-auto mt-10 max-w-3xl font-display text-[clamp(1.35rem,2.8vw,2.15rem)] font-semibold leading-[1.25] tracking-[-0.02em] text-balance md:mt-12">
-          <span className="text-oboya-green">{t("closingLine1")}</span>
-          <br />
-          <span className="text-white">{t("closingLine2")}</span>
-        </p>
-      </div>
     </section>
   );
 }

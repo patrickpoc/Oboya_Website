@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { FolderTree, Pencil, Plus, Search, Tag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Can } from "@/components/admin/permissions/Can";
-import { LocaleFieldTabs } from "@/components/admin/forms/LocaleFieldTabs";
+import { ShopLocalizedNameFields } from "@/components/admin/forms/ShopLocalizedNameFields";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +19,7 @@ import type { CmsLocale } from "@/lib/cms/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import { BrandLabel } from "@/components/shop/BrandLabel";
 import { CountryFlag } from "@/components/ui/country-flag";
+import { useAdminLocale } from "@/contexts/AdminLocaleContext";
 import { useMapLocations } from "@/lib/shop/use-map-locations";
 import { getMapFlagOptions } from "@/lib/shop/map-flag-options";
 import type { FilterOption, ShopBrand, ShopCategory, ShopFilterOptions, ShopLocalizedText } from "@/lib/shop/types";
@@ -26,12 +28,22 @@ type OptionGroupKey = keyof ShopFilterOptions;
 type SortMode = "name-asc" | "name-desc" | "usage-desc";
 type UsageMode = "all" | "used" | "unused";
 
-const FILTER_GROUPS: Array<{ key: OptionGroupKey; label: string }> = [
-  { key: "applications", label: "Application" },
-  { key: "cultures", label: "Crop / Culture" },
-  { key: "certifications", label: "Certifications" },
-  { key: "countriesOfOrigin", label: "Country of Manufacture" },
+const FILTER_GROUP_KEYS: OptionGroupKey[] = [
+  "applications",
+  "cultures",
+  "certifications",
+  "countriesOfOrigin",
 ];
+
+const FILTER_GROUP_LABEL_KEY: Record<
+  OptionGroupKey,
+  "application" | "cultures" | "certifications" | "countriesOfOrigin"
+> = {
+  applications: "application",
+  cultures: "cultures",
+  certifications: "certifications",
+  countriesOfOrigin: "countriesOfOrigin",
+};
 
 function newId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -73,6 +85,9 @@ function sortByMode<T extends { id: string; name: string }>(items: T[], mode: So
 }
 
 export default function MarketplaceFiltersPage() {
+  const t = useTranslations("admin.filters");
+  const tCommon = useTranslations("admin.common");
+  const { locale } = useAdminLocale();
   const [activeTab, setActiveTab] = useState("taxonomy");
   const [categories, setCategories] = useState<ShopCategory[]>([]);
   const [brands, setBrands] = useState<ShopBrand[]>([]);
@@ -103,7 +118,6 @@ export default function MarketplaceFiltersPage() {
   const [optionSheetOpen, setOptionSheetOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(null);
-  const [editingLocale, setEditingLocale] = useState<CmsLocale>("en");
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorLabel, setEditorLabel] = useState("");
   const [editorValue, setEditorValue] = useState("");
@@ -118,6 +132,8 @@ export default function MarketplaceFiltersPage() {
     () => getMapFlagOptions(mapLocations),
     [mapLocations]
   );
+
+  const groupLabel = (key: OptionGroupKey) => t(FILTER_GROUP_LABEL_KEY[key]);
 
   useEffect(() => {
     void (async () => {
@@ -175,16 +191,16 @@ export default function MarketplaceFiltersPage() {
       certifications: {},
       countriesOfOrigin: {},
     };
-    FILTER_GROUPS.forEach((group) => {
-      filterOptions[group.key].forEach((option) => {
-        if (group.key === "applications") {
-          map[group.key][option.id] = products.filter((product) => product.application.includes(option.id)).length;
-        } else if (group.key === "cultures") {
-          map[group.key][option.id] = products.filter((product) => product.cultures.includes(option.id)).length;
-        } else if (group.key === "certifications") {
-          map[group.key][option.id] = products.filter((product) => product.certifications.includes(option.id)).length;
+    FILTER_GROUP_KEYS.forEach((groupKey) => {
+      filterOptions[groupKey].forEach((option) => {
+        if (groupKey === "applications") {
+          map[groupKey][option.id] = products.filter((product) => product.application.includes(option.id)).length;
+        } else if (groupKey === "cultures") {
+          map[groupKey][option.id] = products.filter((product) => product.cultures.includes(option.id)).length;
+        } else if (groupKey === "certifications") {
+          map[groupKey][option.id] = products.filter((product) => product.certifications.includes(option.id)).length;
         } else {
-          map[group.key][option.id] = products.filter((product) => product.countryOfOrigin === option.id).length;
+          map[groupKey][option.id] = products.filter((product) => product.countryOfOrigin === option.id).length;
         }
       });
     });
@@ -274,12 +290,13 @@ export default function MarketplaceFiltersPage() {
       if (brandNames.has(key)) issues.push(`Duplicated brand: ${brand.name}`);
       brandNames.add(key);
     });
-    FILTER_GROUPS.forEach((group) => {
+    FILTER_GROUP_KEYS.forEach((groupKey) => {
+      const label = groupLabel(groupKey);
       const names = new Set<string>();
-      filterOptions[group.key].forEach((option) => {
+      filterOptions[groupKey].forEach((option) => {
         const key = normalize(option.name);
-        if (!key) issues.push(`${group.label} option name cannot be empty.`);
-        if (names.has(key)) issues.push(`Duplicated ${group.label} option: ${option.name}`);
+        if (!key) issues.push(`${label} option name cannot be empty.`);
+        if (names.has(key)) issues.push(`Duplicated ${label} option: ${option.name}`);
         names.add(key);
       });
     });
@@ -300,18 +317,18 @@ export default function MarketplaceFiltersPage() {
         body: JSON.stringify({ categories, brands, filterOptions }),
       });
       const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-      if (!response.ok) throw new Error(payload?.error ?? "Could not save filters");
+      if (!response.ok) throw new Error(payload?.error ?? t("saveFailed"));
       setInitialSnapshot(currentSnapshot);
-      toast.success("Filters saved.");
+      toast.success(t("saved"));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save filters.");
+      toast.error(error instanceof Error ? error.message : t("saveFailed"));
     } finally {
       setSaving(false);
     }
   };
 
   const addCategory = () => {
-    openTextEditor("Create category", "", (value) => {
+    openTextEditor(t("addCategory"), "", (value) => {
       const name = value.trim();
       if (!name) return;
       const next: ShopCategory = { id: newId("category"), name, nameI18n: initI18n(name), subcategories: [] };
@@ -324,7 +341,7 @@ export default function MarketplaceFiltersPage() {
   };
 
   const addSubcategory = (categoryId: string) => {
-    openTextEditor("Create subcategory", "", (value) => {
+    openTextEditor(t("addSubcategory"), "", (value) => {
       const name = value.trim();
       if (!name) return;
       setCategories((prev) =>
@@ -345,7 +362,7 @@ export default function MarketplaceFiltersPage() {
   };
 
   const addBrand = () => {
-    openTextEditor("Create brand", "", (value) => {
+    openTextEditor(t("addBrand"), "", (value) => {
       const name = value.trim();
       if (!name) return;
       const next: ShopBrand = { id: newId("brand"), name, nameI18n: initI18n(name) };
@@ -356,7 +373,7 @@ export default function MarketplaceFiltersPage() {
   };
 
   const addOption = (group: OptionGroupKey) => {
-    openTextEditor(`Add option to ${group}`, "", (value) => {
+    openTextEditor(t("addOption"), "", (value) => {
       const name = value.trim();
       if (!name) return;
       const next: FilterOption = { id: newId(group), name, nameI18n: initI18n(name) };
@@ -368,28 +385,28 @@ export default function MarketplaceFiltersPage() {
 
   if (loading) {
     return (
-      <Can module="marketplace" action="view" fallback={<p className="text-sm text-muted-foreground">Access denied.</p>}>
-        <AdminPageHeader title="Filters" description="Loading taxonomy center..." />
+      <Can module="marketplace" action="view" fallback={<p className="text-sm text-muted-foreground">{tCommon("accessDenied")}</p>}>
+        <AdminPageHeader title={t("title")} description={tCommon("loading")} />
       </Can>
     );
   }
 
   return (
-    <Can module="marketplace" action="view" fallback={<p className="text-sm text-muted-foreground">Access denied.</p>}>
+    <Can module="marketplace" action="view" fallback={<p className="text-sm text-muted-foreground">{tCommon("accessDenied")}</p>}>
       <AdminPageHeader
-        title="Filters"
-        description="Centralize categories, brands and filter options used by products."
+        title={t("title")}
+        description={t("description")}
         actions={
           <div className="flex items-center gap-2">
             <Badge variant={isDirty ? "secondary" : "outline"}>
-              {isDirty ? "Unsaved changes" : "All changes saved"}
+              {isDirty ? tCommon("unsavedChanges") : tCommon("allChangesSaved")}
             </Badge>
             <Button
               onClick={() => void saveAll()}
               className="rounded-full bg-oboya-green text-white hover:bg-oboya-green/90"
               disabled={saving || !isDirty}
             >
-              {saving ? "Saving..." : "Save filters"}
+              {saving ? tCommon("saving") : t("saveFilters")}
             </Button>
           </div>
         }
@@ -397,9 +414,9 @@ export default function MarketplaceFiltersPage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
-          <TabsTrigger value="taxonomy">Categories</TabsTrigger>
-          <TabsTrigger value="brands">Brands</TabsTrigger>
-          <TabsTrigger value="options">Product Filters</TabsTrigger>
+          <TabsTrigger value="taxonomy">{t("categories")}</TabsTrigger>
+          <TabsTrigger value="brands">{t("brands")}</TabsTrigger>
+          <TabsTrigger value="options">{t("productFilters")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="taxonomy">
@@ -407,9 +424,9 @@ export default function MarketplaceFiltersPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  <span>Category Tree</span>
+                  <span>{t("categoryTree")}</span>
                   <Button variant="outline" size="sm" onClick={addCategory}>
-                    <Plus className="mr-1 size-3.5" /> Add category
+                    <Plus className="mr-1 size-3.5" /> {t("addCategory")}
                   </Button>
                 </CardTitle>
               </CardHeader>
@@ -418,18 +435,18 @@ export default function MarketplaceFiltersPage() {
                   <Search className="absolute top-2.5 left-2.5 size-4 text-muted-foreground" />
                   <Input
                     className="pl-8"
-                    placeholder="Search categories or subcategories..."
+                    placeholder={t("searchCategory")}
                     value={searchCategory}
                     onChange={(event) => setSearchCategory(event.target.value)}
                   />
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Button size="sm" variant={categoryUsageFilter === "all" ? "secondary" : "outline"} onClick={() => setCategoryUsageFilter("all")}>All</Button>
-                  <Button size="sm" variant={categoryUsageFilter === "used" ? "secondary" : "outline"} onClick={() => setCategoryUsageFilter("used")}>Used</Button>
-                  <Button size="sm" variant={categoryUsageFilter === "unused" ? "secondary" : "outline"} onClick={() => setCategoryUsageFilter("unused")}>Unused</Button>
-                  <Button size="sm" variant="outline" onClick={() => setCategorySort("name-asc")}>A-Z</Button>
-                  <Button size="sm" variant="outline" onClick={() => setCategorySort("name-desc")}>Z-A</Button>
-                  <Button size="sm" variant="outline" onClick={() => setCategorySort("usage-desc")}>Most used</Button>
+                  <Button size="sm" variant={categoryUsageFilter === "all" ? "secondary" : "outline"} onClick={() => setCategoryUsageFilter("all")}>{tCommon("all")}</Button>
+                  <Button size="sm" variant={categoryUsageFilter === "used" ? "secondary" : "outline"} onClick={() => setCategoryUsageFilter("used")}>{tCommon("used")}</Button>
+                  <Button size="sm" variant={categoryUsageFilter === "unused" ? "secondary" : "outline"} onClick={() => setCategoryUsageFilter("unused")}>{tCommon("unused")}</Button>
+                  <Button size="sm" variant="outline" onClick={() => setCategorySort("name-asc")}>{tCommon("sortAZ")}</Button>
+                  <Button size="sm" variant="outline" onClick={() => setCategorySort("name-desc")}>{tCommon("sortZA")}</Button>
+                  <Button size="sm" variant="outline" onClick={() => setCategorySort("usage-desc")}>{tCommon("mostUsed")}</Button>
                 </div>
                 <div className="max-h-[32rem] space-y-2 overflow-y-auto pr-1">
                   {filteredCategories.map((category) => (
@@ -444,13 +461,15 @@ export default function MarketplaceFiltersPage() {
                           }}
                         >
                           <FolderTree className="size-3.5 text-muted-foreground" />
-                          {pickLocalized(category.name, category.nameI18n, editingLocale)}
+                          {pickLocalized(category.name, category.nameI18n, locale)}
                         </button>
                         <div className="flex items-center gap-1">
                           <Button
                             size="sm"
                             variant="outline"
-                            aria-label={`Editar categoria ${pickLocalized(category.name, category.nameI18n, editingLocale)}`}
+                            aria-label={t("editCategory", {
+                              name: pickLocalized(category.name, category.nameI18n, locale),
+                            })}
                             onClick={() => {
                               setSelectedCategoryId(category.id);
                               setSelectedSubcategoryId(null);
@@ -462,15 +481,17 @@ export default function MarketplaceFiltersPage() {
                           <Button
                             size="sm"
                             variant="destructive"
-                            aria-label={`Remover categoria ${pickLocalized(category.name, category.nameI18n, editingLocale)}`}
+                            aria-label={t("removeCategory", {
+                              name: pickLocalized(category.name, category.nameI18n, locale),
+                            })}
                             onClick={() => {
                               const inUse = categoryUsage[category.id] ?? 0;
                               openDeleteConfirm({
-                                title: "Delete category",
+                                title: t("deleteCategory"),
                                 description:
                                   inUse > 0
-                                    ? `This category is currently used by ${inUse} product(s). Remove associations before deleting.`
-                                    : "This will remove the category and all nested subcategories.",
+                                    ? t("deleteBlocked", { count: inUse })
+                                    : t("deleteConfirm"),
                                 blocked: inUse > 0,
                                 onConfirm: () => {
                                   setCategories((prev) => prev.filter((item) => item.id !== category.id));
@@ -499,7 +520,7 @@ export default function MarketplaceFiltersPage() {
                               }}
                             >
                               <Tag className="size-3 text-muted-foreground" />
-                              {pickLocalized(subcategory.name, subcategory.nameI18n, editingLocale)}
+                              {pickLocalized(subcategory.name, subcategory.nameI18n, locale)}
                             </button>
                           </div>
                         ))}
@@ -512,36 +533,33 @@ export default function MarketplaceFiltersPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Site Reflection</CardTitle>
+                <CardTitle>{t("siteReflection")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="rounded-md bg-oboya-green/10 px-3 py-2 text-sm font-medium">All categories</div>
+                <div className="rounded-md bg-oboya-green/10 px-3 py-2 text-sm font-medium">{t("categories")}</div>
                 <div className="space-y-2">
                   {categories.slice(0, 8).map((category) => (
                     <p key={`preview-category-${category.id}`} className="text-sm text-oboya-blue-dark">
-                      {pickLocalized(category.name, category.nameI18n, editingLocale)}
+                      {pickLocalized(category.name, category.nameI18n, locale)}
                     </p>
                   ))}
                 </div>
                 <div className="border-t border-border/60 pt-4">
-                  <p className="mb-2 text-xs font-semibold uppercase">Brands</p>
+                  <p className="mb-2 text-xs font-semibold uppercase">{t("brands")}</p>
                   {brands.slice(0, 6).map((brand) => (
                     <label key={`preview-brand-${brand.id}`} className="mb-1 flex items-center gap-2 text-sm text-oboya-blue-dark">
                       <input type="checkbox" disabled />
-                      <BrandLabel
-                        brand={brand}
-                        locale={editingLocale}
-                      />
+                      <BrandLabel brand={brand} locale={locale} />
                     </label>
                   ))}
                 </div>
-                {FILTER_GROUPS.map((group) => (
-                  <div key={`preview-group-${group.key}`} className="border-t border-border/60 pt-4">
-                    <p className="mb-2 text-xs font-semibold uppercase">{group.label}</p>
-                    {filterOptions[group.key].slice(0, 6).map((option) => (
+                {FILTER_GROUP_KEYS.map((groupKey) => (
+                  <div key={`preview-group-${groupKey}`} className="border-t border-border/60 pt-4">
+                    <p className="mb-2 text-xs font-semibold uppercase">{groupLabel(groupKey)}</p>
+                    {filterOptions[groupKey].slice(0, 6).map((option) => (
                       <label key={`preview-option-${option.id}`} className="mb-1 flex items-center gap-2 text-sm text-oboya-blue-dark">
                         <input type="checkbox" disabled />
-                        {pickLocalized(option.name, option.nameI18n, editingLocale)}
+                        {pickLocalized(option.name, option.nameI18n, locale)}
                       </label>
                     ))}
                   </div>
@@ -556,37 +574,39 @@ export default function MarketplaceFiltersPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  <span>Brands</span>
+                  <span>{t("brands")}</span>
                   <Button variant="outline" size="sm" onClick={addBrand}>
-                    <Plus className="mr-1 size-3.5" /> Add brand
+                    <Plus className="mr-1 size-3.5" /> {t("addBrand")}
                   </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="relative">
                   <Search className="absolute top-2.5 left-2.5 size-4 text-muted-foreground" />
-                  <Input className="pl-8" placeholder="Search brand..." value={searchBrand} onChange={(event) => setSearchBrand(event.target.value)} />
+                  <Input className="pl-8" placeholder={t("searchBrand")} value={searchBrand} onChange={(event) => setSearchBrand(event.target.value)} />
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button size="sm" variant={brandUsageFilter === "all" ? "secondary" : "outline"} onClick={() => setBrandUsageFilter("all")}>All</Button>
-                  <Button size="sm" variant={brandUsageFilter === "used" ? "secondary" : "outline"} onClick={() => setBrandUsageFilter("used")}>Used</Button>
-                  <Button size="sm" variant={brandUsageFilter === "unused" ? "secondary" : "outline"} onClick={() => setBrandUsageFilter("unused")}>Unused</Button>
-                  <Button size="sm" variant="outline" onClick={() => setBrandSort("name-asc")}>A-Z</Button>
-                  <Button size="sm" variant="outline" onClick={() => setBrandSort("name-desc")}>Z-A</Button>
-                  <Button size="sm" variant="outline" onClick={() => setBrandSort("usage-desc")}>Most used</Button>
+                  <Button size="sm" variant={brandUsageFilter === "all" ? "secondary" : "outline"} onClick={() => setBrandUsageFilter("all")}>{tCommon("all")}</Button>
+                  <Button size="sm" variant={brandUsageFilter === "used" ? "secondary" : "outline"} onClick={() => setBrandUsageFilter("used")}>{tCommon("used")}</Button>
+                  <Button size="sm" variant={brandUsageFilter === "unused" ? "secondary" : "outline"} onClick={() => setBrandUsageFilter("unused")}>{tCommon("unused")}</Button>
+                  <Button size="sm" variant="outline" onClick={() => setBrandSort("name-asc")}>{tCommon("sortAZ")}</Button>
+                  <Button size="sm" variant="outline" onClick={() => setBrandSort("name-desc")}>{tCommon("sortZA")}</Button>
+                  <Button size="sm" variant="outline" onClick={() => setBrandSort("usage-desc")}>{tCommon("mostUsed")}</Button>
                 </div>
                 <div className="max-h-[32rem] space-y-2 overflow-y-auto pr-1">
                   {filteredBrands.map((brand) => (
                     <div key={brand.id} className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left ${selectedBrandId === brand.id ? "border-oboya-green/60 bg-oboya-green/5" : "border-border/60"}`}>
                       <button type="button" className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-oboya-blue-dark hover:underline" onClick={() => setSelectedBrandId(brand.id)}>
                         <Tag className="size-3.5 shrink-0 text-muted-foreground" />
-                        <BrandLabel brand={brand} locale={editingLocale} />
+                        <BrandLabel brand={brand} locale={locale} />
                       </button>
                       <div className="flex items-center gap-1">
                         <Button
                           size="sm"
                           variant="outline"
-                          aria-label={`Editar marca ${pickLocalized(brand.name, brand.nameI18n, editingLocale)}`}
+                          aria-label={t("editBrand", {
+                            name: pickLocalized(brand.name, brand.nameI18n, locale),
+                          })}
                           onClick={() => {
                             setSelectedBrandId(brand.id);
                             setBrandSheetOpen(true);
@@ -597,12 +617,17 @@ export default function MarketplaceFiltersPage() {
                         <Button
                           size="sm"
                           variant="destructive"
-                          aria-label={`Remover marca ${pickLocalized(brand.name, brand.nameI18n, editingLocale)}`}
+                          aria-label={t("removeBrand", {
+                            name: pickLocalized(brand.name, brand.nameI18n, locale),
+                          })}
                           onClick={() => {
                             const used = brandUsage[brand.id] ?? 0;
                             openDeleteConfirm({
-                              title: "Delete brand",
-                              description: used > 0 ? `This brand is used by ${used} product(s).` : "This brand will be removed.",
+                              title: t("deleteBrand"),
+                              description:
+                                used > 0
+                                  ? t("deleteBlocked", { count: used })
+                                  : t("deleteConfirm"),
                               blocked: used > 0,
                               onConfirm: () => {
                                 setBrands((prev) => prev.filter((item) => item.id !== brand.id));
@@ -622,14 +647,14 @@ export default function MarketplaceFiltersPage() {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle>Site Reflection</CardTitle>
+                <CardTitle>{t("siteReflection")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <p className="text-xs font-semibold uppercase text-oboya-blue-dark">Brands</p>
+                <p className="text-xs font-semibold uppercase text-oboya-blue-dark">{t("brands")}</p>
                 {brands.slice(0, 12).map((brand) => (
                   <label key={`brands-preview-${brand.id}`} className="mb-1 flex items-center gap-2 text-sm text-oboya-blue-dark">
                     <input type="checkbox" disabled />
-                    <BrandLabel brand={brand} locale={editingLocale} />
+                    <BrandLabel brand={brand} locale={locale} />
                   </label>
                 ))}
               </CardContent>
@@ -640,31 +665,31 @@ export default function MarketplaceFiltersPage() {
         <TabsContent value="options">
           <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
             <Card>
-              <CardHeader><CardTitle>Filter Groups</CardTitle></CardHeader>
+              <CardHeader><CardTitle>{t("productFilters")}</CardTitle></CardHeader>
               <CardContent className="space-y-2">
-                {FILTER_GROUPS.map((group) => (
+                {FILTER_GROUP_KEYS.map((groupKey) => (
                   <div
-                    key={group.key}
-                    className={`rounded-lg border px-3 py-2 ${selectedGroup === group.key ? "border-oboya-green/60 bg-oboya-green/5" : "border-border/60"}`}
+                    key={groupKey}
+                    className={`rounded-lg border px-3 py-2 ${selectedGroup === groupKey ? "border-oboya-green/60 bg-oboya-green/5" : "border-border/60"}`}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <button
                         type="button"
                         className="text-left text-sm font-medium text-oboya-blue-dark hover:underline"
                         onClick={() => {
-                          setSelectedGroup(group.key);
-                          setSelectedOptionId(filterOptions[group.key][0]?.id ?? null);
+                          setSelectedGroup(groupKey);
+                          setSelectedOptionId(filterOptions[groupKey][0]?.id ?? null);
                         }}
                       >
-                        {group.label}
+                        {groupLabel(groupKey)}
                       </button>
                       <Button
                         size="sm"
                         variant="outline"
-                        aria-label={`Editar grupo ${group.label}`}
+                        aria-label={t("editGroup", { name: groupLabel(groupKey) })}
                         onClick={() => {
-                          setSelectedGroup(group.key);
-                          setSelectedOptionId(filterOptions[group.key][0]?.id ?? null);
+                          setSelectedGroup(groupKey);
+                          setSelectedOptionId(filterOptions[groupKey][0]?.id ?? null);
                           setOptionSheetOpen(true);
                         }}
                       >
@@ -672,42 +697,42 @@ export default function MarketplaceFiltersPage() {
                       </Button>
                     </div>
                     <div className="mt-2 space-y-1 border-l border-border/60 pl-3">
-                      {(filterOptions[group.key] ?? []).slice(0, 4).map((option) => (
+                      {(filterOptions[groupKey] ?? []).slice(0, 4).map((option) => (
                         <button
-                          key={`group-preview-${group.key}-${option.id}`}
+                          key={`group-preview-${groupKey}-${option.id}`}
                           type="button"
                           className="block text-left text-xs text-muted-foreground hover:text-oboya-blue-dark"
                           onClick={() => {
-                            setSelectedGroup(group.key);
+                            setSelectedGroup(groupKey);
                             setSelectedOptionId(option.id);
                           }}
                         >
-                          {pickLocalized(option.name, option.nameI18n, editingLocale)}
+                          {pickLocalized(option.name, option.nameI18n, locale)}
                         </button>
                       ))}
-                      {filterOptions[group.key].length > 4 && (
+                      {filterOptions[groupKey].length > 4 && (
                         <p className="text-[11px] text-muted-foreground">
-                          +{filterOptions[group.key].length - 4} more options
+                          {t("moreOptions", { count: filterOptions[groupKey].length - 4 })}
                         </p>
                       )}
                     </div>
                   </div>
                 ))}
                 <p className="text-xs text-muted-foreground">
-                  Use the edit button on a filter group to manage options in the side panel.
+                  {t("optionDetailsDesc")}
                 </p>
               </CardContent>
             </Card>
             <Card>
-              <CardHeader><CardTitle>Site Reflection</CardTitle></CardHeader>
+              <CardHeader><CardTitle>{t("siteReflection")}</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                {FILTER_GROUPS.map((group) => (
-                  <div key={`options-preview-${group.key}`} className="border-b border-border/60 pb-3 last:border-b-0">
-                    <p className="mb-2 text-xs font-semibold uppercase text-oboya-blue-dark">{group.label}</p>
-                    {filterOptions[group.key].slice(0, 8).map((option) => (
+                {FILTER_GROUP_KEYS.map((groupKey) => (
+                  <div key={`options-preview-${groupKey}`} className="border-b border-border/60 pb-3 last:border-b-0">
+                    <p className="mb-2 text-xs font-semibold uppercase text-oboya-blue-dark">{groupLabel(groupKey)}</p>
+                    {filterOptions[groupKey].slice(0, 8).map((option) => (
                       <label key={`options-preview-item-${option.id}`} className="mb-1 flex items-center gap-2 text-sm text-oboya-blue-dark">
                         <input type="checkbox" disabled />
-                        {pickLocalized(option.name, option.nameI18n, editingLocale)}
+                        {pickLocalized(option.name, option.nameI18n, locale)}
                       </label>
                     ))}
                   </div>
@@ -721,71 +746,83 @@ export default function MarketplaceFiltersPage() {
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="right" className="w-full sm:max-w-lg">
           <SheetHeader>
-            <SheetTitle>Taxonomy Details</SheetTitle>
-            <SheetDescription>Manage category and subcategories in a side panel.</SheetDescription>
+            <SheetTitle>{t("taxonomyDetails")}</SheetTitle>
+            <SheetDescription>{t("taxonomyDetailsDesc")}</SheetDescription>
           </SheetHeader>
           <div className="space-y-4 overflow-y-auto px-4">
-            {!selectedCategory && <p className="text-sm text-muted-foreground">Select a category first.</p>}
+            {!selectedCategory && <p className="text-sm text-muted-foreground">{t("selectCategoryFirst")}</p>}
             {selectedCategory && (
               <>
                 <div className="rounded-lg border border-border/60 p-3">
-                  <Label>Category</Label>
-                  <Input
+                  <Label>{t("category")}</Label>
+                  <ShopLocalizedNameFields
                     className="mt-2"
-                    value={selectedCategory.name}
-                    onChange={(event) =>
+                    name={selectedCategory.name}
+                    nameI18n={selectedCategory.nameI18n}
+                    onNameChange={(nextName) =>
+                      setCategories((prev) =>
+                        prev.map((category) =>
+                          category.id === selectedCategory.id
+                            ? { ...category, name: nextName }
+                            : category
+                        )
+                      )
+                    }
+                    onI18nChange={(loc, value) =>
                       setCategories((prev) =>
                         prev.map((category) =>
                           category.id === selectedCategory.id
                             ? {
                                 ...category,
-                                name: event.target.value,
-                                nameI18n: { ...initI18n(event.target.value, category.nameI18n), en: event.target.value },
+                                nameI18n: {
+                                  ...initI18n(category.name, category.nameI18n),
+                                  [loc]: value,
+                                },
                               }
                             : category
                         )
                       )
                     }
                   />
-                  <LocaleFieldTabs value={editingLocale} onChange={setEditingLocale}>
-                    {(locale) => (
-                      <Input
-                        className="mt-2"
-                        value={selectedCategory.nameI18n?.[locale] ?? ""}
-                        placeholder={locale === "en" ? "Required" : "Optional (falls back to English)"}
-                        onChange={(event) =>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>{t("subcategories")}</Label>
+                    <Button size="sm" variant="outline" onClick={() => addSubcategory(selectedCategory.id)}>
+                      <Plus className="mr-1 size-3.5" /> {t("addSubcategory")}
+                    </Button>
+                  </div>
+                  {selectedCategory.subcategories.map((subcategory) => (
+                    <div
+                      key={subcategory.id}
+                      className={`space-y-2 rounded-lg border p-2 ${
+                        selectedSubcategoryId === subcategory.id
+                          ? "border-oboya-green/60 bg-oboya-green/5"
+                          : "border-border/60"
+                      }`}
+                      onFocus={() => setSelectedSubcategoryId(subcategory.id)}
+                    >
+                      <ShopLocalizedNameFields
+                        name={subcategory.name}
+                        nameI18n={subcategory.nameI18n}
+                        onNameChange={(nextName) =>
                           setCategories((prev) =>
                             prev.map((category) =>
                               category.id === selectedCategory.id
                                 ? {
                                     ...category,
-                                    nameI18n: {
-                                      ...initI18n(category.name, category.nameI18n),
-                                      [locale]: event.target.value,
-                                    },
+                                    subcategories: category.subcategories.map((item) =>
+                                      item.id === subcategory.id
+                                        ? { ...item, name: nextName }
+                                        : item
+                                    ),
                                   }
                                 : category
                             )
                           )
                         }
-                      />
-                    )}
-                  </LocaleFieldTabs>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label>Subcategories</Label>
-                    <Button size="sm" variant="outline" onClick={() => addSubcategory(selectedCategory.id)}>
-                      <Plus className="mr-1 size-3.5" /> Add subcategory
-                    </Button>
-                  </div>
-                  {selectedCategory.subcategories.map((subcategory) => (
-                    <div key={subcategory.id} className="space-y-2 rounded-lg border border-border/60 p-2">
-                      <Input
-                        value={subcategory.name}
-                        onFocus={() => setSelectedSubcategoryId(subcategory.id)}
-                        onChange={(event) =>
+                        onI18nChange={(loc, value) =>
                           setCategories((prev) =>
                             prev.map((category) =>
                               category.id === selectedCategory.id
@@ -795,8 +832,10 @@ export default function MarketplaceFiltersPage() {
                                       item.id === subcategory.id
                                         ? {
                                             ...item,
-                                            name: event.target.value,
-                                            nameI18n: { ...initI18n(event.target.value, item.nameI18n), en: event.target.value },
+                                            nameI18n: {
+                                              ...initI18n(item.name, item.nameI18n),
+                                              [loc]: value,
+                                            },
                                           }
                                         : item
                                     ),
@@ -806,38 +845,6 @@ export default function MarketplaceFiltersPage() {
                           )
                         }
                       />
-                      {selectedSubcategoryId === subcategory.id && (
-                        <LocaleFieldTabs value={editingLocale} onChange={setEditingLocale}>
-                          {(locale) => (
-                            <Input
-                              value={subcategory.nameI18n?.[locale] ?? ""}
-                              placeholder={locale === "en" ? "Required" : "Optional (falls back to English)"}
-                              onChange={(event) =>
-                                setCategories((prev) =>
-                                  prev.map((category) =>
-                                    category.id === selectedCategory.id
-                                      ? {
-                                          ...category,
-                                          subcategories: category.subcategories.map((item) =>
-                                            item.id === subcategory.id
-                                              ? {
-                                                  ...item,
-                                                  nameI18n: {
-                                                    ...initI18n(item.name, item.nameI18n),
-                                                    [locale]: event.target.value,
-                                                  },
-                                                }
-                                              : item
-                                          ),
-                                        }
-                                      : category
-                                  )
-                                )
-                              }
-                            />
-                          )}
-                        </LocaleFieldTabs>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -845,7 +852,7 @@ export default function MarketplaceFiltersPage() {
             )}
           </div>
           <SheetFooter>
-            <Button variant="outline" onClick={() => setSheetOpen(false)}>Close</Button>
+            <Button variant="outline" onClick={() => setSheetOpen(false)}>{tCommon("close")}</Button>
           </SheetFooter>
         </SheetContent>
       </Sheet>
@@ -853,54 +860,45 @@ export default function MarketplaceFiltersPage() {
       <Sheet open={brandSheetOpen} onOpenChange={setBrandSheetOpen}>
         <SheetContent side="right" className="w-full sm:max-w-lg">
           <SheetHeader>
-            <SheetTitle>Brand Details</SheetTitle>
-            <SheetDescription>Edit localized labels with English fallback.</SheetDescription>
+            <SheetTitle>{t("brandDetails")}</SheetTitle>
+            <SheetDescription>{t("brandDetailsDesc")}</SheetDescription>
           </SheetHeader>
           <div className="space-y-4 overflow-y-auto px-4">
-            {!selectedBrand && <p className="text-sm text-muted-foreground">Select a brand first.</p>}
+            {!selectedBrand && <p className="text-sm text-muted-foreground">{t("selectBrandFirst")}</p>}
             {selectedBrand && (
               <div className="space-y-3 rounded-lg border border-border/60 p-3">
-                <Label>English (fallback)</Label>
-                <Input
-                  value={selectedBrand.name}
-                  onChange={(event) =>
+                <ShopLocalizedNameFields
+                  name={selectedBrand.name}
+                  nameI18n={selectedBrand.nameI18n}
+                  onNameChange={(nextName) =>
+                    setBrands((prev) =>
+                      prev.map((brand) =>
+                        brand.id === selectedBrand.id
+                          ? { ...brand, name: nextName }
+                          : brand
+                      )
+                    )
+                  }
+                  onI18nChange={(loc, value) =>
                     setBrands((prev) =>
                       prev.map((brand) =>
                         brand.id === selectedBrand.id
                           ? {
                               ...brand,
-                              name: event.target.value,
-                              nameI18n: { ...initI18n(event.target.value, brand.nameI18n), en: event.target.value },
+                              nameI18n: {
+                                ...initI18n(brand.name, brand.nameI18n),
+                                [loc]: value,
+                              },
                             }
                           : brand
                       )
                     )
                   }
                 />
-                <LocaleFieldTabs value={editingLocale} onChange={setEditingLocale}>
-                  {(locale) => (
-                    <Input
-                      value={selectedBrand.nameI18n?.[locale] ?? ""}
-                      placeholder={locale === "en" ? "Required" : "Optional (falls back to English)"}
-                      onChange={(event) =>
-                        setBrands((prev) =>
-                          prev.map((brand) =>
-                            brand.id === selectedBrand.id
-                              ? {
-                                  ...brand,
-                                  nameI18n: { ...initI18n(brand.name, brand.nameI18n), [locale]: event.target.value },
-                                }
-                              : brand
-                          )
-                        )
-                      }
-                    />
-                  )}
-                </LocaleFieldTabs>
                 <div className="space-y-1.5">
-                  <Label htmlFor="brand-flag">Country flag</Label>
+                  <Label htmlFor="brand-flag">{t("countryFlag")}</Label>
                   <p className="text-xs text-muted-foreground">
-                    Options from the Global Presence map. Leave empty to hide the flag in the shop.
+                    {t("countryFlagHint")}
                   </p>
                   <select
                     id="brand-flag"
@@ -917,7 +915,7 @@ export default function MarketplaceFiltersPage() {
                     }}
                     className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-sm"
                   >
-                    <option value="">No flag</option>
+                    <option value="">{t("noFlag")}</option>
                     {mapFlagOptions.map((option) => (
                       <option key={option.code} value={option.code}>
                         {option.label}
@@ -932,16 +930,18 @@ export default function MarketplaceFiltersPage() {
                           className="block h-full w-full"
                         />
                       </span>
-                      Shop preview
+                      {t("shopPreview")}
                     </div>
                   ) : null}
                 </div>
-                <p className="text-xs text-muted-foreground">Used by {brandUsage[selectedBrand.id] ?? 0} product(s)</p>
+                <p className="text-xs text-muted-foreground">
+                  {t("usedByProducts", { count: brandUsage[selectedBrand.id] ?? 0 })}
+                </p>
               </div>
             )}
           </div>
           <SheetFooter>
-            <Button variant="outline" onClick={() => setBrandSheetOpen(false)}>Close</Button>
+            <Button variant="outline" onClick={() => setBrandSheetOpen(false)}>{tCommon("close")}</Button>
           </SheetFooter>
         </SheetContent>
       </Sheet>
@@ -949,8 +949,8 @@ export default function MarketplaceFiltersPage() {
       <Sheet open={optionSheetOpen} onOpenChange={setOptionSheetOpen}>
         <SheetContent side="right" className="w-full sm:max-w-lg">
           <SheetHeader>
-            <SheetTitle>Filter Option Details</SheetTitle>
-            <SheetDescription>Manage options from search controls downward in this panel.</SheetDescription>
+            <SheetTitle>{t("optionDetails")}</SheetTitle>
+            <SheetDescription>{t("optionDetailsDesc")}</SheetDescription>
           </SheetHeader>
           <div className="space-y-4 overflow-y-auto px-4">
             <div className="relative">
@@ -959,16 +959,16 @@ export default function MarketplaceFiltersPage() {
                 className="pl-8"
                 value={searchOption}
                 onChange={(event) => setSearchOption(event.target.value)}
-                placeholder="Search option..."
+                placeholder={t("searchOption")}
               />
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" variant={optionUsageFilter === "all" ? "secondary" : "outline"} onClick={() => setOptionUsageFilter("all")}>All</Button>
-              <Button size="sm" variant={optionUsageFilter === "used" ? "secondary" : "outline"} onClick={() => setOptionUsageFilter("used")}>Used</Button>
-              <Button size="sm" variant={optionUsageFilter === "unused" ? "secondary" : "outline"} onClick={() => setOptionUsageFilter("unused")}>Unused</Button>
-              <Button size="sm" variant="outline" onClick={() => setOptionSort("name-asc")}>A-Z</Button>
-              <Button size="sm" variant="outline" onClick={() => setOptionSort("name-desc")}>Z-A</Button>
-              <Button size="sm" variant="outline" onClick={() => setOptionSort("usage-desc")}>Most used</Button>
+              <Button size="sm" variant={optionUsageFilter === "all" ? "secondary" : "outline"} onClick={() => setOptionUsageFilter("all")}>{tCommon("all")}</Button>
+              <Button size="sm" variant={optionUsageFilter === "used" ? "secondary" : "outline"} onClick={() => setOptionUsageFilter("used")}>{tCommon("used")}</Button>
+              <Button size="sm" variant={optionUsageFilter === "unused" ? "secondary" : "outline"} onClick={() => setOptionUsageFilter("unused")}>{tCommon("unused")}</Button>
+              <Button size="sm" variant="outline" onClick={() => setOptionSort("name-asc")}>{tCommon("sortAZ")}</Button>
+              <Button size="sm" variant="outline" onClick={() => setOptionSort("name-desc")}>{tCommon("sortZA")}</Button>
+              <Button size="sm" variant="outline" onClick={() => setOptionSort("usage-desc")}>{tCommon("mostUsed")}</Button>
             </div>
 
             <div className="space-y-2">
@@ -976,17 +976,22 @@ export default function MarketplaceFiltersPage() {
                 <div key={option.id} className={`rounded-lg border px-3 py-2 ${selectedOptionId === option.id ? "border-oboya-green/60 bg-oboya-green/5" : "border-border/60"}`}>
                   <div className="flex items-center justify-between gap-2">
                     <button type="button" className="text-left text-sm hover:underline" onClick={() => setSelectedOptionId(option.id)}>
-                      {pickLocalized(option.name, option.nameI18n, editingLocale)}
+                      {pickLocalized(option.name, option.nameI18n, locale)}
                     </button>
                     <Button
                       size="sm"
                       variant="destructive"
-                      aria-label={`Remover opção ${pickLocalized(option.name, option.nameI18n, editingLocale)}`}
+                      aria-label={t("removeOption", {
+                        name: pickLocalized(option.name, option.nameI18n, locale),
+                      })}
                       onClick={() => {
                         const used = optionUsage[selectedGroup][option.id] ?? 0;
                         openDeleteConfirm({
-                          title: "Delete option",
-                          description: used > 0 ? `This option is used by ${used} product(s).` : "This option will be removed.",
+                          title: t("deleteOption"),
+                          description:
+                            used > 0
+                              ? t("deleteOptionUsed", { count: used })
+                              : t("deleteOptionConfirm"),
                           blocked: used > 0,
                           onConfirm: () => {
                             setFilterOptions((prev) => ({
@@ -1004,58 +1009,48 @@ export default function MarketplaceFiltersPage() {
                   </div>
 
                   {selectedOptionId === option.id && (
-                    <div className="mt-3 space-y-2">
-                      <Label>English (fallback)</Label>
-                      <Input
-                        value={option.name}
-                        onChange={(event) =>
-                          setFilterOptions((prev) => ({
-                            ...prev,
-                            [selectedGroup]: prev[selectedGroup].map((item) =>
-                              item.id === option.id
-                                ? {
-                                    ...item,
-                                    name: event.target.value,
-                                    nameI18n: { ...initI18n(event.target.value, item.nameI18n), en: event.target.value },
-                                  }
-                                : item
-                            ),
-                          }))
-                        }
-                      />
-                      <LocaleFieldTabs value={editingLocale} onChange={setEditingLocale}>
-                        {(locale) => (
-                          <Input
-                            value={option.nameI18n?.[locale] ?? ""}
-                            placeholder={locale === "en" ? "Required" : "Optional (falls back to English)"}
-                            onChange={(event) =>
-                              setFilterOptions((prev) => ({
-                                ...prev,
-                                [selectedGroup]: prev[selectedGroup].map((item) =>
-                                  item.id === option.id
-                                    ? {
-                                        ...item,
-                                        nameI18n: { ...initI18n(item.name, item.nameI18n), [locale]: event.target.value },
-                                      }
-                                    : item
-                                ),
-                              }))
-                            }
-                          />
-                        )}
-                      </LocaleFieldTabs>
-                    </div>
+                    <ShopLocalizedNameFields
+                      className="mt-3"
+                      name={option.name}
+                      nameI18n={option.nameI18n}
+                      onNameChange={(nextName) =>
+                        setFilterOptions((prev) => ({
+                          ...prev,
+                          [selectedGroup]: prev[selectedGroup].map((item) =>
+                            item.id === option.id
+                              ? { ...item, name: nextName }
+                              : item
+                          ),
+                        }))
+                      }
+                      onI18nChange={(loc, value) =>
+                        setFilterOptions((prev) => ({
+                          ...prev,
+                          [selectedGroup]: prev[selectedGroup].map((item) =>
+                            item.id === option.id
+                              ? {
+                                  ...item,
+                                  nameI18n: {
+                                    ...initI18n(item.name, item.nameI18n),
+                                    [loc]: value,
+                                  },
+                                }
+                              : item
+                          ),
+                        }))
+                      }
+                    />
                   )}
                 </div>
               ))}
             </div>
 
             <Button variant="outline" size="sm" onClick={() => addOption(selectedGroup)}>
-              <Plus className="mr-1 size-3.5" /> Add option
+              <Plus className="mr-1 size-3.5" /> {t("addOption")}
             </Button>
           </div>
           <SheetFooter>
-            <Button variant="outline" onClick={() => setOptionSheetOpen(false)}>Close</Button>
+            <Button variant="outline" onClick={() => setOptionSheetOpen(false)}>{tCommon("close")}</Button>
           </SheetFooter>
         </SheetContent>
       </Sheet>
@@ -1064,12 +1059,12 @@ export default function MarketplaceFiltersPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editorLabel}</DialogTitle>
-            <DialogDescription>Provide a unique and descriptive name.</DialogDescription>
+            <DialogDescription>{t("editorHint")}</DialogDescription>
           </DialogHeader>
           <Input value={editorValue} onChange={(event) => setEditorValue(event.target.value)} />
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditorOpen(false)}>Cancel</Button>
-            <Button onClick={() => editorAction?.(editorValue)}>Save</Button>
+            <Button variant="outline" onClick={() => setEditorOpen(false)}>{tCommon("cancel")}</Button>
+            <Button onClick={() => editorAction?.(editorValue)}>{tCommon("save")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1081,9 +1076,9 @@ export default function MarketplaceFiltersPage() {
             <DialogDescription>{confirmDescription}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConfirmOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setConfirmOpen(false)}>{tCommon("cancel")}</Button>
             <Button variant={confirmBlocked ? "outline" : "destructive"} disabled={confirmBlocked} onClick={() => confirmAction?.()}>
-              {confirmBlocked ? "Cannot delete" : "Confirm delete"}
+              {confirmBlocked ? tCommon("cannotDelete") : tCommon("confirmDelete")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1091,4 +1086,3 @@ export default function MarketplaceFiltersPage() {
     </Can>
   );
 }
-

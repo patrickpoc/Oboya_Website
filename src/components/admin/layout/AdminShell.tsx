@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { AdminProvider, useAdmin } from "@/contexts/AdminContext";
 import { AdminSidebar } from "@/components/admin/layout/AdminSidebar";
 import { AdminTopbar } from "@/components/admin/layout/AdminTopbar";
@@ -8,6 +9,7 @@ import { AdminPageTransition } from "@/components/admin/layout/AdminPageTransiti
 
 function AdminShellFrame({ children }: { children: React.ReactNode }) {
   const { loading } = useAdmin();
+  const t = useTranslations("admin.common");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (loading) {
@@ -18,7 +20,7 @@ function AdminShellFrame({ children }: { children: React.ReactNode }) {
         aria-live="polite"
       >
         <div className="size-8 animate-spin rounded-full border-2 border-oboya-green/25 border-t-oboya-green" />
-        <p className="text-sm text-muted-foreground">Loading your account…</p>
+        <p className="text-sm text-muted-foreground">{t("loadingAccount")}</p>
       </div>
     );
   }
@@ -29,7 +31,7 @@ function AdminShellFrame({ children }: { children: React.ReactNode }) {
         <button
           type="button"
           className="fixed inset-0 z-40 bg-black/40 lg:hidden"
-          aria-label="Close navigation"
+          aria-label={t("closeNav")}
           onClick={() => setSidebarOpen(false)}
         />
       )}

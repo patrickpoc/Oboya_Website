@@ -1,4 +1,5 @@
-import { readAboutPageSettings } from "@/lib/cms/readers";
+import { getTranslations } from "next-intl/server";
+import { readAboutPageSettings, readHomepageSettings } from "@/lib/cms/readers";
 import { pickLocalized } from "@/lib/cms/utils";
 import { AboutHero } from "@/components/about/AboutHero";
 import { AboutPageBackdrop } from "@/components/about/AboutPageBackdrop";
@@ -10,6 +11,10 @@ import { AboutMission } from "@/components/about/AboutMission";
 import { AboutVision } from "@/components/about/AboutVision";
 import { AboutValues } from "@/components/about/AboutValues";
 import { AboutHonors } from "@/components/about/AboutHonors";
+import { GlobalPresence } from "@/components/sections/GlobalPresence";
+import type { Locale } from "@/i18n/routing";
+import { resolveMapLocationsForLocale } from "@/lib/map-locations";
+import { readMapLocations } from "@/lib/map-locations.server";
 
 interface AboutPageContentProps {
   locale: string;
@@ -18,7 +23,12 @@ interface AboutPageContentProps {
 export async function AboutPageContent({
   locale,
 }: AboutPageContentProps) {
-  const about = await readAboutPageSettings();
+  const [about, mapData, homepage, tPresence] = await Promise.all([
+    readAboutPageSettings(),
+    readMapLocations(),
+    readHomepageSettings(),
+    getTranslations({ locale, namespace: "globalPresence" }),
+  ]);
   const showHero =
     about.sections.hero.enabled ||
     about.sections.institutionalImage.enabled;
@@ -28,12 +38,22 @@ export async function AboutPageContent({
   const imageAlt = pickLocalized(about.institutionalImage.alt, locale);
   const showTimeline = about.sections.timeline.enabled;
   const overBackdrop = showHero;
+  const mapLocations = resolveMapLocationsForLocale(
+    mapData.locations,
+    locale as Locale
+  );
 
   const afterBackdrop = (
     <>
       {about.sections.impact.enabled && (
         <AboutImpact data={about.impact} locale={locale} />
       )}
+      <GlobalPresence
+        locations={mapLocations}
+        connections={mapData.connections}
+        mapAlt={tPresence("mapAlt")}
+        title={pickLocalized(homepage.globalPresence.title, locale)}
+      />
       {about.sections.callout.enabled && (
         <AboutCallout
           data={about.callout}

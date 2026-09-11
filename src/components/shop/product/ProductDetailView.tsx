@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { BrandLabel } from "@/components/shop/BrandLabel";
-import { ColorSwatchGroup } from "@/components/shop/ColorSwatchGroup";
+import { ProductColorThumbnailPicker } from "@/components/shop/product/ProductColorThumbnailPicker";
 import { ProductDescriptionContent } from "@/components/shop/product/ProductDescriptionContent";
 import { ProductGallery } from "@/components/shop/drawers/ProductGallery";
 import { SpecificationTable } from "@/components/shop/drawers/SpecificationTable";
@@ -18,7 +18,6 @@ import {
   getActiveVariant,
   getDisplayColorVariants,
   getGalleryImagesForVariant,
-  getVariantDisplayName,
   hasColorVariants,
   resolveVariantPrice,
   resolveVariantSku,
@@ -144,27 +143,14 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
           ) : null}
 
           {hasColorVariants(product) ? (
-            <div className="mt-5">
-              <p className="text-sm font-medium text-oboya-blue-dark">
-                {t("colorLabel")}
-              </p>
-              <ColorSwatchGroup
-                className="mt-2"
-                variants={variants}
-                selectedId={activeVariant?.id ?? DEFAULT_COLOR_VARIANT_ID}
-                onSelect={setSelectedVariantId}
-                currency={currency}
-                size="md"
-              />
-              {activeVariant ? (
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {t("selectedColor")}:{" "}
-                  <span className="font-medium text-oboya-blue-dark">
-                    {getVariantDisplayName(activeVariant, locale)}
-                  </span>
-                </p>
-              ) : null}
-            </div>
+            <ProductColorThumbnailPicker
+              className="mt-5"
+              product={product}
+              variants={variants}
+              selectedId={activeVariant?.id ?? DEFAULT_COLOR_VARIANT_ID}
+              onSelect={setSelectedVariantId}
+              label={t("colorLabel")}
+            />
           ) : null}
 
           <p className="mt-4 text-sm font-medium text-oboya-green">

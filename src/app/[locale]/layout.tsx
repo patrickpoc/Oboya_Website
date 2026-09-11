@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { Analytics } from "@vercel/analytics/next";
 import { fontVariables, notoSansSC } from "@/lib/fonts";
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,13 @@ export function generateStaticParams() {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://oboya.cc"),
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.png", type: "image/png", sizes: "48x48" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export const viewport: Viewport = {
@@ -57,6 +65,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <AppProviders>{children}</AppProviders>
         </NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   );

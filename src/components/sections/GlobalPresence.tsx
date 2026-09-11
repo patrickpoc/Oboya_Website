@@ -24,7 +24,7 @@ export function GlobalPresence({
   const heading = title ?? t("title");
 
   return (
-    <section id="global-presence" className="bg-white py-[var(--section-y)]">
+    <section id="global-presence" className="border-t border-oboya-green/35 bg-white py-[var(--section-y)]">
       <Container>
         <motion.div
           initial="hidden"
