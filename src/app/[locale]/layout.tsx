@@ -5,14 +5,17 @@ import { notFound } from "next/navigation";
 import { Analytics } from "@vercel/analytics/next";
 import { fontVariables, notoSansSC } from "@/lib/fonts";
 import { routing } from "@/i18n/routing";
-import { SITE_REVALIDATE_SECONDS } from "@/lib/cms/revalidate-site";
 import { siteConfig } from "@/constants/site";
 import { cn } from "@/lib/utils";
 import { AppProviders } from "@/components/providers/AppProviders";
 import "../globals.css";
 
-/** Safety ISR fallback; CMS writes still bust cache via revalidatePath. */
-export const revalidate = SITE_REVALIDATE_SECONDS;
+/**
+ * Safety ISR fallback (seconds); CMS writes still bust cache via revalidatePath.
+ * Must be a literal — Next cannot statically analyze imported segment configs.
+ * Keep in sync with SITE_REVALIDATE_SECONDS in src/lib/cms/revalidate-site.ts.
+ */
+export const revalidate = 3600;
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
