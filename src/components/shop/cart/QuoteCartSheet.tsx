@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useShop } from "@/contexts/ShopContext";
 import { useOverlayA11y } from "@/hooks/use-overlay-a11y";
@@ -30,6 +30,20 @@ export function QuoteCartFab() {
   );
 }
 
+function useIsLgUp() {
+  const [isLgUp, setIsLgUp] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsLgUp(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  return isLgUp;
+}
+
 export function QuoteCartSheet() {
   const t = useTranslations("shop");
   const {
@@ -45,9 +59,13 @@ export function QuoteCartSheet() {
   } = useShop();
   const panelRef = useRef<HTMLDivElement>(null);
   const handleClose = useCallback(() => setCartOpen(false), [setCartOpen]);
+  const isLgUp = useIsLgUp();
+  // Desktop uses the floating QuoteCart panel (`lg:flex`); only lock scroll for the mobile sheet.
+  // Wait until breakpoint is known so desktop never inherits the mobile scroll lock.
+  const sheetActive = isCartOpen && isLgUp === false;
 
   useOverlayA11y({
-    open: isCartOpen,
+    open: sheetActive,
     onClose: handleClose,
     containerRef: panelRef,
     lockScroll: true,
@@ -58,7 +76,7 @@ export function QuoteCartSheet() {
 
   return (
     <AnimatePresence>
-      {isCartOpen && (
+      {sheetActive && (
         <motion.div
           key="quote-cart-sheet"
           initial={{ opacity: 0 }}
