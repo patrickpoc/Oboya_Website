@@ -4,10 +4,19 @@
     "description": "Your one-stop partner for horticulture. Integrated solutions from propagation and planting to packaging and retail display — serving growers worldwide."
   },
   "cookies": {
-    "body": "We use strictly necessary cookies for language and security. Optional first-party analytics (page views, referrer, and country) load only if you accept.",
-    "accept": "Accept analytics",
-    "decline": "Decline",
-    "privacyLink": "Privacy Policy"
+    "title": "Cookie Consent",
+    "body": "We use cookies to give you the best possible online experience. By clicking the <accept>I ACCEPT</accept> button to use our website, you are consenting to our <cookiePolicy>Cookie Policy</cookiePolicy>. <privacyPolicy>Privacy Policy</privacyPolicy>.",
+    "acceptAll": "I ACCEPT",
+    "rejectOptional": "Necessary only",
+    "savePreferences": "Save preferences",
+    "cookiePolicy": "Cookie Policy",
+    "privacyLink": "Privacy Policy",
+    "manage": "Cookie settings",
+    "necessaryTitle": "Necessary",
+    "necessaryBody": "Language, security, and storing your cookie choice. Always on.",
+    "alwaysOn": "Always on",
+    "analyticsTitle": "Analytics",
+    "analyticsBody": "First-party page views, referrer, and country. Off unless you accept."
   },
   "nav": {
     "solutions": "Solutions",
@@ -186,6 +195,8 @@
     "flowers": "Flowers",
     "fruits": "Fruits",
     "privacy": "Privacy Policy",
+    "cookies": "Cookie Policy",
+    "cookieSettings": "Cookie settings",
     "terms": "Terms of Use",
     "rights": "All rights reserved.",
     "linkedin": "LinkedIn",
@@ -284,6 +295,11 @@
       "title": "Privacy Policy",
       "eyebrow": "Legal",
       "description": "How Oboya Horticulture collects, uses, stores, and protects personal data."
+    },
+    "cookiePolicy": {
+      "title": "Cookie Policy",
+      "eyebrow": "Legal",
+      "description": "How Oboya Horticulture uses cookies, how consent is collected, and how you can change your choice."
     },
     "terms": {
       "title": "Terms of Use",

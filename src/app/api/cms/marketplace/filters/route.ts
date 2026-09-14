@@ -9,6 +9,10 @@ import { readProducts } from "@/lib/cms/server/products.server";
 import { getCountryCode } from "@/constants/country-flags";
 import type { ShopBrand, ShopCategory, ShopFilterOptions } from "@/lib/shop/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
+import { noStoreHeaders } from "@/lib/security/http-cache";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 class ValidationError extends Error {}
 
@@ -46,7 +50,7 @@ function countUsageForOption(group: keyof ShopFilterOptions, optionId: string, p
 export async function GET() {
   try {
     const data = await readMarketplaceFilters();
-    return NextResponse.json(data);
+    return NextResponse.json(data, { headers: noStoreHeaders });
   } catch (error) {
     return publicApiError(error, "Failed to load filters");
   }

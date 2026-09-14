@@ -119,3 +119,29 @@ export async function cmsGuard(
   }
   return { user: result.user };
 }
+
+/** Succeeds if any of the module/action pairs is allowed. */
+export async function cmsGuardAny(
+  checks: Array<{ module: CmsModule; action: CmsAction }>
+): Promise<{ user: CmsUser } | { response: NextResponse }> {
+  let lastFail: CmsAuthFail | null = null;
+  for (const check of checks) {
+    const result = await requireCmsAuth(check);
+    if (result.ok) return { user: result.user };
+    lastFail = result;
+    if (result.status === 401 || result.status === 503) {
+      return {
+        response: NextResponse.json(
+          { error: result.error },
+          { status: result.status }
+        ),
+      };
+    }
+  }
+  return {
+    response: NextResponse.json(
+      { error: lastFail?.error ?? "Forbidden" },
+      { status: lastFail?.status ?? 403 }
+    ),
+  };
+}

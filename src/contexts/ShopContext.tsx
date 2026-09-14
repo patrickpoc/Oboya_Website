@@ -256,10 +256,14 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
     void (async () => {
       try {
+        const catalogFetch: RequestInit = {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+        };
         const [productsRes, filtersRes, currenciesRes] = await Promise.all([
-          fetch("/api/cms/products", { cache: "no-store" }),
-          fetch("/api/cms/marketplace/filters", { cache: "no-store" }),
-          fetch("/api/cms/marketplace/currencies", { cache: "no-store" }),
+          fetch("/api/cms/products", catalogFetch),
+          fetch("/api/cms/marketplace/filters", catalogFetch),
+          fetch("/api/cms/marketplace/currencies", catalogFetch),
         ]);
         if (!productsRes.ok) throw new Error("Failed to load products");
 

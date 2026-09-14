@@ -3,7 +3,9 @@ import { Logo } from "@/components/brand/Logo";
 import { Container } from "@/components/ui/container";
 import { getFooterNavigation } from "@/constants/navigation";
 import { Link } from "@/i18n/navigation";
+import NextLink from "next/link";
 import { siteConfig } from "@/constants/site";
+import { CookieSettingsButton } from "@/components/privacy/CookieSettingsButton";
 
 export async function Footer() {
   const t = await getTranslations();
@@ -112,12 +114,18 @@ export async function Footer() {
               </li>
             ))}
             <li>
-              <a
+              <CookieSettingsButton
+                label={t("footer.cookieSettings")}
+                className="inline-flex min-h-11 items-center text-xs text-oboya-green transition-colors hover:text-oboya-blue"
+              />
+            </li>
+            <li>
+              <NextLink
                 href="/admin/login"
                 className="inline-flex min-h-11 items-center text-xs text-oboya-blue-dark/55 transition-colors hover:text-oboya-green"
               >
                 {t("footer.adminLogin")}
-              </a>
+              </NextLink>
             </li>
           </ul>
         </div>

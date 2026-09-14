@@ -20,6 +20,7 @@ export const pageRegistry: Record<string, PageConfig> = {
   faqs: { messageKey: "faqs", template: "faqs" },
   careers: { messageKey: "careers" },
   privacy: { messageKey: "privacy", template: "legal" },
+  cookies: { messageKey: "cookiePolicy", template: "legal" },
   terms: { messageKey: "terms", template: "legal" },
   sustainability: { messageKey: "sustainability" },
 

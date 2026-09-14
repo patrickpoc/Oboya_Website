@@ -9,6 +9,10 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 import { publicApiError } from "@/lib/security/public-error";
 import { toPublicProduct } from "@/lib/cms/server/public-product";
+import { noStoreHeaders } from "@/lib/security/http-cache";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET(request: Request) {
   try {
@@ -17,12 +21,12 @@ export async function GET(request: Request) {
       const auth = await cmsGuard("marketplace", "view");
       if ("response" in auth) return auth.response;
       const products = await readProducts({ includeDeleted: true, asAdmin: true });
-      return NextResponse.json(products);
+      return NextResponse.json(products, { headers: noStoreHeaders });
     }
     const products = (await readProducts({ includeDeleted: false }))
       .filter((product) => product.status === "published" && !product.deletedAt)
       .map(toPublicProduct);
-    return NextResponse.json(products);
+    return NextResponse.json(products, { headers: noStoreHeaders });
   } catch (error) {
     return publicApiError(error, "Failed to load products");
   }

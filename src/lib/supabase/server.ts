@@ -27,8 +27,9 @@ export async function createClient() {
 }
 
 /**
- * Cookie-free anon client for public reads during static generation.
- * Avoids Dynamic server usage from `cookies()` on prerendered routes.
+ * Cookie-free anon client for public reads.
+ * `cache: "no-store"` prevents Next from Data-Caching Supabase REST
+ * (otherwise the shop catalog can stay stale for the parent ISR TTL).
  */
 export function createPublicClient() {
   const { url, anonKey } = getSupabaseEnv();
@@ -38,6 +39,13 @@ export function createPublicClient() {
       persistSession: false,
       autoRefreshToken: false,
       detectSessionInUrl: false,
+    },
+    global: {
+      fetch: (input, init) =>
+        fetch(input, {
+          ...init,
+          cache: "no-store",
+        }),
     },
   });
 }

@@ -27,9 +27,16 @@ export async function readShopCatalog() {
 
 export async function readProducts() {
   await hydrateShopCatalogDurable();
+  const { readProducts: readProductsFromStore } = await import(
+    "@/lib/cms/server/products.server"
+  );
+  const live = (await readProductsFromStore()).filter(
+    (product) => product.status === "published" && !product.deletedAt
+  );
+  if (live.length > 0) return live;
   const cmsProducts = getCmsProducts();
   if (cmsProducts.length > 0) {
-    return cmsProducts.filter((p) => p.status === "published");
+    return cmsProducts.filter((p) => p.status === "published" && !p.deletedAt);
   }
   return getShopCatalog().products;
 }

@@ -77,8 +77,14 @@ export function revalidateNewsPages() {
 }
 
 export function revalidateShopPages(productId?: string) {
+  revalidateSiteLayout();
+  revalidatePath("/api/cms/products");
+  revalidatePath("/api/cms/marketplace/filters");
+  revalidatePath("/api/cms/marketplace/currencies");
   forEachLocale((locale) => {
     revalidatePath(`/${locale}/shop`);
+    revalidatePath(`/${locale}/shop/cart`);
+    revalidatePath(`/${locale}/shop/checkout`);
     if (productId) {
       revalidatePath(`/${locale}/shop/products/${productId}`);
     }

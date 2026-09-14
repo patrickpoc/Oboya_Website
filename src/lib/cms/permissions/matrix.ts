@@ -70,7 +70,7 @@ const MATRIX: Record<CmsRole, Partial<Record<CmsModule, PermissionLevel>>> = {
     case_studies: VIEW,
     blog: VIEW,
     careers: VIEW,
-    media: VIEW,
+    media: EDIT,
     forms: "none",
     users: "none",
     settings: "none",

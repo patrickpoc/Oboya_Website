@@ -8,6 +8,38 @@ export type UploadMediaOptions = {
   folder?: string;
 };
 
+function messageFromApiError(error: string | undefined, fallback: string) {
+  if (!error) return fallback;
+  if (error === "Forbidden") {
+    return "You don’t have permission to upload this image.";
+  }
+  return error;
+}
+
+function messageFromStoragePut(detail: string) {
+  const trimmed = detail.trim();
+  if (!trimmed) {
+    return "Storage upload failed. Confirm the cms-media bucket exists in Supabase.";
+  }
+  try {
+    const parsed = JSON.parse(trimmed) as {
+      error?: string;
+      message?: string;
+      statusCode?: string;
+    };
+    const text = parsed.message || parsed.error;
+    if (text === "Forbidden" || parsed.statusCode === "403") {
+      return "Storage denied the upload. Confirm cms-media policies allow staff uploads.";
+    }
+    if (text) return text;
+  } catch {
+    if (/^forbidden$/i.test(trimmed)) {
+      return "Storage denied the upload. Confirm cms-media policies allow staff uploads.";
+    }
+  }
+  return trimmed.length > 180 ? trimmed.slice(0, 180) : trimmed;
+}
+
 /**
  * Upload an image/video for CMS use.
  * Uses signed direct-to-Supabase when configured (required on Vercel);
@@ -55,7 +87,7 @@ export async function uploadMediaFile(
       originalName?: string;
     };
     if (!signRes.ok || !signed.signedUrl || !signed.id || !signed.publicUrl) {
-      throw new Error(signed.error ?? "Could not start upload");
+      throw new Error(messageFromApiError(signed.error, "Could not start upload"));
     }
 
     const putRes = await fetch(signed.signedUrl, {
@@ -67,10 +99,7 @@ export async function uploadMediaFile(
     });
     if (!putRes.ok) {
       const detail = await putRes.text().catch(() => "");
-      throw new Error(
-        detail ||
-          "Storage upload failed. Confirm the cms-media bucket exists in Supabase."
-      );
+      throw new Error(messageFromStoragePut(detail));
     }
 
     const completeRes = await fetch("/api/cms/media", {
@@ -92,7 +121,7 @@ export async function uploadMediaFile(
       asset?: MediaAsset;
     };
     if (!completeRes.ok || !completed.asset) {
-      throw new Error(completed.error ?? "Upload finalize failed");
+      throw new Error(messageFromApiError(completed.error, "Upload finalize failed"));
     }
     return completed.asset;
   }
@@ -107,7 +136,7 @@ export async function uploadMediaFile(
     asset?: MediaAsset;
   };
   if (!res.ok || !data.asset) {
-    throw new Error(data.error ?? "Upload failed");
+    throw new Error(messageFromApiError(data.error, "Upload failed"));
   }
   return data.asset;
 }

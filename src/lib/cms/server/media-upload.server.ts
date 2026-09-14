@@ -10,6 +10,15 @@ import { FOLDER_WEBSITE_FILES } from "@/lib/cms/media-folder-ids";
 import { assertLocalDiskWritable } from "@/lib/cms/server/local-fs.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
+import {
+  createServiceClient,
+  isServiceRoleConfigured,
+} from "@/lib/supabase/admin";
+
+async function mediaSupabase() {
+  if (isServiceRoleConfigured()) return createServiceClient();
+  return createClient();
+}
 
 export const MEDIA_BUCKET = "cms-media";
 
@@ -121,7 +130,7 @@ async function reencodeStoredImage(url: string, mime: string) {
   }
   const original = Buffer.from(await response.arrayBuffer());
   const stripped = await stripImageMetadata(original, mime);
-  const supabase = await createClient();
+  const supabase = await mediaSupabase();
   const { error: uploadError } = await supabase.storage
     .from(MEDIA_BUCKET)
     .upload(objectPath, stripped.buffer, {
@@ -155,7 +164,7 @@ export async function createSignedMediaUpload(input: {
     throw new Error("Supabase is not configured for direct uploads.");
   }
 
-  const supabase = await createClient();
+  const supabase = await mediaSupabase();
   const { id, filename, objectPath } = buildObjectFilename(mime);
 
   const { data, error } = await supabase.storage
@@ -217,7 +226,7 @@ export async function registerMediaAsset(input: {
   };
 
   if (isSupabaseConfigured()) {
-    const supabase = await createClient();
+    const supabase = await mediaSupabase();
     const { error } = await supabase.from("cms_media").upsert({
       id: asset.id,
       name: asset.name,
@@ -289,7 +298,7 @@ export async function storeMediaViaSupabaseServer(input: {
     );
   }
 
-  const supabase = await createClient();
+  const supabase = await mediaSupabase();
   const { id, filename, objectPath } = buildObjectFilename(input.mime);
   const original = Buffer.from(await input.file.arrayBuffer());
   const stripped = await stripImageMetadata(original, input.mime);
@@ -343,7 +352,7 @@ export async function removeMediaAsset(input: {
   const removed = deleteMediaAsset(input.id);
 
   if (isSupabaseConfigured()) {
-    const supabase = await createClient();
+    const supabase = await mediaSupabase();
     const { error: dbError } = await supabase
       .from("cms_media")
       .delete()

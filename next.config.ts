@@ -59,6 +59,26 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: "/:locale/shop",
+        headers: [
+          ...securityHeaders,
+          {
+            key: "Cache-Control",
+            value: "private, no-store, max-age=0, must-revalidate",
+          },
+        ],
+      },
+      {
+        source: "/:locale/shop/:path*",
+        headers: [
+          ...securityHeaders,
+          {
+            key: "Cache-Control",
+            value: "private, no-store, max-age=0, must-revalidate",
+          },
+        ],
+      },
+      {
         source: "/((?!_next/static|_next/image|api/|admin/|.*\\..*).*)",
         headers: [
           ...securityHeaders,

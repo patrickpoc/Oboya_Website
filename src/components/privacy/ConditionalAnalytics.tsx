@@ -3,18 +3,19 @@
 import { useEffect, useState } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import {
-  ANALYTICS_CONSENT_EVENT,
-  readAnalyticsConsent,
-} from "@/lib/privacy/analytics-consent";
+  COOKIE_CONSENT_EVENT,
+  hasAnalyticsConsent,
+  readCookieConsent,
+} from "@/lib/privacy/cookie-consent";
 
 export function ConditionalAnalytics() {
   const [allowed, setAllowed] = useState(false);
 
   useEffect(() => {
-    const sync = () => setAllowed(readAnalyticsConsent() === "accepted");
+    const sync = () => setAllowed(hasAnalyticsConsent(readCookieConsent()));
     sync();
-    window.addEventListener(ANALYTICS_CONSENT_EVENT, sync);
-    return () => window.removeEventListener(ANALYTICS_CONSENT_EVENT, sync);
+    window.addEventListener(COOKIE_CONSENT_EVENT, sync);
+    return () => window.removeEventListener(COOKIE_CONSENT_EVENT, sync);
   }, []);
 
   if (!allowed) return null;

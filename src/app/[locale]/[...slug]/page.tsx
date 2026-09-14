@@ -8,6 +8,7 @@ import { FaqsPageContent } from "@/components/faqs/FaqsPageContent";
 import { WorkWithUsPageContent } from "@/components/work-with-us/WorkWithUsPageContent";
 import { LegalPageContent } from "@/components/legal/LegalPageContent";
 import { PrivacyPageContent } from "@/components/legal/PrivacyPageContent";
+import { CookiePageContent } from "@/components/legal/CookiePageContent";
 import { InnerPageHero } from "@/components/sections/InnerPageHero";
 import { LoremContent } from "@/components/sections/LoremContent";
 import { PageListing } from "@/components/sections/PageListing";
@@ -90,7 +91,9 @@ export default async function InnerPage({ params }: PageProps) {
           : config.template === "legal"
             ? pageSlug === "privacy"
               ? t("privacy.description")
-              : t("terms.description")
+              : pageSlug === "cookies"
+                ? t("cookiePolicy.description")
+                : t("terms.description")
             : tCommon("loremShort");
 
   if (config.template === "about") {
@@ -122,6 +125,8 @@ export default async function InnerPage({ params }: PageProps) {
       <SiteLayout>
         {pageSlug === "privacy" ? (
           <PrivacyPageContent locale={locale} />
+        ) : pageSlug === "cookies" ? (
+          <CookiePageContent locale={locale} />
         ) : (
           <LegalPageContent />
         )}

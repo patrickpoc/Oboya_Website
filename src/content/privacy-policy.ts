@@ -414,15 +414,15 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
     blocks: [
       {
         type: "p",
-        text: "Strictly necessary cookies may be used for language preference and security. They do not require consent.",
+        text: "Strictly necessary cookies may be used for language preference, security, and storing your cookie choice. They do not require consent.",
       },
       {
         type: "p",
-        text: "Optional first-party Vercel Analytics is loaded only after you accept the cookie banner. Analytics may process page path, referrer, and country inferred from IP address. Google Analytics and Google Tag Manager are not enabled.",
+        text: "Optional first-party Vercel Analytics is loaded only after you accept analytics cookies in the cookie notice. Analytics may process page path, referrer, and country inferred from IP address. Google Analytics and Google Tag Manager are not enabled.",
       },
       {
         type: "p",
-        text: "You can change your choice later by clearing site cookies. Advertising cookies, social pixels, and cross-site tracking are not used at the time this policy is published.",
+        text: "Details of each cookie, how we collect consent, and how to change your choice are in our Cookie Policy (https://www.oboya-horticulture.com/en/cookies). You can also use Cookie settings in the website footer.",
       },
     ],
   },

@@ -19,6 +19,10 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { cmsGuard, requireCmsAuth } from "@/lib/cms/server/require-cms-auth";
 import { publicApiError } from "@/lib/security/public-error";
 import { toPublicProduct } from "@/lib/cms/server/public-product";
+import { noStoreHeaders } from "@/lib/security/http-cache";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET(
   _request: Request,
@@ -36,7 +40,9 @@ export async function GET(
     ) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
-    return NextResponse.json(asAdmin ? product : toPublicProduct(product));
+    return NextResponse.json(asAdmin ? product : toPublicProduct(product), {
+      headers: noStoreHeaders,
+    });
   } catch (error) {
     return publicApiError(error, "Failed to load product");
   }

@@ -123,15 +123,15 @@ export const PRIVACY_SECTIONS_PT: LegalSection[] = [
     blocks: [
       {
         type: "p",
-        text: "Cookies estritamente necessários podem ser usados para idioma e segurança. Não exigem consentimento.",
+        text: "Cookies estritamente necessários podem ser usados para idioma, segurança e para guardar a sua escolha de cookies. Não exigem consentimento.",
       },
       {
         type: "p",
-        text: "O Vercel Analytics de primeira parte é carregado somente após o aceite no banner. Pode processar caminho da página, referenciador e país inferido do IP. Google Analytics e Google Tag Manager não estão ativados.",
+        text: "O Vercel Analytics de primeira parte é carregado somente após o aceite da categoria Analytics no aviso de cookies. Pode processar caminho da página, referenciador e país inferido do IP. Google Analytics e Google Tag Manager não estão ativados.",
       },
       {
         type: "p",
-        text: "Você pode alterar a escolha depois limpando os cookies do site. Não utilizamos cookies de publicidade, pixels sociais nem rastreamento entre sites.",
+        text: "O detalhamento de cada cookie, a coleta de consentimento e como alterar a escolha estão na Política de Cookies (https://www.oboya-horticulture.com/pt-BR/cookies). Você também pode usar “Configurações de cookies” no rodapé.",
       },
     ],
   },

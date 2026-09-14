@@ -6,13 +6,17 @@ import {
 } from "@/lib/cms/server/marketplace-config.server";
 import { readProducts } from "@/lib/cms/server/products.server";
 import type { ShopCountry } from "@/lib/shop/types";
+import { noStoreHeaders } from "@/lib/security/http-cache";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 class ValidationError extends Error {}
 
 export async function GET() {
   try {
     const data = await readMarketplaceCurrencies();
-    return NextResponse.json(data);
+    return NextResponse.json(data, { headers: noStoreHeaders });
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to load currencies" },

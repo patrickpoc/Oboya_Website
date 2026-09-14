@@ -20,7 +20,7 @@ import {
   moveMediaFolder,
   renameMediaFolder,
 } from "@/lib/cms/repositories/media-repository";
-import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
+import { cmsGuard, cmsGuardAny } from "@/lib/cms/server/require-cms-auth";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 export async function GET() {
@@ -71,7 +71,10 @@ export async function DELETE(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const auth = await cmsGuard("media", "create");
+  const auth = await cmsGuardAny([
+    { module: "media", action: "create" },
+    { module: "marketplace", action: "edit" },
+  ]);
   if ("response" in auth) return auth.response;
 
   const contentType = request.headers.get("content-type") || "";

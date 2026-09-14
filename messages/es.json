@@ -4,10 +4,19 @@
     "description": "Su socio integral en horticultura. Soluciones integradas desde la propagación y el plantío hasta el empaquetado y la exposición en retail — al servicio de productores en todo el mundo."
   },
   "cookies": {
-    "body": "Usamos cookies estrictamente necesarias para idioma y seguridad. El análisis de primera parte (páginas, referente y país) solo se carga si usted acepta.",
-    "accept": "Aceptar analítica",
-    "decline": "Rechazar",
-    "privacyLink": "Política de Privacidad"
+    "title": "Consentimiento de cookies",
+    "body": "Utilizamos cookies para ofrecerle la mejor experiencia online posible. Al hacer clic en el botón <accept>ACEPTO</accept> para usar nuestro sitio, usted consiente nuestra <cookiePolicy>Política de cookies</cookiePolicy>. <privacyPolicy>Política de Privacidad</privacyPolicy>.",
+    "acceptAll": "ACEPTO",
+    "rejectOptional": "Solo necesarias",
+    "savePreferences": "Guardar preferencias",
+    "cookiePolicy": "Política de cookies",
+    "privacyLink": "Política de Privacidad",
+    "manage": "Configuración de cookies",
+    "necessaryTitle": "Necesarias",
+    "necessaryBody": "Idioma, seguridad y registro de su elección. Siempre activas.",
+    "alwaysOn": "Siempre activas",
+    "analyticsTitle": "Analítica",
+    "analyticsBody": "Vistas de página, referente y país. Desactivadas hasta que acepte."
   },
   "nav": {
     "solutions": "Soluciones",
@@ -178,6 +187,8 @@
     "flowers": "Flores",
     "fruits": "Frutas",
     "privacy": "Política de Privacidad",
+    "cookies": "Política de cookies",
+    "cookieSettings": "Configuración de cookies",
     "terms": "Términos de Uso",
     "rights": "Todos los derechos reservados.",
     "linkedin": "LinkedIn",
@@ -266,6 +277,11 @@
       "title": "Política de Privacidad",
       "eyebrow": "Legal",
       "description": "Cómo Oboya Horticulture recopila, usa, almacena y protege los datos personales."
+    },
+    "cookiePolicy": {
+      "title": "Política de cookies",
+      "eyebrow": "Legal",
+      "description": "Cómo Oboya Horticulture usa cookies, cómo se recoge el consentimiento y cómo puede cambiar su elección."
     },
     "terms": {
       "title": "Términos de Uso",
