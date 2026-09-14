@@ -51,5 +51,5 @@ Confirm:
 
 - Privacy contact: `info@oboya.cc` until a dedicated mailbox exists.
 - Inquiry/RFQ rows without a contract are purged after 12 months (cron) or via Admin → Forms → Delete / Anonymize.
-- Cookie notice records consent in `oboya_cookie_consent` (necessary + optional analytics). Vercel Analytics loads only if analytics is accepted. Cookie Policy: `/{locale}/cookies`.
+- Cookie notice records consent in `oboya_cookie_consent` (necessary + optional analytics). Vercel Analytics loads only if analytics is accepted. Details are in the Privacy Policy.
 - Portuguese (`pt-BR`) privacy policy is the LGPD controlling version alongside English.

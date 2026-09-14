@@ -131,7 +131,7 @@ export const PRIVACY_SECTIONS_PT: LegalSection[] = [
       },
       {
         type: "p",
-        text: "O detalhamento de cada cookie, a coleta de consentimento e como alterar a escolha estão na Política de Cookies (https://www.oboya-horticulture.com/pt-BR/cookies). Você também pode usar “Configurações de cookies” no rodapé.",
+        text: "O detalhamento dos cookies, a coleta de consentimento e como alterar a escolha estão nesta Política de Privacidade. Você também pode usar “Configurações de cookies” no rodapé.",
       },
     ],
   },

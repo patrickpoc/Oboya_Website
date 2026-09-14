@@ -40,7 +40,6 @@ export function getFooterNavigation(t: Translator) {
     ],
     legal: [
       { label: t("footer.privacy"), href: "/privacy" },
-      { label: t("footer.cookies"), href: "/cookies" },
       { label: t("footer.terms"), href: "/terms" },
     ],
   };

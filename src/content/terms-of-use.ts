@@ -788,7 +788,7 @@ export const TERMS_SECTIONS: TermsSection[] = [
     blocks: [
       {
         type: "p",
-        text: "These Terms, together with any applicable Privacy Policy, Cookie Policy, Seller Terms, Terms of Sale, quotation, order confirmation, commercial agreement, or other applicable terms, constitute the agreement governing the relevant use of the Platform or transaction.",
+        text: "These Terms, together with any applicable Privacy Policy, Seller Terms, Terms of Sale, quotation, order confirmation, commercial agreement, or other applicable terms, constitute the agreement governing the relevant use of the Platform or transaction.",
       },
       {
         type: "p",

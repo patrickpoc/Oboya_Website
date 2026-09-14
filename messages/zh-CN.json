@@ -5,18 +5,11 @@
   },
   "cookies": {
     "title": "Cookie 同意",
-    "body": "我们使用 Cookie 为您提供尽可能好的在线体验。点击 <accept>我接受</accept> 按钮即表示您同意我们的 <cookiePolicy>Cookie 政策</cookiePolicy>。<privacyPolicy>隐私政策</privacyPolicy>。",
-    "acceptAll": "我接受",
-    "rejectOptional": "仅必要 Cookie",
-    "savePreferences": "保存偏好",
-    "cookiePolicy": "Cookie 政策",
+    "body": "我们使用 Cookie 为您提供尽可能好的在线体验。点击 <accept>接受</accept> 按钮即表示您同意我们的 <privacyPolicy>隐私政策</privacyPolicy>。",
+    "accept": "接受",
+    "decline": "拒绝",
     "privacyLink": "隐私政策",
-    "manage": "Cookie 设置",
-    "necessaryTitle": "必要",
-    "necessaryBody": "语言、安全以及保存您的选择。始终开启。",
-    "alwaysOn": "始终开启",
-    "analyticsTitle": "分析",
-    "analyticsBody": "页面浏览、来源和国家/地区。仅在您同意后开启。"
+    "manage": "Cookie 设置"
   },
   "nav": {
     "solutions": "解决方案",
@@ -187,7 +180,6 @@
     "flowers": "花卉",
     "fruits": "水果",
     "privacy": "隐私政策",
-    "cookies": "Cookie 政策",
     "cookieSettings": "Cookie 设置",
     "terms": "使用条款",
     "rights": "版权所有。",
@@ -277,11 +269,6 @@
       "title": "隐私政策",
       "eyebrow": "法律",
       "description": "Oboya Horticulture 如何收集、使用、存储和保护个人数据。"
-    },
-    "cookiePolicy": {
-      "title": "Cookie 政策",
-      "eyebrow": "法律",
-      "description": "Oboya Horticulture 如何使用 Cookie、如何收集同意以及如何更改您的选择。"
     },
     "terms": {
       "title": "使用条款",

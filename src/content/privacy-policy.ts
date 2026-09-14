@@ -422,7 +422,7 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
       },
       {
         type: "p",
-        text: "Details of each cookie, how we collect consent, and how to change your choice are in our Cookie Policy (https://www.oboya-horticulture.com/en/cookies). You can also use Cookie settings in the website footer.",
+        text: "Details of cookies we use, how we collect consent, and how to change your choice are in this Privacy Policy. You can also use Cookie settings in the website footer.",
       },
     ],
   },
