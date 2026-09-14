@@ -184,7 +184,7 @@ export async function readProducts(options?: {
     const result = await Promise.race([
       query,
       new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Supabase products timeout")), 5000)
+        setTimeout(() => reject(new Error("Supabase products timeout")), 15000)
       ),
     ]);
 
@@ -192,7 +192,7 @@ export async function readProducts(options?: {
     if (error) throw new Error(error.message);
 
     const products = (data ?? []).map((row) => rowToProduct(row as ProductRow));
-    if (products.length === 0) {
+    if (products.length === 0 && options?.asAdmin) {
       const seed = fallback();
       if (seed.length > 0) return seed;
     }
@@ -202,7 +202,11 @@ export async function readProducts(options?: {
       "cms_products read:",
       error instanceof Error ? error.message : error
     );
-    return fallback();
+    const seed = fallback();
+    if (options?.asAdmin) return seed;
+    return seed.filter(
+      (product) => product.status === "published" && !product.deletedAt
+    );
   }
 }
 

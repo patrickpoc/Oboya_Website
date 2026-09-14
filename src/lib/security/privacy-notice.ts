@@ -1,0 +1,2 @@
+export const PRIVACY_NOTICE_VERSION = "2026-09-14";
+export const FORM_RETENTION_DAYS = 365;

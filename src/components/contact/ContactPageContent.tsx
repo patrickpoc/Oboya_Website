@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/constants/site";
+import { Link } from "@/i18n/navigation";
 import {
   WORLD_COUNTRIES,
   getWorldCountryByCode,
@@ -405,6 +406,8 @@ export function ContactPageContent() {
       countryName: country?.name ?? countryCode,
       subject: subject.trim(),
       message: message.trim(),
+      privacyAccepted: formData.get("privacyAccepted") === "on",
+      marketingOptIn: formData.get("marketingOptIn") === "on",
     };
 
     try {
@@ -622,6 +625,35 @@ export function ContactPageContent() {
                     />
                     <CharCount remaining={MESSAGE_MAX - message.length} />
                   </div>
+
+                  <p className="text-sm leading-relaxed text-oboya-blue-dark/70">
+                    {t("privacyNotice")}{" "}
+                    <Link
+                      href="/privacy"
+                      className="text-oboya-blue-light underline-offset-2 hover:underline"
+                    >
+                      {t("privacyLink")}
+                    </Link>
+                  </p>
+
+                  <label className="flex items-start gap-3 text-sm text-oboya-blue-dark/80">
+                    <input
+                      type="checkbox"
+                      name="privacyAccepted"
+                      required
+                      className="mt-1 size-4 accent-oboya-blue-dark"
+                    />
+                    <span>{t("privacyAccept")}</span>
+                  </label>
+
+                  <label className="flex items-start gap-3 text-sm text-oboya-blue-dark/80">
+                    <input
+                      type="checkbox"
+                      name="marketingOptIn"
+                      className="mt-1 size-4 accent-oboya-blue-dark"
+                    />
+                    <span>{t("marketingOptIn")}</span>
+                  </label>
 
                   {error && (
                     <p className="text-sm text-oboya-orange" role="alert">

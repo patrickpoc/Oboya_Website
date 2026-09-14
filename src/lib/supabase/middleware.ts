@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { getSupabaseEnv } from "@/lib/supabase/env";
+import { safeAdminNext } from "@/lib/security/admin-next";
 
 function mustChangePassword(user: {
   user_metadata?: Record<string, unknown>;
@@ -12,8 +13,14 @@ function mustChangePassword(user: {
   );
 }
 
-export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+export async function updateSession(
+  request: NextRequest,
+  requestHeaders?: Headers
+) {
+  const nextInit = requestHeaders
+    ? { request: { headers: requestHeaders } }
+    : { request };
+  let supabaseResponse = NextResponse.next(nextInit);
   const { url, anonKey } = getSupabaseEnv();
 
   const supabase = createServerClient(url, anonKey, {
@@ -25,7 +32,7 @@ export async function updateSession(request: NextRequest) {
         cookiesToSet.forEach(({ name, value }) => {
           request.cookies.set(name, value);
         });
-        supabaseResponse = NextResponse.next({ request });
+        supabaseResponse = NextResponse.next(nextInit);
         cookiesToSet.forEach(({ name, value, options }) => {
           supabaseResponse.cookies.set(name, value, options);
         });
@@ -48,7 +55,7 @@ export async function updateSession(request: NextRequest) {
   if (!user && !isLoginPage && !isAuthCallback) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/admin/login";
-    redirectUrl.searchParams.set("next", pathname);
+    redirectUrl.searchParams.set("next", safeAdminNext(pathname));
     return NextResponse.redirect(redirectUrl);
   }
 

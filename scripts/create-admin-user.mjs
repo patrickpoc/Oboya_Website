@@ -4,7 +4,6 @@ import { fileURLToPath } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const DEFAULT_PASSWORD = "Oboya2026";
 
 function loadEnvFile(filename) {
   const filePath = path.join(rootDir, filename);
@@ -32,11 +31,16 @@ loadEnvFile(".env");
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const email = process.env.ADMIN_EMAIL ?? "admin@oboya.cc";
-const password = process.env.ADMIN_PASSWORD ?? DEFAULT_PASSWORD;
+const password = process.env.ADMIN_PASSWORD;
 const name = process.env.ADMIN_NAME ?? "Oboya Admin";
 
 if (!url || !serviceKey) {
   console.error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+  process.exit(1);
+}
+
+if (!password || password.length < 8) {
+  console.error("Set ADMIN_PASSWORD (min 8 characters). Do not use a shared default.");
   process.exit(1);
 }
 
@@ -65,8 +69,10 @@ if (existing) {
       password,
       email_confirm: true,
       user_metadata: {
-        must_change_password: false,
         name,
+      },
+      app_metadata: {
+        must_change_password: false,
       },
     }
   );
@@ -85,8 +91,10 @@ if (existing) {
       password,
       email_confirm: true,
       user_metadata: {
-        must_change_password: false,
         name,
+      },
+      app_metadata: {
+        must_change_password: false,
       },
     });
 

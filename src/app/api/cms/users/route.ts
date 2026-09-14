@@ -2,44 +2,29 @@ import { NextResponse } from "next/server";
 import {
   createCmsUserDurable,
   listCmsUsersDurable,
-  resolveAdminActor,
 } from "@/lib/cms/server/users.server";
+import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 import type { CmsLocale, CmsRole } from "@/lib/cms/types";
 
 export async function GET() {
-  const actor = await resolveAdminActor();
-  if (!actor.ok) {
-    return NextResponse.json(
-      {
-        error: actor.error,
-        debug: actor.debug,
-      },
-      { status: 401 }
-    );
-  }
+  const auth = await cmsGuard("users", "view");
+  if ("response" in auth) return auth.response;
 
   try {
     const users = await listCmsUsersDurable();
     return NextResponse.json({
       ok: true,
       users,
-      serviceRole: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to list users";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Failed to list users:", error);
+    return NextResponse.json({ error: "Failed to list users" }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
-  const actor = await resolveAdminActor();
-  if (!actor.ok) {
-    return NextResponse.json(
-      { error: actor.error, debug: actor.debug },
-      { status: 401 }
-    );
-  }
+  const auth = await cmsGuard("users", "create");
+  if ("response" in auth) return auth.response;
 
   try {
     const body = (await request.json()) as {
@@ -58,7 +43,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await createCmsUserDurable({
+    const { user, temporaryPassword } = await createCmsUserDurable({
       email: body.email.trim().toLowerCase(),
       name: body.name.trim(),
       role: body.role,
@@ -70,11 +55,10 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       user,
-      defaultPassword: "Oboya2026",
+      temporaryPassword,
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to create user";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Failed to create user:", error);
+    return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
   }
 }

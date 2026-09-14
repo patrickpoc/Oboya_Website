@@ -11,22 +11,15 @@ import type {
   CmsFaqItem,
 } from "@/lib/cms/repositories/faqs-repository";
 import { revalidateFaqPages } from "@/lib/cms/revalidate-site";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { requireAdminUser } from "@/lib/map-locations.server";
-
-async function assertAdmin() {
-  if (!isSupabaseConfigured()) return true;
-  return Boolean(await requireAdminUser());
-}
+import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 
 export async function GET() {
   return NextResponse.json(await readFaqsDurable());
 }
 
 export async function PUT(request: Request) {
-  if (!(await assertAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await cmsGuard("website", "edit");
+  if ("response" in auth) return auth.response;
 
   const body = (await request.json()) as {
     type: "category" | "faq";
@@ -49,9 +42,8 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  if (!(await assertAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await cmsGuard("website", "delete");
+  if ("response" in auth) return auth.response;
 
   const { searchParams } = new URL(request.url);
   const type = searchParams.get("type");

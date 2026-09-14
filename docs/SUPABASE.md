@@ -17,12 +17,10 @@
 7. Create/reset the first admin user:
 
 ```bash
-node scripts/create-admin-user.mjs
+ADMIN_EMAIL=admin@oboya.cc ADMIN_PASSWORD='your-strong-password' node scripts/create-admin-user.mjs
 ```
 
-Default credentials: `admin@oboya.cc` / `Oboya2026` (override with `ADMIN_EMAIL` / `ADMIN_PASSWORD`).
-
-New users created in **Users & Permissions** also start with temporary password `Oboya2026` and must change it on first login.
+`ADMIN_PASSWORD` is required (minimum 8 characters). New CMS users created in **Users & Permissions** receive a random one-time password and must change it on first login.
 
 ## 2. Environment variables
 

@@ -3,6 +3,12 @@
     "title": "Oboya Horticulture | Soluções Integradas em Horticultura",
     "description": "Seu parceiro completo em horticultura. Soluções integradas da propagação e plantio à embalagem e exposição no varejo — atendendo produtores em todo o mundo."
   },
+  "cookies": {
+    "body": "Usamos cookies estritamente necessários para idioma e segurança. A analytics de primeira parte (páginas, referenciador e país) só é carregada se você aceitar.",
+    "accept": "Aceitar analytics",
+    "decline": "Recusar",
+    "privacyLink": "Política de Privacidade"
+  },
   "nav": {
     "solutions": "Soluções",
     "products": "Produtos",
@@ -235,7 +241,11 @@
       "support": "Suporte"
     },
     "success": "Obrigado. Nossa equipe entrará em contato em breve.",
-    "error": "Não foi possível enviar sua mensagem. Tente novamente."
+    "error": "Não foi possível enviar sua mensagem. Tente novamente.",
+    "privacyNotice": "Usamos estas informações para responder à sua solicitação (LGPD art. 7º, V/IX — procedimentos preliminares e legítimo interesse).",
+    "privacyLink": "Política de Privacidade",
+    "privacyAccept": "Li o aviso de privacidade e concordo com o tratamento dos meus dados para esta solicitação.",
+    "marketingOptIn": "Quero receber novidades de produtos por e-mail (opcional)."
   },
   "pages": {
     "about": {
@@ -254,7 +264,8 @@
     },
     "privacy": {
       "title": "Política de Privacidade",
-      "eyebrow": "Legal"
+      "eyebrow": "Legal",
+      "description": "Como a Oboya Horticulture coleta, usa, armazena e protege dados pessoais."
     },
     "terms": {
       "title": "Termos de Uso",
@@ -499,6 +510,10 @@
     "phone": "Phone",
     "email": "Email",
     "notes": "Additional notes",
+    "privacyNotice": "Usamos estas informações para preparar uma cotação (LGPD art. 7º, V/IX — procedimentos preliminares e legítimo interesse).",
+    "privacyLink": "Política de Privacidade",
+    "privacyAccept": "Li o aviso de privacidade e concordo com o tratamento dos meus dados para este pedido de cotação.",
+    "marketingOptIn": "Quero receber novidades de produtos por e-mail (opcional).",
     "askForQuotation": "Ask for Quotation",
     "contactSales": "Contact Local Sales Team",
     "quoteConfirmed": "Quotation request received",
@@ -883,27 +898,9 @@
     }
   },
   "legalPage": {
-    "updated": "Last updated: March 2026",
-    "s1": {
-      "title": "1. Acceptance of terms",
-      "body": "By accessing this website you agree to these terms and conditions. If you do not agree, please discontinue use of the site."
-    },
-    "s2": {
-      "title": "2. Use of content",
-      "body": "All content is provided for informational purposes. Product specifications, availability, and pricing may change without notice."
-    },
-    "s3": {
-      "title": "3. Intellectual property",
-      "body": "Trademarks, logos, text, and images are owned by Oboya or its licensors and may not be reused without permission."
-    },
-    "s4": {
-      "title": "4. Limitation of liability",
-      "body": "Oboya is not liable for indirect damages arising from use of the website or reliance on estimated pricing shown in the B2B shop."
-    },
-    "s5": {
-      "title": "5. Contact",
-      "body": "For legal inquiries contact legal@oboya.example or your local Oboya office listed on the contact page."
-    }
+    "updated": "Last Updated: September 14, 2026",
+    "heroTitle": "Terms of Use",
+    "heroBody": "Please read these Terms of Use carefully before accessing or using Oboya websites and digital services."
   },
   "solutionsPage": {
     "metaTitle": "Soluções",

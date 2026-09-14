@@ -16,7 +16,9 @@ import {
   softDeleteProduct,
 } from "@/lib/cms/server/products.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { requireAdminUser } from "@/lib/map-locations.server";
+import { cmsGuard, requireCmsAuth } from "@/lib/cms/server/require-cms-auth";
+import { publicApiError } from "@/lib/security/public-error";
+import { toPublicProduct } from "@/lib/cms/server/public-product";
 
 export async function GET(
   _request: Request,
@@ -24,23 +26,19 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const adminUser = isSupabaseConfigured() ? await requireAdminUser() : null;
-    const product = await readProductById(id, { asAdmin: Boolean(adminUser) });
+    const adminAuth = await requireCmsAuth({ module: "marketplace", action: "view" });
+    const asAdmin = adminAuth.ok;
+    const product = await readProductById(id, { asAdmin });
     if (!product) return NextResponse.json({ error: "Not found" }, { status: 404 });
     if (
-      !adminUser &&
+      !asAdmin &&
       (product.status !== "published" || product.deletedAt)
     ) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
-    return NextResponse.json(product);
+    return NextResponse.json(asAdmin ? product : toPublicProduct(product));
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "Failed to load product",
-      },
-      { status: 500 }
-    );
+    return publicApiError(error, "Failed to load product");
   }
 }
 
@@ -49,12 +47,8 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (isSupabaseConfigured()) {
-      const user = await requireAdminUser();
-      if (!user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-    }
+    const auth = await cmsGuard("marketplace", "edit");
+    if ("response" in auth) return auth.response;
 
     const { id } = await params;
     const body = (await request.json()) as CmsProduct;
@@ -91,12 +85,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (isSupabaseConfigured()) {
-      const user = await requireAdminUser();
-      if (!user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-    }
+    const auth = await cmsGuard("marketplace", "delete");
+    if ("response" in auth) return auth.response;
 
     const { id } = await params;
     const hardDelete = new URL(_request.url).searchParams.get("hard") === "1";
@@ -134,12 +124,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (isSupabaseConfigured()) {
-      const user = await requireAdminUser();
-      if (!user) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-    }
+    const auth = await cmsGuard("marketplace", "edit");
+    if ("response" in auth) return auth.response;
 
     const { id } = await params;
     const action = new URL(_request.url).searchParams.get("action");

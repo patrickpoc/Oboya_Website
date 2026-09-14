@@ -5,22 +5,15 @@ import {
   saveNewsPageSettingsDurable,
 } from "@/lib/cms/server/news-page.server";
 import { revalidateNewsPages } from "@/lib/cms/revalidate-site";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { requireAdminUser } from "@/lib/map-locations.server";
-
-async function assertAdmin() {
-  if (!isSupabaseConfigured()) return true;
-  return Boolean(await requireAdminUser());
-}
+import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 
 export async function GET() {
   return NextResponse.json(await readNewsPageSettingsDurable());
 }
 
 export async function PUT(request: Request) {
-  if (!(await assertAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await cmsGuard("website", "edit");
+  if ("response" in auth) return auth.response;
   const body = (await request.json()) as NewsPageSettings;
   const saved = await saveNewsPageSettingsDurable(body);
   revalidateNewsPages();

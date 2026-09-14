@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { requireAdminUser } from "@/lib/map-locations.server";
+import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 import {
   readMarketplaceCurrencies,
   saveMarketplaceCurrencies,
@@ -16,7 +15,7 @@ export async function GET() {
     return NextResponse.json(data);
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to load currencies" },
+      { error: "Failed to load currencies" },
       { status: 500 }
     );
   }
@@ -24,10 +23,8 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    if (isSupabaseConfigured()) {
-      const user = await requireAdminUser();
-      if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await cmsGuard("marketplace", "edit");
+    if ("response" in auth) return auth.response;
     const payload = (await request.json()) as {
       countries: ShopCountry[];
       currencies: string[];

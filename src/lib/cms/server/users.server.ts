@@ -1,20 +1,20 @@
 import "server-only";
 
 import type { CmsLocale, CmsRole, CmsUser } from "@/lib/cms/types";
-import { createClient } from "@/lib/supabase/server";
-import {
-  createServiceClient,
-  isServiceRoleConfigured,
-} from "@/lib/supabase/admin";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
 import {
   deleteCmsUser,
   getCmsUserById,
   getCmsUsers,
   saveCmsUser,
 } from "@/lib/cms/repositories/users-repository";
-
-export const DEFAULT_USER_PASSWORD = "Oboya2026";
+import { createClient } from "@/lib/supabase/server";
+import {
+  createServiceClient,
+  isServiceRoleConfigured,
+} from "@/lib/supabase/admin";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { generateTemporaryPassword } from "@/lib/security/password";
+import { isHostedRuntime } from "@/lib/security/runtime";
 
 type ProfileRow = {
   id: string;
@@ -64,19 +64,7 @@ export function profileToCmsUser(
 
 export type AdminActorResult =
   | { ok: true; user: CmsUser }
-  | {
-      ok: false;
-      error: string;
-      debug: {
-        hasSession: boolean;
-        email?: string;
-        userId?: string;
-        role?: string;
-        status?: string;
-        serviceRole: boolean;
-        profileFound: boolean;
-      };
-    };
+  | { ok: false; error: string };
 
 export async function requireAdminActor(): Promise<CmsUser | null> {
   const result = await resolveAdminActor();
@@ -85,13 +73,12 @@ export async function requireAdminActor(): Promise<CmsUser | null> {
 
 export async function resolveAdminActor(): Promise<AdminActorResult> {
   if (!isSupabaseConfigured()) {
+    if (isHostedRuntime()) {
+      return { ok: false, error: "Service unavailable" };
+    }
     const fallback = getCmsUsers()[0];
     if (!fallback) {
-      return {
-        ok: false,
-        error: "No local mock admin user.",
-        debug: { hasSession: false, serviceRole: false, profileFound: false },
-      };
+      return { ok: false, error: "Unauthorized" };
     }
     return { ok: true, user: fallback };
   }
@@ -102,15 +89,7 @@ export async function resolveAdminActor(): Promise<AdminActorResult> {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return {
-      ok: false,
-      error: "Not authenticated. Log in again at /admin/login.",
-      debug: {
-        hasSession: false,
-        serviceRole: isServiceRoleConfigured(),
-        profileFound: false,
-      },
-    };
+    return { ok: false, error: "Unauthorized" };
   }
 
   const serviceRole = isServiceRoleConfigured();
@@ -128,11 +107,9 @@ export async function resolveAdminActor(): Promise<AdminActorResult> {
       profile = (data as ProfileRow | null) ?? null;
 
       if (!profile) {
-        const { count } = await admin
-          .from("cms_user_profiles")
-          .select("id", { count: "exact", head: true });
-        const role =
-          !count || count === 0 ? "super_admin" : "viewer";
+        const bootstrapEmail = process.env.CMS_BOOTSTRAP_ADMIN_EMAIL?.toLowerCase();
+        const isBootstrap =
+          Boolean(bootstrapEmail && user.email?.toLowerCase() === bootstrapEmail);
         const now = new Date().toISOString();
         const { data: created } = await admin
           .from("cms_user_profiles")
@@ -142,10 +119,10 @@ export async function resolveAdminActor(): Promise<AdminActorResult> {
               (user.user_metadata?.name as string | undefined) ||
               user.email?.split("@")[0] ||
               "User",
-            role,
+            role: isBootstrap ? "super_admin" : "viewer",
             locale: "en",
             status: "active",
-            must_change_password: role !== "super_admin",
+            must_change_password: !isBootstrap,
             created_at: now,
             updated_at: now,
           })
@@ -154,7 +131,6 @@ export async function resolveAdminActor(): Promise<AdminActorResult> {
         profile = (created as ProfileRow | null) ?? null;
       }
 
-      // Only force-promote when explicitly configured — never every non-admin login.
       const bootstrapEmail = process.env.CMS_BOOTSTRAP_ADMIN_EMAIL?.toLowerCase();
       const shouldForcePromote =
         Boolean(process.env.CMS_AUTO_PROMOTE_ADMIN === "true") ||
@@ -204,137 +180,17 @@ export async function resolveAdminActor(): Promise<AdminActorResult> {
   }
 
   if (!profile) {
-    return {
-      ok: false,
-      error:
-        "No cms_user_profiles row for your account. Run supabase/diagnostics/force-all-super-admin.sql",
-      debug: {
-        hasSession: true,
-        email: user.email ?? undefined,
-        userId: user.id,
-        serviceRole,
-        profileFound: false,
-      },
-    };
+    console.error("No cms_user_profiles row", { userId: user.id, serviceRole });
+    return { ok: false, error: "Unauthorized" };
   }
 
-  let me = profileToCmsUser(profile, user.email ?? "");
+  const me = profileToCmsUser(profile, user.email ?? "");
 
   if (me.status !== "active") {
-    return {
-      ok: false,
-      error: `Your profile status is "${me.status}". Set status=active in cms_user_profiles.`,
-      debug: {
-        hasSession: true,
-        email: me.email,
-        userId: me.id,
-        role: me.role,
-        status: me.status,
-        serviceRole,
-        profileFound: true,
-      },
-    };
-  }
-
-  if (me.role !== "super_admin" && me.role !== "admin") {
-    me = await promoteToSuperAdminIfNoAdmins(me);
-  }
-
-  if (me.role !== "super_admin" && me.role !== "admin") {
-    return {
-      ok: false,
-      error: `Logged in as ${me.email || user.email} with role "${me.role}". Run force-all-super-admin.sql or set CMS_BOOTSTRAP_ADMIN_EMAIL=${me.email || user.email} on Vercel and redeploy.`,
-      debug: {
-        hasSession: true,
-        email: me.email || user.email || undefined,
-        userId: me.id,
-        role: me.role,
-        status: me.status,
-        serviceRole,
-        profileFound: true,
-      },
-    };
+    return { ok: false, error: "Forbidden" };
   }
 
   return { ok: true, user: me };
-}
-
-async function countActiveAdmins(): Promise<number | null> {
-  try {
-    if (isServiceRoleConfigured()) {
-      const admin = createServiceClient();
-      const { count, error } = await admin
-        .from("cms_user_profiles")
-        .select("id", { count: "exact", head: true })
-        .in("role", ["super_admin", "admin"])
-        .eq("status", "active");
-      if (error) return null;
-      return count ?? 0;
-    }
-  } catch {
-    return null;
-  }
-  return null;
-}
-
-async function promoteToSuperAdminIfNoAdmins(me: CmsUser): Promise<CmsUser> {
-  // Prefer DB security-definer RPC (works even without service role key).
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase.rpc("ensure_cms_super_admin");
-    if (!error && data) {
-      const row = (Array.isArray(data) ? data[0] : data) as ProfileRow | null;
-      if (row?.id) {
-        return profileToCmsUser(row, me.email);
-      }
-    }
-  } catch (error) {
-    console.error("ensure_cms_super_admin rpc failed:", error);
-  }
-
-  const adminCount = await countActiveAdmins();
-  if (adminCount === null || adminCount > 0) return me;
-
-  try {
-    if (isServiceRoleConfigured()) {
-      const admin = createServiceClient();
-      const { data, error } = await admin
-        .from("cms_user_profiles")
-        .update({
-          role: "super_admin",
-          status: "active",
-          must_change_password: false,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", me.id)
-        .select("*")
-        .single();
-      if (!error && data) {
-        return profileToCmsUser(data as ProfileRow, me.email);
-      }
-    }
-
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("cms_user_profiles")
-      .update({
-        role: "super_admin",
-        status: "active",
-        must_change_password: false,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", me.id)
-      .select("*")
-      .single();
-
-    if (!error && data) {
-      return profileToCmsUser(data as ProfileRow, me.email);
-    }
-  } catch (error) {
-    console.error("Failed to bootstrap super_admin:", error);
-  }
-
-  return me;
 }
 
 export async function getOrCreateProfileForAuthUser(
@@ -360,21 +216,13 @@ export async function getOrCreateProfileForAuthUser(
     return profileToCmsUser(existing as ProfileRow, email);
   }
 
-  // Bootstrap first user as super_admin; later users default to viewer.
+  const bootstrapEmail = process.env.CMS_BOOTSTRAP_ADMIN_EMAIL?.toLowerCase();
+  const isBootstrap =
+    Boolean(bootstrapEmail && email.toLowerCase() === bootstrapEmail);
+
   let role: CmsRole = "viewer";
   let mustChange = true;
-  try {
-    if (isServiceRoleConfigured()) {
-      const admin = createServiceClient();
-      const { count } = await admin
-        .from("cms_user_profiles")
-        .select("id", { count: "exact", head: true });
-      if (!count || count === 0) {
-        role = "super_admin";
-        mustChange = false;
-      }
-    }
-  } catch {
+  if (isBootstrap && isServiceRoleConfigured()) {
     role = "super_admin";
     mustChange = false;
   }
@@ -392,7 +240,11 @@ export async function getOrCreateProfileForAuthUser(
     updated_at: now,
   };
 
-  const { data, error } = await supabase
+  const writer = isServiceRoleConfigured()
+    ? createServiceClient()
+    : supabase;
+
+  const { data, error } = await writer
     .from("cms_user_profiles")
     .upsert(row)
     .select("*")
@@ -474,7 +326,9 @@ export async function createCmsUserDurable(input: {
   locale?: CmsLocale;
   jobTitle?: string;
   status?: CmsUser["status"];
-}): Promise<CmsUser> {
+}): Promise<{ user: CmsUser; temporaryPassword: string }> {
+  const temporaryPassword = generateTemporaryPassword();
+
   if (!isSupabaseConfigured()) {
     const now = new Date().toISOString();
     const user: CmsUser = {
@@ -489,7 +343,7 @@ export async function createCmsUserDurable(input: {
       createdAt: now,
       updatedAt: now,
     };
-    return saveCmsUser(user);
+    return { user: saveCmsUser(user), temporaryPassword };
   }
 
   if (!isServiceRoleConfigured()) {
@@ -502,11 +356,13 @@ export async function createCmsUserDurable(input: {
   const { data: created, error: createError } =
     await admin.auth.admin.createUser({
       email: input.email,
-      password: DEFAULT_USER_PASSWORD,
+      password: temporaryPassword,
       email_confirm: true,
       user_metadata: {
-        must_change_password: true,
         name: input.name,
+      },
+      app_metadata: {
+        must_change_password: true,
       },
     });
 
@@ -538,7 +394,7 @@ export async function createCmsUserDurable(input: {
 
   const user = profileToCmsUser(profile as ProfileRow, input.email);
   saveCmsUser(user);
-  return user;
+  return { user, temporaryPassword };
 }
 
 export async function updateCmsUserDurable(
@@ -615,8 +471,13 @@ export async function updateCmsUserDurable(
 
 export async function resetCmsUserPasswordDurable(
   id: string,
-  password = DEFAULT_USER_PASSWORD
-): Promise<void> {
+  password?: string
+): Promise<string> {
+  const nextPassword = password?.trim() || generateTemporaryPassword();
+  if (nextPassword.length < 8) {
+    throw new Error("Password must be at least 8 characters");
+  }
+
   if (!isSupabaseConfigured() || !isServiceRoleConfigured()) {
     const existing = getCmsUserById(id);
     if (!existing) throw new Error("User not found");
@@ -625,15 +486,18 @@ export async function resetCmsUserPasswordDurable(
       mustChangePassword: true,
       updatedAt: new Date().toISOString(),
     });
-    return;
+    return nextPassword;
   }
 
   const admin = createServiceClient();
   const { data: existingAuth } = await admin.auth.admin.getUserById(id);
   const { error } = await admin.auth.admin.updateUserById(id, {
-    password,
+    password: nextPassword,
     user_metadata: {
       ...(existingAuth.user?.user_metadata ?? {}),
+    },
+    app_metadata: {
+      ...(existingAuth.user?.app_metadata ?? {}),
       must_change_password: true,
     },
   });
@@ -648,6 +512,7 @@ export async function resetCmsUserPasswordDurable(
     .eq("id", id);
 
   if (profileError) throw new Error(profileError.message);
+  return nextPassword;
 }
 
 export async function deleteCmsUserDurable(id: string): Promise<void> {
@@ -700,6 +565,21 @@ export async function clearMustChangePassword(userId: string): Promise<void> {
     } else {
       throw new Error(error.message);
     }
+  }
+
+  if (isServiceRoleConfigured()) {
+    const admin = createServiceClient();
+    const { data: existingAuth } = await admin.auth.admin.getUserById(userId);
+    await admin.auth.admin.updateUserById(userId, {
+      app_metadata: {
+        ...(existingAuth.user?.app_metadata ?? {}),
+        must_change_password: false,
+      },
+      user_metadata: {
+        ...(existingAuth.user?.user_metadata ?? {}),
+        must_change_password: false,
+      },
+    });
   }
 }
 

@@ -5,22 +5,20 @@ import {
   saveAboutPageSettingsDurable,
 } from "@/lib/cms/server/about-page.server";
 import { revalidateAboutPages } from "@/lib/cms/revalidate-site";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { requireAdminUser } from "@/lib/map-locations.server";
-
-async function assertAdmin() {
-  if (!isSupabaseConfigured()) return true;
-  return Boolean(await requireAdminUser());
-}
+import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 
 export async function GET() {
-  return NextResponse.json(await readAboutPageSettingsDurable());
+  try {
+    return NextResponse.json(await readAboutPageSettingsDurable());
+  } catch (error) {
+    console.error("Failed to load about settings:", error);
+    return NextResponse.json({ error: "Failed to load about settings" }, { status: 500 });
+  }
 }
 
 export async function PUT(request: Request) {
-  if (!(await assertAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await cmsGuard("website", "edit");
+  if ("response" in auth) return auth.response;
 
   try {
     const body = (await request.json()) as AboutPageSettings;

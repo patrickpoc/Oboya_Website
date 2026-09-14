@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/brand/Logo";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { safeAdminNext } from "@/lib/security/admin-next";
 
 export function AdminLoginForm() {
   const searchParams = useSearchParams();
@@ -26,7 +27,12 @@ export function AdminLoginForm() {
     setError(null);
 
     if (!isSupabaseConfigured()) {
-      window.location.href = searchParams.get("next") ?? "/admin/dashboard";
+      if (process.env.NODE_ENV !== "development") {
+        setError("Admin is not available.");
+        setLoading(false);
+        return;
+      }
+      window.location.href = safeAdminNext(searchParams.get("next"));
       return;
     }
 
@@ -59,12 +65,18 @@ export function AdminLoginForm() {
       return;
     }
 
-    const next = searchParams.get("next") ?? "/admin/dashboard";
-    window.location.href =
-      next === "/admin/change-password" ? "/admin/dashboard" : next;
+    const next = safeAdminNext(searchParams.get("next"));
+    window.location.href = next;
   };
 
   if (!isSupabaseConfigured()) {
+    if (process.env.NODE_ENV !== "development") {
+      return (
+        <Container className="flex min-h-screen items-center justify-center py-12">
+          <p className="text-sm text-muted-foreground">Admin is not available.</p>
+        </Container>
+      );
+    }
     return (
       <Container className="flex min-h-screen items-center justify-center py-12">
         <div className="w-full max-w-sm rounded-2xl border border-border/60 bg-white p-6 shadow-[var(--shadow-card)]">

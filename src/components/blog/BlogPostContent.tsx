@@ -1,5 +1,9 @@
+"use client";
+
 import Image from "next/image";
+import { useMemo } from "react";
 import { Container } from "@/components/ui/container";
+import { sanitizeRichHtml } from "@/lib/cms/sanitize-rich-html.client";
 import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
 import type { BlogCategory } from "@/lib/cms/repositories/blog-categories-repository";
 
@@ -22,6 +26,8 @@ export function BlogPostContent({
   formattedDate,
   detailPlaceholder,
 }: BlogPostContentProps) {
+  const safeBody = useMemo(() => sanitizeRichHtml(body), [body]);
+
   return (
     <>
       <section className="bg-oboya-blue-dark text-white">
@@ -57,10 +63,10 @@ export function BlogPostContent({
           {excerpt && (
             <p className="text-lg leading-relaxed text-oboya-blue-dark/80">{excerpt}</p>
           )}
-          {body ? (
+          {safeBody ? (
             <div
               className="prose prose-neutral mt-8 max-w-none"
-              dangerouslySetInnerHTML={{ __html: body }}
+              dangerouslySetInnerHTML={{ __html: safeBody }}
             />
           ) : (
             <div className="mt-8 space-y-4 text-muted-foreground">

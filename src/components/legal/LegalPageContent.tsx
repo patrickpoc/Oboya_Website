@@ -1,30 +1,26 @@
-"use client";
-
-import { useTranslations } from "next-intl";
-import { Container } from "@/components/ui/container";
-
-const sections = ["s1", "s2", "s3", "s4", "s5"] as const;
+import { LegalDocument } from "@/components/legal/LegalDocument";
+import {
+  TERMS_CONTACT,
+  TERMS_HERO_BODY,
+  TERMS_HERO_TITLE,
+  TERMS_INTRO,
+  TERMS_SECTIONS,
+  TERMS_UPDATED,
+} from "@/content/terms-of-use";
 
 export function LegalPageContent() {
-  const t = useTranslations("legalPage");
-
   return (
-    <section className="py-16 md:py-20">
-      <Container size="narrow">
-        <p className="mb-10 text-sm text-muted-foreground">{t("updated")}</p>
-        <div className="space-y-10">
-          {sections.map((section) => (
-            <article key={section}>
-              <h2 className="text-lg font-semibold text-oboya-blue-dark">
-                {t(`${section}.title`)}
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                {t(`${section}.body`)}
-              </p>
-            </article>
-          ))}
-        </div>
-      </Container>
-    </section>
+    <LegalDocument
+      heroTitle={TERMS_HERO_TITLE}
+      heroBody={TERMS_HERO_BODY}
+      updated={TERMS_UPDATED}
+      intro={TERMS_INTRO}
+      sections={TERMS_SECTIONS}
+      contact={{
+        company: TERMS_CONTACT.company,
+        website: TERMS_CONTACT.website,
+      }}
+      footerNote={TERMS_CONTACT.privacyNote}
+    />
   );
 }

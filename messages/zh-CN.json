@@ -3,6 +3,12 @@
     "title": "Oboya Horticulture | 综合园艺解决方案",
     "description": "您的一站式园艺合作伙伴。从繁殖种植到包装零售展示的综合解决方案——服务全球种植者。"
   },
+  "cookies": {
+    "body": "我们使用必要 Cookie 以保存语言和保障安全。仅在您同意后才会加载第一方分析（页面浏览、来源和国家/地区）。",
+    "accept": "接受分析",
+    "decline": "拒绝",
+    "privacyLink": "隐私政策"
+  },
   "nav": {
     "solutions": "解决方案",
     "products": "产品",
@@ -235,7 +241,11 @@
       "support": "支持"
     },
     "success": "谢谢。我们的团队将尽快与您联系。",
-    "error": "消息发送失败，请重试。"
+    "error": "消息发送失败，请重试。",
+    "privacyNotice": "我们使用这些信息回复您的咨询（LGPD 第 7 条 V/IX — 缔约前程序与合法利益）。",
+    "privacyLink": "隐私政策",
+    "privacyAccept": "我已阅读隐私说明，并同意为本次咨询处理我的数据。",
+    "marketingOptIn": "我希望偶尔通过电子邮件接收产品更新（可选）。"
   },
   "pages": {
     "about": {
@@ -254,7 +264,8 @@
     },
     "privacy": {
       "title": "隐私政策",
-      "eyebrow": "法律"
+      "eyebrow": "法律",
+      "description": "Oboya Horticulture 如何收集、使用、存储和保护个人数据。"
     },
     "terms": {
       "title": "使用条款",
@@ -499,6 +510,10 @@
     "phone": "Phone",
     "email": "Email",
     "notes": "Additional notes",
+    "privacyNotice": "我们使用这些信息准备报价（LGPD 第 7 条 V/IX — 缔约前程序与合法利益）。",
+    "privacyLink": "隐私政策",
+    "privacyAccept": "我已阅读隐私说明，并同意为本次报价请求处理我的数据。",
+    "marketingOptIn": "我希望偶尔通过电子邮件接收产品更新（可选）。",
     "askForQuotation": "Ask for Quotation",
     "contactSales": "Contact Local Sales Team",
     "quoteConfirmed": "Quotation request received",
@@ -883,27 +898,9 @@
     }
   },
   "legalPage": {
-    "updated": "Last updated: March 2026",
-    "s1": {
-      "title": "1. Acceptance of terms",
-      "body": "By accessing this website you agree to these terms and conditions. If you do not agree, please discontinue use of the site."
-    },
-    "s2": {
-      "title": "2. Use of content",
-      "body": "All content is provided for informational purposes. Product specifications, availability, and pricing may change without notice."
-    },
-    "s3": {
-      "title": "3. Intellectual property",
-      "body": "Trademarks, logos, text, and images are owned by Oboya or its licensors and may not be reused without permission."
-    },
-    "s4": {
-      "title": "4. Limitation of liability",
-      "body": "Oboya is not liable for indirect damages arising from use of the website or reliance on estimated pricing shown in the B2B shop."
-    },
-    "s5": {
-      "title": "5. Contact",
-      "body": "For legal inquiries contact legal@oboya.example or your local Oboya office listed on the contact page."
-    }
+    "updated": "Last Updated: September 14, 2026",
+    "heroTitle": "Terms of Use",
+    "heroBody": "Please read these Terms of Use carefully before accessing or using Oboya websites and digital services."
   },
   "solutionsPage": {
     "metaTitle": "解决方案",

@@ -4,10 +4,9 @@ import {
 } from "@/lib/map-locations";
 import {
   readMapLocations,
-  requireAdminUser,
   writeMapLocations,
 } from "@/lib/map-locations.server";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 import { revalidateMapPages } from "@/lib/cms/revalidate-site";
 import { NextResponse } from "next/server";
 
@@ -25,12 +24,8 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  if (isSupabaseConfigured()) {
-    const user = await requireAdminUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  const auth = await cmsGuard("global_presence", "edit");
+  if ("response" in auth) return auth.response;
 
   try {
     const body = (await request.json()) as MapLocationsData;

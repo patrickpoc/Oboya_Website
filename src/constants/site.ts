@@ -3,7 +3,7 @@ export const siteConfig = {
   shortName: "Oboya",
   description:
     "Your one-stop partner for horticulture. Integrated solutions from propagation and planting to packaging and retail display — serving growers worldwide.",
-  url: "https://oboya.cc",
+  url: "https://www.oboya-horticulture.com",
   locale: "en",
   company: {
     address: "Global Headquarters",

@@ -33,3 +33,20 @@ export function addFormSubmission(
   cache.unshift(entry);
   return entry;
 }
+
+export function deleteFormSubmission(id: string): boolean {
+  const next = cache.filter((s) => s.id !== id);
+  if (next.length === cache.length) return false;
+  cache = next;
+  return true;
+}
+
+export function anonymizeFormSubmission(id: string): FormSubmission | null {
+  const idx = cache.findIndex((s) => s.id === id);
+  if (idx < 0) return null;
+  cache[idx] = {
+    ...cache[idx],
+    data: { redacted: true },
+  };
+  return cache[idx];
+}

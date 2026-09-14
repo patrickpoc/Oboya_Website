@@ -7,6 +7,7 @@ import {
   deleteBlogPost as deletePostMemory,
   type CmsBlogPost,
 } from "@/lib/cms/repositories/blog-repository";
+import { sanitizeLocalizedRichHtml } from "@/lib/cms/sanitize-rich-html.server";
 import {
   readCmsDocumentData,
   writeCmsDocumentData,
@@ -30,7 +31,10 @@ export async function saveBlogPostDurable(
   post: CmsBlogPost
 ): Promise<CmsBlogPost> {
   await readBlogPostsDurable();
-  const saved = savePostMemory(post);
+  const saved = savePostMemory({
+    ...post,
+    body: sanitizeLocalizedRichHtml(post.body),
+  });
   await writeCmsDocumentData(BLOG_POSTS_DOC_ID, "blog", getBlogPosts());
   return saved;
 }

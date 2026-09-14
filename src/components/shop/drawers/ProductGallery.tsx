@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 const ZOOM_SCALE = 1.8;
 /** Fallback while natural size loads (portrait-ish). */
 const FALLBACK_RATIO = 3 / 4;
-const MAX_FRAME_HEIGHT = "min(85vh, 52rem)";
 
 interface ProductGalleryProps {
   images: string[];
@@ -74,12 +73,13 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
         ref={frameRef}
         className={cn(
           "relative mx-auto w-full overflow-hidden rounded-lg bg-oboya-soft-white",
+          "[--gallery-max-h:min(38vh,16.5rem)] sm:[--gallery-max-h:min(42vh,20rem)] md:[--gallery-max-h:min(70vh,36rem)]",
           zoomOn && "cursor-crosshair"
         )}
         style={{
           aspectRatio: String(aspect),
-          maxHeight: MAX_FRAME_HEIGHT,
-          maxWidth: `min(100%, calc(${MAX_FRAME_HEIGHT} * ${aspect}))`,
+          maxHeight: "var(--gallery-max-h)",
+          maxWidth: `min(100%, calc(var(--gallery-max-h) * ${aspect}))`,
         }}
         onPointerMove={(event) => {
           if (!zoomOn) return;

@@ -2,18 +2,16 @@ import { NextResponse } from "next/server";
 import {
   deleteCmsUserDurable,
   listCmsUsersDurable,
-  requireAdminActor,
   updateCmsUserDurable,
 } from "@/lib/cms/server/users.server";
+import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 import type { CmsLocale, CmsRole } from "@/lib/cms/types";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, { params }: Params) {
-  const actor = await requireAdminActor();
-  if (!actor) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await cmsGuard("users", "view");
+  if ("response" in auth) return auth.response;
 
   const { id } = await params;
   try {
@@ -24,17 +22,14 @@ export async function GET(_request: Request, { params }: Params) {
     }
     return NextResponse.json({ ok: true, user });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to load user";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Failed to load user:", error);
+    return NextResponse.json({ error: "Failed to load user" }, { status: 500 });
   }
 }
 
 export async function PATCH(request: Request, { params }: Params) {
-  const actor = await requireAdminActor();
-  if (!actor) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await cmsGuard("users", "edit");
+  if ("response" in auth) return auth.response;
 
   const { id } = await params;
   try {
@@ -58,20 +53,17 @@ export async function PATCH(request: Request, { params }: Params) {
 
     return NextResponse.json({ ok: true, user });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to update user";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Failed to update user:", error);
+    return NextResponse.json({ error: "Failed to update user" }, { status: 500 });
   }
 }
 
 export async function DELETE(_request: Request, { params }: Params) {
-  const actor = await requireAdminActor();
-  if (!actor) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await cmsGuard("users", "delete");
+  if ("response" in auth) return auth.response;
 
   const { id } = await params;
-  if (id === actor.id) {
+  if (id === auth.user.id) {
     return NextResponse.json(
       { error: "You cannot delete your own account" },
       { status: 400 }
@@ -82,8 +74,7 @@ export async function DELETE(_request: Request, { params }: Params) {
     await deleteCmsUserDurable(id);
     return NextResponse.json({ ok: true });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to delete user";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Failed to delete user:", error);
+    return NextResponse.json({ error: "Failed to delete user" }, { status: 500 });
   }
 }

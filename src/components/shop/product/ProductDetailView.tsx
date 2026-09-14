@@ -113,14 +113,14 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
         </Link>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-12">
+      <div className="grid gap-6 md:grid-cols-2 md:items-start md:gap-8 lg:gap-12">
         <ProductGallery images={galleryImages} alt={name} />
 
-        <div className="lg:sticky lg:top-24 lg:self-start">
+        <div className="md:sticky md:top-24 md:self-start">
           <p className="text-xs font-medium uppercase tracking-wide text-oboya-green">
             {category?.name}
           </p>
-          <h1 className="mt-2 font-display text-3xl font-semibold text-oboya-blue-dark">
+          <h1 className="mt-2 font-display text-2xl font-semibold text-oboya-blue-dark md:text-3xl">
             {name}
           </h1>
           <p className="mt-2 flex flex-wrap items-center gap-x-1 text-sm text-muted-foreground">

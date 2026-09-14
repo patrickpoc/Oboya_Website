@@ -5,28 +5,19 @@ import {
   saveHomepageSettingsDurable,
 } from "@/lib/cms/server/homepage.server";
 import { revalidateHomePages } from "@/lib/cms/revalidate-site";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { requireAdminUser } from "@/lib/map-locations.server";
+import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 
 export async function GET() {
-  if (isSupabaseConfigured()) {
-    const user = await requireAdminUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  const auth = await cmsGuard("website", "view");
+  if ("response" in auth) return auth.response;
 
   const settings = await readHomepageSettingsDurable();
   return NextResponse.json(settings);
 }
 
 export async function PUT(request: Request) {
-  if (isSupabaseConfigured()) {
-    const user = await requireAdminUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  const auth = await cmsGuard("website", "edit");
+  if ("response" in auth) return auth.response;
 
   try {
     const body = (await request.json()) as HomepageSettings;

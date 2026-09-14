@@ -452,12 +452,9 @@ for (const locale of ["en", "pt-BR", "es", "zh-CN"]) {
       },
     };
     data.legalPage = {
-      updated: "Last updated: March 2026",
-      s1: { title: "1. Acceptance of terms", body: "By accessing this website you agree to these terms and conditions. If you do not agree, please discontinue use of the site." },
-      s2: { title: "2. Use of content", body: "All content is provided for informational purposes. Product specifications, availability, and pricing may change without notice." },
-      s3: { title: "3. Intellectual property", body: "Trademarks, logos, text, and images are owned by Oboya or its licensors and may not be reused without permission." },
-      s4: { title: "4. Limitation of liability", body: "Oboya is not liable for indirect damages arising from use of the website or reliance on estimated pricing shown in the B2B shop." },
-      s5: { title: "5. Contact", body: "For legal inquiries contact legal@oboya.example or your local Oboya office listed on the contact page." },
+      updated: "Last Updated: September 14, 2026",
+      heroTitle: "Terms of Use",
+      heroBody: "Please read these Terms of Use carefully before accessing or using Oboya websites and digital services.",
     };
   } else {
     data.aboutPage = aboutPage.en;
@@ -466,7 +463,7 @@ for (const locale of ["en", "pt-BR", "es", "zh-CN"]) {
     data.caseStudies = { ...caseStudies.en, eyebrow: shared[locale].nav.caseStudies };
     data.faqsPage = { intro: shared[locale].pages.faqs.description, categories: { products: "Products", shipping: "Shipping", quotations: "Quotations", support: "Support" }, products: { q1: { question: "FAQ", answer: "Answer placeholder." } } };
     data.workWithUsPage = { intro: shared[locale].pages.workWithUs.description, benefits: { b1: { title: "Global", description: "..." } }, openings: { title: "Openings", o1: { title: "Role", location: "City", type: "Full-time" } }, application: { title: "Apply", description: "...", name: "Name", email: "Email", message: "Message", submit: "Submit", success: "..." } };
-    data.legalPage = { updated: "2026", s1: { title: "Terms", body: shared[locale].pages.terms.description } };
+    data.legalPage = { updated: "Last Updated: September 14, 2026", heroTitle: "Terms of Use", heroBody: shared[locale].pages.terms.description };
   }
   fs.writeFileSync(file, `${JSON.stringify(data, null, 2)}\n`);
 }

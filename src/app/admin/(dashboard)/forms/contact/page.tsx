@@ -11,6 +11,7 @@ import type {
   FormSubmission,
   FormSubmissionStatus,
 } from "@/lib/cms/types";
+import { FormPiiActions } from "@/components/admin/forms/FormPiiActions";
 import { cn } from "@/lib/utils";
 
 const STATUS_OPTIONS: { value: FormSubmissionStatus | "all"; label: string }[] =
@@ -285,6 +286,13 @@ export default function ContactFormsPage() {
               >
                 Close
               </Button>
+              <FormPiiActions
+                id={selected.id}
+                onDone={() => {
+                  setSelected(null);
+                  void refresh();
+                }}
+              />
             </div>
           ) : null
         }

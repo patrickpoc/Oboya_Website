@@ -2,12 +2,13 @@ import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { Analytics } from "@vercel/analytics/next";
 import { fontVariables, notoSansSC } from "@/lib/fonts";
 import { routing } from "@/i18n/routing";
 import { siteConfig } from "@/constants/site";
 import { cn } from "@/lib/utils";
 import { AppProviders } from "@/components/providers/AppProviders";
+import { ConditionalAnalytics } from "@/components/privacy/ConditionalAnalytics";
+import { CookieConsentBanner } from "@/components/privacy/CookieConsentBanner";
 import "../globals.css";
 
 /**
@@ -73,10 +74,13 @@ export default async function LocaleLayout({
           locale === "zh-CN" && "font-chinese"
         )}
       >
-        <NextIntlClientProvider messages={messages}>
-          <AppProviders>{children}</AppProviders>
+        <NextIntlClientProvider locale={locale} messages={messages} timeZone="UTC">
+          <AppProviders>
+            {children}
+            <CookieConsentBanner />
+          </AppProviders>
         </NextIntlClientProvider>
-        <Analytics />
+        <ConditionalAnalytics />
       </body>
     </html>
   );

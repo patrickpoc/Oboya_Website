@@ -1,40 +1,29 @@
 import { NextResponse } from "next/server";
-import {
-  DEFAULT_USER_PASSWORD,
-  requireAdminActor,
-  resetCmsUserPasswordDurable,
-} from "@/lib/cms/server/users.server";
+import { resetCmsUserPasswordDurable } from "@/lib/cms/server/users.server";
+import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function POST(request: Request, { params }: Params) {
-  const actor = await requireAdminActor();
-  if (!actor) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await cmsGuard("users", "edit");
+  if ("response" in auth) return auth.response;
 
   const { id } = await params;
   try {
     const body = (await request.json().catch(() => ({}))) as {
       password?: string;
     };
-    const password = body.password?.trim() || DEFAULT_USER_PASSWORD;
-    if (password.length < 8) {
-      return NextResponse.json(
-        { error: "Password must be at least 8 characters" },
-        { status: 400 }
-      );
-    }
-
-    await resetCmsUserPasswordDurable(id, password);
+    const password = await resetCmsUserPasswordDurable(id, body.password);
     return NextResponse.json({
       ok: true,
       password,
       mustChangePassword: true,
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to reset password";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Failed to reset password:", error);
+    return NextResponse.json(
+      { error: "Failed to reset password" },
+      { status: 500 }
+    );
   }
 }

@@ -7,6 +7,7 @@ import { Container } from "@/components/ui/container";
 import { readBlogCategories, readBlogPostBySlug, readBlogPosts } from "@/lib/cms/readers";
 import { pickLocalized } from "@/lib/cms/utils";
 import { routing } from "@/i18n/routing";
+import { sanitizeRichHtml } from "@/lib/cms/sanitize-rich-html.server";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -51,7 +52,7 @@ export default async function NewsArticlePage({ params }: Props) {
   const category = categories.find((c) => c.id === post.categoryId);
   const title = pickLocalized(post.title, locale);
   const excerpt = pickLocalized(post.excerpt, locale);
-  const body = pickLocalized(post.body, locale);
+  const body = sanitizeRichHtml(pickLocalized(post.body, locale));
 
   return (
     <SiteLayout>

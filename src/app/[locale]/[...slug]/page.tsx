@@ -7,6 +7,7 @@ import { ContactPageContent } from "@/components/contact/ContactPageContent";
 import { FaqsPageContent } from "@/components/faqs/FaqsPageContent";
 import { WorkWithUsPageContent } from "@/components/work-with-us/WorkWithUsPageContent";
 import { LegalPageContent } from "@/components/legal/LegalPageContent";
+import { PrivacyPageContent } from "@/components/legal/PrivacyPageContent";
 import { InnerPageHero } from "@/components/sections/InnerPageHero";
 import { LoremContent } from "@/components/sections/LoremContent";
 import { PageListing } from "@/components/sections/PageListing";
@@ -87,7 +88,9 @@ export default async function InnerPage({ params }: PageProps) {
         : config.template === "workWithUs"
           ? t("workWithUs.description")
           : config.template === "legal"
-            ? t("terms.description")
+            ? pageSlug === "privacy"
+              ? t("privacy.description")
+              : t("terms.description")
             : tCommon("loremShort");
 
   if (config.template === "about") {
@@ -114,11 +117,22 @@ export default async function InnerPage({ params }: PageProps) {
     );
   }
 
+  if (config.template === "legal") {
+    return (
+      <SiteLayout>
+        {pageSlug === "privacy" ? (
+          <PrivacyPageContent locale={locale} />
+        ) : (
+          <LegalPageContent />
+        )}
+      </SiteLayout>
+    );
+  }
+
   return (
     <SiteLayout>
       <InnerPageHero eyebrow={eyebrow} title={title} description={description} />
       {config.template === "workWithUs" && <WorkWithUsPageContent />}
-      {config.template === "legal" && <LegalPageContent />}
       {config.template === "listing" && <PageListing items={children} />}
       {(!config.template || config.template === "default") && <LoremContent />}
     </SiteLayout>

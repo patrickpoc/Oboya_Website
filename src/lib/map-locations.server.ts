@@ -100,20 +100,3 @@ export async function writeMapLocations(data: MapLocationsData): Promise<void> {
   }
 }
 
-export async function requireAdminUser() {
-  if (!isSupabaseConfigured()) {
-    return null;
-  }
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-
-  if (error || !user) {
-    return null;
-  }
-
-  return user;
-}

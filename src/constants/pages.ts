@@ -19,7 +19,7 @@ export const pageRegistry: Record<string, PageConfig> = {
   "work-with-us": { messageKey: "workWithUs", template: "workWithUs" },
   faqs: { messageKey: "faqs", template: "faqs" },
   careers: { messageKey: "careers" },
-  privacy: { messageKey: "privacy" },
+  privacy: { messageKey: "privacy", template: "legal" },
   terms: { messageKey: "terms", template: "legal" },
   sustainability: { messageKey: "sustainability" },
 

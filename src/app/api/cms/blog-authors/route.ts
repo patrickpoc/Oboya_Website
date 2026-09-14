@@ -6,25 +6,17 @@ import {
   saveBlogAuthorDurable,
 } from "@/lib/cms/server/blog-authors.server";
 import { revalidateBlogPages } from "@/lib/cms/revalidate-site";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { requireAdminUser } from "@/lib/map-locations.server";
-
-async function assertAdmin() {
-  if (!isSupabaseConfigured()) return true;
-  return Boolean(await requireAdminUser());
-}
+import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 
 export async function GET() {
-  if (!(await assertAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await cmsGuard("blog", "view");
+  if ("response" in auth) return auth.response;
   return NextResponse.json(await readBlogAuthorsDurable());
 }
 
 export async function POST(request: Request) {
-  if (!(await assertAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await cmsGuard("blog", "edit");
+  if ("response" in auth) return auth.response;
   const body = (await request.json()) as BlogAuthor;
   const saved = await saveBlogAuthorDurable(body);
   revalidateBlogPages();
@@ -32,9 +24,8 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  if (!(await assertAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await cmsGuard("blog", "delete");
+  if ("response" in auth) return auth.response;
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   if (!id) {

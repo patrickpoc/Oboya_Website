@@ -7,6 +7,7 @@ import { DataTable } from "@/components/admin/data-table/DataTable";
 import { FormDrawer } from "@/components/admin/forms/FormDrawer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { FormPiiActions } from "@/components/admin/forms/FormPiiActions";
 import { formatShopPrice } from "@/lib/shop/format-price";
 import type { FormSubmission, FormSubmissionStatus } from "@/lib/cms/types";
 
@@ -162,15 +163,24 @@ export default function QuoteFormsPage() {
         width="lg"
         footer={
           selected ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="ml-auto"
-              onClick={() => setSelected(null)}
-            >
-              Close
-            </Button>
+            <div className="flex flex-wrap items-center gap-3">
+              <FormPiiActions
+                id={selected.id}
+                onDone={() => {
+                  setSelected(null);
+                  void load();
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="ml-auto"
+                onClick={() => setSelected(null)}
+              >
+                Close
+              </Button>
+            </div>
           ) : null
         }
       >

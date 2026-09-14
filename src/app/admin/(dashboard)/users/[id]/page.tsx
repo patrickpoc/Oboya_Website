@@ -14,8 +14,6 @@ import { ROLE_LABELS } from "@/lib/cms/permissions/matrix";
 import { CMS_LOCALES } from "@/contexts/AdminContext";
 import type { CmsLocale, CmsRole, CmsUser } from "@/lib/cms/types";
 
-const DEFAULT_PASSWORD = "Oboya2026";
-
 export default function UserDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -94,7 +92,9 @@ export default function UserDetailPage() {
       const data = (await res.json()) as { error?: string; password?: string };
       if (!res.ok) throw new Error(data.error || "Failed to reset password");
       toast.success(
-        `Password set to ${data.password ?? password ?? DEFAULT_PASSWORD}. User must change it on next login.`
+        data.password
+          ? `Password set to ${data.password}. User must change it on next login.`
+          : "Password reset. User must change it on next login."
       );
       setCustomPassword("");
       await loadUser();
@@ -236,8 +236,8 @@ export default function UserDetailPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Reset to the default temporary password ({DEFAULT_PASSWORD}) or set
-              a custom one. The user must change it on next login.
+              Generate a one-time temporary password or set a custom one. The
+              user must change it on next login.
             </p>
             <Button
               type="button"
@@ -245,7 +245,7 @@ export default function UserDetailPage() {
               className="rounded-full"
               onClick={() => void handleResetPassword()}
             >
-              Reset to {DEFAULT_PASSWORD}
+              Generate temporary password
             </Button>
             <div className="space-y-1.5">
               <Label>Custom temporary password</Label>

@@ -20,19 +20,12 @@ import {
   moveMediaFolder,
   renameMediaFolder,
 } from "@/lib/cms/repositories/media-repository";
+import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { requireAdminUser } from "@/lib/map-locations.server";
-
-async function assertAdmin() {
-  if (!isSupabaseConfigured()) return true;
-  const user = await requireAdminUser();
-  return Boolean(user);
-}
 
 export async function GET() {
-  if (!(await assertAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await cmsGuard("media", "view");
+  if ("response" in auth) return auth.response;
 
   try {
     const [assets, folders] = await Promise.all([
@@ -55,9 +48,8 @@ export async function GET() {
 }
 
 export async function DELETE(request: Request) {
-  if (!(await assertAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await cmsGuard("media", "delete");
+  if ("response" in auth) return auth.response;
 
   try {
     const { searchParams } = new URL(request.url);
@@ -79,9 +71,8 @@ export async function DELETE(request: Request) {
 }
 
 export async function POST(request: Request) {
-  if (!(await assertAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await cmsGuard("media", "create");
+  if ("response" in auth) return auth.response;
 
   const contentType = request.headers.get("content-type") || "";
 

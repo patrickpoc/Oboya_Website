@@ -15,8 +15,6 @@ import { ROLE_LABELS } from "@/lib/cms/permissions/matrix";
 import { CMS_LOCALES } from "@/contexts/AdminContext";
 import type { CmsLocale, CmsRole, CmsUser } from "@/lib/cms/types";
 
-const DEFAULT_PASSWORD = "Oboya2026";
-
 type DraftUser = {
   id?: string;
   email: string;
@@ -41,17 +39,13 @@ export default function UsersPage() {
     setLoadError(null);
     try {
       const res = await fetch("/api/cms/users");
-      const data = (await res.json()) as {
-        users?: CmsUser[];
-        error?: string;
-        debug?: Record<string, unknown>;
-      };
-      if (!res.ok) {
-        const debugHint = data.debug
-          ? ` (${JSON.stringify(data.debug)})`
-          : "";
-        throw new Error(`${data.error || "Failed to load users"}${debugHint}`);
-      }
+        const data = (await res.json()) as {
+          users?: CmsUser[];
+          error?: string;
+        };
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to load users");
+        }
       setUsers(data.users ?? []);
     } catch (error) {
       const message =
@@ -118,11 +112,13 @@ export default function UsersPage() {
         });
         const data = (await res.json()) as {
           error?: string;
-          defaultPassword?: string;
+          temporaryPassword?: string;
         };
         if (!res.ok) throw new Error(data.error || "Failed to create user");
         toast.success(
-          `User created. Temporary password: ${data.defaultPassword ?? DEFAULT_PASSWORD}`
+          data.temporaryPassword
+            ? `User created. Temporary password: ${data.temporaryPassword}`
+            : "User created."
         );
       } else if (editing.id) {
         const res = await fetch(`/api/cms/users/${editing.id}`, {
@@ -154,7 +150,7 @@ export default function UsersPage() {
   const handleResetPassword = async (user: CmsUser) => {
     if (
       !confirm(
-        `Reset password for ${user.email} to ${DEFAULT_PASSWORD}? They will be asked to change it on next login.`
+        `Generate a new temporary password for ${user.email}? They will be asked to change it on next login.`
       )
     ) {
       return;
@@ -168,7 +164,11 @@ export default function UsersPage() {
       });
       const data = (await res.json()) as { error?: string; password?: string };
       if (!res.ok) throw new Error(data.error || "Failed to reset password");
-      toast.success(`Password reset to ${data.password ?? DEFAULT_PASSWORD}`);
+      toast.success(
+        data.password
+          ? `Password reset to ${data.password}`
+          : "Password reset"
+      );
       await loadUsers();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Reset failed");
@@ -303,9 +303,8 @@ export default function UsersPage() {
           <div className="space-y-4">
             {editing.isNew && (
               <p className="rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
-                New users start with temporary password{" "}
-                <span className="font-medium text-foreground">{DEFAULT_PASSWORD}</span>{" "}
-                and must change it on first login.
+                New users receive a one-time temporary password after save and
+                must change it on first login.
               </p>
             )}
             <div className="space-y-1.5">

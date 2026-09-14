@@ -85,6 +85,7 @@ export function AdminIntlProvider({ children }: { children: React.ReactNode }) {
         key={activeLocale}
         locale={activeLocale}
         messages={MESSAGE_CATALOG[activeLocale]}
+        timeZone="UTC"
       >
         {children}
       </NextIntlClientProvider>

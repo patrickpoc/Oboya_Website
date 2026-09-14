@@ -129,6 +129,22 @@ function sameCartLine(
   );
 }
 
+function currentLocationQuery() {
+  return window.location.search.startsWith("?")
+    ? window.location.search.slice(1)
+    : window.location.search;
+}
+
+/** Keep the listing query in the address bar without a Next/next-intl navigation. */
+function replaceListingQuery(query: string) {
+  const nextUrl = query
+    ? `${window.location.pathname}?${query}`
+    : window.location.pathname;
+  const current = `${window.location.pathname}${window.location.search}`;
+  if (current === nextUrl) return;
+  window.history.replaceState(window.history.state, "", nextUrl);
+}
+
 function sanitizeCartItems(items: unknown): CartItem[] {
   if (!Array.isArray(items)) return [];
   return items
@@ -207,8 +223,6 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const lastSyncedQuery = useRef<string | null>(null);
   const wasOnShop = useRef(false);
   const softOpenTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const urlWriteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const isShopListingRoute =
     pathname === "/shop" || pathname.endsWith("/shop");
   /** Catalog + cart overlays: listing, PDP, cart, checkout. */
@@ -329,52 +343,59 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    const applyQuery = (query: string, enteringShop: boolean) => {
+      if (query === lastSyncedQuery.current && !enteringShop) return;
+      lastSyncedQuery.current = query;
+
+      const urlState = parseShopUrlState(new URLSearchParams(query));
+      const pendingProduct = urlState.product;
+      const softOpen = enteringShop && Boolean(pendingProduct);
+
+      if (softOpenTimer.current) {
+        clearTimeout(softOpenTimer.current);
+        softOpenTimer.current = null;
+      }
+
+      skipUrlWrite.current = true;
+      setState((prev) => ({
+        ...prev,
+        countryCode: urlState.country ?? prev.countryCode,
+        currency: urlState.currency ?? prev.currency,
+        search: urlState.q,
+        sort: urlState.sort,
+        viewMode: urlState.view,
+        filters: urlState.filters,
+        quickViewProductId: null,
+        isCartOpen: urlState.cart,
+        isQuoteModalOpen: urlState.quote,
+        visibleCount: PRODUCTS_PAGE_SIZE,
+      }));
+      hydratedFromUrl.current = true;
+
+      if (softOpen && pendingProduct) {
+        softOpenTimer.current = setTimeout(() => {
+          softOpenTimer.current = null;
+          skipUrlWrite.current = false;
+          router.replace(`/shop/products/${pendingProduct}`);
+        }, 100);
+      } else {
+        queueMicrotask(() => {
+          skipUrlWrite.current = false;
+        });
+      }
+    };
+
     const enteringShop = !wasOnShop.current;
     wasOnShop.current = true;
+    applyQuery(searchParams.toString(), enteringShop);
 
-    const query = searchParams.toString();
-    if (query === lastSyncedQuery.current && !enteringShop) return;
-    lastSyncedQuery.current = query;
-
-    const urlState = parseShopUrlState(searchParams);
-    const pendingProduct = urlState.product;
-    // Legacy ?product= deep-links redirect to the product detail page.
-    const softOpen = enteringShop && Boolean(pendingProduct);
-
-    if (softOpenTimer.current) {
-      clearTimeout(softOpenTimer.current);
-      softOpenTimer.current = null;
-    }
-
-    skipUrlWrite.current = true;
-    setState((prev) => ({
-      ...prev,
-      countryCode: urlState.country ?? prev.countryCode,
-      currency: urlState.currency ?? prev.currency,
-      search: urlState.q,
-      sort: urlState.sort,
-      viewMode: urlState.view,
-      filters: urlState.filters,
-      quickViewProductId: null,
-      isCartOpen: urlState.cart,
-      isQuoteModalOpen: urlState.quote,
-      visibleCount: PRODUCTS_PAGE_SIZE,
-    }));
-    hydratedFromUrl.current = true;
-
-    if (softOpen && pendingProduct) {
-      softOpenTimer.current = setTimeout(() => {
-        softOpenTimer.current = null;
-        skipUrlWrite.current = false;
-        router.replace(`/shop/products/${pendingProduct}`);
-      }, 100);
-    } else {
-      queueMicrotask(() => {
-        skipUrlWrite.current = false;
-      });
-    }
+    const onPopState = () => {
+      applyQuery(currentLocationQuery(), false);
+    };
+    window.addEventListener("popstate", onPopState);
 
     return () => {
+      window.removeEventListener("popstate", onPopState);
       if (softOpenTimer.current) {
         clearTimeout(softOpenTimer.current);
         softOpenTimer.current = null;
@@ -392,8 +413,9 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   }, [state.countryCode, state.currency, state.items, isReady]);
 
-  // Only write shop state back to the URL while on the shop listing route.
-  // Debounce to avoid router.replace thrashing on each search keystroke.
+  // Mirror shop listing state into the address bar on every change.
+  // history.replaceState (not next-intl router.replace) so query strings
+  // from inbound links (Solutions, etc.) stay writable.
   useEffect(() => {
     if (
       !isShopListingRoute ||
@@ -417,28 +439,12 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     });
 
     const next = params.toString();
-    const current = searchParams.toString();
-    if (next === current) return;
-
-    if (urlWriteTimer.current) clearTimeout(urlWriteTimer.current);
-    urlWriteTimer.current = setTimeout(() => {
-      lastSyncedQuery.current = next;
-      router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
-      urlWriteTimer.current = null;
-    }, 400);
-
-    return () => {
-      if (urlWriteTimer.current) {
-        clearTimeout(urlWriteTimer.current);
-        urlWriteTimer.current = null;
-      }
-    };
+    if (next === lastSyncedQuery.current) return;
+    lastSyncedQuery.current = next;
+    replaceListingQuery(next);
   }, [
     isReady,
     isShopListingRoute,
-    pathname,
-    router,
-    searchParams,
     state.countryCode,
     state.currency,
     state.filters,

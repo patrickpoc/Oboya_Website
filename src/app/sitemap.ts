@@ -3,7 +3,7 @@ import { routing } from "@/i18n/routing";
 import { getAllPageSlugs } from "@/constants/pages";
 import { readBlogPosts, readProducts } from "@/lib/cms/readers";
 
-const baseUrl = "https://oboya.cc";
+const baseUrl = "https://www.oboya-horticulture.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const homeEntries = routing.locales.map((locale) => ({

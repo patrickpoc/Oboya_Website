@@ -184,6 +184,8 @@ export interface RfqPayload {
   countryCode: string;
   currency: CurrencyCode;
   officeId: string | null;
+  privacyAccepted: boolean;
+  marketingOptIn?: boolean;
   items: {
     productId: string;
     variantId?: string | null;

@@ -4,25 +4,17 @@ import {
   readAuditLogsDurable,
 } from "@/lib/cms/server/audit-logs.server";
 import type { AuditLogEntry } from "@/lib/cms/types";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { requireAdminUser } from "@/lib/map-locations.server";
-
-async function assertAdmin() {
-  if (!isSupabaseConfigured()) return true;
-  return Boolean(await requireAdminUser());
-}
+import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 
 export async function GET() {
-  if (!(await assertAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await cmsGuard("audit_logs", "view");
+  if ("response" in auth) return auth.response;
   return NextResponse.json(await readAuditLogsDurable());
 }
 
 export async function POST(request: Request) {
-  if (!(await assertAdmin())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await cmsGuard("audit_logs", "create");
+  if ("response" in auth) return auth.response;
   const body = (await request.json()) as Omit<
     AuditLogEntry,
     "id" | "createdAt"

@@ -3,7 +3,6 @@
 import { Container } from "@/components/ui/container";
 import { useShop } from "@/contexts/ShopContext";
 import { ShopToolbar } from "@/components/shop/toolbar/ShopToolbar";
-import { OfficeCard } from "@/components/shop/OfficeCard";
 import { FilterSidebar, FilterDrawer } from "@/components/shop/catalog/FilterSidebar";
 import { ProductCatalog } from "@/components/shop/catalog/ProductCatalog";
 import { ShopOverlays } from "@/components/shop/ShopOverlays";
@@ -20,7 +19,6 @@ export function ShopPageContent() {
       {status === "offline" && <OfflineBanner />}
 
       <ShopToolbar />
-      <OfficeCard />
 
       <section className="py-8 md:py-12">
         <Container size="wide">

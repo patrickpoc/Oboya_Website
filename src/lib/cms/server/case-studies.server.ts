@@ -7,6 +7,7 @@ import {
   deleteCaseStudy as deleteMemory,
   type CmsCaseStudy,
 } from "@/lib/cms/repositories/case-studies-repository";
+import { sanitizeLocalizedRichHtml } from "@/lib/cms/sanitize-rich-html.server";
 import {
   readCmsDocumentData,
   writeCmsDocumentData,
@@ -30,7 +31,18 @@ export async function saveCaseStudyDurable(
   study: CmsCaseStudy
 ): Promise<CmsCaseStudy> {
   await readCaseStudiesDurable();
-  const saved = saveMemory(study);
+  const saved = saveMemory({
+    ...study,
+    excerpt: sanitizeLocalizedRichHtml(study.excerpt),
+    challenge: sanitizeLocalizedRichHtml(study.challenge),
+    solution: sanitizeLocalizedRichHtml(study.solution),
+    implementation: sanitizeLocalizedRichHtml(study.implementation),
+    results: sanitizeLocalizedRichHtml(study.results),
+    testimonial: {
+      ...study.testimonial,
+      quote: sanitizeLocalizedRichHtml(study.testimonial.quote),
+    },
+  });
   await writeCmsDocumentData(CASE_STUDIES_DOC_ID, "case-studies", getCaseStudies());
   return saved;
 }

@@ -5,13 +5,14 @@ import path from "node:path";
 import type { FormSubmission, FormSubmissionStatus } from "@/lib/cms/types";
 import {
   addFormSubmission as addToMemory,
+  anonymizeFormSubmission as anonymizeMemory,
+  deleteFormSubmission as deleteMemory,
   getFormSubmissions as getFromMemory,
   replaceFormSubmissionsCache,
   updateSubmissionStatus as updateStatusMemory,
 } from "@/lib/cms/repositories/forms-repository";
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { createClient, createPublicClient } from "@/lib/supabase/server";
 import {
   createServiceClient,
   isServiceRoleConfigured,
@@ -58,13 +59,16 @@ function writeClient() {
   return null;
 }
 
-async function readFormsFromSupabase(): Promise<FormSubmission[]> {
-  let client = createPublicClient();
-  try {
-    client = await createClient();
-  } catch {
-    /* public client fallback */
+function requireWriteClient() {
+  const client = writeClient();
+  if (!client) {
+    throw new Error("Form storage is unavailable");
   }
+  return client;
+}
+
+async function readFormsFromSupabase(): Promise<FormSubmission[]> {
+  const client = requireWriteClient();
 
   const { data, error } = await client
     .from("cms_form_submissions")
@@ -93,7 +97,7 @@ export async function addFormSubmissionDurable(
   submission: Omit<FormSubmission, "id" | "createdAt">
 ): Promise<FormSubmission> {
   if (isSupabaseConfigured()) {
-    const client = writeClient() ?? (await createClient());
+    const client = requireWriteClient();
     const { data, error } = await client
       .from("cms_form_submissions")
       .insert({
@@ -121,7 +125,7 @@ export async function updateFormSubmissionStatusDurable(
   status: FormSubmissionStatus
 ): Promise<FormSubmission | null> {
   if (isSupabaseConfigured()) {
-    const client = writeClient() ?? (await createClient());
+    const client = requireWriteClient();
     const { data, error } = await client
       .from("cms_form_submissions")
       .update({ status })
@@ -142,4 +146,63 @@ export async function updateFormSubmissionStatusDurable(
     await writeLocalJsonFile(FORMS_FILE, getFromMemory());
   }
   return updated;
+}
+
+export async function deleteFormSubmissionDurable(id: string): Promise<boolean> {
+  if (isSupabaseConfigured()) {
+    const client = requireWriteClient();
+    const { error } = await client.from("cms_form_submissions").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+    deleteMemory(id);
+    return true;
+  }
+  await hydrateFromDisk();
+  const ok = deleteMemory(id);
+  if (ok) await writeLocalJsonFile(FORMS_FILE, getFromMemory());
+  return ok;
+}
+
+export async function anonymizeFormSubmissionDurable(
+  id: string
+): Promise<FormSubmission | null> {
+  if (isSupabaseConfigured()) {
+    const client = requireWriteClient();
+    const { data, error } = await client
+      .from("cms_form_submissions")
+      .update({ data: { redacted: true } })
+      .eq("id", id)
+      .select("id, type, status, data, created_at")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) return null;
+    const entry = rowToSubmission(data as FormRow);
+    anonymizeMemory(id);
+    return entry;
+  }
+  await hydrateFromDisk();
+  const updated = anonymizeMemory(id);
+  if (updated) await writeLocalJsonFile(FORMS_FILE, getFromMemory());
+  return updated;
+}
+
+export async function purgeFormSubmissionsOlderThan(
+  days: number
+): Promise<number> {
+  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  if (isSupabaseConfigured()) {
+    const client = requireWriteClient();
+    const { data, error } = await client
+      .from("cms_form_submissions")
+      .delete()
+      .lt("created_at", cutoff)
+      .select("id");
+    if (error) throw new Error(error.message);
+    return data?.length ?? 0;
+  }
+  await hydrateFromDisk();
+  const remaining = getFromMemory().filter((row) => row.createdAt >= cutoff);
+  const removed = getFromMemory().length - remaining.length;
+  replaceFormSubmissionsCache(remaining);
+  await writeLocalJsonFile(FORMS_FILE, remaining);
+  return removed;
 }

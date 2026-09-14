@@ -10,6 +10,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 export default function ChangePasswordPage() {
   const [password, setPassword] = useState("");
+  const [current, setCurrent] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -38,7 +39,7 @@ export default function ChangePasswordPage() {
       const res = await fetch("/api/cms/me/change-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password, currentPassword: current }),
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
@@ -73,6 +74,17 @@ export default function ChangePasswordPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="current">Current password</Label>
+            <Input
+              id="current"
+              type="password"
+              value={current}
+              onChange={(e) => setCurrent(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor="password">New password</Label>
             <Input

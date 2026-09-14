@@ -3,6 +3,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import sharp from "sharp";
 import type { MediaAsset } from "@/lib/cms/types";
 import { saveMediaAsset, deleteMediaAsset } from "@/lib/cms/repositories/media-repository";
 import { FOLDER_WEBSITE_FILES } from "@/lib/cms/media-folder-ids";
@@ -50,6 +51,86 @@ export function buildObjectFilename(mime: string) {
   const id = randomUUID();
   const filename = `media-${id}.${ext}`;
   return { id, filename, objectPath: `uploads/${filename}` };
+}
+
+const MEDIA_OBJECT_RE = /^uploads\/media-[0-9a-f-]{36}\.[a-z0-9]+$/i;
+
+function uploadsRoot() {
+  return path.resolve(process.cwd(), "public", "uploads");
+}
+
+function resolveLocalUploadPath(filename: string) {
+  const safeName = path.basename(filename);
+  const resolved = path.resolve(uploadsRoot(), safeName);
+  if (!resolved.startsWith(`${uploadsRoot()}${path.sep}`)) {
+    throw new Error("Invalid media path");
+  }
+  return resolved;
+}
+
+export function isAllowedCompletedMediaUrl(url: string, id: string): boolean {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (url.startsWith("/uploads/")) {
+    const filename = path.basename(url);
+    return MEDIA_OBJECT_RE.test(`uploads/${filename}`) && filename.includes(id);
+  }
+  try {
+    const parsed = new URL(url);
+    if (supabaseUrl) {
+      const expectedHost = new URL(supabaseUrl).hostname;
+      if (parsed.hostname !== expectedHost) return false;
+    } else if (!parsed.hostname.endsWith(".supabase.co")) {
+      return false;
+    }
+    const marker = `/object/public/${MEDIA_BUCKET}/`;
+    const idx = parsed.pathname.indexOf(marker);
+    if (idx < 0) return false;
+    const objectPath = decodeURIComponent(parsed.pathname.slice(idx + marker.length));
+    return MEDIA_OBJECT_RE.test(objectPath) && objectPath.includes(`media-${id}.`);
+  } catch {
+    return false;
+  }
+}
+
+async function stripImageMetadata(
+  buffer: Buffer,
+  mime: string
+): Promise<{ buffer: Buffer; mime: string }> {
+  if (!IMAGE_TYPES.has(mime) || mime === "image/gif") {
+    return { buffer, mime };
+  }
+  if (mime === "image/png") {
+    return { buffer: await sharp(buffer).rotate().png().toBuffer(), mime };
+  }
+  if (mime === "image/webp") {
+    return { buffer: await sharp(buffer).rotate().webp().toBuffer(), mime };
+  }
+  return {
+    buffer: await sharp(buffer).rotate().jpeg({ quality: 90 }).toBuffer(),
+    mime: "image/jpeg",
+  };
+}
+
+async function reencodeStoredImage(url: string, mime: string) {
+  if (!IMAGE_TYPES.has(mime) || mime === "image/gif") return;
+  const objectPath = storagePathFromPublicUrl(url);
+  if (!objectPath?.startsWith("uploads/")) return;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error("Could not inspect uploaded image");
+  }
+  const original = Buffer.from(await response.arrayBuffer());
+  const stripped = await stripImageMetadata(original, mime);
+  const supabase = await createClient();
+  const { error: uploadError } = await supabase.storage
+    .from(MEDIA_BUCKET)
+    .upload(objectPath, stripped.buffer, {
+      contentType: stripped.mime,
+      upsert: true,
+    });
+  if (uploadError) {
+    throw new Error("Could not strip image metadata");
+  }
 }
 
 export async function createSignedMediaUpload(input: {
@@ -114,7 +195,12 @@ export async function registerMediaAsset(input: {
   mimeType: string;
   size: number;
   folder?: string;
+  skipReencode?: boolean;
 }) {
+  if (!isAllowedCompletedMediaUrl(input.url, input.id)) {
+    throw new Error("Invalid media URL");
+  }
+
   const now = new Date().toISOString();
   const folder = input.folder || FOLDER_WEBSITE_FILES;
   const asset: MediaAsset = {
@@ -150,6 +236,9 @@ export async function registerMediaAsset(input: {
         error.message || "Failed to save media asset to the database"
       );
     }
+    if (asset.type === "image" && !input.skipReencode) {
+      await reencodeStoredImage(asset.url, asset.mimeType);
+    }
   }
 
   return saveMediaAsset(asset);
@@ -170,19 +259,20 @@ export async function storeMediaLocally(input: {
   }
 
   const { id, filename } = buildObjectFilename(input.mime);
-  const uploadsDir = path.join(process.cwd(), "public", "uploads");
-  await mkdir(uploadsDir, { recursive: true });
-  const buffer = Buffer.from(await input.file.arrayBuffer());
-  await writeFile(path.join(uploadsDir, filename), buffer);
+  await mkdir(uploadsRoot(), { recursive: true });
+  const original = Buffer.from(await input.file.arrayBuffer());
+  const stripped = await stripImageMetadata(original, input.mime);
+  await writeFile(resolveLocalUploadPath(filename), stripped.buffer);
 
   return registerMediaAsset({
     id,
-    name: input.file.name || filename,
+    name: path.basename(input.file.name || filename),
     url: `/uploads/${filename}`,
     type: input.kind,
-    mimeType: input.mime,
-    size: input.file.size,
+    mimeType: stripped.mime,
+    size: stripped.buffer.byteLength,
     folder: input.folder,
+    skipReencode: true,
   });
 }
 
@@ -201,12 +291,13 @@ export async function storeMediaViaSupabaseServer(input: {
 
   const supabase = await createClient();
   const { id, filename, objectPath } = buildObjectFilename(input.mime);
-  const buffer = Buffer.from(await input.file.arrayBuffer());
+  const original = Buffer.from(await input.file.arrayBuffer());
+  const stripped = await stripImageMetadata(original, input.mime);
 
   const { error } = await supabase.storage
     .from(MEDIA_BUCKET)
-    .upload(objectPath, buffer, {
-      contentType: input.mime,
+    .upload(objectPath, stripped.buffer, {
+      contentType: stripped.mime,
       upsert: false,
     });
 
@@ -223,12 +314,13 @@ export async function storeMediaViaSupabaseServer(input: {
 
   return registerMediaAsset({
     id,
-    name: input.file.name || filename,
+    name: path.basename(input.file.name || filename),
     url: publicUrl,
     type: input.kind,
-    mimeType: input.mime,
-    size: input.file.size,
+    mimeType: stripped.mime,
+    size: stripped.buffer.byteLength,
     folder: input.folder,
+    skipReencode: true,
   });
 }
 
@@ -276,7 +368,7 @@ export async function removeMediaAsset(input: {
   if (input.url?.startsWith("/uploads/")) {
     try {
       const { unlink } = await import("node:fs/promises");
-      await unlink(path.join(process.cwd(), "public", input.url.replace(/^\//, "")));
+      await unlink(resolveLocalUploadPath(path.basename(input.url)));
     } catch {
       // File may already be gone.
     }

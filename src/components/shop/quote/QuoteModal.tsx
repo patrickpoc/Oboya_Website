@@ -46,6 +46,8 @@ export function QuoteModal() {
     phone: "",
     country: "",
     message: "",
+    privacyAccepted: false,
+    marketingOptIn: false,
   });
 
   const office = countryCode
@@ -76,6 +78,8 @@ export function QuoteModal() {
         phone: "",
         country: "",
         message: "",
+        privacyAccepted: false,
+        marketingOptIn: false,
       });
     } catch {
       // rfqStatus set in context
@@ -136,6 +140,7 @@ export function QuoteModal() {
                     <input
                       id="rfq-company"
                       required
+                      maxLength={120}
                       value={form.company}
                       onChange={(e) =>
                         setForm((p) => ({ ...p, company: e.target.value }))
@@ -151,6 +156,7 @@ export function QuoteModal() {
                     <input
                       id="rfq-contact"
                       required
+                      maxLength={120}
                       value={form.contactName}
                       onChange={(e) =>
                         setForm((p) => ({ ...p, contactName: e.target.value }))
@@ -182,6 +188,7 @@ export function QuoteModal() {
                     <input
                       id="rfq-phone"
                       required
+                      maxLength={32}
                       value={form.phone}
                       onChange={(e) =>
                         setForm((p) => ({ ...p, phone: e.target.value }))
@@ -212,6 +219,7 @@ export function QuoteModal() {
                     <textarea
                       id="rfq-notes"
                       rows={3}
+                      maxLength={2000}
                       value={form.message}
                       onChange={(e) =>
                         setForm((p) => ({ ...p, message: e.target.value }))
@@ -220,6 +228,39 @@ export function QuoteModal() {
                       className="w-full rounded-lg border border-border px-3 py-2 text-sm"
                     />
                   </div>
+
+                  <p className="text-xs leading-relaxed text-oboya-blue-dark/70">
+                    {t("privacyNotice")}{" "}
+                    <Link
+                      href="/privacy"
+                      className="text-oboya-blue-light underline-offset-2 hover:underline"
+                    >
+                      {t("privacyLink")}
+                    </Link>
+                  </p>
+                  <label className="flex items-start gap-2 text-xs text-oboya-blue-dark/80">
+                    <input
+                      type="checkbox"
+                      required
+                      checked={form.privacyAccepted}
+                      onChange={(e) =>
+                        setForm((p) => ({ ...p, privacyAccepted: e.target.checked }))
+                      }
+                      className="mt-0.5 size-4 accent-oboya-blue-dark"
+                    />
+                    <span>{t("privacyAccept")}</span>
+                  </label>
+                  <label className="flex items-start gap-2 text-xs text-oboya-blue-dark/80">
+                    <input
+                      type="checkbox"
+                      checked={form.marketingOptIn}
+                      onChange={(e) =>
+                        setForm((p) => ({ ...p, marketingOptIn: e.target.checked }))
+                      }
+                      className="mt-0.5 size-4 accent-oboya-blue-dark"
+                    />
+                    <span>{t("marketingOptIn")}</span>
+                  </label>
 
                   <div className="flex flex-col gap-2 pt-2 sm:flex-row">
                     <button

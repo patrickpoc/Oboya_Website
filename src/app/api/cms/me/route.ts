@@ -12,10 +12,17 @@ import {
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { getCmsUsers } from "@/lib/cms/repositories/users-repository";
 import type { CmsLocale } from "@/lib/cms/types";
+import { isHostedRuntime } from "@/lib/security/runtime";
 
 export async function GET() {
   try {
     if (!isSupabaseConfigured()) {
+      if (isHostedRuntime()) {
+        return NextResponse.json(
+          { error: "Service unavailable" },
+          { status: 503 }
+        );
+      }
       const user = getCmsUsers()[0];
       if (!user) {
         return NextResponse.json({ error: "No user" }, { status: 404 });
@@ -72,6 +79,7 @@ export async function GET() {
     };
 
     const mustChange =
+      authUser.app_metadata?.must_change_password === true ||
       authUser.user_metadata?.must_change_password === true ||
       user.mustChangePassword === true;
 
@@ -80,9 +88,8 @@ export async function GET() {
       user: { ...user, mustChangePassword: mustChange },
     });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Failed to load profile";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Failed to load profile:", error);
+    return NextResponse.json({ error: "Failed to load profile" }, { status: 500 });
   }
 }
 
