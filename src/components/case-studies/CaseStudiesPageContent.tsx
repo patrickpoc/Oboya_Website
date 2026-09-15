@@ -18,7 +18,7 @@ function coverSrc(url: string) {
   if (!url) return FALLBACK_COVER;
   if (url.includes("images.unsplash.com")) {
     const base = url.split("?")[0];
-    return `${base}?auto=format&fit=crop&w=1200&h=1500&q=75`;
+    return `${base}?auto=format&fit=crop&w=1200&h=900&q=75`;
   }
   return url;
 }
@@ -36,7 +36,7 @@ export async function CaseStudiesPageContent({
       <CaseStudiesIntro />
 
       <section
-        className="overflow-x-clip bg-white pb-[var(--section-y)]"
+        className="overflow-x-clip bg-white pb-[clamp(2rem,4.5vw,3.75rem)]"
         aria-label={t("showcaseTitle")}
       >
         <Container>
@@ -45,7 +45,7 @@ export async function CaseStudiesPageContent({
               {t("emptyState")}
             </p>
           ) : (
-            <div className="mx-auto flex w-full min-w-0 flex-col gap-[clamp(4.05rem,9.9vw,7.65rem)] lg:w-[90%]">
+            <div className="mx-auto flex w-full min-w-0 flex-col gap-[clamp(2.25rem,5vw,3.75rem)] lg:w-[90%]">
               {published.map((study, index) => {
                 const title = pickLocalized(study.title, locale);
                 const paragraphs = splitCaseStudyExcerpt(

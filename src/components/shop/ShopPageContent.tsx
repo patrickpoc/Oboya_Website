@@ -7,12 +7,23 @@ import { FilterSidebar, FilterDrawer } from "@/components/shop/catalog/FilterSid
 import { ProductCatalog } from "@/components/shop/catalog/ProductCatalog";
 import { ShopOverlays } from "@/components/shop/ShopOverlays";
 import {
+  CatalogLoading,
   ErrorState,
   OfflineBanner,
 } from "@/components/shop/states/ShopStateViews";
 
 export function ShopPageContent() {
-  const { status, countryCode } = useShop();
+  const { status, countryCode, catalogReady } = useShop();
+
+  if (!catalogReady) {
+    return (
+      <section className="py-8 md:py-12">
+        <Container size="wide">
+          <CatalogLoading />
+        </Container>
+      </section>
+    );
+  }
 
   return (
     <>

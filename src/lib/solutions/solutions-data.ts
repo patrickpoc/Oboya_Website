@@ -19,19 +19,19 @@ export const SOLUTION_CROP_FILTERS: SolutionsCropFilter[] = [
     id: "flowers",
     labelKey: "flowers",
     areaKey: "flowers",
-    shop: { q: "flowers" },
+    shop: { cultures: ["flowers"] },
   },
   {
     id: "vegetables",
     labelKey: "vegetables",
     areaKey: "vegetables",
-    shop: { cultures: ["vegetables"], q: "vegetables" },
+    shop: { cultures: ["vegetables"] },
   },
   {
     id: "fruits",
     labelKey: "fruits",
     areaKey: "fruits",
-    shop: { q: "fruits" },
+    shop: { cultures: ["fruits"] },
   },
 ];
 
@@ -41,49 +41,49 @@ export const SOLUTION_STAGE_CARDS: SolutionStageCard[] = [
     image: "/assets/homepage/capabilities-value-chain.jpg",
     titleKey: "propagation",
     tagKeys: ["seedlingTrays", "substrates"],
-    shop: { q: "propagation trays" },
+    shop: { categoryId: "propagation" },
   },
   {
     id: "growing",
     image: "/assets/homepage/hero-vineyard.jpg",
     titleKey: "growing",
     tagKeys: ["seedlingTrays", "substrates", "pots", "irrigation"],
-    shop: { q: "pots irrigation" },
+    shop: { categoryId: "growing" },
   },
   {
     id: "harvest",
     image: "/assets/homepage/solutions-integrated.jpg",
     titleKey: "harvest",
     tagKeys: ["crates", "transportTrays", "harvestCarts"],
-    shop: { q: "crates harvest" },
+    shop: { categoryId: "harvest" },
   },
   {
     id: "postharvest",
     image: "/assets/homepage/capabilities-partnerships.jpg",
     titleKey: "postharvest",
     tagKeys: ["packaging", "crates"],
-    shop: { q: "packaging" },
+    shop: { categoryId: "post-harvest" },
   },
   {
     id: "transport-logistics",
     image: "/assets/homepage/solutions-logistics.jpg",
     titleKey: "transportLogistics",
     tagKeys: ["logisticsTrolleys", "displaySystems"],
-    shop: { q: "trolleys logistics" },
+    shop: { categoryId: "transport-and-logistics" },
   },
   {
     id: "retail",
     image: "/assets/homepage/capabilities-global-local.jpg",
     titleKey: "retail",
     tagKeys: ["logisticsTrolleys", "displaySystems"],
-    shop: { q: "display retail" },
+    shop: { categoryId: "retail" },
   },
   {
     id: "automation",
     image: "/assets/homepage/greenhouse-technology.webp",
     titleKey: "automation",
     tagKeys: ["automationSystems", "greenhouseTech"],
-    shop: { q: "automation" },
+    shop: { categoryId: "automation-and-machinery" },
   },
 ];
 
@@ -243,12 +243,76 @@ export function solutionAreaHref(id: SolutionsAreaId): string {
   return `/solutions?area=${id}`;
 }
 
+const CROP_FILTER_IDS = new Set<SolutionsCropFilter["id"]>([
+  "flowers",
+  "vegetables",
+  "fruits",
+]);
+
+/** Homepage / deep-link area → Solutions crop filter. Non-crop areas map to All Crops. */
 export function cropFilterFromAreaParam(
   area: string | null
 ): SolutionsCropFilter["id"] | null {
   if (!area) return null;
-  if (area === "flowers" || area === "vegetables" || area === "fruits") {
-    return area;
+  const normalized = area.trim().toLowerCase();
+  if (normalized === "all") return "all";
+  if (
+    normalized === "flowers" ||
+    normalized === "vegetables" ||
+    normalized === "fruits"
+  ) {
+    return normalized;
   }
-  return null;
+  return "all";
+}
+
+/**
+ * Resolve a Solutions deep-link for a homepage business-solutions card.
+ * Crop cards → that filter; anything else → All Crops.
+ */
+export function solutionsHrefForBusinessCard(input: {
+  id: string;
+  href?: string;
+  title?: string;
+}): string {
+  const id = input.id.trim().toLowerCase();
+  if (CROP_FILTER_IDS.has(id as SolutionsCropFilter["id"])) {
+    return `/solutions?area=${id}`;
+  }
+
+  const haystack = `${id} ${input.href ?? ""} ${input.title ?? ""}`.toLowerCase();
+  if (/\bflowers?\b|flor(?:es|icultura)?\b/.test(haystack)) {
+    return "/solutions?area=flowers";
+  }
+  if (
+    /\bvegetables?\b|\bherbs?\b|vegetais|hortali[cç]as?|hierbas?\b/.test(
+      haystack
+    )
+  ) {
+    return "/solutions?area=vegetables";
+  }
+  if (/\bfruits?\b|frutas?\b/.test(haystack)) {
+    return "/solutions?area=fruits";
+  }
+
+  try {
+    const raw = (input.href || "").trim();
+    if (raw) {
+      const url = new URL(raw, "https://oboya.local");
+      const area =
+        url.searchParams.get("area") ||
+        url.hash.replace(/^#/, "") ||
+        (url.pathname.includes("/solutions/")
+          ? url.pathname.split("/solutions/")[1]?.split(/[?#]/)[0]
+          : "");
+      const mapped = cropFilterFromAreaParam(area || null);
+      if (mapped && mapped !== "all") {
+        return `/solutions?area=${mapped}`;
+      }
+    }
+  } catch {
+    // fall through to All Crops
+  }
+
+  return "/solutions?area=all";
 }

@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { getShopCatalog, updateShopCatalog } from "@/lib/shop/catalog";
-import type { ShopBrand, ShopCategory, ShopCountry, ShopFilterOptions } from "@/lib/shop/types";
+import type {
+  ShopBrand,
+  ShopCategory,
+  ShopCountry,
+  ShopFilterGroup,
+  ShopFilterOptions,
+} from "@/lib/shop/types";
 
 export function useAdminMarketplaceCatalog() {
   const [catalog, setCatalog] = useState(() => getShopCatalog());
@@ -23,12 +29,14 @@ export function useAdminMarketplaceCatalog() {
           const data = (await filtersResponse.json()) as {
             categories: ShopCategory[];
             brands: ShopBrand[];
+            filterGroups?: ShopFilterGroup[];
             filterOptions: ShopFilterOptions;
           };
 
           updateShopCatalog({
             categories: data.categories,
             brands: data.brands,
+            filterGroups: data.filterGroups,
             filterOptions: data.filterOptions,
           });
         }

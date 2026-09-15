@@ -25,6 +25,7 @@ export function FilterChips() {
     updateFilters,
     clearFilters,
     activeFilterCount,
+    filterGroups,
     filterOptions,
     categories,
   } = useShop();
@@ -83,62 +84,52 @@ export function FilterChips() {
     });
   }
 
-  for (const id of filters.applications) {
-    const option = filterOptions.applications.find((item) => item.id === id);
-    const text = pickLabel(locale, option?.name ?? id, option?.nameI18n);
-    chips.push({
-      key: `app-${id}`,
-      label: text,
-      ariaLabel: text,
-      onRemove: () =>
-        updateFilters({
-          applications: filters.applications.filter((item) => item !== id),
-        }),
-    });
-  }
-
-  for (const id of filters.cultures) {
-    const option = filterOptions.cultures.find((item) => item.id === id);
-    const text = pickLabel(locale, option?.name ?? id, option?.nameI18n);
-    chips.push({
-      key: `culture-${id}`,
-      label: text,
-      ariaLabel: text,
-      onRemove: () =>
-        updateFilters({
-          cultures: filters.cultures.filter((item) => item !== id),
-        }),
-    });
-  }
-
-  for (const id of filters.certifications) {
-    const option = filterOptions.certifications.find((item) => item.id === id);
-    const text = pickLabel(locale, option?.name ?? id, option?.nameI18n);
-    chips.push({
-      key: `cert-${id}`,
-      label: text,
-      ariaLabel: text,
-      onRemove: () =>
-        updateFilters({
-          certifications: filters.certifications.filter((item) => item !== id),
-        }),
-    });
-  }
-
-  for (const id of filters.countriesOfOrigin) {
-    const option = filterOptions.countriesOfOrigin.find((item) => item.id === id);
-    const text = pickLabel(locale, option?.name ?? id, option?.nameI18n);
-    chips.push({
-      key: `origin-${id}`,
-      label: text,
-      ariaLabel: text,
-      onRemove: () =>
-        updateFilters({
-          countriesOfOrigin: filters.countriesOfOrigin.filter(
-            (item) => item !== id
-          ),
-        }),
-    });
+  for (const group of filterGroups) {
+    const selectedIds =
+      group.id === "applications"
+        ? filters.applications
+        : group.id === "cultures"
+          ? filters.cultures
+          : group.id === "certifications"
+            ? filters.certifications
+            : group.id === "countriesOfOrigin"
+              ? filters.countriesOfOrigin
+              : (filters.customFilters?.[group.id] ?? []);
+    const options = filterOptions[group.id] ?? [];
+    for (const id of selectedIds) {
+      const option = options.find((item) => item.id === id);
+      const text = pickLabel(locale, option?.name ?? id, option?.nameI18n);
+      chips.push({
+        key: `${group.id}-${id}`,
+        label: text,
+        ariaLabel: text,
+        onRemove: () => {
+          const next = selectedIds.filter((item) => item !== id);
+          if (group.id === "applications") {
+            updateFilters({ applications: next });
+            return;
+          }
+          if (group.id === "cultures") {
+            updateFilters({ cultures: next });
+            return;
+          }
+          if (group.id === "certifications") {
+            updateFilters({ certifications: next });
+            return;
+          }
+          if (group.id === "countriesOfOrigin") {
+            updateFilters({ countriesOfOrigin: next });
+            return;
+          }
+          updateFilters({
+            customFilters: {
+              ...(filters.customFilters ?? {}),
+              [group.id]: next,
+            },
+          });
+        },
+      });
+    }
   }
 
   if (filters.availabilityOnly) {

@@ -25,13 +25,22 @@ export interface ShopCategory {
   id: string;
   name: string;
   nameI18n?: ShopLocalizedText;
-  subcategories: { id: string; name: string; nameI18n?: ShopLocalizedText }[];
+  /** Stable public key for URLs (e.g. `propagation`). */
+  slug?: string;
+  subcategories: {
+    id: string;
+    name: string;
+    nameI18n?: ShopLocalizedText;
+    slug?: string;
+  }[];
 }
 
 export interface ShopBrand {
   id: string;
   name: string;
   nameI18n?: ShopLocalizedText;
+  /** Stable public key for URLs (e.g. `oboya-qs-ecovaso`). */
+  slug?: string;
   /** ISO country code from the Global Presence map (e.g. BR, US). */
   flag?: string;
 }
@@ -40,13 +49,31 @@ export interface FilterOption {
   id: string;
   name: string;
   nameI18n?: ShopLocalizedText;
+  /**
+   * Stable public key for URLs / Solutions deep-links (e.g. `flowers`).
+   * Prefer this over generated admin ids like `cultures-1788…`.
+   */
+  slug?: string;
 }
 
+/** Ordered filter group shown in admin + shop sidebar. */
+export interface ShopFilterGroup {
+  id: string;
+  name: string;
+  nameI18n?: ShopLocalizedText;
+}
+
+/**
+ * Option lists keyed by filter group id.
+ * Built-ins: applications, cultures, certifications, countriesOfOrigin.
+ * Custom groups use arbitrary ids and map to `product.customFilters`.
+ */
 export interface ShopFilterOptions {
   applications: FilterOption[];
   cultures: FilterOption[];
   certifications: FilterOption[];
   countriesOfOrigin: FilterOption[];
+  [groupId: string]: FilterOption[];
 }
 
 export interface ProductSpec {
@@ -95,6 +122,11 @@ export interface ShopProduct {
   cultures: string[];
   certifications: string[];
   countryOfOrigin: string;
+  /**
+   * Values for custom filter groups (groupId → option ids).
+   * Built-in groups use the dedicated fields above.
+   */
+  customFilters?: Record<string, string[]>;
   stockStatus: StockStatus;
   stockQuantity: number | null;
   unlimitedStock: boolean;
@@ -116,6 +148,7 @@ export interface ShopCatalog {
   countries: ShopCountry[];
   categories: ShopCategory[];
   brands: ShopBrand[];
+  filterGroups: ShopFilterGroup[];
   filterOptions: ShopFilterOptions;
   products: ShopProduct[];
 }
@@ -135,6 +168,8 @@ export interface ShopFilters {
   cultures: string[];
   certifications: string[];
   countriesOfOrigin: string[];
+  /** Selected option ids for custom filter groups. */
+  customFilters: Record<string, string[]>;
   availabilityOnly: boolean;
   priceMin: number | null;
   priceMax: number | null;
@@ -148,6 +183,7 @@ export const EMPTY_SHOP_FILTERS: ShopFilters = {
   cultures: [],
   certifications: [],
   countriesOfOrigin: [],
+  customFilters: {},
   availabilityOnly: false,
   priceMin: null,
   priceMax: null,

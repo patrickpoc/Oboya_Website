@@ -1,29 +1,34 @@
 import countriesData from "../../../data/shop/countries.json";
-import categoriesData from "../../../data/shop/categories.json";
-import brandsData from "../../../data/shop/brands.json";
-import filterOptionsData from "../../../data/shop/filter-options.json";
-import productsData from "../../../data/shop/products.json";
-import type {
-  ShopBrand,
-  ShopCatalog,
-  ShopCategory,
-  ShopCountry,
-  ShopFilterOptions,
-  ShopProduct,
-} from "@/lib/shop/types";
+import {
+  DEFAULT_FILTER_GROUPS,
+  emptyShopFilterOptions,
+  normalizeFilterGroups,
+  normalizeFilterOptions,
+} from "@/lib/shop/filter-groups";
+import type { ShopCatalog, ShopCountry } from "@/lib/shop/types";
 
+const emptyOptions = normalizeFilterOptions(emptyShopFilterOptions());
+
+/**
+ * Client bootstrap catalog. Taxonomy + products stay empty until
+ * `/api/cms/marketplace/*` hydrates via `updateShopCatalog` — avoids flashing
+ * stale local seed/demo filters (Categoria Demo, Teste Crop, etc.).
+ * Countries remain available so the market picker works immediately.
+ */
 const catalog: ShopCatalog = {
   countries: countriesData as ShopCountry[],
-  categories: categoriesData as ShopCategory[],
-  brands: brandsData as ShopBrand[],
-  filterOptions: filterOptionsData as ShopFilterOptions,
-  products: productsData as ShopProduct[],
+  categories: [],
+  brands: [],
+  filterGroups: normalizeFilterGroups(DEFAULT_FILTER_GROUPS, emptyOptions),
+  filterOptions: emptyOptions,
+  products: [],
 };
 
 export function updateShopCatalog(patch: Partial<ShopCatalog>) {
   if (patch.countries) catalog.countries = patch.countries;
   if (patch.categories) catalog.categories = patch.categories;
   if (patch.brands) catalog.brands = patch.brands;
+  if (patch.filterGroups) catalog.filterGroups = patch.filterGroups;
   if (patch.filterOptions) catalog.filterOptions = patch.filterOptions;
   if (patch.products) catalog.products = patch.products;
 }
@@ -49,12 +54,10 @@ export function getCategoryById(id: string) {
 }
 
 export function getAvailableProducts(countryCode: string) {
-  return catalog.products.filter(
-    (product) => {
-      const enabledMap = product.enabledCountries ?? product.availability;
-      return Boolean(enabledMap[countryCode]);
-    }
-  );
+  return catalog.products.filter((product) => {
+    const enabledMap = product.enabledCountries ?? product.availability;
+    return Boolean(enabledMap[countryCode]);
+  });
 }
 
 export function getProductsByIds(ids: string[]) {

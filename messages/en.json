@@ -642,6 +642,7 @@
     "rfqError": "We could not submit your request. Please try again or contact your local office.",
     "retry": "Retry",
     "loadError": "Unable to load products. Please refresh the page.",
+    "catalogLoading": "Loading catalog…",
     "offlineMessage": "You are offline. Some features may be unavailable.",
     "sort": {
       "relevance": "Relevance",
@@ -723,7 +724,7 @@
     "description": "Partnerships across South Africa, Colombia, and Ecuador — from pot plant wrapping automation and integrated post-harvest logistics to RFID and AGV pilots and inclusive bouquet equipment.",
     "heroEyebrow": "Real Challenges. Measurable Results.",
     "heroTitle": "Discover how growers, exporters, distributors, and retailers have partnered with Oboya to improve efficiency, strengthen supply chains, and achieve meaningful business outcomes.",
-    "introTitle": "Every Operation Has Its Own Challenges.",
+    "introTitle": "Every Operation Has<br></br>Its Own Challenges.",
     "introBody": "From greenhouse floors to retail shelves, every partner faces distinct operational pressures. These stories show how Oboya collaborates locally to unlock efficiency, resilience, and lasting results.",
     "findOutMore": "Find out more",
     "emptyState": "Case studies are coming soon.",
@@ -1362,7 +1363,8 @@
       "emailTemplates": "Email Templates",
       "analytics": "Analytics",
       "backups": "Backups",
-      "auditLogs": "Audit Logs"
+      "auditLogs": "Audit Logs",
+      "solutions": "Solutions"
     },
     "filters": {
       "title": "Filters",
@@ -1375,6 +1377,7 @@
       "addCategory": "Add category",
       "addSubcategory": "Add subcategory",
       "addBrand": "Add brand",
+      "addGroup": "Add filter group",
       "addOption": "Add option",
       "searchCategory": "Search category…",
       "searchBrand": "Search brand…",
@@ -1400,6 +1403,7 @@
       "countriesOfOrigin": "Country of Manufacture",
       "deleteCategory": "Delete category",
       "deleteBrand": "Delete brand",
+      "deleteGroup": "Delete filter group",
       "deleteOption": "Delete option",
       "deleteBlocked": "This item is used by {count} product(s) and cannot be removed.",
       "deleteConfirm": "This item will be removed.",
@@ -1414,6 +1418,8 @@
       "editBrand": "Edit brand {name}",
       "removeBrand": "Remove brand {name}",
       "editGroup": "Edit group {name}",
+      "editGroupName": "Edit group name",
+      "removeGroup": "Remove group {name}",
       "removeOption": "Remove option {name}",
       "siteReflection": "Site Reflection",
       "moreOptions": "+{count} more options"

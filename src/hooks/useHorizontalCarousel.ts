@@ -145,7 +145,16 @@ export function useHorizontalCarousel({
 
   const onPointerDown = (event: ReactPointerEvent) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
-    if ((event.target as HTMLElement | null)?.closest?.("button")) return;
+    const target = event.target as HTMLElement | null;
+    // Don't start a drag (or capture the pointer) on real interactive targets —
+    // otherwise <Link> / <a> clicks never navigate.
+    if (
+      target?.closest?.(
+        "a, button, input, textarea, select, label, [role='link'], [role='button']"
+      )
+    ) {
+      return;
+    }
 
     setAnimateSnap(false);
     pointerStartX.current = event.clientX;

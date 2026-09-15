@@ -18,6 +18,15 @@ import {
   getShopCatalog,
   updateShopCatalog,
 } from "@/lib/shop/catalog";
+import {
+  normalizeBrands,
+  normalizeCategories,
+  normalizeFilterGroups,
+  normalizeFilterOptions,
+  resolveShopFilters,
+  toPublicShopFilters,
+  type ShopFilterTaxonomy,
+} from "@/lib/shop/filter-groups";
 import { countActiveFilters, filterProducts, sortProducts } from "@/lib/shop/filters";
 import {
   buildShopSearchParams,
@@ -62,6 +71,8 @@ interface PersistedState {
 
 interface ShopContextValue extends ShopState {
   isReady: boolean;
+  /** True after marketplace CMS products/filters have hydrated (or failed). */
+  catalogReady: boolean;
   itemCount: number;
   activeFilterCount: number;
   filteredProducts: ShopProduct[];
@@ -71,6 +82,7 @@ interface ShopContextValue extends ShopState {
   countries: ReturnType<typeof getShopCatalog>["countries"];
   categories: ReturnType<typeof getShopCatalog>["categories"];
   brands: ReturnType<typeof getShopCatalog>["brands"];
+  filterGroups: ReturnType<typeof getShopCatalog>["filterGroups"];
   filterOptions: ReturnType<typeof getShopCatalog>["filterOptions"];
   getProductById: (productId: string) => ShopProduct | undefined;
   setCountry: (countryCode: string) => void;
@@ -145,6 +157,15 @@ function replaceListingQuery(query: string) {
   window.history.replaceState(window.history.state, "", nextUrl);
 }
 
+function catalogTaxonomy(): ShopFilterTaxonomy {
+  const catalog = getShopCatalog();
+  return {
+    categories: catalog.categories,
+    brands: catalog.brands,
+    filterOptions: catalog.filterOptions,
+  };
+}
+
 function sanitizeCartItems(items: unknown): CartItem[] {
   if (!Array.isArray(items)) return [];
   return items
@@ -216,7 +237,9 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     null
   );
   const [isReady, setIsReady] = useState(false);
-  const [shopProducts, setShopProducts] = useState<ShopProduct[]>(() => getShopCatalog().products);
+  // Start empty — seed/demo JSON must not flash before the live CMS catalog loads.
+  const [shopProducts, setShopProducts] = useState<ShopProduct[]>([]);
+  const [catalogReady, setCatalogReady] = useState(false);
   const [catalogTick, setCatalogTick] = useState(0);
   const hydratedFromUrl = useRef(false);
   const skipUrlWrite = useRef(false);
@@ -250,6 +273,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     if (!isShopAreaRoute) return;
 
     let cancelled = false;
+    setCatalogReady(false);
     setState((prev) =>
       prev.status === "offline" ? prev : { ...prev, status: "loading" }
     );
@@ -271,12 +295,23 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           const filters = (await filtersRes.json()) as {
             categories?: ReturnType<typeof getShopCatalog>["categories"];
             brands?: ReturnType<typeof getShopCatalog>["brands"];
+            filterGroups?: ReturnType<typeof getShopCatalog>["filterGroups"];
             filterOptions?: ReturnType<typeof getShopCatalog>["filterOptions"];
           };
           updateShopCatalog({
-            categories: filters.categories,
-            brands: filters.brands,
-            filterOptions: filters.filterOptions,
+            categories: filters.categories
+              ? normalizeCategories(filters.categories)
+              : undefined,
+            brands: filters.brands ? normalizeBrands(filters.brands) : undefined,
+            filterGroups: filters.filterGroups
+              ? normalizeFilterGroups(
+                  filters.filterGroups,
+                  normalizeFilterOptions(filters.filterOptions, filters.filterGroups)
+                )
+              : undefined,
+            filterOptions: filters.filterOptions
+              ? normalizeFilterOptions(filters.filterOptions, filters.filterGroups)
+              : undefined,
           });
         }
         if (currenciesRes.ok) {
@@ -287,7 +322,6 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
             updateShopCatalog({ countries: currencies.countries });
           }
         }
-        setCatalogTick((n) => n + 1);
 
         const products = (await productsRes.json()) as CmsProduct[];
         const published = products
@@ -307,24 +341,41 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
             colorVariants: normalizeColorVariants(product.colorVariants),
           }));
         if (cancelled) return;
+
         if (published.length > 0) {
           setShopProducts(published);
+          updateShopCatalog({ products: published });
           const validIds = new Set(published.map((product) => product.id));
           setState((prev) => ({
             ...prev,
             status: prev.status === "offline" ? "offline" : "idle",
             items: prev.items.filter((item) => validIds.has(item.productId)),
+            filters: resolveShopFilters(prev.filters, catalogTaxonomy()),
           }));
         } else {
+          // Keep any previously loaded CMS products; never revive seed demo data.
           setState((prev) =>
             prev.status === "offline" ? prev : { ...prev, status: "idle" }
           );
         }
+        setCatalogTick((n) => n + 1);
+        setCatalogReady(true);
       } catch {
         if (cancelled) return;
-        // Keep static fallback catalog when API is unavailable.
+        // Last-resort seed fallback only when the API is unavailable.
+        setShopProducts((prev) =>
+          prev.length > 0 ? prev : getShopCatalog().products
+        );
+        setCatalogReady(true);
+        setCatalogTick((n) => n + 1);
         setState((prev) =>
-          prev.status === "offline" ? prev : { ...prev, status: "error" }
+          prev.status === "offline"
+            ? prev
+            : {
+                ...prev,
+                status: "error",
+                filters: resolveShopFilters(prev.filters, catalogTaxonomy()),
+              }
         );
       }
     })();
@@ -334,12 +385,18 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     };
   }, [isShopAreaRoute]);
 
-  // Keep shop UI in sync with URL when entering / navigating within shop listing
+  // Keep shop UI in sync with URL when entering / navigating within shop listing.
+  // Prefer window.location over useSearchParams: on client navigations
+  // (e.g. Solutions → Shop) the hook can briefly lag behind the address bar.
+  // Hydrating from an empty hook query then write-back would wipe inbound filters.
   useEffect(() => {
     if (!isReady) return;
 
     if (!isShopListingRoute) {
       wasOnShop.current = false;
+      hydratedFromUrl.current = false;
+      lastSyncedQuery.current = null;
+      skipUrlWrite.current = false;
       if (softOpenTimer.current) {
         clearTimeout(softOpenTimer.current);
         softOpenTimer.current = null;
@@ -348,7 +405,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     }
 
     const applyQuery = (query: string, enteringShop: boolean) => {
-      if (query === lastSyncedQuery.current && !enteringShop) return;
+      if (
+        query === lastSyncedQuery.current &&
+        !enteringShop &&
+        hydratedFromUrl.current
+      ) {
+        return;
+      }
       lastSyncedQuery.current = query;
 
       const urlState = parseShopUrlState(new URLSearchParams(query));
@@ -361,19 +424,25 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       }
 
       skipUrlWrite.current = true;
-      setState((prev) => ({
-        ...prev,
-        countryCode: urlState.country ?? prev.countryCode,
-        currency: urlState.currency ?? prev.currency,
-        search: urlState.q,
-        sort: urlState.sort,
-        viewMode: urlState.view,
-        filters: urlState.filters,
-        quickViewProductId: null,
-        isCartOpen: urlState.cart,
-        isQuoteModalOpen: urlState.quote,
-        visibleCount: PRODUCTS_PAGE_SIZE,
-      }));
+      setState((prev) => {
+        const rawFilters = urlState.filters;
+        const filters = catalogReady
+          ? resolveShopFilters(rawFilters, catalogTaxonomy())
+          : rawFilters;
+        return {
+          ...prev,
+          countryCode: urlState.country ?? prev.countryCode,
+          currency: urlState.currency ?? prev.currency,
+          search: urlState.q,
+          sort: urlState.sort,
+          viewMode: urlState.view,
+          filters,
+          quickViewProductId: null,
+          isCartOpen: urlState.cart,
+          isQuoteModalOpen: urlState.quote,
+          visibleCount: PRODUCTS_PAGE_SIZE,
+        };
+      });
       hydratedFromUrl.current = true;
 
       if (softOpen && pendingProduct) {
@@ -391,7 +460,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
     const enteringShop = !wasOnShop.current;
     wasOnShop.current = true;
-    applyQuery(searchParams.toString(), enteringShop);
+    applyQuery(currentLocationQuery(), enteringShop);
 
     const onPopState = () => {
       applyQuery(currentLocationQuery(), false);
@@ -400,12 +469,14 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       window.removeEventListener("popstate", onPopState);
+      // Strict Mode remount discards the prior setState — force re-hydrate.
+      hydratedFromUrl.current = false;
       if (softOpenTimer.current) {
         clearTimeout(softOpenTimer.current);
         softOpenTimer.current = null;
       }
     };
-  }, [isReady, isShopListingRoute, router, searchParams]);
+  }, [isReady, isShopListingRoute, router, searchParams, catalogReady]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -420,6 +491,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   // Mirror shop listing state into the address bar on every change.
   // history.replaceState (not next-intl router.replace) so query strings
   // from inbound links (Solutions, etc.) stay writable.
+  // Prefer stable slugs (`flowers`) over generated CMS ids in the URL.
   useEffect(() => {
     if (
       !isShopListingRoute ||
@@ -430,13 +502,17 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    const publicFilters = catalogReady
+      ? toPublicShopFilters(state.filters, catalogTaxonomy())
+      : state.filters;
+
     const params = buildShopSearchParams({
       countryCode: state.countryCode,
       currency: state.currency,
       search: state.search,
       sort: state.sort,
       viewMode: state.viewMode,
-      filters: state.filters,
+      filters: publicFilters,
       quickViewProductId: state.quickViewProductId,
       isCartOpen: state.isCartOpen,
       isQuoteModalOpen: state.isQuoteModalOpen,
@@ -449,6 +525,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   }, [
     isReady,
     isShopListingRoute,
+    catalogReady,
+    catalogTick,
     state.countryCode,
     state.currency,
     state.filters,
@@ -840,6 +918,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     () => ({
       ...state,
       isReady,
+      catalogReady,
       itemCount,
       activeFilterCount,
       filteredProducts,
@@ -847,9 +926,18 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       hasMoreProducts: state.visibleCount < filteredProducts.length,
       estimatedTotal,
       countries: catalog.countries,
-      categories: catalog.categories,
-      brands: catalog.brands,
-      filterOptions: catalog.filterOptions,
+      // Hide taxonomy until live CMS filters arrive — never flash seed/demo.
+      categories: catalogReady ? catalog.categories : [],
+      brands: catalogReady ? catalog.brands : [],
+      filterGroups: catalogReady ? catalog.filterGroups : [],
+      filterOptions: catalogReady
+        ? catalog.filterOptions
+        : {
+            applications: [],
+            cultures: [],
+            certifications: [],
+            countriesOfOrigin: [],
+          },
       getProductById: getProductByIdFromState,
       setCountry,
       setCurrency,
@@ -880,6 +968,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     [
       state,
       isReady,
+      catalogReady,
       itemCount,
       activeFilterCount,
       filteredProducts,

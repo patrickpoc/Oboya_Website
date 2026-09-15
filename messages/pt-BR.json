@@ -634,6 +634,7 @@
     "rfqError": "We could not submit your request. Please try again or contact your local office.",
     "retry": "Retry",
     "loadError": "Unable to load products. Please refresh the page.",
+    "catalogLoading": "Carregando catálogo…",
     "offlineMessage": "You are offline. Some features may be unavailable.",
     "sort": {
       "relevance": "Relevance",
@@ -715,7 +716,7 @@
     "description": "Parcerias na África do Sul, Colômbia e Equador — da automação de embalagem de vasos à logística pós-colheita integrada, pilotos RFID e AGV e equipamentos inclusivos para bouquets.",
     "heroEyebrow": "Desafios reais. Resultados mensuráveis.",
     "heroTitle": "Descubra como produtores, exportadores, distribuidores e varejistas se associaram à Oboya para melhorar a eficiência, fortalecer as cadeias de suprimento e alcançar resultados de negócio relevantes.",
-    "introTitle": "Cada operação tem seus próprios desafios.",
+    "introTitle": "Cada operação tem<br></br>seus próprios desafios.",
     "introBody": "Do chão de estufa à prateleira, cada parceiro enfrenta pressões operacionais distintas. Estas histórias mostram como a Oboya colabora localmente para liberar eficiência, resiliência e resultados duradouros.",
     "findOutMore": "Saiba mais",
     "emptyState": "Case studies em breve.",
@@ -1354,7 +1355,8 @@
       "emailTemplates": "Templates de e-mail",
       "analytics": "Analytics",
       "backups": "Backups",
-      "auditLogs": "Logs de auditoria"
+      "auditLogs": "Logs de auditoria",
+      "solutions": "Soluções"
     },
     "filters": {
       "title": "Filtros",
@@ -1367,6 +1369,7 @@
       "addCategory": "Adicionar categoria",
       "addSubcategory": "Adicionar subcategoria",
       "addBrand": "Adicionar marca",
+      "addGroup": "Adicionar grupo de filtro",
       "addOption": "Adicionar opção",
       "searchCategory": "Buscar categoria…",
       "searchBrand": "Buscar marca…",
@@ -1392,6 +1395,7 @@
       "countriesOfOrigin": "País de fabricação",
       "deleteCategory": "Excluir categoria",
       "deleteBrand": "Excluir marca",
+      "deleteGroup": "Excluir grupo de filtro",
       "deleteOption": "Excluir opção",
       "deleteBlocked": "Este item é usado por {count} produto(s) e não pode ser removido.",
       "deleteConfirm": "Este item será removido.",
@@ -1406,6 +1410,8 @@
       "editBrand": "Editar marca {name}",
       "removeBrand": "Remover marca {name}",
       "editGroup": "Editar grupo {name}",
+      "editGroupName": "Editar nome do grupo",
+      "removeGroup": "Remover grupo {name}",
       "removeOption": "Remover opção {name}",
       "siteReflection": "Reflexo no site",
       "moreOptions": "+{count} opções a mais"

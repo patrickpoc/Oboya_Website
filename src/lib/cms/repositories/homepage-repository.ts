@@ -270,7 +270,7 @@ const defaultSettings = (): HomepageSettings => ({
         title: H.businessSolutions.logisticsTitle,
         description: H.businessSolutions.logisticsDesc,
         image: "/assets/homepage/solutions-logistics.jpg",
-        href: "/solutions?area=logistics-display",
+        href: "/solutions?area=all",
         ctaLabel: H.businessSolutions.cta,
       },
       {
@@ -278,7 +278,7 @@ const defaultSettings = (): HomepageSettings => ({
         title: H.businessSolutions.machineryTitle,
         description: H.businessSolutions.machineryDesc,
         image: "/assets/homepage/greenhouse-technology.webp",
-        href: "/solutions?area=machinery-automation",
+        href: "/solutions?area=all",
         ctaLabel: H.businessSolutions.cta,
       },
     ],

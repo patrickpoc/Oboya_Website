@@ -9,10 +9,17 @@ import {
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { readProducts, saveProduct } from "@/lib/cms/server/products.server";
 import { updateShopCatalog } from "@/lib/shop/catalog";
+import {
+  normalizeBrands,
+  normalizeCategories,
+  normalizeFilterGroups,
+  normalizeFilterOptions,
+} from "@/lib/shop/filter-groups";
 import type {
   ShopBrand,
   ShopCategory,
   ShopCountry,
+  ShopFilterGroup,
   ShopFilterOptions,
   ShopProduct,
 } from "@/lib/shop/types";
@@ -26,15 +33,22 @@ const FILTER_OPTIONS_FILE = path.join(
   "shop",
   "filter-options.json"
 );
+const FILTER_GROUPS_FILE = path.join(
+  process.cwd(),
+  "data",
+  "shop",
+  "filter-groups.json"
+);
 const COUNTRIES_FILE = path.join(process.cwd(), "data", "shop", "countries.json");
 const PRODUCTS_FILE = path.join(process.cwd(), "data", "shop", "products.json");
 
 export const MARKETPLACE_FILTERS_DOC_ID = "marketplace-filters";
 export const MARKETPLACE_CURRENCIES_DOC_ID = "marketplace-currencies";
 
-type FiltersPayload = {
+export type FiltersPayload = {
   categories: ShopCategory[];
   brands: ShopBrand[];
+  filterGroups: ShopFilterGroup[];
   filterOptions: ShopFilterOptions;
 };
 
@@ -48,7 +62,36 @@ async function readJsonFile<T>(filePath: string): Promise<T> {
   return JSON.parse(raw) as T;
 }
 
-function isFiltersPayload(value: unknown): value is FiltersPayload {
+async function readJsonFileOptional<T>(filePath: string): Promise<T | null> {
+  try {
+    return await readJsonFile<T>(filePath);
+  } catch {
+    return null;
+  }
+}
+
+function normalizeFiltersPayload(raw: {
+  categories: ShopCategory[];
+  brands: ShopBrand[];
+  filterGroups?: ShopFilterGroup[];
+  filterOptions: ShopFilterOptions;
+}): FiltersPayload {
+  const filterOptions = normalizeFilterOptions(raw.filterOptions, raw.filterGroups);
+  const filterGroups = normalizeFilterGroups(raw.filterGroups, filterOptions);
+  return {
+    categories: normalizeCategories(raw.categories),
+    brands: normalizeBrands(raw.brands),
+    filterGroups,
+    filterOptions: normalizeFilterOptions(filterOptions, filterGroups),
+  };
+}
+
+function isFiltersPayload(value: unknown): value is {
+  categories: ShopCategory[];
+  brands: ShopBrand[];
+  filterGroups?: ShopFilterGroup[];
+  filterOptions: ShopFilterOptions;
+} {
   if (!value || typeof value !== "object") return false;
   const doc = value as FiltersPayload;
   return (
@@ -66,17 +109,25 @@ function isCurrenciesPayload(value: unknown): value is CurrenciesPayload {
 }
 
 async function readFiltersSeed(): Promise<FiltersPayload> {
-  const [categories, brands, filterOptions] = await Promise.all([
+  const [categories, brands, filterOptions, filterGroups] = await Promise.all([
     readJsonFile<ShopCategory[]>(CATEGORIES_FILE),
     readJsonFile<ShopBrand[]>(BRANDS_FILE),
     readJsonFile<ShopFilterOptions>(FILTER_OPTIONS_FILE),
+    readJsonFileOptional<ShopFilterGroup[]>(FILTER_GROUPS_FILE),
   ]);
-  return { categories, brands, filterOptions };
+  return normalizeFiltersPayload({
+    categories,
+    brands,
+    filterGroups: filterGroups ?? undefined,
+    filterOptions,
+  });
 }
 
 export async function readMarketplaceFilters(): Promise<FiltersPayload> {
   const remote = await readCmsDocumentData(MARKETPLACE_FILTERS_DOC_ID);
-  const payload = isFiltersPayload(remote) ? remote : await readFiltersSeed();
+  const payload = normalizeFiltersPayload(
+    isFiltersPayload(remote) ? remote : await readFiltersSeed()
+  );
   updateShopCatalog(payload);
   return payload;
 }
@@ -84,23 +135,25 @@ export async function readMarketplaceFilters(): Promise<FiltersPayload> {
 export async function saveMarketplaceFilters(
   payload: FiltersPayload
 ): Promise<FiltersPayload> {
-  updateShopCatalog(payload);
+  const normalized = normalizeFiltersPayload(payload);
+  updateShopCatalog(normalized);
 
   if (isSupabaseConfigured()) {
     await writeCmsDocumentData(
       MARKETPLACE_FILTERS_DOC_ID,
       "marketplace",
-      payload
+      normalized
     );
-    return payload;
+    return normalized;
   }
 
   await Promise.all([
-    writeLocalJsonFile(CATEGORIES_FILE, payload.categories),
-    writeLocalJsonFile(BRANDS_FILE, payload.brands),
-    writeLocalJsonFile(FILTER_OPTIONS_FILE, payload.filterOptions),
+    writeLocalJsonFile(CATEGORIES_FILE, normalized.categories),
+    writeLocalJsonFile(BRANDS_FILE, normalized.brands),
+    writeLocalJsonFile(FILTER_OPTIONS_FILE, normalized.filterOptions),
+    writeLocalJsonFile(FILTER_GROUPS_FILE, normalized.filterGroups),
   ]);
-  return payload;
+  return normalized;
 }
 
 function deriveCurrencies(countries: ShopCountry[], products: ShopProduct[]) {
@@ -208,6 +261,7 @@ export async function hydrateShopCatalogDurable() {
   updateShopCatalog({
     categories: filters.categories,
     brands: filters.brands,
+    filterGroups: filters.filterGroups,
     filterOptions: filters.filterOptions,
     countries: currencies.countries,
   });

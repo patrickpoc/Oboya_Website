@@ -42,6 +42,7 @@ export const adminNavigation: AdminNavItem[] = [
     children: [
       { labelKey: "home", label: "Home", href: "/admin/website/home" },
       { labelKey: "aboutUs", label: "About Us", href: "/admin/website/about" },
+      { labelKey: "solutions", label: "Solutions", href: "/admin/website/solutions" },
       { labelKey: "newsPage", label: "News Page", href: "/admin/website/news" },
       { labelKey: "pages", label: "Pages", href: "/admin/website/pages" },
       { labelKey: "faqs", label: "FAQs", href: "/admin/website/faqs" },

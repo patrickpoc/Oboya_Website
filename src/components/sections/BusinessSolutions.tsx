@@ -10,48 +10,10 @@ import { fadeInUp, revealViewport } from "@/lib/animations";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import { pickLocalized } from "@/lib/cms/utils";
 import { cn } from "@/lib/utils";
-import { isSolutionCategoryId } from "@/lib/solutions/category-stages";
-import { solutionAreaHref } from "@/lib/solutions/solutions-data";
-import type { SolutionsAreaId } from "@/lib/solutions/types";
+import { solutionsHrefForBusinessCard } from "@/lib/solutions/solutions-data";
 import { useHorizontalCarousel } from "@/hooks/useHorizontalCarousel";
 
 const GAP = 20;
-
-/** Route homepage segment cards into the Solutions one-page anchors. */
-function resolveBusinessSolutionHref(href: string | undefined, itemId: string) {
-  if (isSolutionCategoryId(itemId)) {
-    return solutionAreaHref(itemId as SolutionsAreaId);
-  }
-  const raw = (href || "").trim();
-  if (!raw) return "/solutions";
-
-  try {
-    const url = new URL(raw, "https://oboya.local");
-    if (url.pathname === "/solutions" || url.pathname.endsWith("/solutions")) {
-      const area = url.searchParams.get("area");
-      if (area && isSolutionCategoryId(area)) {
-        return solutionAreaHref(area as SolutionsAreaId);
-      }
-      if (url.hash) {
-        const hashId = url.hash.replace(/^#/, "");
-        if (isSolutionCategoryId(hashId)) {
-          return solutionAreaHref(hashId as SolutionsAreaId);
-        }
-      }
-      return raw.startsWith("http") ? "/solutions" : raw;
-    }
-  } catch {
-    // fall through
-  }
-
-  if (raw.startsWith("/solutions/") && raw !== "/solutions") {
-    const slug = raw.replace("/solutions/", "").split("?")[0]?.split("#")[0];
-    if (slug && isSolutionCategoryId(slug)) {
-      return solutionAreaHref(slug as SolutionsAreaId);
-    }
-  }
-  return raw;
-}
 
 function cardsPerView(width: number) {
   if (width < 640) return 1.15;
@@ -164,7 +126,11 @@ export function BusinessSolutions({
                 item.ctaLabel != null
                   ? pickLocalized(item.ctaLabel, locale)
                   : "Explore Solutions";
-              const href = resolveBusinessSolutionHref(item.href, item.id);
+              const href = solutionsHrefForBusinessCard({
+                id: item.id,
+                href: item.href,
+                title,
+              });
 
               return (
                 <article

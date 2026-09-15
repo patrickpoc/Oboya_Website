@@ -349,10 +349,9 @@ const defaultSettings = (): AboutPageSettings => ({
       },
       {
         id: "manufacturing",
-        value: 0,
-        suffix: "",
+        value: 20,
+        suffix: "+",
         icon: "factory",
-        pending: true,
         accentColor: "#4DAF4E",
         objectPosition: "center 35%",
         image: {
@@ -373,10 +372,9 @@ const defaultSettings = (): AboutPageSettings => ({
       },
       {
         id: "offices",
-        value: 0,
-        suffix: "",
+        value: 30,
+        suffix: "+",
         icon: "building",
-        pending: true,
         accentColor: "#009CD4",
         objectPosition: "center 30%",
         image: {
@@ -420,10 +418,9 @@ const defaultSettings = (): AboutPageSettings => ({
       },
       {
         id: "clients",
-        value: 0,
-        suffix: "",
+        value: 1,
+        suffix: "m+",
         icon: "handshake",
-        pending: true,
         accentColor: "#ea5744",
         objectPosition: "center 30%",
         image: {
@@ -444,10 +441,9 @@ const defaultSettings = (): AboutPageSettings => ({
       },
       {
         id: "products",
-        value: 0,
-        suffix: "",
+        value: 20,
+        suffix: "+",
         icon: "package",
-        pending: true,
         accentColor: "#75C566",
         objectPosition: "center 45%",
         image: {
@@ -638,12 +634,12 @@ const defaultSettings = (): AboutPageSettings => ({
           "从育苗到销售终端，客户可通过单一可信伙伴获得覆盖运营多阶段的解决方案。"
         ),
         image:
-          "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1200&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=1400&auto=format&fit=crop",
         imageAlt: loc(
-          "Oboya team collaborating on integrated horticulture solutions",
-          "Equipe Oboya colaborando em soluções integradas de horticultura",
-          "Equipo Oboya colaborando en soluciones hortícolas integradas",
-          "Oboya 团队协作推进一体化园艺方案"
+          "Horticulture facility with fields and production buildings",
+          "Instalação hortícola com campos e prédios de produção",
+          "Instalación hortícola con campos y edificios de producción",
+          "带田地与生产建筑的园艺设施"
         ),
         imageSide: "right",
         ctaLabel: loc("Learn more", "Saiba mais", "Saber más", "了解更多"),
@@ -1129,12 +1125,31 @@ function normalizeImpactStats(stats: AboutImpactStat[]): AboutImpactStat[] {
     }
     const media = fallbackImpactMedia(id);
     const src = stat.image?.src ?? "";
+    // Promote former pending placeholders when defaults now carry verified numbers.
+    const promoteFromDefaults =
+      Boolean(fromDefaults) &&
+      fromDefaults?.pending !== true &&
+      (stat.pending === true ||
+        (typeof stat.value === "number" &&
+          stat.value === 0 &&
+          !stat.suffix));
+    const value = promoteFromDefaults
+      ? (fromDefaults?.value ?? stat.value)
+      : stat.value;
+    const suffix = promoteFromDefaults
+      ? (fromDefaults?.suffix ?? stat.suffix ?? "")
+      : (stat.suffix ?? "");
+    const pending = promoteFromDefaults
+      ? false
+      : stat.pending === true;
     return {
       ...fromDefaults,
       ...stat,
       id,
+      value,
+      suffix,
       icon: stat.icon ?? IMPACT_ICON_BY_ID[id] ?? fromDefaults?.icon ?? "globe",
-      pending: stat.pending === true,
+      pending,
       accentColor:
         stat.accentColor ??
         IMPACT_ACCENT_BY_ID[id] ??

@@ -89,6 +89,7 @@ export function ProductEditorForm({ product, onChange }: ProductEditorFormProps)
         product={product}
         categories={catalog.categories}
         brands={catalog.brands}
+        filterGroups={catalog.filterGroups}
         filterOptions={catalog.filterOptions}
         loading={catalogLoading}
         onUpdate={update}

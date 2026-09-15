@@ -1,30 +1,6 @@
 {
-  "applications": [
-    {
-      "id": "greenhouse",
-      "name": "Greenhouse"
-    }
-  ],
-  "cultures": [
-    {
-      "id": "vegetables",
-      "name": "Vegetables"
-    },
-    {
-      "id": "cultures-1787160229049-679",
-      "name": "Teste Crop"
-    }
-  ],
-  "certifications": [
-    {
-      "id": "iso-9001",
-      "name": "ISO 9001"
-    }
-  ],
-  "countriesOfOrigin": [
-    {
-      "id": "BR",
-      "name": "Brazil"
-    }
-  ]
+  "applications": [],
+  "cultures": [],
+  "certifications": [],
+  "countriesOfOrigin": []
 }

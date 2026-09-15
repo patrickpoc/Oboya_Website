@@ -10,6 +10,7 @@ interface SolutionsCtaProps {
   title: string;
   description: string;
   buttonLabel: string;
+  href?: string;
   imageSrc?: string;
   /** When true, skip local image and rely on a page-level scroll backdrop. */
   sharedBackdrop?: boolean;
@@ -20,6 +21,7 @@ export function SolutionsCta({
   title,
   description,
   buttonLabel,
+  href = "/shop",
   imageSrc = "/assets/homepage/solutions-integrated.jpg",
   sharedBackdrop = false,
   size = "default",
@@ -84,7 +86,7 @@ export function SolutionsCta({
             {description}
           </p>
           <Link
-            href="/shop"
+            href={href}
             className={cn(
               buttonVariants({ size: "cta" }),
               "border border-white bg-transparent text-white hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-black/40"

@@ -22,32 +22,26 @@ import { CountryFlag } from "@/components/ui/country-flag";
 import { useAdminLocale } from "@/contexts/AdminLocaleContext";
 import { useMapLocations } from "@/lib/shop/use-map-locations";
 import { getMapFlagOptions } from "@/lib/shop/map-flag-options";
-import type { FilterOption, ShopBrand, ShopCategory, ShopFilterOptions, ShopLocalizedText } from "@/lib/shop/types";
+import {
+  countGroupUsage,
+  countOptionUsage,
+  emptyShopFilterOptions,
+  initFilterGroupI18n,
+  normalizeFilterGroups,
+  normalizeFilterOptions,
+  uniqueOptionId,
+} from "@/lib/shop/filter-groups";
+import type {
+  FilterOption,
+  ShopBrand,
+  ShopCategory,
+  ShopFilterGroup,
+  ShopFilterOptions,
+  ShopLocalizedText,
+} from "@/lib/shop/types";
 
-type OptionGroupKey = keyof ShopFilterOptions;
 type SortMode = "name-asc" | "name-desc" | "usage-desc";
 type UsageMode = "all" | "used" | "unused";
-
-const FILTER_GROUP_KEYS: OptionGroupKey[] = [
-  "applications",
-  "cultures",
-  "certifications",
-  "countriesOfOrigin",
-];
-
-const FILTER_GROUP_LABEL_KEY: Record<
-  OptionGroupKey,
-  "application" | "cultures" | "certifications" | "countriesOfOrigin"
-> = {
-  applications: "application",
-  cultures: "cultures",
-  certifications: "certifications",
-  countriesOfOrigin: "countriesOfOrigin",
-};
-
-function newId(prefix: string) {
-  return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-}
 
 function normalize(value: string) {
   return value.trim().toLowerCase();
@@ -91,12 +85,8 @@ export default function MarketplaceFiltersPage() {
   const [activeTab, setActiveTab] = useState("taxonomy");
   const [categories, setCategories] = useState<ShopCategory[]>([]);
   const [brands, setBrands] = useState<ShopBrand[]>([]);
-  const [filterOptions, setFilterOptions] = useState<ShopFilterOptions>({
-    applications: [],
-    cultures: [],
-    certifications: [],
-    countriesOfOrigin: [],
-  });
+  const [filterGroups, setFilterGroups] = useState<ShopFilterGroup[]>([]);
+  const [filterOptions, setFilterOptions] = useState<ShopFilterOptions>(emptyShopFilterOptions());
   const [products, setProducts] = useState<CmsProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -111,7 +101,7 @@ export default function MarketplaceFiltersPage() {
   const [brandUsageFilter, setBrandUsageFilter] = useState<UsageMode>("all");
   const [optionUsageFilter, setOptionUsageFilter] = useState<UsageMode>("all");
   const [selectedBrandId, setSelectedBrandId] = useState<string | null>(null);
-  const [selectedGroup, setSelectedGroup] = useState<OptionGroupKey>("applications");
+  const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [brandSheetOpen, setBrandSheetOpen] = useState(false);
@@ -133,7 +123,11 @@ export default function MarketplaceFiltersPage() {
     [mapLocations]
   );
 
-  const groupLabel = (key: OptionGroupKey) => t(FILTER_GROUP_LABEL_KEY[key]);
+  const groupLabel = (groupId: string) => {
+    const group = filterGroups.find((item) => item.id === groupId);
+    if (!group) return groupId;
+    return pickLocalized(group.name, group.nameI18n, locale);
+  };
 
   useEffect(() => {
     void (async () => {
@@ -146,15 +140,27 @@ export default function MarketplaceFiltersPage() {
         const payload = (await filtersResponse.json()) as {
           categories: ShopCategory[];
           brands: ShopBrand[];
+          filterGroups?: ShopFilterGroup[];
           filterOptions: ShopFilterOptions;
+        };
+        const normalizedOptions = normalizeFilterOptions(payload.filterOptions, payload.filterGroups);
+        const normalizedGroups = normalizeFilterGroups(payload.filterGroups, normalizedOptions);
+        const snapshot = {
+          categories: payload.categories,
+          brands: payload.brands,
+          filterGroups: normalizedGroups,
+          filterOptions: normalizedOptions,
         };
         setCategories(payload.categories);
         setBrands(payload.brands);
-        setFilterOptions(payload.filterOptions);
-        setInitialSnapshot(JSON.stringify(payload));
+        setFilterGroups(normalizedGroups);
+        setFilterOptions(normalizedOptions);
+        setInitialSnapshot(JSON.stringify(snapshot));
         setSelectedCategoryId(payload.categories[0]?.id ?? null);
         setSelectedBrandId(payload.brands[0]?.id ?? null);
-        setSelectedOptionId(payload.filterOptions.applications[0]?.id ?? null);
+        const firstGroupId = normalizedGroups[0]?.id ?? "";
+        setSelectedGroup(firstGroupId);
+        setSelectedOptionId(normalizedOptions[firstGroupId]?.[0]?.id ?? null);
         if (productsResponse.ok) {
           const allProducts = (await productsResponse.json()) as CmsProduct[];
           setProducts(allProducts.filter((product) => !product.deletedAt));
@@ -185,27 +191,22 @@ export default function MarketplaceFiltersPage() {
     [brands, products]
   );
   const optionUsage = useMemo(() => {
-    const map: Record<OptionGroupKey, Record<string, number>> = {
-      applications: {},
-      cultures: {},
-      certifications: {},
-      countriesOfOrigin: {},
-    };
-    FILTER_GROUP_KEYS.forEach((groupKey) => {
-      filterOptions[groupKey].forEach((option) => {
-        if (groupKey === "applications") {
-          map[groupKey][option.id] = products.filter((product) => product.application.includes(option.id)).length;
-        } else if (groupKey === "cultures") {
-          map[groupKey][option.id] = products.filter((product) => product.cultures.includes(option.id)).length;
-        } else if (groupKey === "certifications") {
-          map[groupKey][option.id] = products.filter((product) => product.certifications.includes(option.id)).length;
-        } else {
-          map[groupKey][option.id] = products.filter((product) => product.countryOfOrigin === option.id).length;
-        }
+    const map: Record<string, Record<string, number>> = {};
+    filterGroups.forEach((group) => {
+      map[group.id] = {};
+      (filterOptions[group.id] ?? []).forEach((option) => {
+        map[group.id][option.id] = countOptionUsage(group.id, option.id, products);
       });
     });
     return map;
-  }, [filterOptions, products]);
+  }, [filterGroups, filterOptions, products]);
+  const groupUsage = useMemo(
+    () =>
+      Object.fromEntries(
+        filterGroups.map((group) => [group.id, countGroupUsage(group.id, products)])
+      ),
+    [filterGroups, products]
+  );
 
   const filteredCategories = useMemo(() => {
     const q = normalize(searchCategory);
@@ -235,16 +236,17 @@ export default function MarketplaceFiltersPage() {
     const list = filterOptions[selectedGroup] ?? [];
     const matches = list.filter((option) => normalize(option.name).includes(q));
     return sortByMode(
-      matches.filter((option) => matchesUsage(optionUsage[selectedGroup][option.id] ?? 0, optionUsageFilter)),
+      matches.filter((option) => matchesUsage(optionUsage[selectedGroup]?.[option.id] ?? 0, optionUsageFilter)),
       optionSort,
-      optionUsage[selectedGroup]
+      optionUsage[selectedGroup] ?? {}
     );
   }, [filterOptions, selectedGroup, searchOption, optionSort, optionUsage, optionUsageFilter]);
 
   const selectedCategory = categories.find((category) => category.id === selectedCategoryId) ?? null;
   const selectedBrand = brands.find((brand) => brand.id === selectedBrandId) ?? null;
+  const selectedGroupEntry = filterGroups.find((group) => group.id === selectedGroup) ?? null;
 
-  const currentSnapshot = JSON.stringify({ categories, brands, filterOptions });
+  const currentSnapshot = JSON.stringify({ categories, brands, filterGroups, filterOptions });
   const isDirty = initialSnapshot !== "" && currentSnapshot !== initialSnapshot;
 
   const openTextEditor = (label: string, value: string, onConfirm: (nextValue: string) => void) => {
@@ -290,10 +292,15 @@ export default function MarketplaceFiltersPage() {
       if (brandNames.has(key)) issues.push(`Duplicated brand: ${brand.name}`);
       brandNames.add(key);
     });
-    FILTER_GROUP_KEYS.forEach((groupKey) => {
-      const label = groupLabel(groupKey);
+    const groupNames = new Set<string>();
+    filterGroups.forEach((group) => {
+      const groupKey = normalize(group.name);
+      if (!groupKey) issues.push("Filter group name cannot be empty.");
+      if (groupNames.has(groupKey)) issues.push(`Duplicated filter group: ${group.name}`);
+      groupNames.add(groupKey);
+      const label = groupLabel(group.id);
       const names = new Set<string>();
-      filterOptions[groupKey].forEach((option) => {
+      (filterOptions[group.id] ?? []).forEach((option) => {
         const key = normalize(option.name);
         if (!key) issues.push(`${label} option name cannot be empty.`);
         if (names.has(key)) issues.push(`Duplicated ${label} option: ${option.name}`);
@@ -314,7 +321,7 @@ export default function MarketplaceFiltersPage() {
       const response = await fetch("/api/cms/marketplace/filters", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ categories, brands, filterOptions }),
+        body: JSON.stringify({ categories, brands, filterGroups, filterOptions }),
       });
       const payload = (await response.json().catch(() => null)) as { error?: string } | null;
       if (!response.ok) throw new Error(payload?.error ?? t("saveFailed"));
@@ -331,7 +338,14 @@ export default function MarketplaceFiltersPage() {
     openTextEditor(t("addCategory"), "", (value) => {
       const name = value.trim();
       if (!name) return;
-      const next: ShopCategory = { id: newId("category"), name, nameI18n: initI18n(name), subcategories: [] };
+      const id = uniqueOptionId(name, categories);
+      const next: ShopCategory = {
+        id,
+        name,
+        nameI18n: initI18n(name),
+        slug: id,
+        subcategories: [],
+      };
       setCategories((prev) => [...prev, next]);
       setSelectedCategoryId(next.id);
       setSelectedSubcategoryId(null);
@@ -344,19 +358,21 @@ export default function MarketplaceFiltersPage() {
     openTextEditor(t("addSubcategory"), "", (value) => {
       const name = value.trim();
       if (!name) return;
-      setCategories((prev) =>
-        prev.map((category) =>
+      setCategories((prev) => {
+        const existingSubs = prev.flatMap((category) => category.subcategories);
+        const id = uniqueOptionId(name, existingSubs);
+        return prev.map((category) =>
           category.id === categoryId
             ? {
                 ...category,
                 subcategories: [
                   ...category.subcategories,
-                  { id: newId("subcategory"), name, nameI18n: initI18n(name) },
+                  { id, name, nameI18n: initI18n(name), slug: id },
                 ],
               }
             : category
-        )
-      );
+        );
+      });
       setEditorOpen(false);
     });
   };
@@ -365,19 +381,53 @@ export default function MarketplaceFiltersPage() {
     openTextEditor(t("addBrand"), "", (value) => {
       const name = value.trim();
       if (!name) return;
-      const next: ShopBrand = { id: newId("brand"), name, nameI18n: initI18n(name) };
+      const id = uniqueOptionId(name, brands);
+      const next: ShopBrand = {
+        id,
+        name,
+        nameI18n: initI18n(name),
+        slug: id,
+      };
       setBrands((prev) => [...prev, next]);
       setSelectedBrandId(next.id);
       setEditorOpen(false);
     });
   };
 
-  const addOption = (group: OptionGroupKey) => {
+  const addFilterGroup = () => {
+    openTextEditor(t("addGroup"), "", (value) => {
+      const name = value.trim();
+      if (!name) return;
+      const id = uniqueOptionId(name, filterGroups);
+      const next: ShopFilterGroup = {
+        id,
+        name,
+        nameI18n: initFilterGroupI18n(name),
+      };
+      setFilterGroups((prev) => [...prev, next]);
+      setFilterOptions((prev) => ({ ...prev, [next.id]: [] }));
+      setSelectedGroup(next.id);
+      setSelectedOptionId(null);
+      setOptionSheetOpen(true);
+      setEditorOpen(false);
+    });
+  };
+
+  const addOption = (groupId: string) => {
     openTextEditor(t("addOption"), "", (value) => {
       const name = value.trim();
       if (!name) return;
-      const next: FilterOption = { id: newId(group), name, nameI18n: initI18n(name) };
-      setFilterOptions((prev) => ({ ...prev, [group]: [...prev[group], next] }));
+      const id = uniqueOptionId(name, filterOptions[groupId] ?? []);
+      const next: FilterOption = {
+        id,
+        name,
+        nameI18n: initI18n(name),
+        slug: id,
+      };
+      setFilterOptions((prev) => ({
+        ...prev,
+        [groupId]: [...(prev[groupId] ?? []), next],
+      }));
       setSelectedOptionId(next.id);
       setEditorOpen(false);
     });
@@ -553,10 +603,10 @@ export default function MarketplaceFiltersPage() {
                     </label>
                   ))}
                 </div>
-                {FILTER_GROUP_KEYS.map((groupKey) => (
-                  <div key={`preview-group-${groupKey}`} className="border-t border-border/60 pt-4">
-                    <p className="mb-2 text-xs font-semibold uppercase">{groupLabel(groupKey)}</p>
-                    {filterOptions[groupKey].slice(0, 6).map((option) => (
+                {filterGroups.map((group) => (
+                  <div key={`preview-group-${group.id}`} className="border-t border-border/60 pt-4">
+                    <p className="mb-2 text-xs font-semibold uppercase">{groupLabel(group.id)}</p>
+                    {(filterOptions[group.id] ?? []).slice(0, 6).map((option) => (
                       <label key={`preview-option-${option.id}`} className="mb-1 flex items-center gap-2 text-sm text-oboya-blue-dark">
                         <input type="checkbox" disabled />
                         {pickLocalized(option.name, option.nameI18n, locale)}
@@ -665,54 +715,102 @@ export default function MarketplaceFiltersPage() {
         <TabsContent value="options">
           <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
             <Card>
-              <CardHeader><CardTitle>{t("productFilters")}</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>{t("productFilters")}</span>
+                  <Button variant="outline" size="sm" onClick={addFilterGroup}>
+                    <Plus className="mr-1 size-3.5" /> {t("addGroup")}
+                  </Button>
+                </CardTitle>
+              </CardHeader>
               <CardContent className="space-y-2">
-                {FILTER_GROUP_KEYS.map((groupKey) => (
+                {filterGroups.map((group) => (
                   <div
-                    key={groupKey}
-                    className={`rounded-lg border px-3 py-2 ${selectedGroup === groupKey ? "border-oboya-green/60 bg-oboya-green/5" : "border-border/60"}`}
+                    key={group.id}
+                    className={`rounded-lg border px-3 py-2 ${selectedGroup === group.id ? "border-oboya-green/60 bg-oboya-green/5" : "border-border/60"}`}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <button
                         type="button"
                         className="text-left text-sm font-medium text-oboya-blue-dark hover:underline"
                         onClick={() => {
-                          setSelectedGroup(groupKey);
-                          setSelectedOptionId(filterOptions[groupKey][0]?.id ?? null);
+                          setSelectedGroup(group.id);
+                          setSelectedOptionId(filterOptions[group.id]?.[0]?.id ?? null);
                         }}
                       >
-                        {groupLabel(groupKey)}
+                        {groupLabel(group.id)}
                       </button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        aria-label={t("editGroup", { name: groupLabel(groupKey) })}
-                        onClick={() => {
-                          setSelectedGroup(groupKey);
-                          setSelectedOptionId(filterOptions[groupKey][0]?.id ?? null);
-                          setOptionSheetOpen(true);
-                        }}
-                      >
-                        <Pencil className="size-3.5" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          aria-label={t("editGroup", { name: groupLabel(group.id) })}
+                          onClick={() => {
+                            setSelectedGroup(group.id);
+                            setSelectedOptionId(filterOptions[group.id]?.[0]?.id ?? null);
+                            setOptionSheetOpen(true);
+                          }}
+                        >
+                          <Pencil className="size-3.5" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          aria-label={t("removeGroup", { name: groupLabel(group.id) })}
+                          onClick={() => {
+                            const inUse = groupUsage[group.id] ?? 0;
+                            openDeleteConfirm({
+                              title: t("deleteGroup"),
+                              description:
+                                inUse > 0
+                                  ? t("deleteBlocked", { count: inUse })
+                                  : t("deleteConfirm"),
+                              blocked: inUse > 0,
+                              onConfirm: () => {
+                                setFilterGroups((prev) => {
+                                  const remaining = prev.filter((item) => item.id !== group.id);
+                                  if (selectedGroup === group.id) {
+                                    const nextGroupId = remaining[0]?.id ?? "";
+                                    setSelectedGroup(nextGroupId);
+                                    setSelectedOptionId(
+                                      nextGroupId
+                                        ? filterOptions[nextGroupId]?.[0]?.id ?? null
+                                        : null
+                                    );
+                                  }
+                                  return remaining;
+                                });
+                                setFilterOptions((prev) => {
+                                  const next = { ...prev };
+                                  delete next[group.id];
+                                  return next;
+                                });
+                                setConfirmOpen(false);
+                              },
+                            });
+                          }}
+                        >
+                          <Trash2 className="size-3.5" />
+                        </Button>
+                      </div>
                     </div>
                     <div className="mt-2 space-y-1 border-l border-border/60 pl-3">
-                      {(filterOptions[groupKey] ?? []).slice(0, 4).map((option) => (
+                      {(filterOptions[group.id] ?? []).slice(0, 4).map((option) => (
                         <button
-                          key={`group-preview-${groupKey}-${option.id}`}
+                          key={`group-preview-${group.id}-${option.id}`}
                           type="button"
                           className="block text-left text-xs text-muted-foreground hover:text-oboya-blue-dark"
                           onClick={() => {
-                            setSelectedGroup(groupKey);
+                            setSelectedGroup(group.id);
                             setSelectedOptionId(option.id);
                           }}
                         >
                           {pickLocalized(option.name, option.nameI18n, locale)}
                         </button>
                       ))}
-                      {filterOptions[groupKey].length > 4 && (
+                      {(filterOptions[group.id]?.length ?? 0) > 4 && (
                         <p className="text-[11px] text-muted-foreground">
-                          {t("moreOptions", { count: filterOptions[groupKey].length - 4 })}
+                          {t("moreOptions", { count: (filterOptions[group.id]?.length ?? 0) - 4 })}
                         </p>
                       )}
                     </div>
@@ -726,10 +824,10 @@ export default function MarketplaceFiltersPage() {
             <Card>
               <CardHeader><CardTitle>{t("siteReflection")}</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                {FILTER_GROUP_KEYS.map((groupKey) => (
-                  <div key={`options-preview-${groupKey}`} className="border-b border-border/60 pb-3 last:border-b-0">
-                    <p className="mb-2 text-xs font-semibold uppercase text-oboya-blue-dark">{groupLabel(groupKey)}</p>
-                    {filterOptions[groupKey].slice(0, 8).map((option) => (
+                {filterGroups.map((group) => (
+                  <div key={`options-preview-${group.id}`} className="border-b border-border/60 pb-3 last:border-b-0">
+                    <p className="mb-2 text-xs font-semibold uppercase text-oboya-blue-dark">{groupLabel(group.id)}</p>
+                    {(filterOptions[group.id] ?? []).slice(0, 8).map((option) => (
                       <label key={`options-preview-item-${option.id}`} className="mb-1 flex items-center gap-2 text-sm text-oboya-blue-dark">
                         <input type="checkbox" disabled />
                         {pickLocalized(option.name, option.nameI18n, locale)}
@@ -953,6 +1051,43 @@ export default function MarketplaceFiltersPage() {
             <SheetDescription>{t("optionDetailsDesc")}</SheetDescription>
           </SheetHeader>
           <div className="space-y-4 overflow-y-auto px-4">
+            {selectedGroupEntry && (
+              <div className="rounded-lg border border-border/60 p-3">
+                <Label>{t("editGroupName")}</Label>
+                <ShopLocalizedNameFields
+                  className="mt-2"
+                  name={selectedGroupEntry.name}
+                  nameI18n={selectedGroupEntry.nameI18n}
+                  onNameChange={(nextName) =>
+                    setFilterGroups((prev) =>
+                      prev.map((group) =>
+                        group.id === selectedGroupEntry.id
+                          ? { ...group, name: nextName }
+                          : group
+                      )
+                    )
+                  }
+                  onI18nChange={(loc, value) =>
+                    setFilterGroups((prev) =>
+                      prev.map((group) =>
+                        group.id === selectedGroupEntry.id
+                          ? {
+                              ...group,
+                              nameI18n: {
+                                ...initFilterGroupI18n(group.name, group.nameI18n),
+                                [loc]: value,
+                              },
+                            }
+                          : group
+                      )
+                    )
+                  }
+                />
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {t("usedByProducts", { count: groupUsage[selectedGroupEntry.id] ?? 0 })}
+                </p>
+              </div>
+            )}
             <div className="relative">
               <Search className="absolute top-2.5 left-2.5 size-4 text-muted-foreground" />
               <Input
@@ -985,7 +1120,7 @@ export default function MarketplaceFiltersPage() {
                         name: pickLocalized(option.name, option.nameI18n, locale),
                       })}
                       onClick={() => {
-                        const used = optionUsage[selectedGroup][option.id] ?? 0;
+                        const used = optionUsage[selectedGroup]?.[option.id] ?? 0;
                         openDeleteConfirm({
                           title: t("deleteOption"),
                           description:
@@ -996,7 +1131,7 @@ export default function MarketplaceFiltersPage() {
                           onConfirm: () => {
                             setFilterOptions((prev) => ({
                               ...prev,
-                              [selectedGroup]: prev[selectedGroup].filter((item) => item.id !== option.id),
+                              [selectedGroup]: (prev[selectedGroup] ?? []).filter((item) => item.id !== option.id),
                             }));
                             if (selectedOptionId === option.id) setSelectedOptionId(null);
                             setConfirmOpen(false);
@@ -1016,7 +1151,7 @@ export default function MarketplaceFiltersPage() {
                       onNameChange={(nextName) =>
                         setFilterOptions((prev) => ({
                           ...prev,
-                          [selectedGroup]: prev[selectedGroup].map((item) =>
+                          [selectedGroup]: (prev[selectedGroup] ?? []).map((item) =>
                             item.id === option.id
                               ? { ...item, name: nextName }
                               : item
@@ -1026,7 +1161,7 @@ export default function MarketplaceFiltersPage() {
                       onI18nChange={(loc, value) =>
                         setFilterOptions((prev) => ({
                           ...prev,
-                          [selectedGroup]: prev[selectedGroup].map((item) =>
+                          [selectedGroup]: (prev[selectedGroup] ?? []).map((item) =>
                             item.id === option.id
                               ? {
                                   ...item,

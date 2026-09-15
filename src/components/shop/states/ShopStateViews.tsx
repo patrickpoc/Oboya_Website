@@ -65,6 +65,25 @@ export function EmptyQuote({ compact = false }: { compact?: boolean }) {
   );
 }
 
+export function CatalogLoading() {
+  const t = useTranslations("shop");
+
+  return (
+    <div
+      className="flex min-h-[50vh] flex-col items-center justify-center gap-4 px-6 py-20"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <span
+        className="size-3 rounded-full bg-oboya-green shop-catalog-loader-dot motion-reduce:!animate-none motion-reduce:opacity-60"
+        aria-hidden
+      />
+      <p className="font-body text-sm text-oboya-blue-dark/55">{t("catalogLoading")}</p>
+    </div>
+  );
+}
+
 export function LoadingSkeleton({ viewMode }: { viewMode: "grid" | "list" }) {
   if (viewMode === "list") {
     return (
@@ -77,7 +96,7 @@ export function LoadingSkeleton({ viewMode }: { viewMode: "grid" | "list" }) {
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4 xl:gap-5">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-4 xl:gap-5">
       {Array.from({ length: 8 }).map((_, i) => (
         <Skeleton key={i} className="aspect-[3/4] w-full rounded-xl" />
       ))}

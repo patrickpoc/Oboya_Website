@@ -7,8 +7,18 @@ import {
 } from "@/lib/cms/server/marketplace-config.server";
 import { readProducts } from "@/lib/cms/server/products.server";
 import { getCountryCode } from "@/constants/country-flags";
-import type { ShopBrand, ShopCategory, ShopFilterOptions } from "@/lib/shop/types";
-import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
+import {
+  countGroupUsage,
+  countOptionUsage,
+  normalizeFilterGroups,
+  normalizeFilterOptions,
+} from "@/lib/shop/filter-groups";
+import type {
+  ShopBrand,
+  ShopCategory,
+  ShopFilterGroup,
+  ShopFilterOptions,
+} from "@/lib/shop/types";
 import { noStoreHeaders } from "@/lib/security/http-cache";
 
 export const dynamic = "force-dynamic";
@@ -32,19 +42,6 @@ function assertNoDuplicateNames(values: string[], entityLabel: string) {
     }
     seen.add(key);
   }
-}
-
-function countUsageForOption(group: keyof ShopFilterOptions, optionId: string, products: CmsProduct[]) {
-  if (group === "applications") {
-    return products.filter((product) => product.application.includes(optionId)).length;
-  }
-  if (group === "cultures") {
-    return products.filter((product) => product.cultures.includes(optionId)).length;
-  }
-  if (group === "certifications") {
-    return products.filter((product) => product.certifications.includes(optionId)).length;
-  }
-  return products.filter((product) => product.countryOfOrigin === optionId).length;
 }
 
 export async function GET() {
@@ -74,12 +71,25 @@ export async function PUT(request: Request) {
   try {
     const auth = await cmsGuard("marketplace", "edit");
     if ("response" in auth) return auth.response;
-    const payload = (await request.json()) as {
+    const body = (await request.json()) as {
       categories: ShopCategory[];
       brands: ShopBrand[];
+      filterGroups?: ShopFilterGroup[];
       filterOptions: ShopFilterOptions;
     };
-    payload.brands = normalizeBrands(payload.brands);
+    body.brands = normalizeBrands(body.brands);
+    const filterOptions = normalizeFilterOptions(
+      body.filterOptions,
+      body.filterGroups
+    );
+    const filterGroups = normalizeFilterGroups(body.filterGroups, filterOptions);
+    const payload = {
+      categories: body.categories,
+      brands: body.brands,
+      filterGroups,
+      filterOptions: normalizeFilterOptions(filterOptions, filterGroups),
+    };
+
     const current = await readMarketplaceFilters();
     const products = (await readProducts({ includeDeleted: false })).filter(
       (product) => !product.deletedAt
@@ -99,16 +109,31 @@ export async function PUT(request: Request) {
       payload.brands.map((brand) => brand.name),
       "Brand"
     );
-    (Object.keys(payload.filterOptions) as Array<keyof ShopFilterOptions>).forEach((group) => {
+    assertNoDuplicateNames(
+      payload.filterGroups.map((group) => group.name),
+      "Filter group"
+    );
+    const groupIds = new Set<string>();
+    for (const group of payload.filterGroups) {
+      const id = group.id.trim();
+      if (!id) throw new ValidationError("Filter group id cannot be empty.");
+      if (groupIds.has(id)) {
+        throw new ValidationError(`Filter group id "${id}" is duplicated.`);
+      }
+      groupIds.add(id);
+    }
+    payload.filterGroups.forEach((group) => {
       assertNoDuplicateNames(
-        payload.filterOptions[group].map((option) => option.name),
-        `${group} option`
+        (payload.filterOptions[group.id] ?? []).map((option) => option.name),
+        `${group.name || group.id} option`
       );
     });
 
     const nextCategoryIds = new Set(payload.categories.map((category) => category.id));
     const nextSubcategoryIds = new Set(
-      payload.categories.flatMap((category) => category.subcategories.map((subcategory) => subcategory.id))
+      payload.categories.flatMap((category) =>
+        category.subcategories.map((subcategory) => subcategory.id)
+      )
     );
     const nextBrandIds = new Set(payload.brands.map((brand) => brand.id));
     const removedCategories = current.categories
@@ -140,18 +165,32 @@ export async function PUT(request: Request) {
       }
     }
 
-    (Object.keys(current.filterOptions) as Array<keyof ShopFilterOptions>).forEach((group) => {
-      const next = new Set(payload.filterOptions[group].map((option) => option.id));
-      const removed = current.filterOptions[group]
-        .map((option) => option.id)
-        .filter((id) => !next.has(id));
-      removed.forEach((optionId) => {
-        const usedBy = countUsageForOption(group, optionId, products);
+    const nextGroupIds = new Set(payload.filterGroups.map((group) => group.id));
+    for (const group of current.filterGroups) {
+      if (nextGroupIds.has(group.id)) continue;
+      const usedBy = countGroupUsage(group.id, products);
+      if (usedBy > 0) {
+        throw new ValidationError(
+          `Filter group "${group.name}" is used by ${usedBy} product(s).`
+        );
+      }
+    }
+
+    for (const group of payload.filterGroups) {
+      const previousOptions = current.filterOptions[group.id] ?? [];
+      const nextOptionIds = new Set(
+        (payload.filterOptions[group.id] ?? []).map((option) => option.id)
+      );
+      for (const option of previousOptions) {
+        if (nextOptionIds.has(option.id)) continue;
+        const usedBy = countOptionUsage(group.id, option.id, products);
         if (usedBy > 0) {
-          throw new ValidationError(`Filter option is used by ${usedBy} product(s) in ${group}.`);
+          throw new ValidationError(
+            `Filter option is used by ${usedBy} product(s) in ${group.name}.`
+          );
         }
-      });
-    });
+      }
+    }
 
     const saved = await saveMarketplaceFilters(payload);
     try {
@@ -171,4 +210,3 @@ export async function PUT(request: Request) {
     );
   }
 }
-

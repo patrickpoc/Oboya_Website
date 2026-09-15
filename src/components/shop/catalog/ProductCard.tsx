@@ -147,10 +147,10 @@ function ProductCardComponent({
           alt={name}
           fill
           className="object-cover transition-opacity duration-200 group-hover:opacity-95"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
         />
       </Link>
-      <div className="flex flex-1 flex-col gap-1.5 p-3 sm:p-3.5">
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-2.5 sm:p-3.5">
         {category ? (
           <p className="text-[10px] font-medium uppercase tracking-wide text-oboya-green">
             {category.name}
@@ -161,13 +161,14 @@ function ProductCardComponent({
             {name}
           </Link>
         </h3>
-        {(brand || displaySku) && (
+        {displaySku ? (
+          <p className="truncate text-[11px] text-muted-foreground">{displaySku}</p>
+        ) : null}
+        {brand ? (
           <p className="truncate text-[11px] text-muted-foreground">
-            {brand ? <BrandLabel brand={brand} locale={locale} /> : null}
-            {brand && displaySku ? <span aria-hidden> · </span> : null}
-            {displaySku ? <span>{displaySku}</span> : null}
+            <BrandLabel brand={brand} locale={locale} />
           </p>
-        )}
+        ) : null}
         {showSwatches ? (
           <ColorSwatchGroup
             className="mt-0.5"
@@ -176,8 +177,12 @@ function ProductCardComponent({
             onSelect={setSelectedVariantId}
             currency={currency}
           />
-        ) : null}
-        <div className="mt-auto space-y-0.5 pt-2">
+        ) : (
+          <div className="flex min-h-5 flex-1 items-center" aria-hidden>
+            <div className="h-px w-full bg-oboya-blue/25" />
+          </div>
+        )}
+        <div className={showSwatches ? "mt-auto space-y-0.5 pt-2" : "space-y-0.5"}>
           <p className="text-base font-semibold tabular-nums text-oboya-blue-dark">
             {formatShopPrice(price, currency)}
           </p>

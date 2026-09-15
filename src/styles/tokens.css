@@ -52,3 +52,15 @@
   --glass-border: rgb(255 255 255 / 20%);
   --glass-blur: 16px;
 }
+
+@keyframes shop-catalog-fade {
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

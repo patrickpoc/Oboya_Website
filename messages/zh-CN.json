@@ -634,6 +634,7 @@
     "rfqError": "We could not submit your request. Please try again or contact your local office.",
     "retry": "Retry",
     "loadError": "Unable to load products. Please refresh the page.",
+    "catalogLoading": "正在加载目录…",
     "offlineMessage": "You are offline. Some features may be unavailable.",
     "sort": {
       "relevance": "Relevance",
@@ -715,7 +716,7 @@
     "description": "南非、哥伦比亚和厄瓜多尔的合作伙伴关系——涵盖盆栽自动包装、集成采后物流、RFID 与 AGV 试点以及包容性花束设备。",
     "heroEyebrow": "真实挑战。可衡量的成果。",
     "heroTitle": "了解种植者、出口商、分销商与零售商如何与 Oboya 合作，提升效率、强化供应链，并实现切实的业务成果。",
-    "introTitle": "每项运营都有其独特挑战。",
+    "introTitle": "每项运营都有<br></br>其独特挑战。",
     "introBody": "从温室到货架，每位合作伙伴都面临不同的运营压力。这些故事展示 Oboya 如何在本地协作，释放效率、韧性与持久成果。",
     "findOutMore": "了解更多",
     "emptyState": "案例研究即将上线。",
@@ -1354,7 +1355,8 @@
       "emailTemplates": "邮件模板",
       "analytics": "分析",
       "backups": "备份",
-      "auditLogs": "审计日志"
+      "auditLogs": "审计日志",
+      "solutions": "解决方案"
     },
     "filters": {
       "title": "筛选",
@@ -1367,6 +1369,7 @@
       "addCategory": "添加分类",
       "addSubcategory": "添加子分类",
       "addBrand": "添加品牌",
+      "addGroup": "添加筛选分组",
       "addOption": "添加选项",
       "searchCategory": "搜索分类…",
       "searchBrand": "搜索品牌…",
@@ -1392,6 +1395,7 @@
       "countriesOfOrigin": "制造国",
       "deleteCategory": "删除分类",
       "deleteBrand": "删除品牌",
+      "deleteGroup": "删除筛选分组",
       "deleteOption": "删除选项",
       "deleteBlocked": "该项目被 {count} 个产品使用，无法删除。",
       "deleteConfirm": "该项目将被删除。",
@@ -1406,6 +1410,8 @@
       "editBrand": "编辑品牌 {name}",
       "removeBrand": "移除品牌 {name}",
       "editGroup": "编辑分组 {name}",
+      "editGroupName": "编辑分组名称",
+      "removeGroup": "移除分组 {name}",
       "removeOption": "移除选项 {name}",
       "siteReflection": "站点预览",
       "moreOptions": "+{count} 个更多选项"

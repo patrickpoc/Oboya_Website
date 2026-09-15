@@ -4,50 +4,67 @@ import Image from "next/image";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Container } from "@/components/ui/container";
-import { fadeInUp, revealViewport, staggerContainer } from "@/lib/animations";
-import {
-  cropFilterFromAreaParam,
-  SOLUTION_CROP_FILTERS,
-  SOLUTION_STAGE_CARDS,
-} from "@/lib/solutions/solutions-data";
+import { fadeInUp, staggerContainer } from "@/lib/animations";
+import { pickLocalized } from "@/lib/cms/utils";
+import type {
+  SolutionsPageBanner,
+  SolutionsPageCrop,
+  SolutionsPageSettings,
+} from "@/lib/cms/repositories/solutions-page-repository";
+import { cropFilterFromAreaParam } from "@/lib/solutions/solutions-data";
 import type { SolutionsCropFilterId } from "@/lib/solutions/types";
-import { buildShopHrefForSolution } from "@/lib/solutions/solutions-shop-linking";
+import {
+  buildShopHrefForSolution,
+  mergeShopFilterTargets,
+} from "@/lib/solutions/solutions-shop-linking";
 import { cn } from "@/lib/utils";
 
 const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-green/60 focus-visible:ring-offset-2";
 
-export function SolutionsExplorer() {
+interface SolutionsExplorerProps {
+  settings: SolutionsPageSettings;
+}
+
+export function SolutionsExplorer({ settings }: SolutionsExplorerProps) {
   const t = useTranslations("solutionsPage.explorer");
+  const locale = useLocale();
   const reduceMotion = useReducedMotion();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
+  const crops = settings.crops;
+  const banners = settings.banners;
+
   const [activeFilter, setActiveFilter] =
-    useState<SolutionsCropFilterId>("flowers");
+    useState<SolutionsCropFilterId>(() => {
+      return cropFilterFromAreaParam(searchParams.get("area")) ?? "flowers";
+    });
 
   useEffect(() => {
     const mapped = cropFilterFromAreaParam(searchParams.get("area"));
-    if (!mapped) return;
+    if (mapped == null) return;
     startTransition(() => setActiveFilter(mapped));
   }, [searchParams, startTransition]);
 
-  const activeMeta = useMemo(
-    () => SOLUTION_CROP_FILTERS.find((f) => f.id === activeFilter)!,
-    [activeFilter]
+  const activeCrop: SolutionsPageCrop | undefined = useMemo(
+    () => crops.find((crop) => crop.id === activeFilter) ?? crops[0],
+    [activeFilter, crops]
   );
 
   const heading =
     activeFilter === "all"
       ? t("headingAll")
-      : t("headingFor", { sector: t(`areas.${activeMeta.areaKey}.title`) });
+      : t("headingFor", {
+          sector: pickLocalized(activeCrop?.sectorTitle ?? { en: "" }, locale),
+        });
 
-  const description =
-    activeFilter === "all"
-      ? t("description")
-      : t(`areas.${activeMeta.areaKey}.description`);
+  const description = pickLocalized(
+    activeCrop?.description ?? { en: "" },
+    locale
+  );
 
   return (
     <section
@@ -60,13 +77,17 @@ export function SolutionsExplorer() {
           aria-label={t("navLabel")}
           className="flex flex-wrap gap-2.5"
         >
-          {SOLUTION_CROP_FILTERS.map((filter) => {
+          {crops.map((filter) => {
             const isActive = filter.id === activeFilter;
             return (
               <button
                 key={filter.id}
                 type="button"
-                onClick={() => startTransition(() => setActiveFilter(filter.id))}
+                onClick={() =>
+                  startTransition(() =>
+                    setActiveFilter(filter.id as SolutionsCropFilterId)
+                  )
+                }
                 aria-pressed={isActive}
                 className={cn(
                   "rounded-full px-4 py-2 font-body text-sm font-medium transition-colors",
@@ -76,7 +97,7 @@ export function SolutionsExplorer() {
                     : "bg-oboya-soft-white text-oboya-green hover:bg-oboya-green/15"
                 )}
               >
-                {t(`filters.${filter.labelKey}`)}
+                {pickLocalized(filter.label, locale)}
               </button>
             );
           })}
@@ -107,14 +128,13 @@ export function SolutionsExplorer() {
           variants={reduceMotion ? undefined : staggerContainer}
           className="mt-10 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:mt-12 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-12"
         >
-          {SOLUTION_STAGE_CARDS.map((card) => {
-            const href = buildShopHrefForSolution({
-              ...card.shop,
-              ...activeMeta.shop,
-              q: [activeMeta.shop.q, card.shop.q].filter(Boolean).join(" ").trim() || undefined,
-            });
-            const tags = card.tagKeys
-              .map((key) => t(`items.${key}`))
+          {banners.map((card: SolutionsPageBanner) => {
+            const href = buildShopHrefForSolution(
+              mergeShopFilterTargets(activeCrop?.shop, card.shop)
+            );
+            const tags = card.tags
+              .map((tag) => pickLocalized(tag, locale))
+              .filter(Boolean)
               .join(", ");
 
             return (
@@ -129,7 +149,7 @@ export function SolutionsExplorer() {
                   <div className="relative aspect-square overflow-hidden bg-oboya-soft-white">
                     <Image
                       src={card.image}
-                      alt={t(`stages.${card.titleKey}.title`)}
+                      alt={pickLocalized(card.title, locale)}
                       fill
                       className={cn(
                         "object-cover",
@@ -140,11 +160,13 @@ export function SolutionsExplorer() {
                     />
                   </div>
                   <h2 className="mt-4 font-display text-[1.05rem] font-semibold leading-snug text-oboya-blue-dark md:text-[1.15rem]">
-                    {t(`stages.${card.titleKey}.title`)}
+                    {pickLocalized(card.title, locale)}
                   </h2>
-                  <p className="mt-1.5 font-body text-sm leading-relaxed text-oboya-blue-dark/55">
-                    {tags}
-                  </p>
+                  {tags ? (
+                    <p className="mt-1.5 font-body text-sm leading-relaxed text-oboya-blue-dark/55">
+                      {tags}
+                    </p>
+                  ) : null}
                 </Link>
               </motion.article>
             );

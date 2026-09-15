@@ -66,6 +66,7 @@ export function FilterSidebar({ className }: { className?: string }) {
   const {
     categories,
     brands,
+    filterGroups,
     filterOptions,
     filters,
     updateFilters,
@@ -75,6 +76,47 @@ export function FilterSidebar({ className }: { className?: string }) {
   } = useShop();
 
   const selectedCategory = categories.find((c) => c.id === filters.categoryId);
+
+  const getGroupSelectedIds = useCallback(
+    (groupId: string) => {
+      if (groupId === "applications") return filters.applications;
+      if (groupId === "cultures") return filters.cultures;
+      if (groupId === "certifications") return filters.certifications;
+      if (groupId === "countriesOfOrigin") return filters.countriesOfOrigin;
+      return filters.customFilters?.[groupId] ?? [];
+    },
+    [filters]
+  );
+
+  const toggleGroupOption = useCallback(
+    (groupId: string, optionId: string) => {
+      const current = getGroupSelectedIds(groupId);
+      const next = toggleInList(current, optionId);
+      if (groupId === "applications") {
+        updateFilters({ applications: next });
+        return;
+      }
+      if (groupId === "cultures") {
+        updateFilters({ cultures: next });
+        return;
+      }
+      if (groupId === "certifications") {
+        updateFilters({ certifications: next });
+        return;
+      }
+      if (groupId === "countriesOfOrigin") {
+        updateFilters({ countriesOfOrigin: next });
+        return;
+      }
+      updateFilters({
+        customFilters: {
+          ...(filters.customFilters ?? {}),
+          [groupId]: next,
+        },
+      });
+    },
+    [filters.customFilters, getGroupSelectedIds, updateFilters]
+  );
 
   return (
     <aside
@@ -165,72 +207,27 @@ export function FilterSidebar({ className }: { className?: string }) {
         ))}
       </FilterGroup>
 
-      <FilterGroup title={t("filterApplication")}>
-        {filterOptions.applications.map((item) => (
-          <CheckboxRow
-            key={item.id}
-            id={`app-${item.id}`}
-            label={pickLocalizedLabel(locale, item.name, item.nameI18n)}
-            checked={filters.applications.includes(item.id)}
-            onChange={() =>
-              updateFilters({
-                applications: toggleInList(filters.applications, item.id),
-              })
-            }
-          />
-        ))}
-      </FilterGroup>
-
-      <FilterGroup title={t("filterCulture")}>
-        {filterOptions.cultures.map((item) => (
-          <CheckboxRow
-            key={item.id}
-            id={`culture-${item.id}`}
-            label={pickLocalizedLabel(locale, item.name, item.nameI18n)}
-            checked={filters.cultures.includes(item.id)}
-            onChange={() =>
-              updateFilters({
-                cultures: toggleInList(filters.cultures, item.id),
-              })
-            }
-          />
-        ))}
-      </FilterGroup>
-
-      <FilterGroup title={t("filterCertifications")}>
-        {filterOptions.certifications.map((item) => (
-          <CheckboxRow
-            key={item.id}
-            id={`cert-${item.id}`}
-            label={pickLocalizedLabel(locale, item.name, item.nameI18n)}
-            checked={filters.certifications.includes(item.id)}
-            onChange={() =>
-              updateFilters({
-                certifications: toggleInList(filters.certifications, item.id),
-              })
-            }
-          />
-        ))}
-      </FilterGroup>
-
-      <FilterGroup title={t("filterOrigin")}>
-        {filterOptions.countriesOfOrigin.map((item) => (
-          <CheckboxRow
-            key={item.id}
-            id={`origin-${item.id}`}
-            label={pickLocalizedLabel(locale, item.name, item.nameI18n)}
-            checked={filters.countriesOfOrigin.includes(item.id)}
-            onChange={() =>
-              updateFilters({
-                countriesOfOrigin: toggleInList(
-                  filters.countriesOfOrigin,
-                  item.id
-                ),
-              })
-            }
-          />
-        ))}
-      </FilterGroup>
+      {filterGroups.map((group) => {
+        const options = filterOptions[group.id] ?? [];
+        if (options.length === 0) return null;
+        const selectedIds = getGroupSelectedIds(group.id);
+        return (
+          <FilterGroup
+            key={group.id}
+            title={pickLocalizedLabel(locale, group.name, group.nameI18n)}
+          >
+            {options.map((item) => (
+              <CheckboxRow
+                key={item.id}
+                id={`filter-${group.id}-${item.id}`}
+                label={pickLocalizedLabel(locale, item.name, item.nameI18n)}
+                checked={selectedIds.includes(item.id)}
+                onChange={() => toggleGroupOption(group.id, item.id)}
+              />
+            ))}
+          </FilterGroup>
+        );
+      })}
 
       <FilterGroup title={t("filterAvailability")}>
         <CheckboxRow

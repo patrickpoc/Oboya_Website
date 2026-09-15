@@ -1,0 +1,6 @@
+[
+  { "id": "applications", "name": "Application" },
+  { "id": "cultures", "name": "Crop / Culture" },
+  { "id": "certifications", "name": "Certifications" },
+  { "id": "countriesOfOrigin", "name": "Country of Manufacture" }
+]

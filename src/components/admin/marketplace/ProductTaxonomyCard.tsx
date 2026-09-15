@@ -16,37 +16,21 @@ import { Label } from "@/components/ui/label";
 import { PRODUCT_EDITOR_SELECT_CLASS } from "@/components/admin/marketplace/product-editor.constants";
 import { useAdminLocale } from "@/contexts/AdminLocaleContext";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
+import {
+  getProductOptionIds,
+  patchProductFilterValues,
+} from "@/lib/shop/filter-groups";
 import { pickLocalizedLabel } from "@/lib/shop/localized-label";
-import type { FilterOption, ShopBrand, ShopCategory, ShopFilterOptions } from "@/lib/shop/types";
+import type {
+  FilterOption,
+  ShopBrand,
+  ShopCategory,
+  ShopFilterGroup,
+  ShopFilterOptions,
+} from "@/lib/shop/types";
 import { cn } from "@/lib/utils";
 
 const SELECT_CLASS = PRODUCT_EDITOR_SELECT_CLASS;
-
-const MULTI_FILTER_GROUPS: Array<{
-  key: keyof Pick<ShopFilterOptions, "applications" | "cultures" | "certifications">;
-  accordionValue: string;
-  labelKey: "application" | "cultures" | "certifications";
-  productField: "application" | "cultures" | "certifications";
-}> = [
-  {
-    key: "applications",
-    accordionValue: "applications",
-    labelKey: "application",
-    productField: "application",
-  },
-  {
-    key: "cultures",
-    accordionValue: "cultures",
-    labelKey: "cultures",
-    productField: "cultures",
-  },
-  {
-    key: "certifications",
-    accordionValue: "certifications",
-    labelKey: "certifications",
-    productField: "certifications",
-  },
-];
 
 function toggleInList(list: string[], id: string) {
   return list.includes(id) ? list.filter((item) => item !== id) : [...list, id];
@@ -56,6 +40,7 @@ interface ProductTaxonomyCardProps {
   product: CmsProduct;
   categories: ShopCategory[];
   brands: ShopBrand[];
+  filterGroups: ShopFilterGroup[];
   filterOptions: ShopFilterOptions;
   loading?: boolean;
   onUpdate: (patch: Partial<CmsProduct>) => void;
@@ -65,6 +50,7 @@ export function ProductTaxonomyCard({
   product,
   categories,
   brands,
+  filterGroups,
   filterOptions,
   loading = false,
   onUpdate,
@@ -89,55 +75,42 @@ export function ProductTaxonomyCard({
   );
 
   const discoverySummary = useMemo(() => {
-    const chips: Array<{ id: string; label: string; group: string }> = [];
+    const chips: Array<{ id: string; label: string; groupId: string }> = [];
 
-    for (const group of MULTI_FILTER_GROUPS) {
-      const options = filterOptions[group.key];
-      for (const optionId of product[group.productField]) {
+    for (const group of filterGroups) {
+      const options = filterOptions[group.id] ?? [];
+      for (const optionId of getProductOptionIds(product, group.id)) {
         const option = options.find((item) => item.id === optionId);
         if (option) {
           chips.push({
             id: option.id,
             label: pickLocalizedLabel(locale, option.name, option.nameI18n),
-            group: group.productField,
+            groupId: group.id,
           });
         }
       }
     }
 
-    if (product.countryOfOrigin) {
-      const country = filterOptions.countriesOfOrigin.find(
-        (item) => item.id === product.countryOfOrigin
-      );
-      if (country) {
-        chips.push({
-          id: country.id,
-          label: pickLocalizedLabel(locale, country.name, country.nameI18n),
-          group: "countryOfOrigin",
-        });
-      }
-    }
-
     return chips;
-  }, [filterOptions, locale, product]);
+  }, [filterGroups, filterOptions, locale, product]);
 
-  const toggleMultiFilter = (
-    field: "application" | "cultures" | "certifications",
-    optionId: string
-  ) => {
-    onUpdate({ [field]: toggleInList(product[field], optionId) });
+  const toggleGroupOption = (groupId: string, optionId: string) => {
+    const current = getProductOptionIds(product, groupId);
+    const next =
+      groupId === "countriesOfOrigin"
+        ? current.includes(optionId)
+          ? []
+          : [optionId]
+        : toggleInList(current, optionId);
+    onUpdate(patchProductFilterValues(product, groupId, next));
   };
 
-  const clearMultiFilter = (field: "application" | "cultures" | "certifications") => {
-    onUpdate({ [field]: [] });
+  const clearGroupOptions = (groupId: string) => {
+    onUpdate(patchProductFilterValues(product, groupId, []));
   };
 
-  const removeDiscoveryChip = (group: string, optionId: string) => {
-    if (group === "countryOfOrigin") {
-      onUpdate({ countryOfOrigin: "" });
-      return;
-    }
-    toggleMultiFilter(group as "application" | "cultures" | "certifications", optionId);
+  const removeDiscoveryChip = (groupId: string, optionId: string) => {
+    toggleGroupOption(groupId, optionId);
   };
 
   return (
@@ -157,13 +130,13 @@ export function ProductTaxonomyCard({
               {t("shopFilters")}
             </span>
             {discoverySummary.map((chip) => (
-              <Badge key={`${chip.group}-${chip.id}`} variant="secondary" className="gap-1 pr-1">
+              <Badge key={`${chip.groupId}-${chip.id}`} variant="secondary" className="gap-1 pr-1">
                 {chip.label}
                 <button
                   type="button"
                   className="rounded-sm p-0.5 hover:bg-muted"
                   aria-label={t("removeChip", { label: chip.label })}
-                  onClick={() => removeDiscoveryChip(chip.group, chip.id)}
+                  onClick={() => removeDiscoveryChip(chip.groupId, chip.id)}
                 >
                   <X className="size-3" />
                 </button>
@@ -287,19 +260,20 @@ export function ProductTaxonomyCard({
             <>
               <Accordion
                 multiple
-                defaultValue={["applications", "cultures"]}
+                defaultValue={filterGroups.slice(0, 2).map((group) => group.id)}
                 className="space-y-2"
               >
-                {MULTI_FILTER_GROUPS.map((group) => {
-                  const options = filterOptions[group.key];
-                  const selectedIds = product[group.productField];
+                {filterGroups.map((group) => {
+                  const options = filterOptions[group.id] ?? [];
+                  const selectedIds = getProductOptionIds(product, group.id);
                   const selectedCount = selectedIds.length;
-                  const groupLabel = t(group.labelKey);
+                  const groupLabel = labelFor(group);
+                  const singleSelect = group.id === "countriesOfOrigin";
 
                   return (
                     <AccordionItem
-                      key={group.key}
-                      value={group.accordionValue}
+                      key={group.id}
+                      value={group.id}
                       className="rounded-lg border border-border/60 px-4"
                     >
                       <AccordionTrigger className="py-3 hover:no-underline">
@@ -322,6 +296,27 @@ export function ProductTaxonomyCard({
                               {t("manageOptions")}
                             </Link>
                           </p>
+                        ) : singleSelect ? (
+                          <select
+                            value={selectedIds[0] ?? ""}
+                            onChange={(e) =>
+                              onUpdate(
+                                patchProductFilterValues(
+                                  product,
+                                  group.id,
+                                  e.target.value ? [e.target.value] : []
+                                )
+                              )
+                            }
+                            className={SELECT_CLASS}
+                          >
+                            <option value="">{t("notSpecified")}</option>
+                            {options.map((option) => (
+                              <option key={option.id} value={option.id}>
+                                {labelFor(option)}
+                              </option>
+                            ))}
+                          </select>
                         ) : (
                           <fieldset className="space-y-3">
                             <legend className="sr-only">{groupLabel}</legend>
@@ -345,7 +340,7 @@ export function ProductTaxonomyCard({
                                           label: labelFor(option),
                                         })}
                                         onClick={() =>
-                                          toggleMultiFilter(group.productField, optionId)
+                                          toggleGroupOption(group.id, optionId)
                                         }
                                       >
                                         <X className="size-3" />
@@ -372,7 +367,7 @@ export function ProductTaxonomyCard({
                                       className="size-4 rounded border-input"
                                       checked={checked}
                                       onChange={() =>
-                                        toggleMultiFilter(group.productField, option.id)
+                                        toggleGroupOption(group.id, option.id)
                                       }
                                     />
                                     <span>{labelFor(option)}</span>
@@ -385,7 +380,7 @@ export function ProductTaxonomyCard({
                               <button
                                 type="button"
                                 className="text-xs text-muted-foreground hover:text-foreground"
-                                onClick={() => clearMultiFilter(group.productField)}
+                                onClick={() => clearGroupOptions(group.id)}
                               >
                                 {t("clearAll")}
                               </button>
@@ -397,23 +392,6 @@ export function ProductTaxonomyCard({
                   );
                 })}
               </Accordion>
-
-              <div className="space-y-1.5 sm:max-w-md">
-                <Label htmlFor="country-of-manufacture">{t("countryOfOrigin")}</Label>
-                <select
-                  id="country-of-manufacture"
-                  value={product.countryOfOrigin}
-                  onChange={(e) => onUpdate({ countryOfOrigin: e.target.value })}
-                  className={SELECT_CLASS}
-                >
-                  <option value="">{t("notSpecified")}</option>
-                  {filterOptions.countriesOfOrigin.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {labelFor(option)}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </>
           )}
         </section>

@@ -243,6 +243,10 @@
   }
 }
 
+.shop-catalog-loader-dot {
+  animation: shop-catalog-fade 1.15s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .timeline-blob-a,
   .timeline-blob-b,
@@ -251,6 +255,10 @@
   }
 
   .partners-marquee-track {
+    animation: none;
+  }
+
+  .shop-catalog-loader-dot {
     animation: none;
   }
 }

@@ -78,6 +78,13 @@ function matchesFilters(
   ) {
     return false;
   }
+  for (const [groupId, selectedIds] of Object.entries(filters.customFilters ?? {})) {
+    if (selectedIds.length === 0) continue;
+    const productIds = product.customFilters?.[groupId] ?? [];
+    if (!selectedIds.some((id) => productIds.includes(id))) {
+      return false;
+    }
+  }
   if (filters.availabilityOnly && countryCode) {
     const enabledMap = product.enabledCountries ?? product.availability;
     if (!enabledMap[countryCode]) return false;
@@ -191,6 +198,9 @@ export function countActiveFilters(filters: ShopFilters): number {
   count += filters.cultures.length;
   count += filters.certifications.length;
   count += filters.countriesOfOrigin.length;
+  for (const selectedIds of Object.values(filters.customFilters ?? {})) {
+    count += selectedIds.length;
+  }
   if (filters.availabilityOnly) count += 1;
   if (filters.priceMin !== null) count += 1;
   if (filters.priceMax !== null) count += 1;
