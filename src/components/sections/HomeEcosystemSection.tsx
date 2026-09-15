@@ -48,27 +48,27 @@ const STAGES: StageDef[] = [
   {
     id: "growing",
     icon: Leaf,
-    image: "/assets/homepage/hero-vineyard.jpg",
+    image: "/assets/homepage/ecosystem-growing.jpg",
   },
   {
     id: "packaging",
     icon: Package,
-    image: "/assets/homepage/capabilities-partnerships.jpg",
+    image: "/assets/homepage/ecosystem-packaging.jpg",
   },
   {
     id: "logistics",
     icon: Truck,
-    image: "/assets/homepage/solutions-logistics.jpg",
+    image: "/assets/homepage/ecosystem-logistics.jpg",
   },
   {
     id: "retail",
     icon: Store,
-    image: "/assets/homepage/solutions-integrated.jpg",
+    image: "/assets/homepage/ecosystem-retail.jpg",
   },
   {
     id: "pos",
     icon: ShoppingCart,
-    image: "/assets/homepage/capabilities-value-chain.jpg",
+    image: "/assets/homepage/ecosystem-pos.jpg",
   },
 ];
 

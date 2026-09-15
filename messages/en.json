@@ -617,7 +617,7 @@
     "noResultsDesc": "Try adjusting your search or clearing some filters.",
     "confirmClearQuoteOnCountryChange": "Changing country clears your quote list. Continue?",
     "removeFilter": "Remove filter {label}",
-    "resultsCount": "{count} products",
+    "resultsCount": "{count, plural, one {# product} other {# products}}",
     "loadMore": "Load more products",
     "officeCardEyebrow": "Your commercial office",
     "specifications": "Specifications",
@@ -1050,8 +1050,8 @@
     "explorer": {
       "eyebrow": "Explore our solutions",
       "title": "Solutions for every horticulture sector",
-      "description": "Discover how Oboya supports every stage of horticultural operations — then open related products directly in the Shop.",
-      "headingAll": "Solutions for every crop",
+      "description": "Supporting flower growers, exporters, distributors, and retailers from propagation to point of sale.",
+      "headingAll": "Solutions for every Crop",
       "headingFor": "Solutions for {sector}",
       "navLabel": "Crop filters",
       "filters": {
@@ -1423,6 +1423,12 @@
       "removeOption": "Remove option {name}",
       "siteReflection": "Site Reflection",
       "moreOptions": "+{count} more options"
+    },
+    "products": {
+      "title": "Products",
+      "statTotal": "Total registered",
+      "statActive": "Active",
+      "statDraft": "Draft"
     },
     "taxonomy": {
       "title": "Filters & classification",

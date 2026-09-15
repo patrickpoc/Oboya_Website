@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Copy, Pencil, Plus, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Can } from "@/components/admin/permissions/Can";
@@ -29,6 +30,7 @@ function buildUniqueDuplicateSku(baseSku: string, existingSkus: Set<string>) {
 }
 
 export default function ProductsPage() {
+  const t = useTranslations("admin.products");
   const router = useRouter();
   const [products, setProducts] = useState<CmsProduct[]>([]);
   const [deletedProducts, setDeletedProducts] = useState<CmsProduct[]>([]);
@@ -102,6 +104,20 @@ export default function ProductsPage() {
     currentPage * PAGE_SIZE
   );
 
+  const productUnitStats = useMemo(() => {
+    let total = 0;
+    let active = 0;
+    let draft = 0;
+    for (const product of products) {
+      // Main/default color + each additional color variant
+      const units = 1 + (product.colorVariants?.length ?? 0);
+      total += units;
+      if (product.status === "published") active += units;
+      else draft += units;
+    }
+    return { total, active, draft };
+  }, [products]);
+
   const handleDuplicate = (id: string) => {
     void (async () => {
       const original = products.find((product) => product.id === id);
@@ -128,8 +144,29 @@ export default function ProductsPage() {
   return (
     <Can module="marketplace" action="view">
       <AdminPageHeader
-        title="Products"
-        description="Grid de produtos com criação, edição, paginação e lixeira."
+        title={t("title")}
+        description={
+          <dl className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-muted-foreground sm:gap-x-4">
+            <div className="inline-flex items-baseline gap-1.5 rounded-full bg-white/80 px-2.5 py-1 ring-1 ring-oboya-blue-dark/10">
+              <dt>{t("statTotal")}</dt>
+              <dd className="font-semibold tabular-nums text-oboya-blue-dark">
+                {productUnitStats.total}
+              </dd>
+            </div>
+            <div className="inline-flex items-baseline gap-1.5 rounded-full bg-white/80 px-2.5 py-1 ring-1 ring-oboya-green/25">
+              <dt>{t("statActive")}</dt>
+              <dd className="font-semibold tabular-nums text-oboya-green">
+                {productUnitStats.active}
+              </dd>
+            </div>
+            <div className="inline-flex items-baseline gap-1.5 rounded-full bg-white/80 px-2.5 py-1 ring-1 ring-oboya-blue-dark/10">
+              <dt>{t("statDraft")}</dt>
+              <dd className="font-semibold tabular-nums text-oboya-blue-dark/70">
+                {productUnitStats.draft}
+              </dd>
+            </div>
+          </dl>
+        }
         actions={
           <Can module="marketplace" action="create">
             <Link
@@ -352,10 +389,16 @@ export default function ProductsPage() {
                     void (async () => {
                       const ok = window.confirm("Remover permanentemente da lixeira?");
                       if (!ok) return;
-                      await fetch(`/api/cms/products/${product.id}?hard=1`, {
-                        method: "DELETE",
-                      });
+                      const response = await fetch(
+                        `/api/cms/products/${product.id}?hard=1`,
+                        { method: "DELETE" }
+                      );
+                      if (!response.ok) {
+                        toast.error("Não foi possível remover permanentemente.");
+                        return;
+                      }
                       await refresh();
+                      toast.success("Produto removido permanentemente.");
                     })()
                   }
                 >

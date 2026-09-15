@@ -7,7 +7,7 @@ export function AdminPageHeader({
   className,
 }: {
   title: string;
-  description?: string;
+  description?: React.ReactNode;
   actions?: React.ReactNode;
   className?: string;
 }) {
@@ -17,9 +17,13 @@ export function AdminPageHeader({
         <h1 className="font-display text-2xl font-semibold text-oboya-blue-dark">
           {title}
         </h1>
-        {description && (
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-        )}
+        {description ? (
+          typeof description === "string" ? (
+            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+          ) : (
+            <div className="mt-1">{description}</div>
+          )
+        ) : null}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>

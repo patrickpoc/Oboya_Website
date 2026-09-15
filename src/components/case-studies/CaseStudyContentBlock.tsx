@@ -67,7 +67,7 @@ export function CaseStudyContentBlock({
           className="mt-2.5 h-px w-10 bg-oboya-orange sm:mt-3 sm:w-12"
           aria-hidden
         />
-        <div className="mt-2.5 flex max-w-[20rem] flex-col gap-1.5 font-body text-[0.7rem] leading-[1.55] text-oboya-blue-dark/55 sm:mt-3 sm:gap-2 sm:text-[0.75rem] sm:leading-[1.6] md:text-[0.8125rem] md:leading-[1.65]">
+        <div className="mt-2.5 flex max-w-[20rem] flex-col gap-1.5 font-display text-[0.7rem] font-normal leading-[1.55] tracking-normal text-oboya-blue-dark/55 sm:mt-3 sm:gap-2 sm:text-[0.75rem] sm:leading-[1.6] md:text-[0.8125rem] md:leading-[1.65]">
           {paragraphs.filter(Boolean).map((paragraph, index) => (
             <p key={index} className="line-clamp-3 sm:line-clamp-4">
               {paragraph}

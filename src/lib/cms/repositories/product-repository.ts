@@ -74,8 +74,25 @@ function purgeExpired(items: CmsProduct[]): CmsProduct[] {
   const now = Date.now();
   return items.filter((item) => {
     if (!item.purgeAt) return true;
-    return new Date(item.purgeAt).getTime() > now;
+    const purgeTime = new Date(item.purgeAt).getTime();
+    if (Number.isNaN(purgeTime)) return true;
+    return purgeTime > now;
   });
+}
+
+/** Drop trash items whose purge window has elapsed. Returns how many were removed. */
+export function purgeExpiredCmsProducts(): number {
+  if (!productsCache) productsCache = seedProducts();
+  const before = productsCache.length;
+  productsCache = purgeExpired(productsCache);
+  return before - productsCache.length;
+}
+
+export function isProductPurgeDue(product: Pick<CmsProduct, "purgeAt">): boolean {
+  if (!product.purgeAt) return false;
+  const purgeTime = new Date(product.purgeAt).getTime();
+  if (Number.isNaN(purgeTime)) return false;
+  return purgeTime <= Date.now();
 }
 
 function seedProducts(): CmsProduct[] {

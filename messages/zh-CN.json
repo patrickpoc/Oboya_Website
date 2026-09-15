@@ -609,7 +609,7 @@
     "noResultsDesc": "Try adjusting your search or clearing some filters.",
     "confirmClearQuoteOnCountryChange": "更换国家将清空报价清单。是否继续？",
     "removeFilter": "移除筛选 {label}",
-    "resultsCount": "{count} products",
+    "resultsCount": "{count, plural, one {# product} other {# products}}",
     "loadMore": "Load more products",
     "officeCardEyebrow": "Your commercial office",
     "specifications": "Specifications",
@@ -1415,6 +1415,12 @@
       "removeOption": "移除选项 {name}",
       "siteReflection": "站点预览",
       "moreOptions": "+{count} 个更多选项"
+    },
+    "products": {
+      "title": "产品",
+      "statTotal": "已登记总数",
+      "statActive": "已上架",
+      "statDraft": "草稿"
     },
     "taxonomy": {
       "title": "筛选与分类",

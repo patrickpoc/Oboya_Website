@@ -53,8 +53,8 @@ function ContactBlock({ contact }: { contact: LegalContact }) {
     });
   }
   rows.push({
-    label: "Privacy Contact",
-    value: contact.privacyEmail || "info@oboya.cc",
+    label: "Legal Contact",
+    value: contact.privacyEmail || "Robert@shopquip.se",
   });
   if (contact.website) {
     rows.push({ label: "Website", value: contact.website });
@@ -73,7 +73,7 @@ function ContactBlock({ contact }: { contact: LegalContact }) {
             >
               {row.value.replace(/^https?:\/\//, "")}
             </a>
-          ) : row.label === "Privacy Contact" ? (
+          ) : row.label === "Legal Contact" ? (
             <a
               href={`mailto:${row.value}`}
               className="text-oboya-blue-light underline-offset-2 hover:underline"

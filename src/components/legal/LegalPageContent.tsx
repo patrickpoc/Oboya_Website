@@ -18,7 +18,11 @@ export function LegalPageContent() {
       sections={TERMS_SECTIONS}
       contact={{
         company: TERMS_CONTACT.company,
+        headquarters: TERMS_CONTACT.headquarters,
         website: TERMS_CONTACT.website,
+        legalEntity: TERMS_CONTACT.legalEntity,
+        registeredAddress: TERMS_CONTACT.registeredAddress,
+        privacyEmail: TERMS_CONTACT.privacyEmail,
       }}
       footerNote={TERMS_CONTACT.privacyNote}
     />

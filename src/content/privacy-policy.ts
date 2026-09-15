@@ -11,15 +11,15 @@ export const PRIVACY_HERO_TITLE = "Privacy Policy";
 export const PRIVACY_HERO_BODY =
   "Oboya Horticulture respects your privacy and is committed to protecting the personal data and information you provide when using our websites, online services, communication channels, and digital platforms.";
 
-/** Fill these when the legal entity details are confirmed. Empty values are omitted from the page. */
+/** Confirmed legal entity details for the contact block. */
 export const PRIVACY_CONTACT: LegalContact = {
   company: "Oboya Horticulture",
-  headquarters: "Dubai, United Arab Emirates",
+  headquarters: "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis",
   website: "https://www.oboya-horticulture.com",
-  legalEntity: "",
-  registeredAddress: "",
+  legalEntity: "OBOYA HORTICULTURE SOLUTIONS TRADING FZCO",
+  registeredAddress: "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis",
   registrationNumber: "",
-  privacyEmail: "info@oboya.cc",
+  privacyEmail: "Robert@shopquip.se",
 };
 
 export const PRIVACY_SECTIONS: LegalSection[] = [
@@ -55,7 +55,7 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
       { type: "h3", text: "1.3 Responsible Oboya Entity" },
       {
         type: "p",
-        text: "Oboya Horticulture’s headquarters are located in Dubai, United Arab Emirates.",
+        text: "Oboya Horticulture’s headquarters are located at DSO-IFZA, IFZA Properties, Dubai Silicon Oasis. The legal entity is OBOYA HORTICULTURE SOLUTIONS TRADING FZCO.",
       },
       {
         type: "p",
@@ -597,7 +597,7 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
     blocks: [
       {
         type: "p",
-        text: "As Oboya Horticulture’s headquarters are located in Dubai, United Arab Emirates, Personal Data may also be processed in accordance with applicable UAE data protection legislation.",
+        text: "As Oboya Horticulture’s headquarters are located in Dubai (DSO-IFZA, IFZA Properties, Dubai Silicon Oasis), Personal Data may also be processed in accordance with applicable UAE data protection legislation.",
       },
       {
         type: "p",
@@ -703,7 +703,7 @@ export function getPrivacyDocument(locale: string) {
     intro:
       locale === "es" || locale === "zh-CN"
         ? [
-            "The controlling versions of this Privacy Policy are English and Portuguese (Brazil). This page is shown in English; contact info@oboya.cc if you need assistance.",
+            "The controlling versions of this Privacy Policy are English and Portuguese (Brazil). This page is shown in English; contact Robert@shopquip.se if you need assistance.",
           ]
         : undefined,
   };

@@ -50,7 +50,7 @@ function defaultCrops(): SolutionsPageCrop[] {
       id: "all",
       label: L("All Crops"),
       description: L(
-        "Discover how Oboya supports every stage of horticultural operations — then open related products directly in the Shop."
+        "Supporting flower growers, exporters, distributors, and retailers from propagation to point of sale."
       ),
       sectorTitle: L("every crop"),
       shop: {},
@@ -89,49 +89,49 @@ function defaultBanners(): SolutionsPageBanner[] {
   return [
     {
       id: "propagation",
-      image: "/assets/homepage/capabilities-value-chain.jpg",
+      image: "/assets/solutions/stage-propagation.jpg",
       title: L("Propagation Solutions"),
       tags: [L("Seedling trays"), L("Substrates")],
       shop: { categoryId: "propagation" },
     },
     {
       id: "growing",
-      image: "/assets/homepage/hero-vineyard.jpg",
+      image: "/assets/solutions/stage-growing.jpg",
       title: L("Growing Solutions"),
       tags: [L("Seedling trays"), L("Substrates"), L("Pots"), L("Irrigation")],
       shop: { categoryId: "growing" },
     },
     {
       id: "harvest",
-      image: "/assets/homepage/solutions-integrated.jpg",
+      image: "/assets/solutions/stage-harvest.jpg",
       title: L("Harvest Solutions"),
       tags: [L("Crates"), L("Transport trays"), L("Harvest carts")],
       shop: { categoryId: "harvest" },
     },
     {
       id: "postharvest",
-      image: "/assets/homepage/capabilities-partnerships.jpg",
+      image: "/assets/solutions/stage-postharvest.jpg",
       title: L("Postharvest Solutions"),
       tags: [L("Packaging"), L("Crates")],
       shop: { categoryId: "post-harvest" },
     },
     {
       id: "transport-logistics",
-      image: "/assets/homepage/solutions-logistics.jpg",
+      image: "/assets/solutions/stage-transport.png",
       title: L("Transport & Logistics"),
       tags: [L("Logistics trolleys"), L("Display systems")],
       shop: { categoryId: "transport-and-logistics" },
     },
     {
       id: "retail",
-      image: "/assets/homepage/capabilities-global-local.jpg",
+      image: "/assets/solutions/stage-retail.jpg",
       title: L("Retail"),
       tags: [L("Logistics trolleys"), L("Display systems")],
       shop: { categoryId: "retail" },
     },
     {
       id: "automation",
-      image: "/assets/homepage/greenhouse-technology.webp",
+      image: "/assets/solutions/stage-automation.jpg",
       title: L("Automation & Machinery"),
       tags: [L("Automation systems"), L("Greenhouse tech")],
       shop: { categoryId: "automation-and-machinery" },
@@ -274,16 +274,36 @@ export function normalizeSolutionsPageSettings(
       ? cropsRaw
           .filter(isObject)
           .map((crop, index) => {
-            const fallback = defaults.crops[index] ?? defaults.crops[0]!;
+            const byId = defaults.crops.find((item) => item.id === crop.id);
+            const fallback = byId ?? defaults.crops[index] ?? defaults.crops[0]!;
+            const description = normalizeLocalized(
+              crop.description,
+              fallback.description
+            );
+            // Promote legacy All Crops blurb to the verified copy.
+            if (
+              crop.id === "all" &&
+              description.en.includes(
+                "Discover how Oboya supports every stage of horticultural operations"
+              )
+            ) {
+              return {
+                id: "all" as SolutionsCropFilterId,
+                label: normalizeLocalized(crop.label, fallback.label),
+                description: { ...fallback.description },
+                sectorTitle: normalizeLocalized(
+                  crop.sectorTitle,
+                  fallback.sectorTitle
+                ),
+                shop: normalizeShop(crop.shop),
+              };
+            }
             return {
               id: (typeof crop.id === "string"
                 ? crop.id
                 : fallback.id) as SolutionsCropFilterId,
               label: normalizeLocalized(crop.label, fallback.label),
-              description: normalizeLocalized(
-                crop.description,
-                fallback.description
-              ),
+              description,
               sectorTitle: normalizeLocalized(
                 crop.sectorTitle,
                 fallback.sectorTitle
@@ -293,17 +313,35 @@ export function normalizeSolutionsPageSettings(
           })
       : defaults.crops;
 
-  const banners =
+  const LEGACY_BANNER_IMAGES = new Set([
+  "/assets/homepage/capabilities-value-chain.jpg",
+  "/assets/homepage/hero-vineyard.jpg",
+  "/assets/homepage/solutions-integrated.jpg",
+  "/assets/homepage/capabilities-partnerships.jpg",
+  "/assets/homepage/solutions-logistics.jpg",
+  "/assets/homepage/capabilities-global-local.jpg",
+  "/assets/homepage/greenhouse-technology.webp",
+]);
+
+const banners =
     bannersRaw.length > 0
       ? bannersRaw.filter(isObject).map((banner, index) => {
-          const fallback = defaults.banners[index] ?? defaults.banners[0]!;
+          const byId = defaults.banners.find(
+            (item) => item.id === banner.id
+          );
+          const fallback = byId ?? defaults.banners[index] ?? defaults.banners[0]!;
           const tagsRaw = Array.isArray(banner.tags) ? banner.tags : [];
+          const rawImage =
+            typeof banner.image === "string" && banner.image
+              ? banner.image
+              : "";
+          const image =
+            !rawImage || LEGACY_BANNER_IMAGES.has(rawImage)
+              ? fallback.image
+              : rawImage;
           return {
             id: typeof banner.id === "string" ? banner.id : fallback.id,
-            image:
-              typeof banner.image === "string" && banner.image
-                ? banner.image
-                : fallback.image,
+            image,
             title: normalizeLocalized(banner.title, fallback.title),
             tags:
               tagsRaw.length > 0

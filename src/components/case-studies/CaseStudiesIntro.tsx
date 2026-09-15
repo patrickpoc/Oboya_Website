@@ -13,7 +13,7 @@ export async function CaseStudiesIntro() {
               br: () => <br />,
             })}
           </h2>
-          <p className="col-span-6 font-body text-[0.75rem] leading-[1.6] text-oboya-blue-dark/55 sm:text-[0.8125rem] sm:leading-[1.65] md:text-[0.875rem] md:leading-[1.7] lg:pt-0.5">
+          <p className="col-span-6 font-display text-[0.75rem] font-normal leading-[1.6] tracking-normal text-oboya-blue-dark/55 sm:text-[0.8125rem] sm:leading-[1.65] md:text-[0.875rem] md:leading-[1.7] lg:pt-0.5">
             {t("introBody")}
           </p>
         </div>

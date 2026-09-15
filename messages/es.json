@@ -609,7 +609,7 @@
     "noResultsDesc": "Try adjusting your search or clearing some filters.",
     "confirmClearQuoteOnCountryChange": "Cambiar de país vacía su lista de cotización. ¿Continuar?",
     "removeFilter": "Quitar filtro {label}",
-    "resultsCount": "{count} products",
+    "resultsCount": "{count, plural, one {# product} other {# products}}",
     "loadMore": "Load more products",
     "officeCardEyebrow": "Your commercial office",
     "specifications": "Specifications",
@@ -1415,6 +1415,12 @@
       "removeOption": "Quitar opción {name}",
       "siteReflection": "Reflexión del sitio",
       "moreOptions": "+{count} opciones más"
+    },
+    "products": {
+      "title": "Productos",
+      "statTotal": "Total registrados",
+      "statActive": "Activos",
+      "statDraft": "Borrador"
     },
     "taxonomy": {
       "title": "Filtros y clasificación",

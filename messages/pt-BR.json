@@ -609,7 +609,7 @@
     "noResultsDesc": "Try adjusting your search or clearing some filters.",
     "confirmClearQuoteOnCountryChange": "Alterar o país limpa sua lista de cotação. Continuar?",
     "removeFilter": "Remover filtro {label}",
-    "resultsCount": "{count} products",
+    "resultsCount": "{count, plural, one {# product} other {# products}}",
     "loadMore": "Load more products",
     "officeCardEyebrow": "Your commercial office",
     "specifications": "Specifications",
@@ -1415,6 +1415,12 @@
       "removeOption": "Remover opção {name}",
       "siteReflection": "Reflexo no site",
       "moreOptions": "+{count} opções a mais"
+    },
+    "products": {
+      "title": "Produtos",
+      "statTotal": "Total cadastrados",
+      "statActive": "Ativos",
+      "statDraft": "Rascunho"
     },
     "taxonomy": {
       "title": "Filtros e classificação",

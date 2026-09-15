@@ -13,7 +13,7 @@ export interface TermsSection {
 export const TERMS_UPDATED = "September 14, 2026";
 export const TERMS_HERO_TITLE = "Terms of Use";
 export const TERMS_HERO_BODY =
-  "Please read these Terms of Use carefully before accessing or using the websites, digital platforms, online stores, applications, product catalogs, services, and other digital services operated by Oboya Horticulture Industries AB and/or its applicable subsidiaries, affiliates, or authorized entities (collectively, “Oboya”, “we”, “us”, or “our”).";
+  "Please read these Terms of Use carefully before accessing or using the websites, digital platforms, online stores, applications, product catalogs, services, and other digital services operated by OBOYA HORTICULTURE SOLUTIONS TRADING FZCO and/or its applicable subsidiaries, affiliates, or authorized entities (collectively, “Oboya”, “we”, “us”, or “our”).";
 
 export const TERMS_INTRO: string[] = [
   "These Terms of Use (“Terms”) govern your access to and use of Oboya’s websites and digital services (collectively, the “Platform”).",
@@ -844,7 +844,11 @@ export const TERMS_SECTIONS: TermsSection[] = [
 
 export const TERMS_CONTACT = {
   company: "Oboya Horticulture",
-  website: "https://oboya.cc",
+  headquarters: "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis",
+  website: "https://www.oboya-horticulture.com",
+  legalEntity: "OBOYA HORTICULTURE SOLUTIONS TRADING FZCO",
+  registeredAddress: "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis",
+  privacyEmail: "Robert@shopquip.se",
   privacyNote:
-    "For questions concerning personal data and privacy, please refer to the applicable Privacy Policy and privacy contact information.",
+    "For questions concerning personal data and privacy, please refer to the applicable Privacy Policy and legal contact information.",
 };

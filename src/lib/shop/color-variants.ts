@@ -183,6 +183,33 @@ export function resolveVariantSku(
   return product.sku || "";
 }
 
+/**
+ * Sellable catalog units for the results count: always includes the main
+ * (default) color, plus each additional color variant when present.
+ */
+export function countActiveSkus(
+  products: Array<
+    Pick<
+      ShopProduct,
+      | "sku"
+      | "colorVariants"
+      | "defaultColor"
+      | "defaultColorName"
+      | "images"
+      | "prices"
+    >
+  >
+): number {
+  let total = 0;
+  for (const product of products) {
+    // Main / default color SKU
+    total += 1;
+    // Additional color variants (each is its own SKU)
+    total += sortedColorVariants(product).length;
+  }
+  return total;
+}
+
 export function resolveVariantPrice(
   product: Pick<ShopProduct, "prices">,
   variant: ProductColorVariant | null | undefined,

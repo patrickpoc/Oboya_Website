@@ -2,10 +2,19 @@ import "server-only";
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { getCmsProducts, type CmsProduct } from "@/lib/cms/repositories/product-repository";
+import {
+  getCmsProducts,
+  isProductPurgeDue,
+  purgeExpiredCmsProducts,
+  type CmsProduct,
+} from "@/lib/cms/repositories/product-repository";
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
+import {
+  createServiceClient,
+  isServiceRoleConfigured,
+} from "@/lib/supabase/admin";
 import { normalizeColorVariants, normalizeImageColorIds, normalizeLocalizedColorName } from "@/lib/shop/color-variants";
 
 const PRODUCTS_FILE = path.join(process.cwd(), "data", "shop", "products.json");
@@ -162,6 +171,16 @@ export async function readProducts(options?: {
   /** Cookie-backed client for admin reads (drafts, trash). */
   asAdmin?: boolean;
 }) {
+  // Drop soft items whose 24h purge window has elapsed (Supabase + local).
+  try {
+    await purgeExpiredProducts();
+  } catch (error) {
+    console.error(
+      "cms_products purge:",
+      error instanceof Error ? error.message : error
+    );
+  }
+
   if (!isSupabaseConfigured()) {
     return getCmsProducts(options);
   }
@@ -191,7 +210,10 @@ export async function readProducts(options?: {
     const { data, error } = result;
     if (error) throw new Error(error.message);
 
-    const products = (data ?? []).map((row) => rowToProduct(row as ProductRow));
+    const products = (data ?? [])
+      .map((row) => rowToProduct(row as ProductRow))
+      // Defense in depth if DB purge could not run (RLS / missing service role).
+      .filter((product) => !isProductPurgeDue(product));
     if (products.length === 0 && options?.asAdmin) {
       const seed = fallback();
       if (seed.length > 0) return seed;
@@ -208,6 +230,43 @@ export async function readProducts(options?: {
       (product) => product.status === "published" && !product.deletedAt
     );
   }
+}
+
+/**
+ * Permanently remove trash products whose `purge_at` is due.
+ * Prefer the service-role client (cron); admin session can purge on trash load.
+ */
+export async function purgeExpiredProducts(options?: {
+  asAdmin?: boolean;
+}): Promise<number> {
+  const nowIso = new Date().toISOString();
+
+  if (!isSupabaseConfigured()) {
+    const removed = purgeExpiredCmsProducts();
+    if (removed > 0) {
+      await persistProductsToFileSafe(getCmsProducts({ includeDeleted: true }));
+    }
+    return removed;
+  }
+
+  if (!isServiceRoleConfigured() && !options?.asAdmin) {
+    // Public catalog reads: skip DB delete; caller filters purge-due rows.
+    return 0;
+  }
+
+  const client = isServiceRoleConfigured()
+    ? createServiceClient()
+    : await createClient();
+
+  const { data, error } = await client
+    .from("cms_products")
+    .delete()
+    .not("purge_at", "is", null)
+    .lte("purge_at", nowIso)
+    .select("id");
+
+  if (error) throw new Error(error.message);
+  return data?.length ?? 0;
 }
 
 export async function readProductById(

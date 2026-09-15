@@ -22,7 +22,7 @@ export const PRIVACY_SECTIONS_PT: LegalSection[] = [
       { type: "h3", text: "1.3 Controlador" },
       {
         type: "p",
-        text: "A sede da Oboya Horticulture fica em Dubai, Emirados Árabes Unidos. A entidade Oboya que decide as finalidades e os meios do tratamento atua como controladora. Para o Brasil, esta versão em português é a versão de referência da LGPD.",
+        text: "A sede da Oboya Horticulture fica em DSO-IFZA, IFZA Properties, Dubai Silicon Oasis. A entidade jurídica é OBOYA HORTICULTURE SOLUTIONS TRADING FZCO. A entidade Oboya que decide as finalidades e os meios do tratamento atua como controladora. Para o Brasil, esta versão em português é a versão de referência da LGPD.",
       },
       { type: "contact" },
     ],

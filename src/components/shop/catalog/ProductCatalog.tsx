@@ -10,6 +10,7 @@ import {
   LoadingSkeleton,
   SelectCountryPrompt,
 } from "@/components/shop/states/ShopStateViews";
+import { countActiveSkus } from "@/lib/shop/color-variants";
 
 export function ProductCatalog() {
   const t = useTranslations("shop");
@@ -25,6 +26,7 @@ export function ProductCatalog() {
     openAddToQuoteDialog,
   } = useShop();
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const activeSkuCount = countActiveSkus(filteredProducts);
 
   useEffect(() => {
     const node = loadMoreRef.current;
@@ -59,7 +61,7 @@ export function ProductCatalog() {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {t("resultsCount", { count: filteredProducts.length })}
+          {t("resultsCount", { count: activeSkuCount })}
         </p>
       </div>
       <FilterChips />

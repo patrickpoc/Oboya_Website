@@ -1,5 +1,4 @@
 import { BusinessSolutions } from "@/components/sections/BusinessSolutions";
-import { HomeChallenges } from "@/components/sections/HomeChallenges";
 import { Capabilities } from "@/components/sections/Capabilities";
 import { Hero } from "@/components/sections/Hero";
 import { HomeEcosystemSection } from "@/components/sections/HomeEcosystemSection";
@@ -40,7 +39,6 @@ export function HomePageContent({
           animationsEnabled={animationsEnabled}
         />
       )}
-      <HomeChallenges />
       {homepage.sections.testimonials.enabled && (
         <Testimonials
           data={homepage.testimonials}
