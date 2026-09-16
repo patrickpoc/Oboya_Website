@@ -22,7 +22,7 @@ export function SolutionsCta({
   description,
   buttonLabel,
   href = "/shop",
-  imageSrc = "/assets/homepage/solutions-integrated.jpg",
+  imageSrc = "/assets/solutions/cta-horticulture.jpg",
   sharedBackdrop = false,
   size = "default",
 }: SolutionsCtaProps) {

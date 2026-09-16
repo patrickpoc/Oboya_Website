@@ -52,6 +52,10 @@ export async function AboutPageContent({
         <AboutTimeline data={about.timeline} locale={locale} />
       ) : null}
 
+      {about.sections.callout.enabled && (
+        <AboutCallout data={about.callout} locale={locale} />
+      )}
+
       {about.sections.impact.enabled && (
         <AboutImpact data={about.impact} locale={locale} />
       )}
@@ -61,13 +65,6 @@ export async function AboutPageContent({
         mapAlt={tPresence("mapAlt")}
         title={pickLocalized(homepage.globalPresence.title, locale)}
       />
-      {about.sections.callout.enabled && (
-        <AboutCallout
-          data={about.callout}
-          locale={locale}
-          imageSrc={about.institutionalImage.src}
-        />
-      )}
       {about.sections.culture.enabled && (
         <AboutCorporateCulture data={about.culture} locale={locale} />
       )}

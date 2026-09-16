@@ -4,78 +4,53 @@ import { motion, useReducedMotion } from "framer-motion";
 import { fadeInUp } from "@/lib/animations";
 import { pickLocalized } from "@/lib/cms/utils";
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
-import { cn } from "@/lib/utils";
 
 interface AboutCalloutProps {
   data: AboutPageSettings["callout"];
   locale: string;
-  /** Same institutional image used by the About hero. */
-  imageSrc?: string | null;
 }
 
-export function AboutCallout({ data, locale, imageSrc }: AboutCalloutProps) {
+/**
+ * Solid navy statement band — green lead-in + white body in one paragraph.
+ * No background image / parallax.
+ */
+export function AboutCallout({ data, locale }: AboutCalloutProps) {
   const reduceMotion = useReducedMotion();
-  const title = data.segments
+  const lead = data.segments
     .map((segment) => pickLocalized(segment.text, locale))
     .join("")
     .trim();
-  const body = data.body ? pickLocalized(data.body, locale) : "";
-  const paragraphs = body
-    .split(/\n\n+/)
-    .map((part) => part.trim())
-    .filter(Boolean);
-  const backgroundSrc =
-    imageSrc || "/assets/about/institutional.png";
+  const leadWithPeriod =
+    lead && !/[.!?…]$/.test(lead) ? `${lead}.` : lead;
+  const body = data.body
+    ? pickLocalized(data.body, locale).replace(/\s*\n\s*/g, " ").trim()
+    : "";
 
-  if (!title && paragraphs.length === 0) return null;
+  if (!leadWithPeriod && !body) return null;
 
   return (
     <section
-      className={cn(
-        "relative overflow-hidden",
-        "min-h-[min(54.6vw,20.8rem)] md:min-h-[23.4rem] lg:min-h-[26rem]"
-      )}
-      aria-labelledby={title ? "about-callout-heading" : undefined}
+      data-about-callout="navy"
+      className="bg-oboya-blue-dark"
+      aria-labelledby={leadWithPeriod ? "about-callout-heading" : undefined}
     >
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-fixed"
-        style={{
-          backgroundImage: `url(${backgroundSrc})`,
-        }}
-        aria-hidden
-      />
-      <div className="absolute inset-0 bg-black/50" aria-hidden />
-
       <motion.div
-        className="relative z-10 flex min-h-[inherit] flex-col justify-center px-[var(--container-padding)] py-[3.25rem] text-left md:py-[3.9rem] lg:py-[4.55rem]"
+        className="mx-auto w-full max-w-[var(--container-max)] px-[var(--container-padding)] py-[clamp(3.75rem,9vw,6.5rem)]"
         initial={reduceMotion ? false : "hidden"}
         whileInView={reduceMotion ? undefined : "visible"}
         viewport={{ once: true, margin: "-80px" }}
         variants={reduceMotion ? undefined : fadeInUp}
       >
-        <div className="mx-auto w-full max-w-[var(--container-max)]">
-          {title ? (
-            <h2
-              id="about-callout-heading"
-              className="max-w-4xl font-display text-[clamp(2rem,3.6vw,2.75rem)] font-semibold leading-[1.1] tracking-[-0.02em] text-white text-balance"
-            >
-              {title}
-            </h2>
+        <p
+          id="about-callout-heading"
+          className="max-w-[52rem] font-display text-[clamp(1.35rem,2.8vw,1.875rem)] font-light leading-[1.4] tracking-[-0.01em] text-pretty"
+        >
+          {leadWithPeriod ? (
+            <span className="text-oboya-green">{leadWithPeriod}</span>
           ) : null}
-
-          {paragraphs.length > 0 ? (
-            <div className="mt-6 max-w-4xl space-y-5 md:mt-8 md:space-y-6">
-              {paragraphs.map((paragraph, index) => (
-                <p
-                  key={`${index}-${paragraph.slice(0, 24)}`}
-                  className="whitespace-pre-line font-body text-[clamp(0.95rem,1.5vw,1.125rem)] font-normal leading-[1.55] text-white/92 md:leading-[1.6]"
-                >
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          ) : null}
-        </div>
+          {leadWithPeriod && body ? " " : null}
+          {body ? <span className="text-white">{body}</span> : null}
+        </p>
       </motion.div>
     </section>
   );

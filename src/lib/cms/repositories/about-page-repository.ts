@@ -598,16 +598,21 @@ const defaultSettings = (): AboutPageSettings => ({
   callout: {
     segments: [
       {
-        text: loc("More Than a Supplier"),
+        text: loc(
+          "More Than a Supplier",
+          "Mais que um Fornecedor",
+          "Más que un Proveedor",
+          "不止是供应商"
+        ),
         tone: "white",
         breakBefore: false,
       },
     ],
     body: loc(
-      "Many suppliers focus on individual categories. Oboya Horticulture takes a wider perspective.\n\nBy offering solutions across multiple stages of the horticultural journey, we help customers improve efficiency, protect\nquality, optimize resources, and create long-term value throughout their operations.",
-      "Muitos fornecedores focam em categorias individuais. A Oboya Horticulture tem uma perspectiva mais ampla.\n\nAo oferecer soluções em múltiplas etapas da jornada hortícola, ajudamos os clientes a melhorar a eficiência, proteger\na qualidade, otimizar recursos e criar valor de longo prazo em suas operações.",
-      "Muchos proveedores se centran en categorías individuales. Oboya Horticulture adopta una perspectiva más amplia.\n\nAl ofrecer soluciones en múltiples etapas del recorrido hortícola, ayudamos a los clientes a mejorar la eficiencia, proteger\nla calidad, optimizar recursos y crear valor a largo plazo en sus operaciones.",
-      "许多供应商专注于单一品类。Oboya Horticulture 拥有更广阔的视角。\n\n通过在园艺旅程的多个阶段提供解决方案，我们帮助客户提升效率、保障\n品质、优化资源，并在运营中创造长期价值。"
+      "Many suppliers focus on individual categories. Oboya Horticulture takes a wider perspective. By offering solutions across multiple stages of the horticultural journey, we help customers improve efficiency, protect quality, optimize resources, and create long-term value throughout their operations.",
+      "Muitos fornecedores focam em categorias individuais. A Oboya Horticulture tem uma perspectiva mais ampla. Ao oferecer soluções em múltiplas etapas da jornada hortícola, ajudamos os clientes a melhorar a eficiência, proteger a qualidade, otimizar recursos e criar valor de longo prazo em todas as suas operações.",
+      "Muchos proveedores se centran en categorías individuales. Oboya Horticulture adopta una perspectiva más amplia. Al ofrecer soluciones en múltiples etapas del recorrido hortícola, ayudamos a los clientes a mejorar la eficiencia, proteger la calidad, optimizar recursos y crear valor a largo plazo en todas sus operaciones.",
+      "许多供应商专注于单一品类。Oboya Horticulture 拥有更广阔的视角。通过在园艺旅程的多个阶段提供解决方案，我们帮助客户提升效率、保障品质、优化资源，并在整个运营中创造长期价值。"
     ),
   },
   culture: {
@@ -779,21 +784,21 @@ const defaultSettings = (): AboutPageSettings => ({
     ),
     images: [
       {
-        src: "https://images.unsplash.com/photo-1573497019940-1cfe6d4b9f07?q=80&w=1200&auto=format&fit=crop",
+        src: "/assets/homepage/capabilities-global-local.jpg",
         alt: loc(
-          "Team collaborating with technology in a modern workspace",
-          "Equipe colaborando com tecnologia em espaço moderno",
-          "Equipo colaborando con tecnología en un espacio moderno",
-          "团队在现代空间中借助技术协作"
+          "Global horticulture network connecting partners across regions",
+          "Rede global de horticultura conectando parceiros entre regiões",
+          "Red hortícola global que conecta socios entre regiones",
+          "连接各地区合作伙伴的全球园艺网络"
         ),
       },
       {
-        src: "https://images.unsplash.com/photo-1466692476867-a0881dfc0648?q=80&w=800&auto=format&fit=crop",
+        src: "/assets/homepage/greenhouse-technology.webp",
         alt: loc(
-          "Hands holding a young plant sprout",
-          "Mãos segurando um broto jovem",
-          "Manos sosteniendo un brote joven",
-          "双手托起幼苗"
+          "Young plants growing in a modern greenhouse",
+          "Plantas jovens crescendo em estufa moderna",
+          "Plantas jóvenes creciendo en un invernadero moderno",
+          "现代化温室中生长的幼苗"
         ),
       },
     ],
@@ -944,7 +949,7 @@ const defaultSettings = (): AboutPageSettings => ({
 });
 
 let cache: AboutPageSettings | null = null;
-const CONTENT_REVISION = 22;
+const CONTENT_REVISION = 24;
 let cacheRevision = 0;
 
 const VALUE_IMAGE_FALLBACKS: Record<
@@ -1165,6 +1170,35 @@ function normalizeImpactStats(stats: AboutImpactStat[]): AboutImpactStat[] {
   });
 }
 
+/** Broken Unsplash IDs previously used on About (return HTTP 404). */
+const BROKEN_ABOUT_IMAGE_MARKERS = [
+  "photo-1573497019940-1cfe6d4b9f07",
+  "photo-1466692476867-a0881dfc0648",
+];
+
+function repairMissionVisionImages(
+  block: AboutMissionVisionBlock | undefined,
+  fallback: AboutMissionVisionBlock
+): AboutMissionVisionBlock {
+  const images = (block?.images?.length ? block.images : fallback.images).map(
+    (image, index) => {
+      const src = image?.src ?? "";
+      const broken =
+        !src || BROKEN_ABOUT_IMAGE_MARKERS.some((marker) => src.includes(marker));
+      if (!broken) return image;
+      return fallback.images[index] ?? fallback.images[0]!;
+    }
+  );
+
+  return {
+    ...fallback,
+    ...block,
+    title: block?.title ?? fallback.title,
+    body: block?.body ?? fallback.body,
+    images,
+  };
+}
+
 /** Ensure durable / legacy CMS docs have value images and Numbers stats. */
 export function normalizeAboutPageSettings(
   settings: AboutPageSettings
@@ -1188,7 +1222,8 @@ export function normalizeAboutPageSettings(
   const isLegacyCallout =
     !currentCalloutBody ||
     currentCalloutBody.includes("Most suppliers specialize") ||
-    !currentCalloutBody.includes("protect\nquality");
+    currentCalloutBody.includes("protect\nquality") ||
+    !currentCalloutBody.includes("create long-term value throughout their operations");
 
   const currentHeroTitle = settings.hero?.title?.en ?? "";
   const isLegacyHero =
@@ -1230,8 +1265,9 @@ export function normalizeAboutPageSettings(
     callout: {
       ...defaults.callout,
       ...settings.callout,
-      segments:
-        settings.callout?.segments?.length
+      segments: isLegacyCallout
+        ? defaults.callout.segments
+        : settings.callout?.segments?.length
           ? settings.callout.segments
           : defaults.callout.segments,
       body: isLegacyCallout
@@ -1247,6 +1283,8 @@ export function normalizeAboutPageSettings(
           eyebrow: settings.culture?.eyebrow ?? defaults.culture.eyebrow,
           items: cultureItems.length ? cultureItems : defaults.culture.items,
         },
+    mission: repairMissionVisionImages(settings.mission, defaults.mission),
+    vision: repairMissionVisionImages(settings.vision, defaults.vision),
     impact: {
       title: settings.impact?.title ?? defaults.impact.title,
       description: settings.impact?.description ?? defaults.impact.description,

@@ -98,7 +98,7 @@ export async function SolutionCategoryPageContent({
         title={t("ctaTitle")}
         description={t("ctaDescription")}
         buttonLabel={t("ctaButton")}
-        imageSrc="/assets/homepage/solutions-integrated.jpg"
+        imageSrc="/assets/solutions/cta-horticulture.jpg"
       />
     </>
   );
