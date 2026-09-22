@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,27 +15,28 @@ export function LatestNewsSectionEditor({
   setSettings,
   locale,
 }: HomepageSectionEditorProps) {
+  const t = useTranslations("admin.website.home");
   return (
     <Card className="max-w-4xl">
       <CardHeader>
-        <CardTitle>Latest News</CardTitle>
+        <CardTitle>{t("sections.latestNews.title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <LocalizedInput
-          label="Eyebrow"
+          label={t("fields.eyebrow")}
           locale={locale}
           value={settings.latestNews.eyebrow[locale]}
           onChange={(l, v) => updateSettingsLocalized(setSettings, "latestNews", "eyebrow", l, v)}
         />
         <LocalizedInput
-          label="Headline"
+          label={t("fields.headline")}
           locale={locale}
           value={settings.latestNews.headline[locale]}
           onChange={(l, v) => updateSettingsLocalized(setSettings, "latestNews", "headline", l, v)}
           multiline
         />
         <div className="space-y-1.5">
-          <Label>Number of posts on homepage</Label>
+          <Label>{t("fields.postsToShow")}</Label>
           <Input
             type="number"
             min={1}
@@ -51,7 +53,7 @@ export function LatestNewsSectionEditor({
             }
           />
         </div>
-        <p className="text-xs text-muted-foreground">Articles are managed under Blog → Posts.</p>
+        <p className="text-xs text-muted-foreground">{t("fields.articlesManagedHint")}</p>
       </CardContent>
     </Card>
   );

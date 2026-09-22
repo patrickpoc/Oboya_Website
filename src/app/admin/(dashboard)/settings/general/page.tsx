@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/constants/site";
 
 export default function GeneralSettingsPage() {
+  const t = useTranslations("admin.settings.general");
+  const tCommon = useTranslations("admin.common");
   const [settings, setSettings] = useState({
     name: siteConfig.name,
     shortName: siteConfig.shortName,
@@ -25,33 +28,30 @@ export default function GeneralSettingsPage() {
   });
 
   const handleSave = () => {
-    toast.success("Settings saved (mock — ready for API integration)");
+    toast.success(t("saved"));
   };
+
+  const companyFields = [
+    ["name", t("companyName")],
+    ["shortName", t("shortName")],
+    ["description", tCommon("description")],
+    ["url", t("websiteUrl")],
+    ["email", tCommon("email")],
+    ["phone", tCommon("phone")],
+    ["address", tCommon("address")],
+  ] as const;
 
   return (
     <div>
-      <AdminPageHeader
-        title="General Settings"
-        description="Company information, branding and global configuration."
-      />
+      <AdminPageHeader title={t("title")} description={t("description")} />
 
       <div className="grid max-w-2xl gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Company</CardTitle>
+            <CardTitle>{t("company")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {(
-              [
-                ["name", "Company name"],
-                ["shortName", "Short name"],
-                ["description", "Description"],
-                ["url", "Website URL"],
-                ["email", "Email"],
-                ["phone", "Phone"],
-                ["address", "Address"],
-              ] as const
-            ).map(([key, label]) => (
+            {companyFields.map(([key, label]) => (
               <div key={key} className="space-y-1.5">
                 <Label>{label}</Label>
                 <Input
@@ -65,25 +65,25 @@ export default function GeneralSettingsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Social & Analytics</CardTitle>
+            <CardTitle>{t("socialAnalytics")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
-              <Label>LinkedIn</Label>
+              <Label>{t("linkedin")}</Label>
               <Input
                 value={settings.linkedin}
                 onChange={(e) => setSettings({ ...settings, linkedin: e.target.value })}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Facebook</Label>
+              <Label>{t("facebook")}</Label>
               <Input
                 value={settings.facebook}
                 onChange={(e) => setSettings({ ...settings, facebook: e.target.value })}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Google Analytics ID</Label>
+              <Label>{t("gaId")}</Label>
               <Input
                 value={settings.gaId}
                 onChange={(e) => setSettings({ ...settings, gaId: e.target.value })}
@@ -91,7 +91,7 @@ export default function GeneralSettingsPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Google Tag Manager ID</Label>
+              <Label>{t("gtmId")}</Label>
               <Input
                 value={settings.gtmId}
                 onChange={(e) => setSettings({ ...settings, gtmId: e.target.value })}
@@ -102,7 +102,7 @@ export default function GeneralSettingsPage() {
         </Card>
 
         <Button onClick={handleSave} className="w-fit rounded-full bg-oboya-green">
-          Save settings
+          {t("save")}
         </Button>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -11,12 +12,14 @@ import { buttonVariants } from "@/components/ui/button";
 import type { CmsCaseStudy } from "@/lib/cms/repositories/case-studies-repository";
 
 export default function CaseStudiesPage() {
+  const t = useTranslations("admin.caseStudies");
+  const tCommon = useTranslations("admin.common");
   const [studies, setStudies] = useState<CmsCaseStudy[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     const res = await fetch("/api/cms/case-studies");
-    if (!res.ok) throw new Error("Failed to load case studies");
+    if (!res.ok) throw new Error(tCommon("loadFailed"));
     const data = (await res.json()) as CmsCaseStudy[];
     setStudies(Array.isArray(data) ? data : []);
   };
@@ -26,25 +29,26 @@ export default function CaseStudiesPage() {
       try {
         await load();
       } catch {
-        toast.error("Could not load case studies");
+        toast.error(t("loadFailed"));
       } finally {
         setLoading(false);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- initial load
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Delete this case study?")) return;
+    if (!window.confirm(t("deleteConfirm"))) return;
     try {
       const res = await fetch(
         `/api/cms/case-studies?id=${encodeURIComponent(id)}`,
         { method: "DELETE" }
       );
-      if (!res.ok) throw new Error("Delete failed");
+      if (!res.ok) throw new Error(tCommon("deleteFailed"));
       await load();
-      toast.success("Case study deleted");
+      toast.success(t("deleted"));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete");
+      toast.error(error instanceof Error ? error.message : tCommon("couldNotDelete"));
     }
   };
 
@@ -52,31 +56,39 @@ export default function CaseStudiesPage() {
     () => [
       {
         key: "title",
-        header: "Title",
+        header: t("columns.title"),
         sortable: true,
         cell: (row: CmsCaseStudy) => row.title.en,
       },
       {
         key: "country",
-        header: "Country",
+        header: t("columns.country"),
         cell: (row: CmsCaseStudy) => row.country,
       },
       {
         key: "industry",
-        header: "Industry",
+        header: t("columns.industry"),
         cell: (row: CmsCaseStudy) => row.industry,
       },
       {
         key: "region",
-        header: "Region",
+        header: t("columns.region"),
         cell: (row: CmsCaseStudy) => (
           <span className="capitalize">{row.region}</span>
         ),
       },
       {
         key: "status",
-        header: "Status",
-        cell: (row: CmsCaseStudy) => <Badge>{row.status}</Badge>,
+        header: t("columns.status"),
+        cell: (row: CmsCaseStudy) => (
+          <Badge>
+            {row.status === "draft" ||
+            row.status === "published" ||
+            row.status === "archived"
+              ? tCommon(row.status)
+              : row.status}
+          </Badge>
+        ),
       },
       {
         key: "actions",
@@ -93,7 +105,7 @@ export default function CaseStudiesPage() {
               type="button"
               onClick={() => void handleDelete(row.id)}
               className="rounded p-1 text-destructive hover:bg-muted"
-              aria-label="Delete case study"
+              aria-label={t("deleteAria")}
             >
               <Trash2 className="size-3.5" />
             </button>
@@ -101,14 +113,14 @@ export default function CaseStudiesPage() {
         ),
       },
     ],
-    []
+    [t, tCommon]
   );
 
   return (
     <div>
       <AdminPageHeader
-        title="Case Studies"
-        description="Manage success stories with challenge, solution and results."
+        title={t("title")}
+        description={t("description")}
         actions={
           <Link
             href="/admin/case-studies/new"
@@ -118,13 +130,11 @@ export default function CaseStudiesPage() {
             })}
           >
             <Plus className="size-4" />
-            New case study
+            {t("add")}
           </Link>
         }
       />
-      {loading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
-      ) : (
+      {loading ? null : (
         <DataTable data={studies} columns={columns} searchKey="country" />
       )}
     </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +20,8 @@ export function BusinessSolutionsSectionEditor({
   setSettings,
   locale,
 }: HomepageSectionEditorProps) {
+  const t = useTranslations("admin.website.home");
+  const tCommon = useTranslations("admin.common");
   const section = settings.businessSolutions;
 
   const patch = (
@@ -32,11 +35,11 @@ export function BusinessSolutionsSectionEditor({
   return (
     <Card className="max-w-4xl">
       <CardHeader>
-        <CardTitle>Solutions Tailored to Your Business</CardTitle>
+        <CardTitle>{t("sections.businessSolutions.title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <LocalizedInput
-          label="Eyebrow"
+          label={t("fields.eyebrow")}
           locale={locale}
           value={section.eyebrow[locale]}
           onChange={(l, v) =>
@@ -44,7 +47,7 @@ export function BusinessSolutionsSectionEditor({
           }
         />
         <LocalizedInput
-          label="Title"
+          label={tCommon("title")}
           locale={locale}
           value={section.title[locale]}
           onChange={(l, v) =>
@@ -70,7 +73,7 @@ export function BusinessSolutionsSectionEditor({
               </Button>
             </div>
             <LocalizedInput
-              label="Title"
+              label={tCommon("title")}
               locale={locale}
               value={item.title[locale]}
               onChange={(l, v) => {
@@ -83,7 +86,7 @@ export function BusinessSolutionsSectionEditor({
               }}
             />
             <LocalizedInput
-              label="Description"
+              label={tCommon("description")}
               locale={locale}
               value={item.description[locale]}
               onChange={(l, v) => {
@@ -100,7 +103,7 @@ export function BusinessSolutionsSectionEditor({
               multiline
             />
             <ImageField
-              label="Background image"
+              label={t("fields.backgroundImage")}
               value={item.image ?? ""}
               onChange={(url) => {
                 const items = section.items.map((it, i) =>
@@ -111,7 +114,7 @@ export function BusinessSolutionsSectionEditor({
             />
             <div className="grid gap-3 sm:grid-cols-2">
               <LocalizedInput
-                label="Explore label"
+                label={t("fields.exploreLabel")}
                 locale={locale}
                 value={(item.ctaLabel ?? emptyLocalized())[locale]}
                 onChange={(l, v) => {
@@ -131,7 +134,7 @@ export function BusinessSolutionsSectionEditor({
                 }}
               />
               <div className="space-y-1.5">
-                <Label>Link</Label>
+                <Label>{tCommon("link")}</Label>
                 <Input
                   value={item.href ?? ""}
                   onChange={(e) => {

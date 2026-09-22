@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { CMS_LOCALES } from "@/contexts/AdminContext";
 import { ProductRichTextEditor } from "@/components/admin/marketplace/ProductRichTextEditor";
 import { LocalizedFieldGrid } from "@/components/admin/marketplace/LocalizedFieldGrid";
@@ -17,6 +18,8 @@ interface ProductDescriptionCardProps {
 }
 
 export function ProductDescriptionCard({ product, onUpdate }: ProductDescriptionCardProps) {
+  const t = useTranslations("admin.products");
+  const tEditor = useTranslations("admin.products.editor");
   const [previewLocale, setPreviewLocale] = useState<CmsLocale>("en");
 
   const updateShortDescription = (locale: CmsLocale, value: string) => {
@@ -40,35 +43,31 @@ export function ProductDescriptionCard({ product, onUpdate }: ProductDescription
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Product description</CardTitle>
-        <CardDescription>
-          Rich content for the product page. Description images are stored separately from the
-          product gallery.
-        </CardDescription>
+        <CardTitle>{tEditor("descriptionTitle")}</CardTitle>
+        <CardDescription>{tEditor("descriptionCardHint")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <RegistrationSection
-          title="Short description"
-          description="Plain-text teaser for catalog cards and quick view. Optional."
+          title={tEditor("shortDescription")}
+          description={tEditor("shortDescriptionHint")}
         >
           <LocalizedFieldGrid
-            label="Short description"
+            label={tEditor("shortDescription")}
             value={product.shortDescription}
             onChange={updateShortDescription}
             multiline
             rows={3}
-            placeholder="Brief summary shown on product cards"
+            placeholder={tEditor("shortDescriptionPlaceholder")}
           />
         </RegistrationSection>
 
         <RegistrationSection
-          title="Full description"
-          description="English is the fallback when another locale is empty."
+          title={tEditor("fullDescription")}
+          description={tEditor("fullDescriptionHint")}
         >
           {enEmpty ? (
             <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-              Other locales have content but English is empty. The shop will fall back to English
-              when a locale is missing.
+              {tEditor("enEmptyWarning")}
             </p>
           ) : null}
 
@@ -77,19 +76,19 @@ export function ProductDescriptionCard({ product, onUpdate }: ProductDescription
               <div key={loc.value} className="space-y-2 rounded-lg border border-border/60 p-3">
                 <Label className="text-sm font-medium text-oboya-blue-dark">
                   {loc.label}
-                  {loc.value === "en" ? " (default)" : ""}
+                  {loc.value === "en" ? t("defaultLocaleSuffix") : ""}
                 </Label>
                 <ProductRichTextEditor
                   value={product.description[loc.value] ?? ""}
                   onChange={(value) => updateDescription(loc.value, value)}
-                  placeholder={`Write the ${loc.label} product description…`}
+                  placeholder={tEditor("descriptionPlaceholder", { locale: loc.label })}
                 />
               </div>
             ))}
           </div>
         </RegistrationSection>
 
-        <RegistrationSection title="Preview" description="Approximate storefront rendering.">
+        <RegistrationSection title={tEditor("preview")} description={tEditor("previewHint")}>
           <div className="space-y-3">
             <div className="flex flex-wrap gap-2">
               {CMS_LOCALES.map((loc) => (

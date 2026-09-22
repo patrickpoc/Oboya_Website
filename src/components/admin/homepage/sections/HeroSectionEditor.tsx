@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +18,8 @@ export function HeroSectionEditor({
   locale,
   persistSettings,
 }: HomepageSectionEditorProps) {
+  const t = useTranslations("admin.website.home");
+  const tCommon = useTranslations("admin.common");
   const hero = settings.hero;
   const mediaType = hero.mediaType ?? "image";
 
@@ -56,16 +59,16 @@ export function HeroSectionEditor({
   return (
     <Card className="max-w-4xl">
       <CardHeader>
-        <CardTitle>Hero</CardTitle>
+        <CardTitle>{t("sections.hero.title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Media type</Label>
+          <Label className="text-sm font-medium">{t("fields.mediaType")}</Label>
           <div className="flex flex-wrap gap-2">
             {(
               [
-                { id: "image", label: "Image" },
-                { id: "video", label: "Video" },
+                { id: "image", label: tCommon("image") },
+                { id: "video", label: tCommon("video") },
               ] as const
             ).map((option) => (
               <button
@@ -87,7 +90,7 @@ export function HeroSectionEditor({
 
         {mediaType === "image" ? (
           <MediaField
-            label="Background image"
+            label={t("fields.backgroundImage")}
             value={hero.backgroundImage}
             allowedTypes={["image"]}
             onChange={(url) =>
@@ -99,7 +102,7 @@ export function HeroSectionEditor({
           />
         ) : (
           <MediaField
-            label="Background video"
+            label={t("fields.backgroundVideo")}
             value={hero.backgroundVideo ?? ""}
             allowedTypes={["video"]}
             onChange={(url) => {
@@ -110,13 +113,12 @@ export function HeroSectionEditor({
 
         {mediaType === "video" ? (
           <p className="text-xs text-muted-foreground">
-            Uploading a video saves it to storage and publishes the homepage hero
-            automatically. The homepage shows a loading spinner until the video is ready.
+            {t("fields.videoUploadHint")}
           </p>
         ) : null}
 
         <LocalizedInput
-          label="Eyebrow"
+          label={t("fields.eyebrow")}
           locale={locale}
           value={hero.eyebrow[locale]}
           onChange={(l, v) =>
@@ -127,7 +129,7 @@ export function HeroSectionEditor({
           }
         />
         <LocalizedInput
-          label="Headline"
+          label={t("fields.headline")}
           locale={locale}
           value={hero.title[locale]}
           onChange={(l, v) =>
@@ -138,7 +140,7 @@ export function HeroSectionEditor({
           }
         />
         <LocalizedInput
-          label="Subheadline"
+          label={t("fields.subheadline")}
           locale={locale}
           value={hero.description[locale]}
           onChange={(l, v) =>
@@ -155,9 +157,9 @@ export function HeroSectionEditor({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-3 rounded-lg border p-4">
-            <p className="text-sm font-medium">Primary CTA</p>
+            <p className="text-sm font-medium">{t("fields.primaryCta")}</p>
             <LocalizedInput
-              label="Label"
+              label={tCommon("label")}
               locale={locale}
               value={hero.ctaPrimary.label[locale]}
               onChange={(l, v) =>
@@ -174,7 +176,7 @@ export function HeroSectionEditor({
               }
             />
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Link</Label>
+              <Label className="text-xs text-muted-foreground">{tCommon("link")}</Label>
               <Input
                 value={hero.ctaPrimary.href}
                 onChange={(e) =>
@@ -190,9 +192,9 @@ export function HeroSectionEditor({
             </div>
           </div>
           <div className="space-y-3 rounded-lg border p-4">
-            <p className="text-sm font-medium">Secondary CTA</p>
+            <p className="text-sm font-medium">{t("fields.secondaryCta")}</p>
             <LocalizedInput
-              label="Label"
+              label={tCommon("label")}
               locale={locale}
               value={hero.ctaSecondary.label[locale]}
               onChange={(l, v) =>
@@ -209,7 +211,7 @@ export function HeroSectionEditor({
               }
             />
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Link</Label>
+              <Label className="text-xs text-muted-foreground">{tCommon("link")}</Label>
               <Input
                 value={hero.ctaSecondary.href}
                 onChange={(e) =>

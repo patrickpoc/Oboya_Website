@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
@@ -12,8 +13,11 @@ import { Button } from "@/components/ui/button";
 import { Can } from "@/components/admin/permissions/Can";
 import type { BlogCategory } from "@/lib/cms/repositories/blog-categories-repository";
 import type { CmsLocale } from "@/lib/cms/types";
+import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
 
 export default function BlogCategoriesPage() {
+  const t = useTranslations("admin.blog.categories");
+  const tCommon = useTranslations("admin.common");
   const [categories, setCategories] = useState<BlogCategory[]>([]);
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -21,7 +25,7 @@ export default function BlogCategoriesPage() {
 
   const load = async () => {
     const res = await fetch("/api/cms/blog-categories");
-    if (!res.ok) throw new Error("Failed to load");
+    if (!res.ok) throw new Error(tCommon("loadFailed"));
     const data = (await res.json()) as BlogCategory[];
     setCategories(Array.isArray(data) ? data : []);
   };
@@ -31,7 +35,7 @@ export default function BlogCategoriesPage() {
       try {
         await load();
       } catch {
-        toast.error("Could not load categories");
+        toast.error(t("loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -50,12 +54,12 @@ export default function BlogCategoriesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(category),
       });
-      if (!res.ok) throw new Error("Save failed");
+      if (!res.ok) throw new Error(tCommon("saveFailed"));
       await load();
-      toast.success("Category saved");
+      toast.success(t("saved"));
       setEditingId(null);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save");
+      toast.error(error instanceof Error ? error.message : tCommon("couldNotSave"));
     }
   };
 
@@ -73,28 +77,28 @@ export default function BlogCategoriesPage() {
   const handleDelete = async (id: string) => {
     try {
       const res = await fetch(`/api/cms/blog-categories?id=${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Delete failed");
+      if (!res.ok) throw new Error(tCommon("deleteFailed"));
       await load();
-      toast.success("Category deleted");
+      toast.success(t("deleted"));
       if (editingId === id) setEditingId(null);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete");
+      toast.error(error instanceof Error ? error.message : tCommon("couldNotDelete"));
     }
   };
 
   return (
-    <Can module="blog" action="view" fallback={<p className="text-sm text-muted-foreground">Access denied.</p>}>
+    <Can module="blog" action="view" fallback={<AccessDenied />}>
       <div>
         <AdminPageHeader
-          title="Blog Categories"
-          description="Categories appear in the /news filter dropdown and on article cards."
+          title={t("title")}
+          description={t("description")}
           actions={
             <Button
               onClick={handleAdd}
               className="gap-1.5 rounded-full bg-oboya-green text-white hover:bg-oboya-green/90"
             >
               <Plus className="size-4" />
-              New category
+              {t("add")}
             </Button>
           }
         />
@@ -120,7 +124,7 @@ export default function BlogCategoriesPage() {
             <Card>
               <CardContent className="space-y-4 pt-6">
                 <div className="space-y-1.5">
-                  <Label>Slug</Label>
+                  <Label>{tCommon("slug")}</Label>
                   <Input
                     value={editing.slug}
                     onChange={(e) => {
@@ -136,7 +140,7 @@ export default function BlogCategoriesPage() {
                 <LocaleFieldTabs value={locale} onChange={setLocale}>
                   {(loc) => (
                     <div className="space-y-1.5">
-                      <Label>Name</Label>
+                      <Label>{tCommon("name")}</Label>
                       <Input
                         value={editing.name[loc]}
                         onChange={(e) => {
@@ -159,7 +163,7 @@ export default function BlogCategoriesPage() {
                     onClick={() => handleSave(editing)}
                     className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
                   >
-                    Save category
+                    {t("save")}
                   </Button>
                   <Button
                     variant="outline"
@@ -167,7 +171,7 @@ export default function BlogCategoriesPage() {
                     className="gap-1.5 rounded-full text-destructive"
                   >
                     <Trash2 className="size-4" />
-                    Delete
+                    {tCommon("delete")}
                   </Button>
                 </div>
               </CardContent>

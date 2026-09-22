@@ -7,10 +7,10 @@ import { ExternalLink, LogOut, Menu, Search } from "lucide-react";
 import { AdminLanguageSwitcher } from "@/components/admin/layout/AdminLanguageSwitcher";
 import { getBreadcrumbs } from "@/lib/cms/navigation";
 import { useAdmin } from "@/contexts/AdminContext";
-import { ROLE_LABELS } from "@/lib/cms/permissions/matrix";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { cn } from "@/lib/utils";
+import type { CmsRole } from "@/lib/cms/types";
 
 interface AdminTopbarProps {
   onMenuClick?: () => void;
@@ -113,7 +113,7 @@ export function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
           <p className="text-xs font-medium text-oboya-blue-dark">{user.name}</p>
           <p className="text-[10px] text-muted-foreground">{user.email}</p>
           <p className="text-[10px] text-muted-foreground">
-            {ROLE_LABELS[user.role]}
+            {t(`roles.${user.role as CmsRole}`)}
           </p>
         </div>
       </Link>

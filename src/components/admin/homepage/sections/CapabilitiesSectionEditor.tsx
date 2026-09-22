@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +20,8 @@ export function CapabilitiesSectionEditor({
   setSettings,
   locale,
 }: HomepageSectionEditorProps) {
+  const t = useTranslations("admin.website.home");
+  const tCommon = useTranslations("admin.common");
   const section = settings.capabilities;
 
   const patchCapabilities = (
@@ -32,11 +35,11 @@ export function CapabilitiesSectionEditor({
   return (
     <Card className="max-w-4xl">
       <CardHeader>
-        <CardTitle>Why Oboya Horticulture</CardTitle>
+        <CardTitle>{t("sections.capabilities.title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <LocalizedInput
-          label="Eyebrow"
+          label={t("fields.eyebrow")}
           locale={locale}
           value={section.eyebrow[locale]}
           onChange={(l, v) =>
@@ -44,7 +47,7 @@ export function CapabilitiesSectionEditor({
           }
         />
         <LocalizedInput
-          label="Title"
+          label={tCommon("title")}
           locale={locale}
           value={section.title[locale]}
           onChange={(l, v) =>
@@ -54,7 +57,7 @@ export function CapabilitiesSectionEditor({
         />
         <div className="grid gap-3 sm:grid-cols-2">
           <LocalizedInput
-            label="CTA label"
+            label={t("fields.ctaLabel")}
             locale={locale}
             value={section.ctaLabel[locale]}
             onChange={(l, v) =>
@@ -62,7 +65,7 @@ export function CapabilitiesSectionEditor({
             }
           />
           <div className="space-y-1.5">
-            <Label>CTA link</Label>
+            <Label>{t("fields.ctaLink")}</Label>
             <Input
               value={section.ctaHref}
               onChange={(e) => patchCapabilities({ ctaHref: e.target.value })}
@@ -88,7 +91,7 @@ export function CapabilitiesSectionEditor({
               </Button>
             </div>
             <LocalizedInput
-              label="Title"
+              label={tCommon("title")}
               locale={locale}
               value={item.title[locale]}
               onChange={(l, v) => {
@@ -99,7 +102,7 @@ export function CapabilitiesSectionEditor({
               }}
             />
             <LocalizedInput
-              label="Description"
+              label={tCommon("description")}
               locale={locale}
               value={item.description[locale]}
               onChange={(l, v) => {
@@ -114,7 +117,7 @@ export function CapabilitiesSectionEditor({
             />
             <div className="grid gap-3 sm:grid-cols-2">
               <ImageField
-                label="Image"
+                label={tCommon("image")}
                 value={item.image}
                 onChange={(url) => {
                   const items = section.items.map((it, i) =>
@@ -124,7 +127,7 @@ export function CapabilitiesSectionEditor({
                 }}
               />
               <div className="space-y-1.5">
-                <Label>Link</Label>
+                <Label>{tCommon("link")}</Label>
                 <Input
                   value={item.href}
                   onChange={(e) => {

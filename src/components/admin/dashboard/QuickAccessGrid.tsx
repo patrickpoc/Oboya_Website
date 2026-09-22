@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import { Settings2, Star, X } from "lucide-react";
 import { useAdmin } from "@/contexts/AdminContext";
@@ -34,6 +35,9 @@ function savePinned(userId: string, hrefs: string[]) {
 }
 
 export function QuickAccessGrid() {
+  const t = useTranslations("admin.dashboard");
+  const tNav = useTranslations("admin.nav");
+  const tCommon = useTranslations("admin.common");
   const { user, can } = useAdmin();
   const [pinnedHrefs, setPinnedHrefs] = useState<Set<string>>(new Set());
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -72,11 +76,11 @@ export function QuickAccessGrid() {
     <div className="relative">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-semibold text-oboya-blue-dark">Quick Access</h2>
+          <h2 className="text-sm font-semibold text-oboya-blue-dark">{t("quickAccess")}</h2>
           <p className="text-xs text-muted-foreground">
             {pinnedHrefs.size > 0
-              ? `${pinnedHrefs.size} pinned shortcut${pinnedHrefs.size !== 1 ? "s" : ""}`
-              : "All available sections"}
+              ? t("pinnedCount", { count: pinnedHrefs.size })
+              : t("allSections")}
           </p>
         </div>
         <button
@@ -85,7 +89,7 @@ export function QuickAccessGrid() {
           className="flex items-center gap-1.5 rounded-lg bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted/80"
         >
           <Settings2 className="size-3.5" />
-          Customize
+          {t("customize")}
         </button>
       </div>
 
@@ -108,11 +112,11 @@ export function QuickAccessGrid() {
               )}
               <div>
                 <p className="text-sm font-semibold text-oboya-blue-dark">
-                  {item.label}
+                  {tNav(item.labelKey)}
                 </p>
                 {childCount > 0 && (
                   <p className="mt-1 text-[11px] text-muted-foreground">
-                    {childCount} section{childCount !== 1 ? "s" : ""}
+                    {t("sectionCount", { count: childCount })}
                   </p>
                 )}
               </div>
@@ -146,17 +150,17 @@ export function QuickAccessGrid() {
               <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border/50 bg-white px-5 py-4">
                 <div>
                   <h3 className="text-sm font-semibold text-oboya-blue-dark">
-                    Customize Quick Access
+                    {t("customizeTitle")}
                   </h3>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    Toggle sections on or off
+                    {t("customizeSubtitle")}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setDrawerOpen(false)}
                   className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
-                  aria-label="Close"
+                  aria-label={tCommon("close")}
                 >
                   <X className="size-4" />
                 </button>
@@ -201,11 +205,11 @@ export function QuickAccessGrid() {
                             "text-sm font-medium",
                             isPinned ? "text-oboya-blue-dark" : "text-muted-foreground"
                           )}>
-                            {item.label}
+                            {tNav(item.labelKey)}
                           </p>
                           {childCount > 0 && (
                             <p className="text-[11px] text-muted-foreground">
-                              {childCount} section{childCount !== 1 ? "s" : ""}
+                              {t("sectionCount", { count: childCount })}
                             </p>
                           )}
                         </div>
@@ -217,7 +221,7 @@ export function QuickAccessGrid() {
 
               <div className="border-t border-border/50 px-5 py-4">
                 <p className="text-[11px] text-muted-foreground">
-                  When no shortcuts are pinned, all sections are shown by default.
+                  {t("customizeHint")}
                 </p>
               </div>
             </motion.div>

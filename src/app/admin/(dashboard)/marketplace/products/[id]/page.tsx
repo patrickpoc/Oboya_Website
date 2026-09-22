@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AdminPageFooterActions } from "@/components/admin/layout/AdminPageFooterActions";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -15,6 +16,7 @@ import { validateColorVariants } from "@/lib/shop/color-variants";
 import Link from "next/link";
 
 export default function ProductDetailPage() {
+  const t = useTranslations("admin.products");
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
@@ -40,15 +42,15 @@ export default function ProductDetailPage() {
   }, [id]);
 
   if (loading) {
-    return <div className="text-center text-muted-foreground">Loading product...</div>;
+    return <div className="min-h-[40vh]" aria-hidden />;
   }
 
   if (!product) {
     return (
       <div className="text-center text-muted-foreground">
-        Product not found.{" "}
+        {t("notFound")}{" "}
         <Link href="/admin/marketplace/products" className="text-oboya-green">
-          Back to products
+          {t("backToProducts")}
         </Link>
       </div>
     );
@@ -75,11 +77,13 @@ export default function ProductDetailPage() {
           const payload = (await response.json().catch(() => null)) as { error?: string } | null;
           throw new Error(payload?.error ?? "failed");
         }
-        toast.success("Product saved");
+        toast.success(t("productSaved"));
         router.push("/admin/marketplace/products");
       } catch (error) {
         toast.error(
-          error instanceof Error ? `Could not persist product: ${error.message}` : "Could not persist product."
+          error instanceof Error
+            ? t("persistFailedWithReason", { reason: error.message })
+            : t("persistFailed")
         );
       }
     })();
@@ -89,7 +93,7 @@ export default function ProductDetailPage() {
     <div className="pb-24">
       <AdminPageHeader
         title={product.name["pt-BR"] || product.name.en || product.id}
-        description={`SKU: ${product.sku} · MOQ: ${product.moq}`}
+        description={t("skuMoqMeta", { sku: product.sku, moq: product.moq })}
       />
 
       <ProductEditorForm product={product} onChange={setProduct} />
@@ -99,13 +103,13 @@ export default function ProductDetailPage() {
           href="/admin/marketplace/products"
           className={buttonVariants({ variant: "outline", className: "rounded-full" })}
         >
-          Back
+          {t("back")}
         </Link>
         <Button
           onClick={handleSave}
           className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
         >
-          Save changes
+          {t("saveChanges")}
         </Button>
       </AdminPageFooterActions>
     </div>

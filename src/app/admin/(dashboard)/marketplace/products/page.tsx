@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Copy, Pencil, Plus, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, Copy, Pencil, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -16,7 +16,7 @@ import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 
 const PAGE_SIZE = 20;
 
-type ViewTab = "active" | "trash";
+type ViewTab = "active" | "archived" | "trash";
 
 function buildUniqueDuplicateSku(baseSku: string, existingSkus: Set<string>) {
   const candidate = `${baseSku}-COPY`;
@@ -29,10 +29,16 @@ function buildUniqueDuplicateSku(baseSku: string, existingSkus: Set<string>) {
   return `${baseSku}-COPY-${suffix}`;
 }
 
+function productDisplayName(product: CmsProduct) {
+  return product.name["pt-BR"] || product.name.en || product.name.es || product.name["zh-CN"] || product.id;
+}
+
 export default function ProductsPage() {
   const t = useTranslations("admin.products");
+  const tCommon = useTranslations("admin.common");
   const router = useRouter();
-  const [products, setProducts] = useState<CmsProduct[]>([]);
+  const [activeProducts, setActiveProducts] = useState<CmsProduct[]>([]);
+  const [archivedProducts, setArchivedProducts] = useState<CmsProduct[]>([]);
   const [deletedProducts, setDeletedProducts] = useState<CmsProduct[]>([]);
   const [tab, setTab] = useState<ViewTab>("active");
   const [selected, setSelected] = useState<string[]>([]);
@@ -42,15 +48,17 @@ export default function ProductsPage() {
   const refresh = async () => {
     const response = await fetch("/api/cms/products?includeDeleted=1", { cache: "no-store" });
     if (!response.ok) {
-      toast.error("Não foi possível carregar os produtos.");
+      toast.error(t("loadFailed"));
       return;
     }
     const all = (await response.json()) as CmsProduct[];
     if (!Array.isArray(all)) {
-      toast.error("Não foi possível carregar os produtos.");
+      toast.error(t("loadFailed"));
       return;
     }
-    setProducts(all.filter((p) => !p.deletedAt));
+    const notDeleted = all.filter((p) => !p.deletedAt);
+    setActiveProducts(notDeleted.filter((p) => p.status !== "archived"));
+    setArchivedProducts(notDeleted.filter((p) => p.status === "archived"));
     setDeletedProducts(all.filter((p) => Boolean(p.deletedAt)));
     setSelected([]);
   };
@@ -63,39 +71,68 @@ export default function ProductsPage() {
 
   const handleDelete = (id: string) => {
     void (async () => {
-      const ok = window.confirm("Remover produto? Ele irá para a lixeira por 24h.");
+      const ok = window.confirm(t("deleteConfirm"));
       if (!ok) return;
       await fetch(`/api/cms/products/${id}`, { method: "DELETE" });
       await refresh();
-      toast.success("Produto movido para lixeira.");
+      toast.success(t("deleteSuccess"));
     })();
   };
 
   const handleBulkDelete = () => {
     void (async () => {
       if (selected.length === 0) return;
-      const ok = window.confirm(`Remover ${selected.length} produto(s)?`);
+      const ok = window.confirm(t("bulkDeleteConfirm", { count: selected.length }));
       if (!ok) return;
       await Promise.all(selected.map((id) => fetch(`/api/cms/products/${id}`, { method: "DELETE" })));
       await refresh();
-      toast.success(`${selected.length} produto(s) movido(s) para lixeira.`);
+      toast.success(t("bulkDeleteSuccess", { count: selected.length }));
+    })();
+  };
+
+  const handleArchive = (product: CmsProduct) => {
+    void (async () => {
+      const ok = window.confirm(t("archiveConfirm"));
+      if (!ok) return;
+      const response = await fetch(`/api/cms/products/${product.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...product, status: "archived" }),
+      });
+      if (!response.ok) {
+        toast.error(t("archiveFailed"));
+        return;
+      }
+      await refresh();
+      toast.success(t("archiveSuccess"));
+    })();
+  };
+
+  const handleUnarchive = (product: CmsProduct) => {
+    void (async () => {
+      const response = await fetch(`/api/cms/products/${product.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...product, status: "draft" }),
+      });
+      if (!response.ok) {
+        toast.error(t("unarchiveFailed"));
+        return;
+      }
+      await refresh();
+      toast.success(t("unarchiveSuccess"));
     })();
   };
 
   const filteredProducts = useMemo(() => {
+    const source = tab === "archived" ? archivedProducts : activeProducts;
     const q = search.trim().toLowerCase();
-    if (!q) return products;
-    return products.filter((product) => {
-      const name = (
-        product.name["pt-BR"] ||
-        product.name.en ||
-        product.name.es ||
-        product.name["zh-CN"] ||
-        ""
-      ).toLowerCase();
+    if (!q) return source;
+    return source.filter((product) => {
+      const name = productDisplayName(product).toLowerCase();
       return name.includes(q) || product.sku.toLowerCase().includes(q);
     });
-  }, [products, search]);
+  }, [activeProducts, archivedProducts, search, tab]);
 
   const pageCount = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount);
@@ -108,21 +145,24 @@ export default function ProductsPage() {
     let total = 0;
     let active = 0;
     let draft = 0;
-    for (const product of products) {
-      // Main/default color + each additional color variant
+    for (const product of activeProducts) {
       const units = 1 + (product.colorVariants?.length ?? 0);
       total += units;
       if (product.status === "published") active += units;
       else draft += units;
     }
     return { total, active, draft };
-  }, [products]);
+  }, [activeProducts]);
 
   const handleDuplicate = (id: string) => {
     void (async () => {
-      const original = products.find((product) => product.id === id);
+      const original =
+        activeProducts.find((product) => product.id === id) ||
+        archivedProducts.find((product) => product.id === id);
       if (!original) return;
-      const existingSkus = new Set(products.map((product) => product.sku.toLowerCase()));
+      const existingSkus = new Set(
+        [...activeProducts, ...archivedProducts].map((product) => product.sku.toLowerCase())
+      );
       const copy: CmsProduct = {
         ...JSON.parse(JSON.stringify(original)),
         id: `${original.id}-copy-${Date.now()}`,
@@ -137,8 +177,15 @@ export default function ProductsPage() {
         body: JSON.stringify(copy),
       });
       await refresh();
-      toast.success("Produto duplicado.");
+      toast.success(t("duplicateSuccess"));
     })();
+  };
+
+  const switchTab = (next: ViewTab) => {
+    setTab(next);
+    setPage(1);
+    setSelected([]);
+    setSearch("");
   };
 
   return (
@@ -177,7 +224,7 @@ export default function ProductsPage() {
               })}
             >
               <Plus className="size-4" />
-              Add product
+              {t("addProduct")}
             </Link>
           </Can>
         }
@@ -186,173 +233,37 @@ export default function ProductsPage() {
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={() => setTab("active")}
+          onClick={() => switchTab("active")}
           className={buttonVariants({
             variant: tab === "active" ? "default" : "outline",
             className: "rounded-full",
           })}
         >
-          Active
+          {t("tabActive")}
         </button>
         <button
           type="button"
-          onClick={() => setTab("trash")}
+          onClick={() => switchTab("archived")}
+          className={buttonVariants({
+            variant: tab === "archived" ? "default" : "outline",
+            className: "rounded-full",
+          })}
+        >
+          {t("tabArchive", { count: archivedProducts.length })}
+        </button>
+        <button
+          type="button"
+          onClick={() => switchTab("trash")}
           className={buttonVariants({
             variant: tab === "trash" ? "default" : "outline",
             className: "rounded-full",
           })}
         >
-          Trash ({deletedProducts.length})
+          {t("tabTrash", { count: deletedProducts.length })}
         </button>
       </div>
 
-      {tab === "active" ? (
-        <>
-          <div className="mb-4 flex flex-wrap gap-2">
-            <Input
-              className="max-w-xs"
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              placeholder="Search by product name or SKU"
-            />
-            <Button
-              variant="destructive"
-              disabled={selected.length === 0}
-              onClick={handleBulkDelete}
-              className="rounded-full"
-            >
-              <Trash2 className="mr-1 size-4" />
-              Delete selected ({selected.length})
-            </Button>
-            <Link
-              href="/admin/marketplace/products/bulk-import"
-              className={buttonVariants({ variant: "outline", className: "rounded-full" })}
-            >
-              Bulk import
-            </Link>
-            <Link
-              href="/admin/marketplace/products/bulk-update"
-              className={buttonVariants({ variant: "outline", className: "rounded-full" })}
-            >
-              Bulk update
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-5">
-            {paginatedProducts.map((product) => {
-              const checked = selected.includes(product.id);
-              const mainImage = product.images[0] || "";
-              const isUnavailable =
-                Object.values(product.prices).every((value) => !value || value <= 0) ||
-                (!product.unlimitedStock && (product.stockQuantity ?? 0) <= 0);
-              return (
-                <article
-                  key={product.id}
-                  className="rounded-xl border border-border/60 bg-white shadow-sm"
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl bg-muted/40">
-                    {mainImage ? (
-                      <Image
-                        src={mainImage}
-                        alt={product.name["pt-BR"] || product.id}
-                        fill
-                        unoptimized
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-                        sem imagem
-                      </div>
-                    )}
-                    <input
-                      type="checkbox"
-                      className="absolute top-2 left-2"
-                      checked={checked}
-                      onChange={(e) => {
-                        setSelected((prev) =>
-                          e.target.checked
-                            ? [...prev, product.id]
-                            : prev.filter((id) => id !== product.id)
-                        );
-                      }}
-                    />
-                  </div>
-                  <div className="space-y-2 p-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className="line-clamp-2 text-sm font-semibold text-oboya-blue-dark">
-                          {product.name["pt-BR"] || product.name.en || product.id}
-                        </p>
-                        <p className="text-xs text-muted-foreground">{product.sku}</p>
-                      </div>
-                      <button
-                        type="button"
-                        className="rounded p-1 hover:bg-muted"
-                        onClick={() => router.push(`/admin/marketplace/products/${product.id}`)}
-                      >
-                        <Pencil className="size-4" />
-                      </button>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      USD: {product.prices.USD ?? 0} | BRL: {product.prices.BRL ?? 0} | EUR:{" "}
-                      {product.prices.EUR ?? 0}
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      <Badge variant={product.status === "published" ? "default" : "secondary"}>
-                        {product.status}
-                      </Badge>
-                      {isUnavailable && <Badge variant="destructive">hidden in shop</Badge>}
-                    </div>
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 px-2 text-xs"
-                        onClick={() => handleDuplicate(product.id)}
-                      >
-                        <Copy className="mr-1 size-3.5" />
-                        Duplicate
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        className="h-7 px-2 text-xs"
-                        onClick={() => handleDelete(product.id)}
-                      >
-                        <Trash2 className="mr-1 size-3.5" />
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-
-          <div className="mt-4 flex items-center justify-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage <= 1}
-            >
-              Prev
-            </Button>
-            <span className="text-sm text-muted-foreground">
-              Page {currentPage} / {pageCount}
-            </span>
-            <Button
-              variant="outline"
-              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
-              disabled={currentPage >= pageCount}
-            >
-              Next
-            </Button>
-          </div>
-        </>
-      ) : (
+      {tab === "trash" ? (
         <div className="space-y-3">
           {deletedProducts.map((product) => (
             <div
@@ -360,11 +271,9 @@ export default function ProductsPage() {
               className="flex items-center justify-between rounded-xl border border-border/60 bg-white p-3"
             >
               <div>
-                <p className="font-medium text-oboya-blue-dark">
-                  {product.name["pt-BR"] || product.name.en || product.id}
-                </p>
+                <p className="font-medium text-oboya-blue-dark">{productDisplayName(product)}</p>
                 <p className="text-xs text-muted-foreground">
-                  SKU {product.sku} · purge at {product.purgeAt}
+                  {t("purgeAt", { sku: product.sku, purgeAt: product.purgeAt ?? "—" })}
                 </p>
               </div>
               <div className="flex gap-2">
@@ -380,37 +289,214 @@ export default function ProductsPage() {
                     })()
                   }
                 >
-                  Restore
+                  {tCommon("restore")}
                 </Button>
                 <Button
                   variant="destructive"
                   size="sm"
                   onClick={() =>
                     void (async () => {
-                      const ok = window.confirm("Remover permanentemente da lixeira?");
+                      const ok = window.confirm(t("hardDeleteConfirm"));
                       if (!ok) return;
-                      const response = await fetch(
-                        `/api/cms/products/${product.id}?hard=1`,
-                        { method: "DELETE" }
-                      );
+                      const response = await fetch(`/api/cms/products/${product.id}?hard=1`, {
+                        method: "DELETE",
+                      });
                       if (!response.ok) {
-                        toast.error("Não foi possível remover permanentemente.");
+                        toast.error(t("hardDeleteFailed"));
                         return;
                       }
                       await refresh();
-                      toast.success("Produto removido permanentemente.");
+                      toast.success(t("hardDeleteSuccess"));
                     })()
                   }
                 >
-                  Delete now
+                  {t("deleteNow")}
                 </Button>
               </div>
             </div>
           ))}
           {deletedProducts.length === 0 && (
-            <p className="text-sm text-muted-foreground">Lixeira vazia.</p>
+            <p className="text-sm text-muted-foreground">{t("emptyTrash")}</p>
           )}
         </div>
+      ) : (
+        <>
+          <div className="mb-4 flex flex-wrap gap-2">
+            <Input
+              className="max-w-xs"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              placeholder={t("searchPlaceholder")}
+            />
+            {tab === "active" && (
+              <Button
+                variant="destructive"
+                disabled={selected.length === 0}
+                onClick={handleBulkDelete}
+                className="rounded-full"
+              >
+                <Trash2 className="mr-1 size-4" />
+                {t("deleteSelected", { count: selected.length })}
+              </Button>
+            )}
+          </div>
+
+          {paginatedProducts.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              {tab === "archived" ? t("emptyArchive") : t("emptyActive")}
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-5">
+              {paginatedProducts.map((product) => {
+                const checked = selected.includes(product.id);
+                const mainImage = product.images[0] || "";
+                const isUnavailable =
+                  Object.values(product.prices).every((value) => !value || value <= 0) ||
+                  (!product.unlimitedStock && (product.stockQuantity ?? 0) <= 0);
+                return (
+                  <article
+                    key={product.id}
+                    className="rounded-xl border border-border/60 bg-white shadow-sm"
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl bg-muted/40">
+                      {mainImage ? (
+                        <Image
+                          src={mainImage}
+                          alt={productDisplayName(product)}
+                          fill
+                          unoptimized
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+                          {t("noImage")}
+                        </div>
+                      )}
+                      {tab === "active" && (
+                        <input
+                          type="checkbox"
+                          className="absolute top-2 left-2"
+                          checked={checked}
+                          onChange={(e) => {
+                            setSelected((prev) =>
+                              e.target.checked
+                                ? [...prev, product.id]
+                                : prev.filter((id) => id !== product.id)
+                            );
+                          }}
+                        />
+                      )}
+                    </div>
+                    <div className="space-y-2 p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="line-clamp-2 text-sm font-semibold text-oboya-blue-dark">
+                            {productDisplayName(product)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">{product.sku}</p>
+                        </div>
+                        <button
+                          type="button"
+                          className="rounded p-1 hover:bg-muted"
+                          onClick={() => router.push(`/admin/marketplace/products/${product.id}`)}
+                        >
+                          <Pencil className="size-4" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        USD: {product.prices.USD ?? 0} | BRL: {product.prices.BRL ?? 0} | EUR:{" "}
+                        {product.prices.EUR ?? 0}
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        <Badge variant={product.status === "published" ? "default" : "secondary"}>
+                          {product.status}
+                        </Badge>
+                        {isUnavailable && <Badge variant="destructive">{t("hiddenInShop")}</Badge>}
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {tab === "active" ? (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 px-2 text-xs"
+                              onClick={() => handleDuplicate(product.id)}
+                            >
+                              <Copy className="mr-1 size-3.5" />
+                              {tCommon("duplicate")}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 px-2 text-xs"
+                              onClick={() => handleArchive(product)}
+                            >
+                              <Archive className="mr-1 size-3.5" />
+                              {tCommon("archive")}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="h-7 px-2 text-xs"
+                              onClick={() => handleDelete(product.id)}
+                            >
+                              <Trash2 className="mr-1 size-3.5" />
+                              {tCommon("delete")}
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 px-2 text-xs"
+                              onClick={() => handleUnarchive(product)}
+                            >
+                              <ArchiveRestore className="mr-1 size-3.5" />
+                              {tCommon("unarchive")}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="h-7 px-2 text-xs"
+                              onClick={() => handleDelete(product.id)}
+                            >
+                              <Trash2 className="mr-1 size-3.5" />
+                              {tCommon("delete")}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage <= 1}
+            >
+              {tCommon("prev")}
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              {t("pageLabel", { current: currentPage, total: pageCount })}
+            </span>
+            <Button
+              variant="outline"
+              onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+              disabled={currentPage >= pageCount}
+            >
+              {tCommon("next")}
+            </Button>
+          </div>
+        </>
       )}
     </Can>
   );

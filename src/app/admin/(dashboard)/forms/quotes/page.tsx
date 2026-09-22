@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -20,13 +21,6 @@ type QuoteLineItem = {
   lineTotal?: number;
 };
 
-const STATUS_LABELS: Record<FormSubmissionStatus, string> = {
-  new: "New",
-  read: "Read",
-  replied: "Replied",
-  archived: "Archived",
-};
-
 function statusBadgeVariant(
   status: FormSubmissionStatus
 ): "default" | "secondary" | "outline" {
@@ -41,6 +35,8 @@ function quoteItems(row: FormSubmission): QuoteLineItem[] {
 }
 
 export default function QuoteFormsPage() {
+  const t = useTranslations("admin.forms.quotes");
+  const tCommon = useTranslations("admin.common");
   const [submissions, setSubmissions] = useState<FormSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<FormSubmission | null>(null);
@@ -49,11 +45,11 @@ export default function QuoteFormsPage() {
     setLoading(true);
     try {
       const res = await fetch("/api/cms/forms?type=quote");
-      if (!res.ok) throw new Error("Failed to load");
+      if (!res.ok) throw new Error(tCommon("loadFailed"));
       const data = (await res.json()) as FormSubmission[];
       setSubmissions(Array.isArray(data) ? data : []);
     } catch {
-      toast.error("Could not load quote submissions");
+      toast.error(t("loadFailed"));
       setSubmissions([]);
     } finally {
       setLoading(false);
@@ -68,23 +64,23 @@ export default function QuoteFormsPage() {
     () => [
       {
         key: "reference",
-        header: "Reference",
+        header: t("columns.reference"),
         cell: (row: FormSubmission) =>
           String(row.data.referenceId ?? row.id.slice(0, 8)),
       },
       {
         key: "company",
-        header: "Company",
+        header: t("columns.company"),
         cell: (row: FormSubmission) => String(row.data.company ?? "—"),
       },
       {
         key: "email",
-        header: "Email",
+        header: t("columns.email"),
         cell: (row: FormSubmission) => String(row.data.email ?? "—"),
       },
       {
         key: "items",
-        header: "Lines",
+        header: t("columns.lines"),
         cell: (row: FormSubmission) => {
           const items = quoteItems(row);
           const count =
@@ -94,7 +90,7 @@ export default function QuoteFormsPage() {
       },
       {
         key: "total",
-        header: "Est. Total",
+        header: t("columns.estTotal"),
         cell: (row: FormSubmission) => {
           const currency = String(row.data.currency ?? "USD");
           const total = Number(row.data.total ?? 0);
@@ -103,22 +99,22 @@ export default function QuoteFormsPage() {
       },
       {
         key: "status",
-        header: "Status",
+        header: t("columns.status"),
         cell: (row: FormSubmission) => (
           <Badge variant={statusBadgeVariant(row.status)}>
-            {STATUS_LABELS[row.status]}
+            {tCommon(row.status)}
           </Badge>
         ),
       },
       {
         key: "createdAt",
-        header: "Date",
+        header: t("columns.date"),
         sortable: true,
         cell: (row: FormSubmission) =>
           new Date(row.createdAt).toLocaleString(),
       },
     ],
-    []
+    [t, tCommon]
   );
 
   const openDetail = (row: FormSubmission) => setSelected(row);
@@ -131,8 +127,8 @@ export default function QuoteFormsPage() {
   return (
     <div>
       <AdminPageHeader
-        title="Quote Submissions"
-        description="RFQ requests from the shop — line items validated server-side."
+        title={t("title")}
+        description={t("description")}
       />
 
       <DataTable
@@ -141,7 +137,7 @@ export default function QuoteFormsPage() {
         getRowId={(row) => row.id}
         onRowClick={openDetail}
         emptyMessage={
-          loading ? "Loading…" : "No quote submissions yet."
+          loading ? "" : t("empty")
         }
       />
 
@@ -150,8 +146,8 @@ export default function QuoteFormsPage() {
         onClose={() => setSelected(null)}
         title={
           selected
-            ? String(selected.data.company ?? "Quote request")
-            : "Quote"
+            ? String(selected.data.company ?? t("quoteRequest"))
+            : t("quote")
         }
         description={
           selected
@@ -186,10 +182,10 @@ export default function QuoteFormsPage() {
       >
         {selected && (
           <div className="space-y-5 text-sm">
-            <DetailField label="Contact">
+            <DetailField label={t("contact")}>
               {String(selected.data.contactName ?? "—")}
             </DetailField>
-            <DetailField label="Email">
+            <DetailField label={tCommon("email")}>
               <a
                 href={`mailto:${String(selected.data.email ?? "")}`}
                 className="text-oboya-green hover:underline"
@@ -197,27 +193,27 @@ export default function QuoteFormsPage() {
                 {String(selected.data.email ?? "—")}
               </a>
             </DetailField>
-            <DetailField label="Phone">
+            <DetailField label={tCommon("phone")}>
               {String(selected.data.phone ?? "—")}
             </DetailField>
-            <DetailField label="Country">
+            <DetailField label={tCommon("country")}>
               {String(
                 selected.data.country ?? selected.data.countryCode ?? "—"
               )}
             </DetailField>
-            <DetailField label="Status">
+            <DetailField label={t("columns.status")}>
               <Badge variant={statusBadgeVariant(selected.status)}>
-                {STATUS_LABELS[selected.status]}
+                {tCommon(selected.status)}
               </Badge>
             </DetailField>
             {selected.data.message ? (
-              <DetailField label="Notes">
+              <DetailField label={t("notes")}>
                 <p className="whitespace-pre-wrap rounded-lg border border-border/60 bg-muted/30 px-3 py-3">
                   {String(selected.data.message)}
                 </p>
               </DetailField>
             ) : null}
-            <DetailField label="Line items">
+            <DetailField label={t("lineItems")}>
               {items.length === 0 ? (
                 <p className="text-muted-foreground">No line items stored.</p>
               ) : (
@@ -258,7 +254,7 @@ export default function QuoteFormsPage() {
                 </div>
               )}
             </DetailField>
-            <DetailField label="Estimated total">
+            <DetailField label={t("estimatedTotal")}>
               <span className="text-base font-semibold text-oboya-blue-dark">
                 {formatShopPrice(Number(selected.data.total ?? 0), currency)}
               </span>

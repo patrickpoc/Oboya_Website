@@ -19,6 +19,7 @@ import {
   Redo2,
   Undo2,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
   MediaLibraryDialog,
@@ -82,6 +83,9 @@ export function ProductRichTextEditor({
   className,
   placeholder,
 }: ProductRichTextEditorProps) {
+  const t = useTranslations("admin.products.editor");
+  const tCommon = useTranslations("admin.common");
+  const tProducts = useTranslations("admin.products");
   const fileRef = useRef<HTMLInputElement>(null);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [libraryTick, setLibraryTick] = useState(0);
@@ -196,7 +200,7 @@ export function ProductRichTextEditor({
         openImageDialog(asset.url, asset.name);
         void refreshLibrary();
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Upload failed");
+        toast.error(error instanceof Error ? error.message : tProducts("uploadFailed"));
       }
     },
     [openImageDialog, refreshLibrary]
@@ -205,14 +209,14 @@ export function ProductRichTextEditor({
   const setLink = useCallback(() => {
     if (!editor) return;
     const previous = editor.getAttributes("link").href as string | undefined;
-    const url = window.prompt("Link URL", previous ?? "https://");
+    const url = window.prompt(t("richLinkPrompt"), previous ?? "https://");
     if (url === null) return;
     if (!url.trim()) {
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
       return;
     }
     editor.chain().focus().extendMarkRange("link").setLink({ href: url.trim() }).run();
-  }, [editor]);
+  }, [editor, t]);
 
   const toolbarButton = (
     label: string,
@@ -238,32 +242,32 @@ export function ProductRichTextEditor({
   return (
     <div className={cn("space-y-2", className)}>
       <div className="flex flex-wrap gap-1">
-        {toolbarButton("Bold", <Bold className="size-3.5" />, () =>
+        {toolbarButton(t("richBold"), <Bold className="size-3.5" />, () =>
           editor?.chain().focus().toggleBold().run()
         )}
-        {toolbarButton("Italic", <Italic className="size-3.5" />, () =>
+        {toolbarButton(t("richItalic"), <Italic className="size-3.5" />, () =>
           editor?.chain().focus().toggleItalic().run()
         )}
-        {toolbarButton("Underline", <span className="text-[11px] font-semibold underline">U</span>, () =>
+        {toolbarButton(t("richUnderline"), <span className="text-[11px] font-semibold underline">U</span>, () =>
           editor?.chain().focus().toggleUnderline().run()
         )}
-        {toolbarButton("Heading 2", <Heading2 className="size-3.5" />, () =>
+        {toolbarButton(t("richH2"), <Heading2 className="size-3.5" />, () =>
           editor?.chain().focus().toggleHeading({ level: 2 }).run()
         )}
-        {toolbarButton("Heading 3", <Heading3 className="size-3.5" />, () =>
+        {toolbarButton(t("richH3"), <Heading3 className="size-3.5" />, () =>
           editor?.chain().focus().toggleHeading({ level: 3 }).run()
         )}
-        {toolbarButton("Bullet list", <List className="size-3.5" />, () =>
+        {toolbarButton(t("richBulletList"), <List className="size-3.5" />, () =>
           editor?.chain().focus().toggleBulletList().run()
         )}
-        {toolbarButton("Ordered list", <ListOrdered className="size-3.5" />, () =>
+        {toolbarButton(t("richOrderedList"), <ListOrdered className="size-3.5" />, () =>
           editor?.chain().focus().toggleOrderedList().run()
         )}
-        {toolbarButton("Link", <Link2 className="size-3.5" />, setLink)}
-        {toolbarButton("Horizontal rule", <Minus className="size-3.5" />, () =>
+        {toolbarButton(t("richLink"), <Link2 className="size-3.5" />, setLink)}
+        {toolbarButton(t("richHorizontalRule"), <Minus className="size-3.5" />, () =>
           editor?.chain().focus().setHorizontalRule().run()
         )}
-        {toolbarButton("Insert image", <ImageIcon className="size-3.5" />, () =>
+        {toolbarButton(t("richInsertImage"), <ImageIcon className="size-3.5" />, () =>
           fileRef.current?.click()
         )}
         <Button
@@ -276,12 +280,12 @@ export function ProductRichTextEditor({
           }}
         >
           <ImageIcon className="mr-1 size-3.5" />
-          Library
+          {tProducts("library")}
         </Button>
-        {toolbarButton("Undo", <Undo2 className="size-3.5" />, () =>
+        {toolbarButton(t("richUndo"), <Undo2 className="size-3.5" />, () =>
           editor?.chain().focus().undo().run()
         )}
-        {toolbarButton("Redo", <Redo2 className="size-3.5" />, () =>
+        {toolbarButton(t("richRedo"), <Redo2 className="size-3.5" />, () =>
           editor?.chain().focus().redo().run()
         )}
       </div>
@@ -316,26 +320,26 @@ export function ProductRichTextEditor({
           <button
             type="button"
             className="absolute inset-0 bg-oboya-blue-dark/40"
-            aria-label="Close"
+            aria-label={tCommon("close")}
             onClick={() => setPendingImage(null)}
           />
           <div className="relative z-10 w-full max-w-md rounded-xl border border-border/60 bg-white p-5 shadow-2xl">
-            <h4 className="font-semibold text-oboya-blue-dark">Insert image</h4>
+            <h4 className="font-semibold text-oboya-blue-dark">{t("insertImageTitle")}</h4>
             <p className="mt-1 text-xs text-muted-foreground">
-              Add alt text for accessibility and SEO.
+              {t("insertImageHint")}
             </p>
             <div className="mt-4 space-y-3">
               <div className="space-y-1.5">
-                <Label htmlFor="image-alt">Alt text</Label>
+                <Label htmlFor="image-alt">{t("altText")}</Label>
                 <Input
                   id="image-alt"
                   value={altDraft}
                   onChange={(event) => setAltDraft(event.target.value)}
-                  placeholder="Describe the image"
+                  placeholder={t("altPlaceholder")}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="image-align">Alignment</Label>
+                <Label htmlFor="image-align">{t("alignment")}</Label>
                 <select
                   id="image-align"
                   value={alignDraft}
@@ -344,15 +348,15 @@ export function ProductRichTextEditor({
                   }
                   className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-sm"
                 >
-                  <option value="left">Left</option>
-                  <option value="center">Center</option>
-                  <option value="right">Right</option>
+                  <option value="left">{t("alignLeft")}</option>
+                  <option value="center">{t("alignCenter")}</option>
+                  <option value="right">{t("alignRight")}</option>
                 </select>
               </div>
             </div>
             <div className="mt-5 flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => setPendingImage(null)}>
-                Cancel
+                {tCommon("cancel")}
               </Button>
               <Button
                 type="button"
@@ -362,7 +366,7 @@ export function ProductRichTextEditor({
                   setPendingImage(null);
                 }}
               >
-                Insert
+                {t("insert")}
               </Button>
             </div>
           </div>

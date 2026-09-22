@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { HomepageTestimonial } from "@/lib/cms/repositories/homepage-repository";
@@ -16,14 +17,16 @@ export function TestimonialsSectionEditor({
   setSettings,
   locale,
 }: HomepageSectionEditorProps) {
+  const t = useTranslations("admin.website.home");
+  const tCommon = useTranslations("admin.common");
   return (
     <Card className="max-w-4xl">
       <CardHeader>
-        <CardTitle>Testimonials</CardTitle>
+        <CardTitle>{t("sections.testimonials.title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <LocalizedInput
-          label="Eyebrow"
+          label={t("fields.eyebrow")}
           locale={locale}
           value={settings.testimonials.eyebrow[locale]}
           onChange={(l, v) => updateSettingsLocalized(setSettings, "testimonials", "eyebrow", l, v)}
@@ -48,7 +51,7 @@ export function TestimonialsSectionEditor({
               </Button>
             </div>
             <LocalizedInput
-              label="Quote"
+              label={t("fields.quote")}
               locale={locale}
               value={item.quote[locale]}
               onChange={(_, v) => {
@@ -65,7 +68,7 @@ export function TestimonialsSectionEditor({
               multiline
             />
             <LocalizedInput
-              label="Author"
+              label={tCommon("author")}
               locale={locale}
               value={item.author[locale]}
               onChange={(_, v) => {
@@ -81,7 +84,7 @@ export function TestimonialsSectionEditor({
               }}
             />
             <LocalizedInput
-              label="Role"
+              label={t("fields.role")}
               locale={locale}
               value={item.role[locale]}
               onChange={(_, v) => {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AdminPageFooterActions } from "@/components/admin/layout/AdminPageFooterActions";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -17,6 +18,7 @@ import {
 import { validateColorVariants } from "@/lib/shop/color-variants";
 
 export default function ProductNewPage() {
+  const t = useTranslations("admin.products");
   const router = useRouter();
   const { catalog, loading } = useAdminMarketplaceCatalog();
   const [product, setProduct] = useState<CmsProduct | null>(null);
@@ -54,11 +56,13 @@ export default function ProductNewPage() {
           const payload = (await response.json().catch(() => null)) as { error?: string } | null;
           throw new Error(payload?.error ?? "failed");
         }
-        toast.success("Product created");
+        toast.success(t("productCreated"));
         router.push(`/admin/marketplace/products/${product.id}`);
       } catch (error) {
         toast.error(
-          error instanceof Error ? `Could not persist product: ${error.message}` : "Could not persist product."
+          error instanceof Error
+            ? t("persistFailedWithReason", { reason: error.message })
+            : t("persistFailed")
         );
       }
     })();
@@ -66,14 +70,11 @@ export default function ProductNewPage() {
 
   return (
     <div className="pb-24">
-      <AdminPageHeader
-        title="New product"
-        description="Create a product with translations, media, countries and prices."
-      />
+      <AdminPageHeader title={t("newTitle")} description={t("newDescription")} />
       {product ? (
         <ProductEditorForm product={product} onChange={setProduct} />
       ) : (
-        <p className="text-sm text-muted-foreground">Loading product editor…</p>
+        <p className="text-sm text-muted-foreground">{t("loadingEditor")}</p>
       )}
 
       <AdminPageFooterActions>
@@ -84,17 +85,16 @@ export default function ProductNewPage() {
             className: "rounded-full",
           })}
         >
-          Back
+          {t("back")}
         </Link>
         <Button
           onClick={handleSave}
           disabled={!product}
           className="rounded-full bg-oboya-green text-white hover:bg-oboya-green/90"
         >
-          Create product
+          {t("createProduct")}
         </Button>
       </AdminPageFooterActions>
     </div>
   );
 }
-

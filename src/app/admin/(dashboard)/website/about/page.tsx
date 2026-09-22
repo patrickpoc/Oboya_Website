@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -9,10 +10,13 @@ import { ValuesSectionEditor } from "@/components/admin/about/ValuesSectionEdito
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Can } from "@/components/admin/permissions/Can";
+import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
 import type { CmsLocale } from "@/lib/cms/types";
 
 export default function AboutPageAdmin() {
+  const t = useTranslations("admin.website.about");
+  const tCommon = useTranslations("admin.common");
   const [settings, setSettings] = useState<AboutPageSettings | null>(null);
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [loading, setLoading] = useState(true);
@@ -22,10 +26,10 @@ export default function AboutPageAdmin() {
     void (async () => {
       try {
         const res = await fetch("/api/cms/about");
-        if (!res.ok) throw new Error("Failed to load");
+        if (!res.ok) throw new Error(tCommon("loadFailed"));
         setSettings(await res.json());
       } catch {
-        toast.error("Could not load about page settings");
+        toast.error(t("loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -45,15 +49,15 @@ export default function AboutPageAdmin() {
         error?: string;
       };
       if (!res.ok) {
-        throw new Error(data.error ?? "Save failed");
+        throw new Error(data.error ?? tCommon("saveFailed"));
       }
       setSettings(data);
-      toast.success("About page saved to live CMS");
+      toast.success(t("saved"));
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to save about page settings"
+          : t("saveFailed")
       );
     } finally {
       setSaving(false);
@@ -61,7 +65,7 @@ export default function AboutPageAdmin() {
   }, [settings]);
 
   if (loading || !settings) {
-    return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
+    return <div className="min-h-[40vh]" aria-hidden />;
   }
 
   return (
@@ -69,20 +73,20 @@ export default function AboutPageAdmin() {
       module="website"
       action="edit"
       fallback={
-        <p className="text-sm text-muted-foreground">Access denied.</p>
+        <AccessDenied />
       }
     >
       <div>
         <AdminPageHeader
-          title="About Us"
-          description="Edit Oboya in Numbers, Values, and related About content. Saves to Supabase cms_documents (about-page) when configured — not browser cache."
+          title={t("title")}
+          description={t("description")}
           actions={
             <Button
               onClick={() => void handleSave()}
               disabled={saving}
               className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
             >
-              {saving ? "Saving…" : "Save"}
+              {saving ? tCommon("saving") : tCommon("save")}
             </Button>
           }
         />
@@ -112,23 +116,23 @@ export default function AboutPageAdmin() {
               />
               <Card>
                 <CardHeader>
-                  <CardTitle>Other sections</CardTitle>
+                  <CardTitle>{t("otherSections")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm text-muted-foreground">
                   <p>
-                    Timeline: {settings.timeline.events.length} events · Culture:{" "}
-                    {settings.culture.items.length} · Honors:{" "}
-                    {settings.honors.items.length}
+                    {t("otherSectionsStats", {
+                      timeline: settings.timeline.events.length,
+                      culture: settings.culture.items.length,
+                      honors: settings.honors.items.length,
+                    })}
                   </p>
                   <p>
-                    Mission images: {settings.mission.images.length} · Vision
-                    images: {settings.vision.images.length}
+                    {t("otherSectionsImages", {
+                      mission: settings.mission.images.length,
+                      vision: settings.vision.images.length,
+                    })}
                   </p>
-                  <p className="text-xs">
-                    Hero, timeline, callout, culture, mission, vision, and honors
-                    still use the shared About document — expand editors here as
-                    needed. Save persists the full document.
-                  </p>
+                  <p className="text-xs">{t("otherSectionsHint")}</p>
                 </CardContent>
               </Card>
             </div>

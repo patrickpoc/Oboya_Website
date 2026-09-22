@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -11,8 +12,11 @@ import { Button } from "@/components/ui/button";
 import type { NewsPageSettings } from "@/lib/cms/repositories/news-page-repository";
 import type { CmsLocale } from "@/lib/cms/types";
 import { Can } from "@/components/admin/permissions/Can";
+import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
 
 export default function NewsPageAdmin() {
+  const t = useTranslations("admin.website.news");
+  const tCommon = useTranslations("admin.common");
   const [settings, setSettings] = useState<NewsPageSettings | null>(null);
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [loading, setLoading] = useState(true);
@@ -21,10 +25,10 @@ export default function NewsPageAdmin() {
     void (async () => {
       try {
         const res = await fetch("/api/cms/news-page");
-        if (!res.ok) throw new Error("Failed to load");
+        if (!res.ok) throw new Error(tCommon("loadFailed"));
         setSettings(await res.json());
       } catch {
-        toast.error("Could not load news page settings");
+        toast.error(t("loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -39,36 +43,36 @@ export default function NewsPageAdmin() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       });
-      if (!res.ok) throw new Error("Save failed");
-      toast.success("News page settings saved");
+      if (!res.ok) throw new Error(tCommon("saveFailed"));
+      toast.success(t("saved"));
     } catch {
-      toast.error("Failed to save news page settings");
+      toast.error(t("saveFailed"));
     }
   };
 
   if (loading || !settings) {
-    return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
+    return <div className="min-h-[40vh]" aria-hidden />;
   }
 
   return (
-    <Can module="website" action="edit" fallback={<p className="text-sm text-muted-foreground">Access denied.</p>}>
+    <Can module="website" action="edit" fallback={<AccessDenied />}>
       <div>
         <AdminPageHeader
-          title="News Page"
-          description="Edit the hero section and listing settings for /news."
+          title={t("title")}
+          description={t("description")}
         />
 
         <div className="grid max-w-3xl gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Hero section</CardTitle>
+              <CardTitle>{t("heroSection")}</CardTitle>
             </CardHeader>
             <CardContent>
               <LocaleFieldTabs value={locale} onChange={setLocale}>
                 {(loc) => (
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label>Eyebrow label</Label>
+                      <Label>{t("eyebrowLabel")}</Label>
                       <Input
                         value={settings.eyebrow[loc]}
                         onChange={(e) =>
@@ -77,11 +81,11 @@ export default function NewsPageAdmin() {
                             eyebrow: { ...settings.eyebrow, [loc]: e.target.value },
                           })
                         }
-                        placeholder="Latest News"
+                        placeholder={t("eyebrowPlaceholder")}
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Headline</Label>
+                      <Label>{tCommon("title")}</Label>
                       <textarea
                         value={settings.headline[loc]}
                         onChange={(e) =>
@@ -92,7 +96,7 @@ export default function NewsPageAdmin() {
                         }
                         rows={4}
                         className="w-full rounded-lg border border-input px-3 py-2 text-sm"
-                        placeholder="Main headline shown on the news listing page"
+                        placeholder={t("headlinePlaceholder")}
                       />
                     </div>
                   </div>
@@ -103,11 +107,11 @@ export default function NewsPageAdmin() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Listing</CardTitle>
+              <CardTitle>{t("listing")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
-                <Label>Posts per page</Label>
+                <Label>{t("postsPerPage")}</Label>
                 <Input
                   type="number"
                   min={3}
@@ -122,13 +126,13 @@ export default function NewsPageAdmin() {
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Articles are managed under Blog → Posts. Categories control the filter dropdown.
+                {t("listingHint")}
               </p>
             </CardContent>
           </Card>
 
           <Button onClick={handleSave} className="w-fit rounded-full bg-oboya-green">
-            Save news page
+            {t("save")}
           </Button>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { ImageIcon, Plus, Trash2, Upload } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   MediaLibraryDialog,
   type MediaLibraryItem,
@@ -33,7 +34,10 @@ import {
   normalizeImageColorIds,
   sortedColorVariants,
 } from "@/lib/shop/color-variants";
-import { PRODUCT_IMAGE_SECTION_DESCRIPTION } from "@/components/admin/marketplace/product-editor.constants";
+import {
+  PRODUCT_IMAGE_ASPECT_RATIO,
+  PRODUCT_IMAGE_RECOMMENDED_SIZE,
+} from "@/components/admin/marketplace/product-editor.constants";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +47,8 @@ interface ProductImagesCardProps {
 }
 
 export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps) {
+  const t = useTranslations("admin.products.editor");
+  const tProducts = useTranslations("admin.products");
   const imageUploadRef = useRef<HTMLInputElement>(null);
   const [uploadTargetIndex, setUploadTargetIndex] = useState<number | null>(null);
   const [libraryOpen, setLibraryOpen] = useState(false);
@@ -59,15 +65,15 @@ export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps)
     const defaultName =
       getVariantDisplayName(
         {
-          name: product.defaultColorName?.en || "Default",
+          name: product.defaultColorName?.en || t("defaultColorFallback"),
           nameI18n: product.defaultColorName,
         },
         "en"
-      ) || "Default";
+      ) || t("defaultColorFallback");
     return [
       {
         id: DEFAULT_COLOR_VARIANT_ID,
-        label: `${defaultName} (default)`,
+        label: t("defaultColorLabel", { name: defaultName }),
         color: product.defaultColor || "#888888",
       },
       ...sortedColorVariants(product).map((variant) => ({
@@ -76,7 +82,7 @@ export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps)
         color: variant.color,
       })),
     ];
-  }, [product]);
+  }, [product, t]);
 
   const refreshLibrary = async () => {
     try {
@@ -154,7 +160,7 @@ export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps)
   const openMediaLibrary = (slotIndex?: number) => {
     const targetIndex = slotIndex ?? findEmptyImageSlotIndex();
     if (targetIndex < 0) {
-      toast.error("Add an image slot before choosing from the library.");
+      toast.error(t("needImageSlot"));
       return;
     }
     setLibraryTargetIndex(targetIndex);
@@ -210,9 +216,9 @@ export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps)
         });
         saveMediaAsset(asset);
         setImageAt(index, asset.url);
-        toast.success("Image uploaded");
+        toast.success(t("imageUploaded"));
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Upload failed");
+        toast.error(error instanceof Error ? error.message : tProducts("uploadFailed"));
       }
     })();
   };
@@ -220,19 +226,22 @@ export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps)
   return (
     <Card>
       <CardHeader className="pb-4">
-        <CardTitle>Images</CardTitle>
+        <CardTitle>{t("imagesTitle")}</CardTitle>
         <CardDescription>
-          {PRODUCT_IMAGE_SECTION_DESCRIPTION}
+          {t("imagesBaseHint", {
+            size: PRODUCT_IMAGE_RECOMMENDED_SIZE,
+            ratio: PRODUCT_IMAGE_ASPECT_RATIO,
+          })}
           {colorOptions.length > 0
-            ? " Assign each slot to one or more colors so the shop carousel changes with the selected swatch."
-            : " Add color variations first to assign images per color."}
+            ? t("imagesColorAssignHint")
+            : t("imagesAddColorsHint")}
         </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">
         <div className="flex flex-wrap gap-2">
           <Button type="button" size="sm" variant="outline" onClick={addImage}>
-            <Plus className="mr-1 size-3.5" /> Add slot
+            <Plus className="mr-1 size-3.5" /> {t("addSlot")}
           </Button>
           <Button
             type="button"
@@ -240,7 +249,7 @@ export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps)
             variant="outline"
             onClick={() => openImageUpload()}
           >
-            <Upload className="mr-1 size-3.5" /> Upload
+            <Upload className="mr-1 size-3.5" /> {tProducts("upload")}
           </Button>
           <Button
             type="button"
@@ -248,14 +257,16 @@ export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps)
             variant="outline"
             onClick={() => openMediaLibrary()}
           >
-            <ImageIcon className="mr-1 size-3.5" /> Library
+            <ImageIcon className="mr-1 size-3.5" /> {tProducts("library")}
           </Button>
         </div>
 
         {filledImages.length > 0 && (
           <p className="text-xs text-muted-foreground">
-            {filledImages.length} image{filledImages.length === 1 ? "" : "s"} · Main:{" "}
-            {product.images[0]?.trim() ? "set" : "missing"}
+            {t("imageCountSummary", {
+              count: filledImages.length,
+              main: product.images[0]?.trim() ? t("mainSet") : t("mainMissing"),
+            })}
           </p>
         )}
 
@@ -269,19 +280,19 @@ export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps)
                 {image ? (
                   <Image
                     src={image}
-                    alt={`Product image ${index + 1}`}
+                    alt={t("productImageAlt", { index: index + 1 })}
                     fill
                     unoptimized
                     className="object-cover"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
-                    No image
+                    {t("noImage")}
                   </div>
                 )}
               </div>
               <div className="px-2 py-1.5 text-xs font-medium">
-                {index === 0 ? "Main image" : `Image ${index + 1}`}
+                {index === 0 ? t("mainImage") : t("imageN", { index: index + 1 })}
               </div>
             </div>
           ))}
@@ -300,11 +311,11 @@ export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps)
                     value={index}
                     onChange={(e) => reorderImage(index, Number(e.target.value))}
                     className="h-9 w-28 rounded-lg border border-input bg-background px-2.5 text-sm"
-                    aria-label={`Position for image ${index + 1}`}
+                    aria-label={t("positionForImage", { index: index + 1 })}
                   >
                     {product.images.map((_, orderIndex) => (
                       <option key={`order-${index}-${orderIndex}`} value={orderIndex}>
-                        Position {orderIndex}
+                        {t("position", { index: orderIndex })}
                       </option>
                     ))}
                   </select>
@@ -319,14 +330,14 @@ export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps)
                     variant="outline"
                     onClick={() => openImageUpload(index)}
                   >
-                    <Upload className="mr-1 size-3.5" /> Upload
+                    <Upload className="mr-1 size-3.5" /> {tProducts("upload")}
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => openMediaLibrary(index)}
                   >
-                    <ImageIcon className="mr-1 size-3.5" /> Library
+                    <ImageIcon className="mr-1 size-3.5" /> {tProducts("library")}
                   </Button>
                   <Button
                     type="button"
@@ -334,7 +345,7 @@ export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps)
                     variant="outline"
                     onClick={() => removeImage(index)}
                     disabled={product.images.length <= 1}
-                    aria-label={`Remove image slot ${index + 1}`}
+                    aria-label={t("removeImageSlot", { index: index + 1 })}
                   >
                     <Trash2 className="size-4" />
                   </Button>
@@ -343,10 +354,8 @@ export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps)
                 {colorOptions.length > 0 ? (
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">
-                      Show for colors
-                      {assigned.size === 0
-                        ? " (untagged — shared only if no other slots are tagged)"
-                        : ""}
+                      {t("showForColors")}
+                      {assigned.size === 0 ? t("untaggedHint") : ""}
                     </Label>
                     <div className="flex flex-wrap gap-2">
                       {colorOptions.map((option) => {

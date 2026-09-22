@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -55,6 +56,8 @@ function emptyStudy(): CmsCaseStudy {
 }
 
 export default function CaseStudyEditPage() {
+  const t = useTranslations("admin.caseStudies.editor");
+  const tCommon = useTranslations("admin.common");
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
@@ -72,11 +75,11 @@ export default function CaseStudyEditPage() {
     void (async () => {
       try {
         const res = await fetch("/api/cms/case-studies");
-        if (!res.ok) throw new Error("Failed to load");
+        if (!res.ok) throw new Error(tCommon("loadFailed"));
         const data = (await res.json()) as CmsCaseStudy[];
         const existing = data.find((item) => item.id === id);
         if (!existing) {
-          toast.error("Case study not found");
+          toast.error(t("notFound"));
           router.push("/admin/case-studies");
           return;
         }
@@ -94,7 +97,7 @@ export default function CaseStudyEditPage() {
           },
         });
       } catch {
-        toast.error("Could not load case study");
+        toast.error(t("loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -110,18 +113,18 @@ export default function CaseStudyEditPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(study),
       });
-      if (!res.ok) throw new Error("Save failed");
-      toast.success("Case study saved");
+      if (!res.ok) throw new Error(tCommon("saveFailed"));
+      toast.success(t("saved"));
       router.push("/admin/case-studies");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save");
+      toast.error(error instanceof Error ? error.message : tCommon("couldNotSave"));
     } finally {
       setSaving(false);
     }
   };
 
   if (loading || !study) {
-    return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
+    return <div className="min-h-[40vh]" aria-hidden />;
   }
 
   const setImageAt = (index: number, url: string) => {
@@ -134,21 +137,21 @@ export default function CaseStudyEditPage() {
   return (
     <div>
       <AdminPageHeader
-        title={isNew ? "New case study" : study.title.en}
+        title={isNew ? t("new") : study.title.en}
         actions={
           <div className="flex gap-2">
             <Link
               href="/admin/case-studies"
               className={buttonVariants({ variant: "outline", className: "rounded-full" })}
             >
-              Back
+              {tCommon("back")}
             </Link>
             <Button
               onClick={() => void handleSave()}
               disabled={saving}
               className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
             >
-              {saving ? "Saving…" : "Save"}
+              {saving ? tCommon("saving") : tCommon("save")}
             </Button>
           </div>
         }
@@ -157,14 +160,14 @@ export default function CaseStudyEditPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Content</CardTitle>
+            <CardTitle>{t("content")}</CardTitle>
           </CardHeader>
           <CardContent>
             <LocaleFieldTabs value={locale} onChange={setLocale}>
               {(loc) => (
                 <div className="space-y-4">
                   <div className="space-y-1.5">
-                    <Label>Title</Label>
+                    <Label>{tCommon("title")}</Label>
                     <Input
                       value={study.title[loc]}
                       onChange={(e) =>
@@ -173,7 +176,7 @@ export default function CaseStudyEditPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Outcome metric (e.g. −18% handling time)</Label>
+                    <Label>{t("outcomeMetric")}</Label>
                     <Input
                       value={study.metric[loc]}
                       onChange={(e) =>
@@ -182,7 +185,7 @@ export default function CaseStudyEditPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Excerpt (listing / hero intro)</Label>
+                    <Label>{t("excerpt")}</Label>
                     <Textarea
                       value={study.excerpt[loc]}
                       onChange={(e) =>
@@ -192,7 +195,7 @@ export default function CaseStudyEditPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Timeline</Label>
+                    <Label>{t("timeline")}</Label>
                     <Input
                       value={study.timeline[loc]}
                       onChange={(e) =>
@@ -204,7 +207,7 @@ export default function CaseStudyEditPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Challenge</Label>
+                    <Label>{t("challenge")}</Label>
                     <RichTextEditor
                       value={study.challenge[loc]}
                       onChange={(html) =>
@@ -216,7 +219,7 @@ export default function CaseStudyEditPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Solution</Label>
+                    <Label>{t("solution")}</Label>
                     <RichTextEditor
                       value={study.solution[loc]}
                       onChange={(html) =>
@@ -228,7 +231,7 @@ export default function CaseStudyEditPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Implementation</Label>
+                    <Label>{t("implementation")}</Label>
                     <RichTextEditor
                       value={study.implementation[loc]}
                       onChange={(html) =>
@@ -240,7 +243,7 @@ export default function CaseStudyEditPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Results</Label>
+                    <Label>{t("results")}</Label>
                     <RichTextEditor
                       value={study.results[loc]}
                       onChange={(html) =>
@@ -252,7 +255,7 @@ export default function CaseStudyEditPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Client perspective quote</Label>
+                    <Label>{t("clientQuote")}</Label>
                     <Textarea
                       value={study.testimonial.quote[loc]}
                       onChange={(e) =>
@@ -279,57 +282,57 @@ export default function CaseStudyEditPage() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Metadata</CardTitle>
+              <CardTitle>{t("metadata")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
-                <Label>Slug</Label>
+                <Label>{tCommon("slug")}</Label>
                 <Input
                   value={study.slug}
                   onChange={(e) => setStudy({ ...study, slug: e.target.value })}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Client</Label>
+                <Label>{t("client")}</Label>
                 <Input
                   value={study.client}
                   onChange={(e) => setStudy({ ...study, client: e.target.value })}
                 />
               </div>
               <ImageField
-                label="Cover image"
+                label={t("coverImage")}
                 value={study.coverImage}
                 onChange={(url) => setStudy({ ...study, coverImage: url })}
                 optional
               />
               <ImageField
-                label="Story image 1 (Challenge / Solution)"
+                label={t("storyImage1")}
                 value={study.images[0] ?? ""}
                 onChange={(url) => setImageAt(0, url)}
                 optional
               />
               <ImageField
-                label="Story image 2 (Implementation / Results)"
+                label={t("storyImage2")}
                 value={study.images[1] ?? ""}
                 onChange={(url) => setImageAt(1, url)}
                 optional
               />
               <div className="space-y-1.5">
-                <Label>Country</Label>
+                <Label>{tCommon("country")}</Label>
                 <Input
                   value={study.country}
                   onChange={(e) => setStudy({ ...study, country: e.target.value })}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Industry / Segment</Label>
+                <Label>{t("industry")}</Label>
                 <Input
                   value={study.industry}
                   onChange={(e) => setStudy({ ...study, industry: e.target.value })}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Region</Label>
+                <Label>{t("region")}</Label>
                 <select
                   value={study.region}
                   onChange={(e) =>
@@ -345,7 +348,7 @@ export default function CaseStudyEditPage() {
                 </select>
               </div>
               <div className="space-y-1.5">
-                <Label>Status</Label>
+                <Label>{tCommon("status")}</Label>
                 <select
                   value={study.status}
                   onChange={(e) =>
@@ -353,9 +356,9 @@ export default function CaseStudyEditPage() {
                   }
                   className="h-8 w-full rounded-lg border border-input px-2.5 text-sm"
                 >
-                  <option value="draft">Draft</option>
-                  <option value="published">Published</option>
-                  <option value="archived">Archived</option>
+                  <option value="draft">{t("draft")}</option>
+                  <option value="published">{t("published")}</option>
+                  <option value="archived">{t("archived")}</option>
                 </select>
               </div>
             </CardContent>
@@ -363,11 +366,11 @@ export default function CaseStudyEditPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Testimonial attribution</CardTitle>
+              <CardTitle>{t("testimonialAttribution")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
-                <Label>Author name</Label>
+                <Label>{t("authorName")}</Label>
                 <Input
                   value={study.testimonial.author}
                   onChange={(e) =>
@@ -379,7 +382,7 @@ export default function CaseStudyEditPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Company</Label>
+                <Label>{tCommon("company")}</Label>
                 <Input
                   value={study.testimonial.company}
                   onChange={(e) =>

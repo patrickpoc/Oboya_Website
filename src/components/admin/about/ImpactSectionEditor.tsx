@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,14 +25,14 @@ const ICON_OPTIONS: AboutImpactStatIcon[] = [
 
 /** Brand palette accents for collapsed Numbers panels. */
 const ACCENT_OPTIONS = [
-  { label: "Main Blue", value: "#004F7C" },
-  { label: "Light Blue", value: "#009CD4" },
-  { label: "Dark Blue", value: "#01203F" },
-  { label: "Main Green", value: "#4DAF4E" },
-  { label: "Light Green", value: "#75C566" },
-  { label: "Orange Red", value: "#ea5744" },
-  { label: "Dark Yellow", value: "#909B03" },
-  { label: "Light Yellow", value: "#DBE64C" },
+  { labelKey: "mainBlue" as const, value: "#004F7C" },
+  { labelKey: "lightBlue" as const, value: "#009CD4" },
+  { labelKey: "darkBlue" as const, value: "#01203F" },
+  { labelKey: "mainGreen" as const, value: "#4DAF4E" },
+  { labelKey: "lightGreen" as const, value: "#75C566" },
+  { labelKey: "orangeRed" as const, value: "#ea5744" },
+  { labelKey: "darkYellow" as const, value: "#909B03" },
+  { labelKey: "lightYellow" as const, value: "#DBE64C" },
 ] as const;
 
 export type AboutSectionEditorProps = {
@@ -78,6 +79,8 @@ export function ImpactSectionEditor({
   setSettings,
   locale,
 }: AboutSectionEditorProps) {
+  const t = useTranslations("admin.website.about");
+  const tCommon = useTranslations("admin.common");
   const impact = settings.impact;
 
   const updateStat = (
@@ -96,11 +99,11 @@ export function ImpactSectionEditor({
   return (
     <Card className="max-w-4xl">
       <CardHeader>
-        <CardTitle>Oboya in Numbers</CardTitle>
+        <CardTitle>{t("impactTitle")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="flex items-center justify-between gap-4 rounded-lg border px-3 py-2">
-          <Label htmlFor="impact-enabled">Section enabled</Label>
+          <Label htmlFor="impact-enabled">{t("fields.sectionEnabled")}</Label>
           <Switch
             id="impact-enabled"
             checked={settings.sections.impact.enabled}
@@ -117,7 +120,7 @@ export function ImpactSectionEditor({
         </div>
 
         <LocalizedField
-          label="Title"
+          label={tCommon("title")}
           locale={locale}
           value={impact.title[locale] ?? ""}
           onChange={(v) =>
@@ -131,7 +134,7 @@ export function ImpactSectionEditor({
           }
         />
         <LocalizedField
-          label="Description"
+          label={tCommon("description")}
           locale={locale}
           multiline
           value={impact.description[locale] ?? ""}
@@ -147,10 +150,8 @@ export function ImpactSectionEditor({
         />
 
         <p className="text-xs text-muted-foreground">
-          Pending metrics show XX on the site until a verified value is set.
-          Accent color tints the collapsed card and open text bar. Saves to live{" "}
-          <code className="rounded bg-muted px-1">cms_documents</code>{" "}
-          (about-page).
+          {t("pendingMetricsHint")}
+          {t("fields.accentHint")}
         </p>
 
         {impact.stats.map((stat, index) => (
@@ -159,7 +160,7 @@ export function ImpactSectionEditor({
               <p className="text-sm font-medium capitalize">{stat.id}</p>
               <div className="flex items-center gap-2">
                 <Label htmlFor={`pending-${stat.id}`} className="text-xs">
-                  Pending
+                  {t("fields.pending")}
                 </Label>
                 <Switch
                   id={`pending-${stat.id}`}
@@ -172,7 +173,7 @@ export function ImpactSectionEditor({
             </div>
 
             <LocalizedField
-              label="Label"
+              label={tCommon("label")}
               locale={locale}
               value={stat.label[locale] ?? ""}
               onChange={(v) =>
@@ -184,7 +185,7 @@ export function ImpactSectionEditor({
 
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="space-y-1.5">
-                <Label>Value</Label>
+                <Label>{tCommon("value")}</Label>
                 <Input
                   type="number"
                   value={stat.value}
@@ -195,7 +196,7 @@ export function ImpactSectionEditor({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Suffix</Label>
+                <Label>{tCommon("suffix")}</Label>
                 <Input
                   value={stat.suffix}
                   disabled={stat.pending === true}
@@ -205,7 +206,7 @@ export function ImpactSectionEditor({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Icon</Label>
+                <Label>{tCommon("icon")}</Label>
                 <select
                   value={stat.icon}
                   onChange={(e) =>
@@ -226,7 +227,7 @@ export function ImpactSectionEditor({
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label>Accent color</Label>
+                <Label>{tCommon("accentColor")}</Label>
                 <div className="flex items-center gap-2">
                   <span
                     className="size-8 shrink-0 rounded-md border"
@@ -242,31 +243,31 @@ export function ImpactSectionEditor({
                   >
                     {ACCENT_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
-                        {opt.label} ({opt.value})
+                        {t(`palette.${opt.labelKey}`)} ({opt.value})
                       </option>
                     ))}
                     {!ACCENT_OPTIONS.some((o) => o.value === stat.accentColor) ? (
                       <option value={stat.accentColor}>
-                        Custom ({stat.accentColor})
+                        {t("fields.customAccent", { color: stat.accentColor })}
                       </option>
                     ) : null}
                   </select>
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label>Object position</Label>
+                <Label>{tCommon("objectPosition")}</Label>
                 <Input
                   value={stat.objectPosition ?? "center center"}
                   onChange={(e) =>
                     updateStat(index, { objectPosition: e.target.value })
                   }
-                  placeholder="center 40%"
+                  placeholder={tCommon("objectPositionPlaceholder")}
                 />
               </div>
             </div>
 
             <ImageField
-              label="Panel image"
+              label={tCommon("panelImage")}
               value={stat.image?.src ?? ""}
               onChange={(url) =>
                 updateStat(index, {
@@ -283,7 +284,7 @@ export function ImpactSectionEditor({
               }
             />
             <LocalizedField
-              label="Image alt"
+              label={tCommon("imageAlt")}
               locale={locale}
               value={stat.image?.alt?.[locale] ?? ""}
               onChange={(v) =>

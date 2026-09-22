@@ -3,9 +3,12 @@
 import { useEffect, useState, useTransition } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { AdminLoadingOverlay } from "@/components/admin/layout/AdminLoadingOverlay";
+import { useAdminLoading } from "@/components/admin/layout/AdminLoadingContext";
 
 export function AdminPageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { isLoading, showNow, clearForced } = useAdminLoading();
   const [visible, setVisible] = useState(true);
   const [displayPath, setDisplayPath] = useState(pathname);
   const [pending, startTransition] = useTransition();
@@ -33,47 +36,33 @@ export function AdminPageTransition({ children }: { children: React.ReactNode })
 
       setNavigating(true);
       setVisible(false);
+      showNow();
     };
 
     document.addEventListener("click", onClick, true);
     return () => document.removeEventListener("click", onClick, true);
-  }, [pathname]);
+  }, [pathname, showNow]);
 
   useEffect(() => {
     startTransition(() => {
       setDisplayPath(pathname);
       setNavigating(false);
+      clearForced();
       requestAnimationFrame(() => setVisible(true));
     });
-  }, [pathname]);
+  }, [pathname, clearForced]);
 
-  const showLoader = navigating || pending || !visible;
+  const showOverlay = isLoading || navigating || pending || !visible;
 
   return (
     <div className="relative min-h-[50vh]">
-      <div
-        className={cn(
-          "pointer-events-none absolute inset-0 z-20 flex items-start justify-center pt-24 transition-opacity duration-200",
-          showLoader ? "opacity-100" : "opacity-0"
-        )}
-        aria-hidden={!showLoader}
-        aria-busy={showLoader}
-      >
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-border/60 bg-white/90 px-6 py-5 shadow-[var(--shadow-card)] backdrop-blur-sm">
-          <span
-            className="size-8 animate-spin rounded-full border-2 border-oboya-green/25 border-t-oboya-green"
-            role="status"
-            aria-label="Loading"
-          />
-          <p className="text-xs font-medium text-muted-foreground">Loading…</p>
-        </div>
-      </div>
+      <AdminLoadingOverlay active={showOverlay} />
 
       <div
         key={displayPath}
         className={cn(
-          "transition-opacity duration-300 ease-out",
-          visible && !navigating ? "opacity-100" : "opacity-0"
+          "transition-opacity duration-200 ease-out",
+          visible && !navigating && !pending ? "opacity-100" : "opacity-70"
         )}
       >
         {children}

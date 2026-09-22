@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { KeyRound, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -11,9 +12,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ROLE_LABELS } from "@/lib/cms/permissions/matrix";
 import { CMS_LOCALES } from "@/contexts/AdminContext";
 import type { CmsLocale, CmsRole, CmsUser } from "@/lib/cms/types";
+
+const ROLES: CmsRole[] = [
+  "super_admin",
+  "admin",
+  "content_manager",
+  "marketplace_manager",
+  "sales_manager",
+  "hr_manager",
+  "viewer",
+];
 
 type DraftUser = {
   id?: string;
@@ -27,6 +37,9 @@ type DraftUser = {
 };
 
 export default function UsersPage() {
+  const t = useTranslations("admin.users");
+  const tCommon = useTranslations("admin.common");
+  const tRoles = useTranslations("admin.roles");
   const [users, setUsers] = useState<CmsUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -44,18 +57,18 @@ export default function UsersPage() {
           error?: string;
         };
         if (!res.ok) {
-          throw new Error(data.error || "Failed to load users");
+          throw new Error(data.error || t("loadFailed"));
         }
       setUsers(data.users ?? []);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to load users";
+        error instanceof Error ? error.message : t("loadFailed");
       setLoadError(message);
       toast.error(message);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void loadUsers();
@@ -91,7 +104,7 @@ export default function UsersPage() {
   const handleSave = async () => {
     if (!editing) return;
     if (!editing.name.trim() || !editing.email.trim()) {
-      toast.error("Name and email are required");
+      toast.error(t("nameEmailRequired"));
       return;
     }
 
@@ -114,11 +127,11 @@ export default function UsersPage() {
           error?: string;
           temporaryPassword?: string;
         };
-        if (!res.ok) throw new Error(data.error || "Failed to create user");
+        if (!res.ok) throw new Error(data.error || t("createFailed"));
         toast.success(
           data.temporaryPassword
-            ? `User created. Temporary password: ${data.temporaryPassword}`
-            : "User created."
+            ? t("createdWithPassword", { password: data.temporaryPassword })
+            : t("created")
         );
       } else if (editing.id) {
         const res = await fetch(`/api/cms/users/${editing.id}`, {
@@ -134,25 +147,21 @@ export default function UsersPage() {
           }),
         });
         const data = (await res.json()) as { error?: string };
-        if (!res.ok) throw new Error(data.error || "Failed to update user");
-        toast.success("User updated");
+        if (!res.ok) throw new Error(data.error || t("updateFailed"));
+        toast.success(t("updated"));
       }
 
       setDrawerOpen(false);
       await loadUsers();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Save failed");
+      toast.error(error instanceof Error ? error.message : t("saveFailed"));
     } finally {
       setSaving(false);
     }
   };
 
   const handleResetPassword = async (user: CmsUser) => {
-    if (
-      !confirm(
-        `Generate a new temporary password for ${user.email}? They will be asked to change it on next login.`
-      )
-    ) {
+    if (!confirm(t("resetConfirm", { email: user.email }))) {
       return;
     }
 
@@ -163,47 +172,47 @@ export default function UsersPage() {
         body: JSON.stringify({}),
       });
       const data = (await res.json()) as { error?: string; password?: string };
-      if (!res.ok) throw new Error(data.error || "Failed to reset password");
+      if (!res.ok) throw new Error(data.error || t("resetFailed"));
       toast.success(
         data.password
-          ? `Password reset to ${data.password}`
-          : "Password reset"
+          ? t("resetToPassword", { password: data.password })
+          : t("resetSuccess")
       );
       await loadUsers();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Reset failed");
+      toast.error(error instanceof Error ? error.message : t("resetActionFailed"));
     }
   };
 
   const handleDelete = async (user: CmsUser) => {
-    if (!confirm(`Delete user ${user.email}? This cannot be undone.`)) return;
+    if (!confirm(t("deleteConfirm", { email: user.email }))) return;
 
     try {
       const res = await fetch(`/api/cms/users/${user.id}`, { method: "DELETE" });
       const data = (await res.json()) as { error?: string };
-      if (!res.ok) throw new Error(data.error || "Failed to delete user");
-      toast.success("User deleted");
+      if (!res.ok) throw new Error(data.error || t("deleteFailed"));
+      toast.success(t("deleted"));
       await loadUsers();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Delete failed");
+      toast.error(error instanceof Error ? error.message : t("deleteActionFailed"));
     }
   };
 
   const columns = useMemo(
     () => [
-      { key: "name", header: "Name", sortable: true, cell: (r: CmsUser) => r.name },
-      { key: "email", header: "Email", cell: (r: CmsUser) => r.email },
-      { key: "role", header: "Role", cell: (r: CmsUser) => ROLE_LABELS[r.role] },
+      { key: "name", header: tCommon("name"), sortable: true, cell: (r: CmsUser) => r.name },
+      { key: "email", header: tCommon("email"), cell: (r: CmsUser) => r.email },
+      { key: "role", header: tCommon("role"), cell: (r: CmsUser) => tRoles(r.role) },
       {
         key: "status",
-        header: "Status",
+        header: tCommon("status"),
         cell: (r: CmsUser) => (
           <div className="flex flex-wrap gap-1">
             <Badge variant={r.status === "active" ? "default" : "secondary"}>
-              {r.status}
+              {r.status === "active" ? tCommon("active") : tCommon("inactive")}
             </Badge>
             {r.mustChangePassword ? (
-              <Badge variant="outline">Must change password</Badge>
+              <Badge variant="outline">{t("mustChangePassword")}</Badge>
             ) : null}
           </div>
         ),
@@ -215,7 +224,7 @@ export default function UsersPage() {
           <div className="flex items-center gap-1">
             <button
               type="button"
-              title="Edit"
+              title={tCommon("edit")}
               onClick={() => openEdit(r)}
               className="rounded p-1 hover:bg-muted"
             >
@@ -223,7 +232,7 @@ export default function UsersPage() {
             </button>
             <button
               type="button"
-              title="Reset password"
+              title={t("resetPassword")}
               onClick={() => void handleResetPassword(r)}
               className="rounded p-1 hover:bg-muted"
             >
@@ -231,27 +240,27 @@ export default function UsersPage() {
             </button>
             <button
               type="button"
-              title="Delete"
+              title={tCommon("delete")}
               onClick={() => void handleDelete(r)}
               className="rounded p-1 text-destructive hover:bg-muted"
             >
               <Trash2 className="size-3.5" />
             </button>
             <Link href={`/admin/users/${r.id}`} className="text-xs text-oboya-green">
-              View
+              {tCommon("view")}
             </Link>
           </div>
         ),
       },
     ],
-    []
+    [t, tCommon, tRoles]
   );
 
   return (
     <div>
       <AdminPageHeader
-        title="Users"
-        description="Manage admin accounts, roles, passwords and access."
+        title={t("title")}
+        description={t("description")}
         actions={
           <button
             type="button"
@@ -262,23 +271,21 @@ export default function UsersPage() {
             })}
           >
             <Plus className="size-4" />
-            Add user
+            {t("addUser")}
           </button>
         }
       />
 
-      {loading ? (
-        <p className="text-sm text-muted-foreground">Loading users…</p>
-      ) : loadError ? (
+      {loading ? null : loadError ? (
         <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-          <p className="font-medium">Could not load users</p>
+          <p className="font-medium">{t("loadErrorTitle")}</p>
           <p className="mt-1 text-destructive/90">{loadError}</p>
           <button
             type="button"
             className="mt-3 text-oboya-green underline"
             onClick={() => void loadUsers()}
           >
-            Retry
+            {tCommon("retry")}
           </button>
         </div>
       ) : (
@@ -288,14 +295,14 @@ export default function UsersPage() {
       <FormDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        title={editing?.isNew ? "New user" : editing?.name || "Edit user"}
+        title={editing?.isNew ? t("newUser") : editing?.name || t("editUser")}
         footer={
           <Button
             onClick={() => void handleSave()}
             disabled={saving}
             className="rounded-full bg-oboya-green"
           >
-            {saving ? "Saving…" : "Save user"}
+            {saving ? tCommon("saving") : t("saveUser")}
           </Button>
         }
       >
@@ -303,19 +310,18 @@ export default function UsersPage() {
           <div className="space-y-4">
             {editing.isNew && (
               <p className="rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
-                New users receive a one-time temporary password after save and
-                must change it on first login.
+                {t("newUserHint")}
               </p>
             )}
             <div className="space-y-1.5">
-              <Label>Name</Label>
+              <Label>{tCommon("name")}</Label>
               <Input
                 value={editing.name}
                 onChange={(e) => setEditing({ ...editing, name: e.target.value })}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Email</Label>
+              <Label>{tCommon("email")}</Label>
               <Input
                 type="email"
                 value={editing.email}
@@ -323,7 +329,7 @@ export default function UsersPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Job title</Label>
+              <Label>{tCommon("jobTitle")}</Label>
               <Input
                 value={editing.jobTitle}
                 onChange={(e) =>
@@ -332,7 +338,7 @@ export default function UsersPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Role</Label>
+              <Label>{tCommon("role")}</Label>
               <select
                 value={editing.role}
                 onChange={(e) =>
@@ -340,15 +346,15 @@ export default function UsersPage() {
                 }
                 className="h-8 w-full rounded-lg border border-input px-2.5 text-sm"
               >
-                {Object.entries(ROLE_LABELS).map(([k, v]) => (
-                  <option key={k} value={k}>
-                    {v}
+                {ROLES.map((role) => (
+                  <option key={role} value={role}>
+                    {tRoles(role)}
                   </option>
                 ))}
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label>Locale</Label>
+              <Label>{tCommon("locale")}</Label>
               <select
                 value={editing.locale}
                 onChange={(e) =>
@@ -367,7 +373,7 @@ export default function UsersPage() {
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label>Status</Label>
+              <Label>{tCommon("status")}</Label>
               <select
                 value={editing.status}
                 onChange={(e) =>
@@ -378,8 +384,8 @@ export default function UsersPage() {
                 }
                 className="h-8 w-full rounded-lg border border-input px-2.5 text-sm"
               >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="active">{tCommon("active")}</option>
+                <option value="inactive">{tCommon("inactive")}</option>
               </select>
             </div>
           </div>

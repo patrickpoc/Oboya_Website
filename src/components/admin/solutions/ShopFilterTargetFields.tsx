@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import type { ShopFilterTarget } from "@/lib/solutions/types";
 import type { ShopBrand, ShopCategory, ShopFilterOptions } from "@/lib/shop/types";
 import { Label } from "@/components/ui/label";
@@ -74,6 +75,9 @@ export function ShopFilterTargetFields({
   brands,
   className,
 }: ShopFilterTargetFieldsProps) {
+  const t = useTranslations("admin.website.solutions");
+  const tTax = useTranslations("admin.taxonomy");
+
   const subcategoryOptions = useMemo(() => {
     return categories.flatMap((category) =>
       category.subcategories.map((sub) => ({
@@ -85,25 +89,22 @@ export function ShopFilterTargetFields({
 
   return (
     <div className={cn("space-y-4 rounded-lg border border-border/60 p-3", className)}>
-      <p className="text-xs text-muted-foreground">
-        Shop filters applied when this item is clicked. Crop filters and banner
-        filters are combined.
-      </p>
+      <p className="text-xs text-muted-foreground">{t("shopFilterHint")}</p>
 
       <div className="space-y-1.5">
-        <Label htmlFor="shop-q">Search query (optional)</Label>
+        <Label htmlFor="shop-q">{t("searchQueryOptional")}</Label>
         <Input
           id="shop-q"
           value={value.q ?? ""}
           onChange={(event) =>
             onChange({ ...value, q: event.target.value || undefined })
           }
-          placeholder="e.g. trays"
+          placeholder={t("searchQueryPlaceholder")}
         />
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="shop-category">Category</Label>
+        <Label htmlFor="shop-category">{tTax("category")}</Label>
         <select
           id="shop-category"
           className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-sm"
@@ -115,7 +116,7 @@ export function ShopFilterTargetFields({
             })
           }
         >
-          <option value="">Any category</option>
+          <option value="">{t("anyCategory")}</option>
           {categories.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
@@ -125,7 +126,7 @@ export function ShopFilterTargetFields({
       </div>
 
       <OptionChecklist
-        title="Cultures / Crops"
+        title={t("culturesCrops")}
         options={filterOptions.cultures ?? []}
         selected={value.cultures ?? []}
         onToggle={(id) =>
@@ -134,7 +135,7 @@ export function ShopFilterTargetFields({
       />
 
       <OptionChecklist
-        title="Applications / Stages"
+        title={t("applicationsStages")}
         options={filterOptions.applications ?? []}
         selected={value.applications ?? []}
         onToggle={(id) =>
@@ -146,7 +147,7 @@ export function ShopFilterTargetFields({
       />
 
       <OptionChecklist
-        title="Certifications"
+        title={tTax("certifications")}
         options={filterOptions.certifications ?? []}
         selected={value.certifications ?? []}
         onToggle={(id) =>
@@ -158,7 +159,7 @@ export function ShopFilterTargetFields({
       />
 
       <OptionChecklist
-        title="Subcategories"
+        title={t("subcategories")}
         options={subcategoryOptions}
         selected={value.subcategoryIds ?? []}
         onToggle={(id) =>
@@ -170,7 +171,7 @@ export function ShopFilterTargetFields({
       />
 
       <OptionChecklist
-        title="Brands"
+        title={t("brands")}
         options={brands}
         selected={value.brandIds ?? []}
         onToggle={(id) =>
@@ -179,7 +180,7 @@ export function ShopFilterTargetFields({
       />
 
       <OptionChecklist
-        title="Country of manufacture"
+        title={t("countryOfManufacture")}
         options={filterOptions.countriesOfOrigin ?? []}
         selected={value.countriesOfOrigin ?? []}
         onToggle={(id) =>

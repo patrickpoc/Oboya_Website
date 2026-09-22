@@ -436,7 +436,8 @@ export default function MarketplaceFiltersPage() {
   if (loading) {
     return (
       <Can module="marketplace" action="view" fallback={<p className="text-sm text-muted-foreground">{tCommon("accessDenied")}</p>}>
-        <AdminPageHeader title={t("title")} description={tCommon("loading")} />
+        <AdminPageHeader title={t("title")} description={t("description")} />
+        <div className="min-h-[40vh]" aria-hidden />
       </Can>
     );
   }

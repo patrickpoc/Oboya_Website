@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,8 +11,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { ShopCountry } from "@/lib/shop/types";
+import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
 
 export default function Page() {
+  const t = useTranslations("admin.currencies");
+  const tCommon = useTranslations("admin.common");
   const [countries, setCountries] = useState<ShopCountry[]>([]);
   const [currencies, setCurrencies] = useState<string[]>([]);
   const [newCurrency, setNewCurrency] = useState("");
@@ -21,15 +25,15 @@ export default function Page() {
     void (async () => {
       try {
         const response = await fetch("/api/cms/marketplace/currencies", { cache: "no-store" });
-        if (!response.ok) throw new Error("Could not load currencies.");
+        if (!response.ok) throw new Error(t("loadFailed"));
         const payload = (await response.json()) as { countries: ShopCountry[]; currencies: string[] };
         setCountries(payload.countries);
         setCurrencies(payload.currencies);
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Could not load currencies.");
+        toast.error(error instanceof Error ? error.message : t("loadFailed"));
       }
     })();
-  }, []);
+  }, [t]);
 
   const currencySet = useMemo(() => new Set(currencies), [currencies]);
 
@@ -42,34 +46,34 @@ export default function Page() {
         body: JSON.stringify({ countries, currencies }),
       });
       const payload = (await response.json().catch(() => null)) as { error?: string } | null;
-      if (!response.ok) throw new Error(payload?.error ?? "Could not save currencies");
-      toast.success("Currencies saved.");
+      if (!response.ok) throw new Error(payload?.error ?? t("saveFailed"));
+      toast.success(t("saved"));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save currencies.");
+      toast.error(error instanceof Error ? error.message : t("saveFailed"));
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <Can module="marketplace" action="view" fallback={<p className="text-sm text-muted-foreground">Access denied.</p>}>
+    <Can module="marketplace" action="view" fallback={<AccessDenied />}>
       <AdminPageHeader
-        title="Currencies"
-        description="Create/edit currencies, connect them to countries, and reflect availability in product pricing."
+        title={t("title")}
+        description={t("description")}
         actions={
           <Button
             onClick={() => void save()}
             className="rounded-full bg-oboya-green text-white hover:bg-oboya-green/90"
             disabled={saving}
           >
-            {saving ? "Saving..." : "Save currencies"}
+            {saving ? tCommon("saving") : t("saveCurrencies")}
           </Button>
         }
       />
       <Card>
         <CardContent className="space-y-6 py-6">
           <div className="rounded-lg border border-border/60 p-4">
-            <p className="mb-2 text-sm font-semibold">Currency registry</p>
+            <p className="mb-2 text-sm font-semibold">{t("registry")}</p>
             <div className="mb-3 flex flex-wrap gap-2">
               {currencies.map((code) => (
                 <div key={code} className="flex items-center gap-2 rounded-full border border-border px-3 py-1 text-sm">
@@ -95,7 +99,7 @@ export default function Page() {
                     }}
                     className="h-6 px-1 text-xs text-destructive"
                   >
-                    remove
+                    {tCommon("remove")}
                   </Button>
                 </div>
               ))}
@@ -104,7 +108,7 @@ export default function Page() {
               <Input
                 value={newCurrency}
                 onChange={(event) => setNewCurrency(event.target.value.toUpperCase())}
-                placeholder="Add currency code (e.g. GBP)"
+                placeholder={t("addPlaceholder")}
                 maxLength={6}
               />
               <Button
@@ -112,24 +116,24 @@ export default function Page() {
                 onClick={() => {
                   const code = newCurrency.trim().toUpperCase();
                   if (!/^[A-Z]{3,6}$/.test(code)) {
-                    toast.error("Currency code must have 3-6 uppercase letters.");
+                    toast.error(t("invalidCode"));
                     return;
                   }
                   if (currencySet.has(code)) {
-                    toast.error("This currency already exists.");
+                    toast.error(t("alreadyExists"));
                     return;
                   }
                   setCurrencies([...currencies, code]);
                   setNewCurrency("");
                 }}
               >
-                Add
+                {tCommon("add")}
               </Button>
             </div>
           </div>
 
           <div className="rounded-lg border border-border/60 p-4">
-            <p className="mb-3 text-sm font-semibold">Country currency mapping</p>
+            <p className="mb-3 text-sm font-semibold">{t("mapping")}</p>
             <div className="space-y-3">
               {countries.map((country, countryIndex) => (
                 <div key={country.code} className="rounded-md border border-border/60 p-3">
@@ -138,7 +142,7 @@ export default function Page() {
                   </p>
                   <div className="mt-2 grid gap-2 md:grid-cols-2">
                     <div>
-                      <p className="mb-1 text-xs text-muted-foreground">Allowed currencies</p>
+                      <p className="mb-1 text-xs text-muted-foreground">{t("allowed")}</p>
                       <div className="flex flex-wrap gap-2">
                         {currencies.map((code) => {
                           const enabled = country.currencies.includes(code);
@@ -162,7 +166,7 @@ export default function Page() {
                                   };
                                   setCountries(nextCountries);
                                 }}
-                                aria-label={`Toggle ${code} for ${country.name}`}
+                                aria-label={t("toggleAria", { code, country: country.name })}
                               />
                               {code}
                             </label>
@@ -171,7 +175,7 @@ export default function Page() {
                       </div>
                     </div>
                     <div>
-                      <p className="mb-1 text-xs text-muted-foreground">Default currency</p>
+                      <p className="mb-1 text-xs text-muted-foreground">{t("defaultCurrency")}</p>
                       <Select
                         value={country.defaultCurrency}
                         onValueChange={(nextValue) => {
@@ -185,7 +189,7 @@ export default function Page() {
                         }}
                       >
                         <SelectTrigger className="h-9 w-full">
-                          <SelectValue placeholder="Select currency" />
+                          <SelectValue placeholder={t("selectCurrency")} />
                         </SelectTrigger>
                         <SelectContent>
                           {country.currencies.map((code) => (

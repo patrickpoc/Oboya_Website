@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,11 +11,23 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ROLE_LABELS } from "@/lib/cms/permissions/matrix";
 import { CMS_LOCALES } from "@/contexts/AdminContext";
 import type { CmsLocale, CmsRole, CmsUser } from "@/lib/cms/types";
 
+const ROLES: CmsRole[] = [
+  "super_admin",
+  "admin",
+  "content_manager",
+  "marketplace_manager",
+  "sales_manager",
+  "hr_manager",
+  "viewer",
+];
+
 export default function UserDetailPage() {
+  const t = useTranslations("admin.users");
+  const tCommon = useTranslations("admin.common");
+  const tRoles = useTranslations("admin.roles");
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
@@ -35,8 +48,8 @@ export default function UserDetailPage() {
     try {
       const res = await fetch(`/api/cms/users/${id}`);
       const data = (await res.json()) as { user?: CmsUser; error?: string };
-      if (!res.ok) throw new Error(data.error || "User not found");
-      if (!data.user) throw new Error("User not found");
+      if (!res.ok) throw new Error(data.error || t("notFound"));
+      if (!data.user) throw new Error(t("notFound"));
       setUser(data.user);
       setName(data.user.name);
       setEmail(data.user.email);
@@ -45,12 +58,12 @@ export default function UserDetailPage() {
       setLocale(data.user.locale);
       setStatus(data.user.status);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to load user");
+      toast.error(error instanceof Error ? error.message : t("loadUserFailed"));
       setUser(null);
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     void loadUser();
@@ -72,11 +85,11 @@ export default function UserDetailPage() {
         }),
       });
       const data = (await res.json()) as { user?: CmsUser; error?: string };
-      if (!res.ok) throw new Error(data.error || "Failed to update");
+      if (!res.ok) throw new Error(data.error || t("updateFailedShort"));
       if (data.user) setUser(data.user);
-      toast.success("User updated");
+      toast.success(t("updated"));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Update failed");
+      toast.error(error instanceof Error ? error.message : t("updateActionFailed"));
     } finally {
       setSaving(false);
     }
@@ -90,39 +103,39 @@ export default function UserDetailPage() {
         body: JSON.stringify(password ? { password } : {}),
       });
       const data = (await res.json()) as { error?: string; password?: string };
-      if (!res.ok) throw new Error(data.error || "Failed to reset password");
+      if (!res.ok) throw new Error(data.error || t("resetFailed"));
       toast.success(
         data.password
-          ? `Password set to ${data.password}. User must change it on next login.`
-          : "Password reset. User must change it on next login."
+          ? t("passwordSetTo", { password: data.password })
+          : t("passwordResetMustChange")
       );
       setCustomPassword("");
       await loadUser();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Reset failed");
+      toast.error(error instanceof Error ? error.message : t("resetActionFailed"));
     }
   };
 
   const handleDelete = async () => {
     if (!user) return;
-    if (!confirm(`Delete ${user.email}? This cannot be undone.`)) return;
+    if (!confirm(t("deleteConfirmShort", { email: user.email }))) return;
     try {
       const res = await fetch(`/api/cms/users/${id}`, { method: "DELETE" });
       const data = (await res.json()) as { error?: string };
-      if (!res.ok) throw new Error(data.error || "Failed to delete");
-      toast.success("User deleted");
+      if (!res.ok) throw new Error(data.error || t("deleteFailed"));
+      toast.success(t("deleted"));
       router.push("/admin/users");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Delete failed");
+      toast.error(error instanceof Error ? error.message : t("deleteActionFailed"));
     }
   };
 
   if (loading) {
-    return <p className="text-muted-foreground">Loading…</p>;
+    return <div className="min-h-[40vh]" aria-hidden />;
   }
 
   if (!user) {
-    return <p className="text-muted-foreground">User not found.</p>;
+    return <p className="text-muted-foreground">{t("notFoundPeriod")}</p>;
   }
 
   return (
@@ -138,7 +151,7 @@ export default function UserDetailPage() {
               className: "rounded-full",
             })}
           >
-            Back to users
+            {t("backToUsers")}
           </Link>
         }
       />
@@ -146,25 +159,25 @@ export default function UserDetailPage() {
       <div className="grid max-w-2xl gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Account details</CardTitle>
+            <CardTitle>{t("accountDetails")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-2">
-              <Badge>{ROLE_LABELS[user.role]}</Badge>
+              <Badge>{tRoles(user.role)}</Badge>
               <Badge variant={user.status === "active" ? "default" : "secondary"}>
-                {user.status}
+                {user.status === "active" ? tCommon("active") : tCommon("inactive")}
               </Badge>
               {user.mustChangePassword ? (
-                <Badge variant="outline">Must change password</Badge>
+                <Badge variant="outline">{t("mustChangePassword")}</Badge>
               ) : null}
             </div>
 
             <div className="space-y-1.5">
-              <Label>Name</Label>
+              <Label>{tCommon("name")}</Label>
               <Input value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label>Email</Label>
+              <Label>{tCommon("email")}</Label>
               <Input
                 type="email"
                 value={email}
@@ -172,28 +185,28 @@ export default function UserDetailPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Job title</Label>
+              <Label>{tCommon("jobTitle")}</Label>
               <Input
                 value={jobTitle}
                 onChange={(e) => setJobTitle(e.target.value)}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Role</Label>
+              <Label>{tCommon("role")}</Label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value as CmsRole)}
                 className="h-8 w-full rounded-lg border border-input px-2.5 text-sm"
               >
-                {Object.entries(ROLE_LABELS).map(([k, v]) => (
-                  <option key={k} value={k}>
-                    {v}
+                {ROLES.map((r) => (
+                  <option key={r} value={r}>
+                    {tRoles(r)}
                   </option>
                 ))}
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label>Locale</Label>
+              <Label>{tCommon("locale")}</Label>
               <select
                 value={locale}
                 onChange={(e) => setLocale(e.target.value as CmsLocale)}
@@ -207,7 +220,7 @@ export default function UserDetailPage() {
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label>Status</Label>
+              <Label>{tCommon("status")}</Label>
               <select
                 value={status}
                 onChange={(e) =>
@@ -215,8 +228,8 @@ export default function UserDetailPage() {
                 }
                 className="h-8 w-full rounded-lg border border-input px-2.5 text-sm"
               >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="active">{tCommon("active")}</option>
+                <option value="inactive">{tCommon("inactive")}</option>
               </select>
             </div>
 
@@ -225,19 +238,18 @@ export default function UserDetailPage() {
               disabled={saving}
               className="rounded-full bg-oboya-green"
             >
-              {saving ? "Saving…" : "Save changes"}
+              {saving ? tCommon("saving") : t("saveChanges")}
             </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Password</CardTitle>
+            <CardTitle>{t("passwordSection")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Generate a one-time temporary password or set a custom one. The
-              user must change it on next login.
+              {t("passwordHint")}
             </p>
             <Button
               type="button"
@@ -245,10 +257,10 @@ export default function UserDetailPage() {
               className="rounded-full"
               onClick={() => void handleResetPassword()}
             >
-              Generate temporary password
+              {t("generateTempPassword")}
             </Button>
             <div className="space-y-1.5">
-              <Label>Custom temporary password</Label>
+              <Label>{t("customTempPassword")}</Label>
               <Input
                 type="password"
                 value={customPassword}
@@ -262,14 +274,14 @@ export default function UserDetailPage() {
               disabled={customPassword.length < 8}
               onClick={() => void handleResetPassword(customPassword)}
             >
-              Set custom password
+              {t("setCustomPassword")}
             </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Danger zone</CardTitle>
+            <CardTitle>{t("dangerZone")}</CardTitle>
           </CardHeader>
           <CardContent>
             <Button
@@ -278,7 +290,7 @@ export default function UserDetailPage() {
               className="rounded-full"
               onClick={() => void handleDelete()}
             >
-              Delete user
+              {t("deleteUser")}
             </Button>
           </CardContent>
         </Card>

@@ -41,6 +41,7 @@ import {
   createEmptyColorVariant,
   normalizeLocalizedColorName,
 } from "@/lib/shop/color-variants";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 interface ProductColorVariantsCardProps {
@@ -67,6 +68,8 @@ export function ProductColorVariantsCard({
   currenciesLoading = false,
   onUpdate,
 }: ProductColorVariantsCardProps) {
+  const t = useTranslations("admin.products.editor");
+  const tProducts = useTranslations("admin.products");
   const imageUploadRef = useRef<HTMLInputElement>(null);
   const [uploadVariantId, setUploadVariantId] = useState<string | null>(null);
   const [libraryOpen, setLibraryOpen] = useState(false);
@@ -178,9 +181,9 @@ export function ProductColorVariantsCard({
         });
         saveMediaAsset(asset);
         updateVariant(variantId, { image: asset.url });
-        toast.success("Variant image uploaded");
+        toast.success(t("variantImageUploaded"));
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Upload failed");
+        toast.error(error instanceof Error ? error.message : tProducts("uploadFailed"));
       }
     })();
   };
@@ -188,12 +191,8 @@ export function ProductColorVariantsCard({
   return (
     <Card>
       <CardHeader className="pb-4">
-        <CardTitle>Color variations</CardTitle>
-        <CardDescription>
-          The product default color is always the first swatch in the shop.
-          Additional colors appear after it. Leave additional colors empty for
-          products without options.
-        </CardDescription>
+        <CardTitle>{t("colorsTitle")}</CardTitle>
+        <CardDescription>{t("colorsDescription")}</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -224,18 +223,17 @@ export function ProductColorVariantsCard({
             />
             <div>
               <p className="text-sm font-semibold text-oboya-blue-dark">
-                Default product color
+                {t("defaultProductColor")}
               </p>
               <p className="text-xs text-muted-foreground">
-                Uses the product gallery image, base prices, and product SKU.
-                Shown first when additional colors exist.
+                {t("defaultProductColorHint")}
               </p>
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="default-color-hex">Swatch color</Label>
+              <Label htmlFor="default-color-hex">{t("swatchColor")}</Label>
               <ColorHexField
                 id="default-color-hex"
                 value={product.defaultColor ?? ""}
@@ -248,7 +246,7 @@ export function ProductColorVariantsCard({
 
           <div className="mt-4">
             <LocalizedFieldGrid
-              label="Default color name"
+              label={t("defaultColorName")}
               value={defaultColorName}
               onChange={(locale: CmsLocale, nextValue: string) => {
                 const next = { ...defaultColorName, [locale]: nextValue };
@@ -256,27 +254,22 @@ export function ProductColorVariantsCard({
                   defaultColorName: next,
                 });
               }}
-              placeholder="e.g. Black / Preto"
+              placeholder={t("defaultColorNamePlaceholder")}
             />
             <p className="mt-2 text-xs text-muted-foreground">
-              Default color SKU:{" "}
-              <span className="font-medium text-oboya-blue-dark">
-                {product.sku || "—"}
-              </span>{" "}
-              (from product registration)
+              {t("defaultColorSku", { sku: product.sku || "—" })}
             </p>
           </div>
         </div>
 
         {variants.length === 0 ? (
           <p className="rounded-lg border border-dashed border-border/70 bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
-            No additional colors yet. Add colors (e.g. Terracotta) to appear
-            after the default swatch.
+            {t("noAdditionalColors")}
           </p>
         ) : (
           <div className="space-y-4">
             <p className="text-sm font-medium text-oboya-blue-dark">
-              Additional colors
+              {t("additionalColors")}
             </p>
             {variants.map((variant, index) => {
               const nameI18n = toLocalizedString(
@@ -301,7 +294,7 @@ export function ProductColorVariantsCard({
                           size="icon-sm"
                           disabled={index === 0}
                           onClick={() => moveVariant(variant.id, -1)}
-                          aria-label="Move color up"
+                          aria-label={t("moveColorUp")}
                         >
                           <ArrowUp className="size-4" />
                         </Button>
@@ -311,7 +304,7 @@ export function ProductColorVariantsCard({
                           size="icon-sm"
                           disabled={index === variants.length - 1}
                           onClick={() => moveVariant(variant.id, 1)}
-                          aria-label="Move color down"
+                          aria-label={t("moveColorDown")}
                         >
                           <ArrowDown className="size-4" />
                         </Button>
@@ -321,7 +314,7 @@ export function ProductColorVariantsCard({
                     <div className="min-w-0 flex-1 space-y-3">
                       <div className="grid gap-3 sm:grid-cols-2">
                         <div className="space-y-1.5">
-                          <Label htmlFor={`color-sku-${variant.id}`}>SKU</Label>
+                          <Label htmlFor={`color-sku-${variant.id}`}>{t("sku")}</Label>
                           <Input
                             id={`color-sku-${variant.id}`}
                             value={variant.sku ?? ""}
@@ -335,7 +328,7 @@ export function ProductColorVariantsCard({
                         </div>
                         <div className="space-y-1.5">
                           <Label htmlFor={`color-hex-${variant.id}`}>
-                            Swatch color
+                            {t("swatchColor")}
                           </Label>
                           <ColorHexField
                             id={`color-hex-${variant.id}`}
@@ -356,7 +349,7 @@ export function ProductColorVariantsCard({
                       size="icon-sm"
                       className="text-destructive hover:text-destructive"
                       onClick={() => removeVariant(variant.id)}
-                      aria-label={`Remove ${variant.name || "color"}`}
+                      aria-label={t("removeColor", { name: variant.name || t("colorFallback") })}
                     >
                       <Trash2 className="size-4" />
                     </Button>
@@ -364,7 +357,7 @@ export function ProductColorVariantsCard({
 
                   <div className="mt-4">
                     <LocalizedFieldGrid
-                      label="Color name"
+                      label={t("colorName")}
                       value={nameI18n}
                       onChange={(locale: CmsLocale, nextValue: string) => {
                         const next = { ...nameI18n, [locale]: nextValue };
@@ -373,18 +366,18 @@ export function ProductColorVariantsCard({
                           name: next.en || nextValue,
                         });
                       }}
-                      placeholder="e.g. Terracotta"
+                      placeholder={t("colorNamePlaceholder")}
                     />
                   </div>
 
                   <div className="mt-4 grid gap-4 lg:grid-cols-[11rem_1fr]">
                     <div className="space-y-2">
-                      <Label>Product image</Label>
+                      <Label>{t("productImage")}</Label>
                       <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-border/60 bg-white">
                         {variant.image ? (
                           <Image
                             src={variant.image}
-                            alt={variant.name || "Color variant"}
+                            alt={variant.name || t("colorVariantAlt")}
                             fill
                             className="object-cover"
                             sizes="176px"
@@ -403,7 +396,7 @@ export function ProductColorVariantsCard({
                           onClick={() => openImageUpload(variant.id)}
                         >
                           <Upload className="size-3.5" />
-                          Upload
+                          {tProducts("upload")}
                         </Button>
                         <Button
                           type="button"
@@ -411,7 +404,7 @@ export function ProductColorVariantsCard({
                           size="sm"
                           onClick={() => openMediaLibrary(variant.id)}
                         >
-                          Library
+                          {tProducts("library")}
                         </Button>
                       </div>
                       <Input
@@ -421,20 +414,20 @@ export function ProductColorVariantsCard({
                             image: event.target.value,
                           })
                         }
-                        placeholder="Image URL"
+                        placeholder={t("imageUrl")}
                         className="text-xs"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Prices</Label>
+                      <Label>{t("prices")}</Label>
                       {currenciesLoading ? (
                         <p className="text-sm text-muted-foreground">
-                          Loading currencies…
+                          {t("loadingCurrencies")}
                         </p>
                       ) : currencies.length === 0 ? (
                         <p className="text-sm text-muted-foreground">
-                          Configure currencies in Marketplace → Currencies.
+                          {t("configureCurrencies")}
                         </p>
                       ) : (
                         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -470,8 +463,7 @@ export function ProductColorVariantsCard({
                         </div>
                       )}
                       <p className="text-xs text-muted-foreground">
-                        Empty or 0 falls back to the product base price for that
-                        currency.
+                        {t("variantPriceFallback")}
                       </p>
                     </div>
                   </div>
@@ -483,7 +475,7 @@ export function ProductColorVariantsCard({
 
         <Button type="button" variant="outline" onClick={addVariant}>
           <Plus className="size-4" />
-          Add color
+          {t("addColor")}
         </Button>
 
         {libraryOpen ? (

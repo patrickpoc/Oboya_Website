@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import {
@@ -77,6 +78,8 @@ function AssetTagEditor({
   onSave: (tags: string[]) => void;
   onClose: () => void;
 }) {
+  const t = useTranslations("admin.media");
+  const tCommon = useTranslations("admin.common");
   const [tags, setTags] = useState<string[]>([...asset.tags]);
   const [newTag, setNewTag] = useState("");
 
@@ -93,7 +96,7 @@ function AssetTagEditor({
       <div className="w-full max-w-md rounded-xl bg-white p-5 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-oboya-blue-dark">
-            Edit Tags — {asset.name}
+            {t("editTagsTitle", { name: asset.name })}
           </h3>
           <button type="button" onClick={onClose} className="rounded-full p-1 hover:bg-muted">
             <X className="size-4 text-muted-foreground" />
@@ -113,7 +116,7 @@ function AssetTagEditor({
             </span>
           ))}
           {tags.length === 0 && (
-            <p className="text-xs text-muted-foreground">No tags yet</p>
+            <p className="text-xs text-muted-foreground">{t("noTagsYet")}</p>
           )}
         </div>
 
@@ -125,7 +128,7 @@ function AssetTagEditor({
             onKeyDown={(e) => {
               if (e.key === "Enter") { e.preventDefault(); addTag(newTag); }
             }}
-            placeholder="Add new tag..."
+            placeholder={t("addNewTag")}
             className="h-8 flex-1 rounded-lg border border-border px-3 text-sm focus:border-oboya-green focus:outline-none"
           />
           <button
@@ -134,13 +137,13 @@ function AssetTagEditor({
             disabled={!newTag.trim()}
             className={buttonVariants({ size: "sm", className: "h-8 rounded-lg bg-oboya-green text-white hover:bg-oboya-green/90" })}
           >
-            Add
+            {tCommon("add")}
           </button>
         </div>
 
         {allTags.length > 0 && (
           <div className="mb-4">
-            <p className="mb-1.5 text-[11px] font-medium text-muted-foreground uppercase">Existing tags</p>
+            <p className="mb-1.5 text-[11px] font-medium text-muted-foreground uppercase">{t("existingTags")}</p>
             <div className="flex flex-wrap gap-1">
               {allTags.filter((t) => !tags.includes(t)).map((tag) => (
                 <button
@@ -158,14 +161,14 @@ function AssetTagEditor({
 
         <div className="flex justify-end gap-2">
           <button type="button" onClick={onClose} className={buttonVariants({ variant: "outline", size: "sm", className: "rounded-lg" })}>
-            Cancel
+            {tCommon("cancel")}
           </button>
           <button
             type="button"
             onClick={() => { onSave(tags); onClose(); }}
             className={buttonVariants({ size: "sm", className: "rounded-lg bg-oboya-green text-white hover:bg-oboya-green/90" })}
           >
-            Save Tags
+            {t("saveTags")}
           </button>
         </div>
       </div>
@@ -186,6 +189,7 @@ function FolderContextMenu({
   onMoveTo: () => void;
   onClose: () => void;
 }) {
+  const t = useTranslations("admin.media");
   return (
     <>
       <div className="fixed inset-0 z-50" onClick={onClose} onContextMenu={(e) => { e.preventDefault(); onClose(); }} />
@@ -199,7 +203,7 @@ function FolderContextMenu({
           className="flex w-full items-center gap-2 px-3 py-2 text-sm text-oboya-blue-dark hover:bg-muted"
         >
           <Pencil className="size-3.5" />
-          Rename
+          {t("rename")}
         </button>
         <button
           type="button"
@@ -207,7 +211,7 @@ function FolderContextMenu({
           className="flex w-full items-center gap-2 px-3 py-2 text-sm text-oboya-blue-dark hover:bg-muted"
         >
           <FolderInput className="size-3.5" />
-          Move to...
+          {t("moveTo")}
         </button>
       </div>
     </>
@@ -223,24 +227,26 @@ function RenameFolderDialog({
   onConfirm: (name: string) => void;
   onClose: () => void;
 }) {
+  const t = useTranslations("admin.media");
+  const tCommon = useTranslations("admin.common");
   const [name, setName] = useState(currentName);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-oboya-blue-dark/30">
       <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-2xl">
-        <h3 className="mb-4 text-sm font-semibold text-oboya-blue-dark">Rename Folder</h3>
+        <h3 className="mb-4 text-sm font-semibold text-oboya-blue-dark">{t("renameFolder")}</h3>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) { onConfirm(name.trim()); onClose(); } }}
-          placeholder="Folder name..."
+          placeholder={t("folderNamePlaceholder")}
           className="mb-4 h-9 w-full rounded-lg border border-border px-3 text-sm focus:border-oboya-green focus:outline-none"
           autoFocus
         />
         <div className="flex justify-end gap-2">
           <button type="button" onClick={onClose} className={buttonVariants({ variant: "outline", size: "sm", className: "rounded-lg" })}>
-            Cancel
+            {tCommon("cancel")}
           </button>
           <button
             type="button"
@@ -248,7 +254,7 @@ function RenameFolderDialog({
             onClick={() => { onConfirm(name.trim()); onClose(); }}
             className={buttonVariants({ size: "sm", className: "rounded-lg bg-oboya-green text-white hover:bg-oboya-green/90" })}
           >
-            Rename
+            {t("rename")}
           </button>
         </div>
       </div>
@@ -265,6 +271,8 @@ function MoveToDialog({
   onConfirm: (targetId: string) => void;
   onClose: () => void;
 }) {
+  const t = useTranslations("admin.media");
+  const tCommon = useTranslations("admin.common");
   const allFolders = getMediaFolders();
   const targets = allFolders.filter((f) => f.id !== folderId);
 
@@ -281,8 +289,8 @@ function MoveToDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-oboya-blue-dark/30">
       <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-2xl">
-        <h3 className="mb-1 text-sm font-semibold text-oboya-blue-dark">Move Folder</h3>
-        <p className="mb-4 text-xs text-muted-foreground">Select the destination folder</p>
+        <h3 className="mb-1 text-sm font-semibold text-oboya-blue-dark">{t("moveFolder")}</h3>
+        <p className="mb-4 text-xs text-muted-foreground">{t("selectDestination")}</p>
         <div className="max-h-60 space-y-1 overflow-y-auto">
           {targets.map((folder) => (
             <button
@@ -298,7 +306,7 @@ function MoveToDialog({
         </div>
         <div className="mt-4 flex justify-end">
           <button type="button" onClick={onClose} className={buttonVariants({ variant: "outline", size: "sm", className: "rounded-lg" })}>
-            Cancel
+            {tCommon("cancel")}
           </button>
         </div>
       </div>
@@ -313,24 +321,26 @@ function NewFolderDialog({
   onConfirm: (name: string) => void;
   onClose: () => void;
 }) {
+  const t = useTranslations("admin.media");
+  const tCommon = useTranslations("admin.common");
   const [name, setName] = useState("");
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-oboya-blue-dark/30">
       <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-2xl">
-        <h3 className="mb-4 text-sm font-semibold text-oboya-blue-dark">New Folder</h3>
+        <h3 className="mb-4 text-sm font-semibold text-oboya-blue-dark">{t("newFolder")}</h3>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && name.trim()) { onConfirm(name.trim()); onClose(); } }}
-          placeholder="Folder name..."
+          placeholder={t("folderNamePlaceholder")}
           className="mb-4 h-9 w-full rounded-lg border border-border px-3 text-sm focus:border-oboya-green focus:outline-none"
           autoFocus
         />
         <div className="flex justify-end gap-2">
           <button type="button" onClick={onClose} className={buttonVariants({ variant: "outline", size: "sm", className: "rounded-lg" })}>
-            Cancel
+            {tCommon("cancel")}
           </button>
           <button
             type="button"
@@ -338,7 +348,7 @@ function NewFolderDialog({
             onClick={() => { onConfirm(name.trim()); onClose(); }}
             className={buttonVariants({ size: "sm", className: "rounded-lg bg-oboya-green text-white hover:bg-oboya-green/90" })}
           >
-            Create
+            {t("create")}
           </button>
         </div>
       </div>
@@ -347,6 +357,8 @@ function NewFolderDialog({
 }
 
 export default function MediaLibraryPage() {
+  const t = useTranslations("admin.media");
+  const tCommon = useTranslations("admin.common");
   const [currentFolderId, setCurrentFolderId] = useState<string>("folder-root");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -382,7 +394,7 @@ export default function MediaLibraryPage() {
           ready?: boolean;
         };
         if (!res.ok) {
-          throw new Error(data.error || "Could not load media library");
+          throw new Error(data.error || t("loadFailed"));
         }
         if (cancelled) return;
         replaceMediaAssetsCache(data.assets ?? []);
@@ -397,7 +409,7 @@ export default function MediaLibraryPage() {
         clearMediaAssetsCache();
         setLibraryVersion((n) => n + 1);
         const message =
-          error instanceof Error ? error.message : "Could not load media library";
+          error instanceof Error ? error.message : t("loadFailed");
         setLibraryError(message);
         toast.error(message);
       }
@@ -406,7 +418,7 @@ export default function MediaLibraryPage() {
     return () => {
       cancelled = true;
     };
-  }, [refresh]);
+  }, [refresh, t]);
 
   const handleUploadFiles = async (files: FileList | null) => {
     if (!files?.length) return;
@@ -423,8 +435,8 @@ export default function MediaLibraryPage() {
         } catch (error) {
           toast.error(
             error instanceof Error
-              ? `${file.name}: ${error.message}`
-              : `${file.name}: upload failed`
+              ? t("uploadFailedNamedReason", { name: file.name, reason: error.message })
+              : t("uploadFailedNamed", { name: file.name })
           );
         }
       }
@@ -440,7 +452,7 @@ export default function MediaLibraryPage() {
         }
         setLibraryVersion((n) => n + 1);
         refresh();
-        toast.success(ok === 1 ? "1 file uploaded" : `${ok} files uploaded`);
+        toast.success(ok === 1 ? t("oneFileUploaded") : t("filesUploaded", { count: ok }));
       }
     } finally {
       setUploading(false);
@@ -488,13 +500,13 @@ export default function MediaLibraryPage() {
         error?: string;
         folders?: MediaFolder[];
       };
-      if (!res.ok) throw new Error(data.error || "Failed to create folder");
+      if (!res.ok) throw new Error(data.error || t("folderCreateFailed"));
       if (data.folders) replaceMediaFoldersCache(data.folders);
       else createMediaFolder(name, currentFolderId);
       refresh();
-      toast.success("Folder created");
+      toast.success(t("folderCreated"));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to create folder");
+      toast.error(error instanceof Error ? error.message : t("folderCreateFailed"));
     }
   };
 
@@ -513,13 +525,13 @@ export default function MediaLibraryPage() {
         error?: string;
         folders?: MediaFolder[];
       };
-      if (!res.ok) throw new Error(data.error || "Failed to rename folder");
+      if (!res.ok) throw new Error(data.error || t("folderRenameFailed"));
       if (data.folders) replaceMediaFoldersCache(data.folders);
       else renameMediaFolder(id, name);
       refresh();
-      toast.success("Folder renamed");
+      toast.success(t("folderRenamed"));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to rename folder");
+      toast.error(error instanceof Error ? error.message : t("folderRenameFailed"));
     }
   };
 
@@ -538,13 +550,13 @@ export default function MediaLibraryPage() {
         error?: string;
         folders?: MediaFolder[];
       };
-      if (!res.ok) throw new Error(data.error || "Failed to move folder");
+      if (!res.ok) throw new Error(data.error || t("folderMoveFailed"));
       if (data.folders) replaceMediaFoldersCache(data.folders);
       else moveMediaFolder(id, targetId);
       refresh();
-      toast.success("Folder moved");
+      toast.success(t("folderMoved"));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to move folder");
+      toast.error(error instanceof Error ? error.message : t("folderMoveFailed"));
     }
   };
 
@@ -566,7 +578,7 @@ export default function MediaLibraryPage() {
           }),
         });
         const data = (await res.json()) as { error?: string; asset?: MediaAsset };
-        if (!res.ok) throw new Error(data.error ?? "Could not save tags");
+        if (!res.ok) throw new Error(data.error ?? t("tagsSaveFailed"));
         if (data.asset) {
           updateAssetTags(data.asset.id, data.asset.tags);
           saveMediaAsset(data.asset);
@@ -574,9 +586,9 @@ export default function MediaLibraryPage() {
           updateAssetTags(asset.id, tags);
         }
         refresh();
-        toast.success("Tags saved");
+        toast.success(t("tagsSaved"));
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Could not save tags");
+        toast.error(error instanceof Error ? error.message : t("tagsSaveFailed"));
       }
     })();
   };
@@ -587,11 +599,11 @@ export default function MediaLibraryPage() {
       asset.id.startsWith("used-") ||
       asset.url.startsWith("/assets/")
     ) {
-      toast.error("Site files in use can’t be removed from the library.");
+      toast.error(t("siteFilesProtected"));
       return;
     }
 
-    const confirmed = window.confirm(`Remove “${asset.name}”? This cannot be undone.`);
+    const confirmed = window.confirm(t("removeConfirm", { name: asset.name }));
     if (!confirmed) return;
 
     try {
@@ -601,21 +613,21 @@ export default function MediaLibraryPage() {
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
-        throw new Error(data.error ?? "Delete failed");
+        throw new Error(data.error ?? t("deleteFailed"));
       }
       deleteMediaAsset(asset.id);
       refresh();
-      toast.success("File removed");
+      toast.success(t("fileRemoved"));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not remove file");
+      toast.error(error instanceof Error ? error.message : t("removeFailed"));
     }
   };
 
   return (
     <div>
       <AdminPageHeader
-        title="Media Library"
-        description="Only assets in use on the site, plus recent uploads."
+        title={t("title")}
+        description={t("description")}
         actions={
           <div className="flex gap-2">
             <button
@@ -625,7 +637,7 @@ export default function MediaLibraryPage() {
               className={buttonVariants({ variant: "outline", className: "gap-1.5 rounded-full" })}
             >
               <FolderPlus className="size-4" />
-              New Folder
+              {t("newFolder")}
             </button>
             <input
               ref={fileInputRef}
@@ -644,7 +656,7 @@ export default function MediaLibraryPage() {
               className={buttonVariants({ className: "gap-1.5 rounded-full" })}
             >
               <Upload className="size-4" />
-              {uploading ? "Uploading…" : "Upload"}
+              {uploading ? t("uploading") : t("upload")}
             </button>
           </div>
         }
@@ -658,19 +670,19 @@ export default function MediaLibraryPage() {
         >
           <div className="size-8 animate-spin rounded-full border-2 border-oboya-green/25 border-t-oboya-green" />
           <p className="text-sm text-muted-foreground">
-            Loading media library…
+            {t("loading")}
           </p>
         </div>
       ) : libraryError ? (
         <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-sm text-destructive">
-          <p className="font-medium">Could not load media library</p>
+          <p className="font-medium">{t("loadFailed")}</p>
           <p className="mt-1 text-destructive/90">{libraryError}</p>
           <button
             type="button"
             className="mt-3 text-oboya-green underline"
             onClick={() => window.location.reload()}
           >
-            Retry
+            {t("retry")}
           </button>
         </div>
       ) : (
@@ -683,7 +695,7 @@ export default function MediaLibraryPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by name, tag or file type..."
+            placeholder={t("searchPlaceholder")}
             className="h-10 w-full rounded-xl border border-border bg-white pl-10 pr-4 text-sm shadow-sm transition-colors focus:border-oboya-green focus:outline-none"
           />
           {searchQuery && (
@@ -700,19 +712,25 @@ export default function MediaLibraryPage() {
 
       {/* Type filter tabs */}
       <div className="mb-3 flex gap-1.5">
-        {(["all", "image", "document", "video"] as const).map((t) => (
+        {(["all", "image", "document", "video"] as const).map((typeKey) => (
           <button
-            key={t}
+            key={typeKey}
             type="button"
-            onClick={() => setTypeFilter(t)}
+            onClick={() => setTypeFilter(typeKey)}
             className={cn(
               "rounded-lg px-3 py-1.5 text-xs font-medium capitalize transition-colors",
-              typeFilter === t
+              typeFilter === typeKey
                 ? "bg-oboya-blue-dark text-white"
                 : "bg-muted text-muted-foreground hover:bg-muted/80"
             )}
           >
-            {t === "all" ? "All Types" : `${t}s`}
+            {typeKey === "all"
+              ? t("allTypes")
+              : typeKey === "image"
+                ? t("typeImages")
+                : typeKey === "document"
+                  ? t("typeDocuments")
+                  : t("typeVideos")}
           </button>
         ))}
       </div>
@@ -720,7 +738,7 @@ export default function MediaLibraryPage() {
       {/* Tag filters */}
       {allTags.length > 0 && (
         <div className="mb-4 flex flex-wrap items-center gap-1.5">
-          <span className="mr-1 text-[11px] font-medium text-muted-foreground uppercase">Tags:</span>
+          <span className="mr-1 text-[11px] font-medium text-muted-foreground uppercase">{t("tags")}</span>
           {allTags.map((tag) => (
             <TagBadge
               key={tag}
@@ -735,7 +753,7 @@ export default function MediaLibraryPage() {
               onClick={() => setSelectedTags([])}
               className="ml-1 text-[11px] text-muted-foreground hover:text-oboya-blue-dark"
             >
-              Clear
+              {t("clear")}
             </button>
           )}
         </div>
@@ -766,9 +784,14 @@ export default function MediaLibraryPage() {
 
       {isSearching && (
         <p className="mb-4 text-sm text-muted-foreground">
-          Showing {assets.length} result{assets.length !== 1 ? "s" : ""}
-          {searchQuery && <> for &quot;{searchQuery}&quot;</>}
-          {selectedTags.length > 0 && <> with tags: {selectedTags.join(", ")}</>}
+          {t("showingResults", {
+            count: assets.length,
+            plural: assets.length !== 1 ? "s" : "",
+          })}
+          {searchQuery ? t("forQuery", { query: searchQuery }) : null}
+          {selectedTags.length > 0
+            ? t("withTags", { tags: selectedTags.join(", ") })
+            : null}
         </p>
       )}
 
@@ -849,7 +872,7 @@ export default function MediaLibraryPage() {
                   className="flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-oboya-green"
                 >
                   <Tag className="size-3" />
-                  Edit Tags
+                  {t("editTags")}
                 </button>
                 {!asset.id.startsWith("site-") &&
                 !asset.id.startsWith("used-") &&
@@ -858,13 +881,13 @@ export default function MediaLibraryPage() {
                     type="button"
                     onClick={() => void handleDeleteAsset(asset)}
                     className="flex size-7 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600 transition-colors hover:bg-red-600 hover:text-white"
-                    aria-label={`Remove ${asset.name}`}
-                    title="Remove file"
+                    aria-label={t("removeAsset", { name: asset.name })}
+                    title={t("removeFile")}
                   >
                     <X className="size-3.5" strokeWidth={2.5} />
                   </button>
                 ) : (
-                  <span className="text-[10px] text-muted-foreground">In use</span>
+                  <span className="text-[10px] text-muted-foreground">{t("inUse")}</span>
                 )}
               </div>
             </CardContent>
@@ -875,9 +898,9 @@ export default function MediaLibraryPage() {
       {assets.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <Search className="mb-3 size-10 text-muted-foreground/40" />
-          <p className="text-sm font-medium text-oboya-blue-dark">No files found</p>
+          <p className="text-sm font-medium text-oboya-blue-dark">{t("noFiles")}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            {isSearching ? "Try adjusting your search or filters" : "This folder is empty"}
+            {isSearching ? t("adjustSearch") : t("folderEmpty")}
           </p>
         </div>
       )}

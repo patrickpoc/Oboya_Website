@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { RegistrationSection } from "@/components/admin/marketplace/RegistrationSection";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,19 +18,20 @@ interface ProductPublicationCardProps {
 }
 
 export function ProductPublicationCard({ product, onUpdate }: ProductPublicationCardProps) {
+  const t = useTranslations("admin.products.editor");
   const published = isProductPublished(product.status);
 
   return (
     <Card>
       <CardHeader className="pb-4">
-        <CardTitle>Publication</CardTitle>
-        <CardDescription>Make the product available in the public catalog.</CardDescription>
+        <CardTitle>{t("publicationTitle")}</CardTitle>
+        <CardDescription>{t("publicationDescription")}</CardDescription>
       </CardHeader>
 
       <CardContent>
         <RegistrationSection
-          title="Catalog visibility"
-          description="Products are saved as draft until you enable availability."
+          title={t("catalogVisibility")}
+          description={t("catalogVisibilityHint")}
           isFirst
         >
           <div className="flex flex-wrap items-center gap-4 rounded-lg bg-muted/30 p-4">
@@ -44,14 +46,12 @@ export function ProductPublicationCard({ product, onUpdate }: ProductPublication
                 }
               />
               <div className="space-y-1">
-                <Label htmlFor="product-published">Available in the shop</Label>
-                <p className="text-xs text-muted-foreground">
-                  When unchecked, the product stays as draft and is hidden from buyers.
-                </p>
+                <Label htmlFor="product-published">{t("availableInShop")}</Label>
+                <p className="text-xs text-muted-foreground">{t("availableInShopHint")}</p>
               </div>
             </div>
             <Badge variant={published ? "default" : "secondary"}>
-              {published ? "Published" : "Draft"}
+              {published ? t("published") : t("draft")}
             </Badge>
           </div>
         </RegistrationSection>

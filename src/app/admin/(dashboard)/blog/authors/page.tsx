@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
@@ -10,15 +11,18 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Can } from "@/components/admin/permissions/Can";
 import type { BlogAuthor } from "@/lib/cms/repositories/blog-authors-repository";
+import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
 
 export default function BlogAuthorsPage() {
+  const t = useTranslations("admin.blog.authors");
+  const tCommon = useTranslations("admin.common");
   const [authors, setAuthors] = useState<BlogAuthor[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     const res = await fetch("/api/cms/blog-authors");
-    if (!res.ok) throw new Error("Failed to load");
+    if (!res.ok) throw new Error(tCommon("loadFailed"));
     const data = (await res.json()) as BlogAuthor[];
     setAuthors(Array.isArray(data) ? data : []);
   };
@@ -28,7 +32,7 @@ export default function BlogAuthorsPage() {
       try {
         await load();
       } catch {
-        toast.error("Could not load authors");
+        toast.error(t("loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -47,12 +51,12 @@ export default function BlogAuthorsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(author),
       });
-      if (!res.ok) throw new Error("Save failed");
+      if (!res.ok) throw new Error(tCommon("saveFailed"));
       await load();
-      toast.success("Author saved");
+      toast.success(t("saved"));
       setEditingId(null);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save");
+      toast.error(error instanceof Error ? error.message : tCommon("couldNotSave"));
     }
   };
 
@@ -68,33 +72,33 @@ export default function BlogAuthorsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Delete this author?")) return;
+    if (!window.confirm(t("deleteConfirm"))) return;
     try {
       const res = await fetch(`/api/cms/blog-authors?id=${encodeURIComponent(id)}`, {
         method: "DELETE",
       });
-      if (!res.ok) throw new Error("Delete failed");
+      if (!res.ok) throw new Error(tCommon("deleteFailed"));
       await load();
-      toast.success("Author deleted");
+      toast.success(t("deleted"));
       if (editingId === id) setEditingId(null);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete");
+      toast.error(error instanceof Error ? error.message : tCommon("couldNotDelete"));
     }
   };
 
   return (
-    <Can module="blog" action="view" fallback={<p className="text-sm text-muted-foreground">Access denied.</p>}>
+    <Can module="blog" action="view" fallback={<AccessDenied />}>
       <div>
         <AdminPageHeader
-          title="Blog Authors"
-          description="Authors appear in the post editor and on published articles."
+          title={t("title")}
+          description={t("description")}
           actions={
             <Button
               onClick={handleAdd}
               className="gap-1.5 rounded-full bg-oboya-green text-white hover:bg-oboya-green/90"
             >
               <Plus className="size-4" />
-              New author
+              {t("add")}
             </Button>
           }
         />
@@ -104,7 +108,7 @@ export default function BlogAuthorsPage() {
             <CardContent className="divide-y p-0">
               {authors.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-                  No authors yet. Add one to get started.
+                  {t("empty")}
                 </p>
               ) : (
                 authors.map((author) => (
@@ -114,7 +118,7 @@ export default function BlogAuthorsPage() {
                     onClick={() => setEditingId(author.id)}
                     className="flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-muted/50"
                   >
-                    <span className="font-medium">{author.name || "Untitled author"}</span>
+                    <span className="font-medium">{author.name || t("untitled")}</span>
                     <span className="text-xs text-muted-foreground">{author.email}</span>
                   </button>
                 ))
@@ -126,7 +130,7 @@ export default function BlogAuthorsPage() {
             <Card>
               <CardContent className="space-y-4 pt-6">
                 <div className="space-y-1.5">
-                  <Label>Name</Label>
+                  <Label>{tCommon("name")}</Label>
                   <Input
                     value={editing.name}
                     onChange={(e) => {
@@ -139,7 +143,7 @@ export default function BlogAuthorsPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Email</Label>
+                  <Label>{tCommon("email")}</Label>
                   <Input
                     type="email"
                     value={editing.email}
@@ -158,7 +162,7 @@ export default function BlogAuthorsPage() {
                     onClick={() => handleSave(editing)}
                     className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
                   >
-                    Save author
+                    {t("save")}
                   </Button>
                   <Button
                     variant="outline"
@@ -166,7 +170,7 @@ export default function BlogAuthorsPage() {
                     className="gap-1.5 rounded-full text-destructive"
                   >
                     <Trash2 className="size-4" />
-                    Delete
+                    {tCommon("delete")}
                   </Button>
                 </div>
               </CardContent>

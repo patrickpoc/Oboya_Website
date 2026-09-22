@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -39,6 +40,8 @@ function emptyPost(
 }
 
 export default function BlogPostEditPage() {
+  const t = useTranslations("admin.blog.postEditor");
+  const tCommon = useTranslations("admin.common");
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
@@ -68,14 +71,14 @@ export default function BlogPostEditPage() {
         } else {
           const existing = (Array.isArray(posts) ? posts : []).find((p) => p.id === id);
           if (!existing) {
-            toast.error("Post not found");
+            toast.error(t("notFound"));
             router.push("/admin/blog/posts");
             return;
           }
           setPost(existing);
         }
       } catch {
-        toast.error("Could not load post");
+        toast.error(t("loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -83,7 +86,7 @@ export default function BlogPostEditPage() {
   }, [id, isNew, router]);
 
   if (loading || !post) {
-    return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
+    return <div className="min-h-[40vh]" aria-hidden />;
   }
 
   const handleSave = async () => {
@@ -102,25 +105,25 @@ export default function BlogPostEditPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(toSave),
       });
-      if (!res.ok) throw new Error("Save failed");
-      toast.success("Post saved");
+      if (!res.ok) throw new Error(tCommon("saveFailed"));
+      toast.success(t("saved"));
       router.push("/admin/blog/posts");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save");
+      toast.error(error instanceof Error ? error.message : tCommon("couldNotSave"));
     }
   };
 
   return (
     <div>
       <AdminPageHeader
-        title={isNew ? "New post" : post.title.en || post.slug}
+        title={isNew ? t("newPost") : post.title.en || post.slug}
         actions={
           <div className="flex gap-2">
             <Link
               href="/admin/blog/posts"
               className={buttonVariants({ variant: "outline", className: "rounded-full" })}
             >
-              Back
+              {tCommon("back")}
             </Link>
             <Button
               onClick={handleSave}
@@ -136,14 +139,14 @@ export default function BlogPostEditPage() {
         <div className="space-y-6 lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Content</CardTitle>
+              <CardTitle>{t("contentPanel")}</CardTitle>
             </CardHeader>
             <CardContent>
               <LocaleFieldTabs value={locale} onChange={setLocale}>
                 {(loc) => (
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label>Title</Label>
+                      <Label>{tCommon("title")}</Label>
                       <Input
                         value={post.title[loc]}
                         onChange={(e) =>
@@ -155,7 +158,7 @@ export default function BlogPostEditPage() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Excerpt</Label>
+                      <Label>{t("excerpt")}</Label>
                       <textarea
                         value={post.excerpt[loc]}
                         onChange={(e) =>
@@ -169,7 +172,7 @@ export default function BlogPostEditPage() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Body</Label>
+                      <Label>{t("content")}</Label>
                       <RichTextEditor
                         value={post.body[loc]}
                         onChange={(html) =>
@@ -190,11 +193,11 @@ export default function BlogPostEditPage() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Settings</CardTitle>
+              <CardTitle>{t("settingsPanel")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
-                <Label>Slug</Label>
+                <Label>{tCommon("slug")}</Label>
                 <Input
                   value={post.slug}
                   onChange={(e) => setPost({ ...post, slug: e.target.value })}
@@ -202,7 +205,7 @@ export default function BlogPostEditPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Status</Label>
+                <Label>{tCommon("status")}</Label>
                 <select
                   value={post.status}
                   onChange={(e) =>
@@ -210,13 +213,13 @@ export default function BlogPostEditPage() {
                   }
                   className="h-8 w-full rounded-lg border border-input px-2.5 text-sm"
                 >
-                  <option value="draft">Draft</option>
-                  <option value="scheduled">Scheduled</option>
-                  <option value="published">Published</option>
+                  <option value="draft">{tCommon("draft")}</option>
+                  <option value="scheduled">{tCommon("scheduled")}</option>
+                  <option value="published">{tCommon("published")}</option>
                 </select>
               </div>
               <div className="space-y-1.5">
-                <Label>Schedule publish</Label>
+                <Label>{t("schedulePublish")}</Label>
                 <Input
                   type="datetime-local"
                   value={post.scheduledAt?.slice(0, 16) ?? ""}
@@ -231,7 +234,7 @@ export default function BlogPostEditPage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Published date</Label>
+                <Label>{t("publishedDate")}</Label>
                 <Input
                   type="date"
                   value={post.publishedAt?.slice(0, 10) ?? ""}
@@ -246,13 +249,13 @@ export default function BlogPostEditPage() {
                 />
               </div>
               <ImageField
-                label="Featured image"
+                label={t("featuredImage")}
                 value={post.featuredImage ?? ""}
                 onChange={(url) => setPost({ ...post, featuredImage: url })}
                 optional
               />
               <div className="space-y-1.5">
-                <Label>Author</Label>
+                <Label>{tCommon("author")}</Label>
                 <select
                   value={post.author}
                   onChange={(e) => setPost({ ...post, author: e.target.value })}
@@ -266,7 +269,7 @@ export default function BlogPostEditPage() {
                 </select>
               </div>
               <div className="space-y-1.5">
-                <Label>Category</Label>
+                <Label>{tCommon("category")}</Label>
                 <select
                   value={post.categoryId}
                   onChange={(e) => setPost({ ...post, categoryId: e.target.value })}

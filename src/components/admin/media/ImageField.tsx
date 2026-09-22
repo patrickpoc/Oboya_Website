@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Film, ImageIcon, Link2, Upload } from "lucide-react";
 import { VideoThumbnail } from "@/components/admin/media/VideoThumbnail";
@@ -65,6 +66,7 @@ export function MediaField({
   optional = false,
   allowedTypes = DEFAULT_TYPES,
 }: MediaFieldProps) {
+  const t = useTranslations("admin.media");
   const types = allowedTypes.length ? allowedTypes : DEFAULT_TYPES;
   const videoOnly = types.length === 1 && types[0] === "video";
   const [mode, setMode] = useState<SourceMode>("url");
@@ -135,9 +137,9 @@ export function MediaField({
       setKnownName(asset.name || file.name);
       onChange(asset.url);
       setMode("upload");
-      toast.success("Media uploaded");
+      toast.success(t("mediaUploaded"));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Upload failed");
+      toast.error(error instanceof Error ? error.message : t("uploadFailed"));
     } finally {
       setUploading(false);
     }
@@ -149,7 +151,7 @@ export function MediaField({
         <Label className="text-sm font-medium">
           {label}
           {optional ? (
-            <span className="ml-1 font-normal text-muted-foreground">(optional)</span>
+            <span className="ml-1 font-normal text-muted-foreground">{t("optional")}</span>
           ) : null}
         </Label>
         {value ? (
@@ -163,7 +165,7 @@ export function MediaField({
               onChange("");
             }}
           >
-            Clear
+            {t("clearSelection")}
           </Button>
         ) : null}
       </div>
@@ -184,7 +186,7 @@ export function MediaField({
               title={displayName}
             >
               <span className="font-medium">
-                {isVideoValue ? "Video" : "File"}:
+                {isVideoValue ? t("videoLabel") : t("fileLabel")}:
               </span>{" "}
               <span className="text-muted-foreground">{displayName}</span>
             </p>
@@ -192,7 +194,7 @@ export function MediaField({
         </div>
       ) : (
         <div className="flex h-28 max-w-xs items-center justify-center rounded-lg border border-dashed border-border bg-white text-xs text-muted-foreground">
-          No {videoOnly ? "video" : "media"} selected
+          {videoOnly ? t("noVideoSelected") : t("noMediaSelected")}
         </div>
       )}
 
@@ -209,7 +211,7 @@ export function MediaField({
           }}
         >
           <Upload className="size-3.5" />
-          {uploading ? "Uploading…" : "Upload from PC"}
+          {uploading ? t("uploading") : t("uploadFromPc")}
         </Button>
         <Button
           type="button"
@@ -219,7 +221,7 @@ export function MediaField({
           onClick={() => setMode("url")}
         >
           <Link2 className="size-3.5" />
-          Paste link
+          {t("pasteLink")}
         </Button>
         <Button
           type="button"
@@ -237,7 +239,7 @@ export function MediaField({
           ) : (
             <ImageIcon className="size-3.5" />
           )}
-          Media library
+          {t("mediaLibrary")}
         </Button>
       </div>
 
@@ -257,12 +259,12 @@ export function MediaField({
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
           <div className="flex-1 space-y-1.5">
             <Label className="text-xs text-muted-foreground">
-              {videoOnly ? "Video URL" : "Media URL"}
+              {videoOnly ? t("videoUrl") : t("mediaUrl")}
             </Label>
             <Input
               value={urlDraft}
               onChange={(e) => setUrlDraft(e.target.value)}
-              placeholder="https://… or /assets/…"
+              placeholder={t("urlPlaceholder")}
             />
           </div>
           <Button
@@ -275,7 +277,7 @@ export function MediaField({
               onChange(next);
             }}
           >
-            Apply URL
+            {t("applyUrl")}
           </Button>
         </div>
       )}

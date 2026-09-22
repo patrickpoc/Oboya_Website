@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
@@ -7,6 +8,7 @@ import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { LocaleFieldTabs } from "@/components/admin/forms/LocaleFieldTabs";
 import { ShopFilterTargetFields } from "@/components/admin/solutions/ShopFilterTargetFields";
 import { Can } from "@/components/admin/permissions/Can";
+import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -44,6 +46,8 @@ function setLocalized(
 }
 
 export default function SolutionsPageAdmin() {
+  const t = useTranslations("admin.website.solutions");
+  const tCommon = useTranslations("admin.common");
   const [settings, setSettings] = useState<SolutionsPageSettings | null>(null);
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [loading, setLoading] = useState(true);
@@ -64,7 +68,7 @@ export default function SolutionsPageAdmin() {
           fetch("/api/cms/solutions", { cache: "no-store" }),
           fetch("/api/cms/marketplace/filters", { cache: "no-store" }),
         ]);
-        if (!solutionsRes.ok) throw new Error("Failed to load solutions");
+        if (!solutionsRes.ok) throw new Error(tCommon("loadFailed"));
         setSettings(await solutionsRes.json());
         if (filtersRes.ok) {
           const filters = (await filtersRes.json()) as {
@@ -85,7 +89,7 @@ export default function SolutionsPageAdmin() {
           });
         }
       } catch {
-        toast.error("Could not load solutions page settings");
+        toast.error(t("loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -104,12 +108,12 @@ export default function SolutionsPageAdmin() {
       const data = (await res.json()) as SolutionsPageSettings & {
         error?: string;
       };
-      if (!res.ok) throw new Error(data.error ?? "Save failed");
+      if (!res.ok) throw new Error(data.error ?? tCommon("saveFailed"));
       setSettings(data);
-      toast.success("Solutions page saved");
+      toast.success(t("saved"));
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to save solutions page"
+        error instanceof Error ? error.message : t("saveFailed")
       );
     } finally {
       setSaving(false);
@@ -151,8 +155,8 @@ export default function SolutionsPageAdmin() {
           {
             id,
             image: "/assets/homepage/capabilities-value-chain.jpg",
-            title: emptyLocalized("New solution banner"),
-            tags: [emptyLocalized("Tag")],
+            title: emptyLocalized(t("newBannerTitle")),
+            tags: [emptyLocalized(t("newTag"))],
             shop: {},
           },
         ],
@@ -171,7 +175,7 @@ export default function SolutionsPageAdmin() {
   };
 
   if (loading || !settings) {
-    return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
+    return <div className="min-h-[40vh]" aria-hidden />;
   }
 
   return (
@@ -179,20 +183,20 @@ export default function SolutionsPageAdmin() {
       module="website"
       action="edit"
       fallback={
-        <p className="text-sm text-muted-foreground">Access denied.</p>
+        <AccessDenied />
       }
     >
       <div>
         <AdminPageHeader
-          title="Solutions"
-          description="Edit the Solutions page hero, crop filters, stage banners, and the shop filters each banner applies when clicked."
+          title={t("title")}
+          description={t("description")}
           actions={
             <Button
               onClick={() => void handleSave()}
               disabled={saving}
               className="rounded-full bg-oboya-green text-white hover:bg-oboya-green/90"
             >
-              {saving ? "Saving…" : "Save Solutions"}
+              {saving ? tCommon("saving") : t("save")}
             </Button>
           }
         />
@@ -202,11 +206,11 @@ export default function SolutionsPageAdmin() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Hero</CardTitle>
+              <CardTitle>{t("hero")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="space-y-1.5">
-                <Label>Headline</Label>
+                <Label>{t("headline")}</Label>
                 <Input
                   value={settings.hero.headline[locale] ?? ""}
                   onChange={(event) =>
@@ -225,7 +229,7 @@ export default function SolutionsPageAdmin() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Body</Label>
+                <Label>{t("body")}</Label>
                 <Textarea
                   rows={4}
                   value={settings.hero.body[locale] ?? ""}
@@ -249,7 +253,7 @@ export default function SolutionsPageAdmin() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Crop filters</CardTitle>
+              <CardTitle>{t("crops")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {settings.crops.map((crop, index) => (
@@ -262,7 +266,7 @@ export default function SolutionsPageAdmin() {
                   </p>
                   <div className="grid gap-3 md:grid-cols-2">
                     <div className="space-y-1.5">
-                      <Label>Chip label</Label>
+                      <Label>{t("chipLabel")}</Label>
                       <Input
                         value={crop.label[locale] ?? ""}
                         onChange={(event) =>
@@ -277,7 +281,7 @@ export default function SolutionsPageAdmin() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Sector title</Label>
+                      <Label>{t("sectorTitle")}</Label>
                       <Input
                         value={crop.sectorTitle[locale] ?? ""}
                         onChange={(event) =>
@@ -293,7 +297,7 @@ export default function SolutionsPageAdmin() {
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Description</Label>
+                    <Label>{tCommon("description")}</Label>
                     <Textarea
                       rows={3}
                       value={crop.description[locale] ?? ""}
@@ -323,9 +327,9 @@ export default function SolutionsPageAdmin() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between gap-3">
-                <span>Stage banners</span>
+                <span>{t("banners")}</span>
                 <Button variant="outline" size="sm" onClick={addBanner}>
-                  <Plus className="mr-1 size-3.5" /> Add banner
+                  <Plus className="mr-1 size-3.5" /> {t("addBanner")}
                 </Button>
               </CardTitle>
             </CardHeader>
@@ -341,7 +345,7 @@ export default function SolutionsPageAdmin() {
                       <div className="min-w-0 flex-1 space-y-3">
                         <div className="grid gap-3 md:grid-cols-2">
                           <div className="space-y-1.5">
-                            <Label>Title</Label>
+                            <Label>{tCommon("title")}</Label>
                             <Input
                               value={banner.title[locale] ?? ""}
                               onChange={(event) =>
@@ -356,7 +360,7 @@ export default function SolutionsPageAdmin() {
                             />
                           </div>
                           <div className="space-y-1.5">
-                            <Label>Image URL</Label>
+                            <Label>{t("imageUrl")}</Label>
                             <Input
                               value={banner.image}
                               onChange={(event) =>
@@ -368,7 +372,7 @@ export default function SolutionsPageAdmin() {
                           </div>
                         </div>
                         <div className="space-y-1.5">
-                          <Label>Tags (one per line)</Label>
+                          <Label>{t("tagsOnePerLine")}</Label>
                           <Textarea
                             rows={3}
                             value={banner.tags
@@ -399,7 +403,7 @@ export default function SolutionsPageAdmin() {
                       <Button
                         size="sm"
                         variant="destructive"
-                        aria-label="Remove banner"
+                        aria-label={t("removeBanner")}
                         onClick={() => removeBanner(index)}
                       >
                         <Trash2 className="size-3.5" />
@@ -420,11 +424,11 @@ export default function SolutionsPageAdmin() {
 
           <Card>
             <CardHeader>
-              <CardTitle>CTA</CardTitle>
+              <CardTitle>{t("cta")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="space-y-1.5">
-                <Label>Title</Label>
+                <Label>{tCommon("title")}</Label>
                 <Input
                   value={settings.cta.title[locale] ?? ""}
                   onChange={(event) =>
@@ -443,7 +447,7 @@ export default function SolutionsPageAdmin() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Description</Label>
+                <Label>{tCommon("description")}</Label>
                 <Textarea
                   rows={3}
                   value={settings.cta.description[locale] ?? ""}
@@ -464,7 +468,7 @@ export default function SolutionsPageAdmin() {
               </div>
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label>Button label</Label>
+                  <Label>{t("buttonLabel")}</Label>
                   <Input
                     value={settings.cta.buttonLabel[locale] ?? ""}
                     onChange={(event) =>
@@ -483,7 +487,7 @@ export default function SolutionsPageAdmin() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Button href</Label>
+                  <Label>{t("buttonHref")}</Label>
                   <Input
                     value={settings.cta.href}
                     onChange={(event) =>

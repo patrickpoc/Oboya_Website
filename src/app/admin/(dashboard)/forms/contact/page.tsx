@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
@@ -14,28 +15,6 @@ import type {
 import { FormPiiActions } from "@/components/admin/forms/FormPiiActions";
 import { cn } from "@/lib/utils";
 
-const STATUS_OPTIONS: { value: FormSubmissionStatus | "all"; label: string }[] =
-  [
-    { value: "all", label: "All" },
-    { value: "new", label: "Unread" },
-    { value: "read", label: "Read" },
-    { value: "replied", label: "Replied" },
-    { value: "archived", label: "Archived" },
-  ];
-
-const STATUS_LABELS: Record<FormSubmissionStatus, string> = {
-  new: "Unread",
-  read: "Read",
-  replied: "Replied",
-  archived: "Archived",
-};
-
-const SUBJECT_LABELS: Record<string, string> = {
-  general: "General Inquiry",
-  products: "Products & Solutions",
-  partnership: "Partnership",
-  support: "Support",
-};
 
 function contactName(row: FormSubmission) {
   const first = String(row.data.firstName ?? "");
@@ -54,6 +33,30 @@ function statusBadgeVariant(
 }
 
 export default function ContactFormsPage() {
+  const t = useTranslations("admin.forms.contact");
+  const tCommon = useTranslations("admin.common");
+
+  const STATUS_OPTIONS: { value: FormSubmissionStatus | "all"; label: string }[] = [
+    { value: "all", label: tCommon("all") },
+    { value: "new", label: t("unread") },
+    { value: "read", label: t("read") },
+    { value: "replied", label: t("replied") },
+    { value: "archived", label: t("archived") },
+  ];
+
+  const STATUS_LABELS: Record<FormSubmissionStatus, string> = {
+    new: t("unread"),
+    read: t("read"),
+    replied: t("replied"),
+    archived: t("archived"),
+  };
+
+  const SUBJECT_LABELS: Record<string, string> = {
+    general: t("subjects.general"),
+    products: t("subjects.products"),
+    partnership: t("subjects.partnership"),
+    support: t("subjects.support"),
+  };
   const [submissions, setSubmissions] = useState<FormSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [countryFilter, setCountryFilter] = useState<string>("all");
@@ -64,7 +67,7 @@ export default function ContactFormsPage() {
 
   const refresh = async () => {
     const res = await fetch("/api/cms/forms?type=contact");
-    if (!res.ok) throw new Error("Failed to load submissions");
+    if (!res.ok) throw new Error(tCommon("loadFailed"));
     const data = (await res.json()) as FormSubmission[];
     setSubmissions(Array.isArray(data) ? data : []);
   };
@@ -74,7 +77,7 @@ export default function ContactFormsPage() {
       try {
         await refresh();
       } catch {
-        toast.error("Could not load contact submissions");
+        toast.error(t("loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -93,7 +96,7 @@ export default function ContactFormsPage() {
         body: JSON.stringify({ id, status }),
       });
       const data = (await res.json()) as FormSubmission & { error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Update failed");
+      if (!res.ok) throw new Error(data.error ?? tCommon("updateFailed"));
       setSubmissions((prev) =>
         prev.map((s) => (s.id === id ? { ...s, status } : s))
       );
@@ -101,10 +104,10 @@ export default function ContactFormsPage() {
         current?.id === id ? { ...current, status } : current
       );
       if (!options?.silent) {
-        toast.success("Status updated");
+        toast.success(t("statusUpdated"));
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not update");
+      toast.error(error instanceof Error ? error.message : tCommon("couldNotUpdate"));
     }
   };
 
@@ -142,7 +145,7 @@ export default function ContactFormsPage() {
     () => [
       {
         key: "name",
-        header: "Name",
+        header: t("columns.name"),
         cell: (row: FormSubmission) => (
           <span className="font-medium text-oboya-blue-dark">
             {contactName(row)}
@@ -151,18 +154,18 @@ export default function ContactFormsPage() {
       },
       {
         key: "email",
-        header: "Email",
+        header: t("columns.email"),
         cell: (row: FormSubmission) => String(row.data.email ?? "—"),
       },
       {
         key: "country",
-        header: "Country",
+        header: t("columns.country"),
         cell: (row: FormSubmission) =>
           String(row.data.countryName ?? row.data.countryCode ?? "—"),
       },
       {
         key: "subject",
-        header: "Subject",
+        header: t("columns.subject"),
         cell: (row: FormSubmission) => {
           const key = String(row.data.subject ?? "");
           return SUBJECT_LABELS[key] ?? (key || "—");
@@ -170,7 +173,7 @@ export default function ContactFormsPage() {
       },
       {
         key: "status",
-        header: "Status",
+        header: t("columns.status"),
         cell: (row: FormSubmission) => (
           <Badge variant={statusBadgeVariant(row.status)}>
             {STATUS_LABELS[row.status]}
@@ -179,13 +182,13 @@ export default function ContactFormsPage() {
       },
       {
         key: "createdAt",
-        header: "Date",
+        header: t("columns.date"),
         sortable: true,
         cell: (row: FormSubmission) =>
           new Date(row.createdAt).toLocaleString(),
       },
     ],
-    []
+    [t]
   );
 
   const openDetail = (row: FormSubmission) => {
@@ -200,24 +203,30 @@ export default function ContactFormsPage() {
   return (
     <div>
       <AdminPageHeader
-        title="Contact Submissions"
-        description={`${unreadTotal} unread · ${submissions.length} total from the website contact form.`}
+        title={t("title")}
+        description={t("description", { unread: unreadTotal, total: submissions.length })}
       />
 
       <div className="mb-4 flex flex-wrap gap-2">
         <FilterChip
           active={countryFilter === "all"}
           onClick={() => setCountryFilter("all")}
-          label={`All countries (${submissions.length})`}
+          label={t("allCountries", { count: submissions.length })}
         />
         {countryFilters.map((country) => (
           <FilterChip
             key={country.code}
             active={countryFilter === country.code}
             onClick={() => setCountryFilter(country.code)}
-            label={`${country.name} (${country.total}${
-              country.unread ? ` · ${country.unread} new` : ""
-            })`}
+            label={
+              country.unread
+                ? t("countryUnread", {
+                    name: country.name,
+                    total: country.total,
+                    unread: country.unread,
+                  })
+                : t("countryCount", { name: country.name, total: country.total })
+            }
           />
         ))}
       </div>
@@ -233,22 +242,20 @@ export default function ContactFormsPage() {
         ))}
       </div>
 
-      {loading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
-      ) : (
+      {loading ? null : (
         <DataTable
           data={filtered}
           columns={columns}
           getRowId={(row) => row.id}
           onRowClick={openDetail}
-          emptyMessage="No contact submissions match these filters."
+          emptyMessage={t("empty")}
         />
       )}
 
       <FormDrawer
         open={!!selected}
         onClose={() => setSelected(null)}
-        title={selected ? contactName(selected) : "Contact"}
+        title={selected ? contactName(selected) : t("drawerFallback")}
         description={
           selected
             ? new Date(selected.createdAt).toLocaleString()
@@ -258,7 +265,7 @@ export default function ContactFormsPage() {
         footer={
           selected ? (
             <div className="flex flex-wrap items-center gap-3">
-              <label className="text-sm text-muted-foreground">Status</label>
+              <label className="text-sm text-muted-foreground">{t("columns.status")}</label>
               <select
                 value={selected.status}
                 onChange={(e) =>
@@ -284,7 +291,7 @@ export default function ContactFormsPage() {
                 className="ml-auto"
                 onClick={() => setSelected(null)}
               >
-                Close
+                {tCommon("close")}
               </Button>
               <FormPiiActions
                 id={selected.id}
@@ -299,21 +306,21 @@ export default function ContactFormsPage() {
       >
         {selected && (
           <div className="space-y-5 text-sm">
-            <DetailField label="Status">
+            <DetailField label={t("columns.status")}>
               <Badge variant={statusBadgeVariant(selected.status)}>
                 {STATUS_LABELS[selected.status]}
               </Badge>
             </DetailField>
-            <DetailField label="Country">
+            <DetailField label={t("columns.country")}>
               {String(
                 selected.data.countryName ?? selected.data.countryCode ?? "—"
               )}
             </DetailField>
-            <DetailField label="Subject">
+            <DetailField label={t("columns.subject")}>
               {SUBJECT_LABELS[String(selected.data.subject ?? "")] ??
                 String(selected.data.subject ?? "—")}
             </DetailField>
-            <DetailField label="Email">
+            <DetailField label={t("columns.email")}>
               <a
                 href={`mailto:${String(selected.data.email ?? "")}`}
                 className="text-oboya-green hover:underline"
@@ -321,7 +328,7 @@ export default function ContactFormsPage() {
                 {String(selected.data.email ?? "—")}
               </a>
             </DetailField>
-            <DetailField label="Phone">
+            <DetailField label={t("phone")}>
               {selected.data.phone ? (
                 <a
                   href={`tel:${String(selected.data.phone).replace(/\s/g, "")}`}
@@ -333,7 +340,7 @@ export default function ContactFormsPage() {
                 "—"
               )}
             </DetailField>
-            <DetailField label="Message">
+            <DetailField label={t("message")}>
               <p className="whitespace-pre-wrap rounded-lg border border-border/60 bg-muted/30 px-3 py-3 text-oboya-blue-dark">
                 {String(selected.data.message ?? "—")}
               </p>

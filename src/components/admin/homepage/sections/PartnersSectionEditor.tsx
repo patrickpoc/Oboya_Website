@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,14 +19,16 @@ export function PartnersSectionEditor({
   setSettings,
   locale,
 }: HomepageSectionEditorProps) {
+  const t = useTranslations("admin.website.home");
+  const tCommon = useTranslations("admin.common");
   return (
     <Card className="max-w-4xl">
       <CardHeader>
-        <CardTitle>Partners & Clients</CardTitle>
+        <CardTitle>{t("sections.partners.title")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <LocalizedInput
-          label="Section title"
+          label={t("fields.sectionTitle")}
           locale={locale}
           value={settings.partners.title[locale]}
           onChange={(l, v) => updateSettingsLocalized(setSettings, "partners", "title", l, v)}
@@ -51,7 +54,7 @@ export function PartnersSectionEditor({
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label>Name</Label>
+                <Label>{tCommon("name")}</Label>
                 <Input
                   value={logo.name}
                   onChange={(e) => {
@@ -65,7 +68,7 @@ export function PartnersSectionEditor({
                 />
               </div>
               <ImageField
-                label="Logo image"
+                label={t("fields.logoImage")}
                 value={logo.image}
                 onChange={(url) => {
                   const logos = [...settings.partners.logos];
@@ -79,7 +82,7 @@ export function PartnersSectionEditor({
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Link (optional)</Label>
+              <Label>{t("fields.linkOptional")}</Label>
               <Input
                 value={logo.href ?? ""}
                 onChange={(e) => {

@@ -20,7 +20,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "metadata" });
 
   return {
-    title: t("title"),
+    title: {
+      absolute: t("title"),
+    },
     description: t("description"),
     alternates: {
       languages: Object.fromEntries(

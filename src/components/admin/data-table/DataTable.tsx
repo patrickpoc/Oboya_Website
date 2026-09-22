@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import {
   Table,
@@ -42,15 +43,18 @@ export function DataTable<T>({
   data,
   columns,
   searchKey,
-  searchPlaceholder = "Search...",
+  searchPlaceholder,
   pageSize = 10,
   onRowClick,
   selectedIds = [],
   onSelectionChange,
   getRowId,
-  emptyMessage = "No records found.",
+  emptyMessage,
   mobileLayout = "cards",
 }: DataTableProps<T>) {
+  const t = useTranslations("admin.common");
+  const resolvedSearchPlaceholder = searchPlaceholder ?? t("search");
+  const resolvedEmptyMessage = emptyMessage ?? t("noRecords");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [sortKey, setSortKey] = useState<string | null>(null);
@@ -110,15 +114,14 @@ export function DataTable<T>({
 
   const pagination = totalPages > 1 && (
     <div className="flex items-center justify-between text-xs text-muted-foreground">
-      <span>
-        {filtered.length} record{filtered.length !== 1 ? "s" : ""}
-      </span>
+      <span>{t("recordCount", { count: filtered.length })}</span>
       <div className="flex items-center gap-2">
         <button
           type="button"
           disabled={page === 0}
           onClick={() => setPage(page - 1)}
           className="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border p-2 disabled:opacity-40"
+          aria-label={t("previousPage")}
         >
           <ChevronLeft className="size-3.5" />
         </button>
@@ -130,6 +133,7 @@ export function DataTable<T>({
           disabled={page >= totalPages - 1}
           onClick={() => setPage(page + 1)}
           className="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border p-2 disabled:opacity-40"
+          aria-label={t("nextPage")}
         >
           <ChevronRight className="size-3.5" />
         </button>
@@ -148,7 +152,7 @@ export function DataTable<T>({
               setSearch(e.target.value);
               setPage(0);
             }}
-            placeholder={searchPlaceholder}
+            placeholder={resolvedSearchPlaceholder}
             className="h-11 pl-8 text-base md:h-8 md:text-sm"
           />
         </div>
@@ -158,7 +162,7 @@ export function DataTable<T>({
         <div className="space-y-3 md:hidden">
           {paged.length === 0 ? (
             <p className="rounded-xl border border-border/60 bg-white py-8 text-center text-muted-foreground">
-              {emptyMessage}
+              {resolvedEmptyMessage}
             </p>
           ) : (
             paged.map((row, i) => {
@@ -244,7 +248,7 @@ export function DataTable<T>({
                   colSpan={columns.length + (onSelectionChange ? 1 : 0)}
                   className="py-8 text-center text-muted-foreground"
                 >
-                  {emptyMessage}
+                  {resolvedEmptyMessage}
                 </TableCell>
               </TableRow>
             ) : (

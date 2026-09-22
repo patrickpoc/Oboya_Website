@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { LocalizedFieldGrid } from "@/components/admin/marketplace/LocalizedFieldGrid";
 import { RegistrationSection } from "@/components/admin/marketplace/RegistrationSection";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,8 @@ interface ProductSeoCardProps {
 }
 
 export function ProductSeoCard({ product, onUpdate }: ProductSeoCardProps) {
+  const t = useTranslations("admin.products.editor");
+  const tCommon = useTranslations("admin.common");
   const [newKeyword, setNewKeyword] = useState("");
 
   const updateSeoField = (
@@ -47,24 +50,24 @@ export function ProductSeoCard({ product, onUpdate }: ProductSeoCardProps) {
   return (
     <Card>
       <CardHeader className="pb-4">
-        <CardTitle>SEO & keywords</CardTitle>
-        <CardDescription>Search metadata and shop search keywords.</CardDescription>
+        <CardTitle>{t("seoTitle")}</CardTitle>
+        <CardDescription>{t("seoDescription")}</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-5">
         <RegistrationSection
-          title="SEO"
-          description="Page title and meta description overrides for public pages."
+          title={t("seoSection")}
+          description={t("seoSectionHint")}
           isFirst
         >
           <div className="space-y-4 rounded-lg bg-muted/30 p-4">
             <LocalizedFieldGrid
-              label="SEO title"
+              label={t("seoTitleLabel")}
               value={product.seo.title}
               onChange={(locale, value) => updateSeoField("title", locale, value)}
             />
             <LocalizedFieldGrid
-              label="SEO description"
+              label={t("seoDescriptionLabel")}
               value={product.seo.description}
               onChange={(locale, value) => updateSeoField("description", locale, value)}
               multiline
@@ -73,10 +76,7 @@ export function ProductSeoCard({ product, onUpdate }: ProductSeoCardProps) {
           </div>
         </RegistrationSection>
 
-        <RegistrationSection
-          title="Keywords"
-          description="Used by shop search (name, SKU and keywords)."
-        >
+        <RegistrationSection title={t("keywords")} description={t("keywordsHint")}>
           <div className="space-y-3 rounded-lg bg-muted/30 p-4">
             {(product.tags ?? []).length > 0 ? (
               <div className="flex flex-wrap gap-1.5">
@@ -86,7 +86,7 @@ export function ProductSeoCard({ product, onUpdate }: ProductSeoCardProps) {
                     <button
                       type="button"
                       className="rounded-sm p-0.5 hover:bg-muted"
-                      aria-label={`Remove keyword ${tag}`}
+                      aria-label={t("removeKeyword", { tag })}
                       onClick={() => removeKeyword(tag)}
                     >
                       <X className="size-3" />
@@ -95,12 +95,12 @@ export function ProductSeoCard({ product, onUpdate }: ProductSeoCardProps) {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground">No keywords yet.</p>
+              <p className="text-xs text-muted-foreground">{t("noKeywords")}</p>
             )}
             <div className="flex gap-2">
               <Input
                 className="max-w-md"
-                placeholder="Add keyword"
+                placeholder={t("addKeyword")}
                 value={newKeyword}
                 onChange={(e) => setNewKeyword(e.target.value)}
                 onKeyDown={(e) => {
@@ -111,7 +111,7 @@ export function ProductSeoCard({ product, onUpdate }: ProductSeoCardProps) {
                 }}
               />
               <Button type="button" variant="outline" onClick={addKeyword}>
-                Add
+                {tCommon("add")}
               </Button>
             </div>
           </div>

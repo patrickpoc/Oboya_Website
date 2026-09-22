@@ -1,6 +1,7 @@
 "use client";
 
 import { Pipette } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -39,12 +40,13 @@ export function ColorHexField({
   placeholder?: string;
   className?: string;
 }) {
+  const t = useTranslations("admin.products.editor");
   const hex = normalizeHex(value, fallback);
 
   const pickFromScreen = () => {
     void (async () => {
       if (typeof window.EyeDropper !== "function") {
-        toast.error("Eyedropper is not supported in this browser.");
+        toast.error(t("eyedropperUnsupported"));
         return;
       }
 
@@ -83,7 +85,7 @@ export function ColorHexField({
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         className="h-8 min-w-0 flex-1"
-        aria-label="Color hex"
+        aria-label={t("colorHex")}
       />
       <Button
         type="button"
@@ -91,8 +93,8 @@ export function ColorHexField({
         size="icon"
         className="size-8 shrink-0"
         onClick={pickFromScreen}
-        aria-label="Pick color from screen"
-        title="Pick color from page (scroll freely, then click)"
+        aria-label={t("pickColor")}
+        title={t("pickColorTitle")}
       >
         <Pipette className="size-3.5" />
       </Button>

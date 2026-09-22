@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 interface FormDrawerProps {
@@ -22,6 +23,9 @@ export function FormDrawer({
   footer,
   width = "md",
 }: FormDrawerProps) {
+  const t = useTranslations("admin.forms.drawer");
+  const tCommon = useTranslations("admin.common");
+
   if (!open) return null;
 
   const widths = { sm: "max-w-md", md: "max-w-lg", lg: "max-w-2xl" };
@@ -32,7 +36,7 @@ export function FormDrawer({
         type="button"
         className="absolute inset-0 bg-oboya-blue-dark/30"
         onClick={onClose}
-        aria-label="Close"
+        aria-label={t("close")}
       />
       <aside
         className={cn(
@@ -52,6 +56,7 @@ export function FormDrawer({
           <button
             type="button"
             onClick={onClose}
+            aria-label={tCommon("close")}
             className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
           >
             <X className="size-4" />

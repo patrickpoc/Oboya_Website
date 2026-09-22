@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
+import { useTranslations } from "next-intl";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
@@ -18,12 +18,14 @@ const MOCK_IMAGES = [
   "/assets/homepage/company-overview.webp",
 ];
 
-export function MediaPicker({ value, onChange, label = "Image" }: MediaPickerProps) {
+export function MediaPicker({ value, onChange, label }: MediaPickerProps) {
+  const t = useTranslations("admin.media");
   const [open, setOpen] = useState(false);
+  const resolvedLabel = label ?? t("imageLabel");
 
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      <Label>{resolvedLabel}</Label>
       {value && (
         <div className="relative h-24 w-40 overflow-hidden rounded-lg border">
           <Image src={value} alt="" fill className="object-cover" unoptimized />
@@ -36,7 +38,7 @@ export function MediaPicker({ value, onChange, label = "Image" }: MediaPickerPro
         className="rounded-full"
         onClick={() => setOpen(!open)}
       >
-        {value ? "Change image" : "Select from library"}
+        {value ? t("changeImage") : t("selectFromLibrary")}
       </Button>
       {open && (
         <div className="flex flex-wrap gap-2 rounded-lg border p-2">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,8 @@ import { Logo } from "@/components/brand/Logo";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 export default function ChangePasswordPage() {
+  const t = useTranslations("admin.auth");
+  const tCommon = useTranslations("admin.common");
   const [password, setPassword] = useState("");
   const [current, setCurrent] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -20,11 +23,11 @@ export default function ChangePasswordPage() {
     setError(null);
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError(t("passwordMinLength"));
       return;
     }
     if (password !== confirm) {
-      setError("Passwords do not match.");
+      setError(t("passwordsDoNotMatch"));
       return;
     }
 
@@ -43,7 +46,7 @@ export default function ChangePasswordPage() {
       });
       const data = (await res.json()) as { error?: string };
       if (!res.ok) {
-        setError(data.error || "Failed to update password");
+        setError(data.error || t("updatePasswordFailed"));
         setLoading(false);
         return;
       }
@@ -56,7 +59,7 @@ export default function ChangePasswordPage() {
 
       window.location.href = "/admin/dashboard";
     } catch {
-      setError("Failed to update password");
+      setError(t("updatePasswordFailed"));
       setLoading(false);
     }
   };
@@ -66,16 +69,15 @@ export default function ChangePasswordPage() {
       <div className="w-full max-w-sm rounded-2xl border border-border/60 bg-white p-6 shadow-[var(--shadow-card)]">
         <Logo className="mb-4 h-8 w-auto" intl={false} />
         <h1 className="font-display text-xl font-semibold text-oboya-blue-dark">
-          Create a new password
+          {t("changeTitle")}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          For security, you must set a personal password before accessing the
-          admin dashboard.
+          {t("changeSubtitle")}
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="current">Current password</Label>
+            <Label htmlFor="current">{t("currentPassword")}</Label>
             <Input
               id="current"
               type="password"
@@ -86,7 +88,7 @@ export default function ChangePasswordPage() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="password">New password</Label>
+            <Label htmlFor="password">{t("newPassword")}</Label>
             <Input
               id="password"
               type="password"
@@ -98,7 +100,7 @@ export default function ChangePasswordPage() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="confirm">Confirm password</Label>
+            <Label htmlFor="confirm">{t("confirmPassword")}</Label>
             <Input
               id="confirm"
               type="password"
@@ -117,7 +119,7 @@ export default function ChangePasswordPage() {
           )}
 
           <Button type="submit" className="w-full rounded-full" disabled={loading}>
-            {loading ? "Saving…" : "Save password & continue"}
+            {loading ? tCommon("saving") : t("savePasswordContinue")}
           </Button>
         </form>
       </div>

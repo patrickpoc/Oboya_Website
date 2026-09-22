@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { LocaleFieldTabs } from "@/components/admin/forms/LocaleFieldTabs";
@@ -11,12 +12,10 @@ import {
   getHomepageSettings,
   type HomepageSettings,
 } from "@/lib/cms/repositories/homepage-repository";
-import {
-  HOMEPAGE_SECTION_META,
-  type HomepageSectionSlug,
-} from "@/lib/cms/homepage-sections";
+import type { HomepageSectionSlug } from "@/lib/cms/homepage-sections";
 import type { CmsLocale } from "@/lib/cms/types";
 import type { HomepageSectionEditorProps } from "./shared";
+import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
 
 type HomepageSectionShellProps = {
   section: HomepageSectionSlug;
@@ -24,7 +23,8 @@ type HomepageSectionShellProps = {
 };
 
 export function HomepageSectionShell({ section, children }: HomepageSectionShellProps) {
-  const meta = HOMEPAGE_SECTION_META[section];
+  const t = useTranslations("admin.website.home");
+  const tCommon = useTranslations("admin.common");
   const [settings, setSettings] = useState<HomepageSettings>(getHomepageSettings());
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [saving, setSaving] = useState(false);
@@ -60,23 +60,19 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
         });
         const data = (await res.json()) as HomepageSettings & { error?: string };
         if (!res.ok) {
-          throw new Error(data.error ?? "Save failed");
+          throw new Error(data.error ?? tCommon("saveFailed"));
         }
         setSettings(data);
-        toast.success("Homepage saved");
+        toast.success(t("saved"));
         return true;
       } catch (error) {
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : "Could not save homepage settings"
-        );
+        toast.error(error instanceof Error ? error.message : t("saveFailed"));
         return false;
       } finally {
         setSaving(false);
       }
     },
-    [settings]
+    [settings, t, tCommon]
   );
 
   const handleSave = () => {
@@ -84,29 +80,25 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
   };
 
   return (
-    <Can
-      module="website"
-      action="edit"
-      fallback={<p className="text-sm text-muted-foreground">Access denied.</p>}
-    >
+    <Can module="website" action="edit" fallback={<AccessDenied />}>
       <div>
         <Link
           href="/admin/website/home"
           className="mb-4 inline-flex text-sm text-muted-foreground transition-colors hover:text-oboya-blue-dark"
         >
-          ← All homepage sections
+          {t("backToSections")}
         </Link>
 
         <AdminPageHeader
-          title={meta.title}
-          description={meta.description}
+          title={t(`sections.${section}.title`)}
+          description={t(`sections.${section}.description`)}
           actions={
             <Button
               onClick={handleSave}
               disabled={saving}
               className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
             >
-              {saving ? "Saving…" : "Save"}
+              {saving ? tCommon("saving") : tCommon("save")}
             </Button>
           }
         />

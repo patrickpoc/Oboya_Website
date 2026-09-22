@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { Input } from "@/components/ui/input";
@@ -12,6 +13,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { toast } from "sonner";
 
 export default function ResetPasswordPage() {
+  const t = useTranslations("admin.auth");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,14 +21,14 @@ export default function ResetPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirm) {
-      toast.error("Passwords do not match");
+      toast.error(t("passwordsMismatch"));
       return;
     }
 
     setLoading(true);
 
     if (!isSupabaseConfigured()) {
-      toast.success("Password updated (mock)");
+      toast.success(t("passwordUpdatedMock"));
       window.location.href = "/admin/login";
       return;
     }
@@ -39,7 +41,7 @@ export default function ResetPasswordPage() {
       toast.error(error.message);
       return;
     }
-    toast.success("Password updated successfully");
+    toast.success(t("passwordUpdated"));
     window.location.href = "/admin/login";
   };
 
@@ -48,12 +50,12 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-sm rounded-2xl border border-border/60 bg-white p-6 shadow-[var(--shadow-card)]">
         <Logo className="mb-4 h-8 w-auto" />
         <h1 className="font-display text-xl font-semibold text-oboya-blue-dark">
-          Set new password
+          {t("resetTitle")}
         </h1>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="password">New password</Label>
+            <Label htmlFor="password">{t("newPassword")}</Label>
             <Input
               id="password"
               type="password"
@@ -64,7 +66,7 @@ export default function ResetPasswordPage() {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="confirm">Confirm password</Label>
+            <Label htmlFor="confirm">{t("confirmPassword")}</Label>
             <Input
               id="confirm"
               type="password"
@@ -74,7 +76,7 @@ export default function ResetPasswordPage() {
             />
           </div>
           <Button type="submit" className="w-full rounded-full" disabled={loading}>
-            {loading ? "Updating…" : "Update password"}
+            {loading ? t("updating") : t("updatePassword")}
           </Button>
         </form>
 
@@ -82,7 +84,7 @@ export default function ResetPasswordPage() {
           href="/admin/login"
           className="mt-4 block text-center text-sm text-oboya-green hover:underline"
         >
-          Back to login
+          {t("backToLogin")}
         </Link>
       </div>
     </Container>

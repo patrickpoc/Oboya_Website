@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
@@ -23,6 +24,7 @@ import type {
 } from "@/lib/cms/repositories/faqs-repository";
 import type { CmsLocale } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
+import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
 
 type DrawerMode = "category" | "faq" | null;
 
@@ -32,7 +34,7 @@ async function persistCategory(category: CmsFaqCategory) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ type: "category", data: category }),
   });
-  if (!res.ok) throw new Error("Failed to save category");
+  if (!res.ok) throw new Error("saveCategoryFailed");
 }
 
 async function persistFaq(faq: CmsFaqItem) {
@@ -41,20 +43,22 @@ async function persistFaq(faq: CmsFaqItem) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ type: "faq", data: faq }),
   });
-  if (!res.ok) throw new Error("Failed to save FAQ");
+  if (!res.ok) throw new Error("saveFaqFailed");
 }
 
 async function removeCategory(id: string) {
   const res = await fetch(`/api/cms/faqs?type=category&id=${id}`, { method: "DELETE" });
-  if (!res.ok) throw new Error("Failed to delete category");
+  if (!res.ok) throw new Error("deleteCategoryFailed");
 }
 
 async function removeFaq(id: string) {
   const res = await fetch(`/api/cms/faqs?type=faq&id=${id}`, { method: "DELETE" });
-  if (!res.ok) throw new Error("Failed to delete FAQ");
+  if (!res.ok) throw new Error("deleteFaqFailed");
 }
 
 export default function FaqsAdminPage() {
+  const t = useTranslations("admin.website.faqs");
+  const tCommon = useTranslations("admin.common");
   const [categories, setCategories] = useState<CmsFaqCategory[]>([]);
   const [faqs, setFaqs] = useState<CmsFaqItem[]>([]);
   const [locale, setLocale] = useState<CmsLocale>("en");
@@ -68,7 +72,7 @@ export default function FaqsAdminPage() {
 
   const refresh = async () => {
     const res = await fetch("/api/cms/faqs");
-    if (!res.ok) throw new Error("Failed to load FAQs");
+    if (!res.ok) throw new Error(t("loadFailedError"));
     const data = (await res.json()) as {
       categories: CmsFaqCategory[];
       faqs: CmsFaqItem[];
@@ -82,7 +86,7 @@ export default function FaqsAdminPage() {
       try {
         await refresh();
       } catch {
-        toast.error("Could not load FAQs");
+        toast.error(t("loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -160,10 +164,10 @@ export default function FaqsAdminPage() {
     try {
       await persistCategory(editingCategoryDraft);
       await refresh();
-      toast.success("Category saved");
+      toast.success(t("categorySaved"));
       closeDrawer();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save");
+    } catch {
+      toast.error(t("saveCategoryFailed"));
     }
   };
 
@@ -171,10 +175,10 @@ export default function FaqsAdminPage() {
     try {
       await removeCategory(id);
       await refresh();
-      toast.success("Category deleted");
+      toast.success(t("categoryDeleted"));
       if (editingCategoryDraft?.id === id) closeDrawer();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete");
+    } catch {
+      toast.error(t("deleteCategoryFailed"));
     }
   };
 
@@ -183,10 +187,10 @@ export default function FaqsAdminPage() {
     try {
       await persistFaq(editingFaq);
       await refresh();
-      toast.success("FAQ saved");
+      toast.success(t("faqSaved"));
       closeDrawer();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save");
+    } catch {
+      toast.error(t("saveFaqFailed"));
     }
   };
 
@@ -194,40 +198,40 @@ export default function FaqsAdminPage() {
     try {
       await removeFaq(id);
       await refresh();
-      toast.success("FAQ deleted");
+      toast.success(t("faqDeleted"));
       if (editingFaq?.id === id) closeDrawer();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete");
+    } catch {
+      toast.error(t("deleteFaqFailed"));
     }
   };
 
   const faqColumns = [
     {
       key: "question",
-      header: "Question",
+      header: t("question"),
       sortable: true,
       cell: (row: CmsFaqItem) => (
         <span className="line-clamp-2 font-medium">
-          {row.question.en || "Untitled FAQ"}
+          {row.question.en || t("untitledFaq")}
         </span>
       ),
     },
     {
       key: "categoryId",
-      header: "Category",
+      header: tCommon("category"),
       cell: (row: CmsFaqItem) => (
         <span className="text-muted-foreground">{categoryName(row.categoryId)}</span>
       ),
     },
     {
       key: "order",
-      header: "Order",
+      header: t("orderCol"),
       sortable: true,
       cell: (row: CmsFaqItem) => row.order,
     },
     {
       key: "status",
-      header: "Status",
+      header: tCommon("status"),
       cell: (row: CmsFaqItem) => (
         <Badge variant={row.status === "published" ? "default" : "secondary"}>
           {row.status}
@@ -237,19 +241,19 @@ export default function FaqsAdminPage() {
   ];
 
   if (loading) {
-    return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
+    return <div className="min-h-[40vh]" aria-hidden />;
   }
 
   return (
     <Can
       module="website"
       action="view"
-      fallback={<p className="text-sm text-muted-foreground">Access denied.</p>}
+      fallback={<AccessDenied />}
     >
       <div>
         <AdminPageHeader
-          title="FAQs"
-          description="Manage FAQ categories and published questions for the public /faqs page."
+          title={t("title")}
+          description={t("description")}
           actions={
             <div className="flex flex-wrap gap-2">
               <Button
@@ -258,14 +262,14 @@ export default function FaqsAdminPage() {
                 className="gap-1.5 rounded-full"
               >
                 <Plus className="size-4" />
-                New category
+                {t("addCategory")}
               </Button>
               <Button
                 onClick={openNewFaq}
                 className="gap-1.5 rounded-full bg-oboya-green text-white hover:bg-oboya-green/90"
               >
                 <Plus className="size-4" />
-                New FAQ
+                {t("newFaq")}
               </Button>
             </div>
           }
@@ -299,7 +303,7 @@ export default function FaqsAdminPage() {
                     size="icon"
                     className="size-8 shrink-0 text-destructive"
                     onClick={() => handleDeleteCategory(category.id)}
-                    aria-label="Delete category"
+                    aria-label={t("deleteCategoryAria")}
                   >
                     <Trash2 className="size-3.5" />
                   </Button>
@@ -343,11 +347,11 @@ export default function FaqsAdminPage() {
               data={tableRows}
               columns={faqColumns}
               searchKey="questionText"
-              searchPlaceholder="Search FAQs…"
+              searchPlaceholder={t("searchPlaceholder")}
               getRowId={(row) => row.id}
               onRowClick={(row) => openEditFaq(row)}
               pageSize={12}
-              emptyMessage="No FAQs in this category."
+              emptyMessage={t("emptyCategory")}
             />
           </div>
         </div>
@@ -355,15 +359,15 @@ export default function FaqsAdminPage() {
         <FormDrawer
           open={drawerMode === "category" && !!editingCategoryDraft}
           onClose={closeDrawer}
-          title="Edit category"
-          description="Localized titles appear on the public FAQs page."
+          title={t("editCategory")}
+          description={t("editCategoryDesc")}
           footer={
             <div className="flex gap-2">
               <Button
                 onClick={handleSaveCategory}
                 className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
               >
-                Save category
+                {t("saveCategory")}
               </Button>
               {editingCategoryDraft && (
                 <Button
@@ -372,7 +376,7 @@ export default function FaqsAdminPage() {
                   className="gap-1.5 rounded-full text-destructive"
                 >
                   <Trash2 className="size-4" />
-                  Delete
+                  {tCommon("delete")}
                 </Button>
               )}
             </div>
@@ -382,7 +386,7 @@ export default function FaqsAdminPage() {
             <div className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label>Slug</Label>
+                  <Label>{tCommon("slug")}</Label>
                   <Input
                     value={editingCategoryDraft.slug}
                     onChange={(e) =>
@@ -394,7 +398,7 @@ export default function FaqsAdminPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Order</Label>
+                  <Label>{t("order")}</Label>
                   <Input
                     type="number"
                     value={editingCategoryDraft.order}
@@ -411,7 +415,7 @@ export default function FaqsAdminPage() {
               <LocaleFieldTabs value={locale} onChange={setLocale}>
                 {(loc) => (
                   <div className="space-y-1.5">
-                    <Label>Title</Label>
+                    <Label>{tCommon("title")}</Label>
                     <Input
                       value={editingCategoryDraft.title[loc]}
                       onChange={(e) =>
@@ -434,8 +438,8 @@ export default function FaqsAdminPage() {
         <FormDrawer
           open={drawerMode === "faq" && !!editingFaq}
           onClose={closeDrawer}
-          title={editingFaq?.question.en ? "Edit FAQ" : "New FAQ"}
-          description="Questions and answers support all site locales."
+          title={editingFaq?.question.en ? t("editFaq") : t("newFaq")}
+          description={t("faqDrawerDesc")}
           width="lg"
           footer={
             <div className="flex gap-2">
@@ -443,7 +447,7 @@ export default function FaqsAdminPage() {
                 onClick={handleSaveFaq}
                 className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
               >
-                Save FAQ
+                {t("saveFaq")}
               </Button>
               {editingFaq && (
                 <Button
@@ -452,7 +456,7 @@ export default function FaqsAdminPage() {
                   className="gap-1.5 rounded-full text-destructive"
                 >
                   <Trash2 className="size-4" />
-                  Delete
+                  {tCommon("delete")}
                 </Button>
               )}
             </div>
@@ -462,7 +466,7 @@ export default function FaqsAdminPage() {
             <div className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label>Category</Label>
+                  <Label>{tCommon("category")}</Label>
                   <select
                     value={editingFaq.categoryId}
                     onChange={(e) =>
@@ -478,7 +482,7 @@ export default function FaqsAdminPage() {
                   </select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Order</Label>
+                  <Label>{t("order")}</Label>
                   <Input
                     type="number"
                     value={editingFaq.order}
@@ -493,7 +497,7 @@ export default function FaqsAdminPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label>Status</Label>
+                <Label>{tCommon("status")}</Label>
                 <select
                   value={editingFaq.status}
                   onChange={(e) =>
@@ -504,13 +508,13 @@ export default function FaqsAdminPage() {
                   }
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
                 >
-                  <option value="published">Published</option>
-                  <option value="draft">Draft</option>
+                  <option value="published">{tCommon("published")}</option>
+                  <option value="draft">{tCommon("draft")}</option>
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <Label>Keywords (comma-separated)</Label>
+                <Label>{t("keywords")}</Label>
                 <Input
                   value={editingFaq.keywords.join(", ")}
                   onChange={(e) =>
@@ -522,7 +526,7 @@ export default function FaqsAdminPage() {
                         .filter(Boolean),
                     })
                   }
-                  placeholder="shop, products, samples"
+                  placeholder={t("tagsPlaceholder")}
                 />
               </div>
 
@@ -530,7 +534,7 @@ export default function FaqsAdminPage() {
                 {(loc) => (
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label>Question</Label>
+                      <Label>{t("question")}</Label>
                       <Input
                         value={editingFaq.question[loc]}
                         onChange={(e) =>
@@ -545,7 +549,7 @@ export default function FaqsAdminPage() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Answer</Label>
+                      <Label>{t("answer")}</Label>
                       <Textarea
                         rows={5}
                         value={editingFaq.answer[loc]}

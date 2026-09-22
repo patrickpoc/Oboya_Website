@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { RegistrationSection } from "@/components/admin/marketplace/RegistrationSection";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
@@ -14,6 +15,7 @@ interface ProductMarketsCardProps {
 }
 
 export function ProductMarketsCard({ product, countries, onUpdate }: ProductMarketsCardProps) {
+  const t = useTranslations("admin.products.editor");
   const enabledCountries = useMemo(() => {
     const map = product.enabledCountries ?? product.availability;
     return countries.filter((country) => Boolean(map[country.code]));
@@ -36,27 +38,30 @@ export function ProductMarketsCard({ product, countries, onUpdate }: ProductMark
   return (
     <Card>
       <CardHeader className="pb-4">
-        <CardTitle>Market availability</CardTitle>
-        <CardDescription>Countries where this product can be sold.</CardDescription>
+        <CardTitle>{t("marketsTitle")}</CardTitle>
+        <CardDescription>{t("marketsDescription")}</CardDescription>
       </CardHeader>
 
       <CardContent>
         <RegistrationSection
-          title="Markets"
-          description="Enable countries after pricing is configured."
+          title={t("marketsSection")}
+          description={t("marketsHint")}
           isFirst
         >
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-3 text-xs">
               <span className="text-muted-foreground">
-                {enabledCountries.length} of {countries.length} enabled
+                {t("enabledCount", {
+                  enabled: enabledCountries.length,
+                  total: countries.length,
+                })}
               </span>
               <button
                 type="button"
                 className="text-muted-foreground hover:text-foreground"
                 onClick={() => setAllCountries(true)}
               >
-                Enable all
+                {t("enableAll")}
               </button>
               <span className="text-muted-foreground">·</span>
               <button
@@ -64,7 +69,7 @@ export function ProductMarketsCard({ product, countries, onUpdate }: ProductMark
                 className="text-muted-foreground hover:text-foreground"
                 onClick={() => setAllCountries(false)}
               >
-                Disable all
+                {t("disableAll")}
               </button>
             </div>
 

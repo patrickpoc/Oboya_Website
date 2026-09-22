@@ -22,8 +22,8 @@ export default function AdminLayout({
         <AdminIntlProvider>
           {children}
           <CookieConsentBanner />
+          <Toaster position="top-right" richColors />
         </AdminIntlProvider>
-        <Toaster position="top-right" richColors />
         <ConditionalAnalytics />
       </body>
     </html>

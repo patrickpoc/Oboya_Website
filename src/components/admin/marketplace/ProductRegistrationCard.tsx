@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { LocalizedFieldGrid } from "@/components/admin/marketplace/LocalizedFieldGrid";
 import { RegistrationSection } from "@/components/admin/marketplace/RegistrationSection";
 import { PRODUCT_EDITOR_SELECT_CLASS } from "@/components/admin/marketplace/product-editor.constants";
@@ -23,6 +24,8 @@ export function ProductRegistrationCard({
   currenciesLoading = false,
   onUpdate,
 }: ProductRegistrationCardProps) {
+  const t = useTranslations("admin.products.editor");
+
   const setCurrencyPrice = (currency: string, value: string) => {
     const nextPrices = { ...product.prices };
     if (value.trim() === "") {
@@ -40,40 +43,37 @@ export function ProductRegistrationCard({
   return (
     <Card>
       <CardHeader className="pb-4">
-        <CardTitle>Product registration</CardTitle>
-        <CardDescription>Core product data: name, SKU, prices and stock.</CardDescription>
+        <CardTitle>{t("registrationTitle")}</CardTitle>
+        <CardDescription>{t("registrationDescription")}</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-5">
         <RegistrationSection
-          title="Product name"
-          description="Displayed on catalog cards and product pages."
+          title={t("productName")}
+          description={t("productNameHint")}
           isFirst
         >
           <LocalizedFieldGrid
-            label="Name"
+            label={t("name")}
             value={product.name}
             onChange={updateName}
-            placeholder="e.g. Ecovaso Premium 15L"
+            placeholder={t("namePlaceholder")}
           />
         </RegistrationSection>
 
-        <RegistrationSection
-          title="SKU & MOQ"
-          description="Reference code and minimum order quantity."
-        >
+        <RegistrationSection title={t("skuMoq")} description={t("skuMoqHint")}>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="product-sku">SKU</Label>
+              <Label htmlFor="product-sku">{t("sku")}</Label>
               <Input
                 id="product-sku"
                 value={product.sku}
                 onChange={(e) => onUpdate({ sku: e.target.value })}
-                placeholder="e.g. SKU-001"
+                placeholder={t("skuPlaceholder")}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="product-moq">MOQ</Label>
+              <Label htmlFor="product-moq">{t("moq")}</Label>
               <Input
                 id="product-moq"
                 type="number"
@@ -85,20 +85,17 @@ export function ProductRegistrationCard({
           </div>
         </RegistrationSection>
 
-        <RegistrationSection
-          title="Price"
-          description="Currencies configured in Marketplace → Currencies. Empty or 0 hides the product in that currency."
-        >
+        <RegistrationSection title={t("price")} description={t("priceHint")}>
           {currenciesLoading ? (
-            <p className="text-sm text-muted-foreground">Loading currencies…</p>
+            <p className="text-sm text-muted-foreground">{t("loadingCurrencies")}</p>
           ) : currencies.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No currencies configured.{" "}
+              {t("noCurrencies")}{" "}
               <Link
                 href="/admin/marketplace/currencies"
                 className="text-oboya-green underline-offset-2 hover:underline"
               >
-                Add them in Currencies
+                {t("addCurrenciesLink")}
               </Link>
               .
             </p>
@@ -113,7 +110,7 @@ export function ProductRegistrationCard({
                     min={0}
                     value={product.prices[currency] ?? ""}
                     onChange={(e) => setCurrencyPrice(currency, e.target.value)}
-                    placeholder="Hidden"
+                    placeholder={t("priceHidden")}
                   />
                 </div>
               ))}
@@ -121,10 +118,10 @@ export function ProductRegistrationCard({
           )}
         </RegistrationSection>
 
-        <RegistrationSection title="Stock" description="Inventory signal shown to buyers.">
+        <RegistrationSection title={t("stock")} description={t("stockHint")}>
           <div className="grid gap-3 rounded-lg bg-muted/30 p-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-1.5">
-              <Label htmlFor="product-stock-status">Stock status</Label>
+              <Label htmlFor="product-stock-status">{t("stockStatus")}</Label>
               <select
                 id="product-stock-status"
                 value={product.stockStatus}
@@ -133,9 +130,9 @@ export function ProductRegistrationCard({
                 }
                 className={PRODUCT_EDITOR_SELECT_CLASS}
               >
-                <option value="in_stock">In stock</option>
-                <option value="limited">Limited</option>
-                <option value="on_request">On request</option>
+                <option value="in_stock">{t("stockInStock")}</option>
+                <option value="limited">{t("stockLimited")}</option>
+                <option value="on_request">{t("stockOnRequest")}</option>
               </select>
             </div>
 
@@ -147,12 +144,12 @@ export function ProductRegistrationCard({
                 checked={product.unlimitedStock}
                 onChange={(e) => onUpdate({ unlimitedStock: e.target.checked })}
               />
-              <Label htmlFor="unlimited-stock">Unlimited stock</Label>
+              <Label htmlFor="unlimited-stock">{t("unlimitedStock")}</Label>
             </div>
 
             {!product.unlimitedStock && (
               <div className="space-y-1.5">
-                <Label htmlFor="product-stock-quantity">Stock quantity</Label>
+                <Label htmlFor="product-stock-quantity">{t("stockQuantity")}</Label>
                 <Input
                   id="product-stock-quantity"
                   type="number"

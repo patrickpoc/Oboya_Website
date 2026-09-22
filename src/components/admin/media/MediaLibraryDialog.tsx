@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { Search, Tag, X } from "lucide-react";
@@ -27,10 +28,13 @@ export type MediaLibraryItem = {
 
 type MediaTypeFilter = "all" | MediaAsset["type"];
 
-function itemFolderLabel(folderId: string) {
-  if (folderId === FOLDER_ECOVASO_PRODUCTS) return "Ecovaso Products";
-  if (folderId === FOLDER_PRODUCTS) return "Products";
-  if (folderId === FOLDER_WEBSITE_FILES) return "Website Files";
+function itemFolderLabel(
+  folderId: string,
+  labels: { ecovaso: string; products: string; website: string }
+) {
+  if (folderId === FOLDER_ECOVASO_PRODUCTS) return labels.ecovaso;
+  if (folderId === FOLDER_PRODUCTS) return labels.products;
+  if (folderId === FOLDER_WEBSITE_FILES) return labels.website;
   return folderId;
 }
 
@@ -75,6 +79,16 @@ export function MediaLibraryDialog({
   onClose: () => void;
   defaultFolderId?: string;
 }) {
+  const t = useTranslations("admin.media");
+  const tCommon = useTranslations("admin.common");
+  const folderLabels = useMemo(
+    () => ({
+      ecovaso: t("folderEcovaso"),
+      products: t("folderProducts"),
+      website: t("folderWebsite"),
+    }),
+    [t]
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFolder, setSelectedFolder] = useState<string | "all">(
     defaultFolderId || "all"
@@ -103,11 +117,11 @@ export function MediaLibraryDialog({
   const folderOptions = useMemo(() => {
     const ids = new Set(items.map((item) => item.folder).filter(Boolean) as string[]);
     return Array.from(ids).sort((a, b) => {
-      const nameA = folderNameById.get(a) ?? itemFolderLabel(a);
-      const nameB = folderNameById.get(b) ?? itemFolderLabel(b);
+      const nameA = folderNameById.get(a) ?? itemFolderLabel(a, folderLabels);
+      const nameB = folderNameById.get(b) ?? itemFolderLabel(b, folderLabels);
       return nameA.localeCompare(nameB);
     });
-  }, [items, folderNameById]);
+  }, [items, folderNameById, folderLabels]);
 
   const filteredItems = useMemo(() => {
     const q = searchQuery.trim();
@@ -157,30 +171,30 @@ export function MediaLibraryDialog({
       <button
         type="button"
         className="absolute inset-0 bg-oboya-blue-dark/40 backdrop-blur-[2px]"
-        aria-label="Close media library"
+        aria-label={t("closeLibrary")}
         onClick={onClose}
       />
       <div
         role="dialog"
         aria-modal
-        aria-label="Media library"
+        aria-label={t("dialogTitle")}
         className="relative z-10 flex max-h-[min(85vh,720px)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border/60 bg-white shadow-2xl"
       >
         <div className="border-b border-border/60 px-5 py-4">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h3 className="font-display text-lg font-semibold text-oboya-blue-dark">
-                Media library
+                {t("dialogTitle")}
               </h3>
               <p className="text-xs text-muted-foreground">
-                Search by name or tag, then filter by folder and media type
+                {t("dialogDescription")}
               </p>
             </div>
             <button
               type="button"
               onClick={onClose}
               className="rounded-full p-1.5 text-muted-foreground hover:bg-muted"
-              aria-label="Close"
+              aria-label={tCommon("close")}
             >
               <X className="size-4" />
             </button>
@@ -191,23 +205,23 @@ export function MediaLibraryDialog({
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by name, tag or folder…"
+              placeholder={t("dialogSearchPlaceholder")}
               className="pl-9"
               autoFocus
             />
           </div>
 
           <div className="mt-3 flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase">Folder:</span>
+            <span className="text-[11px] font-medium text-muted-foreground uppercase">{t("folder")}</span>
             <FilterChipButton
-              label="All"
+              label={tCommon("all")}
               active={selectedFolder === "all"}
               onClick={() => setSelectedFolder("all")}
             />
             {folderOptions.map((folderId) => (
               <FilterChipButton
                 key={folderId}
-                label={folderNameById.get(folderId) ?? itemFolderLabel(folderId)}
+                label={folderNameById.get(folderId) ?? itemFolderLabel(folderId, folderLabels)}
                 active={selectedFolder === folderId}
                 onClick={() => setSelectedFolder(folderId)}
               />
@@ -215,11 +229,19 @@ export function MediaLibraryDialog({
           </div>
 
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase">Type:</span>
+            <span className="text-[11px] font-medium text-muted-foreground uppercase">{t("type")}</span>
             {(["all", "image", "document", "video"] as const).map((type) => (
               <FilterChipButton
                 key={type}
-                label={type === "all" ? "All" : `${type}s`}
+                label={
+                  type === "all"
+                    ? tCommon("all")
+                    : type === "image"
+                      ? t("typeImages")
+                      : type === "document"
+                        ? t("typeDocuments")
+                        : t("typeVideos")
+                }
                 active={typeFilter === type}
                 onClick={() => setTypeFilter(type)}
               />
@@ -228,7 +250,7 @@ export function MediaLibraryDialog({
 
           {availableTags.length > 0 && (
             <div className="mt-2 flex max-h-24 flex-wrap items-center gap-1.5 overflow-y-auto">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase">Tags:</span>
+              <span className="text-[11px] font-medium text-muted-foreground uppercase">{t("tags")}</span>
               {availableTags.map((tag) => (
                 <FilterChipButton
                   key={tag}
@@ -244,7 +266,7 @@ export function MediaLibraryDialog({
                   className="text-[11px] text-muted-foreground hover:text-foreground"
                   onClick={() => setSelectedTags([])}
                 >
-                  Clear tags
+                  {t("clearTags")}
                 </button>
               )}
             </div>
@@ -253,12 +275,12 @@ export function MediaLibraryDialog({
 
         <div className="flex-1 overflow-y-auto p-5">
           <p className="mb-3 text-xs text-muted-foreground">
-            {filteredItems.length} result{filteredItems.length === 1 ? "" : "s"}
-            {searchQuery ? ` for "${searchQuery}"` : ""}
+            {t("resultsCount", { count: filteredItems.length })}
+            {searchQuery ? t("resultsFor", { query: searchQuery }) : ""}
           </p>
 
           {filteredItems.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No matching media found.</p>
+            <p className="text-sm text-muted-foreground">{t("noMatching")}</p>
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
               {filteredItems.map(({ item }) => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { CMS_LOCALES } from "@/contexts/AdminContext";
 import type { CmsLocale, LocalizedString } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
@@ -15,11 +16,12 @@ interface LocaleFieldTabsProps {
  * Does NOT nest a Tabs provider — safe to use inside section Tabs.
  */
 export function LocaleFieldTabs({ value, onChange, children }: LocaleFieldTabsProps) {
+  const t = useTranslations("admin.topbar");
   return (
     <div className="space-y-4">
       <div
         role="tablist"
-        aria-label="Language"
+        aria-label={t("language")}
         className="sticky top-14 z-10 -mx-1 inline-flex h-auto min-h-11 flex-wrap items-center gap-1 rounded-lg border border-border/60 bg-muted/40 p-1 backdrop-blur-sm"
       >
         {CMS_LOCALES.map((loc) => {

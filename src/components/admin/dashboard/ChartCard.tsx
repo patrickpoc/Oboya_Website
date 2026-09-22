@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   Bar,
   BarChart,
@@ -14,10 +15,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function VisitorsChart({ data }: { data: { month: string; visitors: number }[] }) {
+  const t = useTranslations("admin.dashboard");
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Visitors (mock)</CardTitle>
+        <CardTitle>{t("visitorsChart")}</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={220}>
@@ -45,10 +47,11 @@ export function QuotesChart({
 }: {
   data: { month: string; quotes: number }[];
 }) {
+  const t = useTranslations("admin.dashboard");
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Quote Requests (mock)</CardTitle>
+        <CardTitle>{t("quotesChart")}</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={220}>

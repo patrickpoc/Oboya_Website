@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
@@ -10,11 +11,12 @@ export function FormPiiActions({
   id: string;
   onDone: () => void;
 }) {
+  const t = useTranslations("admin.forms.pii");
+  const tCommon = useTranslations("admin.common");
+
   const run = async (anonymize: boolean) => {
     const confirmed = window.confirm(
-      anonymize
-        ? "Anonymize this submission? Personal fields will be replaced."
-        : "Permanently delete this submission?"
+      anonymize ? t("confirmAnonymize") : t("confirmDelete")
     );
     if (!confirmed) return;
     try {
@@ -25,19 +27,19 @@ export function FormPiiActions({
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(body?.error ?? "Request failed");
+        throw new Error(body?.error ?? tCommon("requestFailed"));
       }
-      toast.success(anonymize ? "Submission anonymized" : "Submission deleted");
+      toast.success(anonymize ? t("anonymized") : t("deleted"));
       onDone();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not update");
+      toast.error(error instanceof Error ? error.message : tCommon("couldNotUpdate"));
     }
   };
 
   return (
     <>
       <Button type="button" variant="outline" size="sm" onClick={() => void run(true)}>
-        Anonymize
+        {t("anonymize")}
       </Button>
       <Button
         type="button"
@@ -46,7 +48,7 @@ export function FormPiiActions({
         className="text-oboya-orange"
         onClick={() => void run(false)}
       >
-        Delete
+        {tCommon("delete")}
       </Button>
     </>
   );

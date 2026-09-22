@@ -1,10 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import type { HomepageSectionSlug } from "@/lib/cms/homepage-sections";
-import { HOMEPAGE_SECTION_META } from "@/lib/cms/homepage-sections";
 import type { HomepageSectionEditorProps } from "../shared";
 
 const VISIBILITY_SECTION_IDS = [
@@ -17,6 +17,8 @@ const VISIBILITY_SECTION_IDS = [
 ] as const satisfies readonly HomepageSectionSlug[];
 
 export function HomepageSettingsEditor({ settings, setSettings }: HomepageSectionEditorProps) {
+  const t = useTranslations("admin.website.home");
+
   const toggleSection = (id: (typeof VISIBILITY_SECTION_IDS)[number]) => {
     setSettings((prev) => ({
       ...prev,
@@ -31,7 +33,7 @@ export function HomepageSettingsEditor({ settings, setSettings }: HomepageSectio
     <div className="max-w-3xl space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Section visibility</CardTitle>
+          <CardTitle>{t("sectionVisibility")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {VISIBILITY_SECTION_IDS.map((id) => (
@@ -39,9 +41,7 @@ export function HomepageSettingsEditor({ settings, setSettings }: HomepageSectio
               key={id}
               className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
             >
-              <Label htmlFor={`section-${id}`}>
-                {HOMEPAGE_SECTION_META[id].title}
-              </Label>
+              <Label htmlFor={`section-${id}`}>{t(`sections.${id}.title`)}</Label>
               <Switch
                 id={`section-${id}`}
                 checked={settings.sections[id]?.enabled ?? true}
@@ -54,13 +54,11 @@ export function HomepageSettingsEditor({ settings, setSettings }: HomepageSectio
 
       <Card>
         <CardHeader>
-          <CardTitle>Animations</CardTitle>
+          <CardTitle>{t("animations")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <Label htmlFor="animations-enabled">
-              Enable homepage animations (marquees, motion, counters, scroll-telling)
-            </Label>
+            <Label htmlFor="animations-enabled">{t("animationsLabel")}</Label>
             <Switch
               id="animations-enabled"
               checked={settings.animations?.enabled ?? true}

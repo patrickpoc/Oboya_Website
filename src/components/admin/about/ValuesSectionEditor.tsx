@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,16 +21,18 @@ export function ValuesSectionEditor({
   setSettings,
   locale,
 }: ValuesSectionEditorProps) {
+  const t = useTranslations("admin.website.about");
+  const tCommon = useTranslations("admin.common");
   const values = settings.values;
 
   return (
     <Card className="max-w-4xl">
       <CardHeader>
-        <CardTitle>Values</CardTitle>
+        <CardTitle>{t("fields.valueCard")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="flex items-center justify-between gap-4 rounded-lg border px-3 py-2">
-          <Label htmlFor="values-enabled">Section enabled</Label>
+          <Label htmlFor="values-enabled">{t("fields.sectionEnabled")}</Label>
           <Switch
             id="values-enabled"
             checked={settings.sections.values.enabled}
@@ -47,7 +50,7 @@ export function ValuesSectionEditor({
 
         <div className="space-y-1.5">
           <Label>
-            Section title{" "}
+            {t("fields.sectionTitle")}{" "}
             <span className="text-muted-foreground">({locale})</span>
           </Label>
           <Input
@@ -71,7 +74,7 @@ export function ValuesSectionEditor({
             </p>
             <div className="space-y-1.5">
               <Label>
-                Title{" "}
+                {tCommon("title")}{" "}
                 <span className="text-muted-foreground">({locale})</span>
               </Label>
               <Input
@@ -97,7 +100,7 @@ export function ValuesSectionEditor({
             </div>
             <div className="space-y-1.5">
               <Label>
-                Description{" "}
+                {tCommon("description")}{" "}
                 <span className="text-muted-foreground">({locale})</span>
               </Label>
               <textarea
@@ -124,7 +127,7 @@ export function ValuesSectionEditor({
               />
             </div>
             <ImageField
-              label="Image"
+              label={tCommon("image")}
               value={item.image?.src ?? ""}
               onChange={(url) => {
                 const items = values.items.map((entry, i) =>
@@ -184,7 +187,7 @@ export function ValuesSectionEditor({
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Object position</Label>
+              <Label>{tCommon("objectPosition")}</Label>
               <Input
                 value={item.objectPosition ?? "center center"}
                 onChange={(e) => {
@@ -198,7 +201,7 @@ export function ValuesSectionEditor({
                     values: { ...values, items },
                   });
                 }}
-                placeholder="center 40%"
+                placeholder={tCommon("objectPositionPlaceholder")}
               />
             </div>
           </div>

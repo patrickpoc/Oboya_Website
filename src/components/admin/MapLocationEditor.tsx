@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MapLocationInfoPanel } from "@/components/sections/MapLocationInfoPanel";
 import { InteractiveWorldMap } from "@/components/sections/InteractiveWorldMap";
@@ -33,6 +34,8 @@ const isSupabaseConfigured =
 type SaveState = "idle" | "saving" | "saved" | "error";
 
 export function MapLocationEditor() {
+  const t = useTranslations("admin.globalPresence.map");
+  const tCommon = useTranslations("admin.common");
   const [data, setData] = useState<MapLocationsData | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedOfficeId, setSelectedOfficeId] = useState<string | null>(null);
@@ -49,7 +52,7 @@ export function MapLocationEditor() {
       try {
         const response = await fetch("/api/map-locations");
         if (!response.ok) {
-          throw new Error("Failed to load map locations");
+          throw new Error(t("loadFailed"));
         }
         const json = normalizeMapLocations(await response.json());
         if (!cancelled) {
@@ -61,7 +64,7 @@ export function MapLocationEditor() {
       } catch (loadErr) {
         if (!cancelled) {
           setLoadError(
-            loadErr instanceof Error ? loadErr.message : "Failed to load"
+            loadErr instanceof Error ? loadErr.message : tCommon("loadFailed")
           );
         }
       }
@@ -252,7 +255,7 @@ export function MapLocationEditor() {
 
       if (!response.ok) {
         const message =
-          result.errors?.join(", ") ?? result.error ?? "Failed to save";
+          result.errors?.join(", ") ?? result.error ?? tCommon("saveFailed");
         throw new Error(message);
       }
 
@@ -260,7 +263,7 @@ export function MapLocationEditor() {
       setTimeout(() => setSaveState("idle"), 2000);
     } catch (saveErr) {
       setSaveState("error");
-      setError(saveErr instanceof Error ? saveErr.message : "Failed to save");
+      setError(saveErr instanceof Error ? saveErr.message : tCommon("saveFailed"));
     }
   }, [data]);
 
@@ -282,7 +285,7 @@ export function MapLocationEditor() {
   if (!data) {
     return (
       <Container className="py-12">
-        <p className="text-muted-foreground">Loading map locations…</p>
+        <p className="text-muted-foreground">{t("loading")}</p>
       </Container>
     );
   }
@@ -296,21 +299,20 @@ export function MapLocationEditor() {
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="font-display text-2xl font-semibold text-oboya-blue-dark">
-              Map locations
+              {t("locationsTitle")}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Drag markers to reposition. Click the map to add a location. Each
-              country can have multiple offices or factories.
+              {t("locationsDesc")}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {isSupabaseConfigured && (
               <Button type="button" variant="ghost" onClick={() => void handleLogout()}>
-                Sign out
+                {tCommon("signOut")}
               </Button>
             )}
             <Button type="button" variant="outline" onClick={handleAddLocation}>
-              Add location
+              {t("addLocation")}
             </Button>
             <Button
               type="button"
@@ -318,10 +320,10 @@ export function MapLocationEditor() {
               disabled={saveState === "saving"}
             >
               {saveState === "saving"
-                ? "Saving…"
+                ? tCommon("saving")
                 : saveState === "saved"
-                  ? "Saved"
-                  : "Save changes"}
+                  ? tCommon("saved")
+                  : tCommon("saveChanges")}
             </Button>
           </div>
         </div>
@@ -337,10 +339,10 @@ export function MapLocationEditor() {
             <div className="rounded-2xl border border-border/60 bg-white p-4 shadow-[var(--shadow-card)]">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <p className="text-sm font-medium text-oboya-blue-dark">
-                  Interactive map
+                  {t("interactiveMap")}
                 </p>
                 <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                  Preview locale
+                  {t("previewLocale")}
                   <select
                     value={previewLocale}
                     onChange={(event) =>
@@ -359,7 +361,7 @@ export function MapLocationEditor() {
               <InteractiveWorldMap
                 locations={previewLocations}
                 connections={data?.connections}
-                mapAlt="Admin map editor"
+                mapAlt={t("mapAlt")}
                 editable
                 selectedId={selectedId}
                 onSelect={setSelectedId}
@@ -371,7 +373,7 @@ export function MapLocationEditor() {
             {previewLocation && (
               <div>
                 <p className="mb-2 text-sm font-medium text-oboya-blue-dark">
-                  Panel preview
+                  {t("panelPreview")}
                 </p>
                 <MapLocationInfoPanel
                   location={previewLocation}
@@ -386,7 +388,7 @@ export function MapLocationEditor() {
               <div className="space-y-5">
                 <div className="flex items-center justify-between gap-3">
                   <h2 className="font-display text-lg font-semibold text-oboya-blue-dark">
-                    Edit location
+                    {t("editLocation")}
                   </h2>
                   <button
                     type="button"
@@ -395,7 +397,7 @@ export function MapLocationEditor() {
                       buttonVariants({ variant: "destructive", size: "sm" })
                     )}
                   >
-                    Delete
+                    {tCommon("delete")}
                   </button>
                 </div>
 
@@ -418,7 +420,7 @@ export function MapLocationEditor() {
                 </div>
 
                 <div className="space-y-4">
-                  <Field label="ID">
+                  <Field label={t("id")}>
                     <input
                       type="text"
                       value={selectedLocation.id}
@@ -448,7 +450,7 @@ export function MapLocationEditor() {
                     />
                   </Field>
 
-                  <Field label="Flag">
+                  <Field label={t("flag")}>
                     <div className="space-y-2">
                       {selectedLocation.flag && (
                         <div className="aspect-[3/2] w-14 overflow-hidden rounded-lg border border-border bg-muted/40 leading-none">
@@ -461,7 +463,7 @@ export function MapLocationEditor() {
                       <div className="grid max-h-40 grid-cols-5 gap-2 overflow-y-auto rounded-lg border border-border p-2 sm:grid-cols-6">
                         <button
                           type="button"
-                          title="No flag"
+                          title={tCommon("noFlag")}
                           onClick={() =>
                             updateLocation(selectedLocation.id, (location) => ({
                               ...location,
@@ -503,7 +505,7 @@ export function MapLocationEditor() {
                     </div>
                   </Field>
 
-                  <Field label="Has factories">
+                  <Field label={t("hasFactories")}>
                     <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground">
                       <input
                         type="checkbox"
@@ -517,15 +519,15 @@ export function MapLocationEditor() {
                         className="size-4 rounded border-border text-oboya-green focus:ring-oboya-green"
                       />
                       <span>
-                        Map arrows originate from this country
+                        {t("hasFactoriesLabel")}
                         <span className="mt-0.5 block text-xs text-muted-foreground">
-                          Marks this location as a factory hub that can send arrows
+                          {t("hasFactoriesHint")}
                         </span>
                       </span>
                     </label>
                   </Field>
 
-                  <Field label="Send only">
+                  <Field label={t("sendOnly")}>
                     <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground">
                       <input
                         type="checkbox"
@@ -539,16 +541,16 @@ export function MapLocationEditor() {
                         className="size-4 rounded border-border text-oboya-green focus:ring-oboya-green"
                       />
                       <span>
-                        Does not receive arrows — only sends
+                        {t("sendOnlyLabel")}
                         <span className="mt-0.5 block text-xs text-muted-foreground">
-                          Other hubs will never draw arrows into this country
+                          {t("sendOnlyHint")}
                         </span>
                       </span>
                     </label>
                   </Field>
 
                   {MAP_COUNTRY_FIELDS.map((field) => (
-                    <Field key={field.key} label={field.adminLabel}>
+                    <Field key={field.key} label={t(`fields.${field.key}`)}>
                       <input
                         type="text"
                         value={countryTranslation[field.key]}
@@ -586,7 +588,7 @@ export function MapLocationEditor() {
                   <div className="border-t border-border/60 pt-4">
                     <div className="mb-3 flex items-center justify-between gap-2">
                       <p className="text-sm font-medium text-oboya-blue-dark">
-                        Offices / factories
+                        {t("officesFactories")}
                       </p>
                       <Button
                         type="button"
@@ -594,7 +596,7 @@ export function MapLocationEditor() {
                         size="sm"
                         onClick={handleAddOffice}
                       >
-                        Add office
+                        {t("addOffice")}
                       </Button>
                     </div>
 
@@ -604,7 +606,7 @@ export function MapLocationEditor() {
                           office.translations[activeLocale].city ||
                           office.translations[activeLocale].operationType ||
                           office.translations.en.city ||
-                          `Office ${index + 1}`;
+                          t("officeFallback", { index: index + 1 });
 
                         return (
                           <button
@@ -627,7 +629,7 @@ export function MapLocationEditor() {
                     <div className="space-y-4 rounded-lg border border-border/60 bg-muted/20 p-3">
                       <div className="flex items-center justify-between gap-2">
                         <p className="text-xs font-medium text-muted-foreground">
-                          Editing office
+                          {t("editingOffice")}
                         </p>
                         {selectedLocation.offices.length > 1 && (
                           <button
@@ -637,12 +639,12 @@ export function MapLocationEditor() {
                               buttonVariants({ variant: "destructive", size: "sm" })
                             )}
                           >
-                            Remove
+                            {tCommon("remove")}
                           </button>
                         )}
                       </div>
 
-                      <Field label="Office ID">
+                      <Field label={t("officeId")}>
                         <input
                           type="text"
                           value={selectedOffice.id}
@@ -665,7 +667,7 @@ export function MapLocationEditor() {
                         />
                       </Field>
 
-                      <Field label="Email">
+                      <Field label={tCommon("email")}>
                         <input
                           type="email"
                           value={selectedOffice.email}
@@ -684,7 +686,7 @@ export function MapLocationEditor() {
                       </Field>
 
                       {MAP_OFFICE_FIELDS.map((field) => (
-                        <Field key={field.key} label={field.adminLabel}>
+                        <Field key={field.key} label={t(`fields.${field.key}`)}>
                           {field.input === "textarea" ? (
                             <textarea
                               value={officeTranslation[field.key]}
@@ -736,29 +738,27 @@ export function MapLocationEditor() {
                   </div>
 
                   <div className="rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
-                    Position: {selectedLocation.x.toFixed(1)},{" "}
-                    {selectedLocation.y.toFixed(1)}
+                    {t("position", { x: selectedLocation.x.toFixed(1), y: selectedLocation.y.toFixed(1) })}
                   </div>
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
                 <h2 className="font-display text-lg font-semibold text-oboya-blue-dark">
-                  No location selected
+                  {t("noSelection")}
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Select a marker on the map or click the map to add a new
-                  location.
+                  {t("noSelectionHint")}
                 </p>
                 <Button type="button" onClick={handleAddLocation}>
-                  Add location
+                  {t("addLocation")}
                 </Button>
               </div>
             )}
 
             <div className="mt-8 border-t border-border/60 pt-5">
               <p className="mb-3 text-sm font-medium text-oboya-blue-dark">
-                All locations ({data.locations.length})
+                {t("allLocations", { count: data.locations.length })}
               </p>
               <ul className="max-h-48 space-y-1 overflow-y-auto">
                 {data.locations.map((location) => {

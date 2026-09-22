@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,20 +24,21 @@ export function CompanyOverviewSectionEditor({
   setSettings,
   locale,
 }: HomepageSectionEditorProps) {
+  const t = useTranslations("admin.website.home");
+  const tCommon = useTranslations("admin.common");
   return (
     <Card className="max-w-4xl">
       <CardHeader>
-        <CardTitle>Statistics & Mission</CardTitle>
+        <CardTitle>{t("fields.statsMissionTitle")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-xs text-muted-foreground">
-          Headline segments control multi-color line breaks. Deprecated green/white fields remain
-          as fallback when no segments exist.
-        </p>
+        <p className="text-xs text-muted-foreground">{t("fields.segmentsHint")}</p>
         {settings.companyOverview.segments.map((segment, index) => (
           <div key={index} className="space-y-3 rounded-lg border p-4">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-medium">Segment {index + 1}</p>
+              <p className="text-sm font-medium">
+                {t("fields.segmentN", { index: index + 1 })}
+              </p>
               <Button
                 type="button"
                 variant="outline"
@@ -54,11 +56,11 @@ export function CompanyOverviewSectionEditor({
                   });
                 }}
               >
-                Remove
+                {tCommon("remove")}
               </Button>
             </div>
             <LocalizedInput
-              label="Text"
+              label={t("fields.text")}
               locale={locale}
               value={segment.text[locale]}
               onChange={(_, v) => {
@@ -78,7 +80,7 @@ export function CompanyOverviewSectionEditor({
             />
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label>Tone</Label>
+                <Label>{t("fields.tone")}</Label>
                 <select
                   value={segment.tone}
                   onChange={(e) => {
@@ -97,12 +99,14 @@ export function CompanyOverviewSectionEditor({
                   }}
                   className="w-full rounded-lg border border-input px-3 py-2 text-sm"
                 >
-                  <option value="green">green</option>
-                  <option value="white">white</option>
+                  <option value="green">{t("fields.toneGreen")}</option>
+                  <option value="white">{t("fields.toneWhite")}</option>
                 </select>
               </div>
               <div className="flex items-center justify-between gap-4 rounded-lg border px-3 py-2">
-                <Label htmlFor={`segment-break-${index}`}>Line break before</Label>
+                <Label htmlFor={`segment-break-${index}`}>
+                  {t("fields.lineBreakBefore")}
+                </Label>
                 <Switch
                   id={`segment-break-${index}`}
                   checked={segment.breakBefore ?? index > 0}
@@ -140,10 +144,10 @@ export function CompanyOverviewSectionEditor({
             });
           }}
         >
-          Add segment
+          {t("fields.addSegment")}
         </Button>
         <LocalizedInput
-          label="Headline (green part, deprecated)"
+          label={t("fields.headlineGreenDeprecated")}
           locale={locale}
           value={settings.companyOverview.headlineGreen[locale]}
           onChange={(l, v) =>
@@ -151,7 +155,7 @@ export function CompanyOverviewSectionEditor({
           }
         />
         <LocalizedInput
-          label="Headline (white part, deprecated)"
+          label={t("fields.headlineWhiteDeprecated")}
           locale={locale}
           value={settings.companyOverview.headlineWhite[locale]}
           onChange={(l, v) =>
@@ -159,7 +163,7 @@ export function CompanyOverviewSectionEditor({
           }
         />
         <ImageField
-          label="Mission image"
+          label={t("fields.missionImage")}
           value={settings.companyOverview.image}
           onChange={(url) =>
             setSettings({
@@ -172,7 +176,7 @@ export function CompanyOverviewSectionEditor({
           }
         />
         <LocalizedInput
-          label="Image alt text"
+          label={t("fields.imageAltText")}
           locale={locale}
           value={settings.companyOverview.imageAlt[locale]}
           onChange={(l, v) =>
@@ -182,7 +186,9 @@ export function CompanyOverviewSectionEditor({
         {settings.companyOverview.stats.map((stat, index) => (
           <div key={stat.id} className="space-y-3 rounded-lg border p-4">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-medium">Stat {index + 1}</p>
+              <p className="text-sm font-medium">
+                {t("fields.statN", { index: index + 1 })}
+              </p>
               <Button
                 type="button"
                 variant="outline"
@@ -195,12 +201,12 @@ export function CompanyOverviewSectionEditor({
                   });
                 }}
               >
-                Remove
+                {tCommon("remove")}
               </Button>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="space-y-1.5">
-                <Label>Value</Label>
+                <Label>{tCommon("value")}</Label>
                 <Input
                   type="number"
                   value={stat.value}
@@ -215,7 +221,7 @@ export function CompanyOverviewSectionEditor({
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Suffix</Label>
+                <Label>{tCommon("suffix")}</Label>
                 <Input
                   value={stat.suffix}
                   onChange={(e) => {
@@ -229,7 +235,7 @@ export function CompanyOverviewSectionEditor({
                 />
               </div>
               <LocalizedInput
-                label="Label"
+                label={tCommon("label")}
                 locale={locale}
                 value={stat.label[locale]}
                 onChange={(_, v) => {
@@ -266,7 +272,7 @@ export function CompanyOverviewSectionEditor({
             });
           }}
         >
-          Add stat
+          {t("fields.addStat")}
         </Button>
       </CardContent>
     </Card>
