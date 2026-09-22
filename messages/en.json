@@ -1584,6 +1584,9 @@
         "selectRow": "Select {name}",
         "removeRow": "Remove row",
         "emptyTable": "Upload a spreadsheet to preview products here.",
+        "openImagePreview": "Open full-size image for {name}",
+        "imagePreviewTitle": "Image preview",
+        "imagePreviewDescription": "Imported image at original file size.",
         "status": {
           "draft": "Draft",
           "published": "Published",

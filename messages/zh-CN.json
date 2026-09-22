@@ -1584,6 +1584,9 @@
         "selectRow": "选择 {name}",
         "removeRow": "移除行",
         "emptyTable": "上传电子表格以在此预览产品。",
+        "openImagePreview": "打开 {name} 的原尺寸图片",
+        "imagePreviewTitle": "图片预览",
+        "imagePreviewDescription": "以文件原始尺寸显示导入的图片。",
         "status": {
           "draft": "草稿",
           "published": "已发布",

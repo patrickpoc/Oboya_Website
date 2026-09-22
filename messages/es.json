@@ -1584,6 +1584,9 @@
         "selectRow": "Seleccionar {name}",
         "removeRow": "Quitar fila",
         "emptyTable": "Sube una hoja de cálculo para previsualizar productos aquí.",
+        "openImagePreview": "Abrir imagen a tamaño real de {name}",
+        "imagePreviewTitle": "Vista previa de la imagen",
+        "imagePreviewDescription": "Imagen importada en el tamaño original del archivo.",
         "status": {
           "draft": "Borrador",
           "published": "Publicado",

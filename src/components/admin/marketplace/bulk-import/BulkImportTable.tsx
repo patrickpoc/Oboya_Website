@@ -1,10 +1,18 @@
 "use client";
 
+import Image from "next/image";
 import { Trash2 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { PRODUCT_EDITOR_SELECT_CLASS } from "@/components/admin/marketplace/product-editor.constants";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   brandOptions,
@@ -36,9 +44,9 @@ const TH =
 const TD = "border-b border-border/40 px-3 py-3 align-middle";
 const CONTROL = "h-9 text-sm";
 const STICKY_LEFT_PRODUCT =
-  "sticky left-0 z-30 min-w-[14rem] border-r border-border/70 bg-oboya-soft-white shadow-[6px_0_10px_-6px_rgba(1,32,63,0.14)]";
+  "sticky left-0 z-30 min-w-[16rem] border-r border-border/70 bg-oboya-soft-white shadow-[6px_0_10px_-6px_rgba(1,32,63,0.14)]";
 const STICKY_LEFT_PRODUCT_BODY =
-  "sticky left-0 z-20 min-w-[14rem] border-r border-border/70 bg-white shadow-[6px_0_10px_-6px_rgba(1,32,63,0.14)]";
+  "sticky left-0 z-20 min-w-[16rem] border-r border-border/70 bg-white shadow-[6px_0_10px_-6px_rgba(1,32,63,0.14)]";
 const STICKY_RIGHT_HEAD =
   "sticky right-0 z-30 w-12 bg-oboya-soft-white text-center shadow-[-6px_0_8px_-6px_rgba(1,32,63,0.12)]";
 const STICKY_RIGHT_BODY =
@@ -88,6 +96,44 @@ function CellShell({
   );
 }
 
+function ImportImageThumb({
+  src,
+  alt,
+  onOpen,
+  openLabel,
+}: {
+  src: string | undefined;
+  alt: string;
+  onOpen: () => void;
+  openLabel: string;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={!src}
+      onClick={onOpen}
+      aria-label={openLabel}
+      className={cn(
+        "relative size-14 shrink-0 overflow-hidden rounded-lg bg-muted ring-1 ring-border/50",
+        src
+          ? "cursor-zoom-in transition hover:ring-oboya-blue-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-blue-light"
+          : "cursor-default opacity-60"
+      )}
+    >
+      {src ? (
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          className="object-cover"
+          sizes="56px"
+          unoptimized
+        />
+      ) : null}
+    </button>
+  );
+}
+
 export function BulkImportTable({
   rows,
   issues,
@@ -99,6 +145,9 @@ export function BulkImportTable({
   const t = useTranslations("admin.products.bulkImport");
   const categories = categoryOptions(catalog, preferredLocale);
   const brands = brandOptions(catalog, preferredLocale);
+  const [preview, setPreview] = useState<{ src: string; title: string } | null>(
+    null
+  );
 
   return (
     <div className="overflow-x-auto rounded-xl border border-border/60 bg-white">
@@ -123,21 +172,34 @@ export function BulkImportTable({
         <tbody>
           {rows.map((row) => {
             const product = row.pending;
+            const image = product.images.find((url) => Boolean(url?.trim()));
             const subs = subcategoryOptions(catalog, product.categoryId, preferredLocale);
+            const title = product.name.en || product.sku || product.id;
 
             return (
               <tr key={row.productId} className="align-top">
                 <td className={cn(TD, STICKY_LEFT_PRODUCT_BODY)}>
-                  <CellShell field="name" row={row} issues={issues}>
-                    <Input
-                      value={product.name.en}
-                      onChange={(event) =>
-                        onPatch(row.productId, { nameEn: event.target.value })
-                      }
-                      className={cn(CONTROL, "min-w-[140px]")}
-                      placeholder={t("namePlaceholder")}
+                  <div className="flex min-w-[16rem] items-start gap-3 pr-1">
+                    <ImportImageThumb
+                      src={image}
+                      alt={title}
+                      openLabel={t("openImagePreview", { name: title })}
+                      onOpen={() => {
+                        if (!image) return;
+                        setPreview({ src: image, title });
+                      }}
                     />
-                  </CellShell>
+                    <CellShell field="name" row={row} issues={issues}>
+                      <Input
+                        value={product.name.en}
+                        onChange={(event) =>
+                          onPatch(row.productId, { nameEn: event.target.value })
+                        }
+                        className={cn(CONTROL, "min-w-[140px]")}
+                        placeholder={t("namePlaceholder")}
+                      />
+                    </CellShell>
+                  </div>
                 </td>
                 <td className={TD}>
                   <CellShell field="sku" row={row} issues={issues}>
@@ -335,6 +397,31 @@ export function BulkImportTable({
       {rows.length === 0 && (
         <p className="px-4 py-8 text-center text-sm text-muted-foreground">{t("emptyTable")}</p>
       )}
+
+      <Dialog
+        open={Boolean(preview)}
+        onOpenChange={(open) => {
+          if (!open) setPreview(null);
+        }}
+      >
+        <DialogContent
+          className="max-h-[min(96vh,1200px)] w-auto max-w-[min(96vw,1600px)] overflow-auto p-3 sm:max-w-[min(96vw,1600px)]"
+        >
+          <DialogHeader className="sr-only">
+            <DialogTitle>{preview?.title ?? t("imagePreviewTitle")}</DialogTitle>
+            <DialogDescription>{t("imagePreviewDescription")}</DialogDescription>
+          </DialogHeader>
+          {preview ? (
+            // Native img so the browser can show intrinsic file dimensions.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={preview.src}
+              alt={preview.title}
+              className="mx-auto h-auto w-auto max-w-none"
+            />
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
