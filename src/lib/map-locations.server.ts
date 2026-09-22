@@ -5,6 +5,7 @@ import path from "path";
 import type { MapLocationsData } from "@/lib/map-locations";
 import { normalizeMapLocations } from "@/lib/map-locations";
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
+import { rethrowNextSignals } from "@/lib/cms/server/rethrow-next-signals";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 
@@ -62,6 +63,7 @@ export async function readMapLocations(): Promise<MapLocationsData> {
 
     return normalizeMapLocations(data.data);
   } catch (error) {
+    rethrowNextSignals(error);
     const message =
       error instanceof Error ? error.message : "Unknown Supabase read error";
     console.warn(

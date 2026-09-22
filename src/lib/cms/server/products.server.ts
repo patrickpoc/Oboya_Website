@@ -9,6 +9,7 @@ import {
   type CmsProduct,
 } from "@/lib/cms/repositories/product-repository";
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
+import { rethrowNextSignals } from "@/lib/cms/server/rethrow-next-signals";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 import {
@@ -175,6 +176,7 @@ export async function readProducts(options?: {
   try {
     await purgeExpiredProducts();
   } catch (error) {
+    rethrowNextSignals(error);
     console.error(
       "cms_products purge:",
       error instanceof Error ? error.message : error
@@ -220,6 +222,7 @@ export async function readProducts(options?: {
     }
     return products;
   } catch (error) {
+    rethrowNextSignals(error);
     console.error(
       "cms_products read:",
       error instanceof Error ? error.message : error

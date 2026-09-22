@@ -17,6 +17,7 @@ import {
   readCmsDocumentData,
   writeCmsDocumentData,
 } from "@/lib/cms/server/cms-document.server";
+import { rethrowNextSignals } from "@/lib/cms/server/rethrow-next-signals";
 
 export const FAQS_DOC_ID = "faqs";
 
@@ -63,6 +64,7 @@ export async function readFaqsDurable(): Promise<FaqsDoc> {
       try {
         await writeCmsDocumentData(FAQS_DOC_ID, "website", doc);
       } catch (error) {
+        rethrowNextSignals(error);
         // Public reads may lack write auth; in-memory merge still serves new seeds.
         console.error(
           "faqs seed merge persist skipped:",

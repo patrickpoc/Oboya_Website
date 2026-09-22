@@ -9,6 +9,7 @@ import {
   type HomepageSettings,
 } from "@/lib/cms/repositories/homepage-repository";
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
+import { rethrowNextSignals } from "@/lib/cms/server/rethrow-next-signals";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 
@@ -83,6 +84,7 @@ export async function readHomepageSettingsDurable(): Promise<HomepageSettings> {
         return getHomepageSettings();
       }
     } catch (error) {
+      rethrowNextSignals(error);
       console.error(
         "Supabase homepage read failed; falling back to local:",
         error instanceof Error ? error.message : error

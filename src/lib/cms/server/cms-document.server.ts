@@ -3,6 +3,7 @@ import "server-only";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
+import { rethrowNextSignals } from "@/lib/cms/server/rethrow-next-signals";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 
@@ -23,6 +24,7 @@ export async function readCmsDocumentData(
       if (error) throw new Error(error.message);
       if (data?.data != null) return data.data;
     } catch (error) {
+      rethrowNextSignals(error);
       console.error(
         `cms_documents read (${docId}):`,
         error instanceof Error ? error.message : error

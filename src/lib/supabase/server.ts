@@ -28,8 +28,9 @@ export async function createClient() {
 
 /**
  * Cookie-free anon client for public reads.
- * `cache: "no-store"` prevents Next from Data-Caching Supabase REST
- * (otherwise the shop catalog can stay stale for the parent ISR TTL).
+ * Uses ISR-aligned Data Cache (`revalidate`) so public pages can prerender.
+ * CMS writes still bust route cache via `revalidatePath` (see revalidate-site.ts).
+ * Keep TTL in sync with `SITE_REVALIDATE_SECONDS` / locale layout `revalidate`.
  */
 export function createPublicClient() {
   const { url, anonKey } = getSupabaseEnv();
@@ -41,11 +42,15 @@ export function createPublicClient() {
       detectSessionInUrl: false,
     },
     global: {
-      fetch: (input, init) =>
-        fetch(input, {
-          ...init,
-          cache: "no-store",
-        }),
+      fetch: (input, init) => {
+        const { cache: _cache, next: _next, ...rest } = init ?? {};
+        void _cache;
+        void _next;
+        return fetch(input, {
+          ...rest,
+          next: { revalidate: 3600 },
+        });
+      },
     },
   });
 }
