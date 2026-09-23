@@ -20,10 +20,12 @@ export function createEmptyCmsProduct(seed?: {
   categoryId?: string;
   subcategoryId?: string;
   brandId?: string;
+  sku?: string;
 }): CmsProduct {
+  const sku = seed?.sku?.trim() ?? "";
   return {
-    id: `product-${Date.now()}`,
-    sku: "",
+    id: sku,
+    sku,
     moq: 1,
     brandId: seed?.brandId ?? "",
     categoryId: seed?.categoryId ?? "",

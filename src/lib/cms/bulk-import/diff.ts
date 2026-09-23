@@ -112,8 +112,11 @@ export function applyImportPatch(
     prices: { ...product.prices },
   };
 
-  if (patch.id !== undefined) next.id = patch.id;
-  if (patch.sku !== undefined) next.sku = patch.sku;
+  if (patch.sku !== undefined) {
+    const sku = patch.sku.trim();
+    next.sku = patch.sku;
+    next.id = sku || next.id;
+  }
   if (patch.nameEn !== undefined) next.name = { ...next.name, en: patch.nameEn };
   if (patch.namePt !== undefined) next.name = { ...next.name, "pt-BR": patch.namePt };
   if (patch.moq !== undefined) next.moq = patch.moq;

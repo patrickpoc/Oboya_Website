@@ -42,7 +42,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const products = await readProducts();
   const productEntries = routing.locales.flatMap((locale) =>
     products.map((product) => ({
-      url: `${baseUrl}/${locale}/shop/products/${product.id}`,
+      url: `${baseUrl}/${locale}/shop/products/${product.sku || product.id}`,
       lastModified: new Date(),
       changeFrequency: "weekly" as const,
       priority: 0.8,

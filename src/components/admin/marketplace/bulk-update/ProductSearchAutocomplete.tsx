@@ -6,7 +6,8 @@ import Image from "next/image";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import {
   displayProductName,
-  searchProductsForBulkUpdate,
+  searchSkuHitsForBulkUpdate,
+  type BulkSkuSearchHit,
 } from "@/lib/cms/bulk-update/search-products";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -14,7 +15,7 @@ import { cn } from "@/lib/utils";
 type Props = {
   products: CmsProduct[];
   excludeIds: Set<string>;
-  onSelect: (product: CmsProduct) => void;
+  onSelect: (hit: BulkSkuSearchHit) => void;
   preferredLocale?: string;
   disabled?: boolean;
 };
@@ -49,7 +50,7 @@ export function ProductSearchAutocomplete({
     () =>
       disabled
         ? []
-        : searchProductsForBulkUpdate(products, debounced, {
+        : searchSkuHitsForBulkUpdate(products, debounced, {
             limit: 3,
             excludeIds,
           }),
@@ -84,17 +85,18 @@ export function ProductSearchAutocomplete({
             <p className="px-3 py-2 text-sm text-muted-foreground">{t("noProductsFound")}</p>
           ) : (
             <ul className="max-h-64 overflow-y-auto py-1">
-              {suggestions.map((product) => {
+              {suggestions.map((hit) => {
+                const product = hit.product;
                 const image = product.images[0];
                 return (
-                  <li key={product.id}>
+                  <li key={`${product.id}-${hit.matchedSku}`}>
                     <button
                       type="button"
                       className={cn(
                         "flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-oboya-soft-white"
                       )}
                       onClick={() => {
-                        onSelect(product);
+                        onSelect(hit);
                         setQuery("");
                         setDebounced("");
                         setOpen(false);
@@ -116,7 +118,14 @@ export function ProductSearchAutocomplete({
                         <p className="truncate text-sm font-medium text-oboya-blue-dark">
                           {displayProductName(product, preferredLocale)}
                         </p>
-                        <p className="truncate text-xs text-muted-foreground">{product.sku}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {hit.isChildSku
+                            ? t("childSkuHint", {
+                                child: hit.matchedSku,
+                                parent: product.sku,
+                              })
+                            : hit.matchedSku}
+                        </p>
                       </div>
                     </button>
                   </li>

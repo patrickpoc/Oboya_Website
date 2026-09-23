@@ -31,13 +31,15 @@ export function BulkChangeReviewDialog({
   const t = useTranslations("admin.products.bulk");
   const tCommon = useTranslations("admin.common");
   const withChanges = rows.filter((row) => row.changedFields.length > 0);
+  const changedProductCount = new Set(withChanges.map((row) => row.productId)).size;
+  const selectedProductCount = new Set(rows.map((row) => row.productId)).size;
   const fieldsChanged = withChanges.reduce(
     (sum, row) => sum + row.changedFields.length,
     0
   );
   const blocked = issues.filter((issue) => issue.status === "blocked");
   const warnings = issues.filter((issue) => issue.status === "warning");
-  const canApply = blocked.length === 0 && withChanges.length > 0;
+  const canApply = blocked.length === 0 && changedProductCount > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -49,8 +51,8 @@ export function BulkChangeReviewDialog({
 
         <div className="space-y-3 text-sm">
           <div className="grid grid-cols-2 gap-2 rounded-lg bg-muted/40 p-3">
-            <p>{t("productsSelected", { count: rows.length })}</p>
-            <p>{t("productsWithChanges", { count: withChanges.length })}</p>
+            <p>{t("productsSelected", { count: selectedProductCount })}</p>
+            <p>{t("productsWithChanges", { count: changedProductCount })}</p>
             <p>{t("fieldsChanged", { count: fieldsChanged })}</p>
             <p>
               {t("validWarningsBlocked")}{" "}

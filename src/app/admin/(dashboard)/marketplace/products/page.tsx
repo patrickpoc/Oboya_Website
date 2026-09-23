@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
+import { collectAllSkus } from "@/lib/cms/admin-sku-lookup";
 
 const PAGE_SIZE = 20;
 
@@ -130,7 +131,10 @@ export default function ProductsPage() {
     if (!q) return source;
     return source.filter((product) => {
       const name = productDisplayName(product).toLowerCase();
-      return name.includes(q) || product.sku.toLowerCase().includes(q);
+      if (name.includes(q) || product.sku.toLowerCase().includes(q)) return true;
+      return (product.colorVariants ?? []).some((variant) =>
+        (variant.sku || "").toLowerCase().includes(q)
+      );
     });
   }, [activeProducts, archivedProducts, search, tab]);
 
@@ -160,13 +164,22 @@ export default function ProductsPage() {
         activeProducts.find((product) => product.id === id) ||
         archivedProducts.find((product) => product.id === id);
       if (!original) return;
-      const existingSkus = new Set(
-        [...activeProducts, ...archivedProducts].map((product) => product.sku.toLowerCase())
-      );
+      const existingSkus = collectAllSkus([...activeProducts, ...archivedProducts], {
+        includeLegacyIds: true,
+      });
+      const newSku = buildUniqueDuplicateSku(original.sku, existingSkus);
+      existingSkus.add(newSku.toLowerCase());
+      const colorVariants = (original.colorVariants ?? []).map((variant) => {
+        const base = variant.sku?.trim() || `${newSku}-COLOR`;
+        const variantSku = buildUniqueDuplicateSku(base, existingSkus);
+        existingSkus.add(variantSku.toLowerCase());
+        return { ...variant, sku: variantSku, id: variantSku };
+      });
       const copy: CmsProduct = {
         ...JSON.parse(JSON.stringify(original)),
-        id: `${original.id}-copy-${Date.now()}`,
-        sku: buildUniqueDuplicateSku(original.sku, existingSkus),
+        id: newSku,
+        sku: newSku,
+        colorVariants,
         status: "draft",
         deletedAt: null,
         purgeAt: null,

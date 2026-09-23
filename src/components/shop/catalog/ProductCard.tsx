@@ -57,7 +57,7 @@ function ProductCardComponent({
   const displaySku = resolveVariantSku(product, activeVariant);
   const showSwatches = hasColorVariants(product);
   const cartVariantId = toCartVariantId(activeVariant?.id);
-  const detailHref = `/shop/products/${product.id}${
+  const detailHref = `/shop/products/${product.sku || product.id}${
     cartVariantId ? `?variant=${encodeURIComponent(cartVariantId)}` : ""
   }`;
 

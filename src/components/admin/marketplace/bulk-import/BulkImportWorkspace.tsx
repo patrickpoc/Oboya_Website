@@ -28,6 +28,7 @@ import {
   type ImportValidationIssue,
   type ImportWorkspaceRow,
 } from "@/lib/cms/bulk-import/types";
+import { collectAllSkus } from "@/lib/cms/admin-sku-lookup";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import { useAdminLocale } from "@/contexts/AdminLocaleContext";
 import { useAdminMarketplaceCatalog } from "@/hooks/use-admin-marketplace-catalog";
@@ -52,10 +53,11 @@ export function BulkImportWorkspace() {
       brands: liveCatalog.brands,
       countries: liveCatalog.countries,
       filterOptions: liveCatalog.filterOptions,
-      existingIds: new Set(existingProducts.map((product) => product.id)),
-      existingSkus: new Set(
-        existingProducts.map((product) => product.sku.toLowerCase()).filter(Boolean)
-      ),
+      existingIds: new Set([
+        ...existingProducts.map((product) => product.id),
+        ...Array.from(collectAllSkus(existingProducts, { includeLegacyIds: true })),
+      ]),
+      existingSkus: collectAllSkus(existingProducts, { includeLegacyIds: true }),
     }),
     [liveCatalog, existingProducts]
   );

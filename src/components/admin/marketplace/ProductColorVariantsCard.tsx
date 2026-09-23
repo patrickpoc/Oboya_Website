@@ -323,6 +323,12 @@ export function ProductColorVariantsCard({
                                 sku: event.target.value,
                               })
                             }
+                            onBlur={() => {
+                              const trimmed = (variant.sku ?? "").trim();
+                              if (trimmed && trimmed !== variant.id) {
+                                updateVariant(variant.id, { id: trimmed, sku: trimmed });
+                              }
+                            }}
                             placeholder={`${product.sku || "SKU"}-COLOR`}
                           />
                         </div>

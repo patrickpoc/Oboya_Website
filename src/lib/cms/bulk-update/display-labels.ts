@@ -224,6 +224,27 @@ export function formatFieldDisplayValue(
     }
     case "status":
       return product.status === "published" ? "Yes" : "No";
+    case "priceUsd":
+      return String(product.prices?.USD ?? "");
+    case "priceBrl":
+      return String(product.prices?.BRL ?? "");
+    case "priceEur":
+      return String(product.prices?.EUR ?? "");
+    case "defaultColor":
+      return product.defaultColor || "";
+    case "defaultColorNameEn":
+      return product.defaultColorName?.en || "";
+    case "defaultColorNamePt":
+      return product.defaultColorName?.["pt-BR"] || "";
+    case "variantSku":
+    case "variantColor":
+    case "variantColorNameEn":
+    case "variantColorNamePt":
+    case "variantPriceUsd":
+    case "variantPriceBrl":
+    case "variantPriceEur":
+    case "variantImage":
+      return "";
     default:
       return "";
   }

@@ -36,9 +36,15 @@ export default function ProductNewPage() {
 
   const handleSave = () => {
     if (!product) return;
-    const variantError = validateColorVariants(product.colorVariants, {
-      defaultColor: product.defaultColor,
-      defaultColorName: product.defaultColorName,
+    const sku = product.sku.trim();
+    if (!sku) {
+      toast.error("SKU is required.");
+      return;
+    }
+    const toSave: CmsProduct = { ...product, id: sku, sku };
+    const variantError = validateColorVariants(toSave.colorVariants, {
+      defaultColor: toSave.defaultColor,
+      defaultColorName: toSave.defaultColorName,
     });
     if (variantError) {
       toast.error(variantError);
@@ -46,18 +52,18 @@ export default function ProductNewPage() {
     }
     void (async () => {
       try {
-        saveCmsProduct(product);
+        saveCmsProduct(toSave);
         const response = await fetch("/api/cms/products", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(product),
+          body: JSON.stringify(toSave),
         });
         if (!response.ok) {
           const payload = (await response.json().catch(() => null)) as { error?: string } | null;
           throw new Error(payload?.error ?? "failed");
         }
         toast.success(t("productCreated"));
-        router.push(`/admin/marketplace/products/${product.id}`);
+        router.push(`/admin/marketplace/products/${toSave.id}`);
       } catch (error) {
         toast.error(
           error instanceof Error

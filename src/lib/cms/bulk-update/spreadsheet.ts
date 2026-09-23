@@ -1,7 +1,15 @@
 import * as XLSX from "xlsx";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { CmsStatus } from "@/lib/cms/types";
-import { applyPatchToProduct, createWorkspaceRow, refreshRowChangedFields } from "@/lib/cms/bulk-update/diff";
+import { buildSkuIndex, resolveSku } from "@/lib/cms/admin-sku-lookup";
+import {
+  applyPatchToProduct,
+  createWorkspaceGroup,
+  productHasPendingChanges,
+  refreshRowChangedFields,
+  replaceOrInsertGroup,
+  syncGroupPending,
+} from "@/lib/cms/bulk-update/diff";
 import {
   BULK_SPREADSHEET_HEADERS,
   SPREADSHEET_HEADER_ALIASES,
@@ -117,162 +125,236 @@ function parseShopStatus(raw: string): CmsStatus | null {
   return null;
 }
 
+function parseOptionalPrice(
+  raw: string | undefined,
+  rowNumber: number,
+  sku: string,
+  label: string,
+  errors: SpreadsheetImportError[]
+): number | null | undefined {
+  const value = raw?.trim();
+  if (!value) return undefined;
+  const num = Number(value);
+  if (!Number.isFinite(num) || num < 0) {
+    errors.push({
+      row: rowNumber,
+      sku,
+      message: `Invalid ${label} "${value}".`,
+      suggestedAction: "Use a non-negative number.",
+    });
+    return undefined;
+  }
+  return num;
+}
+
 function parseRowToPatch(
   cells: Partial<Record<BulkSpreadsheetHeader, string>>,
   catalog: BulkUpdateCatalog,
   current: CmsProduct,
   rowNumber: number,
-  errors: SpreadsheetImportError[]
+  errors: SpreadsheetImportError[],
+  isChildSku: boolean
 ): BulkProductPatch {
   const patch: BulkProductPatch = {};
   const sku = current.sku;
 
-  const moqRaw = cells["MOQ"]?.trim();
-  if (moqRaw) {
-    const moq = Number(moqRaw);
-    if (!Number.isFinite(moq) || moq < 1 || !Number.isInteger(moq)) {
-      errors.push({
-        row: rowNumber,
-        sku,
-        message: `Invalid MOQ "${moqRaw}".`,
-        suggestedAction: "Use an integer ≥ 1.",
-      });
-    } else {
-      patch.moq = moq;
-    }
-  }
-
-  const categoryRaw = cells["Category"]?.trim();
-  let nextCategoryId = current.categoryId;
-  if (categoryRaw) {
-    const resolved = resolveCategoryId(categoryRaw, catalog);
-    if (!resolved) {
-      errors.push({
-        row: rowNumber,
-        sku,
-        message: `Unknown category "${categoryRaw}".`,
-        suggestedAction: "Use an existing category id or name.",
-      });
-    } else {
-      patch.categoryId = resolved;
-      nextCategoryId = resolved;
-    }
-  }
-
-  const subcategoryRaw = cells["Subcategory"]?.trim();
-  if (subcategoryRaw) {
-    const resolved = resolveSubcategoryId(subcategoryRaw, catalog, nextCategoryId);
-    if (!resolved) {
-      errors.push({
-        row: rowNumber,
-        sku,
-        message: `Unknown subcategory "${subcategoryRaw}".`,
-        suggestedAction: "Use an existing subcategory compatible with the category.",
-      });
-    } else {
-      patch.subcategoryId = resolved;
-    }
-  }
-
-  const brandRaw = cells["Brand"]?.trim();
-  if (brandRaw) {
-    const resolved = resolveBrandId(brandRaw, catalog);
-    if (!resolved) {
-      errors.push({
-        row: rowNumber,
-        sku,
-        message: `Unknown brand "${brandRaw}".`,
-        suggestedAction: "Use an existing brand id or name.",
-      });
-    } else {
-      patch.brandId = resolved;
-    }
-  }
-
-  const multiMaps: Array<{
-    header: BulkSpreadsheetHeader;
-    groupId: string;
-    key: keyof BulkProductPatch;
-  }> = [
-    { header: "Application", groupId: "applications", key: "application" },
-    { header: "Crop/Culture", groupId: "cultures", key: "cultures" },
-    { header: "Certifications", groupId: "certifications", key: "certifications" },
-  ];
-
-  for (const map of multiMaps) {
-    const raw = cells[map.header]?.trim();
-    if (!raw) continue;
-    const parts = splitMulti(raw);
-    const resolved: string[] = [];
-    let failed = false;
-    for (const part of parts) {
-      const id = resolveOptionId(part, catalog, map.groupId);
-      if (!id) {
+  if (!isChildSku) {
+    const moqRaw = cells["MOQ"]?.trim();
+    if (moqRaw) {
+      const moq = Number(moqRaw);
+      if (!Number.isFinite(moq) || moq < 1 || !Number.isInteger(moq)) {
         errors.push({
           row: rowNumber,
           sku,
-          message: `Unknown ${map.header} value "${part}".`,
-          suggestedAction: `Use a valid ${map.header} option id or label.`,
+          message: `Invalid MOQ "${moqRaw}".`,
+          suggestedAction: "Use an integer ≥ 1.",
         });
-        failed = true;
-        break;
+      } else {
+        patch.moq = moq;
       }
-      resolved.push(id);
     }
-    if (!failed) {
-      (patch as Record<string, unknown>)[map.key] = resolved;
-    }
-  }
 
-  const countryRaw = cells["Country of manufacture"]?.trim();
-  if (countryRaw) {
-    const resolved = resolveOptionId(countryRaw, catalog, "countriesOfOrigin");
-    if (!resolved) {
-      errors.push({
-        row: rowNumber,
-        sku,
-        message: `Unknown country of manufacture "${countryRaw}".`,
-        suggestedAction: "Use a valid country of manufacture option.",
-      });
-    } else {
-      patch.countryOfOrigin = resolved;
-    }
-  }
-
-  const marketsRaw = cells["Market availability"]?.trim();
-  if (marketsRaw) {
-    const codes = splitMulti(marketsRaw).map((code) => code.toUpperCase());
-    const validCodes = new Set(catalog.countries.map((c) => c.code));
-    const invalid = codes.filter((code) => !validCodes.has(code));
-    if (invalid.length > 0) {
-      errors.push({
-        row: rowNumber,
-        sku,
-        message: `Invalid market code(s): ${invalid.join(", ")}.`,
-        suggestedAction: "Use valid country codes (e.g. BR;US).",
-      });
-    } else {
-      const enabled: Record<string, boolean> = {};
-      for (const country of catalog.countries) {
-        enabled[country.code] = codes.includes(country.code);
+    const categoryRaw = cells["Category"]?.trim();
+    let nextCategoryId = current.categoryId;
+    if (categoryRaw) {
+      const resolved = resolveCategoryId(categoryRaw, catalog);
+      if (!resolved) {
+        errors.push({
+          row: rowNumber,
+          sku,
+          message: `Unknown category "${categoryRaw}".`,
+          suggestedAction: "Use an existing category id or name.",
+        });
+      } else {
+        patch.categoryId = resolved;
+        nextCategoryId = resolved;
       }
-      patch.enabledCountries = enabled;
     }
-  }
 
-  const shopRaw = cells["Available in Shop"]?.trim();
-  if (shopRaw) {
-    const status = parseShopStatus(shopRaw);
-    if (!status) {
-      errors.push({
-        row: rowNumber,
-        sku,
-        message: `Invalid Available in Shop value "${shopRaw}".`,
-        suggestedAction: "Use yes/no, true/false, or published/draft.",
-      });
-    } else {
-      patch.status = status;
+    const subcategoryRaw = cells["Subcategory"]?.trim();
+    if (subcategoryRaw) {
+      const resolved = resolveSubcategoryId(subcategoryRaw, catalog, nextCategoryId);
+      if (!resolved) {
+        errors.push({
+          row: rowNumber,
+          sku,
+          message: `Unknown subcategory "${subcategoryRaw}".`,
+          suggestedAction: "Use an existing subcategory compatible with the category.",
+        });
+      } else {
+        patch.subcategoryId = resolved;
+      }
     }
+
+    const brandRaw = cells["Brand"]?.trim();
+    if (brandRaw) {
+      const resolved = resolveBrandId(brandRaw, catalog);
+      if (!resolved) {
+        errors.push({
+          row: rowNumber,
+          sku,
+          message: `Unknown brand "${brandRaw}".`,
+          suggestedAction: "Use an existing brand id or name.",
+        });
+      } else {
+        patch.brandId = resolved;
+      }
+    }
+
+    const multiMaps: Array<{
+      header: BulkSpreadsheetHeader;
+      groupId: string;
+      key: keyof BulkProductPatch;
+    }> = [
+      { header: "Application", groupId: "applications", key: "application" },
+      { header: "Crop/Culture", groupId: "cultures", key: "cultures" },
+      { header: "Certifications", groupId: "certifications", key: "certifications" },
+    ];
+
+    for (const map of multiMaps) {
+      const raw = cells[map.header]?.trim();
+      if (!raw) continue;
+      const parts = splitMulti(raw);
+      const resolved: string[] = [];
+      let failed = false;
+      for (const part of parts) {
+        const id = resolveOptionId(part, catalog, map.groupId);
+        if (!id) {
+          errors.push({
+            row: rowNumber,
+            sku,
+            message: `Unknown ${map.header} value "${part}".`,
+            suggestedAction: `Use a valid ${map.header} option id or label.`,
+          });
+          failed = true;
+          break;
+        }
+        resolved.push(id);
+      }
+      if (!failed) {
+        (patch as Record<string, unknown>)[map.key] = resolved;
+      }
+    }
+
+    const countryRaw = cells["Country of manufacture"]?.trim();
+    if (countryRaw) {
+      const resolved = resolveOptionId(countryRaw, catalog, "countriesOfOrigin");
+      if (!resolved) {
+        errors.push({
+          row: rowNumber,
+          sku,
+          message: `Unknown country of manufacture "${countryRaw}".`,
+          suggestedAction: "Use a valid country of manufacture option.",
+        });
+      } else {
+        patch.countryOfOrigin = resolved;
+      }
+    }
+
+    const marketsRaw = cells["Market availability"]?.trim();
+    if (marketsRaw) {
+      const codes = splitMulti(marketsRaw).map((code) => code.toUpperCase());
+      const validCodes = new Set(catalog.countries.map((c) => c.code));
+      const invalid = codes.filter((code) => !validCodes.has(code));
+      if (invalid.length > 0) {
+        errors.push({
+          row: rowNumber,
+          sku,
+          message: `Invalid market code(s): ${invalid.join(", ")}.`,
+          suggestedAction: "Use valid country codes (e.g. BR;US).",
+        });
+      } else {
+        const enabled: Record<string, boolean> = {};
+        for (const country of catalog.countries) {
+          enabled[country.code] = codes.includes(country.code);
+        }
+        patch.enabledCountries = enabled;
+      }
+    }
+
+    const shopRaw = cells["Available in Shop"]?.trim();
+    if (shopRaw) {
+      const status = parseShopStatus(shopRaw);
+      if (!status) {
+        errors.push({
+          row: rowNumber,
+          sku,
+          message: `Invalid Available in Shop value "${shopRaw}".`,
+          suggestedAction: "Use yes/no, true/false, or published/draft.",
+        });
+      } else {
+        patch.status = status;
+      }
+    }
+
+    const priceUsd = parseOptionalPrice(
+      cells["Price USD"],
+      rowNumber,
+      sku,
+      "Price USD",
+      errors
+    );
+    if (priceUsd !== undefined) patch.priceUsd = priceUsd;
+    const priceBrl = parseOptionalPrice(
+      cells["Price BRL"],
+      rowNumber,
+      sku,
+      "Price BRL",
+      errors
+    );
+    if (priceBrl !== undefined) patch.priceBrl = priceBrl;
+    const priceEur = parseOptionalPrice(
+      cells["Price EUR"],
+      rowNumber,
+      sku,
+      "Price EUR",
+      errors
+    );
+    if (priceEur !== undefined) patch.priceEur = priceEur;
+  } else {
+    // Child SKU: variant-only columns. Price USD (without Variant prefix) also maps to variant.
+    const colorHex = cells["Color hex"]?.trim();
+    if (colorHex) patch.variantColor = colorHex;
+
+    const colorName = cells["Color name"]?.trim();
+    if (colorName) {
+      patch.variantColorNameEn = colorName;
+      patch.variantColorNamePt = colorName;
+    }
+
+    const variantPrice =
+      parseOptionalPrice(
+        cells["Variant price USD"],
+        rowNumber,
+        sku,
+        "Variant price USD",
+        errors
+      ) ??
+      parseOptionalPrice(cells["Price USD"], rowNumber, sku, "Price USD", errors);
+    if (variantPrice !== undefined) patch.variantPriceUsd = variantPrice;
+
+    const variantImage = cells["Variant image"]?.trim();
+    if (variantImage) patch.variantImage = variantImage;
   }
 
   return patch;
@@ -350,8 +432,24 @@ export function parseSpreadsheetBuffer(
   return { records: rows, errors: headerErrors };
 }
 
+function patchConflicts(
+  existing: BulkProductPatch,
+  next: BulkProductPatch
+): string[] {
+  const conflicts: string[] = [];
+  for (const key of Object.keys(next) as Array<keyof BulkProductPatch>) {
+    if (next[key] === undefined) continue;
+    if (existing[key] === undefined) continue;
+    if (JSON.stringify(existing[key]) !== JSON.stringify(next[key])) {
+      conflicts.push(String(key));
+    }
+  }
+  return conflicts;
+}
+
 /**
  * Merge spreadsheet rows into workspace.
+ * Parent or child SKUs expand to the full color group.
  * Empty cells keep current values. Unknown SKUs become errors.
  */
 export function mergeSpreadsheetIntoWorkspace(params: {
@@ -359,12 +457,38 @@ export function mergeSpreadsheetIntoWorkspace(params: {
   productsBySku: Map<string, CmsProduct>;
   existingRows: BulkWorkspaceRow[];
   catalog: BulkUpdateCatalog;
+  /** Prefer full catalog for child-SKU resolution when provided. */
+  products?: CmsProduct[];
 }): SpreadsheetImportResult {
-  const { records, productsBySku, existingRows, catalog } = params;
+  const { records, productsBySku, existingRows, catalog, products } = params;
   const errors: SpreadsheetImportError[] = [];
-  const byId = new Map(existingRows.map((row) => [row.productId, { ...row }]));
+  let rows = [...existingRows];
   let skippedEmpty = 0;
   const seenSkus = new Set<string>();
+  const appliedPatches = new Map<string, BulkProductPatch>();
+
+  const catalogProducts =
+    products ??
+    Array.from(
+      new Map(
+        [
+          ...Array.from(productsBySku.values()),
+          ...existingRows.map((row) => row.original),
+        ].map((product) => [product.id, product])
+      ).values()
+    );
+  const skuIndex = buildSkuIndex(catalogProducts);
+
+  // Also allow legacy productsBySku lookups for parent SKUs only.
+  for (const [key, product] of productsBySku) {
+    if (!skuIndex.has(key)) {
+      skuIndex.set(key, {
+        product,
+        matchedSku: product.sku,
+        variantId: null,
+      });
+    }
+  }
 
   records.forEach((cells, index) => {
     const rowNumber = index + 2;
@@ -392,58 +516,99 @@ export function mergeSpreadsheetIntoWorkspace(params: {
         row: rowNumber,
         sku,
         message: `Duplicate SKU "${sku}" in spreadsheet.`,
-        suggestedAction: "Keep only one row per SKU.",
+        suggestedAction: "Keep only one row per SKU (parent or child).",
       });
       return;
     }
     seenSkus.add(skuKey);
 
-    const product = productsBySku.get(skuKey);
-    if (!product) {
+    const hit = resolveSku(skuIndex, sku);
+    if (!hit) {
       errors.push({
         row: rowNumber,
         sku,
         message: `No product found for SKU "${sku}".`,
-        suggestedAction: "Use an existing product SKU.",
+        suggestedAction: "Use an existing parent or color SKU.",
       });
       return;
     }
 
-    const existing = byId.get(product.id);
-    const baseOriginal = existing?.original ?? structuredClone(product);
-    const basePending = existing?.pending ?? structuredClone(product);
-    const patch = parseRowToPatch(cells, catalog, basePending, rowNumber, errors);
+    const { product, variantId } = hit;
+    const isChildSku = Boolean(variantId);
+    const existingGroup = rows.filter((row) => row.productId === product.id);
+    const baseOriginal =
+      existingGroup[0]?.original ?? structuredClone(product);
+    const basePending =
+      existingGroup[0]?.pending ?? structuredClone(product);
+
+    const patch = parseRowToPatch(
+      cells,
+      catalog,
+      basePending,
+      rowNumber,
+      errors,
+      isChildSku
+    );
+
+    const patchKey = `${product.id}::${variantId ?? "__parent__"}`;
+    const prior = appliedPatches.get(patchKey) ?? {};
+    const conflicts = patchConflicts(prior, patch);
+    if (conflicts.length > 0) {
+      errors.push({
+        row: rowNumber,
+        sku,
+        message: `Conflicting values for ${conflicts.join(", ")} on the same product group.`,
+        suggestedAction: "Keep one value per field when multiple spreadsheet rows target the same parent.",
+      });
+    }
+    appliedPatches.set(patchKey, { ...prior, ...patch });
 
     if (Object.keys(patch).length === 0) {
-      if (!existing) {
-        byId.set(product.id, createWorkspaceRow(product));
+      if (existingGroup.length === 0) {
+        rows = replaceOrInsertGroup(rows, product);
       }
       return;
     }
 
-    const pending = applyPatchToProduct(basePending, patch);
-    byId.set(
-      product.id,
-      refreshRowChangedFields({
-        productId: product.id,
-        original: baseOriginal,
-        pending,
-        changedFields: [],
-      })
+    const pending = applyPatchToProduct(basePending, patch, variantId);
+    if (existingGroup.length === 0) {
+      rows = replaceOrInsertGroup(rows, product);
+    }
+    rows = syncGroupPending(rows, product.id, pending).map((row) =>
+      row.productId === product.id
+        ? refreshRowChangedFields({
+            ...row,
+            original: baseOriginal,
+            pending,
+          })
+        : row
     );
+
+    // Ensure group rows exist even if product was only partially in workspace.
+    if (!rows.some((row) => row.productId === product.id && row.kind === "parent")) {
+      const group = createWorkspaceGroup({ ...product, ...pending });
+      rows = [
+        ...rows.filter((row) => row.productId !== product.id),
+        ...group.map((row) =>
+          refreshRowChangedFields({
+            ...row,
+            original: baseOriginal,
+            pending,
+          })
+        ),
+      ];
+    }
   });
 
   return {
-    rows: Array.from(byId.values()),
+    rows,
     errors,
     skippedEmpty,
   };
 }
 
 export function buildTemplateWorkbook(): ArrayBuffer {
-  const example = [
-    ...BULK_SPREADSHEET_HEADERS,
-  ];
+  const example = [...BULK_SPREADSHEET_HEADERS];
   const sample = [
     "SKU-001",
     "100",
@@ -456,15 +621,23 @@ export function buildTemplateWorkbook(): ArrayBuffer {
     "",
     "BR;US",
     "yes",
+    "10",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
   ];
   const notes = [
     [
       "NOTES",
-      "SKU is required. Empty cells keep the current product value (they do NOT clear fields).",
-      "Use existing category/brand/option ids or exact labels.",
-      "Multi-value columns: separate with ; or |",
-      "Market availability: country codes like BR;US",
-      "Available in Shop: yes/no or published/draft",
+      "SKU is required (parent or color/child SKU). Matching a child SKU expands the full color group.",
+      "Empty cells keep the current product value (they do NOT clear fields).",
+      "Parent SKU rows: MOQ/taxonomy/status + Price USD/BRL/EUR apply to the base product.",
+      "Child SKU rows: Color hex, Color name, Variant price USD, Variant image apply to that color only.",
+      "Two rows for the same parent merge into one pending document; same-field conflicts warn.",
+      "Limit: 100 products / color groups (not each color row).",
     ],
   ];
 
@@ -486,3 +659,5 @@ export function downloadBulkUpdateTemplate() {
   anchor.click();
   URL.revokeObjectURL(url);
 }
+
+export { productHasPendingChanges };

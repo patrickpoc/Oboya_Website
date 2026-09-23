@@ -1,36 +1,41 @@
+# Oboya Website
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Product ID = SKU migration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Canonical product identity is `product.id === product.sku` (trimmed). Color children use `colorVariants[].id === colorVariants[].sku`.
 
-## Learn More
+### Bulk Update (parent + color groups)
 
-To learn more about Next.js, take a look at the following resources:
+- Selecting any parent or child SKU expands the full group (parent row + indented color rows).
+- Limit is **100 products / color groups** (not each color row).
+- One PUT per `productId` applies parent taxonomy/MOQ/status plus variant price/color/image patches.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Run the one-shot migration
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# Validate only (no writes)
+npm run migrate:product-ids -- --dry-run
 
-## Deploy on Vercel
+# Apply (backs up products.json → products.json.bak, writes remap)
+npm run migrate:product-ids -- --backup
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+What remaps:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `product.id` → `product.sku` when they differ
+- `relatedProductIds` via the product remap
+- `colorVariants[].id` → `colorVariants[].sku` (skips `__default__`); remaps matching `imageColorIds` tags
+- Writes `data/shop/product-id-remap.json` for cart hydrate (`oboya-shop-quote`) and soft-open `?product=` bookmarks
+- Shop PDP URLs use `/shop/products/{sku}` with a permanent redirect from legacy ids
+
+Historical RFQ rows keep old `productId` values (UI already shows SKU).

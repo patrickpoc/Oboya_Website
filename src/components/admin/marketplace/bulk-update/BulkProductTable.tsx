@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
 import { PRODUCT_EDITOR_SELECT_CLASS } from "@/components/admin/marketplace/product-editor.constants";
@@ -35,12 +35,20 @@ type Props = {
   catalog: BulkUpdateCatalog;
   issues: BulkValidationIssue[];
   selectedIds: Set<string>;
+  focusRowId?: string | null;
   preferredLocale?: string;
   onToggleSelect: (productId: string) => void;
   onToggleSelectAll: () => void;
   onRemove: (productId: string) => void;
-  onPatch: (productId: string, patch: BulkProductPatch) => void;
+  onPatch: (
+    productId: string,
+    patch: BulkProductPatch,
+    variantId?: string | null
+  ) => void;
 };
+
+/** @deprecated Import from `@/lib/cms/bulk-update/types` instead. */
+export { BULK_UPDATE_MAX_PRODUCTS } from "@/lib/cms/bulk-update/types";
 
 const TH =
   "whitespace-nowrap px-3 py-2.5 text-left text-[11px] font-medium uppercase tracking-wide text-oboya-blue-dark/70";
@@ -58,9 +66,6 @@ const STICKY_RIGHT_HEAD =
   "sticky right-0 z-30 w-12 bg-oboya-soft-white text-center shadow-[-6px_0_8px_-6px_rgba(1,32,63,0.12)]";
 const STICKY_RIGHT_BODY =
   "sticky right-0 z-20 w-12 bg-white shadow-[-6px_0_8px_-6px_rgba(1,32,63,0.12)]";
-
-/** Max products in one bulk-update session. */
-export const BULK_UPDATE_MAX_PRODUCTS = 10;
 
 function CellShell({
   field,
@@ -87,7 +92,7 @@ function CellShell({
   return (
     <div
       className={cn(
-        "min-w-[10rem] space-y-1 rounded-md p-1",
+        "min-w-[9rem] space-y-1 rounded-md p-1",
         blocked && "bg-red-50 ring-1 ring-red-200",
         !blocked && warning && "bg-amber-50 ring-1 ring-amber-200",
         !blocked && !warning && changed && "bg-emerald-50 ring-1 ring-emerald-200"
@@ -119,14 +124,21 @@ function MultiSelectCell({
   options,
   values,
   onChange,
+  disabled,
 }: {
   options: Array<{ id: string; name: string }>;
   values: string[];
   onChange: (next: string[]) => void;
+  disabled?: boolean;
 }) {
   const t = useTranslations("admin.products.bulk");
   return (
-    <div className="max-h-28 min-w-[9rem] space-y-1 overflow-y-auto rounded-lg border border-input bg-background p-1.5">
+    <div
+      className={cn(
+        "max-h-28 min-w-[9rem] space-y-1 overflow-y-auto rounded-lg border border-input bg-background p-1.5",
+        disabled && "pointer-events-none opacity-40"
+      )}
+    >
       {options.length === 0 ? (
         <p className="px-1 text-[11px] font-normal text-muted-foreground">{t("noOptions")}</p>
       ) : (
@@ -141,6 +153,7 @@ function MultiSelectCell({
                 type="checkbox"
                 className="size-3.5 shrink-0"
                 checked={checked}
+                disabled={disabled}
                 onChange={() =>
                   onChange(
                     checked
@@ -158,11 +171,16 @@ function MultiSelectCell({
   );
 }
 
+function DimmedDash() {
+  return <span className="text-xs text-muted-foreground/50">—</span>;
+}
+
 export function BulkProductTable({
   rows,
   catalog,
   issues,
   selectedIds,
+  focusRowId,
   preferredLocale = "en",
   onToggleSelect,
   onToggleSelectAll,
@@ -172,7 +190,15 @@ export function BulkProductTable({
   const t = useTranslations("admin.products.bulk");
   const tCommon = useTranslations("admin.common");
   const locale = preferredLocale;
-  const allSelected = rows.length > 0 && rows.every((row) => selectedIds.has(row.productId));
+  const productIds = Array.from(new Set(rows.map((row) => row.productId)));
+  const allSelected =
+    productIds.length > 0 && productIds.every((id) => selectedIds.has(id));
+  const focusRef = useRef<HTMLTableRowElement | null>(null);
+
+  useEffect(() => {
+    if (!focusRowId || !focusRef.current) return;
+    focusRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [focusRowId]);
 
   if (rows.length === 0) {
     return (
@@ -182,10 +208,16 @@ export function BulkProductTable({
     );
   }
 
+  const parentSkuByProduct = new Map(
+    rows
+      .filter((row) => row.kind === "parent")
+      .map((row) => [row.productId, row.pending.sku] as const)
+  );
+
   return (
     <div className="rounded-xl border border-border/60 bg-white">
       <div className="overflow-x-auto">
-        <table className="min-w-[1600px] w-full border-separate border-spacing-0 text-left text-sm">
+        <table className="min-w-[2200px] w-full border-separate border-spacing-0 text-left text-sm">
           <thead className="bg-oboya-soft-white">
             <tr>
               <th className={cn(TH, STICKY_LEFT_CHECK, "border-b border-border/60")}>
@@ -229,6 +261,12 @@ export function BulkProductTable({
               <th className={cn(TH, "border-b border-border/60")}>
                 {BULK_FIELD_LABELS.status}
               </th>
+              <th className={cn(TH, "border-b border-border/60")}>USD</th>
+              <th className={cn(TH, "border-b border-border/60")}>BRL</th>
+              <th className={cn(TH, "border-b border-border/60")}>EUR</th>
+              <th className={cn(TH, "border-b border-border/60")}>Color</th>
+              <th className={cn(TH, "border-b border-border/60")}>Color name</th>
+              <th className={cn(TH, "border-b border-border/60")}>Variant image</th>
               <th
                 className={cn(TH, STICKY_RIGHT_HEAD, "border-b border-border/60")}
                 aria-label={tCommon("remove")}
@@ -238,25 +276,55 @@ export function BulkProductTable({
           <tbody>
             {rows.map((row) => {
               const product = row.pending;
-              const image = product.images[0];
+              const isParent = row.kind === "parent";
+              const variant = !isParent
+                ? (product.colorVariants ?? []).find((item) => item.id === row.variantId)
+                : null;
+              const image = isParent
+                ? product.images[0]
+                : variant?.image || product.images[0];
               const markets = product.enabledCountries ?? product.availability ?? {};
               const enabledMarketCodes = Object.entries(markets)
                 .filter(([, enabled]) => enabled)
                 .map(([code]) => code);
+              const parentSku = parentSkuByProduct.get(row.productId) || product.sku;
+              const isFocused = focusRowId === row.rowId;
 
               return (
-                <tr key={row.productId}>
-                  <td className={cn(TD, STICKY_LEFT_CHECK_BODY)}>
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.has(row.productId)}
-                      onChange={() => onToggleSelect(row.productId)}
-                      aria-label={t("selectProduct", { sku: product.sku })}
-                      className="align-middle"
-                    />
+                <tr
+                  key={row.rowId}
+                  ref={isFocused ? focusRef : undefined}
+                  className={cn(
+                    !isParent && "bg-oboya-soft-white/40",
+                    isFocused && "ring-2 ring-inset ring-oboya-blue-light"
+                  )}
+                >
+                  <td className={cn(TD, STICKY_LEFT_CHECK_BODY, !isParent && "bg-oboya-soft-white/40")}>
+                    {isParent ? (
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(row.productId)}
+                        onChange={() => onToggleSelect(row.productId)}
+                        aria-label={t("selectProduct", { sku: product.sku })}
+                        className="align-middle"
+                      />
+                    ) : (
+                      <span className="block w-3" aria-hidden />
+                    )}
                   </td>
-                  <td className={cn(TD, STICKY_LEFT_PRODUCT_BODY)}>
-                    <div className="flex min-w-[15rem] items-center gap-3 pr-1">
+                  <td
+                    className={cn(
+                      TD,
+                      STICKY_LEFT_PRODUCT_BODY,
+                      !isParent && "bg-oboya-soft-white/40"
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        "flex min-w-[15rem] items-center gap-3 pr-1",
+                        !isParent && "pl-4"
+                      )}
+                    >
                       <div className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-muted ring-1 ring-border/50">
                         {image ? (
                           <Image
@@ -269,291 +337,547 @@ export function BulkProductTable({
                           />
                         ) : null}
                       </div>
-                      <span className="min-w-0 flex-1 text-sm font-medium leading-snug text-oboya-blue-dark">
-                        {displayProductName(product, preferredLocale)}
-                      </span>
+                      <div className="min-w-0 flex-1">
+                        <span className="block text-sm font-medium leading-snug text-oboya-blue-dark">
+                          {isParent
+                            ? displayProductName(product, preferredLocale)
+                            : variant?.nameI18n?.en ||
+                              variant?.name ||
+                              row.matchedSku}
+                        </span>
+                        {!isParent && (
+                          <span className="mt-0.5 inline-flex rounded bg-oboya-blue/10 px-1.5 py-0.5 text-[10px] font-medium text-oboya-blue">
+                            {t("colorOfParent", { parentSku })}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td className={cn(TD, "font-mono text-xs font-normal text-oboya-blue-dark/80")}>
-                    {product.sku}
-                  </td>
-                  <td className={TD}>
-                    <CellShell
-                      field="moq"
-                      row={row}
-                      catalog={catalog}
-                      locale={locale}
-                      issues={issues}
-                    >
+                    {isParent ? (
+                      product.sku
+                    ) : (
                       <Input
-                        type="number"
-                        min={1}
-                        className={CONTROL}
-                        value={product.moq}
+                        className={cn(CONTROL, "font-mono text-xs")}
+                        value={variant?.sku ?? ""}
                         onChange={(event) =>
-                          onPatch(row.productId, { moq: Number(event.target.value) || 0 })
+                          onPatch(
+                            row.productId,
+                            { variantSku: event.target.value },
+                            row.variantId
+                          )
                         }
                       />
-                    </CellShell>
+                    )}
                   </td>
                   <td className={TD}>
-                    <CellShell
-                      field="categoryId"
-                      row={row}
-                      catalog={catalog}
-                      locale={locale}
-                      issues={issues}
-                    >
-                      <select
-                        className={cn(PRODUCT_EDITOR_SELECT_CLASS, CONTROL)}
-                        value={product.categoryId || ""}
-                        onChange={(event) => {
-                          const nextCategoryId = event.target.value;
-                          const nextCategory = catalog.categories.find(
-                            (item) => item.id === nextCategoryId
-                          );
-                          onPatch(row.productId, {
-                            categoryId: nextCategoryId,
-                            subcategoryId: nextCategory?.subcategories[0]?.id ?? "",
-                          });
-                        }}
+                    {isParent ? (
+                      <CellShell
+                        field="moq"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
                       >
-                        <option value="">—</option>
-                        {withCurrentLabeledOption(
-                          categoryOptions(catalog, locale),
-                          product.categoryId,
-                          (id) =>
-                            resolveCatalogDisplayName(catalog, "category", id, locale)
-                        ).map((item) => (
-                          <option key={item.id} value={item.id}>
-                            {item.name}
-                          </option>
-                        ))}
-                      </select>
-                    </CellShell>
-                  </td>
-                  <td className={TD}>
-                    <CellShell
-                      field="subcategoryId"
-                      row={row}
-                      catalog={catalog}
-                      locale={locale}
-                      issues={issues}
-                    >
-                      <select
-                        className={cn(PRODUCT_EDITOR_SELECT_CLASS, CONTROL)}
-                        value={product.subcategoryId || ""}
-                        onChange={(event) =>
-                          onPatch(row.productId, { subcategoryId: event.target.value })
-                        }
-                      >
-                        <option value="">—</option>
-                        {withCurrentLabeledOption(
-                          subcategoryOptions(catalog, product.categoryId, locale),
-                          product.subcategoryId,
-                          (id) =>
-                            resolveCatalogDisplayName(catalog, "subcategory", id, locale)
-                        ).map((item) => (
-                          <option key={item.id} value={item.id}>
-                            {item.name}
-                          </option>
-                        ))}
-                      </select>
-                    </CellShell>
-                  </td>
-                  <td className={TD}>
-                    <CellShell
-                      field="brandId"
-                      row={row}
-                      catalog={catalog}
-                      locale={locale}
-                      issues={issues}
-                    >
-                      <select
-                        className={cn(PRODUCT_EDITOR_SELECT_CLASS, CONTROL)}
-                        value={product.brandId || ""}
-                        onChange={(event) =>
-                          onPatch(row.productId, { brandId: event.target.value })
-                        }
-                      >
-                        <option value="">—</option>
-                        {withCurrentLabeledOption(
-                          brandOptions(catalog, locale),
-                          product.brandId,
-                          (id) => resolveCatalogDisplayName(catalog, "brand", id, locale)
-                        ).map((item) => (
-                          <option key={item.id} value={item.id}>
-                            {item.name}
-                          </option>
-                        ))}
-                      </select>
-                    </CellShell>
-                  </td>
-                  <td className={TD}>
-                    <CellShell
-                      field="application"
-                      row={row}
-                      catalog={catalog}
-                      locale={locale}
-                      issues={issues}
-                    >
-                      <MultiSelectCell
-                        options={withCurrentLabeledOptions(
-                          filterOptionLabels(catalog, "applications", locale),
-                          product.application,
-                          (id) =>
-                            resolveCatalogDisplayName(catalog, "application", id, locale)
-                        )}
-                        values={product.application ?? []}
-                        onChange={(application) => onPatch(row.productId, { application })}
-                      />
-                    </CellShell>
-                  </td>
-                  <td className={TD}>
-                    <CellShell
-                      field="cultures"
-                      row={row}
-                      catalog={catalog}
-                      locale={locale}
-                      issues={issues}
-                    >
-                      <MultiSelectCell
-                        options={withCurrentLabeledOptions(
-                          filterOptionLabels(catalog, "cultures", locale),
-                          product.cultures,
-                          (id) =>
-                            resolveCatalogDisplayName(catalog, "cultures", id, locale)
-                        )}
-                        values={product.cultures ?? []}
-                        onChange={(cultures) => onPatch(row.productId, { cultures })}
-                      />
-                    </CellShell>
-                  </td>
-                  <td className={TD}>
-                    <CellShell
-                      field="certifications"
-                      row={row}
-                      catalog={catalog}
-                      locale={locale}
-                      issues={issues}
-                    >
-                      <MultiSelectCell
-                        options={withCurrentLabeledOptions(
-                          filterOptionLabels(catalog, "certifications", locale),
-                          product.certifications,
-                          (id) =>
-                            resolveCatalogDisplayName(
-                              catalog,
-                              "certifications",
-                              id,
-                              locale
-                            )
-                        )}
-                        values={product.certifications ?? []}
-                        onChange={(certifications) =>
-                          onPatch(row.productId, { certifications })
-                        }
-                      />
-                    </CellShell>
-                  </td>
-                  <td className={TD}>
-                    <CellShell
-                      field="countryOfOrigin"
-                      row={row}
-                      catalog={catalog}
-                      locale={locale}
-                      issues={issues}
-                    >
-                      <select
-                        className={cn(PRODUCT_EDITOR_SELECT_CLASS, CONTROL)}
-                        value={product.countryOfOrigin || ""}
-                        onChange={(event) =>
-                          onPatch(row.productId, { countryOfOrigin: event.target.value })
-                        }
-                      >
-                        <option value="">—</option>
-                        {withCurrentLabeledOption(
-                          filterOptionLabels(catalog, "countriesOfOrigin", locale),
-                          product.countryOfOrigin,
-                          (id) =>
-                            resolveCatalogDisplayName(
-                              catalog,
-                              "countryOfOrigin",
-                              id,
-                              locale
-                            )
-                        ).map((item) => (
-                          <option key={item.id} value={item.id}>
-                            {item.name}
-                          </option>
-                        ))}
-                      </select>
-                    </CellShell>
-                  </td>
-                  <td className={TD}>
-                    <CellShell
-                      field="enabledCountries"
-                      row={row}
-                      catalog={catalog}
-                      locale={locale}
-                      issues={issues}
-                    >
-                      <MultiSelectCell
-                        options={withCurrentLabeledOptions(
-                          marketOptions(catalog),
-                          enabledMarketCodes,
-                          (id) => resolveCatalogDisplayName(catalog, "market", id, locale)
-                        )}
-                        values={enabledMarketCodes}
-                        onChange={(codes) => {
-                          const enabledCountries: Record<string, boolean> = {};
-                          const codesSet = new Set(codes);
-                          for (const country of catalog.countries) {
-                            enabledCountries[country.code] = codesSet.has(country.code);
-                          }
-                          for (const code of codes) {
-                            if (!(code in enabledCountries)) {
-                              enabledCountries[code] = true;
-                            }
-                          }
-                          onPatch(row.productId, { enabledCountries });
-                        }}
-                      />
-                    </CellShell>
-                  </td>
-                  <td className={TD}>
-                    <CellShell
-                      field="status"
-                      row={row}
-                      catalog={catalog}
-                      locale={locale}
-                      issues={issues}
-                    >
-                      <label className="flex h-9 items-center gap-2 text-sm font-normal">
-                        <input
-                          type="checkbox"
-                          checked={product.status === "published"}
+                        <Input
+                          type="number"
+                          min={1}
+                          className={CONTROL}
+                          value={product.moq}
                           onChange={(event) =>
                             onPatch(row.productId, {
-                              status: event.target.checked ? "published" : "draft",
+                              moq: Number(event.target.value) || 0,
                             })
                           }
                         />
-                        Shop
-                      </label>
-                    </CellShell>
+                      </CellShell>
+                    ) : (
+                      <DimmedDash />
+                    )}
                   </td>
-                  <td className={cn(TD, STICKY_RIGHT_BODY)}>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 text-muted-foreground hover:bg-oboya-orange/10 hover:text-oboya-orange"
-                      onClick={() => onRemove(row.productId)}
-                      aria-label={t("removeProduct", { sku: product.sku })}
-                    >
-                      <X className="size-4" />
-                    </Button>
+                  <td className={TD}>
+                    {isParent ? (
+                      <CellShell
+                        field="categoryId"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                      >
+                        <select
+                          className={cn(PRODUCT_EDITOR_SELECT_CLASS, CONTROL)}
+                          value={product.categoryId || ""}
+                          onChange={(event) => {
+                            const nextCategoryId = event.target.value;
+                            const nextCategory = catalog.categories.find(
+                              (item) => item.id === nextCategoryId
+                            );
+                            onPatch(row.productId, {
+                              categoryId: nextCategoryId,
+                              subcategoryId: nextCategory?.subcategories[0]?.id ?? "",
+                            });
+                          }}
+                        >
+                          <option value="">—</option>
+                          {withCurrentLabeledOption(
+                            categoryOptions(catalog, locale),
+                            product.categoryId,
+                            (id) =>
+                              resolveCatalogDisplayName(catalog, "category", id, locale)
+                          ).map((item) => (
+                            <option key={item.id} value={item.id}>
+                              {item.name}
+                            </option>
+                          ))}
+                        </select>
+                      </CellShell>
+                    ) : (
+                      <DimmedDash />
+                    )}
+                  </td>
+                  <td className={TD}>
+                    {isParent ? (
+                      <CellShell
+                        field="subcategoryId"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                      >
+                        <select
+                          className={cn(PRODUCT_EDITOR_SELECT_CLASS, CONTROL)}
+                          value={product.subcategoryId || ""}
+                          onChange={(event) =>
+                            onPatch(row.productId, {
+                              subcategoryId: event.target.value,
+                            })
+                          }
+                        >
+                          <option value="">—</option>
+                          {withCurrentLabeledOption(
+                            subcategoryOptions(catalog, product.categoryId, locale),
+                            product.subcategoryId,
+                            (id) =>
+                              resolveCatalogDisplayName(catalog, "subcategory", id, locale)
+                          ).map((item) => (
+                            <option key={item.id} value={item.id}>
+                              {item.name}
+                            </option>
+                          ))}
+                        </select>
+                      </CellShell>
+                    ) : (
+                      <DimmedDash />
+                    )}
+                  </td>
+                  <td className={TD}>
+                    {isParent ? (
+                      <CellShell
+                        field="brandId"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                      >
+                        <select
+                          className={cn(PRODUCT_EDITOR_SELECT_CLASS, CONTROL)}
+                          value={product.brandId || ""}
+                          onChange={(event) =>
+                            onPatch(row.productId, { brandId: event.target.value })
+                          }
+                        >
+                          <option value="">—</option>
+                          {withCurrentLabeledOption(
+                            brandOptions(catalog, locale),
+                            product.brandId,
+                            (id) => resolveCatalogDisplayName(catalog, "brand", id, locale)
+                          ).map((item) => (
+                            <option key={item.id} value={item.id}>
+                              {item.name}
+                            </option>
+                          ))}
+                        </select>
+                      </CellShell>
+                    ) : (
+                      <DimmedDash />
+                    )}
+                  </td>
+                  <td className={TD}>
+                    {isParent ? (
+                      <CellShell
+                        field="application"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                      >
+                        <MultiSelectCell
+                          options={withCurrentLabeledOptions(
+                            filterOptionLabels(catalog, "applications", locale),
+                            product.application,
+                            (id) =>
+                              resolveCatalogDisplayName(catalog, "application", id, locale)
+                          )}
+                          values={product.application ?? []}
+                          onChange={(application) =>
+                            onPatch(row.productId, { application })
+                          }
+                        />
+                      </CellShell>
+                    ) : (
+                      <DimmedDash />
+                    )}
+                  </td>
+                  <td className={TD}>
+                    {isParent ? (
+                      <CellShell
+                        field="cultures"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                      >
+                        <MultiSelectCell
+                          options={withCurrentLabeledOptions(
+                            filterOptionLabels(catalog, "cultures", locale),
+                            product.cultures,
+                            (id) =>
+                              resolveCatalogDisplayName(catalog, "cultures", id, locale)
+                          )}
+                          values={product.cultures ?? []}
+                          onChange={(cultures) => onPatch(row.productId, { cultures })}
+                        />
+                      </CellShell>
+                    ) : (
+                      <DimmedDash />
+                    )}
+                  </td>
+                  <td className={TD}>
+                    {isParent ? (
+                      <CellShell
+                        field="certifications"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                      >
+                        <MultiSelectCell
+                          options={withCurrentLabeledOptions(
+                            filterOptionLabels(catalog, "certifications", locale),
+                            product.certifications,
+                            (id) =>
+                              resolveCatalogDisplayName(
+                                catalog,
+                                "certifications",
+                                id,
+                                locale
+                              )
+                          )}
+                          values={product.certifications ?? []}
+                          onChange={(certifications) =>
+                            onPatch(row.productId, { certifications })
+                          }
+                        />
+                      </CellShell>
+                    ) : (
+                      <DimmedDash />
+                    )}
+                  </td>
+                  <td className={TD}>
+                    {isParent ? (
+                      <CellShell
+                        field="countryOfOrigin"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                      >
+                        <select
+                          className={cn(PRODUCT_EDITOR_SELECT_CLASS, CONTROL)}
+                          value={product.countryOfOrigin || ""}
+                          onChange={(event) =>
+                            onPatch(row.productId, {
+                              countryOfOrigin: event.target.value,
+                            })
+                          }
+                        >
+                          <option value="">—</option>
+                          {withCurrentLabeledOption(
+                            filterOptionLabels(catalog, "countriesOfOrigin", locale),
+                            product.countryOfOrigin,
+                            (id) =>
+                              resolveCatalogDisplayName(
+                                catalog,
+                                "countryOfOrigin",
+                                id,
+                                locale
+                              )
+                          ).map((item) => (
+                            <option key={item.id} value={item.id}>
+                              {item.name}
+                            </option>
+                          ))}
+                        </select>
+                      </CellShell>
+                    ) : (
+                      <DimmedDash />
+                    )}
+                  </td>
+                  <td className={TD}>
+                    {isParent ? (
+                      <CellShell
+                        field="enabledCountries"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                      >
+                        <MultiSelectCell
+                          options={withCurrentLabeledOptions(
+                            marketOptions(catalog),
+                            enabledMarketCodes,
+                            (id) =>
+                              resolveCatalogDisplayName(catalog, "market", id, locale)
+                          )}
+                          values={enabledMarketCodes}
+                          onChange={(codes) => {
+                            const enabledCountries: Record<string, boolean> = {};
+                            const codesSet = new Set(codes);
+                            for (const country of catalog.countries) {
+                              enabledCountries[country.code] = codesSet.has(country.code);
+                            }
+                            for (const code of codes) {
+                              if (!(code in enabledCountries)) {
+                                enabledCountries[code] = true;
+                              }
+                            }
+                            onPatch(row.productId, { enabledCountries });
+                          }}
+                        />
+                      </CellShell>
+                    ) : (
+                      <DimmedDash />
+                    )}
+                  </td>
+                  <td className={TD}>
+                    {isParent ? (
+                      <CellShell
+                        field="status"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                      >
+                        <label className="flex h-9 items-center gap-2 text-sm font-normal">
+                          <input
+                            type="checkbox"
+                            checked={product.status === "published"}
+                            onChange={(event) =>
+                              onPatch(row.productId, {
+                                status: event.target.checked ? "published" : "draft",
+                              })
+                            }
+                          />
+                          Shop
+                        </label>
+                      </CellShell>
+                    ) : (
+                      <DimmedDash />
+                    )}
+                  </td>
+                  <td className={TD}>
+                    {isParent ? (
+                      <Input
+                        type="number"
+                        min={0}
+                        className={CONTROL}
+                        value={product.prices?.USD ?? ""}
+                        onChange={(event) =>
+                          onPatch(row.productId, {
+                            priceUsd:
+                              event.target.value === ""
+                                ? null
+                                : Number(event.target.value),
+                          })
+                        }
+                      />
+                    ) : (
+                      <Input
+                        type="number"
+                        min={0}
+                        className={CONTROL}
+                        value={variant?.prices?.USD ?? ""}
+                        placeholder={String(product.prices?.USD ?? "")}
+                        onChange={(event) =>
+                          onPatch(
+                            row.productId,
+                            {
+                              variantPriceUsd:
+                                event.target.value === ""
+                                  ? null
+                                  : Number(event.target.value),
+                            },
+                            row.variantId
+                          )
+                        }
+                      />
+                    )}
+                  </td>
+                  <td className={TD}>
+                    {isParent ? (
+                      <Input
+                        type="number"
+                        min={0}
+                        className={CONTROL}
+                        value={product.prices?.BRL ?? ""}
+                        onChange={(event) =>
+                          onPatch(row.productId, {
+                            priceBrl:
+                              event.target.value === ""
+                                ? null
+                                : Number(event.target.value),
+                          })
+                        }
+                      />
+                    ) : (
+                      <Input
+                        type="number"
+                        min={0}
+                        className={CONTROL}
+                        value={variant?.prices?.BRL ?? ""}
+                        placeholder={String(product.prices?.BRL ?? "")}
+                        onChange={(event) =>
+                          onPatch(
+                            row.productId,
+                            {
+                              variantPriceBrl:
+                                event.target.value === ""
+                                  ? null
+                                  : Number(event.target.value),
+                            },
+                            row.variantId
+                          )
+                        }
+                      />
+                    )}
+                  </td>
+                  <td className={TD}>
+                    {isParent ? (
+                      <Input
+                        type="number"
+                        min={0}
+                        className={CONTROL}
+                        value={product.prices?.EUR ?? ""}
+                        onChange={(event) =>
+                          onPatch(row.productId, {
+                            priceEur:
+                              event.target.value === ""
+                                ? null
+                                : Number(event.target.value),
+                          })
+                        }
+                      />
+                    ) : (
+                      <Input
+                        type="number"
+                        min={0}
+                        className={CONTROL}
+                        value={variant?.prices?.EUR ?? ""}
+                        placeholder={String(product.prices?.EUR ?? "")}
+                        onChange={(event) =>
+                          onPatch(
+                            row.productId,
+                            {
+                              variantPriceEur:
+                                event.target.value === ""
+                                  ? null
+                                  : Number(event.target.value),
+                            },
+                            row.variantId
+                          )
+                        }
+                      />
+                    )}
+                  </td>
+                  <td className={TD}>
+                    {isParent ? (
+                      <DimmedDash />
+                    ) : (
+                      <Input
+                        className={CONTROL}
+                        value={variant?.color ?? ""}
+                        onChange={(event) =>
+                          onPatch(
+                            row.productId,
+                            { variantColor: event.target.value },
+                            row.variantId
+                          )
+                        }
+                      />
+                    )}
+                  </td>
+                  <td className={TD}>
+                    {isParent ? (
+                      <DimmedDash />
+                    ) : (
+                      <div className="space-y-1">
+                        <Input
+                          className={CONTROL}
+                          placeholder="EN"
+                          value={variant?.nameI18n?.en || variant?.name || ""}
+                          onChange={(event) =>
+                            onPatch(
+                              row.productId,
+                              { variantColorNameEn: event.target.value },
+                              row.variantId
+                            )
+                          }
+                        />
+                        <Input
+                          className={CONTROL}
+                          placeholder="PT"
+                          value={variant?.nameI18n?.["pt-BR"] || ""}
+                          onChange={(event) =>
+                            onPatch(
+                              row.productId,
+                              { variantColorNamePt: event.target.value },
+                              row.variantId
+                            )
+                          }
+                        />
+                      </div>
+                    )}
+                  </td>
+                  <td className={TD}>
+                    {isParent ? (
+                      <DimmedDash />
+                    ) : (
+                      <Input
+                        className={CONTROL}
+                        value={variant?.image ?? ""}
+                        onChange={(event) =>
+                          onPatch(
+                            row.productId,
+                            { variantImage: event.target.value },
+                            row.variantId
+                          )
+                        }
+                      />
+                    )}
+                  </td>
+                  <td className={cn(TD, STICKY_RIGHT_BODY, !isParent && "bg-oboya-soft-white/40")}>
+                    {isParent ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 text-muted-foreground hover:bg-oboya-orange/10 hover:text-oboya-orange"
+                        onClick={() => onRemove(row.productId)}
+                        aria-label={t("removeProduct", { sku: product.sku })}
+                      >
+                        <X className="size-4" />
+                      </Button>
+                    ) : null}
                   </td>
                 </tr>
               );

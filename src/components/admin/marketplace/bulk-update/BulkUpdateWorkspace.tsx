@@ -5,34 +5,35 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { BulkChangeReviewDialog } from "@/components/admin/marketplace/bulk-update/BulkChangeReviewDialog";
 import { BulkColumnActions } from "@/components/admin/marketplace/bulk-update/BulkColumnActions";
-import {
-  BULK_UPDATE_MAX_PRODUCTS,
-  BulkProductTable,
-} from "@/components/admin/marketplace/bulk-update/BulkProductTable";
+import { BulkProductTable } from "@/components/admin/marketplace/bulk-update/BulkProductTable";
 import { BulkUpdateProgress } from "@/components/admin/marketplace/bulk-update/BulkUpdateProgress";
 import { ProductSearchAutocomplete } from "@/components/admin/marketplace/bulk-update/ProductSearchAutocomplete";
 import { SpreadsheetImportPanel } from "@/components/admin/marketplace/bulk-update/SpreadsheetImportPanel";
 import { Button } from "@/components/ui/button";
+import { countProductGroups } from "@/lib/cms/admin-sku-lookup";
 import {
   applyBulkUpdatesSequentially,
   type SequentialApplyProgress,
 } from "@/lib/cms/bulk-update/apply-sequential";
 import {
   applyPatchToProduct,
-  createWorkspaceRow,
-  getChangedFields,
-  refreshRowChangedFields,
+  createWorkspaceGroup,
+  productHasPendingChanges,
+  replaceOrInsertGroup,
+  syncGroupPending,
 } from "@/lib/cms/bulk-update/diff";
 import {
   summarizeValidation,
   validateBulkUpdate,
 } from "@/lib/cms/bulk-update/validate";
-import type {
-  BulkApplyResult,
-  BulkProductPatch,
-  BulkUpdateCatalog,
-  BulkValidationIssue,
-  BulkWorkspaceRow,
+import type { BulkSkuSearchHit } from "@/lib/cms/bulk-update/search-products";
+import {
+  BULK_UPDATE_MAX_PRODUCTS,
+  type BulkApplyResult,
+  type BulkProductPatch,
+  type BulkUpdateCatalog,
+  type BulkValidationIssue,
+  type BulkWorkspaceRow,
 } from "@/lib/cms/bulk-update/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import { useAdminLocale } from "@/contexts/AdminLocaleContext";
@@ -47,6 +48,7 @@ export function BulkUpdateWorkspace() {
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [rows, setRows] = useState<BulkWorkspaceRow[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [focusRowId, setFocusRowId] = useState<string | null>(null);
   const [serverIssues, setServerIssues] = useState<BulkValidationIssue[] | null>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [applying, setApplying] = useState(false);
@@ -62,6 +64,8 @@ export function BulkUpdateWorkspace() {
     }),
     [liveCatalog]
   );
+
+  const groupCount = useMemo(() => countProductGroups(rows), [rows]);
 
   const loadProducts = useCallback(async () => {
     setLoadingProducts(true);
@@ -117,37 +121,58 @@ export function BulkUpdateWorkspace() {
   );
 
   const summary = useMemo(() => summarizeValidation(issues), [issues]);
-  const changedCount = rows.filter((row) => row.changedFields.length > 0).length;
+  const changedProductIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const row of rows) {
+      if (productHasPendingChanges(row.original, row.pending)) {
+        ids.add(row.productId);
+      }
+    }
+    return ids;
+  }, [rows]);
+  const changedCount = changedProductIds.size;
   const blockedCount = summary.blockedCount;
 
-  const patchRow = (productId: string, patch: BulkProductPatch) => {
+  const patchRow = (
+    productId: string,
+    patch: BulkProductPatch,
+    variantId?: string | null
+  ) => {
     setServerIssues(null);
-    setRows((current) =>
-      current.map((row) => {
-        if (row.productId !== productId) return row;
-        const pending = applyPatchToProduct(row.pending, patch);
-        return refreshRowChangedFields({ ...row, pending });
-      })
-    );
+    setRows((current) => {
+      const sample = current.find((row) => row.productId === productId);
+      if (!sample) return current;
+      const pending = applyPatchToProduct(sample.pending, patch, variantId);
+      return syncGroupPending(current, productId, pending);
+    });
   };
 
-  const addProduct = (product: CmsProduct) => {
-    if (rows.length >= BULK_UPDATE_MAX_PRODUCTS) {
+  const addFromHit = (hit: BulkSkuSearchHit) => {
+    const product = hit.product;
+    if (rows.some((row) => row.productId === product.id)) {
+      const focusId = hit.variantId
+        ? `${product.id}::${hit.variantId}`
+        : product.id;
+      setFocusRowId(focusId);
+      setSelectedIds((current) => new Set(current).add(product.id));
+      return;
+    }
+    if (groupCount >= BULK_UPDATE_MAX_PRODUCTS) {
       toast.error(t("maxSelect", { max: BULK_UPDATE_MAX_PRODUCTS }));
       return;
     }
-    if (rows.some((row) => row.productId === product.id)) return;
 
     setServerIssues(null);
     setResults(null);
-
-    // Optimistically add from search hit, then hydrate with full product record.
     setRows((current) => {
       if (current.some((row) => row.productId === product.id)) return current;
-      if (current.length >= BULK_UPDATE_MAX_PRODUCTS) return current;
-      return [...current, createWorkspaceRow(product)];
+      if (countProductGroups(current) >= BULK_UPDATE_MAX_PRODUCTS) return current;
+      return [...current, ...createWorkspaceGroup(product)];
     });
     setSelectedIds((current) => new Set(current).add(product.id));
+    setFocusRowId(
+      hit.variantId ? `${product.id}::${hit.variantId}` : product.id
+    );
 
     void (async () => {
       try {
@@ -157,17 +182,18 @@ export function BulkUpdateWorkspace() {
         if (!response.ok) return;
         const full = (await response.json()) as CmsProduct;
         setRows((current) => {
-          const exists = current.some((row) => row.productId === full.id);
-          if (!exists) {
-            if (current.length >= BULK_UPDATE_MAX_PRODUCTS) return current;
-            return [...current, createWorkspaceRow(full)];
+          const existing = current.filter((row) => row.productId === full.id);
+          if (existing.length === 0) {
+            if (countProductGroups(current) >= BULK_UPDATE_MAX_PRODUCTS) {
+              return current;
+            }
+            return [...current, ...createWorkspaceGroup(full)];
           }
-          return current.map((row) => {
-            if (row.productId !== full.id) return row;
-            // Preserve any local edits already made; only hydrate if unchanged.
-            if (row.changedFields.length > 0) return row;
-            return createWorkspaceRow(full);
-          });
+          const hasEdits = existing.some((row) =>
+            productHasPendingChanges(row.original, row.pending)
+          );
+          if (hasEdits) return current;
+          return replaceOrInsertGroup(current, full);
         });
       } catch {
         // Keep the search-hit snapshot already in the workspace.
@@ -191,13 +217,16 @@ export function BulkUpdateWorkspace() {
       return;
     }
     setServerIssues(null);
-    setRows((current) =>
-      current.map((row) => {
-        if (!selectedIds.has(row.productId)) return row;
-        const pending = applyPatchToProduct(row.pending, patch);
-        return refreshRowChangedFields({ ...row, pending });
-      })
-    );
+    setRows((current) => {
+      let next = current;
+      for (const productId of selectedIds) {
+        const sample = next.find((row) => row.productId === productId);
+        if (!sample) continue;
+        const pending = applyPatchToProduct(sample.pending, patch);
+        next = syncGroupPending(next, productId, pending);
+      }
+      return next;
+    });
     toast.success(t("appliedTo", { count: selectedIds.size }));
   };
 
@@ -207,6 +236,7 @@ export function BulkUpdateWorkspace() {
     setSelectedIds(new Set());
     setResults(null);
     setProgress(null);
+    setFocusRowId(null);
   };
 
   const openReview = async () => {
@@ -215,41 +245,28 @@ export function BulkUpdateWorkspace() {
       return;
     }
 
-    const updates = rows
-      .filter((row) => getChangedFields(row.original, row.pending).length > 0)
-      .map((row) => ({
-        id: row.productId,
-        patch: Object.fromEntries(
-          row.changedFields.map((field) => {
-            const pending = row.pending;
-            switch (field) {
-              case "moq":
-                return [field, pending.moq] as const;
-              case "categoryId":
-                return [field, pending.categoryId] as const;
-              case "subcategoryId":
-                return [field, pending.subcategoryId] as const;
-              case "brandId":
-                return [field, pending.brandId] as const;
-              case "application":
-                return [field, pending.application] as const;
-              case "cultures":
-                return [field, pending.cultures] as const;
-              case "certifications":
-                return [field, pending.certifications] as const;
-              case "countryOfOrigin":
-                return [field, pending.countryOfOrigin] as const;
-              case "enabledCountries":
-                return [
-                  field,
-                  pending.enabledCountries ?? pending.availability,
-                ] as const;
-              case "status":
-                return [field, pending.status] as const;
-            }
-          })
-        ) as BulkProductPatch,
-      }));
+    const updates = Array.from(changedProductIds).map((productId) => {
+      const sample = rows.find((row) => row.productId === productId)!;
+      const pending = sample.pending;
+      return {
+        id: productId,
+        patch: {
+          moq: pending.moq,
+          categoryId: pending.categoryId,
+          subcategoryId: pending.subcategoryId,
+          brandId: pending.brandId,
+          application: pending.application,
+          cultures: pending.cultures,
+          certifications: pending.certifications,
+          countryOfOrigin: pending.countryOfOrigin,
+          enabledCountries: pending.enabledCountries ?? pending.availability,
+          status: pending.status,
+          priceUsd: pending.prices?.USD ?? null,
+          priceBrl: pending.prices?.BRL ?? null,
+          priceEur: pending.prices?.EUR ?? null,
+        } satisfies BulkProductPatch,
+      };
+    });
 
     try {
       const response = await fetch("/api/cms/products/bulk-validate", {
@@ -319,17 +336,21 @@ export function BulkUpdateWorkspace() {
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm font-semibold text-oboya-blue-dark">{t("searchProducts")}</p>
               <p className="text-xs font-normal text-muted-foreground">
-                {t("selectedFraction", { count: rows.length, max: BULK_UPDATE_MAX_PRODUCTS })}
+                {t("selectedFraction", {
+                  count: groupCount,
+                  max: BULK_UPDATE_MAX_PRODUCTS,
+                })}{" "}
+                {t("productGroupsHint")}
               </p>
             </div>
             <ProductSearchAutocomplete
               products={products}
               excludeIds={excludeIds}
-              disabled={rows.length >= BULK_UPDATE_MAX_PRODUCTS}
-              onSelect={addProduct}
+              disabled={groupCount >= BULK_UPDATE_MAX_PRODUCTS}
+              onSelect={addFromHit}
               preferredLocale={locale}
             />
-            {rows.length >= BULK_UPDATE_MAX_PRODUCTS && (
+            {groupCount >= BULK_UPDATE_MAX_PRODUCTS && (
               <p className="mt-2 text-xs text-amber-700">
                 {t("maxReached", { max: BULK_UPDATE_MAX_PRODUCTS })}
               </p>
@@ -339,7 +360,10 @@ export function BulkUpdateWorkspace() {
           <div className="space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm font-semibold text-oboya-blue-dark">
-                {t("selectedProducts", { count: rows.length, max: BULK_UPDATE_MAX_PRODUCTS })}
+                {t("selectedProducts", {
+                  count: groupCount,
+                  max: BULK_UPDATE_MAX_PRODUCTS,
+                })}
               </p>
               <div className="flex flex-wrap gap-3 text-xs">
                 <span className="text-emerald-700">{t("changed", { count: changedCount })}</span>
@@ -352,6 +376,7 @@ export function BulkUpdateWorkspace() {
               catalog={catalog}
               issues={issues}
               selectedIds={selectedIds}
+              focusRowId={focusRowId}
               preferredLocale={locale}
               onToggleSelect={(productId) => {
                 setSelectedIds((current) => {
@@ -363,10 +388,11 @@ export function BulkUpdateWorkspace() {
               }}
               onToggleSelectAll={() => {
                 setSelectedIds((current) => {
-                  if (rows.every((row) => current.has(row.productId))) {
+                  const ids = Array.from(new Set(rows.map((row) => row.productId)));
+                  if (ids.every((id) => current.has(id))) {
                     return new Set();
                   }
-                  return new Set(rows.map((row) => row.productId));
+                  return new Set(ids);
                 });
               }}
               onRemove={removeProduct}
@@ -386,10 +412,20 @@ export function BulkUpdateWorkspace() {
             existingRows={rows}
             onImported={(nextRows, errors) => {
               setServerIssues(null);
-              const capped = nextRows.slice(0, BULK_UPDATE_MAX_PRODUCTS);
+              const productIds: string[] = [];
+              const capped: BulkWorkspaceRow[] = [];
+              for (const row of nextRows) {
+                if (!productIds.includes(row.productId)) {
+                  if (productIds.length >= BULK_UPDATE_MAX_PRODUCTS) continue;
+                  productIds.push(row.productId);
+                }
+                if (productIds.includes(row.productId)) {
+                  capped.push(row);
+                }
+              }
               setRows(capped);
-              setSelectedIds(new Set(capped.map((row) => row.productId)));
-              if (nextRows.length > BULK_UPDATE_MAX_PRODUCTS) {
+              setSelectedIds(new Set(productIds));
+              if (countProductGroups(nextRows) > BULK_UPDATE_MAX_PRODUCTS) {
                 toast.error(
                   t("importLimited", { max: BULK_UPDATE_MAX_PRODUCTS })
                 );

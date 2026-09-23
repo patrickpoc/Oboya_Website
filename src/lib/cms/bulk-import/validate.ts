@@ -34,7 +34,7 @@ function subcategoryBelongsToCategory(
 function pushIssue(
   issues: ImportValidationIssue[],
   row: ImportWorkspaceRow,
-  field: ImportEditableField | "product" | "id",
+  field: ImportEditableField | "product",
   status: ImportValidationIssue["status"],
   message: string,
   suggestedAction: string
@@ -54,59 +54,47 @@ function pushIssue(
 function validateRow(
   row: ImportWorkspaceRow,
   catalog: ImportCatalog,
-  batchSkus: Map<string, string[]>,
-  batchIds: Map<string, string[]>
+  batchSkus: Map<string, string[]>
 ): ImportValidationIssue[] {
   const issues: ImportValidationIssue[] = [];
   const product = row.pending;
+  const sku = product.sku?.trim() ?? "";
 
-  if (!product.id?.trim()) {
-    pushIssue(issues, row, "id", "blocked", "Product ID is required.", "Provide a unique id.");
-  } else if (catalog.existingIds.has(product.id)) {
-    pushIssue(
-      issues,
-      row,
-      "id",
-      "blocked",
-      `ID "${product.id}" already exists.`,
-      "Use a new unique id."
-    );
-  } else {
-    const dupes = batchIds.get(product.id.toLowerCase()) ?? [];
-    if (dupes.length > 1) {
-      pushIssue(
-        issues,
-        row,
-        "id",
-        "blocked",
-        `Duplicate ID "${product.id}" in this import batch.`,
-        "Make each id unique in the spreadsheet."
-      );
-    }
-  }
-
-  if (!product.sku?.trim()) {
+  // id === sku (identity)
+  if (!sku) {
     pushIssue(issues, row, "sku", "blocked", "SKU is required.", "Fill the SKU field.");
-  } else if (catalog.existingSkus.has(product.sku.toLowerCase())) {
-    pushIssue(
-      issues,
-      row,
-      "sku",
-      "blocked",
-      `SKU "${product.sku}" already exists.`,
-      "Use a new unique SKU."
-    );
   } else {
-    const dupes = batchSkus.get(product.sku.toLowerCase()) ?? [];
-    if (dupes.length > 1) {
+    if (product.id !== sku) {
       pushIssue(
         issues,
         row,
         "sku",
         "blocked",
-        `Duplicate SKU "${product.sku}" in this import batch.`,
-        "Make each SKU unique in the spreadsheet."
+        `Product id must equal SKU (got id="${product.id}", sku="${sku}").`,
+        "Set id = sku."
       );
+    }
+    if (catalog.existingSkus.has(sku.toLowerCase()) || catalog.existingIds.has(sku)) {
+      pushIssue(
+        issues,
+        row,
+        "sku",
+        "blocked",
+        `SKU "${sku}" already exists (parent, color, or legacy id).`,
+        "Use a new unique SKU."
+      );
+    } else {
+      const dupes = batchSkus.get(sku.toLowerCase()) ?? [];
+      if (dupes.length > 1) {
+        pushIssue(
+          issues,
+          row,
+          "sku",
+          "blocked",
+          `Duplicate SKU "${sku}" in this import batch.`,
+          "Make each SKU unique in the spreadsheet."
+        );
+      }
     }
   }
 
@@ -216,23 +204,16 @@ export function validateBulkImport(
   catalog: ImportCatalog
 ): ImportValidationIssue[] {
   const batchSkus = new Map<string, string[]>();
-  const batchIds = new Map<string, string[]>();
   for (const row of rows) {
     const skuKey = row.pending.sku.trim().toLowerCase();
-    const idKey = row.pending.id.trim().toLowerCase();
     if (skuKey) {
       const list = batchSkus.get(skuKey) ?? [];
       list.push(row.productId);
       batchSkus.set(skuKey, list);
     }
-    if (idKey) {
-      const list = batchIds.get(idKey) ?? [];
-      list.push(row.productId);
-      batchIds.set(idKey, list);
-    }
   }
 
-  return rows.flatMap((row) => validateRow(row, catalog, batchSkus, batchIds));
+  return rows.flatMap((row) => validateRow(row, catalog, batchSkus));
 }
 
 export function summarizeImportValidation(issues: ImportValidationIssue[]) {
@@ -245,7 +226,7 @@ export function summarizeImportValidation(issues: ImportValidationIssue[]) {
 export function issuesForImportProduct(
   issues: ImportValidationIssue[],
   productId: string,
-  field?: ImportEditableField | "product" | "id"
+  field?: ImportEditableField | "product"
 ) {
   return issues.filter(
     (issue) =>

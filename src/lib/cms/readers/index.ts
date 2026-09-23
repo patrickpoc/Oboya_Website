@@ -52,6 +52,21 @@ export async function readPublishedProductById(id: string) {
   return product;
 }
 
+/** Resolve PDP param as id or sku (post id=sku migration + legacy bookmarks). */
+export async function readPublishedProductByParam(param: string) {
+  const { readProducts: readProductsFromStore } = await import(
+    "@/lib/cms/server/products.server"
+  );
+  const products = await readProductsFromStore();
+  const published = products.filter(
+    (item) => item.status === "published" && !item.deletedAt
+  );
+  const byId = published.find((item) => item.id === param);
+  if (byId) return byId;
+  const bySku = published.find((item) => item.sku === param);
+  return bySku;
+}
+
 export function readProductById(id: string) {
   const cms = getCmsProductById(id);
   if (cms && cms.status === "published") return cms;

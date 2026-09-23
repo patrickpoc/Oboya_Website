@@ -3,13 +3,15 @@ import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 /** Server/client-safe empty product seed (mirrors ProductEditorForm helper). */
 export function createEmptyImportProduct(seed?: {
   id?: string;
+  sku?: string;
   categoryId?: string;
   subcategoryId?: string;
   brandId?: string;
 }): CmsProduct {
+  const sku = (seed?.sku ?? seed?.id ?? "").trim();
   return {
-    id: seed?.id ?? `product-${Date.now()}`,
-    sku: "",
+    id: sku,
+    sku,
     moq: 1,
     brandId: seed?.brandId ?? "",
     categoryId: seed?.categoryId ?? "",

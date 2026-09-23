@@ -58,7 +58,7 @@ function CellShell({
   issues,
   children,
 }: {
-  field: ImportEditableField | "id";
+  field: ImportEditableField;
   row: ImportWorkspaceRow;
   issues: ImportValidationIssue[];
   children: ReactNode;
@@ -66,10 +66,7 @@ function CellShell({
   const fieldIssues = issuesForImportProduct(issues, row.productId, field);
   const blocked = fieldIssues.some((issue) => issue.status === "blocked");
   const warning = fieldIssues.some((issue) => issue.status === "warning");
-  const changed =
-    field === "id"
-      ? row.original.id !== row.pending.id
-      : row.changedFields.includes(field as ImportEditableField);
+  const changed = row.changedFields.includes(field);
 
   return (
     <div
@@ -156,7 +153,6 @@ export function BulkImportTable({
           <tr className="bg-oboya-soft-white">
             <th className={cn(TH, STICKY_LEFT_PRODUCT)}>{t("colProduct")}</th>
             <th className={TH}>{t("colSku")}</th>
-            <th className={TH}>{t("colId")}</th>
             <th className={TH}>{t("colMoq")}</th>
             <th className={TH}>{t("colCategory")}</th>
             <th className={TH}>{t("colSubcategory")}</th>
@@ -206,15 +202,6 @@ export function BulkImportTable({
                     <Input
                       value={product.sku}
                       onChange={(event) => onPatch(row.productId, { sku: event.target.value })}
-                      className={cn(CONTROL, "min-w-[100px] font-mono text-xs")}
-                    />
-                  </CellShell>
-                </td>
-                <td className={TD}>
-                  <CellShell field="id" row={row} issues={issues}>
-                    <Input
-                      value={product.id}
-                      onChange={(event) => onPatch(row.productId, { id: event.target.value })}
                       className={cn(CONTROL, "min-w-[100px] font-mono text-xs")}
                     />
                   </CellShell>

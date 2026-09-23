@@ -65,7 +65,7 @@ export function RelatedProducts({ ids, onSelect }: RelatedProductsProps) {
           return (
             <Link
               key={product.id}
-              href={`/shop/products/${product.id}`}
+              href={`/shop/products/${product.sku || product.id}`}
               className="flex items-center gap-3 rounded-lg border border-border/60 p-2 text-left transition-colors hover:border-oboya-green/40 hover:bg-oboya-soft-white"
             >
               {content}

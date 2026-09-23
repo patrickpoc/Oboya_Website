@@ -68,7 +68,15 @@ export function ProductRegistrationCard({
               <Input
                 id="product-sku"
                 value={product.sku}
-                onChange={(e) => onUpdate({ sku: e.target.value })}
+                onChange={(e) => {
+                  const sku = e.target.value;
+                  const shouldSyncId = !product.id || product.id === product.sku;
+                  onUpdate(
+                    shouldSyncId
+                      ? { sku, id: sku.trim() || product.id }
+                      : { sku }
+                  );
+                }}
                 placeholder={t("skuPlaceholder")}
               />
             </div>

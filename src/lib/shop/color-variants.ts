@@ -360,17 +360,19 @@ export function resolveCatalogPrice(
 
 export function createEmptyColorVariant(
   sortOrder = 0,
-  currencies: CurrencyCode[] = []
+  currencies: CurrencyCode[] = [],
+  sku = ""
 ): ProductColorVariant {
   const prices: ProductColorVariant["prices"] = {};
   for (const code of currencies) {
     prices[code] = 0;
   }
+  const trimmedSku = sku.trim();
   return {
-    id: `color-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    id: trimmedSku || `color-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     name: "",
     nameI18n: emptyLocalizedText(),
-    sku: "",
+    sku: trimmedSku,
     color: "#4DAF4E",
     image: "",
     prices,

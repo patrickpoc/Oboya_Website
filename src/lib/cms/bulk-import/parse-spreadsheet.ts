@@ -11,7 +11,6 @@ import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { CmsStatus } from "@/lib/cms/types";
 
 export const IMPORT_SPREADSHEET_HEADERS = [
-  "id",
   "sku",
   "name_en",
   "name_ptBR",
@@ -39,7 +38,6 @@ export const IMPORT_SPREADSHEET_HEADERS = [
 export type ImportSpreadsheetHeader = (typeof IMPORT_SPREADSHEET_HEADERS)[number];
 
 const HEADER_ALIASES: Record<string, ImportSpreadsheetHeader> = {
-  id: "id",
   sku: "sku",
   name_en: "name_en",
   nameen: "name_en",
@@ -200,7 +198,6 @@ function rowToProduct(
   rowNumber: number,
   errors: SpreadsheetImportError[]
 ): CmsProduct | null {
-  const id = (cells.id ?? "").trim() || `import-${Date.now()}-${rowNumber}`;
   const sku = (cells.sku ?? "").trim();
   if (!sku) {
     errors.push({
@@ -211,6 +208,7 @@ function rowToProduct(
     });
     return null;
   }
+  const id = sku;
 
   const categoryRaw = cells.categoryId?.trim() ?? "";
   const brandRaw = cells.brandId?.trim() ?? "";
@@ -278,6 +276,7 @@ function rowToProduct(
 
   const base = createEmptyImportProduct({
     id,
+    sku,
     categoryId: categoryId || fallbackCategory?.id || "",
     subcategoryId: subcategoryId || fallbackSub?.id || "",
     brandId: brandId || fallbackBrand?.id || "",
@@ -360,7 +359,6 @@ export function buildImportWorkspaceFromRecords(params: {
 export function downloadBulkImportTemplate() {
   const headers = [...IMPORT_SPREADSHEET_HEADERS];
   const sample = [
-    "produto-demo",
     "SKU-001",
     "Demo Product",
     "Produto Demo",

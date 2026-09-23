@@ -1,16 +1,23 @@
 import { describe, expect, it } from "vitest";
 import {
   applyPatchToProduct,
+  createWorkspaceGroup,
   createWorkspaceRow,
   getChangedFields,
   isBulkFieldEqual,
+  productHasPendingChanges,
 } from "@/lib/cms/bulk-update/diff";
-import { searchProductsForBulkUpdate } from "@/lib/cms/bulk-update/search-products";
+import { searchProductsForBulkUpdate, searchSkuHitsForBulkUpdate } from "@/lib/cms/bulk-update/search-products";
 import {
   mergeSpreadsheetIntoWorkspace,
   parseSpreadsheetBuffer,
 } from "@/lib/cms/bulk-update/spreadsheet";
 import { validateBulkUpdate } from "@/lib/cms/bulk-update/validate";
+import {
+  collectAllSkus,
+  expandSkuGroup,
+  resolveSku,
+} from "@/lib/cms/admin-sku-lookup";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { BulkUpdateCatalog } from "@/lib/cms/bulk-update/types";
 import * as XLSX from "xlsx";
@@ -45,7 +52,7 @@ function makeProduct(partial: Partial<CmsProduct> & { id: string; sku: string })
     relatedProductIds: [],
     defaultColor: "#000000",
     defaultColorName: { en: "Black" },
-    colorVariants: [],
+    colorVariants: partial.colorVariants ?? [],
     name: partial.name ?? {
       en: "English Pot",
       "pt-BR": "Vaso Português",
@@ -98,9 +105,62 @@ const catalog: BulkUpdateCatalog = {
   },
 };
 
+describe("admin-sku-lookup", () => {
+  const product = makeProduct({
+    id: "1",
+    sku: "OBO-001",
+    colorVariants: [
+      {
+        id: "red",
+        name: "Red",
+        nameI18n: { en: "Red" },
+        sku: "OBO-001-RED",
+        color: "#ff0000",
+        image: "/red.jpg",
+        prices: { USD: 12 },
+        sortOrder: 0,
+      },
+    ],
+  });
+
+  it("resolves parent and child SKUs", () => {
+    expect(resolveSku([product], "OBO-001")?.variantId).toBeNull();
+    expect(resolveSku([product], "OBO-001-RED")?.variantId).toBe("red");
+  });
+
+  it("expands parent + children", () => {
+    const rows = expandSkuGroup(product);
+    expect(rows).toHaveLength(2);
+    expect(rows[0]?.kind).toBe("parent");
+    expect(rows[1]?.kind).toBe("variant");
+  });
+
+  it("collects all skus", () => {
+    const skus = collectAllSkus([product]);
+    expect(skus.has("obo-001")).toBe(true);
+    expect(skus.has("obo-001-red")).toBe(true);
+  });
+});
+
 describe("searchProductsForBulkUpdate", () => {
   const products = [
-    makeProduct({ id: "1", sku: "OBO-001", name: { en: "Black Pot", "pt-BR": "Vaso Preto", es: "", "zh-CN": "" } }),
+    makeProduct({
+      id: "1",
+      sku: "OBO-001",
+      name: { en: "Black Pot", "pt-BR": "Vaso Preto", es: "", "zh-CN": "" },
+      colorVariants: [
+        {
+          id: "green",
+          name: "Green",
+          nameI18n: { en: "Green" },
+          sku: "OBO-001-GRN",
+          color: "#00ff00",
+          image: "/g.jpg",
+          prices: {},
+          sortOrder: 0,
+        },
+      ],
+    }),
     makeProduct({ id: "2", sku: "OBO-010", name: { en: "Tray", "pt-BR": "Bandeja", es: "", "zh-CN": "" } }),
     makeProduct({ id: "3", sku: "ABC-001", name: { en: "Other", "pt-BR": "Vaso Verde", es: "", "zh-CN": "" } }),
   ];
@@ -108,6 +168,13 @@ describe("searchProductsForBulkUpdate", () => {
   it("ranks exact SKU first", () => {
     const result = searchProductsForBulkUpdate(products, "OBO-001");
     expect(result[0]?.sku).toBe("OBO-001");
+  });
+
+  it("matches child SKU with hint", () => {
+    const hits = searchSkuHitsForBulkUpdate(products, "OBO-001-GRN");
+    expect(hits[0]?.isChildSku).toBe(true);
+    expect(hits[0]?.matchedSku).toBe("OBO-001-GRN");
+    expect(hits[0]?.product.sku).toBe("OBO-001");
   });
 
   it("matches multilingual names", () => {
@@ -136,6 +203,51 @@ describe("diff", () => {
     const pending = applyPatchToProduct(original, { moq: 200, brandId: "brand-2" });
     expect(getChangedFields(original, pending).sort()).toEqual(["brandId", "moq"]);
     expect(isBulkFieldEqual("categoryId", original, pending)).toBe(true);
+  });
+
+  it("expands workspace group for colors", () => {
+    const product = makeProduct({
+      id: "1",
+      sku: "A",
+      colorVariants: [
+        {
+          id: "v1",
+          name: "Blue",
+          nameI18n: { en: "Blue" },
+          sku: "A-BLUE",
+          color: "#0000ff",
+          image: "/b.jpg",
+          prices: {},
+          sortOrder: 0,
+        },
+      ],
+    });
+    const group = createWorkspaceGroup(product);
+    expect(group).toHaveLength(2);
+    expect(group.every((row) => row.productId === "1")).toBe(true);
+  });
+
+  it("patches variant price without touching product.prices", () => {
+    const original = makeProduct({
+      id: "1",
+      sku: "A",
+      colorVariants: [
+        {
+          id: "v1",
+          name: "Blue",
+          nameI18n: { en: "Blue" },
+          sku: "A-BLUE",
+          color: "#0000ff",
+          image: "/b.jpg",
+          prices: {},
+          sortOrder: 0,
+        },
+      ],
+    });
+    const pending = applyPatchToProduct(original, { variantPriceUsd: 22 }, "v1");
+    expect(pending.prices?.USD).toBe(10);
+    expect(pending.colorVariants[0]?.prices?.USD).toBe(22);
+    expect(productHasPendingChanges(original, pending)).toBe(true);
   });
 });
 
@@ -200,9 +312,42 @@ describe("spreadsheet empty cells", () => {
     });
 
     expect(result.errors).toEqual([]);
-    expect(result.rows[0]?.pending.moq).toBe(200);
-    expect(result.rows[0]?.pending.categoryId).toBe("cat-2");
-    expect(result.rows[0]?.pending.brandId).toBe("brand-1");
+    const parent = result.rows.find((row) => row.kind === "parent");
+    expect(parent?.pending.moq).toBe(200);
+    expect(parent?.pending.categoryId).toBe("cat-2");
+    expect(parent?.pending.brandId).toBe("brand-1");
+  });
+
+  it("expands group when spreadsheet uses child SKU", () => {
+    const product = makeProduct({
+      id: "1",
+      sku: "SKU-001",
+      colorVariants: [
+        {
+          id: "v1",
+          name: "Red",
+          nameI18n: { en: "Red" },
+          sku: "SKU-001-RED",
+          color: "#ff0000",
+          image: "/r.jpg",
+          prices: {},
+          sortOrder: 0,
+        },
+      ],
+    });
+    const result = mergeSpreadsheetIntoWorkspace({
+      records: [{ SKU: "SKU-001-RED", "Variant price USD": "15", "Color hex": "#aabbcc" }],
+      productsBySku: new Map([["sku-001", product]]),
+      existingRows: [],
+      catalog,
+      products: [product],
+    });
+    expect(result.errors).toEqual([]);
+    expect(result.rows.some((row) => row.kind === "parent")).toBe(true);
+    expect(result.rows.some((row) => row.kind === "variant")).toBe(true);
+    const variant = result.rows.find((row) => row.kind === "variant")?.pending.colorVariants[0];
+    expect(variant?.prices?.USD).toBe(15);
+    expect(variant?.color).toBe("#aabbcc");
   });
 
   it("reports duplicate SKU rows", () => {

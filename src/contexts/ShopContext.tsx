@@ -60,6 +60,7 @@ import type {
 } from "@/lib/shop/types";
 import { EMPTY_SHOP_FILTERS } from "@/lib/shop/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
+import { remapCartLine, remapProductId } from "@/lib/shop/product-id-remap";
 
 const STORAGE_KEY = "oboya-shop-quote";
 
@@ -179,11 +180,12 @@ function sanitizeCartItems(items: unknown): CartItem[] {
         typeof row.variantId === "string" && row.variantId.trim()
           ? row.variantId.trim()
           : null;
-      return {
+      const remapped = remapCartLine({
         productId: row.productId.trim(),
         variantId,
         quantity: clampQuantity(quantity, 1),
-      };
+      });
+      return remapped;
     })
     .filter(Boolean) as CartItem[];
 }
@@ -346,10 +348,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           setShopProducts(published);
           updateShopCatalog({ products: published });
           const validIds = new Set(published.map((product) => product.id));
+          // Also accept remapped legacy cart ids that land on current sku/id.
           setState((prev) => ({
             ...prev,
             status: prev.status === "offline" ? "offline" : "idle",
-            items: prev.items.filter((item) => validIds.has(item.productId)),
+            items: prev.items
+              .map((item) => remapCartLine(item))
+              .filter((item) => validIds.has(item.productId)),
             filters: resolveShopFilters(prev.filters, catalogTaxonomy()),
           }));
         } else {
@@ -449,7 +454,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         softOpenTimer.current = setTimeout(() => {
           softOpenTimer.current = null;
           skipUrlWrite.current = false;
-          router.replace(`/shop/products/${pendingProduct}`);
+          router.replace(`/shop/products/${remapProductId(pendingProduct)}`);
         }, 100);
       } else {
         queueMicrotask(() => {
@@ -571,7 +576,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const getProductByIdFromState = useCallback(
-    (productId: string) => shopProducts.find((product) => product.id === productId),
+    (productId: string) =>
+      shopProducts.find(
+        (product) =>
+          product.id === productId ||
+          product.sku === productId ||
+          product.id === remapProductId(productId)
+      ),
     [shopProducts]
   );
 

@@ -3,6 +3,8 @@ import {
   applyPatchToProduct,
   formatFieldValue,
   getChangedFields,
+  productHasPendingChanges,
+  createWorkspaceGroup,
 } from "@/lib/cms/bulk-update/diff";
 import { BULK_FIELD_LABELS } from "@/lib/cms/bulk-update/field-labels";
 import type {
@@ -12,6 +14,7 @@ import type {
   BulkValidationIssue,
   BulkWorkspaceRow,
 } from "@/lib/cms/bulk-update/types";
+import { validateColorVariants } from "@/lib/shop/color-variants";
 
 function optionIdsForGroup(
   catalog: BulkUpdateCatalog,
@@ -47,30 +50,38 @@ function hasAnyPrice(product: CmsProduct): boolean {
 function pushIssue(
   issues: BulkValidationIssue[],
   row: BulkWorkspaceRow,
-  field: BulkEditableField | "product",
+  field: BulkEditableField | "product" | "colorVariants",
   status: BulkValidationIssue["status"],
   message: string,
   suggestedAction: string
 ) {
   issues.push({
     productId: row.productId,
-    sku: row.pending.sku || row.original.sku,
+    sku: row.matchedSku || row.pending.sku || row.original.sku,
     field,
-    currentValue: field === "product" ? "" : formatFieldValue(field, row.original),
-    requestedValue: field === "product" ? "" : formatFieldValue(field, row.pending),
+    currentValue:
+      field === "product" || field === "colorVariants"
+        ? ""
+        : formatFieldValue(field, row.original, row.variantId),
+    requestedValue:
+      field === "product" || field === "colorVariants"
+        ? ""
+        : formatFieldValue(field, row.pending, row.variantId),
     status,
     message,
     suggestedAction,
   });
 }
 
-function validateRow(
+function validateParentRow(
   row: BulkWorkspaceRow,
   catalog: BulkUpdateCatalog
 ): BulkValidationIssue[] {
   const issues: BulkValidationIssue[] = [];
   const product = row.pending;
-  const changed = new Set(getChangedFields(row.original, row.pending));
+  const changed = new Set(
+    getChangedFields(row.original, row.pending, { kind: "parent" })
+  );
 
   if (changed.has("moq") || product.moq !== undefined) {
     const moq = Number(product.moq);
@@ -212,6 +223,40 @@ function validateRow(
     }
   }
 
+  for (const priceField of ["priceUsd", "priceBrl", "priceEur"] as const) {
+    if (!changed.has(priceField)) continue;
+    const raw =
+      priceField === "priceUsd"
+        ? product.prices?.USD
+        : priceField === "priceBrl"
+          ? product.prices?.BRL
+          : product.prices?.EUR;
+    if (raw === undefined || raw === null) continue;
+    if (!Number.isFinite(Number(raw)) || Number(raw) < 0) {
+      pushIssue(
+        issues,
+        row,
+        priceField,
+        "blocked",
+        `${BULK_FIELD_LABELS[priceField]} must be a non-negative number.`,
+        "Enter a valid price or leave empty."
+      );
+    }
+  }
+
+  if (changed.has("defaultColor") && product.defaultColor) {
+    if (!/^#[0-9A-Fa-f]{6}$/.test(product.defaultColor)) {
+      pushIssue(
+        issues,
+        row,
+        "defaultColor",
+        "blocked",
+        "Default color must be a hex value (e.g. #4DAF4E).",
+        "Use a 6-digit hex color."
+      );
+    }
+  }
+
   if (changed.has("status") && product.status === "published") {
     if (!product.sku?.trim()) {
       pushIssue(
@@ -280,14 +325,140 @@ function validateRow(
   return issues;
 }
 
+function validateVariantRow(row: BulkWorkspaceRow): BulkValidationIssue[] {
+  const issues: BulkValidationIssue[] = [];
+  const changed = new Set(
+    getChangedFields(row.original, row.pending, {
+      kind: "variant",
+      variantId: row.variantId,
+    })
+  );
+  if (changed.size === 0) return issues;
+
+  const variant = (row.pending.colorVariants ?? []).find(
+    (item) => item.id === row.variantId
+  );
+  if (!variant) {
+    pushIssue(
+      issues,
+      row,
+      "product",
+      "blocked",
+      "Color variant is missing from the product.",
+      "Remove this row and re-add the product group."
+    );
+    return issues;
+  }
+
+  if (changed.has("variantSku") && !variant.sku?.trim()) {
+    pushIssue(
+      issues,
+      row,
+      "variantSku",
+      "blocked",
+      "Color SKU cannot be empty.",
+      "Provide a unique SKU for this color."
+    );
+  }
+
+  if (changed.has("variantColor") && variant.color) {
+    if (!/^#[0-9A-Fa-f]{6}$/.test(variant.color)) {
+      pushIssue(
+        issues,
+        row,
+        "variantColor",
+        "blocked",
+        "Color must be a hex value (e.g. #4DAF4E).",
+        "Use a 6-digit hex color."
+      );
+    }
+  }
+
+  if (
+    changed.has("variantColorNameEn") &&
+    !(variant.nameI18n?.en?.trim() || variant.name?.trim())
+  ) {
+    pushIssue(
+      issues,
+      row,
+      "variantColorNameEn",
+      "blocked",
+      "Color name (EN) is required.",
+      "Enter an English color name."
+    );
+  }
+
+  for (const priceField of [
+    "variantPriceUsd",
+    "variantPriceBrl",
+    "variantPriceEur",
+  ] as const) {
+    if (!changed.has(priceField)) continue;
+    const raw =
+      priceField === "variantPriceUsd"
+        ? variant.prices?.USD
+        : priceField === "variantPriceBrl"
+          ? variant.prices?.BRL
+          : variant.prices?.EUR;
+    if (raw === undefined || raw === null) continue;
+    if (!Number.isFinite(Number(raw)) || Number(raw) < 0) {
+      pushIssue(
+        issues,
+        row,
+        priceField,
+        "blocked",
+        `${BULK_FIELD_LABELS[priceField]} must be a non-negative number.`,
+        "Enter a valid price or leave empty (falls back to base price)."
+      );
+    }
+  }
+
+  return issues;
+}
+
 export function validateBulkUpdate(
   rows: BulkWorkspaceRow[],
   catalog: BulkUpdateCatalog
 ): BulkValidationIssue[] {
-  return rows.flatMap((row) => {
-    if (getChangedFields(row.original, row.pending).length === 0) return [];
-    return validateRow(row, catalog);
-  });
+  const issues: BulkValidationIssue[] = [];
+  const seenProducts = new Set<string>();
+
+  for (const row of rows) {
+    if (row.kind === "parent") {
+      if (getChangedFields(row.original, row.pending, { kind: "parent" }).length > 0) {
+        issues.push(...validateParentRow(row, catalog));
+      }
+    } else if (
+      getChangedFields(row.original, row.pending, {
+        kind: "variant",
+        variantId: row.variantId,
+      }).length > 0
+    ) {
+      issues.push(...validateVariantRow(row));
+    }
+
+    if (!seenProducts.has(row.productId) && productHasPendingChanges(row.original, row.pending)) {
+      seenProducts.add(row.productId);
+      const variantError = validateColorVariants(row.pending.colorVariants, {
+        defaultColor: row.pending.defaultColor,
+        defaultColorName: row.pending.defaultColorName,
+      });
+      if (variantError && (row.pending.colorVariants?.length ?? 0) > 0) {
+        issues.push({
+          productId: row.productId,
+          sku: row.pending.sku || row.original.sku,
+          field: "colorVariants",
+          currentValue: "",
+          requestedValue: "",
+          status: "blocked",
+          message: variantError,
+          suggestedAction: "Fix color variant data before applying.",
+        });
+      }
+    }
+  }
+
+  return issues;
 }
 
 export function summarizeValidation(issues: BulkValidationIssue[]) {
@@ -318,12 +489,15 @@ export function buildRowsFromUpdates(
     const original = productsById.get(update.id);
     if (!original) continue;
     const pending = applyPatchToProduct(original, update.patch);
-    rows.push({
-      productId: original.id,
-      original,
+    const group = createWorkspaceGroup(original).map((row) => ({
+      ...row,
       pending,
-      changedFields: getChangedFields(original, pending),
-    });
+      changedFields: getChangedFields(row.original, pending, {
+        kind: row.kind,
+        variantId: row.variantId,
+      }),
+    }));
+    rows.push(...group);
   }
   return rows;
 }

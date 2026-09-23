@@ -52,6 +52,7 @@ export function SpreadsheetImportPanel({
         productsBySku,
         existingRows,
         catalog,
+        products,
       });
       setImportErrors(result.errors);
       onImported(result.rows, result.errors);

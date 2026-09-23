@@ -6,6 +6,7 @@ import {
 } from "@/lib/shop/color-variants";
 import type { ShopProduct } from "@/lib/shop/types";
 import type { CmsStatus, LocalizedString, SeoFields } from "@/lib/cms/types";
+import { collectAllSkus } from "@/lib/cms/admin-sku-lookup";
 import productsData from "@/../data/shop/products.json";
 
 export interface CmsProduct extends ShopProduct {
@@ -110,6 +111,36 @@ function buildUniqueDuplicateSku(baseSku: string, existingSkus: Set<string>) {
   return `${baseSku}-COPY-${suffix}`;
 }
 
+export function duplicateCmsProduct(id: string): CmsProduct | null {
+  const original = getCmsProductById(id);
+  if (!original) return null;
+  const existingSkus = collectAllSkus(getCmsProducts({ includeDeleted: true }), {
+    includeLegacyIds: true,
+  });
+  const newSku = buildUniqueDuplicateSku(original.sku, existingSkus);
+  existingSkus.add(newSku.toLowerCase());
+  const colorVariants = (original.colorVariants ?? []).map((variant) => {
+    const base = variant.sku?.trim() || `${newSku}-COLOR`;
+    const variantSku = buildUniqueDuplicateSku(base, existingSkus);
+    existingSkus.add(variantSku.toLowerCase());
+    return {
+      ...variant,
+      sku: variantSku,
+      id: variantSku,
+    };
+  });
+  const copy: CmsProduct = {
+    ...JSON.parse(JSON.stringify(original)),
+    id: newSku,
+    sku: newSku,
+    colorVariants,
+    status: "draft",
+    deletedAt: null,
+    purgeAt: null,
+  };
+  return saveCmsProduct(copy);
+}
+
 export function getCmsProducts(options?: { includeDeleted?: boolean }): CmsProduct[] {
   if (!productsCache) productsCache = seedProducts();
   productsCache = purgeExpired(productsCache);
@@ -183,23 +214,6 @@ export function hardDeleteCmsProduct(id: string): boolean {
   products.splice(idx, 1);
   productsCache = products;
   return true;
-}
-
-export function duplicateCmsProduct(id: string): CmsProduct | null {
-  const original = getCmsProductById(id);
-  if (!original) return null;
-  const existingSkus = new Set(
-    getCmsProducts({ includeDeleted: true }).map((product) => product.sku.toLowerCase())
-  );
-  const copy: CmsProduct = {
-    ...JSON.parse(JSON.stringify(original)),
-    id: `${original.id}-copy-${Date.now()}`,
-    sku: buildUniqueDuplicateSku(original.sku, existingSkus),
-    status: "draft",
-    deletedAt: null,
-    purgeAt: null,
-  };
-  return saveCmsProduct(copy);
 }
 
 export function bulkUpdateBySkus(params: {

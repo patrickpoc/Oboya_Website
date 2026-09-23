@@ -29,7 +29,7 @@ export type ImportIssueStatus = "valid" | "warning" | "blocked";
 export type ImportValidationIssue = {
   productId: string;
   sku: string;
-  field: ImportEditableField | "product" | "id";
+  field: ImportEditableField | "product";
   currentValue: string;
   requestedValue: string;
   status: ImportIssueStatus;
@@ -38,7 +38,6 @@ export type ImportValidationIssue = {
 };
 
 export type ImportProductPatch = Partial<{
-  id: string;
   sku: string;
   nameEn: string;
   namePt: string;
@@ -80,8 +79,7 @@ export type SpreadsheetImportError = {
   suggestedAction: string;
 };
 
-export const IMPORT_FIELD_LABELS: Record<ImportEditableField | "id", string> = {
-  id: "ID",
+export const IMPORT_FIELD_LABELS: Record<ImportEditableField, string> = {
   sku: "SKU",
   name: "Product name",
   moq: "MOQ",
