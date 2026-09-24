@@ -2,13 +2,27 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
 import { fadeInUp, staggerContainer, revealViewport } from "@/lib/animations";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
 import { pickLocalized } from "@/lib/cms/utils";
+
+/** Soft-migrate CMS copy that still says "Latest News". */
+function toBlogLabel(text: string): string {
+  return text
+    .replace(/Latest News section/gi, "Blog")
+    .replace(/Latest News/gi, "Blog")
+    .replace(/seção Últimas Notícias/gi, "Blog")
+    .replace(/Últimas Notícias/gi, "Blog")
+    .replace(/sección Últimas Noticias/gi, "Blog")
+    .replace(/Últimas Noticias/gi, "Blog")
+    .replace(/最新资讯栏目/g, "博客")
+    .replace(/最新资讯/g, "博客");
+}
 
 interface HomeLatestNewsProps {
   data: HomepageSettings["latestNews"];
@@ -23,6 +37,7 @@ export function HomeLatestNews({
   locale,
   animationsEnabled = true,
 }: HomeLatestNewsProps) {
+  const t = useTranslations("home.latestNews");
   const items = posts.slice(0, data.postCount);
   const motionInitial = animationsEnabled ? "hidden" : false;
   const motionWhileInView = animationsEnabled ? "visible" : undefined;
@@ -39,12 +54,12 @@ export function HomeLatestNews({
         >
           <div className="mb-6 flex flex-col gap-3">
             <p className="text-sm font-medium tracking-wide text-oboya-green">
-              {pickLocalized(data.eyebrow, locale)}
+              {toBlogLabel(pickLocalized(data.eyebrow, locale))}
             </p>
             <div className="h-px w-full bg-oboya-blue-dark/15" aria-hidden />
           </div>
           <h2 className="max-w-4xl font-display text-[clamp(1.45rem,2.6vw,2.15rem)] leading-[1.35] font-light tracking-tight text-oboya-blue-dark text-balance">
-            {pickLocalized(data.headline, locale)}
+            {toBlogLabel(pickLocalized(data.headline, locale))}
           </h2>
         </motion.div>
 
@@ -57,10 +72,7 @@ export function HomeLatestNews({
         >
           {items.map((post) => (
             <motion.article key={post.id} variants={fadeInUp}>
-              <Link
-                href={`/news/${post.slug}`}
-                className="group block"
-              >
+              <Link href={`/blog/${post.slug}`} className="group block">
                 <div className="relative aspect-[16/10] overflow-hidden rounded-2xl">
                   {post.featuredImage ? (
                     <Image
@@ -88,6 +100,22 @@ export function HomeLatestNews({
               </Link>
             </motion.article>
           ))}
+        </motion.div>
+
+        <motion.div
+          initial={motionInitial}
+          whileInView={motionWhileInView}
+          viewport={revealViewport}
+          variants={fadeInUp}
+          className="mt-10 flex justify-center md:mt-12"
+        >
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-2 rounded-full border border-oboya-blue-dark/25 bg-white px-5 py-2.5 text-sm font-semibold text-oboya-blue-dark transition-colors hover:border-oboya-green hover:bg-oboya-green hover:text-white"
+          >
+            {t("seeMore")}
+            <ArrowRight className="size-4" />
+          </Link>
         </motion.div>
       </Container>
     </section>

@@ -16,6 +16,8 @@ export type BulkQueueItem = {
   name: string;
   status: BulkQueueItemStatus;
   error?: string;
+  /** Color / child SKUs included in this product write. */
+  variantSkus?: string[];
 };
 
 type Props = {
@@ -81,8 +83,17 @@ export function BulkExecutionQueue({
               <p className="font-mono text-xs text-muted-foreground">
                 {t("skuLabel", { sku: item.sku })}
               </p>
+              {item.variantSkus && item.variantSkus.length > 0 && (
+                <p className="mt-1 font-mono text-[11px] leading-relaxed text-muted-foreground">
+                  {t("queueVariants", {
+                    skus: item.variantSkus.join(" · "),
+                  })}
+                </p>
+              )}
               {item.status === "failed" && item.error && (
-                <p className="mt-1 text-xs text-oboya-orange">{item.error}</p>
+                <p className="mt-1 text-xs font-medium text-oboya-orange">
+                  {t("queueFailedDetail", { error: item.error })}
+                </p>
               )}
             </div>
             <span

@@ -39,6 +39,7 @@ export function RelatedProducts({ ids, onSelect }: RelatedProductsProps) {
                   src={product.images[0] || FALLBACK_IMAGE}
                   alt={getProductName(product)}
                   fill
+                  unoptimized
                   className="object-cover"
                   sizes="48px"
                 />

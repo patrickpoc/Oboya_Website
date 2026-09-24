@@ -1,6 +1,7 @@
 "use client";
 
 import DOMPurify from "dompurify";
+import { applySanitizedStyleAttr } from "@/lib/cms/sanitize-inline-style";
 import {
   ALLOWED_ATTR,
   ALLOWED_TAGS,
@@ -41,6 +42,11 @@ export function sanitizeRichHtml(html: string): string {
     if (!img.getAttribute("alt")) {
       img.setAttribute("alt", "");
     }
+    applySanitizedStyleAttr(img);
+  });
+
+  template.content.querySelectorAll("[style]").forEach((el) => {
+    applySanitizedStyleAttr(el);
   });
 
   return postProcessSanitizedHtml(template.innerHTML);

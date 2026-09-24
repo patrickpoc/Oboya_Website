@@ -11,9 +11,11 @@ import { Logo } from "@/components/brand/Logo";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { toast } from "sonner";
+import { useAdminDocumentTitle } from "@/lib/cms/admin-document-title";
 
 export default function ForgotPasswordPage() {
   const t = useTranslations("admin.auth");
+  useAdminDocumentTitle(t("forgotTitle"));
   const tCommon = useTranslations("admin.common");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);

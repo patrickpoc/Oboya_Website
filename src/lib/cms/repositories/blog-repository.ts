@@ -15,6 +15,8 @@ export interface CmsBlogPost {
   relatedPostIds: string[];
   status: CmsStatus;
   publishedAt?: string;
+  /** Manual listing order — lower appears first. Falls back to publishedAt. */
+  sortOrder?: number;
   scheduledAt?: string;
   seo: SeoFields;
   createdAt: string;
@@ -111,6 +113,44 @@ export function deleteBlogPost(id: string): boolean {
   posts.splice(idx, 1);
   cache = posts;
   return true;
+}
+
+/** Manual sortOrder first (ascending), then publishedAt desc. */
+export function sortBlogPostsForDisplay(posts: CmsBlogPost[]): CmsBlogPost[] {
+  return [...posts].sort((a, b) => {
+    const ao = a.sortOrder;
+    const bo = b.sortOrder;
+    const aHas = typeof ao === "number" && Number.isFinite(ao);
+    const bHas = typeof bo === "number" && Number.isFinite(bo);
+    if (aHas && bHas && ao !== bo) return ao - bo;
+    if (aHas && !bHas) return -1;
+    if (!aHas && bHas) return 1;
+    return (
+      new Date(b.publishedAt ?? 0).getTime() -
+      new Date(a.publishedAt ?? 0).getTime()
+    );
+  });
+}
+
+export function reorderBlogPosts(orderedIds: string[]): CmsBlogPost[] {
+  const posts = getBlogPosts();
+  const byId = new Map(posts.map((post) => [post.id, post]));
+  const next: CmsBlogPost[] = [];
+  orderedIds.forEach((id, index) => {
+    const post = byId.get(id);
+    if (!post) return;
+    next.push({ ...post, sortOrder: index, updatedAt: new Date().toISOString() });
+    byId.delete(id);
+  });
+  for (const leftover of byId.values()) {
+    next.push({
+      ...leftover,
+      sortOrder: next.length,
+      updatedAt: new Date().toISOString(),
+    });
+  }
+  cache = next;
+  return next;
 }
 
 export { getBlogAuthors, type BlogAuthor } from "./blog-authors-repository";

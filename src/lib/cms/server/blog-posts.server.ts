@@ -5,6 +5,7 @@ import {
   replaceBlogPostsCache,
   saveBlogPost as savePostMemory,
   deleteBlogPost as deletePostMemory,
+  reorderBlogPosts,
   type CmsBlogPost,
 } from "@/lib/cms/repositories/blog-repository";
 import { sanitizeLocalizedRichHtml } from "@/lib/cms/sanitize-rich-html.server";
@@ -37,6 +38,15 @@ export async function saveBlogPostDurable(
   });
   await writeCmsDocumentData(BLOG_POSTS_DOC_ID, "blog", getBlogPosts());
   return saved;
+}
+
+export async function reorderBlogPostsDurable(
+  orderedIds: string[]
+): Promise<CmsBlogPost[]> {
+  await readBlogPostsDurable();
+  const next = reorderBlogPosts(orderedIds);
+  await writeCmsDocumentData(BLOG_POSTS_DOC_ID, "blog", next);
+  return next;
 }
 
 export async function deleteBlogPostDurable(id: string): Promise<boolean> {

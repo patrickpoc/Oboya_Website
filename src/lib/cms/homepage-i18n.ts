@@ -298,12 +298,12 @@ export const HOME_I18N = {
     ),
   },
   latestNews: {
-    eyebrow: homeLoc("Latest News", "Últimas Notícias", "Últimas Noticias", "最新资讯"),
+    eyebrow: homeLoc("Blog", "Blog", "Blog", "博客"),
     headline: homeLoc(
-      "Learn more about our latest developments and stories from the field in our Latest News section.",
-      "Saiba mais sobre nossos últimos desenvolvimentos e histórias do campo na seção Últimas Notícias.",
-      "Conozca más sobre nuestros últimos desarrollos e historias del campo en la sección Últimas Noticias.",
-      "在我们的最新资讯栏目中，了解更多最新动态与一线故事。"
+      "Learn more about our latest developments and stories from the field in our Blog.",
+      "Saiba mais sobre nossos últimos desenvolvimentos e histórias do campo no nosso Blog.",
+      "Conozca más sobre nuestros últimos desarrollos e historias del campo en nuestro Blog.",
+      "在我们的博客中，了解更多最新动态与一线故事。"
     ),
   },
   partners: {

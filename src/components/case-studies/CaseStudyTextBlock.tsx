@@ -32,7 +32,7 @@ export function CaseStudyTextBlock({
       </h2>
       {html ? (
         <div
-          className="prose prose-sm mt-3 max-w-none font-body text-[0.9375rem] leading-[1.75] text-oboya-blue-dark/60 md:text-base [&_p]:mb-4 [&_p:last-child]:mb-0"
+          className="rich-text-content prose prose-sm mt-3 max-w-none font-body text-[0.9375rem] leading-[1.75] text-oboya-blue-dark/60 md:text-base [&_p]:mb-4 [&_p:last-child]:mb-0"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       ) : (

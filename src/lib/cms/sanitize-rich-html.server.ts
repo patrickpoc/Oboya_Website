@@ -1,6 +1,7 @@
 import "server-only";
 
 import sanitizeHtml from "sanitize-html";
+import { sanitizeInlineStyle } from "@/lib/cms/sanitize-inline-style";
 import type { LocalizedString } from "@/lib/cms/types";
 import {
   ALLOWED_TAGS,
@@ -18,6 +19,18 @@ export {
   validateProductDescriptions,
 } from "@/lib/cms/sanitize-rich-html.shared";
 
+const STYLE_ATTR_TAGS = ["p", "h2", "h3", "span", "blockquote", "li", "img"] as const;
+
+function withSanitizedStyle(attribs: Record<string, string>) {
+  if (!attribs.style) return attribs;
+  const next = sanitizeInlineStyle(attribs.style);
+  if (!next) {
+    const { style: _removed, ...rest } = attribs;
+    return rest;
+  }
+  return { ...attribs, style: next };
+}
+
 export function sanitizeRichHtml(html: string): string {
   const input = html.trim();
   if (!input) return "";
@@ -26,14 +39,30 @@ export function sanitizeRichHtml(html: string): string {
     allowedTags: [...ALLOWED_TAGS],
     allowedAttributes: {
       a: ["href", "title", "target", "rel", "class"],
-      img: ["src", "alt", "title", "class", "data-align", "loading"],
-      p: ["class"],
-      h2: ["class"],
-      h3: ["class"],
-      blockquote: ["class"],
-      li: ["class"],
+      img: ["src", "alt", "title", "class", "data-align", "loading", "width", "height", "style"],
+      p: ["class", "style"],
+      h2: ["class", "style"],
+      h3: ["class", "style"],
+      span: ["class", "style"],
+      blockquote: ["class", "style"],
+      li: ["class", "style"],
       ul: ["class"],
       ol: ["class"],
+    },
+    allowedStyles: {
+      "*": {
+        color: [
+          /^#([0-9a-fA-F]{3,8})$/i,
+          /^rgb\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)$/i,
+          /^rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*[\d.]+\s*\)$/i,
+          /^var\(--oboya-[a-z0-9-]+\)$/i,
+        ],
+        "font-size": [/^\d+(\.\d+)?(px|rem|em)$/],
+        "text-align": [/^(left|center|right|justify)$/],
+        width: [/^\d+(\.\d+)?(px|%)$/],
+        height: [/^\d+(\.\d+)?(px|%)$/],
+        "max-width": [/^\d+(\.\d+)?(px|%)$/],
+      },
     },
     allowedSchemes: ["http", "https", "mailto"],
     allowedSchemesByTag: {
@@ -66,11 +95,20 @@ export function sanitizeRichHtml(html: string): string {
       },
       img: (_tagName, attribs) => ({
         tagName: "img",
-        attribs: {
+        attribs: withSanitizedStyle({
           ...attribs,
           alt: attribs.alt ?? "",
-        },
+        }),
       }),
+      ...Object.fromEntries(
+        STYLE_ATTR_TAGS.filter((tag) => tag !== "img").map((tag) => [
+          tag,
+          (_tagName: string, attribs: Record<string, string>) => ({
+            tagName: tag,
+            attribs: withSanitizedStyle(attribs),
+          }),
+        ])
+      ),
     },
   });
 

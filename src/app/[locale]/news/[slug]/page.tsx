@@ -91,7 +91,7 @@ export default async function NewsArticlePage({ params }: Props) {
           )}
           {body ? (
             <div
-              className="prose prose-neutral mt-8 max-w-none"
+              className="rich-text-content prose prose-neutral mt-8 max-w-none"
               dangerouslySetInnerHTML={{ __html: body }}
             />
           ) : (

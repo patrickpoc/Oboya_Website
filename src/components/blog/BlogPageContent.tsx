@@ -7,6 +7,7 @@ import { PageIntroBanner } from "@/components/ui/PageIntroBanner";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { BlogFeaturedHero } from "@/components/blog/BlogFeaturedHero";
 import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
+import { sortBlogPostsForDisplay } from "@/lib/cms/repositories/blog-repository";
 import type { BlogCategory } from "@/lib/cms/repositories/blog-categories-repository";
 import { pickLocalized } from "@/lib/cms/utils";
 import { cn } from "@/lib/utils";
@@ -38,10 +39,7 @@ export function BlogPageContent({ posts, categories, locale }: BlogPageContentPr
   );
 
   const filteredPosts = useMemo(() => {
-    const sorted = [...posts].sort(
-      (a, b) =>
-        new Date(b.publishedAt ?? 0).getTime() - new Date(a.publishedAt ?? 0).getTime()
-    );
+    const sorted = sortBlogPostsForDisplay(posts);
     if (categoryId === "all") return sorted;
     return sorted.filter((post) => post.categoryId === categoryId);
   }, [posts, categoryId]);

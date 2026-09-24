@@ -12,10 +12,12 @@ import { Logo } from "@/components/brand/Logo";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { safeAdminNext } from "@/lib/security/admin-next";
+import { useAdminDocumentTitle } from "@/lib/cms/admin-document-title";
 
 export function AdminLoginForm() {
   const t = useTranslations("admin.auth");
   const tCommon = useTranslations("admin.common");
+  useAdminDocumentTitle(t("signInTitle"));
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

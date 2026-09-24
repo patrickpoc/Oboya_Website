@@ -1,3 +1,6 @@
+"use client";
+
+import { useAdminDocumentTitle } from "@/lib/cms/admin-document-title";
 import { cn } from "@/lib/utils";
 
 export function AdminPageHeader({
@@ -11,6 +14,8 @@ export function AdminPageHeader({
   actions?: React.ReactNode;
   className?: string;
 }) {
+  useAdminDocumentTitle(title);
+
   return (
     <div className={cn("mb-6 flex flex-wrap items-start justify-between gap-4", className)}>
       <div>

@@ -153,6 +153,7 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
                 src={imageSrc}
                 alt=""
                 fill
+                unoptimized
                 className="object-contain object-center"
                 sizes="56px"
               />

@@ -695,7 +695,8 @@
         "p2": "Retail-ready packs and display trolleys improve visibility and reduce handling damage.",
         "p3": "Localized assortments help chains tailor pack sizes to regional demand."
       }
-    }
+    },
+    "backToBlog": "返回博客"
   },
   "newsPage": {
     "metaTitle": "最新资讯",
@@ -1992,7 +1993,11 @@
         "expandColors": "展开 {count} 个颜色变体",
         "collapseColors": "收起 {count} 个颜色变体",
         "colorsCollapsed": "已隐藏 {count} 个颜色",
-        "colorsExpanded": "{count} 个颜色"
+        "colorsExpanded": "{count} 个颜色",
+        "queueVariants": "颜色：{skus}",
+        "queueFailedDetail": "失败 — {error}",
+        "blockedBeforeApply": "{count} 个阻断问题：{detail}",
+        "applyFailedCount": "{count} 个产品失败：{detail}"
       }
     },
     "taxonomy": {
@@ -2355,7 +2360,11 @@
           "published": "已发布"
         },
         "editAria": "编辑 {title}",
-        "deleteAria": "删除 {title}"
+        "deleteAria": "删除 {title}",
+        "reorderHint": "拖动文章以更改博客公开页上的顺序。",
+        "reorderSaved": "博客顺序已保存",
+        "reorderFailed": "无法保存博客顺序",
+        "dragHandle": "拖动以重新排序 {title}"
       },
       "postEditor": {
         "newPost": "新建文章",
@@ -2374,7 +2383,11 @@
         "contentPanel": "内容",
         "settingsPanel": "设置",
         "schedulePublish": "计划发布",
-        "publishedDate": "发布日期"
+        "publishedDate": "发布日期",
+        "savePost": "保存文章",
+        "publishedDateHint": "在该日期 00:00 发布（全天可见）。",
+        "slugPlaceholder": "根据标题自动生成",
+        "slugHint": "仅小写字母、数字和连字符。"
       },
       "authors": {
         "title": "博客作者",
@@ -2810,5 +2823,8 @@
       "alreadyExists": "该货币已存在。",
       "toggleAria": "为 {country} 切换 {code}"
     }
+  },
+  "latestNews": {
+    "seeMore": "查看更多"
   }
 }

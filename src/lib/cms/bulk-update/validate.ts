@@ -83,7 +83,7 @@ function validateParentRow(
     getChangedFields(row.original, row.pending, { kind: "parent" })
   );
 
-  if (changed.has("moq") || product.moq !== undefined) {
+  if (changed.has("moq")) {
     const moq = Number(product.moq);
     if (!Number.isFinite(moq) || moq < 1 || !Number.isInteger(moq)) {
       pushIssue(

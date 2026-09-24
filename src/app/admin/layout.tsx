@@ -8,6 +8,11 @@ import { ConditionalAnalytics } from "@/components/privacy/ConditionalAnalytics"
 import { CookieConsentBanner } from "@/components/privacy/CookieConsentBanner";
 
 export const metadata: Metadata = {
+  title: {
+    default: "Admin | Oboya Horticulture",
+    template: "%s | Oboya Admin",
+  },
+  description: "Oboya Horticulture content and marketplace admin",
   robots: { index: false, follow: false },
 };
 

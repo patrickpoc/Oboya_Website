@@ -17,6 +17,11 @@ import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
 import type { BlogAuthor } from "@/lib/cms/repositories/blog-authors-repository";
 import type { BlogCategory } from "@/lib/cms/repositories/blog-categories-repository";
 import type { CmsLocale, CmsStatus } from "@/lib/cms/types";
+import {
+  isoToDateInput,
+  publishedDateToIso,
+  slugify,
+} from "@/lib/cms/slugify";
 
 function emptyPost(
   authors: BlogAuthor[],
@@ -52,6 +57,7 @@ export default function BlogPostEditPage() {
   const [post, setPost] = useState<CmsBlogPost | null>(null);
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [loading, setLoading] = useState(true);
+  const [slugTouched, setSlugTouched] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -82,6 +88,7 @@ export default function BlogPostEditPage() {
             return;
           }
           setPost(existing);
+          setSlugTouched(Boolean(existing.slug));
         }
       } catch {
         toast.error(t("loadFailed"));
@@ -89,20 +96,25 @@ export default function BlogPostEditPage() {
         setLoading(false);
       }
     })();
-  }, [id, isNew, router]);
+  }, [id, isNew, router, t]);
 
   if (loading || !post) {
     return <div className="min-h-[40vh]" aria-hidden />;
   }
 
   const handleSave = async () => {
-    const slug = post.slug.trim() || post.title.en.toLowerCase().replace(/\s+/g, "-");
+    const slug =
+      slugify(post.slug) ||
+      slugify(post.title.en) ||
+      slugify(post.id) ||
+      `post-${Date.now()}`;
     const toSave: CmsBlogPost = {
       ...post,
       slug,
+      scheduledAt: undefined,
       publishedAt:
-        post.status === "published" && !post.publishedAt
-          ? new Date().toISOString()
+        post.status === "published"
+          ? post.publishedAt || publishedDateToIso(new Date().toISOString().slice(0, 10))
           : post.publishedAt,
     };
     try {
@@ -132,10 +144,10 @@ export default function BlogPostEditPage() {
               {tCommon("back")}
             </Link>
             <Button
-              onClick={handleSave}
+              onClick={() => void handleSave()}
               className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
             >
-              Save post
+              {t("savePost")}
             </Button>
           </div>
         }
@@ -155,12 +167,14 @@ export default function BlogPostEditPage() {
                       <Label>{tCommon("title")}</Label>
                       <Input
                         value={post.title[loc]}
-                        onChange={(e) =>
-                          setPost({
-                            ...post,
-                            title: { ...post.title, [loc]: e.target.value },
-                          })
-                        }
+                        onChange={(e) => {
+                          const title = { ...post.title, [loc]: e.target.value };
+                          const next: CmsBlogPost = { ...post, title };
+                          if (loc === "en" && !slugTouched) {
+                            next.slug = slugify(e.target.value);
+                          }
+                          setPost(next);
+                        }}
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -206,53 +220,42 @@ export default function BlogPostEditPage() {
                 <Label>{tCommon("slug")}</Label>
                 <Input
                   value={post.slug}
-                  onChange={(e) => setPost({ ...post, slug: e.target.value })}
-                  placeholder="auto-generated-from-title-if-empty"
+                  onChange={(e) => {
+                    setSlugTouched(true);
+                    setPost({ ...post, slug: slugify(e.target.value) });
+                  }}
+                  placeholder={t("slugPlaceholder")}
                 />
+                <p className="text-xs text-muted-foreground">{t("slugHint")}</p>
               </div>
               <div className="space-y-1.5">
                 <Label>{tCommon("status")}</Label>
                 <select
-                  value={post.status}
+                  value={post.status === "scheduled" ? "draft" : post.status}
                   onChange={(e) =>
                     setPost({ ...post, status: e.target.value as CmsStatus })
                   }
                   className="h-8 w-full rounded-lg border border-input px-2.5 text-sm"
                 >
                   <option value="draft">{tCommon("draft")}</option>
-                  <option value="scheduled">{tCommon("scheduled")}</option>
                   <option value="published">{tCommon("published")}</option>
                 </select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>{t("schedulePublish")}</Label>
-                <Input
-                  type="datetime-local"
-                  value={post.scheduledAt?.slice(0, 16) ?? ""}
-                  onChange={(e) =>
-                    setPost({
-                      ...post,
-                      scheduledAt: e.target.value
-                        ? new Date(e.target.value).toISOString()
-                        : undefined,
-                    })
-                  }
-                />
               </div>
               <div className="space-y-1.5">
                 <Label>{t("publishedDate")}</Label>
                 <Input
                   type="date"
-                  value={post.publishedAt?.slice(0, 10) ?? ""}
+                  value={isoToDateInput(post.publishedAt)}
                   onChange={(e) =>
                     setPost({
                       ...post,
                       publishedAt: e.target.value
-                        ? new Date(e.target.value).toISOString()
+                        ? publishedDateToIso(e.target.value)
                         : undefined,
                     })
                   }
                 />
+                <p className="text-xs text-muted-foreground">{t("publishedDateHint")}</p>
               </div>
               <ImageField
                 label={t("featuredImage")}

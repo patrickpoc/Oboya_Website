@@ -3,11 +3,13 @@ import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
 import {
   deleteBlogPostDurable,
   readBlogPostsDurable,
+  reorderBlogPostsDurable,
   saveBlogPostDurable,
 } from "@/lib/cms/server/blog-posts.server";
 import { revalidateBlogPages } from "@/lib/cms/revalidate-site";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 import type { LocalizedString } from "@/lib/cms/types";
+import { slugify } from "@/lib/cms/slugify";
 
 const EMPTY_LOCALIZED: LocalizedString = {
   en: "",
@@ -50,8 +52,22 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const auth = await cmsGuard("blog", "edit");
   if ("response" in auth) return auth.response;
-  const body = (await request.json()) as CmsBlogPost;
-  const saved = await saveBlogPostDurable(body);
+  const body = (await request.json()) as CmsBlogPost & {
+    action?: string;
+    orderedIds?: string[];
+  };
+
+  if (body.action === "reorder" && Array.isArray(body.orderedIds)) {
+    const next = await reorderBlogPostsDurable(body.orderedIds);
+    revalidateBlogPages();
+    return NextResponse.json({ ok: true, posts: next.map(toListPost) });
+  }
+
+  const slug = slugify(body.slug || body.title?.en || body.id || "post");
+  const saved = await saveBlogPostDurable({
+    ...body,
+    slug: slug || `post-${Date.now()}`,
+  });
   revalidateBlogPages(saved.slug);
   return NextResponse.json(saved, { status: 201 });
 }

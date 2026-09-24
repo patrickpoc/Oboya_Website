@@ -91,6 +91,7 @@ export function ProductColorThumbnailPicker({
                   src={imageSrc}
                   alt={name}
                   fill
+                  unoptimized
                   className="object-cover"
                   sizes="84px"
                 />

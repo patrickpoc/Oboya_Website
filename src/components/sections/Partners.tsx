@@ -27,6 +27,7 @@ function LogoItem({
       alt={decorative ? "" : logo.name}
       width={200}
       height={80}
+      unoptimized
       className="h-14 w-auto max-w-[11rem] object-contain sm:h-16 sm:max-w-[14rem] md:h-20 md:max-w-[17rem]"
     />
   ) : (

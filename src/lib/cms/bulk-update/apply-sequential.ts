@@ -9,6 +9,8 @@ import { validateColorVariants } from "@/lib/shop/color-variants";
 import { DEFER_REVALIDATE_HEADER } from "@/lib/cms/revalidate-headers";
 import { BULK_APPLY_GAP_MS, sleep } from "@/lib/cms/bulk-apply-pace";
 
+const QUIET_HEADER = "x-admin-quiet";
+
 export type SequentialApplyProgress = {
   index: number;
   total: number;
@@ -18,7 +20,10 @@ export type SequentialApplyProgress = {
 
 async function revalidateShopOnce() {
   try {
-    await fetch("/api/cms/products/revalidate", { method: "POST" });
+    await fetch("/api/cms/products/revalidate", {
+      method: "POST",
+      headers: { [QUIET_HEADER]: "1" },
+    });
   } catch {
     // Best-effort; saves already persisted.
   }
@@ -107,6 +112,7 @@ export async function applyBulkUpdatesSequentially(params: {
         headers: {
           "Content-Type": "application/json",
           [DEFER_REVALIDATE_HEADER]: "1",
+          [QUIET_HEADER]: "1",
         },
         body: JSON.stringify(body),
       });

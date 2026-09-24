@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import type { BulkValidationIssue, BulkWorkspaceRow } from "@/lib/cms/bulk-update/types";
 import { BULK_FIELD_LABELS } from "@/lib/cms/bulk-update/field-labels";
+import { productHasPendingChanges } from "@/lib/cms/bulk-update/diff";
 
 type Props = {
   open: boolean;
@@ -30,13 +31,22 @@ export function BulkChangeReviewDialog({
 }: Props) {
   const t = useTranslations("admin.products.bulk");
   const tCommon = useTranslations("admin.common");
-  const withChanges = rows.filter((row) => row.changedFields.length > 0);
+  const withChanges = rows.filter((row) =>
+    productHasPendingChanges(row.original, row.pending)
+  );
   const changedProductCount = new Set(withChanges.map((row) => row.productId)).size;
   const selectedProductCount = new Set(rows.map((row) => row.productId)).size;
-  const fieldsChanged = withChanges.reduce(
-    (sum, row) => sum + row.changedFields.length,
-    0
-  );
+  const fieldsChanged = withChanges.reduce((sum, row) => {
+    const parentFields = row.kind === "parent" ? row.changedFields.length : 0;
+    const variantTouch =
+      row.kind === "variant" &&
+      (row.changedFields.length > 0 ||
+        JSON.stringify(row.original.colorVariants ?? []) !==
+          JSON.stringify(row.pending.colorVariants ?? []))
+        ? Math.max(1, row.changedFields.length)
+        : row.changedFields.length;
+    return sum + (row.kind === "parent" ? parentFields : variantTouch);
+  }, 0);
   const blocked = issues.filter((issue) => issue.status === "blocked");
   const warnings = issues.filter((issue) => issue.status === "warning");
   const canApply = blocked.length === 0 && changedProductCount > 0;

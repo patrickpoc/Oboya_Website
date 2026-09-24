@@ -8,10 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/brand/Logo";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { useAdminDocumentTitle } from "@/lib/cms/admin-document-title";
 
 export default function ChangePasswordPage() {
   const t = useTranslations("admin.auth");
   const tCommon = useTranslations("admin.common");
+  useAdminDocumentTitle(t("changeTitle"));
   const [password, setPassword] = useState("");
   const [current, setCurrent] = useState("");
   const [confirm, setConfirm] = useState("");

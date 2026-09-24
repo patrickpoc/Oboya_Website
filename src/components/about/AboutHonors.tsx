@@ -79,6 +79,7 @@ function HonorMark({
         src={item.image}
         alt={item.name}
         fill
+        unoptimized
         className="object-contain"
         sizes="112px"
         onError={() => setFailed(true)}

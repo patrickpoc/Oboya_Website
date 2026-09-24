@@ -252,91 +252,128 @@ export function BulkUpdateWorkspace() {
       return;
     }
 
-    const updates = Array.from(changedProductIds).map((productId) => {
-      const sample = rows.find((row) => row.productId === productId)!;
-      const pending = sample.pending;
-      return {
-        id: productId,
-        patch: {
-          moq: pending.moq,
-          categoryId: pending.categoryId,
-          subcategoryId: pending.subcategoryId,
-          brandId: pending.brandId,
-          application: pending.application,
-          cultures: pending.cultures,
-          certifications: pending.certifications,
-          countryOfOrigin: pending.countryOfOrigin,
-          enabledCountries: pending.enabledCountries ?? pending.availability,
-          status: pending.status,
-          priceUsd: pending.prices?.USD ?? null,
-          priceBrl: pending.prices?.BRL ?? null,
-          priceEur: pending.prices?.EUR ?? null,
-        } satisfies BulkProductPatch,
-      };
-    });
+    // Prefer live client validation so variant edits are included (server
+    // patch rebuild historically dropped color-variant fields).
+    const liveIssues = validateBulkUpdate(rows, catalog);
+    let nextIssues = liveIssues;
 
     try {
+      const updates = Array.from(changedProductIds).map((productId) => {
+        const sample = rows.find((row) => row.productId === productId)!;
+        const pending = sample.pending;
+        return {
+          id: productId,
+          patch: {
+            moq: pending.moq,
+            categoryId: pending.categoryId,
+            subcategoryId: pending.subcategoryId,
+            brandId: pending.brandId,
+            application: pending.application,
+            cultures: pending.cultures,
+            certifications: pending.certifications,
+            countryOfOrigin: pending.countryOfOrigin,
+            enabledCountries: pending.enabledCountries ?? pending.availability,
+            status: pending.status,
+            priceUsd: pending.prices?.USD ?? null,
+            priceBrl: pending.prices?.BRL ?? null,
+            priceEur: pending.prices?.EUR ?? null,
+            defaultColor: pending.defaultColor,
+            defaultColorNameEn: pending.defaultColorName?.en,
+            defaultColorNamePt: pending.defaultColorName?.["pt-BR"],
+          } satisfies BulkProductPatch,
+        };
+      });
+
       const response = await fetch("/api/cms/products/bulk-validate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-quiet": "1",
+        },
         body: JSON.stringify({ updates }),
       });
       if (response.ok) {
         const payload = (await response.json()) as { issues: BulkValidationIssue[] };
-        setServerIssues(payload.issues);
-        if (payload.issues.some((issue) => issue.status === "blocked")) {
-          toast.error(t("serverBlocked"));
+        // Merge: keep client issues (variants) + server taxonomy issues.
+        const byKey = new Map<string, BulkValidationIssue>();
+        for (const issue of [...liveIssues, ...(payload.issues ?? [])]) {
+          byKey.set(
+            `${issue.productId}:${issue.field}:${issue.message}`,
+            issue
+          );
         }
+        nextIssues = Array.from(byKey.values());
       }
     } catch {
       // Client validation already present; continue to review.
+    }
+
+    setServerIssues(nextIssues);
+    const blocked = nextIssues.filter((issue) => issue.status === "blocked");
+    if (blocked.length > 0) {
+      toast.error(
+        t("blockedBeforeApply", {
+          count: blocked.length,
+          detail: blocked
+            .slice(0, 3)
+            .map((issue) => `${issue.sku}: ${issue.message}`)
+            .join(" · "),
+        })
+      );
+      setReviewOpen(true);
+      return;
     }
 
     setReviewOpen(true);
   };
 
   const confirmApply = async () => {
-    setReviewOpen(false);
-    if (blockedCount > 0) {
-      toast.error(t("resolveBlocked"));
+    const snapshotRows = rows;
+    const freshIssues = validateBulkUpdate(snapshotRows, catalog);
+    const blocked = freshIssues.filter((issue) => issue.status === "blocked");
+    if (blocked.length > 0) {
+      setServerIssues(freshIssues);
+      toast.error(
+        t("blockedBeforeApply", {
+          count: blocked.length,
+          detail: blocked
+            .slice(0, 3)
+            .map((issue) => `${issue.sku}: ${issue.message}`)
+            .join(" · "),
+        })
+      );
       return;
     }
 
-    const applyRows = rows.filter((row) =>
+    setReviewOpen(false);
+
+    const applyRows = snapshotRows.filter((row) =>
       productHasPendingChanges(row.original, row.pending)
     );
-    // One queue entry per product group (parent row).
-    const parents = applyRows.filter((row) => row.kind === "parent");
-    const seen = new Set<string>();
-    const uniqueParents = parents.filter((row) => {
-      if (seen.has(row.productId)) return false;
-      seen.add(row.productId);
-      return true;
-    });
-    // Fallback: if no parent rows, use first row per productId.
-    const queueSource =
-      uniqueParents.length > 0
-        ? uniqueParents
-        : Array.from(
-            applyRows.reduce((map, row) => {
-              if (!map.has(row.productId)) map.set(row.productId, row);
-              return map;
-            }, new Map<string, BulkWorkspaceRow>()).values()
-          );
+    const byProduct = new Map<string, BulkWorkspaceRow>();
+    for (const row of applyRows) {
+      if (!byProduct.has(row.productId)) byProduct.set(row.productId, row);
+    }
+    const queueSource = Array.from(byProduct.values());
 
     if (queueSource.length === 0) {
       toast.error(t("noPending"));
       return;
     }
 
-    const initialQueue: BulkQueueItem[] = queueSource.map((row) => ({
-      id: row.productId,
-      sku: row.pending.sku,
-      name: displayProductName(row.pending),
-      status: "pending",
-    }));
+    const initialQueue: BulkQueueItem[] = queueSource.map((row) => {
+      const variants = (row.pending.colorVariants ?? [])
+        .map((variant) => variant.sku?.trim())
+        .filter((sku): sku is string => Boolean(sku));
+      return {
+        id: row.productId,
+        sku: row.pending.sku,
+        name: displayProductName(row.pending),
+        status: "pending" as const,
+        variantSkus: variants,
+      };
+    });
 
-    const snapshotRows = rows;
     setQueue(initialQueue);
     setRows([]);
     setSelectedIds(new Set());
@@ -391,6 +428,18 @@ export function BulkUpdateWorkspace() {
               ? "skipped"
               : "failed",
           item.error
+        );
+      }
+      const failed = applyResults.filter((item) => item.status === "FAILED");
+      if (failed.length > 0) {
+        toast.error(
+          t("applyFailedCount", {
+            count: failed.length,
+            detail: failed
+              .slice(0, 2)
+              .map((item) => `${item.sku}: ${item.error ?? "failed"}`)
+              .join(" · "),
+          })
         );
       }
       await loadProducts();

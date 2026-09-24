@@ -62,6 +62,7 @@ export default async function BlogPostPage({ params }: Props) {
         categoryLabel={category ? pickLocalized(category.name, locale) : t("articleLabel")}
         formattedDate={formatBlogDate(post.publishedAt, locale)}
         detailPlaceholder={t("detailPlaceholder")}
+        backLabel={t("backToBlog")}
       />
     </SiteLayout>
   );

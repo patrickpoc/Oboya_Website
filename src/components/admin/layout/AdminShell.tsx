@@ -8,6 +8,7 @@ import { AdminTopbar } from "@/components/admin/layout/AdminTopbar";
 import { AdminPageTransition } from "@/components/admin/layout/AdminPageTransition";
 import { AdminLoadingProvider } from "@/components/admin/layout/AdminLoadingContext";
 import { AdminLoadingOverlay } from "@/components/admin/layout/AdminLoadingOverlay";
+import { AdminRouteDocumentTitle } from "@/components/admin/layout/AdminRouteDocumentTitle";
 import type { CmsUser } from "@/lib/cms/types";
 
 function AdminShellFrame({ children }: { children: React.ReactNode }) {
@@ -18,6 +19,7 @@ function AdminShellFrame({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="relative min-h-screen bg-oboya-soft-white" aria-live="polite">
+        <AdminRouteDocumentTitle />
         <AdminLoadingOverlay
           active
           variant="fullscreen"
@@ -29,6 +31,7 @@ function AdminShellFrame({ children }: { children: React.ReactNode }) {
 
   return (
     <AdminLoadingProvider>
+      <AdminRouteDocumentTitle />
       <div className="min-h-screen bg-oboya-soft-white">
         {sidebarOpen && (
           <button

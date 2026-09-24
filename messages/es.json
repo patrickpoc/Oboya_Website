@@ -695,7 +695,8 @@
         "p2": "Retail-ready packs and display trolleys improve visibility and reduce handling damage.",
         "p3": "Localized assortments help chains tailor pack sizes to regional demand."
       }
-    }
+    },
+    "backToBlog": "Volver al blog"
   },
   "newsPage": {
     "metaTitle": "Últimas noticias",
@@ -1992,7 +1993,11 @@
         "expandColors": "Expandir {count} variantes de color",
         "collapseColors": "Contraer {count} variantes de color",
         "colorsCollapsed": "{count} colores ocultos",
-        "colorsExpanded": "{count} colores"
+        "colorsExpanded": "{count} colores",
+        "queueVariants": "Colores: {skus}",
+        "queueFailedDetail": "Falló — {error}",
+        "blockedBeforeApply": "{count} problema(s) bloqueante(s): {detail}",
+        "applyFailedCount": "{count} producto(s) fallaron: {detail}"
       }
     },
     "taxonomy": {
@@ -2355,7 +2360,11 @@
           "published": "Publicado"
         },
         "editAria": "Editar {title}",
-        "deleteAria": "Eliminar {title}"
+        "deleteAria": "Eliminar {title}",
+        "reorderHint": "Arrastra las publicaciones para cambiar el orden en la página pública del blog.",
+        "reorderSaved": "Orden del blog guardado",
+        "reorderFailed": "No se pudo guardar el orden del blog",
+        "dragHandle": "Arrastrar para reordenar {title}"
       },
       "postEditor": {
         "newPost": "Nuevo post",
@@ -2374,7 +2383,11 @@
         "contentPanel": "Contenido",
         "settingsPanel": "Ajustes",
         "schedulePublish": "Programar publicación",
-        "publishedDate": "Fecha de publicación"
+        "publishedDate": "Fecha de publicación",
+        "savePost": "Guardar publicación",
+        "publishedDateHint": "Se publica a las 00:00 de esta fecha (visible todo el día).",
+        "slugPlaceholder": "auto-del-titulo",
+        "slugHint": "Solo minúsculas, números y guiones."
       },
       "authors": {
         "title": "Autores del blog",
@@ -2810,5 +2823,8 @@
       "alreadyExists": "Esta moneda ya existe.",
       "toggleAria": "Alternar {code} para {country}"
     }
+  },
+  "latestNews": {
+    "seeMore": "Ver más"
   }
 }

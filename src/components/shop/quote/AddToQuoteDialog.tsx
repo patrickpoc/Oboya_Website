@@ -97,7 +97,9 @@ export function AddToQuoteDialog() {
               src={imageSrc}
               alt={name}
               fill
+              unoptimized
               className="object-cover"
+              sizes="80px"
             />
           </div>
           <div className="min-w-0 flex-1">

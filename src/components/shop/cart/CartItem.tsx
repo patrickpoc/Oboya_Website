@@ -49,6 +49,7 @@ export function CartItemRow({
           src={imageSrc}
           alt={getProductName(product ?? productId)}
           fill
+          unoptimized
           className="object-cover"
           sizes="56px"
         />

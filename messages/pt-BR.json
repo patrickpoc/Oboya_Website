@@ -695,7 +695,8 @@
         "p2": "Retail-ready packs and display trolleys improve visibility and reduce handling damage.",
         "p3": "Localized assortments help chains tailor pack sizes to regional demand."
       }
-    }
+    },
+    "backToBlog": "Voltar ao blog"
   },
   "newsPage": {
     "metaTitle": "Últimas notícias",
@@ -1992,7 +1993,11 @@
         "rowSkuSuffix": " ({sku})",
         "moq": "MOQ",
         "sku": "SKU",
-        "emptyWorkspace": "Busque e selecione produtos, ou importe uma planilha para começar a editar."
+        "emptyWorkspace": "Busque e selecione produtos, ou importe uma planilha para começar a editar.",
+        "queueVariants": "Cores: {skus}",
+        "queueFailedDetail": "Falhou — {error}",
+        "blockedBeforeApply": "{count} problema(s) bloqueante(s): {detail}",
+        "applyFailedCount": "{count} produto(s) falharam: {detail}"
       }
     },
     "taxonomy": {
@@ -2355,7 +2360,11 @@
           "published": "Publicado"
         },
         "editAria": "Editar {title}",
-        "deleteAria": "Excluir {title}"
+        "deleteAria": "Excluir {title}",
+        "reorderHint": "Arraste as publicações para mudar a ordem na página pública do blog.",
+        "reorderSaved": "Ordem do blog salva",
+        "reorderFailed": "Não foi possível salvar a ordem do blog",
+        "dragHandle": "Arrastar para reordenar {title}"
       },
       "postEditor": {
         "newPost": "Novo post",
@@ -2374,7 +2383,11 @@
         "contentPanel": "Conteúdo",
         "settingsPanel": "Configurações",
         "schedulePublish": "Agendar publicação",
-        "publishedDate": "Data de publicação"
+        "publishedDate": "Data de publicação",
+        "savePost": "Salvar post",
+        "publishedDateHint": "Publica às 00:00 desta data (visível o dia inteiro).",
+        "slugPlaceholder": "auto-do-titulo",
+        "slugHint": "Apenas letras minúsculas, números e hífens."
       },
       "authors": {
         "title": "Autores do blog",
@@ -2810,5 +2823,8 @@
       "alreadyExists": "Esta moeda já existe.",
       "toggleAria": "Alternar {code} para {country}"
     }
+  },
+  "latestNews": {
+    "seeMore": "Ver mais"
   }
 }

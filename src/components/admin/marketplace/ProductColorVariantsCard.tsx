@@ -402,6 +402,7 @@ export function ProductColorVariantsCard({
                             src={variant.image}
                             alt={variant.name || t("colorVariantAlt")}
                             fill
+                            unoptimized
                             className="object-cover"
                             sizes="176px"
                           />

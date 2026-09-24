@@ -112,6 +112,9 @@
     "news1Title": "Next-generation greenhouse technology for sustainable production",
     "news2Title": "Expanding our footprint in Asia-Pacific markets"
   },
+  "latestNews": {
+    "seeMore": "See more"
+  },
   "sustainability": {
     "eyebrow": "Sustainability",
     "title": "Growing responsibly for future generations",
@@ -673,6 +676,7 @@
     "emptyAll": "No articles published yet.",
     "featuredLabel": "Featured",
     "detailPlaceholder": "Full article content will appear here once added in the dashboard.",
+    "backToBlog": "Back to blog",
     "posts": {
       "post1": {
         "title": "Sustainable packaging trends in fresh produce",
@@ -1976,6 +1980,10 @@
         "executionQueue": "Execution queue ({count})",
         "executionQueueRunning": "Processing with paced delay…",
         "clearExecutionQueue": "Clear queue",
+        "queueVariants": "Colors: {skus}",
+        "queueFailedDetail": "Failed — {error}",
+        "blockedBeforeApply": "{count} blocked issue(s): {detail}",
+        "applyFailedCount": "{count} product(s) failed: {detail}",
         "queueStatus": {
           "pending": "Waiting",
           "running": "Processing…",
@@ -2355,13 +2363,18 @@
           "published": "Published"
         },
         "editAria": "Edit {title}",
-        "deleteAria": "Delete {title}"
+        "deleteAria": "Delete {title}",
+        "reorderHint": "Drag posts to change their order on the public blog page.",
+        "reorderSaved": "Blog order saved",
+        "reorderFailed": "Could not save blog order",
+        "dragHandle": "Drag to reorder {title}"
       },
       "postEditor": {
         "newPost": "New post",
         "notFound": "Post not found",
         "loadFailed": "Could not load post",
         "saved": "Post saved",
+        "savePost": "Save post",
         "featuredImage": "Featured image",
         "excerpt": "Excerpt",
         "content": "Content",
@@ -2374,7 +2387,10 @@
         "contentPanel": "Content",
         "settingsPanel": "Settings",
         "schedulePublish": "Schedule publish",
-        "publishedDate": "Published date"
+        "publishedDate": "Published date",
+        "publishedDateHint": "Posts publish at 00:00 on this date (visible for the whole day).",
+        "slugPlaceholder": "auto-from-title",
+        "slugHint": "Only lowercase letters, numbers, and hyphens."
       },
       "authors": {
         "title": "Blog Authors",

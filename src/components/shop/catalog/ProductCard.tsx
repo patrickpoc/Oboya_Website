@@ -71,6 +71,7 @@ function ProductCardComponent({
             src={imageSrc}
             alt={name}
             fill
+            unoptimized
             className="object-cover transition-opacity duration-200"
             sizes="(max-width: 640px) 100vw, 96px"
           />

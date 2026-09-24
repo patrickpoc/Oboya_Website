@@ -6,6 +6,8 @@ import type {
 import { DEFER_REVALIDATE_HEADER } from "@/lib/cms/revalidate-headers";
 import { BULK_APPLY_GAP_MS, sleep } from "@/lib/cms/bulk-apply-pace";
 
+const QUIET_HEADER = "x-admin-quiet";
+
 export type ImportApplyProgress = {
   index: number;
   total: number;
@@ -15,7 +17,10 @@ export type ImportApplyProgress = {
 
 async function revalidateShopOnce() {
   try {
-    await fetch("/api/cms/products/revalidate", { method: "POST" });
+    await fetch("/api/cms/products/revalidate", {
+      method: "POST",
+      headers: { [QUIET_HEADER]: "1" },
+    });
   } catch {
     // Best-effort; saves already persisted.
   }
@@ -46,6 +51,7 @@ export async function applyBulkImportsSequentially(params: {
         headers: {
           "Content-Type": "application/json",
           [DEFER_REVALIDATE_HEADER]: "1",
+          [QUIET_HEADER]: "1",
         },
         body: JSON.stringify(row.pending),
       });

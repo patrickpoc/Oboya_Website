@@ -71,7 +71,12 @@ export function readProductById(id: string) {
 }
 
 export async function readBlogPosts() {
-  return (await readBlogPostsDurable()).filter((p) => p.status === "published");
+  const { sortBlogPostsForDisplay } = await import(
+    "@/lib/cms/repositories/blog-repository"
+  );
+  return sortBlogPostsForDisplay(
+    (await readBlogPostsDurable()).filter((p) => p.status === "published")
+  );
 }
 
 export async function readBlogPostBySlug(slug: string) {
