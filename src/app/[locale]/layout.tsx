@@ -30,15 +30,18 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   icons: {
+    // Stable URLs (no cache-bust query). Prefer ≥48px PNG for Google SERP.
     icon: [
-      { url: "/favicon.ico?v=2", sizes: "any" },
-      { url: "/favicon.svg?v=2", type: "image/svg+xml" },
-      { url: "/favicon.png?v=2", type: "image/png", sizes: "48x48" },
-      { url: "/icon.png?v=2", type: "image/png", sizes: "192x192" },
+      { url: "/favicon-96x96.png", type: "image/png", sizes: "96x96" },
+      { url: "/favicon-48x48.png", type: "image/png", sizes: "48x48" },
+      { url: "/icon.png", type: "image/png", sizes: "192x192" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "48x48" },
     ],
-    shortcut: ["/favicon.ico?v=2"],
-    apple: [{ url: "/apple-icon.png?v=2", sizes: "180x180", type: "image/png" }],
+    shortcut: "/favicon.ico",
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
+  manifest: "/site.webmanifest",
 };
 
 export const viewport: Viewport = {

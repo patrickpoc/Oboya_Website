@@ -22,9 +22,9 @@ import { CountryFlag } from "@/components/ui/country-flag";
 import { screenToSvg } from "@/lib/svg-coords";
 import { cn } from "@/lib/utils";
 
-const AUTO_CYCLE_INTERVAL_MS = 4000;
-const HOVER_RESUME_DELAY_MS = 10_000;
-const TAP_RESUME_DELAY_MS = 30_000;
+const AUTO_CYCLE_INTERVAL_MS = 7000;
+/** Keep the same info card briefly after deselect before advancing the cycle. */
+const DESELECT_HOLD_MS = 900;
 const SELECTION_FADE_MS = 350;
 const FLAG_WIDTH_RATIO = 0.044;
 const FLAG_OFFSET_RATIO = 0.022;
@@ -57,6 +57,10 @@ export function InteractiveWorldMap({
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [manualMode, setManualMode] = useState(false);
+  /** Click pins the country until unlocked (second click / background). */
+  const [selectionLocked, setSelectionLocked] = useState(false);
+  /** After deselect, keep the card but shrink the flag until the next cycle step. */
+  const [suppressFlagEmphasis, setSuppressFlagEmphasis] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -67,6 +71,8 @@ export function InteractiveWorldMap({
   );
   const locationsRef = useRef(locations);
   locationsRef.current = locations;
+  const activeIdRef = useRef(activeId);
+  activeIdRef.current = activeId;
 
   const highlightedId = editable ? selectedId : activeId;
   const autoPlayEnabled =
@@ -233,47 +239,53 @@ export function InteractiveWorldMap({
     }
   }, []);
 
-  const scheduleResumeAutoPlay = useCallback(
-    (delayMs: number) => {
-      clearResumeTimer();
-      resumeTimerRef.current = setTimeout(() => {
-        resumeTimerRef.current = null;
-        setManualMode(false);
-      }, delayMs);
-    },
-    [clearResumeTimer]
-  );
+  const unlockSelection = useCallback(() => {
+    clearResumeTimer();
+    // Contract the flag now, but keep the same country on the info card briefly.
+    setSelectionLocked(false);
+    setSuppressFlagEmphasis(true);
+    setManualMode(true);
+
+    resumeTimerRef.current = setTimeout(() => {
+      resumeTimerRef.current = null;
+      const list = locationsRef.current;
+      if (list.length > 0) {
+        const currentIndex = list.findIndex(
+          (location) => location.id === activeIdRef.current
+        );
+        const nextIndex =
+          currentIndex < 0 ? 0 : (currentIndex + 1) % list.length;
+        setActiveId(list[nextIndex]!.id);
+      }
+      setSuppressFlagEmphasis(false);
+      setManualMode(false);
+    }, DESELECT_HOLD_MS);
+  }, [clearResumeTimer]);
 
   useEffect(() => () => clearResumeTimer(), [clearResumeTimer]);
 
   useEffect(() => {
+    if (locations.length === 0) return;
+    if (activeIdRef.current) return;
+    setActiveId(locations[0]!.id);
+  }, [locations]);
+
+  useEffect(() => {
     if (!autoPlayEnabled || locations.length === 0) return;
 
-    let index = 0;
-    setActiveId(locations[0].id);
+    let index = locations.findIndex(
+      (location) => location.id === activeIdRef.current
+    );
+    if (index < 0) index = 0;
+    setActiveId(locations[index]!.id);
 
     const interval = window.setInterval(() => {
       index = (index + 1) % locations.length;
-      setActiveId(locations[index].id);
+      setActiveId(locations[index]!.id);
     }, AUTO_CYCLE_INTERVAL_MS);
 
     return () => window.clearInterval(interval);
   }, [autoPlayEnabled, locations]);
-
-  const handleHoverStart = useCallback(
-    (id: string) => {
-      if (editable || isTouch) return;
-      clearResumeTimer();
-      setManualMode(true);
-      setActiveId(id);
-    },
-    [clearResumeTimer, editable, isTouch]
-  );
-
-  const handleHoverEnd = useCallback(() => {
-    if (editable || isTouch) return;
-    scheduleResumeAutoPlay(HOVER_RESUME_DELAY_MS);
-  }, [editable, isTouch, scheduleResumeAutoPlay]);
 
   const handleManualSelect = useCallback(
     (id: string) => {
@@ -283,25 +295,49 @@ export function InteractiveWorldMap({
       }
 
       clearResumeTimer();
+
+      // Second click on the same pin → shrink flag, keep card, then advance.
+      if (selectionLocked && activeId === id) {
+        unlockSelection();
+        return;
+      }
+
+      setSelectionLocked(true);
+      setSuppressFlagEmphasis(false);
       setManualMode(true);
       setActiveId(id);
-      scheduleResumeAutoPlay(TAP_RESUME_DELAY_MS);
     },
-    [clearResumeTimer, editable, onSelect, scheduleResumeAutoPlay]
+    [
+      activeId,
+      clearResumeTimer,
+      editable,
+      onSelect,
+      selectionLocked,
+      unlockSelection,
+    ]
   );
+
+  const handleBackgroundClick = useCallback(() => {
+    if (editable) return;
+    if (!selectionLocked) return;
+    unlockSelection();
+  }, [editable, selectionLocked, unlockSelection]);
 
   const handleSvgClick = useCallback(
     (event: React.MouseEvent<SVGRectElement>) => {
-      if (!editable || !onMapClick || !svgRef.current) return;
-
-      const coords = screenToSvg(
-        svgRef.current,
-        event.clientX,
-        event.clientY
-      );
-      onMapClick(coords.x, coords.y);
+      if (editable) {
+        if (!onMapClick || !svgRef.current) return;
+        const coords = screenToSvg(
+          svgRef.current,
+          event.clientX,
+          event.clientY
+        );
+        onMapClick(coords.x, coords.y);
+        return;
+      }
+      handleBackgroundClick();
     },
-    [editable, onMapClick]
+    [editable, handleBackgroundClick, onMapClick]
   );
 
   const handlePointerDown = useCallback(
@@ -341,7 +377,8 @@ export function InteractiveWorldMap({
     [editable, onMove, onSelect]
   );
 
-  const activeLocation = locations.find((loc) => loc.id === highlightedId);
+  const activeLocation =
+    locations.find((loc) => loc.id === highlightedId) ?? locations[0] ?? null;
 
   return (
     <div className="flex flex-col gap-2 md:gap-3">
@@ -363,7 +400,7 @@ export function InteractiveWorldMap({
           width={MAP_VIEWBOX.width}
           height={MAP_VIEWBOX.height}
           fill="transparent"
-          onClick={editable ? handleSvgClick : undefined}
+          onClick={handleSvgClick}
         />
         <image
           href="/assets/world-map.svg"
@@ -402,11 +439,15 @@ export function InteractiveWorldMap({
             <g
               key={location.id}
               className={cn(
+                "outline-none focus:outline-none focus-visible:outline-none",
                 editable ? "cursor-grab" : "cursor-pointer",
                 isDragging && "cursor-grabbing"
               )}
-              onMouseEnter={() => handleHoverStart(location.id)}
-              onMouseLeave={handleHoverEnd}
+              style={{ outline: "none" }}
+              onMouseDown={(event) => {
+                // Prevent browser focus ring ("selection box") on click.
+                if (!editable) event.preventDefault();
+              }}
               onClick={(event) => {
                 event.stopPropagation();
                 if (editable) {
@@ -429,8 +470,7 @@ export function InteractiveWorldMap({
               role="button"
               tabIndex={0}
               aria-label={label}
-              aria-expanded={isActive}
-              aria-pressed={editable ? isActive : undefined}
+              aria-pressed={isActive}
             >
               <circle
                 cx={location.x}
@@ -442,24 +482,13 @@ export function InteractiveWorldMap({
               <circle
                 cx={location.x}
                 cy={location.y}
-                r={isActive ? 6 : 5}
+                r={5}
                 stroke="#ffffff"
-                strokeWidth={isActive ? 2 : 1.5}
+                strokeWidth={1.5}
                 className={cn(
-                  "pointer-events-none fill-oboya-green transition-all duration-300 ease-in-out",
+                  "pointer-events-none fill-oboya-green transition-opacity duration-300 ease-in-out",
                   isActive ? "opacity-100" : "opacity-70",
-                  isActive && "drop-shadow-[0_0_6px_rgb(77_175_78/60%)]",
                   editable && isActive && "fill-oboya-blue-dark"
-                )}
-              />
-              <circle
-                cx={location.x}
-                cy={location.y}
-                r={isActive ? 9 : 7}
-                className={cn(
-                  "pointer-events-none fill-oboya-green/25 transition-all duration-300 ease-in-out",
-                  isActive ? "opacity-100" : "opacity-0",
-                  editable && isActive && "fill-oboya-blue-dark/25"
                 )}
               />
             </g>
@@ -472,16 +501,15 @@ export function InteractiveWorldMap({
 
         const leftPercent = (location.x / MAP_VIEWBOX.width) * 100;
         const topPercent = (location.y / MAP_VIEWBOX.height) * 100;
-        const isActive = highlightedId === location.id;
+        const isEmphasized =
+          highlightedId === location.id && !suppressFlagEmphasis;
 
         return (
           <div
             key={`flag-${location.id}`}
             className={cn(
-              "pointer-events-none absolute z-[1] aspect-[3/2] -translate-x-1/2 -translate-y-full overflow-hidden rounded-[2px] border border-white/90 leading-none shadow-sm transition-transform duration-200",
-              isActive &&
-                "z-[2] scale-110 shadow-md ring-2 ring-oboya-green/50",
-              editable && isActive && "ring-oboya-blue-dark/50"
+              "pointer-events-none absolute z-[1] aspect-[3/2] -translate-x-1/2 -translate-y-full overflow-hidden rounded-[2px] border border-white/90 leading-none shadow-sm transition-transform duration-200 ease-out",
+              isEmphasized && "z-[2] scale-[1.35]"
             )}
             style={{
               left: `${leftPercent}%`,
@@ -496,12 +524,16 @@ export function InteractiveWorldMap({
       })}
       </div>
 
-      {!editable && activeLocation && (
-        <MapLocationInfoPanel
-          location={activeLocation}
-          fadeDuration={prefersReducedMotion ? 0 : SELECTION_FADE_MS}
-          className="mx-auto w-full max-w-3xl md:max-w-4xl"
-        />
+      {!editable && (
+        <div className="relative mx-auto h-[9.75rem] w-full max-w-3xl md:h-[10.25rem] md:max-w-4xl">
+          {activeLocation ? (
+            <MapLocationInfoPanel
+              location={activeLocation}
+              fadeDuration={prefersReducedMotion ? 0 : SELECTION_FADE_MS}
+              className="absolute inset-x-0 top-0 max-h-full w-full overflow-x-auto overflow-y-hidden"
+            />
+          ) : null}
+        </div>
       )}
     </div>
   );

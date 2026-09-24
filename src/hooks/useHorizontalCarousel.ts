@@ -10,7 +10,7 @@ import {
 import { carouselSnapTransition } from "@/lib/animations";
 
 const DRAG_CLICK_THRESHOLD = 8;
-const HORIZONTAL_DRAG_THRESHOLD = 6;
+const AXIS_LOCK_THRESHOLD = 8;
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -49,12 +49,28 @@ export function useHorizontalCarousel({
   const pointerStartX = useRef<number | null>(null);
   const pointerStartY = useRef<number | null>(null);
   const pointerDeltaX = useRef(0);
+  const activePointerId = useRef<number | null>(null);
   const isHorizontalDragRef = useRef(false);
   const suppressClick = useRef(false);
+  const trackElRef = useRef<HTMLElement | null>(null);
+
+  /** Non-passive touchmove so iOS can lock vertical scroll once we commit to horizontal. */
+  const onNativeTouchMove = useRef((event: TouchEvent) => {
+    if (!isHorizontalDragRef.current) return;
+    if (event.cancelable) event.preventDefault();
+  }).current;
+
+  const detachTouchLock = useCallback(() => {
+    const el = trackElRef.current;
+    if (!el) return;
+    el.removeEventListener("touchmove", onNativeTouchMove);
+  }, [onNativeTouchMove]);
 
   useEffect(() => {
     setScrollOffset((prev) => clamp(prev, 0, maxScroll));
   }, [maxScroll]);
+
+  useEffect(() => () => detachTouchLock(), [detachTouchLock]);
 
   const snapToNearest = useCallback(
     (offset: number, animate: boolean) => {
@@ -143,16 +159,24 @@ export function useHorizontalCarousel({
     return () => viewport.removeEventListener("wheel", onWheel);
   }, [maxScroll, viewportRef]);
 
+  const resetPointerState = () => {
+    pointerStartX.current = null;
+    pointerStartY.current = null;
+    pointerDeltaX.current = 0;
+    activePointerId.current = null;
+    isHorizontalDragRef.current = false;
+    setIsDragging(false);
+    setIsHorizontalDrag(false);
+    setDragDelta(0);
+    detachTouchLock();
+  };
+
   const onPointerDown = (event: ReactPointerEvent) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
     const target = event.target as HTMLElement | null;
-    // Don't start a drag (or capture the pointer) on real interactive targets —
-    // otherwise <Link> / <a> clicks never navigate.
-    if (
-      target?.closest?.(
-        "a, button, input, textarea, select, label, [role='link'], [role='button']"
-      )
-    ) {
+    // Form controls keep native behavior; links/buttons stay draggable
+    // (click is suppressed after a real horizontal drag).
+    if (target?.closest?.("input, textarea, select, label")) {
       return;
     }
 
@@ -160,46 +184,79 @@ export function useHorizontalCarousel({
     pointerStartX.current = event.clientX;
     pointerStartY.current = event.clientY;
     pointerDeltaX.current = 0;
+    activePointerId.current = event.pointerId;
+    trackElRef.current = event.currentTarget as HTMLElement;
     setDragDelta(0);
     setIsDragging(true);
     setIsHorizontalDrag(false);
     isHorizontalDragRef.current = false;
-    event.currentTarget.setPointerCapture(event.pointerId);
+
+    // Do NOT setPointerCapture yet — that blocks page scroll on mobile
+    // until we know the gesture is horizontal.
+    const el = event.currentTarget as HTMLElement;
+    el.addEventListener("touchmove", onNativeTouchMove, { passive: false });
   };
 
   const onPointerMove = (event: ReactPointerEvent) => {
+    if (activePointerId.current !== event.pointerId) return;
     if (pointerStartX.current == null || pointerStartY.current == null) return;
 
     const deltaX = event.clientX - pointerStartX.current;
     const deltaY = event.clientY - pointerStartY.current;
     pointerDeltaX.current = deltaX;
 
-    if (
-      !isHorizontalDragRef.current &&
-      Math.abs(deltaX) > HORIZONTAL_DRAG_THRESHOLD &&
-      Math.abs(deltaX) > Math.abs(deltaY)
-    ) {
-      isHorizontalDragRef.current = true;
-      setIsHorizontalDrag(true);
+    if (!isHorizontalDragRef.current) {
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+
+      // Vertical intent: drop tracking so the browser can scroll the page.
+      if (absY > AXIS_LOCK_THRESHOLD && absY > absX) {
+        resetPointerState();
+        return;
+      }
+
+      if (absX > AXIS_LOCK_THRESHOLD && absX > absY) {
+        isHorizontalDragRef.current = true;
+        setIsHorizontalDrag(true);
+        try {
+          event.currentTarget.setPointerCapture(event.pointerId);
+        } catch {
+          // ignore capture failures (e.g. pointer already released)
+        }
+      } else {
+        return;
+      }
     }
 
-    if (isHorizontalDragRef.current) {
-      setDragDelta(deltaX);
-    }
+    setDragDelta(deltaX);
   };
 
-  const finishDrag = () => {
+  const finishDrag = (event?: ReactPointerEvent) => {
     if (pointerStartX.current == null) return;
+    if (
+      event &&
+      activePointerId.current != null &&
+      event.pointerId !== activePointerId.current
+    ) {
+      return;
+    }
 
     const delta = pointerDeltaX.current;
     const wasHorizontal = isHorizontalDragRef.current;
-    pointerStartX.current = null;
-    pointerStartY.current = null;
-    pointerDeltaX.current = 0;
-    isHorizontalDragRef.current = false;
-    setIsDragging(false);
-    setIsHorizontalDrag(false);
-    setDragDelta(0);
+
+    if (
+      wasHorizontal &&
+      event &&
+      event.currentTarget.hasPointerCapture?.(event.pointerId)
+    ) {
+      try {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      } catch {
+        // ignore
+      }
+    }
+
+    resetPointerState();
 
     if (wasHorizontal && Math.abs(delta) > DRAG_CLICK_THRESHOLD) {
       suppressClick.current = true;
@@ -246,8 +303,9 @@ export function useHorizontalCarousel({
       : carouselSnapTransition;
 
   const trackClassName = isDragging && isHorizontalDrag ? "cursor-grabbing" : "cursor-grab";
+  // pan-y lets the page scroll until we lock horizontal (then touchmove preventDefault).
   const trackStyle = {
-    touchAction: isHorizontalDrag ? ("none" as const) : ("pan-y" as const),
+    touchAction: "pan-y" as const,
   };
 
   return {

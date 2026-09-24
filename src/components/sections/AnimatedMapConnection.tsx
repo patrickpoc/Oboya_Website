@@ -39,9 +39,10 @@ function placeArrowAtDistance(
 }
 
 /**
- * Maps animation progress (0–1) to tip distance along the path.
- * Draw → hold at destination → erase from origin toward destination
- * (tail retracts; tip stays until the stroke is gone).
+ * Maps animation progress (0–1) to arrow tip distance along the path.
+ * Draw: tip leads origin → destination.
+ * Erase: tip stays at the head; the stroke is eaten from the tail (origin),
+ * then the tip fades once almost nothing remains.
  */
 function tipStateForProgress(
   progress: number,
@@ -49,7 +50,7 @@ function tipStateForProgress(
 ): { distance: number; opacity: number } {
   const p = Math.max(0, Math.min(1, progress));
 
-  // Draw
+  // Draw — tip leads the stroke
   if (p < 0.38) {
     const distance = (p / 0.38) * length;
     return {
@@ -63,14 +64,17 @@ function tipStateForProgress(
     return { distance: length, opacity: MAP_CONNECTION_STYLE.opacity };
   }
 
-  // Erase: stroke retracts from origin → tip; arrow stays on remaining tip
+  // Erase origin → destination: arrow stays on the head (destination).
+  // The stroke vanishes from the tail; tip fades only when the trail is nearly gone.
   if (p < 0.92) {
     const eraseT = (p - 0.52) / (0.92 - 0.52);
-    // Tip of remaining visible segment still ends at destination until gone
-    return {
-      distance: length,
-      opacity: MAP_CONNECTION_STYLE.opacity * (1 - eraseT * 0.15),
-    };
+    const remainingRatio = 1 - eraseT;
+    const fadeStart = 0.18;
+    const opacity =
+      remainingRatio > fadeStart
+        ? MAP_CONNECTION_STYLE.opacity
+        : MAP_CONNECTION_STYLE.opacity * Math.max(0, remainingRatio / fadeStart);
+    return { distance: length, opacity };
   }
 
   return { distance: length, opacity: 0 };
@@ -78,7 +82,7 @@ function tipStateForProgress(
 
 /**
  * Draws a curved arrow connection from origin → destination with a soft glow,
- * holds briefly, then erases from the origin toward the destination.
+ * holds briefly, then erases in the same direction (origin → destination).
  */
 export function AnimatedMapConnection({
   pathD,
@@ -122,16 +126,15 @@ export function AnimatedMapConnection({
     glow.style.strokeDashoffset = String(length);
     placeArrowAtDistance(path, arrow, 0, 0);
 
-    // Draw: offset length → 0 (reveal from origin)
-    // Hold
-    // Erase: offset 0 → length (hide from origin toward destination)
-    // Negative offset erase looked like "arrive then pop" in some browsers.
+    // Draw:  length → 0   (reveal origin → destination)
+    // Hold:  0
+    // Erase: 0 → -length (hide origin → destination; same direction, not reverse)
     const keyframes: Keyframe[] = [
       { strokeDashoffset: length, offset: 0 },
       { strokeDashoffset: 0, offset: 0.38 },
       { strokeDashoffset: 0, offset: 0.52 },
-      { strokeDashoffset: length, offset: 0.92 },
-      { strokeDashoffset: length, offset: 1 },
+      { strokeDashoffset: -length, offset: 0.92 },
+      { strokeDashoffset: -length, offset: 1 },
     ];
 
     const timing: KeyframeAnimationOptions = {

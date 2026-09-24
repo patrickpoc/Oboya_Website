@@ -16,6 +16,7 @@ import {
   resolveVariantImage,
   resolveVariantPrice,
   resolveVariantSku,
+  resolveVariantMoq,
   toCartVariantId,
 } from "@/lib/shop/color-variants";
 import { useProductName } from "@/lib/shop/use-product-name";
@@ -55,6 +56,7 @@ function ProductCardComponent({
   const price = resolveVariantPrice(product, activeVariant, currency);
   const imageSrc = resolveVariantImage(product, activeVariant);
   const displaySku = resolveVariantSku(product, activeVariant);
+  const displayMoq = resolveVariantMoq(product, activeVariant);
   const showSwatches = hasColorVariants(product);
   const cartVariantId = toCartVariantId(activeVariant?.id);
   const detailHref = `/shop/products/${product.sku || product.id}${
@@ -109,7 +111,7 @@ function ProductCardComponent({
             {t("estimatedPrice")}: {formatShopPrice(price, currency)}
           </p>
           <p className="text-[11px] text-oboya-green">
-            {t("moq", { count: product.moq })}
+            {t("moq", { count: displayMoq })}
           </p>
         </div>
         <div className="flex shrink-0 flex-col justify-center gap-2 sm:min-w-[10rem]">
@@ -187,7 +189,7 @@ function ProductCardComponent({
             {formatShopPrice(price, currency)}
           </p>
           <p className="text-[11px] leading-tight text-oboya-green">
-            {t("moq", { count: product.moq })}
+            {t("moq", { count: displayMoq })}
           </p>
         </div>
         <div className="flex flex-col gap-1.5 pt-2.5">

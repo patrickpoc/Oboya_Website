@@ -163,7 +163,8 @@ export function formatFieldDisplayValue(
   field: BulkEditableField,
   product: CmsProduct,
   catalog: BulkUpdateCatalog,
-  locale = "en"
+  locale = "en",
+  variantId?: string | null
 ): string {
   switch (field) {
     case "moq":
@@ -236,15 +237,30 @@ export function formatFieldDisplayValue(
       return product.defaultColorName?.en || "";
     case "defaultColorNamePt":
       return product.defaultColorName?.["pt-BR"] || "";
-    case "variantSku":
-    case "variantColor":
-    case "variantColorNameEn":
-    case "variantColorNamePt":
-    case "variantPriceUsd":
-    case "variantPriceBrl":
-    case "variantPriceEur":
-    case "variantImage":
-      return "";
+    case "variantMoq": {
+      const variant = (product.colorVariants ?? []).find(
+        (item) => item.id === variantId
+      );
+      return String(variant?.moq ?? "");
+    }
+    case "variantPriceUsd": {
+      const variant = (product.colorVariants ?? []).find(
+        (item) => item.id === variantId
+      );
+      return String(variant?.prices?.USD ?? "");
+    }
+    case "variantPriceBrl": {
+      const variant = (product.colorVariants ?? []).find(
+        (item) => item.id === variantId
+      );
+      return String(variant?.prices?.BRL ?? "");
+    }
+    case "variantPriceEur": {
+      const variant = (product.colorVariants ?? []).find(
+        (item) => item.id === variantId
+      );
+      return String(variant?.prices?.EUR ?? "");
+    }
     default:
       return "";
   }

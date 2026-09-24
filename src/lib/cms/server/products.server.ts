@@ -70,7 +70,10 @@ function rowToProduct(row: ProductRow): CmsProduct {
   return {
     id: row.id,
     sku: row.sku,
-    moq: row.moq ?? 1,
+    moq:
+      Number.isFinite(Number(row.moq)) && Number(row.moq) >= 1
+        ? Math.floor(Number(row.moq))
+        : 1,
     brandId: row.brand_id,
     categoryId: row.category_id,
     subcategoryId: row.subcategory_id,

@@ -313,24 +313,41 @@ export function ProductColorVariantsCard({
 
                     <div className="min-w-0 flex-1 space-y-3">
                       <div className="grid gap-3 sm:grid-cols-2">
-                        <div className="space-y-1.5">
-                          <Label htmlFor={`color-sku-${variant.id}`}>{t("sku")}</Label>
-                          <Input
-                            id={`color-sku-${variant.id}`}
-                            value={variant.sku ?? ""}
-                            onChange={(event) =>
-                              updateVariant(variant.id, {
-                                sku: event.target.value,
-                              })
-                            }
-                            onBlur={() => {
-                              const trimmed = (variant.sku ?? "").trim();
-                              if (trimmed && trimmed !== variant.id) {
-                                updateVariant(variant.id, { id: trimmed, sku: trimmed });
+                        <div className="space-y-3">
+                          <div className="space-y-1.5">
+                            <Label htmlFor={`color-sku-${variant.id}`}>{t("sku")}</Label>
+                            <Input
+                              id={`color-sku-${variant.id}`}
+                              value={variant.sku ?? ""}
+                              onChange={(event) =>
+                                updateVariant(variant.id, {
+                                  sku: event.target.value,
+                                })
                               }
-                            }}
-                            placeholder={`${product.sku || "SKU"}-COLOR`}
-                          />
+                              onBlur={() => {
+                                const trimmed = (variant.sku ?? "").trim();
+                                if (trimmed && trimmed !== variant.id) {
+                                  updateVariant(variant.id, { id: trimmed, sku: trimmed });
+                                }
+                              }}
+                              placeholder={`${product.sku || "SKU"}-COLOR`}
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label htmlFor={`color-moq-${variant.id}`}>{t("moq")}</Label>
+                            <Input
+                              id={`color-moq-${variant.id}`}
+                              type="number"
+                              min={1}
+                              step={1}
+                              value={variant.moq ?? 1}
+                              onChange={(event) =>
+                                updateVariant(variant.id, {
+                                  moq: Math.max(1, Math.floor(Number(event.target.value) || 1)),
+                                })
+                              }
+                            />
+                          </div>
                         </div>
                         <div className="space-y-1.5">
                           <Label htmlFor={`color-hex-${variant.id}`}>

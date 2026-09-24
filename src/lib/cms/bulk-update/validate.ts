@@ -350,42 +350,18 @@ function validateVariantRow(row: BulkWorkspaceRow): BulkValidationIssue[] {
     return issues;
   }
 
-  if (changed.has("variantSku") && !variant.sku?.trim()) {
-    pushIssue(
-      issues,
-      row,
-      "variantSku",
-      "blocked",
-      "Color SKU cannot be empty.",
-      "Provide a unique SKU for this color."
-    );
-  }
-
-  if (changed.has("variantColor") && variant.color) {
-    if (!/^#[0-9A-Fa-f]{6}$/.test(variant.color)) {
+  if (changed.has("variantMoq")) {
+    const moq = Number(variant.moq);
+    if (!Number.isFinite(moq) || moq < 1 || !Number.isInteger(moq)) {
       pushIssue(
         issues,
         row,
-        "variantColor",
+        "variantMoq",
         "blocked",
-        "Color must be a hex value (e.g. #4DAF4E).",
-        "Use a 6-digit hex color."
+        "Color MOQ must be an integer ≥ 1.",
+        "Enter a valid MOQ for this color."
       );
     }
-  }
-
-  if (
-    changed.has("variantColorNameEn") &&
-    !(variant.nameI18n?.en?.trim() || variant.name?.trim())
-  ) {
-    pushIssue(
-      issues,
-      row,
-      "variantColorNameEn",
-      "blocked",
-      "Color name (EN) is required.",
-      "Enter an English color name."
-    );
   }
 
   for (const priceField of [

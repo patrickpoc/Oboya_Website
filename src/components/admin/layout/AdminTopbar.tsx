@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ExternalLink, LogOut, Menu, Search } from "lucide-react";
+import { ExternalLink, LogOut, Menu } from "lucide-react";
 import { AdminLanguageSwitcher } from "@/components/admin/layout/AdminLanguageSwitcher";
 import { getBreadcrumbs } from "@/lib/cms/navigation";
 import { useAdmin } from "@/contexts/AdminContext";
@@ -90,15 +90,6 @@ export function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
         <ExternalLink className="size-3.5 shrink-0" aria-hidden />
         <span className="hidden sm:inline">{t("common.backToSite")}</span>
       </Link>
-
-      <div className="hidden items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-3 py-1.5 md:flex">
-        <Search className="size-3.5 text-muted-foreground" />
-        <input
-          type="search"
-          placeholder={t("topbar.searchPlaceholder")}
-          className="w-40 bg-transparent text-xs outline-none placeholder:text-muted-foreground"
-        />
-      </div>
 
       <AdminLanguageSwitcher />
 

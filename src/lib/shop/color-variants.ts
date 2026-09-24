@@ -71,6 +71,9 @@ export function normalizeColorVariants(
       const nameI18n = normalizeLocalizedColorName(row.nameI18n, name);
       if (name && !nameI18n.en) nameI18n.en = name;
       const sku = typeof row.sku === "string" ? row.sku.trim() : "";
+      const moqRaw = Number(row.moq);
+      const moq =
+        Number.isFinite(moqRaw) && moqRaw >= 1 ? Math.floor(moqRaw) : 1;
       const color =
         typeof row.color === "string" && row.color ? row.color : "#888888";
       const image = typeof row.image === "string" ? row.image : "";
@@ -87,6 +90,7 @@ export function normalizeColorVariants(
         name: name || nameI18n.en || "",
         nameI18n,
         sku,
+        moq,
         color,
         image,
         prices,
@@ -115,16 +119,21 @@ export function sortedColorVariants(
 export function buildDefaultColorVariant(
   product: Pick<
     ShopProduct,
-    "sku" | "defaultColor" | "defaultColorName" | "images" | "prices"
+    "sku" | "moq" | "defaultColor" | "defaultColorName" | "images" | "prices"
   >
 ): ProductColorVariant {
   const nameI18n = normalizeLocalizedColorName(product.defaultColorName);
   const name = nameI18n.en?.trim() || "Default";
+  const moq =
+    Number.isFinite(Number(product.moq)) && Number(product.moq) >= 1
+      ? Math.floor(Number(product.moq))
+      : 1;
   return {
     id: DEFAULT_COLOR_VARIANT_ID,
     name,
     nameI18n,
     sku: product.sku || "",
+    moq,
     color: product.defaultColor?.trim() || "#888888",
     image: product.images[0] || "",
     prices: {},
@@ -140,6 +149,7 @@ export function getDisplayColorVariants(
   product: Pick<
     ShopProduct,
     | "sku"
+    | "moq"
     | "colorVariants"
     | "defaultColor"
     | "defaultColorName"
@@ -155,6 +165,7 @@ export function getActiveVariant(
   product: Pick<
     ShopProduct,
     | "sku"
+    | "moq"
     | "colorVariants"
     | "defaultColor"
     | "defaultColorName"
@@ -181,6 +192,23 @@ export function resolveVariantSku(
     if (sku) return sku;
   }
   return product.sku || "";
+}
+
+/** MOQ for the active color: variant.moq when set, otherwise product.moq (min 1). */
+export function resolveVariantMoq(
+  product: Pick<ShopProduct, "moq" | "colorVariants">,
+  variant: ProductColorVariant | null | undefined
+): number {
+  const base =
+    Number.isFinite(Number(product.moq)) && Number(product.moq) >= 1
+      ? Math.floor(Number(product.moq))
+      : 1;
+  if (!variant || isDefaultColorVariantId(variant.id)) return base;
+  const fromVariant = Number(variant.moq);
+  if (Number.isFinite(fromVariant) && fromVariant >= 1) {
+    return Math.floor(fromVariant);
+  }
+  return base;
 }
 
 /**
@@ -259,6 +287,7 @@ export function getGalleryImagesForVariant(
   product: Pick<
     ShopProduct,
     | "sku"
+    | "moq"
     | "images"
     | "imageColorIds"
     | "colorVariants"
@@ -329,6 +358,7 @@ export function resolveVariantImage(
   product: Pick<
     ShopProduct,
     | "sku"
+    | "moq"
     | "images"
     | "imageColorIds"
     | "colorVariants"
@@ -373,6 +403,7 @@ export function createEmptyColorVariant(
     name: "",
     nameI18n: emptyLocalizedText(),
     sku: trimmedSku,
+    moq: 1,
     color: "#4DAF4E",
     image: "",
     prices,

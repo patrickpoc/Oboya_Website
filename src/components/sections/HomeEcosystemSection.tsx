@@ -43,7 +43,7 @@ const STAGES: StageDef[] = [
   {
     id: "propagation",
     icon: Sprout,
-    image: "/assets/homepage/greenhouse-technology.webp",
+    image: "/assets/homepage/ecosystem-propagation.jpg",
   },
   {
     id: "growing",

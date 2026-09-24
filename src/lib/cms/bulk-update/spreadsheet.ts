@@ -332,17 +332,23 @@ function parseRowToPatch(
     );
     if (priceEur !== undefined) patch.priceEur = priceEur;
   } else {
-    // Child SKU: variant-only columns. Price USD (without Variant prefix) also maps to variant.
-    const colorHex = cells["Color hex"]?.trim();
-    if (colorHex) patch.variantColor = colorHex;
-
-    const colorName = cells["Color name"]?.trim();
-    if (colorName) {
-      patch.variantColorNameEn = colorName;
-      patch.variantColorNamePt = colorName;
+    // Child SKU: MOQ + prices only (for now).
+    const moqRaw = cells["MOQ"]?.trim();
+    if (moqRaw) {
+      const moq = Number(moqRaw);
+      if (!Number.isFinite(moq) || moq < 1 || !Number.isInteger(moq)) {
+        errors.push({
+          row: rowNumber,
+          sku,
+          message: `Invalid MOQ "${moqRaw}".`,
+          suggestedAction: "Use an integer ≥ 1.",
+        });
+      } else {
+        patch.variantMoq = moq;
+      }
     }
 
-    const variantPrice =
+    const variantPriceUsd =
       parseOptionalPrice(
         cells["Variant price USD"],
         rowNumber,
@@ -351,10 +357,25 @@ function parseRowToPatch(
         errors
       ) ??
       parseOptionalPrice(cells["Price USD"], rowNumber, sku, "Price USD", errors);
-    if (variantPrice !== undefined) patch.variantPriceUsd = variantPrice;
+    if (variantPriceUsd !== undefined) patch.variantPriceUsd = variantPriceUsd;
 
-    const variantImage = cells["Variant image"]?.trim();
-    if (variantImage) patch.variantImage = variantImage;
+    const variantPriceBrl = parseOptionalPrice(
+      cells["Price BRL"],
+      rowNumber,
+      sku,
+      "Price BRL",
+      errors
+    );
+    if (variantPriceBrl !== undefined) patch.variantPriceBrl = variantPriceBrl;
+
+    const variantPriceEur = parseOptionalPrice(
+      cells["Price EUR"],
+      rowNumber,
+      sku,
+      "Price EUR",
+      errors
+    );
+    if (variantPriceEur !== undefined) patch.variantPriceEur = variantPriceEur;
   }
 
   return patch;

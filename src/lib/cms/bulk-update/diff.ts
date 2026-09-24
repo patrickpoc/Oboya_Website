@@ -11,7 +11,7 @@ import {
   type BulkWorkspaceRow,
 } from "@/lib/cms/bulk-update/types";
 import type { ProductColorVariant } from "@/lib/shop/types";
-import { normalizeLocalizedColorName } from "@/lib/shop/color-variants";
+import { normalizeColorVariants, normalizeLocalizedColorName } from "@/lib/shop/color-variants";
 
 function sameStringArray(a: string[] | undefined, b: string[] | undefined): boolean {
   const left = [...(a ?? [])].map(String).sort();
@@ -103,40 +103,23 @@ export function isBulkFieldEqual(
         (original.defaultColorName?.["pt-BR"] || "") ===
         (pending.defaultColorName?.["pt-BR"] || "")
       );
-    case "variantSku":
-    case "variantColor":
-    case "variantColorNameEn":
-    case "variantColorNamePt":
+    case "variantMoq":
     case "variantPriceUsd":
     case "variantPriceBrl":
-    case "variantPriceEur":
-    case "variantImage": {
+    case "variantPriceEur": {
       const before = findVariant(original, variantId);
       const after = findVariant(pending, variantId);
       if (!before && !after) return true;
       if (!before || !after) return false;
       switch (field) {
-        case "variantSku":
-          return (before.sku || "") === (after.sku || "");
-        case "variantColor":
-          return (before.color || "") === (after.color || "");
-        case "variantColorNameEn":
-          return (
-            (before.nameI18n?.en || before.name || "") ===
-            (after.nameI18n?.en || after.name || "")
-          );
-        case "variantColorNamePt":
-          return (
-            (before.nameI18n?.["pt-BR"] || "") === (after.nameI18n?.["pt-BR"] || "")
-          );
+        case "variantMoq":
+          return Number(before.moq ?? 1) === Number(after.moq ?? 1);
         case "variantPriceUsd":
           return priceValue(before.prices, "USD") === priceValue(after.prices, "USD");
         case "variantPriceBrl":
           return priceValue(before.prices, "BRL") === priceValue(after.prices, "BRL");
         case "variantPriceEur":
           return priceValue(before.prices, "EUR") === priceValue(after.prices, "EUR");
-        case "variantImage":
-          return (before.image || "") === (after.image || "");
         default:
           return true;
       }
@@ -217,18 +200,9 @@ function applyVariantPatch(
     prices: { ...variant.prices },
   };
 
-  if (patch.variantSku !== undefined) {
-    const sku = patch.variantSku.trim();
-    next.sku = sku;
-    if (sku) next.id = sku;
-  }
-  if (patch.variantColor !== undefined) next.color = patch.variantColor;
-  if (patch.variantColorNameEn !== undefined) {
-    next.nameI18n = { ...next.nameI18n, en: patch.variantColorNameEn };
-    next.name = patch.variantColorNameEn || next.name;
-  }
-  if (patch.variantColorNamePt !== undefined) {
-    next.nameI18n = { ...next.nameI18n, "pt-BR": patch.variantColorNamePt };
+  if (patch.variantMoq !== undefined) {
+    const moq = Number(patch.variantMoq);
+    next.moq = Number.isFinite(moq) && moq >= 1 ? Math.floor(moq) : 1;
   }
   if (patch.variantPriceUsd !== undefined) {
     next.prices = setCurrencyPrice(next.prices, "USD", patch.variantPriceUsd);
@@ -239,7 +213,6 @@ function applyVariantPatch(
   if (patch.variantPriceEur !== undefined) {
     next.prices = setCurrencyPrice(next.prices, "EUR", patch.variantPriceEur);
   }
-  if (patch.variantImage !== undefined) next.image = patch.variantImage;
 
   return next;
 }
@@ -396,7 +369,15 @@ export function normalizeProductForBulk(product: CmsProduct): CmsProduct {
     prices: { ...(product.prices ?? {}) },
     defaultColor: product.defaultColor ?? "",
     defaultColorName: normalizeLocalizedColorName(product.defaultColorName),
-    colorVariants: structuredClone(product.colorVariants ?? []),
+    colorVariants: normalizeColorVariants(product.colorVariants ?? []).map(
+      (variant) => ({
+        ...variant,
+        moq:
+          Number.isFinite(Number(variant.moq)) && Number(variant.moq) >= 1
+            ? Math.floor(Number(variant.moq))
+            : 1,
+      })
+    ),
   };
 }
 
@@ -541,33 +522,21 @@ export function formatFieldValue(
       return product.defaultColorName?.en || "";
     case "defaultColorNamePt":
       return product.defaultColorName?.["pt-BR"] || "";
-    case "variantSku":
-    case "variantColor":
-    case "variantColorNameEn":
-    case "variantColorNamePt":
+    case "variantMoq":
     case "variantPriceUsd":
     case "variantPriceBrl":
-    case "variantPriceEur":
-    case "variantImage": {
+    case "variantPriceEur": {
       const variant = findVariant(product, variantId);
       if (!variant) return "";
       switch (field) {
-        case "variantSku":
-          return variant.sku || "";
-        case "variantColor":
-          return variant.color || "";
-        case "variantColorNameEn":
-          return variant.nameI18n?.en || variant.name || "";
-        case "variantColorNamePt":
-          return variant.nameI18n?.["pt-BR"] || "";
+        case "variantMoq":
+          return String(variant.moq ?? 1);
         case "variantPriceUsd":
           return String(priceValue(variant.prices, "USD") || "");
         case "variantPriceBrl":
           return String(priceValue(variant.prices, "BRL") || "");
         case "variantPriceEur":
           return String(priceValue(variant.prices, "EUR") || "");
-        case "variantImage":
-          return variant.image || "";
         default:
           return "";
       }

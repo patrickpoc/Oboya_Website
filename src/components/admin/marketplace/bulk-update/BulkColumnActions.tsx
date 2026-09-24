@@ -60,7 +60,7 @@ function createRow(field: BulkEditableField = "categoryId"): ActionRowState {
   return {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     field,
-    moq: "100",
+    moq: "1",
     categoryId: "",
     subcategoryId: "",
     brandId: "",

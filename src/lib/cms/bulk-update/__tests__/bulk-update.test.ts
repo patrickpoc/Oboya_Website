@@ -177,6 +177,15 @@ describe("searchProductsForBulkUpdate", () => {
     expect(hits[0]?.product.sku).toBe("OBO-001");
   });
 
+  it("matches color name exactly and by partial correspondence", () => {
+    const exact = searchSkuHitsForBulkUpdate(products, "Green");
+    expect(exact[0]?.isChildSku).toBe(true);
+    expect(exact[0]?.variantId).toBe("green");
+
+    const partial = searchSkuHitsForBulkUpdate(products, "gre");
+    expect(partial.some((hit) => hit.variantId === "green")).toBe(true);
+  });
+
   it("matches multilingual names", () => {
     const result = searchProductsForBulkUpdate(products, "Vaso Preto");
     expect(result.some((product) => product.sku === "OBO-001")).toBe(true);
@@ -237,6 +246,7 @@ describe("diff", () => {
           name: "Blue",
           nameI18n: { en: "Blue" },
           sku: "A-BLUE",
+          moq: 1,
           color: "#0000ff",
           image: "/b.jpg",
           prices: {},
@@ -248,6 +258,33 @@ describe("diff", () => {
     expect(pending.prices?.USD).toBe(10);
     expect(pending.colorVariants[0]?.prices?.USD).toBe(22);
     expect(productHasPendingChanges(original, pending)).toBe(true);
+  });
+
+  it("patches variant MOQ without touching product.moq", () => {
+    const original = makeProduct({
+      id: "1",
+      sku: "A",
+      moq: 1,
+      colorVariants: [
+        {
+          id: "v1",
+          name: "Blue",
+          nameI18n: { en: "Blue" },
+          sku: "A-BLUE",
+          moq: 1,
+          color: "#0000ff",
+          image: "/b.jpg",
+          prices: {},
+          sortOrder: 0,
+        },
+      ],
+    });
+    const pending = applyPatchToProduct(original, { variantMoq: 50 }, "v1");
+    expect(pending.moq).toBe(1);
+    expect(pending.colorVariants[0]?.moq).toBe(50);
+    expect(
+      getChangedFields(original, pending, { kind: "variant", variantId: "v1" })
+    ).toEqual(["variantMoq"]);
   });
 });
 
@@ -328,6 +365,7 @@ describe("spreadsheet empty cells", () => {
           name: "Red",
           nameI18n: { en: "Red" },
           sku: "SKU-001-RED",
+          moq: 1,
           color: "#ff0000",
           image: "/r.jpg",
           prices: {},
@@ -336,7 +374,7 @@ describe("spreadsheet empty cells", () => {
       ],
     });
     const result = mergeSpreadsheetIntoWorkspace({
-      records: [{ SKU: "SKU-001-RED", "Variant price USD": "15", "Color hex": "#aabbcc" }],
+      records: [{ SKU: "SKU-001-RED", MOQ: "25", "Variant price USD": "15" }],
       productsBySku: new Map([["sku-001", product]]),
       existingRows: [],
       catalog,
@@ -347,7 +385,7 @@ describe("spreadsheet empty cells", () => {
     expect(result.rows.some((row) => row.kind === "variant")).toBe(true);
     const variant = result.rows.find((row) => row.kind === "variant")?.pending.colorVariants[0];
     expect(variant?.prices?.USD).toBe(15);
-    expect(variant?.color).toBe("#aabbcc");
+    expect(variant?.moq).toBe(25);
   });
 
   it("reports duplicate SKU rows", () => {

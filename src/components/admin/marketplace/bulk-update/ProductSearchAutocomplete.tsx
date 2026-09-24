@@ -5,7 +5,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import {
-  displayProductName,
+  displaySearchHitImage,
+  displaySearchHitLabel,
   searchSkuHitsForBulkUpdate,
   type BulkSkuSearchHit,
 } from "@/lib/cms/bulk-update/search-products";
@@ -51,7 +52,7 @@ export function ProductSearchAutocomplete({
       disabled
         ? []
         : searchSkuHitsForBulkUpdate(products, debounced, {
-            limit: 3,
+            limit: 10,
             excludeIds,
           }),
     [products, debounced, excludeIds, disabled]
@@ -84,12 +85,13 @@ export function ProductSearchAutocomplete({
           {suggestions.length === 0 ? (
             <p className="px-3 py-2 text-sm text-muted-foreground">{t("noProductsFound")}</p>
           ) : (
-            <ul className="max-h-64 overflow-y-auto py-1">
+            <ul className="max-h-72 overflow-y-auto py-1">
               {suggestions.map((hit) => {
                 const product = hit.product;
-                const image = product.images[0];
+                const image = displaySearchHitImage(hit);
+                const label = displaySearchHitLabel(hit, preferredLocale);
                 return (
-                  <li key={`${product.id}-${hit.matchedSku}`}>
+                  <li key={`${product.id}-${hit.variantId ?? "parent"}-${hit.matchedSku}`}>
                     <button
                       type="button"
                       className={cn(
@@ -116,7 +118,7 @@ export function ProductSearchAutocomplete({
                       </div>
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium text-oboya-blue-dark">
-                          {displayProductName(product, preferredLocale)}
+                          {label}
                         </p>
                         <p className="truncate text-xs text-muted-foreground">
                           {hit.isChildSku

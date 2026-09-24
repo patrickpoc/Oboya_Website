@@ -45,7 +45,7 @@ export function AddToQuoteDialog() {
   const product = addToQuoteProductId
     ? getProductById(addToQuoteProductId)
     : null;
-  const moq = getProductMoq(product);
+  const moq = getProductMoq(product, addToQuoteVariantId);
   const activeVariant =
     product && hasColorVariants(product)
       ? getActiveVariant(product, addToQuoteVariantId)
@@ -55,9 +55,9 @@ export function AddToQuoteDialog() {
     if (!addToQuoteProductId) return;
     const nextProduct = getProductById(addToQuoteProductId);
     queueMicrotask(() => {
-      setQuantity(getProductMoq(nextProduct));
+      setQuantity(getProductMoq(nextProduct, addToQuoteVariantId));
     });
-  }, [addToQuoteProductId, getProductById]);
+  }, [addToQuoteProductId, addToQuoteVariantId, getProductById]);
 
   if (!product) {
     return (

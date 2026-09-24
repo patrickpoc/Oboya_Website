@@ -21,6 +21,7 @@ import {
   hasColorVariants,
   resolveVariantPrice,
   resolveVariantSku,
+  resolveVariantMoq,
   toCartVariantId,
 } from "@/lib/shop/color-variants";
 import { useProductDescription } from "@/lib/shop/use-product-description";
@@ -95,6 +96,7 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
     ? resolveVariantPrice(product, activeVariant, currency)
     : 0;
   const displaySku = resolveVariantSku(product, activeVariant);
+  const displayMoq = resolveVariantMoq(product, activeVariant);
   const descriptionHtml = getDescriptionHtml(product.description);
   const excerpt = getExcerpt({
     shortDescription: product.shortDescription,
@@ -154,7 +156,7 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
           ) : null}
 
           <p className="mt-4 text-sm font-medium text-oboya-green">
-            {t("moq", { count: product.moq })}
+            {t("moq", { count: displayMoq })}
           </p>
 
           {excerpt ? (

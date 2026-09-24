@@ -12,6 +12,7 @@ const FALLBACK_IMAGE = "/assets/homepage/greenhouse-technology.webp";
 
 interface CartItemProps {
   productId: string;
+  variantId?: string | null;
   variantName?: string | null;
   quantity: number;
   unitPrice: number;
@@ -24,6 +25,7 @@ interface CartItemProps {
 
 export function CartItemRow({
   productId,
+  variantId = null,
   variantName,
   quantity,
   unitPrice,
@@ -37,7 +39,7 @@ export function CartItemRow({
   const getProductName = useProductName();
   const { getProductById } = useShop();
   const product = getProductById(productId);
-  const moq = getProductMoq(product);
+  const moq = getProductMoq(product, variantId);
   const imageSrc = image || product?.images[0] || FALLBACK_IMAGE;
 
   return (

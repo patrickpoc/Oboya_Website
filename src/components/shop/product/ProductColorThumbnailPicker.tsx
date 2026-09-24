@@ -16,6 +16,7 @@ interface ProductColorThumbnailPickerProps {
   product: Pick<
     ShopProduct,
     | "sku"
+    | "moq"
     | "images"
     | "imageColorIds"
     | "colorVariants"

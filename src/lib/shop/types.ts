@@ -95,6 +95,8 @@ export interface ProductColorVariant {
   nameI18n?: ShopLocalizedText;
   /** Per-color SKU. Empty falls back to product base SKU. */
   sku: string;
+  /** Minimum order quantity for this color. Falls back to product.moq when unset. */
+  moq?: number;
   color: string;
   image: string;
   prices: Partial<Record<CurrencyCode, number>>;

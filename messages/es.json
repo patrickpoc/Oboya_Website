@@ -184,7 +184,9 @@
     "terms": "Términos de Uso",
     "rights": "Todos los derechos reservados.",
     "linkedin": "LinkedIn",
-    "facebook": "Facebook",
+    "instagram": "Instagram",
+    "headquarters": "Sede central",
+    "legalContact": "Contacto legal",
     "adminLogin": "Acceso admin",
     "resources": "Recursos",
     "shopSection": "Tienda",
@@ -1914,7 +1916,7 @@
         "importLimited": "Importación limitada a los primeros {max} productos / grupos de color.",
         "importSuccess": "Hoja importada en el editor.",
         "importWithErrors": "Importación completada con errores — revisa la lista abajo.",
-        "searchPlaceholder": "Buscar por SKU padre o de color, o nombre del producto...",
+        "searchPlaceholder": "Buscar por SKU padre o de color, nombre del color o nombre del producto...",
         "maxSelectedPlaceholder": "Máximo de 100 productos / grupos de color seleccionados",
         "noProductsFound": "No se encontraron productos.",
         "reviewTitle": "Revisión de actualización masiva",
@@ -1966,7 +1968,11 @@
         "emptyWorkspace": "Busca y selecciona productos, o importa una hoja de cálculo para empezar a editar.",
         "productGroupsHint": "(100 productos / grupos de color)",
         "childSkuHint": "{child} · color de {parent}",
-        "colorOfParent": "Color de {parentSku}"
+        "colorOfParent": "Color de {parentSku}",
+        "expandColors": "Expandir {count} variantes de color",
+        "collapseColors": "Contraer {count} variantes de color",
+        "colorsCollapsed": "{count} colores ocultos",
+        "colorsExpanded": "{count} colores"
       }
     },
     "taxonomy": {
@@ -2439,7 +2445,7 @@
         "shortName": "Nombre corto",
         "websiteUrl": "URL del sitio",
         "linkedin": "LinkedIn",
-        "facebook": "Facebook",
+        "instagram": "Instagram",
         "gaId": "ID de Google Analytics",
         "gtmId": "ID de Google Tag Manager",
         "save": "Guardar ajustes",

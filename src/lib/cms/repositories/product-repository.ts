@@ -38,8 +38,11 @@ function normalizeLocalizedById(id: string): LocalizedString {
 
 function withDefaults(p: ShopProduct): CmsProduct {
   const existing = p as Partial<CmsProduct>;
+  const moqRaw = Number(p.moq);
+  const moq = Number.isFinite(moqRaw) && moqRaw >= 1 ? Math.floor(moqRaw) : 1;
   return {
     ...p,
+    moq,
     enabledCountries: p.enabledCountries ?? { ...p.availability },
     stockQuantity: p.stockQuantity ?? null,
     unlimitedStock: p.unlimitedStock ?? true,

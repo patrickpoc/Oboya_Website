@@ -632,10 +632,10 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const addItem = useCallback(
     (productId: string, quantity = 1, variantId: string | null = null) => {
       const product = getProductByIdFromState(productId);
-      const moq = getProductMoq(product);
-      const maxQty = getProductMaxQuantity(product);
-      const normalizedQuantity = clampQuantity(quantity, moq, maxQty);
       const normalizedVariantId = variantId || null;
+      const moq = getProductMoq(product, normalizedVariantId);
+      const maxQty = getProductMaxQuantity(product, normalizedVariantId);
+      const normalizedQuantity = clampQuantity(quantity, moq, maxQty);
 
       setState((prev) => {
         const existing = prev.items.find((item) =>
@@ -667,9 +667,9 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const updateQuantity = useCallback(
     (productId: string, quantity: number, variantId: string | null = null) => {
       const product = getProductByIdFromState(productId);
-      const moq = getProductMoq(product);
-      const maxQty = getProductMaxQuantity(product);
       const normalizedVariantId = variantId || null;
+      const moq = getProductMoq(product, normalizedVariantId);
+      const maxQty = getProductMaxQuantity(product, normalizedVariantId);
 
       setState((prev) => ({
         ...prev,

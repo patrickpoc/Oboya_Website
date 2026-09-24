@@ -22,7 +22,7 @@ export default function GeneralSettingsPage() {
     phone: siteConfig.company.phone,
     address: siteConfig.company.address,
     linkedin: siteConfig.social.linkedin as string,
-    facebook: siteConfig.social.facebook as string,
+    instagram: siteConfig.social.instagram as string,
     gaId: "",
     gtmId: "",
   });
@@ -76,10 +76,10 @@ export default function GeneralSettingsPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>{t("facebook")}</Label>
+              <Label>{t("instagram")}</Label>
               <Input
-                value={settings.facebook}
-                onChange={(e) => setSettings({ ...settings, facebook: e.target.value })}
+                value={settings.instagram}
+                onChange={(e) => setSettings({ ...settings, instagram: e.target.value })}
               />
             </div>
             <div className="space-y-1.5">

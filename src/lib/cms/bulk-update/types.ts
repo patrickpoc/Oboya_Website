@@ -36,14 +36,10 @@ export const BULK_PARENT_COLOR_FIELDS = [
 ] as const;
 
 export const BULK_VARIANT_FIELDS = [
-  "variantSku",
-  "variantColor",
-  "variantColorNameEn",
-  "variantColorNamePt",
+  "variantMoq",
   "variantPriceUsd",
   "variantPriceBrl",
   "variantPriceEur",
-  "variantImage",
 ] as const;
 
 export const BULK_EDITABLE_FIELDS = [
@@ -88,14 +84,10 @@ export type BulkProductPatch = Partial<{
   defaultColor: string;
   defaultColorNameEn: string;
   defaultColorNamePt: string;
-  variantSku: string;
-  variantColor: string;
-  variantColorNameEn: string;
-  variantColorNamePt: string;
+  variantMoq: number;
   variantPriceUsd: number | null;
   variantPriceBrl: number | null;
   variantPriceEur: number | null;
-  variantImage: string;
 }>;
 
 export type BulkWorkspaceRow = {

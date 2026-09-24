@@ -1,9 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
-import { X } from "lucide-react";
+import { ChevronDown, ChevronRight, X } from "lucide-react";
 import { PRODUCT_EDITOR_SELECT_CLASS } from "@/components/admin/marketplace/product-editor.constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -86,8 +86,20 @@ function CellShell({
   const fieldIssues = issuesForProduct(issues, row.productId, field);
   const blocked = fieldIssues.some((issue) => issue.status === "blocked");
   const warning = fieldIssues.some((issue) => issue.status === "warning");
-  const original = formatFieldDisplayValue(field, row.original, catalog, locale);
-  const pending = formatFieldDisplayValue(field, row.pending, catalog, locale);
+  const original = formatFieldDisplayValue(
+    field,
+    row.original,
+    catalog,
+    locale,
+    row.variantId
+  );
+  const pending = formatFieldDisplayValue(
+    field,
+    row.pending,
+    catalog,
+    locale,
+    row.variantId
+  );
 
   return (
     <div
@@ -194,11 +206,41 @@ export function BulkProductTable({
   const allSelected =
     productIds.length > 0 && productIds.every((id) => selectedIds.has(id));
   const focusRef = useRef<HTMLTableRowElement | null>(null);
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(() => new Set());
+
+  const childCountByProduct = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const row of rows) {
+      if (row.kind !== "variant") continue;
+      counts.set(row.productId, (counts.get(row.productId) ?? 0) + 1);
+    }
+    return counts;
+  }, [rows]);
+
+  const visibleRows = useMemo(
+    () =>
+      rows.filter(
+        (row) => row.kind === "parent" || !collapsedIds.has(row.productId)
+      ),
+    [rows, collapsedIds]
+  );
 
   useEffect(() => {
     if (!focusRowId || !focusRef.current) return;
     focusRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [focusRowId]);
+
+  useEffect(() => {
+    if (!focusRowId) return;
+    const focused = rows.find((row) => row.rowId === focusRowId);
+    if (!focused || focused.kind !== "variant") return;
+    setCollapsedIds((prev) => {
+      if (!prev.has(focused.productId)) return prev;
+      const next = new Set(prev);
+      next.delete(focused.productId);
+      return next;
+    });
+  }, [focusRowId, rows]);
 
   if (rows.length === 0) {
     return (
@@ -214,10 +256,19 @@ export function BulkProductTable({
       .map((row) => [row.productId, row.pending.sku] as const)
   );
 
+  function toggleCollapsed(productId: string) {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(productId)) next.delete(productId);
+      else next.add(productId);
+      return next;
+    });
+  }
+
   return (
     <div className="rounded-xl border border-border/60 bg-white">
       <div className="overflow-x-auto">
-        <table className="min-w-[2200px] w-full border-separate border-spacing-0 text-left text-sm">
+        <table className="min-w-[1900px] w-full border-separate border-spacing-0 text-left text-sm">
           <thead className="bg-oboya-soft-white">
             <tr>
               <th className={cn(TH, STICKY_LEFT_CHECK, "border-b border-border/60")}>
@@ -264,9 +315,6 @@ export function BulkProductTable({
               <th className={cn(TH, "border-b border-border/60")}>USD</th>
               <th className={cn(TH, "border-b border-border/60")}>BRL</th>
               <th className={cn(TH, "border-b border-border/60")}>EUR</th>
-              <th className={cn(TH, "border-b border-border/60")}>Color</th>
-              <th className={cn(TH, "border-b border-border/60")}>Color name</th>
-              <th className={cn(TH, "border-b border-border/60")}>Variant image</th>
               <th
                 className={cn(TH, STICKY_RIGHT_HEAD, "border-b border-border/60")}
                 aria-label={tCommon("remove")}
@@ -274,7 +322,7 @@ export function BulkProductTable({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => {
+            {visibleRows.map((row) => {
               const product = row.pending;
               const isParent = row.kind === "parent";
               const variant = !isParent
@@ -289,6 +337,9 @@ export function BulkProductTable({
                 .map(([code]) => code);
               const parentSku = parentSkuByProduct.get(row.productId) || product.sku;
               const isFocused = focusRowId === row.rowId;
+              const childCount = childCountByProduct.get(row.productId) ?? 0;
+              const hasChildren = isParent && childCount > 0;
+              const isCollapsed = collapsedIds.has(row.productId);
 
               return (
                 <tr
@@ -321,10 +372,33 @@ export function BulkProductTable({
                   >
                     <div
                       className={cn(
-                        "flex min-w-[15rem] items-center gap-3 pr-1",
+                        "flex min-w-[15rem] items-center gap-2 pr-1",
                         !isParent && "pl-4"
                       )}
                     >
+                      {hasChildren ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-7 shrink-0 text-oboya-blue-dark/70 hover:bg-oboya-blue/10 hover:text-oboya-blue"
+                          onClick={() => toggleCollapsed(row.productId)}
+                          aria-expanded={!isCollapsed}
+                          aria-label={
+                            isCollapsed
+                              ? t("expandColors", { count: childCount })
+                              : t("collapseColors", { count: childCount })
+                          }
+                        >
+                          {isCollapsed ? (
+                            <ChevronRight className="size-4" />
+                          ) : (
+                            <ChevronDown className="size-4" />
+                          )}
+                        </Button>
+                      ) : (
+                        <span className="size-7 shrink-0" aria-hidden />
+                      )}
                       <div className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-muted ring-1 ring-border/50">
                         {image ? (
                           <Image
@@ -345,6 +419,13 @@ export function BulkProductTable({
                               variant?.name ||
                               row.matchedSku}
                         </span>
+                        {isParent && hasChildren ? (
+                          <span className="mt-0.5 block text-[10px] font-normal text-muted-foreground">
+                            {isCollapsed
+                              ? t("colorsCollapsed", { count: childCount })
+                              : t("colorsExpanded", { count: childCount })}
+                          </span>
+                        ) : null}
                         {!isParent && (
                           <span className="mt-0.5 inline-flex rounded bg-oboya-blue/10 px-1.5 py-0.5 text-[10px] font-medium text-oboya-blue">
                             {t("colorOfParent", { parentSku })}
@@ -354,21 +435,7 @@ export function BulkProductTable({
                     </div>
                   </td>
                   <td className={cn(TD, "font-mono text-xs font-normal text-oboya-blue-dark/80")}>
-                    {isParent ? (
-                      product.sku
-                    ) : (
-                      <Input
-                        className={cn(CONTROL, "font-mono text-xs")}
-                        value={variant?.sku ?? ""}
-                        onChange={(event) =>
-                          onPatch(
-                            row.productId,
-                            { variantSku: event.target.value },
-                            row.variantId
-                          )
-                        }
-                      />
-                    )}
+                    {isParent ? product.sku : variant?.sku || row.matchedSku}
                   </td>
                   <td className={TD}>
                     {isParent ? (
@@ -392,7 +459,29 @@ export function BulkProductTable({
                         />
                       </CellShell>
                     ) : (
-                      <DimmedDash />
+                      <CellShell
+                        field="variantMoq"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                      >
+                        <Input
+                          type="number"
+                          min={1}
+                          className={CONTROL}
+                          value={variant?.moq ?? 1}
+                          onChange={(event) =>
+                            onPatch(
+                              row.productId,
+                              {
+                                variantMoq: Number(event.target.value) || 0,
+                              },
+                              row.variantId
+                            )
+                          }
+                        />
+                      </CellShell>
                     )}
                   </td>
                   <td className={TD}>
@@ -793,72 +882,6 @@ export function BulkProductTable({
                                   ? null
                                   : Number(event.target.value),
                             },
-                            row.variantId
-                          )
-                        }
-                      />
-                    )}
-                  </td>
-                  <td className={TD}>
-                    {isParent ? (
-                      <DimmedDash />
-                    ) : (
-                      <Input
-                        className={CONTROL}
-                        value={variant?.color ?? ""}
-                        onChange={(event) =>
-                          onPatch(
-                            row.productId,
-                            { variantColor: event.target.value },
-                            row.variantId
-                          )
-                        }
-                      />
-                    )}
-                  </td>
-                  <td className={TD}>
-                    {isParent ? (
-                      <DimmedDash />
-                    ) : (
-                      <div className="space-y-1">
-                        <Input
-                          className={CONTROL}
-                          placeholder="EN"
-                          value={variant?.nameI18n?.en || variant?.name || ""}
-                          onChange={(event) =>
-                            onPatch(
-                              row.productId,
-                              { variantColorNameEn: event.target.value },
-                              row.variantId
-                            )
-                          }
-                        />
-                        <Input
-                          className={CONTROL}
-                          placeholder="PT"
-                          value={variant?.nameI18n?.["pt-BR"] || ""}
-                          onChange={(event) =>
-                            onPatch(
-                              row.productId,
-                              { variantColorNamePt: event.target.value },
-                              row.variantId
-                            )
-                          }
-                        />
-                      </div>
-                    )}
-                  </td>
-                  <td className={TD}>
-                    {isParent ? (
-                      <DimmedDash />
-                    ) : (
-                      <Input
-                        className={CONTROL}
-                        value={variant?.image ?? ""}
-                        onChange={(event) =>
-                          onPatch(
-                            row.productId,
-                            { variantImage: event.target.value },
                             row.variantId
                           )
                         }

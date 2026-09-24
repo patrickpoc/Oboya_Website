@@ -6,13 +6,12 @@ export const siteConfig = {
   url: "https://www.oboya-horticulture.com",
   locale: "en",
   company: {
-    address: "Global Headquarters",
-    email: "info@oboya.cc",
+    address: "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis",
+    email: "Robert@shopquip.se",
     phone: "+86 18669728621",
   },
   social: {
-    linkedin: "https://linkedin.com/company/oboya",
-    facebook: "https://facebook.com/oboya",
-    instagram: "https://instagram.com/oboya",
+    linkedin: "https://www.linkedin.com/company/oboya_horticulture/",
+    instagram: "https://www.instagram.com/oboya_horticulture/",
   },
 } as const;

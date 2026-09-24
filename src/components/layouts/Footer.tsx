@@ -18,11 +18,25 @@ export async function Footer() {
         <div className="grid gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-6 lg:gap-10">
           <div className="lg:col-span-2">
             <Logo className="mb-6" />
-            <p className="max-w-xs text-sm leading-relaxed text-oboya-blue-dark/60">
-              {siteConfig.company.address}
-              <br />
-              {siteConfig.company.email}
-            </p>
+            <div className="max-w-xs space-y-3 text-sm leading-relaxed text-oboya-blue-dark/60">
+              <p>
+                <span className="block text-xs font-semibold tracking-wider text-oboya-blue-dark/80 uppercase">
+                  {t("footer.headquarters")}
+                </span>
+                {siteConfig.company.address}
+              </p>
+              <p>
+                <span className="block text-xs font-semibold tracking-wider text-oboya-blue-dark/80 uppercase">
+                  {t("footer.legalContact")}
+                </span>
+                <a
+                  href={`mailto:${siteConfig.company.email}`}
+                  className="transition-colors hover:text-oboya-green"
+                >
+                  {siteConfig.company.email}
+                </a>
+              </p>
+            </div>
             <div className="mt-6 flex gap-4">
               <Link
                 href={siteConfig.social.linkedin}
@@ -33,12 +47,12 @@ export async function Footer() {
                 {t("footer.linkedin")}
               </Link>
               <Link
-                href={siteConfig.social.facebook}
+                href={siteConfig.social.instagram}
                 className="inline-flex min-h-11 items-center text-sm font-medium text-oboya-blue-dark/70 transition-colors hover:text-oboya-green"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {t("footer.facebook")}
+                {t("footer.instagram")}
               </Link>
             </div>
           </div>

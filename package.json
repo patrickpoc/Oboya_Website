@@ -11,6 +11,7 @@
     "seed:map": "node scripts/seed-map-locations.mjs",
     "seed:products": "node scripts/seed-products.mjs",
     "migrate:product-ids": "node scripts/migrate-product-ids-to-sku.mjs",
+    "migrate:moq-to-one": "node scripts/migrate-moq-to-one.mjs",
     "verify:product-tags": "node scripts/verify-product-tags.mjs"
   },
   "dependencies": {

@@ -128,6 +128,7 @@ export function QuoteCartSheet() {
                   <CartItemRow
                     key={`${item.productId}-${item.variantId ?? "base"}`}
                     productId={item.productId}
+                    variantId={item.variantId}
                     variantName={item.variantName}
                     quantity={item.quantity}
                     unitPrice={item.unitPrice}
