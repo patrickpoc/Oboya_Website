@@ -29,6 +29,7 @@ export function ProductDrawer() {
     currency,
     openAddToQuoteDialog,
     addToQuoteProductId,
+    isCartOpen,
     getProductById,
     ensureProductDetail,
     brands,
@@ -48,6 +49,7 @@ export function ProductDrawer() {
     : null;
   const isOpen = Boolean(product && currency);
   const addDialogOpen = Boolean(addToQuoteProductId);
+  const overlayBlocksDrawer = addDialogOpen || isCartOpen;
 
   const name = product ? getProductName(product as Parameters<typeof getProductName>[0]) : "";
   const brand = product ? brands.find((item) => item.id === product.brandId) : null;
@@ -66,7 +68,8 @@ export function ProductDrawer() {
     open: isOpen,
     onClose: handleClose,
     containerRef: panelRef,
-    trapFocus: !addDialogOpen,
+    lockScroll: !overlayBlocksDrawer,
+    trapFocus: !overlayBlocksDrawer,
     closeOnEscape: !addDialogOpen,
   });
 

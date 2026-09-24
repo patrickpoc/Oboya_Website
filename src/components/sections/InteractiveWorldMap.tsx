@@ -525,12 +525,12 @@ export function InteractiveWorldMap({
       </div>
 
       {!editable && (
-        <div className="relative mx-auto h-[9.75rem] w-full max-w-3xl md:h-[10.25rem] md:max-w-4xl">
+        <div className="relative mx-auto w-full max-w-3xl md:min-h-[10.25rem] md:max-w-4xl">
           {activeLocation ? (
             <MapLocationInfoPanel
               location={activeLocation}
               fadeDuration={prefersReducedMotion ? 0 : SELECTION_FADE_MS}
-              className="absolute inset-x-0 top-0 max-h-full w-full overflow-x-auto overflow-y-hidden"
+              className="w-full md:absolute md:inset-x-0 md:top-0"
             />
           ) : null}
         </div>

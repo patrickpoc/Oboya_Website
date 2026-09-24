@@ -20,8 +20,12 @@ function isPosts(value: unknown): value is CmsBlogPost[] {
   return Array.isArray(value);
 }
 
-export async function readBlogPostsDurable(): Promise<CmsBlogPost[]> {
-  const remote = await readCmsDocumentData(BLOG_POSTS_DOC_ID);
+export async function readBlogPostsDurable(options?: {
+  fresh?: boolean;
+}): Promise<CmsBlogPost[]> {
+  const remote = await readCmsDocumentData(BLOG_POSTS_DOC_ID, {
+    fresh: options?.fresh,
+  });
   if (isPosts(remote) && remote.length >= 0) {
     replaceBlogPostsCache(remote);
   }
@@ -31,7 +35,7 @@ export async function readBlogPostsDurable(): Promise<CmsBlogPost[]> {
 export async function saveBlogPostDurable(
   post: CmsBlogPost
 ): Promise<CmsBlogPost> {
-  await readBlogPostsDurable();
+  await readBlogPostsDurable({ fresh: true });
   const saved = savePostMemory({
     ...post,
     body: sanitizeLocalizedRichHtml(post.body),
@@ -43,14 +47,14 @@ export async function saveBlogPostDurable(
 export async function reorderBlogPostsDurable(
   orderedIds: string[]
 ): Promise<CmsBlogPost[]> {
-  await readBlogPostsDurable();
+  await readBlogPostsDurable({ fresh: true });
   const next = reorderBlogPosts(orderedIds);
   await writeCmsDocumentData(BLOG_POSTS_DOC_ID, "blog", next);
   return next;
 }
 
 export async function deleteBlogPostDurable(id: string): Promise<boolean> {
-  await readBlogPostsDurable();
+  await readBlogPostsDurable({ fresh: true });
   const ok = deletePostMemory(id);
   if (ok) {
     await writeCmsDocumentData(BLOG_POSTS_DOC_ID, "blog", getBlogPosts());

@@ -48,7 +48,10 @@ export function createPublicClient() {
         void _next;
         return fetch(input, {
           ...rest,
-          next: { revalidate: 3600 },
+          next: {
+            revalidate: 3600,
+            tags: ["cms-documents"],
+          },
         });
       },
     },

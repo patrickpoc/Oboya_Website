@@ -37,7 +37,7 @@ export function HomeLatestNews({
   locale,
   animationsEnabled = true,
 }: HomeLatestNewsProps) {
-  const t = useTranslations("home.latestNews");
+  const t = useTranslations("latestNews");
   const items = posts.slice(0, data.postCount);
   const motionInitial = animationsEnabled ? "hidden" : false;
   const motionWhileInView = animationsEnabled ? "visible" : undefined;

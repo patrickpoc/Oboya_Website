@@ -716,8 +716,14 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
                 quantity: nextQuantity,
               },
             ];
-        return { ...prev, items, isCartOpen: true };
+        // Close quick-view immediately; defer cart open so Base UI dialog
+        // can release scroll lock before the mobile sheet locks again.
+        return { ...prev, items, quickViewProductId: null };
       });
+
+      window.setTimeout(() => {
+        setState((prev) => ({ ...prev, isCartOpen: true }));
+      }, 80);
     },
     [getProductByIdFromState]
   );

@@ -73,7 +73,7 @@ export function BusinessSolutions({
     step,
     maxIndex,
     animationsEnabled,
-    snapOnDragEnd: true,
+    snapOnDragEnd: false,
   });
 
   if (count === 0) return null;

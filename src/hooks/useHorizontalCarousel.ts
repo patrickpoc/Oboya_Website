@@ -27,7 +27,7 @@ export interface UseHorizontalCarouselOptions {
   /** Max index for index-based snapping (BusinessSolutions style) */
   maxIndex?: number;
   animationsEnabled?: boolean;
-  /** Snap to nearest position when drag ends (default true) */
+  /** Snap to nearest position when drag ends (default false — free scroll on touch) */
   snapOnDragEnd?: boolean;
 }
 
@@ -38,7 +38,7 @@ export function useHorizontalCarousel({
   snapOffsets,
   maxIndex = 0,
   animationsEnabled = true,
-  snapOnDragEnd = true,
+  snapOnDragEnd = false,
 }: UseHorizontalCarouselOptions) {
   const [scrollOffset, setScrollOffset] = useState(0);
   const [dragDelta, setDragDelta] = useState(0);

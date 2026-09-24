@@ -1,7 +1,6 @@
 import type { CmsStatus, LocalizedString, SeoFields } from "@/lib/cms/types";
 import { blogPosts } from "@/constants/content-data";
-import { BLOG_SEED_I18N, type BlogSeedCopy } from "@/lib/cms/blog-i18n";
-import { mergeLocalized } from "@/lib/cms/utils";
+import { BLOG_SEED_I18N } from "@/lib/cms/blog-i18n";
 
 export interface CmsBlogPost {
   id: string;
@@ -24,15 +23,6 @@ export interface CmsBlogPost {
 }
 
 const emptyLoc = (): LocalizedString => ({ en: "", "pt-BR": "", es: "", "zh-CN": "" });
-
-function migrateBlogPost(post: CmsBlogPost, seedCopy?: BlogSeedCopy): CmsBlogPost {
-  if (!seedCopy) return post;
-  return {
-    ...post,
-    title: mergeLocalized(post.title, seedCopy.title),
-    excerpt: mergeLocalized(post.excerpt, seedCopy.excerpt),
-  };
-}
 
 function seed(): CmsBlogPost[] {
   return blogPosts.map((p) => {
@@ -72,16 +62,9 @@ function seed(): CmsBlogPost[] {
 
 let cache: CmsBlogPost[] | null = null;
 
-const seedKeyBySlug = Object.fromEntries(
-  blogPosts.map((p) => [p.slug, p.messageKey])
-);
-
 export function getBlogPosts(): CmsBlogPost[] {
   if (!cache) cache = seed();
-  return cache.map((post) => {
-    const seedCopy = BLOG_SEED_I18N[seedKeyBySlug[post.slug] ?? ""];
-    return migrateBlogPost(post, seedCopy);
-  });
+  return cache;
 }
 
 export function replaceBlogPostsCache(posts: CmsBlogPost[]) {
@@ -97,21 +80,19 @@ export function getBlogPostBySlug(slug: string): CmsBlogPost | undefined {
 }
 
 export function saveBlogPost(post: CmsBlogPost): CmsBlogPost {
-  const posts = getBlogPosts();
-  const idx = posts.findIndex((p) => p.id === post.id);
+  if (!cache) cache = seed();
   const updated = { ...post, updatedAt: new Date().toISOString() };
-  if (idx >= 0) posts[idx] = updated;
-  else posts.push(updated);
-  cache = posts;
+  const idx = cache.findIndex((p) => p.id === post.id);
+  if (idx >= 0) cache[idx] = updated;
+  else cache.push(updated);
   return updated;
 }
 
 export function deleteBlogPost(id: string): boolean {
-  const posts = getBlogPosts();
-  const idx = posts.findIndex((p) => p.id === id);
+  if (!cache) cache = seed();
+  const idx = cache.findIndex((p) => p.id === id);
   if (idx < 0) return false;
-  posts.splice(idx, 1);
-  cache = posts;
+  cache.splice(idx, 1);
   return true;
 }
 

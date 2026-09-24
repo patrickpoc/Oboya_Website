@@ -2,6 +2,7 @@ import "server-only";
 
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { revalidateTag } from "next/cache";
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { rethrowNextSignals } from "@/lib/cms/server/rethrow-next-signals";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -9,12 +10,20 @@ import { createClient, createPublicClient } from "@/lib/supabase/server";
 
 const DATA_DIR = path.join(process.cwd(), "data", "cms");
 
+/** Bust public Supabase Data Cache after CMS document writes. */
+export const CMS_DOCUMENTS_CACHE_TAG = "cms-documents";
+
 export async function readCmsDocumentData(
-  docId: string
+  docId: string,
+  options?: { fresh?: boolean }
 ): Promise<unknown | null> {
   if (isSupabaseConfigured()) {
     try {
-      const supabase = createPublicClient();
+      // Admin/save paths must not hit the 1h public fetch cache or they
+      // read-modify-write stale translations back to Supabase.
+      const supabase = options?.fresh
+        ? await createClient()
+        : createPublicClient();
       const { data, error } = await supabase
         .from("cms_documents")
         .select("data")
@@ -57,6 +66,8 @@ export async function writeCmsDocumentData(
     if (error) {
       throw new Error(error.message || `Failed to save ${docId}`);
     }
+    revalidateTag(CMS_DOCUMENTS_CACHE_TAG, "max");
+    revalidateTag(`cms-doc-${docId}`, "max");
     return;
   }
 

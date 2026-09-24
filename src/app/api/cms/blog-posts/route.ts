@@ -32,7 +32,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const id = url.searchParams.get("id");
   const fields = url.searchParams.get("fields");
-  const posts = await readBlogPostsDurable();
+  const posts = await readBlogPostsDurable({ fresh: true });
 
   if (id) {
     const post = posts.find((item) => item.id === id);
@@ -80,7 +80,7 @@ export async function DELETE(request: Request) {
   if (!id) {
     return NextResponse.json({ error: "Missing id" }, { status: 400 });
   }
-  const existing = (await readBlogPostsDurable()).find((post) => post.id === id);
+  const existing = (await readBlogPostsDurable({ fresh: true })).find((post) => post.id === id);
   await deleteBlogPostDurable(id);
   revalidateBlogPages(existing?.slug);
   return NextResponse.json({ ok: true });

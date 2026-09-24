@@ -135,14 +135,14 @@ function OfficeColumn({ office }: { office: ResolvedMapOffice }) {
     locationLines[0];
 
   return (
-    <div className="flex h-full min-w-0 flex-1 flex-col gap-1.5 self-stretch px-3 first:pl-0 last:pr-0 sm:px-4">
+    <div className="flex h-full w-[min(75vw,14rem)] shrink-0 flex-col gap-1.5 self-stretch border-r border-border/50 px-3 last:border-r-0 first:pl-0 last:pr-0 sm:w-auto sm:min-w-[11rem] sm:flex-1 sm:px-4">
       {company && (
-        <p className="truncate text-sm font-semibold text-oboya-blue-dark">
+        <p className="text-sm font-semibold text-oboya-blue-dark sm:truncate">
           {company}
         </p>
       )}
       {partner && partner !== company && (
-        <p className="truncate text-[11px] text-oboya-blue-dark/70">{partner}</p>
+        <p className="text-[11px] text-oboya-blue-dark/70 sm:truncate">{partner}</p>
       )}
       {primaryLocation && (
         <div className="flex min-w-0 items-center gap-1.5">
@@ -150,13 +150,13 @@ function OfficeColumn({ office }: { office: ResolvedMapOffice }) {
             className="size-3 shrink-0 text-muted-foreground"
             aria-hidden
           />
-          <p className="truncate text-[11px] text-oboya-blue-dark/80">
+          <p className="text-[11px] text-oboya-blue-dark/80 sm:truncate">
             {primaryLocation}
           </p>
         </div>
       )}
       {segments && (
-        <p className="line-clamp-1 text-[11px] leading-snug text-oboya-blue-dark/70">
+        <p className="line-clamp-2 text-[11px] leading-snug text-oboya-blue-dark/70 sm:line-clamp-1">
           {segments}
         </p>
       )}
@@ -208,7 +208,7 @@ export function MapLocationInfoPanel({
           </div>
 
           {multiOffice ? (
-            <div className="flex min-w-0 flex-1 items-stretch divide-x divide-border/50 overflow-x-auto">
+            <div className="-mx-1 flex min-w-0 flex-1 items-stretch gap-0 overflow-x-auto px-1 pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {location.offices.map((office) => (
                 <OfficeColumn key={office.id} office={office} />
               ))}

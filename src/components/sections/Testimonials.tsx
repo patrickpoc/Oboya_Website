@@ -81,7 +81,7 @@ export function Testimonials({
     step,
     snapOffsets: pageOffsets,
     animationsEnabled,
-    snapOnDragEnd: true,
+    snapOnDragEnd: false,
   });
 
   const activePage = useMemo(() => {

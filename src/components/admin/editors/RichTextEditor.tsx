@@ -148,6 +148,7 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
   const colorPickerRef = useRef<HTMLDivElement>(null);
   const imageMenuRef = useRef<HTMLDivElement>(null);
   const handleUploadRef = useRef<(file: File) => Promise<void>>(async () => {});
+  const lastHtmlRef = useRef(value);
   const dragDepthRef = useRef(0);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [libraryTick, setLibraryTick] = useState(0);
@@ -204,7 +205,11 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
     ],
     content: value,
     immediatelyRender: false,
-    onUpdate: ({ editor: ed }) => onChange(ed.getHTML()),
+    onUpdate: ({ editor: ed }) => {
+      const html = ed.getHTML();
+      lastHtmlRef.current = html;
+      onChange(html);
+    },
     editorProps: {
       attributes: {
         class:
@@ -218,22 +223,45 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
         void handleUploadRef.current(file);
         return true;
       },
-      handlePaste: (_view, event) => {
+      handlePaste: (view, event) => {
         const file = firstImageFile(event.clipboardData?.files);
-        if (!file) return false;
-        event.preventDefault();
-        void handleUploadRef.current(file);
-        return true;
+        if (file) {
+          event.preventDefault();
+          void handleUploadRef.current(file);
+          return true;
+        }
+
+        // Windows/Office HTML paste often includes huge base64 images and freezes
+        // the editor + React state loop. Prefer plain text in that case.
+        const html = event.clipboardData?.getData("text/html") ?? "";
+        const plain = event.clipboardData?.getData("text/plain") ?? "";
+        const tooHeavy =
+          html.length > 200_000 || /src\s*=\s*["']data:image\//i.test(html);
+        if (tooHeavy) {
+          event.preventDefault();
+          if (plain) {
+            const { state, dispatch } = view;
+            const { from, to } = state.selection;
+            dispatch(state.tr.insertText(plain, from, to));
+          }
+          return true;
+        }
+
+        return false;
       },
     },
   });
 
   useEffect(() => {
     if (!editor) return;
+    if (value === lastHtmlRef.current) return;
     const current = editor.getHTML();
-    if (value !== current) {
-      editor.commands.setContent(value || "", { emitUpdate: false });
+    if (value === current) {
+      lastHtmlRef.current = value;
+      return;
     }
+    editor.commands.setContent(value || "", { emitUpdate: false });
+    lastHtmlRef.current = value || "";
   }, [editor, value]);
 
   useEffect(() => {

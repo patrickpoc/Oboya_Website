@@ -59,13 +59,8 @@ export function AddToQuoteDialog() {
     });
   }, [addToQuoteProductId, addToQuoteVariantId, getProductById]);
 
-  if (!product) {
-    return (
-      <Dialog
-        open={Boolean(addToQuoteProductId)}
-        onOpenChange={(open) => !open && closeAddToQuoteDialog()}
-      />
-    );
+  if (!addToQuoteProductId || !product) {
+    return null;
   }
 
   const name = getProductName(product as Parameters<typeof getProductName>[0]);
@@ -76,8 +71,14 @@ export function AddToQuoteDialog() {
   const displaySku = resolveVariantSku(product, activeVariant);
 
   const handleConfirm = () => {
-    addItem(product.id, quantity, toCartVariantId(addToQuoteVariantId));
+    const productId = product.id;
+    const variantId = toCartVariantId(addToQuoteVariantId);
+    const qty = quantity;
     closeAddToQuoteDialog();
+    // Let Base UI release scroll lock before cart sheet acquires it.
+    window.setTimeout(() => {
+      addItem(productId, qty, variantId);
+    }, 0);
   };
 
   return (
