@@ -83,7 +83,7 @@ export function MediaField({
 
   const refreshLibrary = useCallback(async () => {
     try {
-      const res = await fetch("/api/cms/media");
+      const res = await fetch("/api/cms/media?limit=80&offset=0");
       if (!res.ok) return;
       const data = (await res.json()) as { assets?: MediaAsset[] };
       if (data.assets) {

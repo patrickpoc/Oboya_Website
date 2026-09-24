@@ -3,6 +3,8 @@ import type {
   ImportApplyResult,
   ImportWorkspaceRow,
 } from "@/lib/cms/bulk-import/types";
+import { DEFER_REVALIDATE_HEADER } from "@/lib/cms/revalidate-headers";
+import { BULK_APPLY_GAP_MS, sleep } from "@/lib/cms/bulk-apply-pace";
 
 export type ImportApplyProgress = {
   index: number;
@@ -11,13 +13,24 @@ export type ImportApplyProgress = {
   lastResult?: ImportApplyResult;
 };
 
-/** Sequentially POST each product in the import workspace. */
+async function revalidateShopOnce() {
+  try {
+    await fetch("/api/cms/products/revalidate", { method: "POST" });
+  } catch {
+    // Best-effort; saves already persisted.
+  }
+}
+
+/** Sequentially POST each product with a paced gap; one shop revalidate after the batch. */
 export async function applyBulkImportsSequentially(params: {
   rows: ImportWorkspaceRow[];
   onProgress?: (progress: ImportApplyProgress) => void;
+  gapMs?: number;
 }): Promise<ImportApplyResult[]> {
   const { rows, onProgress } = params;
+  const gapMs = params.gapMs ?? BULK_APPLY_GAP_MS;
   const results: ImportApplyResult[] = [];
+  let wroteAny = false;
 
   for (let index = 0; index < rows.length; index += 1) {
     const row = rows[index];
@@ -30,7 +43,10 @@ export async function applyBulkImportsSequentially(params: {
     try {
       const response = await fetch("/api/cms/products", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          [DEFER_REVALIDATE_HEADER]: "1",
+        },
         body: JSON.stringify(row.pending),
       });
 
@@ -53,9 +69,11 @@ export async function applyBulkImportsSequentially(params: {
           current: row,
           lastResult: result,
         });
+        if (index < rows.length - 1) await sleep(gapMs);
         continue;
       }
 
+      wroteAny = true;
       const result: ImportApplyResult = {
         productId: row.productId,
         sku: row.pending.sku,
@@ -86,6 +104,12 @@ export async function applyBulkImportsSequentially(params: {
         lastResult: result,
       });
     }
+
+    if (index < rows.length - 1) await sleep(gapMs);
+  }
+
+  if (wroteAny) {
+    await revalidateShopOnce();
   }
 
   return results;

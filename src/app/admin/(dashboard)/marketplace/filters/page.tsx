@@ -16,15 +16,12 @@ import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { CmsLocale } from "@/lib/cms/types";
-import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import { BrandLabel } from "@/components/shop/BrandLabel";
 import { CountryFlag } from "@/components/ui/country-flag";
 import { useAdminLocale } from "@/contexts/AdminLocaleContext";
 import { useMapLocations } from "@/lib/shop/use-map-locations";
 import { getMapFlagOptions } from "@/lib/shop/map-flag-options";
 import {
-  countGroupUsage,
-  countOptionUsage,
   emptyShopFilterOptions,
   initFilterGroupI18n,
   normalizeFilterGroups,
@@ -87,7 +84,10 @@ export default function MarketplaceFiltersPage() {
   const [brands, setBrands] = useState<ShopBrand[]>([]);
   const [filterGroups, setFilterGroups] = useState<ShopFilterGroup[]>([]);
   const [filterOptions, setFilterOptions] = useState<ShopFilterOptions>(emptyShopFilterOptions());
-  const [products, setProducts] = useState<CmsProduct[]>([]);
+  const [categoryUsage, setCategoryUsage] = useState<Record<string, number>>({});
+  const [brandUsage, setBrandUsage] = useState<Record<string, number>>({});
+  const [optionUsage, setOptionUsage] = useState<Record<string, Record<string, number>>>({});
+  const [groupUsage, setGroupUsage] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [initialSnapshot, setInitialSnapshot] = useState("");
@@ -132,9 +132,9 @@ export default function MarketplaceFiltersPage() {
   useEffect(() => {
     void (async () => {
       try {
-        const [filtersResponse, productsResponse] = await Promise.all([
+        const [filtersResponse, usageResponse] = await Promise.all([
           fetch("/api/cms/marketplace/filters", { cache: "no-store" }),
-          fetch("/api/cms/products?includeDeleted=1", { cache: "no-store" }),
+          fetch("/api/cms/marketplace/filters/usage", { cache: "no-store" }),
         ]);
         if (!filtersResponse.ok) throw new Error("Could not load filters");
         const payload = (await filtersResponse.json()) as {
@@ -161,9 +161,17 @@ export default function MarketplaceFiltersPage() {
         const firstGroupId = normalizedGroups[0]?.id ?? "";
         setSelectedGroup(firstGroupId);
         setSelectedOptionId(normalizedOptions[firstGroupId]?.[0]?.id ?? null);
-        if (productsResponse.ok) {
-          const allProducts = (await productsResponse.json()) as CmsProduct[];
-          setProducts(allProducts.filter((product) => !product.deletedAt));
+        if (usageResponse.ok) {
+          const usage = (await usageResponse.json()) as {
+            categoryUsage?: Record<string, number>;
+            brandUsage?: Record<string, number>;
+            optionUsage?: Record<string, Record<string, number>>;
+            groupUsage?: Record<string, number>;
+          };
+          setCategoryUsage(usage.categoryUsage ?? {});
+          setBrandUsage(usage.brandUsage ?? {});
+          setOptionUsage(usage.optionUsage ?? {});
+          setGroupUsage(usage.groupUsage ?? {});
         }
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Could not load data.");
@@ -172,41 +180,6 @@ export default function MarketplaceFiltersPage() {
       }
     })();
   }, []);
-
-  const categoryUsage = useMemo(
-    () =>
-      Object.fromEntries(
-        categories.map((category) => [
-          category.id,
-          products.filter((product) => product.categoryId === category.id).length,
-        ])
-      ),
-    [categories, products]
-  );
-  const brandUsage = useMemo(
-    () =>
-      Object.fromEntries(
-        brands.map((brand) => [brand.id, products.filter((product) => product.brandId === brand.id).length])
-      ),
-    [brands, products]
-  );
-  const optionUsage = useMemo(() => {
-    const map: Record<string, Record<string, number>> = {};
-    filterGroups.forEach((group) => {
-      map[group.id] = {};
-      (filterOptions[group.id] ?? []).forEach((option) => {
-        map[group.id][option.id] = countOptionUsage(group.id, option.id, products);
-      });
-    });
-    return map;
-  }, [filterGroups, filterOptions, products]);
-  const groupUsage = useMemo(
-    () =>
-      Object.fromEntries(
-        filterGroups.map((group) => [group.id, countGroupUsage(group.id, products)])
-      ),
-    [filterGroups, products]
-  );
 
   const filteredCategories = useMemo(() => {
     const q = normalize(searchCategory);

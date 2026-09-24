@@ -1624,7 +1624,17 @@
         "resultSummary": "{success} correctos · {failed} fallidos",
         "reason": "Motivo: {reason}",
         "action": "Acción: {action}",
-        "closeSummary": "Cerrar resumen"
+        "closeSummary": "Cerrar resumen",
+        "executionQueue": "Cola de ejecución ({count})",
+        "executionQueueRunning": "Procesando con intervalo entre productos…",
+        "clearExecutionQueue": "Vaciar cola",
+        "queueStatus": {
+          "pending": "En espera",
+          "running": "Procesando…",
+          "success": "Listo",
+          "failed": "Falló",
+          "skipped": "Omitido"
+        }
       },
       "bulkUpdate": {
         "title": "Actualización masiva",
@@ -1917,7 +1927,7 @@
         "importSuccess": "Hoja importada en el editor.",
         "importWithErrors": "Importación completada con errores — revisa la lista abajo.",
         "searchPlaceholder": "Buscar por SKU padre o de color, nombre del color o nombre del producto...",
-        "maxSelectedPlaceholder": "Máximo de 100 productos / grupos de color seleccionados",
+        "maxSelectedPlaceholder": "Máximo de 30 productos / grupos de color seleccionados",
         "noProductsFound": "No se encontraron productos.",
         "reviewTitle": "Revisión de actualización masiva",
         "reviewDescription": "Confirma antes de escribir los cambios en la base de datos.",
@@ -1956,6 +1966,16 @@
         "reason": "Motivo: {reason}",
         "action": "Acción: {action}",
         "closeSummary": "Cerrar resumen",
+        "executionQueue": "Cola de ejecución ({count})",
+        "executionQueueRunning": "Procesando con intervalo entre productos…",
+        "clearExecutionQueue": "Vaciar cola",
+        "queueStatus": {
+          "pending": "En espera",
+          "running": "Procesando…",
+          "success": "Listo",
+          "failed": "Falló",
+          "skipped": "Omitido"
+        },
         "importSpreadsheet": "Importar hoja de cálculo",
         "importSpreadsheetHint": "Sube CSV o XLSX. SKU es obligatorio. Las celdas vacías conservan el valor actual: nunca borran campos. Los cambios se previsualizan localmente hasta que apliques.",
         "downloadTemplate": "Descargar plantilla",
@@ -1966,7 +1986,7 @@
         "moq": "MOQ",
         "sku": "SKU",
         "emptyWorkspace": "Busca y selecciona productos, o importa una hoja de cálculo para empezar a editar.",
-        "productGroupsHint": "(100 productos / grupos de color)",
+        "productGroupsHint": "(30 productos / grupos de color)",
         "childSkuHint": "{child} · color de {parent}",
         "colorOfParent": "Color de {parentSku}",
         "expandColors": "Expandir {count} variantes de color",

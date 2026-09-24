@@ -56,12 +56,13 @@ export default function BlogPostEditPage() {
   useEffect(() => {
     void (async () => {
       try {
-        const [postsRes, catsRes, authorsRes] = await Promise.all([
-          fetch("/api/cms/blog-posts"),
+        const [postRes, catsRes, authorsRes] = await Promise.all([
+          isNew
+            ? Promise.resolve(null)
+            : fetch(`/api/cms/blog-posts?id=${encodeURIComponent(id)}`),
           fetch("/api/cms/blog-categories"),
           fetch("/api/cms/blog-authors"),
         ]);
-        const posts = (await postsRes.json()) as CmsBlogPost[];
         const cats = (await catsRes.json()) as BlogCategory[];
         const auths = (await authorsRes.json()) as BlogAuthor[];
         setCategories(Array.isArray(cats) ? cats : []);
@@ -69,8 +70,13 @@ export default function BlogPostEditPage() {
         if (isNew) {
           setPost(emptyPost(Array.isArray(auths) ? auths : [], Array.isArray(cats) ? cats : []));
         } else {
-          const existing = (Array.isArray(posts) ? posts : []).find((p) => p.id === id);
-          if (!existing) {
+          if (!postRes || !postRes.ok) {
+            toast.error(t("notFound"));
+            router.push("/admin/blog/posts");
+            return;
+          }
+          const existing = (await postRes.json()) as CmsBlogPost;
+          if (!existing?.id) {
             toast.error(t("notFound"));
             router.push("/admin/blog/posts");
             return;

@@ -8,6 +8,7 @@ import { AdminTopbar } from "@/components/admin/layout/AdminTopbar";
 import { AdminPageTransition } from "@/components/admin/layout/AdminPageTransition";
 import { AdminLoadingProvider } from "@/components/admin/layout/AdminLoadingContext";
 import { AdminLoadingOverlay } from "@/components/admin/layout/AdminLoadingOverlay";
+import type { CmsUser } from "@/lib/cms/types";
 
 function AdminShellFrame({ children }: { children: React.ReactNode }) {
   const { loading } = useAdmin();
@@ -52,9 +53,15 @@ function AdminShellFrame({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function AdminShell({ children }: { children: React.ReactNode }) {
+export function AdminShell({
+  children,
+  user,
+}: {
+  children: React.ReactNode;
+  user?: CmsUser | null;
+}) {
   return (
-    <AdminProvider>
+    <AdminProvider initialUser={user}>
       <AdminShellFrame>{children}</AdminShellFrame>
     </AdminProvider>
   );

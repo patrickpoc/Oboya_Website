@@ -31,5 +31,5 @@ export default async function DashboardLayout({
     );
   }
 
-  return <AdminShell>{children}</AdminShell>;
+  return <AdminShell user={auth.user}>{children}</AdminShell>;
 }

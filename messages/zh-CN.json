@@ -1624,7 +1624,17 @@
         "resultSummary": "{success} 成功 · {failed} 失败",
         "reason": "原因：{reason}",
         "action": "操作：{action}",
-        "closeSummary": "关闭摘要"
+        "closeSummary": "关闭摘要",
+        "executionQueue": "执行队列（{count}）",
+        "executionQueueRunning": "按间隔逐个处理中…",
+        "clearExecutionQueue": "清空队列",
+        "queueStatus": {
+          "pending": "等待中",
+          "running": "处理中…",
+          "success": "完成",
+          "failed": "失败",
+          "skipped": "已跳过"
+        }
       },
       "bulkUpdate": {
         "title": "批量更新",
@@ -1917,7 +1927,7 @@
         "importSuccess": "电子表格已导入编辑器。",
         "importWithErrors": "导入完成但有错误 — 请查看下方列表。",
         "searchPlaceholder": "按父 SKU、颜色 SKU、颜色名称或产品名称搜索...",
-        "maxSelectedPlaceholder": "已选满 100 个产品 / 颜色组",
+        "maxSelectedPlaceholder": "已选满 30 个产品 / 颜色组",
         "noProductsFound": "未找到产品。",
         "reviewTitle": "批量更新审核",
         "reviewDescription": "写入数据库前请确认。",
@@ -1956,6 +1966,16 @@
         "reason": "原因：{reason}",
         "action": "操作：{action}",
         "closeSummary": "关闭摘要",
+        "executionQueue": "执行队列（{count}）",
+        "executionQueueRunning": "按间隔逐个处理中…",
+        "clearExecutionQueue": "清空队列",
+        "queueStatus": {
+          "pending": "等待中",
+          "running": "处理中…",
+          "success": "完成",
+          "failed": "失败",
+          "skipped": "已跳过"
+        },
         "importSpreadsheet": "导入电子表格",
         "importSpreadsheetHint": "上传 CSV 或 XLSX。SKU 为必填。空单元格保留当前值——不会清空字段。更改在本地预览，直到你应用。",
         "downloadTemplate": "下载模板",
@@ -1966,7 +1986,7 @@
         "moq": "MOQ",
         "sku": "SKU",
         "emptyWorkspace": "搜索并选择产品，或导入电子表格开始编辑。",
-        "productGroupsHint": "（100 个产品 / 颜色组）",
+        "productGroupsHint": "（30 个产品 / 颜色组）",
         "childSkuHint": "{child} · {parent} 的颜色",
         "colorOfParent": "{parentSku} 的颜色",
         "expandColors": "展开 {count} 个颜色变体",

@@ -1,10 +1,10 @@
 import "server-only";
 
-import { getCmsProducts } from "@/lib/cms/repositories/product-repository";
 import { readHomepageSettingsDurable } from "@/lib/cms/server/homepage.server";
 import { readAboutPageSettingsDurable } from "@/lib/cms/server/about-page.server";
 import { readBlogPostsDurable } from "@/lib/cms/server/blog-posts.server";
 import { readCaseStudiesDurable } from "@/lib/cms/server/case-studies.server";
+import { readProducts } from "@/lib/cms/server/products.server";
 import {
   SITE_IN_USE_MEDIA_URLS,
   buildSiteInUseMediaAssets,
@@ -78,7 +78,12 @@ export async function collectInUseMediaUrls(): Promise<Set<string>> {
   }
 
   try {
-    collectFromValue(getCmsProducts(), urls);
+    const products = await readProducts({
+      includeDeleted: true,
+      fields: "list",
+      skipPurge: true,
+    });
+    collectFromValue(products, urls);
   } catch (error) {
     console.error("in-use media: products skipped", error);
   }

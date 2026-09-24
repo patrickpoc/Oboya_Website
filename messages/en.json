@@ -1624,7 +1624,17 @@
         "resultSummary": "{success} successful · {failed} failed",
         "reason": "Reason: {reason}",
         "action": "Action: {action}",
-        "closeSummary": "Close summary"
+        "closeSummary": "Close summary",
+        "executionQueue": "Execution queue ({count})",
+        "executionQueueRunning": "Processing with paced delay…",
+        "clearExecutionQueue": "Clear queue",
+        "queueStatus": {
+          "pending": "Waiting",
+          "running": "Processing…",
+          "success": "Done",
+          "failed": "Failed",
+          "skipped": "Skipped"
+        }
       },
       "bulkUpdate": {
         "title": "Bulk Update",
@@ -1899,7 +1909,7 @@
         "description": "Update multiple products at once.",
         "searchProducts": "Search products",
         "selectedFraction": "{count}/{max} selected",
-        "productGroupsHint": "(100 products / color groups)",
+        "productGroupsHint": "(30 products / color groups)",
         "maxReached": "Maximum of {max} products / color groups reached. Remove one to add another.",
         "selectedProducts": "Selected products / color groups ({count}/{max})",
         "changed": "Changed: {count}",
@@ -1918,7 +1928,7 @@
         "importSuccess": "Spreadsheet imported into the editor.",
         "importWithErrors": "Import completed with errors — review the list below.",
         "searchPlaceholder": "Search by parent or color SKU, color name, or product name...",
-        "maxSelectedPlaceholder": "Maximum of 100 products / color groups selected",
+        "maxSelectedPlaceholder": "Maximum of 30 products / color groups selected",
         "childSkuHint": "{child} · color of {parent}",
         "colorOfParent": "Color of {parentSku}",
         "expandColors": "Expand {count} color variants",
@@ -1963,6 +1973,16 @@
         "reason": "Reason: {reason}",
         "action": "Action: {action}",
         "closeSummary": "Close summary",
+        "executionQueue": "Execution queue ({count})",
+        "executionQueueRunning": "Processing with paced delay…",
+        "clearExecutionQueue": "Clear queue",
+        "queueStatus": {
+          "pending": "Waiting",
+          "running": "Processing…",
+          "success": "Done",
+          "failed": "Failed",
+          "skipped": "Skipped"
+        },
         "importSpreadsheet": "Import spreadsheet",
         "importSpreadsheetHint": "Upload CSV or XLSX. SKU is required. Empty cells keep the current value — they never clear fields. Changes are previewed locally until you apply.",
         "downloadTemplate": "Download Template",

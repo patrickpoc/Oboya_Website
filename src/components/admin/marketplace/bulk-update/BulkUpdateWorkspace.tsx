@@ -9,6 +9,10 @@ import { BulkProductTable } from "@/components/admin/marketplace/bulk-update/Bul
 import { BulkUpdateProgress } from "@/components/admin/marketplace/bulk-update/BulkUpdateProgress";
 import { ProductSearchAutocomplete } from "@/components/admin/marketplace/bulk-update/ProductSearchAutocomplete";
 import { SpreadsheetImportPanel } from "@/components/admin/marketplace/bulk-update/SpreadsheetImportPanel";
+import {
+  BulkExecutionQueue,
+  type BulkQueueItem,
+} from "@/components/admin/marketplace/BulkExecutionQueue";
 import { Button } from "@/components/ui/button";
 import { countProductGroups } from "@/lib/cms/admin-sku-lookup";
 import {
@@ -27,6 +31,7 @@ import {
   validateBulkUpdate,
 } from "@/lib/cms/bulk-update/validate";
 import type { BulkSkuSearchHit } from "@/lib/cms/bulk-update/search-products";
+import { displayProductName } from "@/lib/cms/bulk-update/search-products";
 import {
   BULK_UPDATE_MAX_PRODUCTS,
   type BulkApplyResult,
@@ -54,6 +59,7 @@ export function BulkUpdateWorkspace() {
   const [applying, setApplying] = useState(false);
   const [progress, setProgress] = useState<SequentialApplyProgress | null>(null);
   const [results, setResults] = useState<BulkApplyResult[] | null>(null);
+  const [queue, setQueue] = useState<BulkQueueItem[]>([]);
 
   const catalog: BulkUpdateCatalog = useMemo(
     () => ({
@@ -70,7 +76,7 @@ export function BulkUpdateWorkspace() {
   const loadProducts = useCallback(async () => {
     setLoadingProducts(true);
     try {
-      const response = await fetch("/api/cms/products?includeDeleted=1", {
+      const response = await fetch("/api/cms/products?includeDeleted=1&fields=list", {
         cache: "no-store",
       });
       if (!response.ok) {
@@ -89,7 +95,7 @@ export function BulkUpdateWorkspace() {
     void (async () => {
       setLoadingProducts(true);
       try {
-        const response = await fetch("/api/cms/products?includeDeleted=1", {
+        const response = await fetch("/api/cms/products?includeDeleted=1&fields=list", {
           cache: "no-store",
         });
         if (!response.ok) {
@@ -237,6 +243,7 @@ export function BulkUpdateWorkspace() {
     setResults(null);
     setProgress(null);
     setFocusRowId(null);
+    setQueue([]);
   };
 
   const openReview = async () => {
@@ -294,26 +301,99 @@ export function BulkUpdateWorkspace() {
       toast.error(t("resolveBlocked"));
       return;
     }
+
+    const applyRows = rows.filter((row) =>
+      productHasPendingChanges(row.original, row.pending)
+    );
+    // One queue entry per product group (parent row).
+    const parents = applyRows.filter((row) => row.kind === "parent");
+    const seen = new Set<string>();
+    const uniqueParents = parents.filter((row) => {
+      if (seen.has(row.productId)) return false;
+      seen.add(row.productId);
+      return true;
+    });
+    // Fallback: if no parent rows, use first row per productId.
+    const queueSource =
+      uniqueParents.length > 0
+        ? uniqueParents
+        : Array.from(
+            applyRows.reduce((map, row) => {
+              if (!map.has(row.productId)) map.set(row.productId, row);
+              return map;
+            }, new Map<string, BulkWorkspaceRow>()).values()
+          );
+
+    if (queueSource.length === 0) {
+      toast.error(t("noPending"));
+      return;
+    }
+
+    const initialQueue: BulkQueueItem[] = queueSource.map((row) => ({
+      id: row.productId,
+      sku: row.pending.sku,
+      name: displayProductName(row.pending),
+      status: "pending",
+    }));
+
+    const snapshotRows = rows;
+    setQueue(initialQueue);
+    setRows([]);
+    setSelectedIds(new Set());
+    setServerIssues(null);
+    setFocusRowId(null);
     setApplying(true);
     setResults(null);
+    setProgress(null);
+
+    const markQueue = (
+      productId: string,
+      status: BulkQueueItem["status"],
+      error?: string
+    ) => {
+      setQueue((current) =>
+        current.map((item) =>
+          item.id === productId
+            ? { ...item, status, error: error ?? item.error }
+            : item
+        )
+      );
+    };
+
     try {
       const applyResults = await applyBulkUpdatesSequentially({
-        rows,
-        onProgress: setProgress,
+        rows: snapshotRows,
+        onProgress: (next) => {
+          setProgress(next);
+          if (next.current) {
+            markQueue(next.current.productId, "running");
+          }
+          if (next.lastResult) {
+            markQueue(
+              next.lastResult.productId,
+              next.lastResult.status === "SUCCESS"
+                ? "success"
+                : next.lastResult.status === "SKIPPED"
+                  ? "skipped"
+                  : "failed",
+              next.lastResult.error
+            );
+          }
+        },
       });
       setResults(applyResults);
-      const successIds = new Set(
-        applyResults
-          .filter((item) => item.status === "SUCCESS")
-          .map((item) => item.productId)
-      );
+      for (const item of applyResults) {
+        markQueue(
+          item.productId,
+          item.status === "SUCCESS"
+            ? "success"
+            : item.status === "SKIPPED"
+              ? "skipped"
+              : "failed",
+          item.error
+        );
+      }
       await loadProducts();
-      setRows((current) => current.filter((row) => !successIds.has(row.productId)));
-      setSelectedIds((current) => {
-        const next = new Set(current);
-        successIds.forEach((id) => next.delete(id));
-        return next;
-      });
       toast.success(
         t("updatedCount", {
           count: applyResults.filter((item) => item.status === "SUCCESS").length,
@@ -399,6 +479,17 @@ export function BulkUpdateWorkspace() {
               onPatch={patchRow}
             />
           </div>
+
+          <BulkExecutionQueue
+            namespace="admin.products.bulk"
+            items={queue}
+            running={applying}
+            onClear={() => {
+              setQueue([]);
+              setResults(null);
+              setProgress(null);
+            }}
+          />
 
           <BulkColumnActions
             catalog={catalog}

@@ -8,7 +8,7 @@ import type {
 } from "@/lib/shop/types";
 
 /** Max parent products / color groups in one bulk-update session (not each color row). */
-export const BULK_UPDATE_MAX_PRODUCTS = 100;
+export const BULK_UPDATE_MAX_PRODUCTS = 30;
 
 export const BULK_PARENT_TAXONOMY_FIELDS = [
   "moq",

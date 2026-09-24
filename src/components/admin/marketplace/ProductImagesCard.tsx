@@ -86,7 +86,7 @@ export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps)
 
   const refreshLibrary = async () => {
     try {
-      const response = await fetch("/api/cms/media");
+      const response = await fetch("/api/cms/media?limit=80&offset=0");
       if (!response.ok) return;
       const data = (await response.json()) as { assets?: { id: string }[] };
       if (data.assets) {

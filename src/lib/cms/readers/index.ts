@@ -30,9 +30,9 @@ export async function readProducts() {
   const { readProducts: readProductsFromStore } = await import(
     "@/lib/cms/server/products.server"
   );
-  const live = (await readProductsFromStore()).filter(
-    (product) => product.status === "published" && !product.deletedAt
-  );
+  const live = (
+    await readProductsFromStore({ fields: "list", skipPurge: true })
+  ).filter((product) => product.status === "published" && !product.deletedAt);
   if (live.length > 0) return live;
   const cmsProducts = getCmsProducts();
   if (cmsProducts.length > 0) {
@@ -42,10 +42,10 @@ export async function readProducts() {
 }
 
 export async function readPublishedProductById(id: string) {
-  const { readProducts: readProductsFromStore } = await import(
+  const { readProductById: readProductByIdFromStore } = await import(
     "@/lib/cms/server/products.server"
   );
-  const product = (await readProductsFromStore()).find((item) => item.id === id);
+  const product = await readProductByIdFromStore(id, { asAdmin: false });
   if (!product || product.status !== "published" || product.deletedAt) {
     return undefined;
   }
@@ -54,17 +54,14 @@ export async function readPublishedProductById(id: string) {
 
 /** Resolve PDP param as id or sku (post id=sku migration + legacy bookmarks). */
 export async function readPublishedProductByParam(param: string) {
-  const { readProducts: readProductsFromStore } = await import(
+  const { readProductById: readProductByIdFromStore } = await import(
     "@/lib/cms/server/products.server"
   );
-  const products = await readProductsFromStore();
-  const published = products.filter(
-    (item) => item.status === "published" && !item.deletedAt
-  );
-  const byId = published.find((item) => item.id === param);
-  if (byId) return byId;
-  const bySku = published.find((item) => item.sku === param);
-  return bySku;
+  const product = await readProductByIdFromStore(param, { asAdmin: false });
+  if (!product || product.status !== "published" || product.deletedAt) {
+    return undefined;
+  }
+  return product;
 }
 
 export function readProductById(id: string) {

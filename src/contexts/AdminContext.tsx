@@ -1,9 +1,9 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import type { CmsUser, CmsLocale } from "@/lib/cms/types";
+import type { CmsUser } from "@/lib/cms/types";
 import { canAccess } from "@/lib/cms/permissions/matrix";
-import type { CmsAction, CmsModule } from "@/lib/cms/types";
+import type { CmsAction, CmsModule, CmsLocale } from "@/lib/cms/types";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import mockUsers from "@/../data/cms/users.json";
 
@@ -19,11 +19,29 @@ const AdminContext = createContext<AdminContextValue | null>(null);
 const MOCK_FALLBACK = mockUsers[0] as CmsUser;
 const STORAGE_KEY = "oboya-admin-user";
 
-export function AdminProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<CmsUser | null>(null);
-  const [loading, setLoading] = useState(true);
+export function AdminProvider({
+  children,
+  initialUser,
+}: {
+  children: React.ReactNode;
+  /** From dashboard layout `requireCmsAuth` — skips redundant `/api/cms/me`. */
+  initialUser?: CmsUser | null;
+}) {
+  const [user, setUser] = useState<CmsUser | null>(initialUser ?? null);
+  const [loading, setLoading] = useState(!initialUser);
 
   useEffect(() => {
+    if (initialUser) {
+      setUser(initialUser);
+      setLoading(false);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(initialUser));
+      } catch {
+        // Ignore quota / private mode.
+      }
+      return;
+    }
+
     let cancelled = false;
 
     async function loadMe() {
@@ -55,7 +73,6 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         }
       } catch {
         if (!cancelled) {
-          // Never reuse a stale localStorage identity from another login.
           localStorage.removeItem(STORAGE_KEY);
           setUser(null);
           setLoading(false);
@@ -67,7 +84,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [initialUser]);
 
   const handleSetUser = (next: CmsUser) => {
     setUser(next);

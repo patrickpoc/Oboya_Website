@@ -86,6 +86,8 @@ interface ShopContextValue extends ShopState {
   filterGroups: ReturnType<typeof getShopCatalog>["filterGroups"];
   filterOptions: ReturnType<typeof getShopCatalog>["filterOptions"];
   getProductById: (productId: string) => ShopProduct | undefined;
+  /** Load full product (incl. description HTML) when opening quick view / detail overlays. */
+  ensureProductDetail: (productId: string) => Promise<ShopProduct | undefined>;
   setCountry: (countryCode: string) => void;
   setCurrency: (currency: CurrencyCode) => void;
   setSearch: (search: string) => void;
@@ -287,7 +289,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
         };
         const [productsRes, filtersRes, currenciesRes] = await Promise.all([
-          fetch("/api/cms/products", catalogFetch),
+          fetch("/api/cms/products?fields=list", catalogFetch),
           fetch("/api/cms/marketplace/filters", catalogFetch),
           fetch("/api/cms/marketplace/currencies", catalogFetch),
         ]);
@@ -584,6 +586,62 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           product.id === remapProductId(productId)
       ),
     [shopProducts]
+  );
+
+  const ensureProductDetail = useCallback(
+    async (productId: string) => {
+      const existing = getProductByIdFromState(productId) as
+        | (ShopProduct & { description?: Record<string, string> })
+        | undefined;
+      const hasDescription = Boolean(
+        existing?.description &&
+          Object.values(existing.description).some(
+            (value) => typeof value === "string" && value.trim().length > 0
+          )
+      );
+      if (existing && hasDescription) return existing;
+
+      try {
+        const response = await fetch(`/api/cms/products/${productId}`, {
+          cache: "no-store",
+        });
+        if (!response.ok) return existing;
+        const product = (await response.json()) as CmsProduct;
+        if (product.status !== "published" || product.deletedAt) {
+          return existing;
+        }
+        const normalized: ShopProduct = {
+          ...product,
+          defaultColor: product.defaultColor ?? "",
+          defaultColorName: normalizeLocalizedColorName(product.defaultColorName),
+          imageColorIds: normalizeImageColorIds(
+            product.imageColorIds,
+            (product.images ?? []).length
+          ),
+          colorVariants: normalizeColorVariants(product.colorVariants),
+        };
+        setShopProducts((prev) => {
+          const index = prev.findIndex(
+            (item) => item.id === normalized.id || item.sku === normalized.id
+          );
+          if (index < 0) return [...prev, normalized];
+          const next = [...prev];
+          next[index] = { ...next[index], ...normalized };
+          return next;
+        });
+        updateShopCatalog({
+          products: getShopCatalog().products.map((item) =>
+            item.id === normalized.id || item.sku === normalized.id
+              ? { ...item, ...normalized }
+              : item
+          ),
+        });
+        return normalized;
+      } catch {
+        return existing;
+      }
+    },
+    [getProductByIdFromState]
   );
 
   const setCurrency = useCallback((currency: CurrencyCode) => {
@@ -950,6 +1008,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
             countriesOfOrigin: [],
           },
       getProductById: getProductByIdFromState,
+      ensureProductDetail,
       setCountry,
       setCurrency,
       setSearch,
@@ -987,6 +1046,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       estimatedTotal,
       catalog,
       getProductByIdFromState,
+      ensureProductDetail,
       setCountry,
       setCurrency,
       setSearch,

@@ -20,6 +20,7 @@ import { cmsGuard, requireCmsAuth } from "@/lib/cms/server/require-cms-auth";
 import { publicApiError } from "@/lib/security/public-error";
 import { toPublicProduct } from "@/lib/cms/server/public-product";
 import { noStoreHeaders } from "@/lib/security/http-cache";
+import { shouldDeferRevalidate } from "@/lib/cms/revalidate-site";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -61,6 +62,7 @@ export async function PUT(
     if (body.id !== id) {
       return NextResponse.json({ error: "ID mismatch" }, { status: 400 });
     }
+    const deferRevalidate = shouldDeferRevalidate(request);
     const previous = await readProductById(id, { asAdmin: true });
     const { persistProductWithContent } = await import(
       "@/lib/cms/server/product-content.server"
@@ -72,11 +74,13 @@ export async function PUT(
     }
 
     await persistProductsToFileSafe(getCmsProducts({ includeDeleted: true }));
-    try {
-      const { revalidateShopPages } = await import("@/lib/cms/revalidate-site");
-      revalidateShopPages(saved.id);
-    } catch {
-      // Ignore when revalidation is unavailable.
+    if (!deferRevalidate) {
+      try {
+        const { revalidateShopPages } = await import("@/lib/cms/revalidate-site");
+        revalidateShopPages(saved.id);
+      } catch {
+        // Ignore when revalidation is unavailable.
+      }
     }
     return NextResponse.json(saved);
   } catch (error) {
@@ -95,6 +99,7 @@ export async function DELETE(
     if ("response" in auth) return auth.response;
 
     const { id } = await params;
+    const deferRevalidate = shouldDeferRevalidate(_request);
     const hardDelete = new URL(_request.url).searchParams.get("hard") === "1";
     if (hardDelete) {
       hardDeleteCmsProduct(id);
@@ -108,11 +113,13 @@ export async function DELETE(
     }
 
     await persistProductsToFileSafe(getCmsProducts({ includeDeleted: true }));
-    try {
-      const { revalidateShopPages } = await import("@/lib/cms/revalidate-site");
-      revalidateShopPages(id);
-    } catch {
-      // Ignore when revalidation is unavailable.
+    if (!deferRevalidate) {
+      try {
+        const { revalidateShopPages } = await import("@/lib/cms/revalidate-site");
+        revalidateShopPages(id);
+      } catch {
+        // Ignore when revalidation is unavailable.
+      }
     }
     return NextResponse.json({ ok: true });
   } catch (error) {
@@ -140,16 +147,19 @@ export async function POST(
       return NextResponse.json({ error: "Unsupported action" }, { status: 400 });
     }
 
+    const deferRevalidate = shouldDeferRevalidate(_request);
     restoreCmsProduct(id);
     if (isSupabaseConfigured()) {
       await restoreProduct(id);
     }
     await persistProductsToFileSafe(getCmsProducts({ includeDeleted: true }));
-    try {
-      const { revalidateShopPages } = await import("@/lib/cms/revalidate-site");
-      revalidateShopPages(id);
-    } catch {
-      // Ignore when revalidation is unavailable.
+    if (!deferRevalidate) {
+      try {
+        const { revalidateShopPages } = await import("@/lib/cms/revalidate-site");
+        revalidateShopPages(id);
+      } catch {
+        // Ignore when revalidation is unavailable.
+      }
     }
     return NextResponse.json({ ok: true });
   } catch (error) {

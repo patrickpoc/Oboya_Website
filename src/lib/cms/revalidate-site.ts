@@ -1,5 +1,8 @@
 import { revalidatePath } from "next/cache";
 import { locales } from "@/i18n/routing";
+import { DEFER_REVALIDATE_HEADER } from "@/lib/cms/revalidate-headers";
+
+export { DEFER_REVALIDATE_HEADER } from "@/lib/cms/revalidate-headers";
 
 /**
  * Safety ISR window (seconds) for public pages.
@@ -7,27 +10,32 @@ import { locales } from "@/i18n/routing";
  * This TTL is only a fallback if a write path forgets to bust cache.
  */
 export const SITE_REVALIDATE_SECONDS = 3600;
-
 function forEachLocale(run: (locale: string) => void) {
   for (const locale of locales) {
     run(locale);
   }
 }
 
-/** Bust the root locale layout tree. */
+export function shouldDeferRevalidate(request: Request): boolean {
+  return request.headers.get(DEFER_REVALIDATE_HEADER) === "1";
+}
+
+/**
+ * Bust the root locale layout tree.
+ * Prefer page-scoped helpers below — layout invalidation is expensive under
+ * concurrent admin writes.
+ */
 export function revalidateSiteLayout() {
   revalidatePath("/", "layout");
 }
 
 export function revalidateHomePages() {
-  revalidateSiteLayout();
   forEachLocale((locale) => {
     revalidatePath(`/${locale}`);
   });
 }
 
 export function revalidateAboutPages() {
-  revalidateSiteLayout();
   forEachLocale((locale) => {
     revalidatePath(`/${locale}/about`);
   });
@@ -42,7 +50,6 @@ export function revalidateMapPages() {
 }
 
 export function revalidateCaseStudyPages(slug?: string) {
-  revalidateSiteLayout();
   forEachLocale((locale) => {
     revalidatePath(`/${locale}/case-studies`);
     if (slug) {
@@ -52,7 +59,6 @@ export function revalidateCaseStudyPages(slug?: string) {
 }
 
 export function revalidateBlogPages(slug?: string) {
-  revalidateSiteLayout();
   forEachLocale((locale) => {
     revalidatePath(`/${locale}/blog`);
     revalidatePath(`/${locale}/news`);
@@ -63,21 +69,18 @@ export function revalidateBlogPages(slug?: string) {
 }
 
 export function revalidateFaqPages() {
-  revalidateSiteLayout();
   forEachLocale((locale) => {
     revalidatePath(`/${locale}/faqs`);
   });
 }
 
 export function revalidateNewsPages() {
-  revalidateSiteLayout();
   forEachLocale((locale) => {
     revalidatePath(`/${locale}/news`);
   });
 }
 
 export function revalidateShopPages(productId?: string) {
-  revalidateSiteLayout();
   revalidatePath("/api/cms/products");
   revalidatePath("/api/cms/marketplace/filters");
   revalidatePath("/api/cms/marketplace/currencies");

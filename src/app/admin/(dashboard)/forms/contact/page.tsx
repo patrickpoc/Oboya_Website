@@ -58,6 +58,8 @@ export default function ContactFormsPage() {
     support: t("subjects.support"),
   };
   const [submissions, setSubmissions] = useState<FormSubmission[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [countryFilter, setCountryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<FormSubmissionStatus | "all">(
@@ -65,17 +67,27 @@ export default function ContactFormsPage() {
   );
   const [selected, setSelected] = useState<FormSubmission | null>(null);
 
-  const refresh = async () => {
-    const res = await fetch("/api/cms/forms?type=contact");
+  const PAGE_LIMIT = 50;
+
+  const refresh = async (nextPage = 1, append = false) => {
+    const res = await fetch(
+      `/api/cms/forms?type=contact&page=${nextPage}&limit=${PAGE_LIMIT}`
+    );
     if (!res.ok) throw new Error(tCommon("loadFailed"));
-    const data = (await res.json()) as FormSubmission[];
-    setSubmissions(Array.isArray(data) ? data : []);
+    const data = (await res.json()) as {
+      items?: FormSubmission[];
+      total?: number;
+    };
+    const items = Array.isArray(data.items) ? data.items : [];
+    setTotal(Number(data.total) || items.length);
+    setPage(nextPage);
+    setSubmissions((prev) => (append ? [...prev, ...items] : items));
   };
 
   useEffect(() => {
     void (async () => {
       try {
-        await refresh();
+        await refresh(1, false);
       } catch {
         toast.error(t("loadFailed"));
       } finally {
@@ -204,7 +216,7 @@ export default function ContactFormsPage() {
     <div>
       <AdminPageHeader
         title={t("title")}
-        description={t("description", { unread: unreadTotal, total: submissions.length })}
+        description={t("description", { unread: unreadTotal, total })}
       />
 
       <div className="mb-4 flex flex-wrap gap-2">
@@ -252,6 +264,18 @@ export default function ContactFormsPage() {
         />
       )}
 
+      {!loading && submissions.length < total ? (
+        <div className="mt-4 flex justify-center">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void refresh(page + 1, true)}
+          >
+            Load more
+          </Button>
+        </div>
+      ) : null}
+
       <FormDrawer
         open={!!selected}
         onClose={() => setSelected(null)}
@@ -297,7 +321,7 @@ export default function ContactFormsPage() {
                 id={selected.id}
                 onDone={() => {
                   setSelected(null);
-                  void refresh();
+                  void refresh(1, false);
                 }}
               />
             </div>

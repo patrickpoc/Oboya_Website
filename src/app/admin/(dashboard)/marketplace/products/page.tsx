@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -13,11 +13,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
-import { collectAllSkus } from "@/lib/cms/admin-sku-lookup";
 
 const PAGE_SIZE = 20;
 
 type ViewTab = "active" | "archived" | "trash";
+
+type ProductsPageResponse = {
+  items: CmsProduct[];
+  total: number;
+  page: number;
+  limit: number;
+  tabCounts?: { active: number; archived: number; trash: number };
+  unitStats?: { total: number; active: number; draft: number };
+};
 
 function buildUniqueDuplicateSku(baseSku: string, existingSkus: Set<string>) {
   const candidate = `${baseSku}-COPY`;
@@ -34,41 +42,79 @@ function productDisplayName(product: CmsProduct) {
   return product.name["pt-BR"] || product.name.en || product.name.es || product.name["zh-CN"] || product.id;
 }
 
+async function fetchFullProduct(id: string): Promise<CmsProduct | null> {
+  const response = await fetch(`/api/cms/products/${id}`, { cache: "no-store" });
+  if (!response.ok) return null;
+  return (await response.json()) as CmsProduct;
+}
+
 export default function ProductsPage() {
   const t = useTranslations("admin.products");
   const tCommon = useTranslations("admin.common");
   const router = useRouter();
-  const [activeProducts, setActiveProducts] = useState<CmsProduct[]>([]);
-  const [archivedProducts, setArchivedProducts] = useState<CmsProduct[]>([]);
-  const [deletedProducts, setDeletedProducts] = useState<CmsProduct[]>([]);
+  const [products, setProducts] = useState<CmsProduct[]>([]);
+  const [total, setTotal] = useState(0);
+  const [tabCounts, setTabCounts] = useState({ active: 0, archived: 0, trash: 0 });
+  const [unitStats, setUnitStats] = useState({ total: 0, active: 0, draft: 0 });
   const [tab, setTab] = useState<ViewTab>("active");
   const [selected, setSelected] = useState<string[]>([]);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
 
-  const refresh = async () => {
-    const response = await fetch("/api/cms/products?includeDeleted=1", { cache: "no-store" });
-    if (!response.ok) {
-      toast.error(t("loadFailed"));
-      return;
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(search), 250);
+    return () => window.clearTimeout(timer);
+  }, [search]);
+
+  const refresh = async (opts?: { purgeTrash?: boolean }) => {
+    setLoading(true);
+    try {
+      if (opts?.purgeTrash) {
+        try {
+          await fetch("/api/cms/products/purge", { method: "POST" });
+        } catch {
+          // Best-effort.
+        }
+      }
+
+      const params = new URLSearchParams({
+        includeDeleted: "1",
+        fields: "table",
+        page: String(page),
+        limit: String(PAGE_SIZE),
+        tab,
+        q: debouncedSearch,
+      });
+      const response = await fetch(`/api/cms/products?${params}`, {
+        cache: "no-store",
+      });
+      if (!response.ok) {
+        toast.error(t("loadFailed"));
+        return;
+      }
+      const data = (await response.json()) as ProductsPageResponse;
+      if (!data || !Array.isArray(data.items)) {
+        toast.error(t("loadFailed"));
+        return;
+      }
+      setProducts(data.items);
+      setTotal(data.total);
+      setSelected([]);
+      if (data.tabCounts) setTabCounts(data.tabCounts);
+      if (data.unitStats) setUnitStats(data.unitStats);
+    } finally {
+      setLoading(false);
     }
-    const all = (await response.json()) as CmsProduct[];
-    if (!Array.isArray(all)) {
-      toast.error(t("loadFailed"));
-      return;
-    }
-    const notDeleted = all.filter((p) => !p.deletedAt);
-    setActiveProducts(notDeleted.filter((p) => p.status !== "archived"));
-    setArchivedProducts(notDeleted.filter((p) => p.status === "archived"));
-    setDeletedProducts(all.filter((p) => Boolean(p.deletedAt)));
-    setSelected([]);
   };
 
   useEffect(() => {
     queueMicrotask(() => {
-      void refresh();
+      void refresh({ purgeTrash: tab === "trash" });
     });
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional refresh keys
+  }, [tab, page, debouncedSearch]);
 
   const handleDelete = (id: string) => {
     void (async () => {
@@ -95,10 +141,11 @@ export default function ProductsPage() {
     void (async () => {
       const ok = window.confirm(t("archiveConfirm"));
       if (!ok) return;
+      const full = (await fetchFullProduct(product.id)) ?? product;
       const response = await fetch(`/api/cms/products/${product.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...product, status: "archived" }),
+        body: JSON.stringify({ ...full, status: "archived" }),
       });
       if (!response.ok) {
         toast.error(t("archiveFailed"));
@@ -111,10 +158,11 @@ export default function ProductsPage() {
 
   const handleUnarchive = (product: CmsProduct) => {
     void (async () => {
+      const full = (await fetchFullProduct(product.id)) ?? product;
       const response = await fetch(`/api/cms/products/${product.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...product, status: "draft" }),
+        body: JSON.stringify({ ...full, status: "draft" }),
       });
       if (!response.ok) {
         toast.error(t("unarchiveFailed"));
@@ -125,48 +173,31 @@ export default function ProductsPage() {
     })();
   };
 
-  const filteredProducts = useMemo(() => {
-    const source = tab === "archived" ? archivedProducts : activeProducts;
-    const q = search.trim().toLowerCase();
-    if (!q) return source;
-    return source.filter((product) => {
-      const name = productDisplayName(product).toLowerCase();
-      if (name.includes(q) || product.sku.toLowerCase().includes(q)) return true;
-      return (product.colorVariants ?? []).some((variant) =>
-        (variant.sku || "").toLowerCase().includes(q)
-      );
-    });
-  }, [activeProducts, archivedProducts, search, tab]);
-
-  const pageCount = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount);
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
-  );
+  const paginatedProducts = products;
 
-  const productUnitStats = useMemo(() => {
-    let total = 0;
-    let active = 0;
-    let draft = 0;
-    for (const product of activeProducts) {
-      const units = 1 + (product.colorVariants?.length ?? 0);
-      total += units;
-      if (product.status === "published") active += units;
-      else draft += units;
-    }
-    return { total, active, draft };
-  }, [activeProducts]);
+  const productUnitStats = unitStats;
 
   const handleDuplicate = (id: string) => {
     void (async () => {
-      const original =
-        activeProducts.find((product) => product.id === id) ||
-        archivedProducts.find((product) => product.id === id);
-      if (!original) return;
-      const existingSkus = collectAllSkus([...activeProducts, ...archivedProducts], {
-        includeLegacyIds: true,
-      });
+      const original = await fetchFullProduct(id);
+      if (!original) {
+        toast.error(t("loadFailed"));
+        return;
+      }
+      const skuRes = await fetch(
+        "/api/cms/products?fields=skus",
+        { cache: "no-store" }
+      );
+      const skuPayload = skuRes.ok
+        ? ((await skuRes.json()) as { skus?: string[] })
+        : { skus: [] };
+      const existingSkus = new Set(
+        (Array.isArray(skuPayload.skus) ? skuPayload.skus : []).map((s) =>
+          s.toLowerCase()
+        )
+      );
       const newSku = buildUniqueDuplicateSku(original.sku, existingSkus);
       existingSkus.add(newSku.toLowerCase());
       const colorVariants = (original.colorVariants ?? []).map((variant) => {
@@ -262,7 +293,7 @@ export default function ProductsPage() {
             className: "rounded-full",
           })}
         >
-          {t("tabArchive", { count: archivedProducts.length })}
+          {t("tabArchive", { count: tabCounts.archived })}
         </button>
         <button
           type="button"
@@ -272,13 +303,13 @@ export default function ProductsPage() {
             className: "rounded-full",
           })}
         >
-          {t("tabTrash", { count: deletedProducts.length })}
+          {t("tabTrash", { count: tabCounts.trash })}
         </button>
       </div>
 
       {tab === "trash" ? (
         <div className="space-y-3">
-          {deletedProducts.map((product) => (
+          {products.map((product) => (
             <div
               key={product.id}
               className="flex items-center justify-between rounded-xl border border-border/60 bg-white p-3"
@@ -328,7 +359,7 @@ export default function ProductsPage() {
               </div>
             </div>
           ))}
-          {deletedProducts.length === 0 && (
+          {!loading && products.length === 0 && (
             <p className="text-sm text-muted-foreground">{t("emptyTrash")}</p>
           )}
         </div>

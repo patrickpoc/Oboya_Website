@@ -7,6 +7,7 @@ import {
 import { readProducts } from "@/lib/cms/server/products.server";
 import type { ShopCountry } from "@/lib/shop/types";
 import { noStoreHeaders } from "@/lib/security/http-cache";
+import { logCmsPerf } from "@/lib/cms/server/perf-log.server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -37,6 +38,7 @@ export async function PUT(request: Request) {
     if (uniqueCurrencies.length === 0) {
       throw new ValidationError("At least one currency is required.");
     }
+    const started = Date.now();
     uniqueCurrencies.forEach((code) => {
       if (!/^[A-Z]{3,6}$/.test(code)) {
         throw new ValidationError(`Invalid currency code: ${code}`);
@@ -85,6 +87,11 @@ export async function PUT(request: Request) {
     } catch {
       // Ignore when revalidation is unavailable.
     }
+    logCmsPerf("PUT /api/cms/marketplace/currencies", started, {
+      currencies: uniqueCurrencies.length,
+      countries: normalizedCountries.length,
+      productsTouched: Array.isArray(saved.products) ? saved.products.length : undefined,
+    });
     return NextResponse.json(saved);
   } catch (error) {
     if (error instanceof ValidationError) {

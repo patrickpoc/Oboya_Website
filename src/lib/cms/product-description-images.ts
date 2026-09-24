@@ -2,7 +2,7 @@ import type { LocalizedString } from "@/lib/cms/types";
 import { FOLDER_PRODUCT_DESCRIPTIONS } from "@/lib/cms/media-folder-ids";
 import { getMediaAssets } from "@/lib/cms/repositories/media-repository";
 import { removeMediaAsset } from "@/lib/cms/server/media-upload.server";
-import { syncMediaLibraryFromSupabase } from "@/lib/cms/server/media-library.server";
+import { listMediaLibrary } from "@/lib/cms/server/media-library.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 const IMG_SRC_RE = /<img\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi;
@@ -40,7 +40,7 @@ function normalizeUrl(url: string) {
 
 async function loadDescriptionAssets() {
   if (isSupabaseConfigured()) {
-    const assets = await syncMediaLibraryFromSupabase();
+    const assets = await listMediaLibrary();
     return assets.filter((asset) => asset.folder === FOLDER_PRODUCT_DESCRIPTIONS);
   }
   return getMediaAssets().filter((asset) => asset.folder === FOLDER_PRODUCT_DESCRIPTIONS);

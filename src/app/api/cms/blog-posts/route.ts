@@ -7,11 +7,44 @@ import {
 } from "@/lib/cms/server/blog-posts.server";
 import { revalidateBlogPages } from "@/lib/cms/revalidate-site";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
+import type { LocalizedString } from "@/lib/cms/types";
 
-export async function GET() {
+const EMPTY_LOCALIZED: LocalizedString = {
+  en: "",
+  "pt-BR": "",
+  es: "",
+  "zh-CN": "",
+};
+
+function toListPost(post: CmsBlogPost): CmsBlogPost {
+  return {
+    ...post,
+    body: EMPTY_LOCALIZED,
+  };
+}
+
+export async function GET(request: Request) {
   const auth = await cmsGuard("blog", "view");
   if ("response" in auth) return auth.response;
-  return NextResponse.json(await readBlogPostsDurable());
+
+  const url = new URL(request.url);
+  const id = url.searchParams.get("id");
+  const fields = url.searchParams.get("fields");
+  const posts = await readBlogPostsDurable();
+
+  if (id) {
+    const post = posts.find((item) => item.id === id);
+    if (!post) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    return NextResponse.json(post);
+  }
+
+  if (fields === "list") {
+    return NextResponse.json(posts.map(toListPost));
+  }
+
+  return NextResponse.json(posts);
 }
 
 export async function POST(request: Request) {

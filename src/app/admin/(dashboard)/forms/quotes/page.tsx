@@ -38,26 +38,38 @@ export default function QuoteFormsPage() {
   const t = useTranslations("admin.forms.quotes");
   const tCommon = useTranslations("admin.common");
   const [submissions, setSubmissions] = useState<FormSubmission[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<FormSubmission | null>(null);
 
-  const load = useCallback(async () => {
+  const PAGE_LIMIT = 50;
+
+  const load = useCallback(async (nextPage = 1, append = false) => {
     setLoading(true);
     try {
-      const res = await fetch("/api/cms/forms?type=quote");
+      const res = await fetch(
+        `/api/cms/forms?type=quote&page=${nextPage}&limit=${PAGE_LIMIT}`
+      );
       if (!res.ok) throw new Error(tCommon("loadFailed"));
-      const data = (await res.json()) as FormSubmission[];
-      setSubmissions(Array.isArray(data) ? data : []);
+      const data = (await res.json()) as {
+        items?: FormSubmission[];
+        total?: number;
+      };
+      const items = Array.isArray(data.items) ? data.items : [];
+      setTotal(Number(data.total) || items.length);
+      setPage(nextPage);
+      setSubmissions((prev) => (append ? [...prev, ...items] : items));
     } catch {
       toast.error(t("loadFailed"));
-      setSubmissions([]);
+      if (!append) setSubmissions([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t, tCommon]);
 
   useEffect(() => {
-    void load();
+    void load(1, false);
   }, [load]);
 
   const columns = useMemo(
@@ -140,6 +152,18 @@ export default function QuoteFormsPage() {
           loading ? "" : t("empty")
         }
       />
+
+      {!loading && submissions.length < total ? (
+        <div className="mt-4 flex justify-center">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void load(page + 1, true)}
+          >
+            Load more
+          </Button>
+        </div>
+      ) : null}
 
       <FormDrawer
         open={!!selected}

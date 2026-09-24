@@ -218,21 +218,36 @@ export async function saveMarketplaceCurrencies(payload: {
   };
 
   if (isSupabaseConfigured()) {
+    const started = Date.now();
     await writeCmsDocumentData(MARKETPLACE_CURRENCIES_DOC_ID, "marketplace", {
       countries: payload.countries,
       currencies: payload.currencies,
     });
 
-    const products = await readProducts({ includeDeleted: true });
-    const normalizedProducts = products.map((product) =>
-      normalizePrices(product)
-    );
-    await Promise.all(
-      normalizedProducts.map((product) => saveProduct(product))
-    );
+    const products = await readProducts({
+      includeDeleted: true,
+      fields: "list",
+      skipPurge: true,
+      asAdmin: true,
+    });
+    const changed = products.filter((product) => {
+      const next = normalizePrices(product);
+      return (
+        JSON.stringify(product.prices ?? {}) !==
+        JSON.stringify(next.prices ?? {})
+      );
+    });
+    const normalizedChanged = changed.map((product) => normalizePrices(product));
+    await Promise.all(normalizedChanged.map((product) => saveProduct(product)));
 
     updateShopCatalog({ countries: payload.countries });
-    return { countries: payload.countries, products: normalizedProducts };
+    const productsOut = products.map((product) => normalizePrices(product));
+    const { logCmsPerf } = await import("@/lib/cms/server/perf-log.server");
+    logCmsPerf("saveMarketplaceCurrencies", started, {
+      upserted: normalizedChanged.length,
+      scanned: products.length,
+    });
+    return { countries: payload.countries, products: productsOut };
   }
 
   const products = await readJsonFile<ShopProduct[]>(PRODUCTS_FILE);

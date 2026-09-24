@@ -126,6 +126,34 @@ async function readRemoteMedia(): Promise<MediaAsset[]> {
   }
 }
 
+/**
+ * Fast media library read for admin UI — remote rows + in-memory cache only.
+ * Does not scan the filesystem or walk CMS documents for in-use URLs.
+ */
+export async function listMediaLibrary(): Promise<MediaAsset[]> {
+  ensureMediaFolders(SITE_MEDIA_FOLDERS);
+  try {
+    const folders = await readMediaFoldersDurable();
+    ensureMediaFolders(folders);
+  } catch (error) {
+    console.error("media folders list skipped:", error);
+  }
+
+  let remote: MediaAsset[] = [];
+  try {
+    remote = await readRemoteMedia();
+  } catch (error) {
+    console.error("readRemoteMedia failed:", error);
+  }
+
+  if (remote.length > 0) {
+    replaceMediaAssetsCache(remote, []);
+    return getMediaAssets();
+  }
+
+  return getMediaAssets();
+}
+
 async function persistFolderIfChanged(asset: MediaAsset, folder: string) {
   if (asset.folder === folder) return asset;
   const next = {
@@ -148,10 +176,8 @@ async function persistFolderIfChanged(asset: MediaAsset, folder: string) {
 }
 
 /**
- * Media Library shows only:
- * - assets currently referenced by site/CMS content, and
- * - uploads that are recent (or still in use).
- * Folders: Website Files (site/editables) + Products/Ecovaso Products (recent uploads).
+ * Full reconcile: in-use URLs, site scan, folder migration.
+ * Use sparingly (`?sync=1`) — not on every Media page open.
  */
 export async function syncMediaLibraryFromSupabase(): Promise<MediaAsset[]> {
   ensureMediaFolders(SITE_MEDIA_FOLDERS);

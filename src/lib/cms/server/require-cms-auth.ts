@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { NextResponse } from "next/server";
 import type { CmsAction, CmsModule, CmsUser } from "@/lib/cms/types";
 import { canAccess } from "@/lib/cms/permissions/matrix";
@@ -23,6 +24,35 @@ export type CmsAuthFail = {
 };
 export type CmsAuthResult = CmsAuthOk | CmsAuthFail;
 
+/** Cross-request memo of session+profile within one serverless isolate. */
+const SESSION_TTL_MS = 45_000;
+const sessionCache = new Map<
+  string,
+  { expiresAt: number; result: CmsAuthOk }
+>();
+
+function getCachedSession(userId: string): CmsAuthOk | null {
+  const hit = sessionCache.get(userId);
+  if (!hit) return null;
+  if (Date.now() > hit.expiresAt) {
+    sessionCache.delete(userId);
+    return null;
+  }
+  return hit.result;
+}
+
+function setCachedSession(userId: string, result: CmsAuthOk) {
+  sessionCache.set(userId, {
+    expiresAt: Date.now() + SESSION_TTL_MS,
+    result,
+  });
+}
+
+function invalidateCachedSession(userId?: string) {
+  if (userId) sessionCache.delete(userId);
+  else sessionCache.clear();
+}
+
 async function loadActiveProfile(userId: string, email: string): Promise<CmsUser | null> {
   if (isServiceRoleConfigured()) {
     const admin = createServiceClient();
@@ -45,12 +75,8 @@ async function loadActiveProfile(userId: string, email: string): Promise<CmsUser
   return profileToCmsUser(data as ProfileRow, email);
 }
 
-export async function requireCmsAuth(input: {
-  module: CmsModule;
-  action?: CmsAction;
-}): Promise<CmsAuthResult> {
-  const action = input.action ?? "view";
-
+/** Deduplicates auth+profile within a single RSC/request tree. */
+const resolveCmsSessionUser = cache(async (): Promise<CmsAuthResult> => {
   if (!isSupabaseConfigured()) {
     if (isHostedRuntime()) {
       return {
@@ -63,9 +89,6 @@ export async function requireCmsAuth(input: {
     if (!fallback) {
       return { ok: false, status: 401, error: "Unauthorized" };
     }
-    if (!canAccess(fallback.role, input.module, action)) {
-      return { ok: false, status: 403, error: "Forbidden" };
-    }
     return { ok: true, user: fallback };
   }
 
@@ -75,11 +98,21 @@ export async function requireCmsAuth(input: {
   } = await supabase.auth.getUser();
 
   if (!user) {
+    invalidateCachedSession();
     return { ok: false, status: 401, error: "Unauthorized" };
+  }
+
+  const cached = getCachedSession(user.id);
+  if (cached) {
+    return {
+      ok: true,
+      user: { ...cached.user, email: user.email ?? cached.user.email },
+    };
   }
 
   const profile = await loadActiveProfile(user.id, user.email ?? "");
   if (!profile || profile.status !== "active") {
+    invalidateCachedSession(user.id);
     return { ok: false, status: 403, error: "Forbidden" };
   }
 
@@ -89,6 +122,7 @@ export async function requireCmsAuth(input: {
   ) {
     const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     if (aal?.currentLevel !== "aal2") {
+      invalidateCachedSession(user.id);
       return {
         ok: false,
         status: 403,
@@ -97,11 +131,27 @@ export async function requireCmsAuth(input: {
     }
   }
 
-  if (!canAccess(profile.role, input.module, action)) {
+  const ok: CmsAuthOk = {
+    ok: true,
+    user: { ...profile, email: user.email ?? profile.email },
+  };
+  setCachedSession(user.id, ok);
+  return ok;
+});
+
+export async function requireCmsAuth(input: {
+  module: CmsModule;
+  action?: CmsAction;
+}): Promise<CmsAuthResult> {
+  const action = input.action ?? "view";
+  const session = await resolveCmsSessionUser();
+  if (!session.ok) return session;
+
+  if (!canAccess(session.user.role, input.module, action)) {
     return { ok: false, status: 403, error: "Forbidden" };
   }
 
-  return { ok: true, user: { ...profile, email: user.email ?? profile.email } };
+  return session;
 }
 
 export async function cmsGuard(

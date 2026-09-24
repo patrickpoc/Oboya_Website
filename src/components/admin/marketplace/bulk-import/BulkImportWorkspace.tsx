@@ -7,11 +7,16 @@ import { BulkImportProgress } from "@/components/admin/marketplace/bulk-import/B
 import { BulkImportReviewDialog } from "@/components/admin/marketplace/bulk-import/BulkImportReviewDialog";
 import { BulkImportTable } from "@/components/admin/marketplace/bulk-import/BulkImportTable";
 import { SpreadsheetImportPanel } from "@/components/admin/marketplace/bulk-import/SpreadsheetImportPanel";
+import {
+  BulkExecutionQueue,
+  type BulkQueueItem,
+} from "@/components/admin/marketplace/BulkExecutionQueue";
 import { Button } from "@/components/ui/button";
 import {
   applyBulkImportsSequentially,
   type ImportApplyProgress,
 } from "@/lib/cms/bulk-import/apply-sequential";
+import { displayProductName } from "@/lib/cms/bulk-update/search-products";
 import {
   applyImportPatch,
   refreshImportChangedFields,
@@ -46,6 +51,7 @@ export function BulkImportWorkspace() {
   const [applying, setApplying] = useState(false);
   const [progress, setProgress] = useState<ImportApplyProgress | null>(null);
   const [results, setResults] = useState<ImportApplyResult[] | null>(null);
+  const [queue, setQueue] = useState<BulkQueueItem[]>([]);
 
   const catalog: ImportCatalog = useMemo(
     () => ({
@@ -65,7 +71,7 @@ export function BulkImportWorkspace() {
   const loadProducts = useCallback(async () => {
     setLoadingProducts(true);
     try {
-      const response = await fetch("/api/cms/products?includeDeleted=1", {
+      const response = await fetch("/api/cms/products?includeDeleted=1&fields=list", {
         cache: "no-store",
       });
       if (!response.ok) {
@@ -117,6 +123,7 @@ export function BulkImportWorkspace() {
     setRows([]);
     setResults(null);
     setProgress(null);
+    setQueue([]);
   };
 
   const openReview = async () => {
@@ -164,21 +171,68 @@ export function BulkImportWorkspace() {
       return;
     }
 
+    const initialQueue: BulkQueueItem[] = readyRows.map((row) => ({
+      id: row.productId,
+      sku: row.pending.sku,
+      name: displayProductName(row.pending),
+      status: "pending",
+    }));
+
+    setQueue(initialQueue);
+    setRows([]);
+    setServerIssues(null);
     setApplying(true);
     setResults(null);
+    setProgress(null);
+
+    const markQueue = (
+      productId: string,
+      status: BulkQueueItem["status"],
+      error?: string
+    ) => {
+      setQueue((current) =>
+        current.map((item) =>
+          item.id === productId
+            ? { ...item, status, error: error ?? item.error }
+            : item
+        )
+      );
+    };
+
     try {
       const applyResults = await applyBulkImportsSequentially({
         rows: readyRows,
-        onProgress: setProgress,
+        onProgress: (next) => {
+          setProgress(next);
+          if (next.current) {
+            markQueue(next.current.productId, "running");
+          }
+          if (next.lastResult) {
+            markQueue(
+              next.lastResult.productId,
+              next.lastResult.status === "SUCCESS"
+                ? "success"
+                : next.lastResult.status === "SKIPPED"
+                  ? "skipped"
+                  : "failed",
+              next.lastResult.error
+            );
+          }
+        },
       });
       setResults(applyResults);
-      const successIds = new Set(
-        applyResults
-          .filter((item) => item.status === "SUCCESS")
-          .map((item) => item.productId)
-      );
+      for (const item of applyResults) {
+        markQueue(
+          item.productId,
+          item.status === "SUCCESS"
+            ? "success"
+            : item.status === "SKIPPED"
+              ? "skipped"
+              : "failed",
+          item.error
+        );
+      }
       await loadProducts();
-      setRows((current) => current.filter((row) => !successIds.has(row.productId)));
       toast.success(
         t("importedCount", {
           count: applyResults.filter((item) => item.status === "SUCCESS").length,
@@ -203,6 +257,7 @@ export function BulkImportWorkspace() {
             onLoaded={(nextRows, truncated) => {
               setServerIssues(null);
               setResults(null);
+              setQueue([]);
               setRows(nextRows);
               if (truncated) {
                 toast.error(t("importLimited", { max: BULK_IMPORT_MAX_PRODUCTS }));
@@ -237,6 +292,17 @@ export function BulkImportWorkspace() {
               onPatch={patchRow}
             />
           </div>
+
+          <BulkExecutionQueue
+            namespace="admin.products.bulkImport"
+            items={queue}
+            running={applying}
+            onClear={() => {
+              setQueue([]);
+              setResults(null);
+              setProgress(null);
+            }}
+          />
 
           <BulkImportProgress
             running={applying}

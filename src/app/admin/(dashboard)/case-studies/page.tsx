@@ -18,7 +18,7 @@ export default function CaseStudiesPage() {
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    const res = await fetch("/api/cms/case-studies");
+    const res = await fetch("/api/cms/case-studies?fields=list");
     if (!res.ok) throw new Error(tCommon("loadFailed"));
     const data = (await res.json()) as CmsCaseStudy[];
     setStudies(Array.isArray(data) ? data : []);

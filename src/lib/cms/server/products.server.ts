@@ -17,6 +17,7 @@ import {
   isServiceRoleConfigured,
 } from "@/lib/supabase/admin";
 import { normalizeColorVariants, normalizeImageColorIds, normalizeLocalizedColorName } from "@/lib/shop/color-variants";
+import { logCmsPerf } from "@/lib/cms/server/perf-log.server";
 
 const PRODUCTS_FILE = path.join(process.cwd(), "data", "shop", "products.json");
 
@@ -170,27 +171,165 @@ function productToRow(product: CmsProduct): ProductRow {
   };
 }
 
+/** Slim columns for admin products table UI. */
+const PRODUCT_TABLE_COLUMNS = [
+  "id",
+  "sku",
+  "moq",
+  "brand_id",
+  "category_id",
+  "subcategory_id",
+  "images",
+  "prices",
+  "name",
+  "status",
+  "stock_status",
+  "stock_quantity",
+  "unlimited_stock",
+  "deleted_at",
+  "purge_at",
+  "updated_at",
+  "color_variants",
+].join(",");
+
+/** Columns for bulk UIs — omits heavy HTML `description`. */
+const PRODUCT_LIST_COLUMNS = [
+  "id",
+  "sku",
+  "moq",
+  "brand_id",
+  "category_id",
+  "subcategory_id",
+  "images",
+  "image_color_ids",
+  "tags",
+  "availability",
+  "enabled_countries",
+  "prices",
+  "application",
+  "cultures",
+  "certifications",
+  "country_of_origin",
+  "stock_status",
+  "stock_quantity",
+  "unlimited_stock",
+  "specs",
+  "documents",
+  "related_product_ids",
+  "default_color",
+  "default_color_name",
+  "color_variants",
+  "name",
+  "short_description",
+  "status",
+  "seo",
+  "deleted_at",
+  "purge_at",
+  "updated_at",
+].join(",");
+
+export type ProductReadFields = "table" | "list" | "full";
+
+function stripHeavyFields(product: CmsProduct): CmsProduct {
+  return {
+    ...product,
+    description: { en: "", "pt-BR": "", es: "", "zh-CN": "" },
+  };
+}
+
+function stripTableFields(product: CmsProduct): CmsProduct {
+  return {
+    ...stripHeavyFields(product),
+    shortDescription: { en: "", "pt-BR": "", es: "", "zh-CN": "" },
+    specs: [],
+    documents: [],
+    seo: {
+      title: { en: "", "pt-BR": "", es: "", "zh-CN": "" },
+      description: { en: "", "pt-BR": "", es: "", "zh-CN": "" },
+    },
+    // Keep colorVariants for SKU uniqueness helpers; trim names only via empty desc.
+  };
+}
+
+function projectFields(product: CmsProduct, fields: ProductReadFields): CmsProduct {
+  if (fields === "table") return stripTableFields(product);
+  if (fields === "list") return stripHeavyFields(product);
+  return product;
+}
+
+function selectColumns(fields: ProductReadFields): string {
+  if (fields === "table") return PRODUCT_TABLE_COLUMNS;
+  if (fields === "list") return PRODUCT_LIST_COLUMNS;
+  return "*";
+}
+
+function productMatchesQuery(product: CmsProduct, q: string): boolean {
+  if (!q) return true;
+  const needle = q.trim().toLowerCase();
+  if (!needle) return true;
+  const name = [
+    product.name.en,
+    product.name["pt-BR"],
+    product.name.es,
+    product.name["zh-CN"],
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return (
+    product.id.toLowerCase().includes(needle) ||
+    product.sku.toLowerCase().includes(needle) ||
+    name.includes(needle)
+  );
+}
+
+function productMatchesTab(
+  product: CmsProduct,
+  tab: "active" | "archived" | "trash" | "all"
+): boolean {
+  if (tab === "all") return true;
+  if (tab === "trash") return Boolean(product.deletedAt);
+  if (product.deletedAt) return false;
+  if (tab === "archived") return product.status === "archived";
+  return product.status !== "archived";
+}
+
 export async function readProducts(options?: {
   includeDeleted?: boolean;
   /** Cookie-backed client for admin reads (drafts, trash). */
   asAdmin?: boolean;
+  /**
+   * `table` — admin product list (slim).
+   * `list` — bulk / shop catalog without description HTML.
+   * `full` — edit forms and public detail.
+   */
+  fields?: ProductReadFields;
+  /** Skip trash purge (hot paths). */
+  skipPurge?: boolean;
 }) {
-  // Drop soft items whose 24h purge window has elapsed (Supabase + local).
-  try {
-    await purgeExpiredProducts();
-  } catch (error) {
-    rethrowNextSignals(error);
-    console.error(
-      "cms_products purge:",
-      error instanceof Error ? error.message : error
-    );
+  const fields = options?.fields ?? "full";
+
+  if (!options?.skipPurge) {
+    try {
+      await purgeExpiredProducts({ asAdmin: options?.asAdmin });
+    } catch (error) {
+      rethrowNextSignals(error);
+      console.error(
+        "cms_products purge:",
+        error instanceof Error ? error.message : error
+      );
+    }
   }
 
   if (!isSupabaseConfigured()) {
-    return getCmsProducts(options);
+    const local = getCmsProducts(options);
+    return local.map((product) => projectFields(product, fields));
   }
 
-  const fallback = () => getCmsProducts(options);
+  const fallback = () => {
+    const local = getCmsProducts(options);
+    return local.map((product) => projectFields(product, fields));
+  };
 
   try {
     const supabase = options?.asAdmin
@@ -199,7 +338,7 @@ export async function readProducts(options?: {
 
     let query = supabase
       .from("cms_products")
-      .select("*")
+      .select(selectColumns(fields))
       .order("updated_at", { ascending: false });
     if (!options?.includeDeleted) {
       query = query.is("deleted_at", null);
@@ -216,8 +355,10 @@ export async function readProducts(options?: {
     if (error) throw new Error(error.message);
 
     const products = (data ?? [])
-      .map((row) => rowToProduct(row as ProductRow))
-      // Defense in depth if DB purge could not run (RLS / missing service role).
+      .map((row) => {
+        const product = rowToProduct(row as unknown as ProductRow);
+        return projectFields(product, fields);
+      })
       .filter((product) => !isProductPurgeDue(product));
     if (products.length === 0 && options?.asAdmin) {
       const seed = fallback();
@@ -235,6 +376,327 @@ export async function readProducts(options?: {
     return seed.filter(
       (product) => product.status === "published" && !product.deletedAt
     );
+  }
+}
+
+/** Slim SKU index for duplicate / uniqueness checks — no images or HTML. */
+export async function readProductSkuIndex(options?: {
+  asAdmin?: boolean;
+}): Promise<Array<{ id: string; sku: string; variantSkus: string[] }>> {
+  const started = Date.now();
+
+  const toIndex = (products: CmsProduct[]) =>
+    products.map((product) => ({
+      id: product.id,
+      sku: product.sku,
+      variantSkus: (product.colorVariants ?? [])
+        .map((v) => v.sku?.trim() ?? "")
+        .filter(Boolean),
+    }));
+
+  if (!isSupabaseConfigured()) {
+    const local = getCmsProducts({ includeDeleted: true });
+    const index = toIndex(local);
+    logCmsPerf("readProductSkuIndex.local", started, { count: index.length });
+    return index;
+  }
+
+  try {
+    const supabase =
+      options?.asAdmin !== false
+        ? await createClient()
+        : createPublicClient();
+    const { data, error } = await supabase
+      .from("cms_products")
+      .select("id, sku, color_variants, deleted_at");
+    if (error) throw new Error(error.message);
+
+    const index = (data ?? []).map((row) => {
+      const variants = Array.isArray(row.color_variants)
+        ? (row.color_variants as Array<{ sku?: string }>)
+        : [];
+      return {
+        id: String(row.id ?? ""),
+        sku: String(row.sku ?? ""),
+        variantSkus: variants
+          .map((v) => (typeof v?.sku === "string" ? v.sku.trim() : ""))
+          .filter(Boolean),
+      };
+    });
+    logCmsPerf("readProductSkuIndex.supabase", started, { count: index.length });
+    return index;
+  } catch (error) {
+    rethrowNextSignals(error);
+    console.error(
+      "cms_products sku index:",
+      error instanceof Error ? error.message : error
+    );
+    const index = toIndex(getCmsProducts({ includeDeleted: true }));
+    logCmsPerf("readProductSkuIndex.fallback", started, { count: index.length });
+    return index;
+  }
+}
+
+export type ProductPageResult = {
+  items: CmsProduct[];
+  total: number;
+  page: number;
+  limit: number;
+  tabCounts: { active: number; archived: number; trash: number };
+  unitStats: { total: number; active: number; draft: number };
+};
+
+function computeUnitStats(products: CmsProduct[]) {
+  let total = 0;
+  let active = 0;
+  let draft = 0;
+  for (const product of products) {
+    if (product.deletedAt || product.status === "archived") continue;
+    const units = 1 + (product.colorVariants?.length ?? 0);
+    total += units;
+    if (product.status === "published") active += units;
+    else draft += units;
+  }
+  return { total, active, draft };
+}
+
+function computeTabCounts(products: CmsProduct[]) {
+  let active = 0;
+  let archived = 0;
+  let trash = 0;
+  for (const product of products) {
+    if (product.deletedAt) {
+      trash += 1;
+      continue;
+    }
+    if (product.status === "archived") archived += 1;
+    else active += 1;
+  }
+  return { active, archived, trash };
+}
+
+function applyTabFilter(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query: any,
+  tab: "active" | "archived" | "trash" | "all"
+) {
+  if (tab === "trash") return query.not("deleted_at", "is", null);
+  if (tab === "archived") {
+    return query.is("deleted_at", null).eq("status", "archived");
+  }
+  if (tab === "active") {
+    return query.is("deleted_at", null).neq("status", "archived");
+  }
+  return query;
+}
+
+function applySearchFilter(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query: any,
+  q: string
+) {
+  const needle = q.trim();
+  if (!needle) return query;
+  // Strip PostgREST reserved chars; wrap pattern in quotes for safety.
+  const safe = needle.replace(/[%_,.()"'\\]/g, " ").replace(/\s+/g, " ").trim();
+  if (!safe) return query;
+  const pattern = `"%${safe}%"`;
+  return query.or(
+    [
+      `sku.ilike.${pattern}`,
+      `id.ilike.${pattern}`,
+      `name->>en.ilike.${pattern}`,
+      `name->>pt-BR.ilike.${pattern}`,
+      `name->>es.ilike.${pattern}`,
+      `name->>zh-CN.ilike.${pattern}`,
+    ].join(",")
+  );
+}
+
+/** Paginated admin product list with DB range + embedded tab/unit stats. */
+export async function readProductsPage(options: {
+  asAdmin?: boolean;
+  fields?: ProductReadFields;
+  page?: number;
+  limit?: number;
+  tab?: "active" | "archived" | "trash" | "all";
+  q?: string;
+}): Promise<ProductPageResult> {
+  const started = Date.now();
+  const page = Math.max(1, options.page ?? 1);
+  const limit = Math.min(100, Math.max(1, options.limit ?? 20));
+  const tab = options.tab ?? "active";
+  const fields = options.fields ?? "table";
+  const q = options.q ?? "";
+
+  if (!isSupabaseConfigured()) {
+    const all = await readProducts({
+      includeDeleted: true,
+      asAdmin: options.asAdmin ?? true,
+      fields,
+      skipPurge: true,
+    });
+    const filtered = all.filter(
+      (product) =>
+        productMatchesTab(product, tab) && productMatchesQuery(product, q)
+    );
+    const total = filtered.length;
+    const start = (page - 1) * limit;
+    const items = filtered.slice(start, start + limit);
+    const result = {
+      items,
+      total,
+      page,
+      limit,
+      tabCounts: computeTabCounts(all),
+      unitStats: computeUnitStats(all),
+    };
+    logCmsPerf("readProductsPage.local", started, {
+      tab,
+      total,
+      page,
+      limit,
+      q: Boolean(q.trim()),
+    });
+    return result;
+  }
+
+  try {
+    const supabase = options.asAdmin !== false
+      ? await createClient()
+      : createPublicClient();
+
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
+    let pageQuery = supabase
+      .from("cms_products")
+      .select(selectColumns(fields), { count: "exact" })
+      .order("updated_at", { ascending: false });
+    pageQuery = applyTabFilter(pageQuery, tab);
+    pageQuery = applySearchFilter(pageQuery, q);
+    pageQuery = pageQuery.range(from, to);
+
+    const [pageResult, activeHead, archivedHead, trashHead, unitStatsRpc] =
+      await Promise.all([
+        Promise.race([
+          pageQuery,
+          new Promise<never>((_, reject) =>
+            setTimeout(
+              () => reject(new Error("Supabase products page timeout")),
+              15000
+            )
+          ),
+        ]),
+        supabase
+          .from("cms_products")
+          .select("id", { count: "exact", head: true })
+          .is("deleted_at", null)
+          .neq("status", "archived"),
+        supabase
+          .from("cms_products")
+          .select("id", { count: "exact", head: true })
+          .is("deleted_at", null)
+          .eq("status", "archived"),
+        supabase
+          .from("cms_products")
+          .select("id", { count: "exact", head: true })
+          .not("deleted_at", "is", null),
+        supabase.rpc("cms_product_unit_stats"),
+      ]);
+
+    if (pageResult.error) throw new Error(pageResult.error.message);
+
+    const items = (pageResult.data ?? [])
+      .map((row) =>
+        projectFields(rowToProduct(row as unknown as ProductRow), fields)
+      )
+      .filter((product) => !isProductPurgeDue(product));
+
+    const rpcRow = Array.isArray(unitStatsRpc.data)
+      ? (unitStatsRpc.data[0] as
+          | { total?: number; active?: number; draft?: number }
+          | undefined)
+      : (unitStatsRpc.data as
+          | { total?: number; active?: number; draft?: number }
+          | null);
+
+    let unitStats = { total: 0, active: 0, draft: 0 };
+    if (!unitStatsRpc.error && rpcRow) {
+      unitStats = {
+        total: Number(rpcRow.total ?? 0),
+        active: Number(rpcRow.active ?? 0),
+        draft: Number(rpcRow.draft ?? 0),
+      };
+    } else {
+      if (unitStatsRpc.error) {
+        console.error(
+          "cms_product_unit_stats:",
+          unitStatsRpc.error.message ?? unitStatsRpc.error
+        );
+      }
+      const { data: unitRows } = await supabase
+        .from("cms_products")
+        .select("id, status, deleted_at, color_variants")
+        .is("deleted_at", null)
+        .neq("status", "archived");
+      unitStats = computeUnitStats(
+        (unitRows ?? []).map((row) =>
+          rowToProduct(row as unknown as ProductRow)
+        )
+      );
+    }
+
+    const result: ProductPageResult = {
+      items,
+      total: pageResult.count ?? items.length,
+      page,
+      limit,
+      tabCounts: {
+        active: activeHead.count ?? 0,
+        archived: archivedHead.count ?? 0,
+        trash: trashHead.count ?? 0,
+      },
+      unitStats,
+    };
+
+    logCmsPerf("readProductsPage.supabase", started, {
+      tab,
+      total: result.total,
+      page,
+      limit,
+      items: items.length,
+      q: Boolean(q.trim()),
+    });
+    return result;
+  } catch (error) {
+    rethrowNextSignals(error);
+    console.error(
+      "cms_products page:",
+      error instanceof Error ? error.message : error
+    );
+    // Fallback: in-memory page from seed/cache.
+    const all = getCmsProducts({ includeDeleted: true }).map((product) =>
+      projectFields(product, fields)
+    );
+    const filtered = all.filter(
+      (product) =>
+        productMatchesTab(product, tab) && productMatchesQuery(product, q)
+    );
+    const start = (page - 1) * limit;
+    const result = {
+      items: filtered.slice(start, start + limit),
+      total: filtered.length,
+      page,
+      limit,
+      tabCounts: computeTabCounts(all),
+      unitStats: computeUnitStats(all),
+    };
+    logCmsPerf("readProductsPage.fallback", started, {
+      tab,
+      total: result.total,
+    });
+    return result;
   }
 }
 
@@ -278,12 +740,56 @@ export async function purgeExpiredProducts(options?: {
 export async function readProductById(
   id: string,
   options?: { asAdmin?: boolean }
-) {
-  const products = await readProducts({
-    includeDeleted: true,
-    asAdmin: options?.asAdmin,
-  });
-  return products.find((product) => product.id === id);
+): Promise<CmsProduct | undefined> {
+  if (!id) return undefined;
+
+  if (!isSupabaseConfigured()) {
+    const products = getCmsProducts({ includeDeleted: true });
+    return products.find(
+      (product) => product.id === id || product.sku === id
+    );
+  }
+
+  try {
+    const supabase = options?.asAdmin
+      ? await createClient()
+      : createPublicClient();
+
+    const byId = await Promise.race([
+      supabase.from("cms_products").select("*").eq("id", id).maybeSingle(),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Supabase product timeout")), 8000)
+      ),
+    ]);
+
+    if (byId.error) throw new Error(byId.error.message);
+    if (byId.data) {
+      const product = rowToProduct(byId.data as ProductRow);
+      if (isProductPurgeDue(product)) return undefined;
+      return product;
+    }
+
+    const bySku = await Promise.race([
+      supabase.from("cms_products").select("*").eq("sku", id).maybeSingle(),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Supabase product timeout")), 8000)
+      ),
+    ]);
+
+    if (bySku.error) throw new Error(bySku.error.message);
+    if (!bySku.data) return undefined;
+    const product = rowToProduct(bySku.data as ProductRow);
+    if (isProductPurgeDue(product)) return undefined;
+    return product;
+  } catch (error) {
+    rethrowNextSignals(error);
+    console.error(
+      "cms_products readById:",
+      error instanceof Error ? error.message : error
+    );
+    const seed = getCmsProducts({ includeDeleted: true });
+    return seed.find((product) => product.id === id || product.sku === id);
+  }
 }
 
 export async function saveProduct(product: CmsProduct) {

@@ -4,8 +4,9 @@ import {
   readSolutionsPageSettingsDurable,
   saveSolutionsPageSettingsDurable,
 } from "@/lib/cms/server/solutions-page.server";
-import { revalidateSiteLayout } from "@/lib/cms/revalidate-site";
+import { locales } from "@/i18n/routing";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
+import { revalidatePath } from "next/cache";
 
 export async function GET() {
   try {
@@ -27,7 +28,9 @@ export async function PUT(request: Request) {
     const body = (await request.json()) as SolutionsPageSettings;
     const saved = await saveSolutionsPageSettingsDurable(body);
     try {
-      revalidateSiteLayout();
+      for (const locale of locales) {
+        revalidatePath(`/${locale}/solutions`);
+      }
     } catch {
       // Ignore when revalidation is unavailable.
     }

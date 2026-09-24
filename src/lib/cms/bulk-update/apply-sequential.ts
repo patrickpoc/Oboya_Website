@@ -6,6 +6,8 @@ import type {
   BulkWorkspaceRow,
 } from "@/lib/cms/bulk-update/types";
 import { validateColorVariants } from "@/lib/shop/color-variants";
+import { DEFER_REVALIDATE_HEADER } from "@/lib/cms/revalidate-headers";
+import { BULK_APPLY_GAP_MS, sleep } from "@/lib/cms/bulk-apply-pace";
 
 export type SequentialApplyProgress = {
   index: number;
@@ -14,15 +16,27 @@ export type SequentialApplyProgress = {
   lastResult?: BulkApplyResult;
 };
 
+async function revalidateShopOnce() {
+  try {
+    await fetch("/api/cms/products/revalidate", { method: "POST" });
+  } catch {
+    // Best-effort; saves already persisted.
+  }
+}
+
 /**
  * Sequentially PUT each unique productId that has pending changes.
  * Parent + color child rows share one document — one PUT per group.
+ * Paces requests with a gap to avoid overloading the admin/API.
+ * Defers shop revalidation until the batch finishes.
  */
 export async function applyBulkUpdatesSequentially(params: {
   rows: BulkWorkspaceRow[];
   onProgress?: (progress: SequentialApplyProgress) => void;
+  gapMs?: number;
 }): Promise<BulkApplyResult[]> {
   const { rows, onProgress } = params;
+  const gapMs = params.gapMs ?? BULK_APPLY_GAP_MS;
   const byProduct = new Map<string, BulkWorkspaceRow[]>();
   for (const row of rows) {
     const list = byProduct.get(row.productId) ?? [];
@@ -30,9 +44,9 @@ export async function applyBulkUpdatesSequentially(params: {
     byProduct.set(row.productId, list);
   }
 
-  const groups = Array.from(byProduct.entries()).map(([productId, groupRows]) => {
+  const groups = Array.from(byProduct.entries()).map(([, groupRows]) => {
     const parent = groupRows.find((row) => row.kind === "parent") ?? groupRows[0]!;
-    return { productId, parent, groupRows };
+    return { parent, groupRows };
   });
 
   const results: BulkApplyResult[] = [];
@@ -49,6 +63,8 @@ export async function applyBulkUpdatesSequentially(params: {
       status: "SKIPPED",
     });
   }
+
+  let wroteAny = false;
 
   for (let index = 0; index < withChanges.length; index += 1) {
     const { parent } = withChanges[index];
@@ -79,6 +95,7 @@ export async function applyBulkUpdatesSequentially(params: {
         current: parent,
         lastResult: result,
       });
+      if (index < withChanges.length - 1) await sleep(gapMs);
       continue;
     }
 
@@ -87,7 +104,10 @@ export async function applyBulkUpdatesSequentially(params: {
     try {
       const response = await fetch(`/api/cms/products/${parent.productId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          [DEFER_REVALIDATE_HEADER]: "1",
+        },
         body: JSON.stringify(body),
       });
 
@@ -110,9 +130,11 @@ export async function applyBulkUpdatesSequentially(params: {
           current: parent,
           lastResult: result,
         });
+        if (index < withChanges.length - 1) await sleep(gapMs);
         continue;
       }
 
+      wroteAny = true;
       const result: BulkApplyResult = {
         productId: parent.productId,
         sku: parent.pending.sku,
@@ -143,6 +165,12 @@ export async function applyBulkUpdatesSequentially(params: {
         lastResult: result,
       });
     }
+
+    if (index < withChanges.length - 1) await sleep(gapMs);
+  }
+
+  if (wroteAny) {
+    await revalidateShopOnce();
   }
 
   return results;

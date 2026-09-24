@@ -5,7 +5,7 @@ import type {
   BulkUpdateCatalog,
 } from "@/lib/cms/bulk-update/types";
 
-export const BULK_IMPORT_MAX_PRODUCTS = 100;
+export const BULK_IMPORT_MAX_PRODUCTS = 30;
 
 export const IMPORT_EDITABLE_FIELDS = [
   "sku",

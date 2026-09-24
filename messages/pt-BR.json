@@ -1624,7 +1624,17 @@
         "resultSummary": "{success} com sucesso · {failed} falharam",
         "reason": "Motivo: {reason}",
         "action": "Ação: {action}",
-        "closeSummary": "Fechar resumo"
+        "closeSummary": "Fechar resumo",
+        "executionQueue": "Fila de execução ({count})",
+        "executionQueueRunning": "Processando com intervalo entre produtos…",
+        "clearExecutionQueue": "Limpar fila",
+        "queueStatus": {
+          "pending": "Aguardando",
+          "running": "Processando…",
+          "success": "Concluído",
+          "failed": "Falhou",
+          "skipped": "Ignorado"
+        }
       },
       "bulkUpdate": {
         "title": "Atualização em massa",
@@ -1899,7 +1909,7 @@
         "description": "Atualize vários produtos de uma vez.",
         "searchProducts": "Buscar produtos",
         "selectedFraction": "{count}/{max} selecionados",
-        "productGroupsHint": "(100 produtos / grupos de cor)",
+        "productGroupsHint": "(30 produtos / grupos de cor)",
         "maxReached": "Máximo de {max} produtos / grupos de cor atingido. Remova um para adicionar outro.",
         "selectedProducts": "Produtos / grupos de cor selecionados ({count}/{max})",
         "changed": "Alterados: {count}",
@@ -1918,7 +1928,7 @@
         "importSuccess": "Planilha importada no editor.",
         "importWithErrors": "Importação concluída com erros — revise a lista abaixo.",
         "searchPlaceholder": "Buscar por SKU pai ou de cor, nome da cor ou nome do produto...",
-        "maxSelectedPlaceholder": "Máximo de 100 produtos / grupos de cor selecionados",
+        "maxSelectedPlaceholder": "Máximo de 30 produtos / grupos de cor selecionados",
         "childSkuHint": "{child} · cor de {parent}",
         "colorOfParent": "Cor de {parentSku}",
         "expandColors": "Expandir {count} variações de cor",
@@ -1963,6 +1973,16 @@
         "reason": "Motivo: {reason}",
         "action": "Ação: {action}",
         "closeSummary": "Fechar resumo",
+        "executionQueue": "Fila de execução ({count})",
+        "executionQueueRunning": "Processando com intervalo entre produtos…",
+        "clearExecutionQueue": "Limpar fila",
+        "queueStatus": {
+          "pending": "Aguardando",
+          "running": "Processando…",
+          "success": "Concluído",
+          "failed": "Falhou",
+          "skipped": "Ignorado"
+        },
         "importSpreadsheet": "Importar planilha",
         "importSpreadsheetHint": "Envie CSV ou XLSX. SKU é obrigatório. Células vazias mantêm o valor atual — nunca limpam campos. As alterações são pré-visualizadas localmente até você aplicar.",
         "downloadTemplate": "Baixar modelo",

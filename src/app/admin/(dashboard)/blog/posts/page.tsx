@@ -18,7 +18,7 @@ export default function BlogPostsPage() {
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    const res = await fetch("/api/cms/blog-posts");
+    const res = await fetch("/api/cms/blog-posts?fields=list");
     if (!res.ok) throw new Error(tCommon("loadFailed"));
     const data = (await res.json()) as CmsBlogPost[];
     setPosts(Array.isArray(data) ? data : []);

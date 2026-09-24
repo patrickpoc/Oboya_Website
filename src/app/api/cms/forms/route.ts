@@ -32,7 +32,23 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const type = searchParams.get("type") as FormSubmission["type"] | null;
+  const pageRaw = searchParams.get("page");
+  const limitRaw = searchParams.get("limit");
   const submissions = await readFormSubmissions(type ?? undefined);
+
+  if (pageRaw !== null || limitRaw !== null) {
+    const page = Math.max(1, Number(pageRaw) || 1);
+    const limit = Math.min(100, Math.max(1, Number(limitRaw) || 25));
+    const start = (page - 1) * limit;
+    const items = submissions.slice(start, start + limit);
+    return NextResponse.json({
+      items,
+      total: submissions.length,
+      page,
+      limit,
+    });
+  }
+
   return NextResponse.json(submissions);
 }
 

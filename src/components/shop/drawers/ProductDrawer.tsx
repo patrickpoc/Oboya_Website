@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { BrandLabel } from "@/components/shop/BrandLabel";
 import { useShop } from "@/contexts/ShopContext";
@@ -30,12 +30,18 @@ export function ProductDrawer() {
     openAddToQuoteDialog,
     addToQuoteProductId,
     getProductById,
+    ensureProductDetail,
     brands,
     categories,
   } = useShop();
   const getProductName = useProductName();
   const { getDescriptionHtml, getShortDescription } = useProductDescription();
   const panelRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!quickViewProductId) return;
+    void ensureProductDetail(quickViewProductId);
+  }, [quickViewProductId, ensureProductDetail]);
 
   const product = quickViewProductId
     ? (getProductById(quickViewProductId) as CmsProduct | undefined)

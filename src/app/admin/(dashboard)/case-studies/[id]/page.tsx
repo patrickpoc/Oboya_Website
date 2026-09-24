@@ -74,11 +74,12 @@ export default function CaseStudyEditPage() {
     if (isNew) return;
     void (async () => {
       try {
-        const res = await fetch("/api/cms/case-studies");
+        const res = await fetch(
+          `/api/cms/case-studies?id=${encodeURIComponent(id)}`
+        );
         if (!res.ok) throw new Error(tCommon("loadFailed"));
-        const data = (await res.json()) as CmsCaseStudy[];
-        const existing = data.find((item) => item.id === id);
-        if (!existing) {
+        const existing = (await res.json()) as CmsCaseStudy;
+        if (!existing?.id) {
           toast.error(t("notFound"));
           router.push("/admin/case-studies");
           return;

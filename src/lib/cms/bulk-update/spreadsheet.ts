@@ -658,7 +658,7 @@ export function buildTemplateWorkbook(): ArrayBuffer {
       "Parent SKU rows: MOQ/taxonomy/status + Price USD/BRL/EUR apply to the base product.",
       "Child SKU rows: Color hex, Color name, Variant price USD, Variant image apply to that color only.",
       "Two rows for the same parent merge into one pending document; same-field conflicts warn.",
-      "Limit: 100 products / color groups (not each color row).",
+      "Limit: 30 products / color groups (not each color row).",
     ],
   ];
 
