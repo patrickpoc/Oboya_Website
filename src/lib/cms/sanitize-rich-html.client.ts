@@ -1,53 +1,8 @@
 "use client";
 
-import DOMPurify from "dompurify";
-import { applySanitizedStyleAttr } from "@/lib/cms/sanitize-inline-style";
-import {
-  ALLOWED_ATTR,
-  ALLOWED_TAGS,
-  isAllowedImageSrc,
-  isAllowedLinkHref,
-  postProcessSanitizedHtml,
-} from "@/lib/cms/sanitize-rich-html.shared";
-
-export function sanitizeRichHtml(html: string): string {
-  const input = html.trim();
-  if (!input) return "";
-
-  const purified = DOMPurify.sanitize(input, {
-    ALLOWED_TAGS: [...ALLOWED_TAGS],
-    ALLOWED_ATTR: [...ALLOWED_ATTR],
-    ALLOW_DATA_ATTR: true,
-  });
-
-  const template = document.createElement("template");
-  template.innerHTML = purified;
-
-  template.content.querySelectorAll("a").forEach((anchor) => {
-    const href = anchor.getAttribute("href") ?? "";
-    if (!isAllowedLinkHref(href)) {
-      anchor.removeAttribute("href");
-    } else if (href.startsWith("http")) {
-      anchor.setAttribute("rel", "noopener noreferrer");
-      anchor.setAttribute("target", "_blank");
-    }
-  });
-
-  template.content.querySelectorAll("img").forEach((img) => {
-    const src = img.getAttribute("src") ?? "";
-    if (!isAllowedImageSrc(src)) {
-      img.remove();
-      return;
-    }
-    if (!img.getAttribute("alt")) {
-      img.setAttribute("alt", "");
-    }
-    applySanitizedStyleAttr(img);
-  });
-
-  template.content.querySelectorAll("[style]").forEach((el) => {
-    applySanitizedStyleAttr(el);
-  });
-
-  return postProcessSanitizedHtml(template.innerHTML);
-}
+/**
+ * Client entry for rich-HTML sanitization.
+ * Uses the shared `sanitize-html` implementation so SSR of client components
+ * works on Vercel (plain `dompurify` has no `.sanitize` under Node).
+ */
+export { sanitizeRichHtml } from "@/lib/cms/sanitize-rich-html.core";

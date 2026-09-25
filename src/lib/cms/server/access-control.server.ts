@@ -11,7 +11,7 @@ import {
   isValidRoleId,
 } from "@/lib/cms/permissions/access-types";
 import { buildDefaultAccessControlDoc } from "@/lib/cms/permissions/defaults";
-import { hydrateAccessControl } from "@/lib/cms/permissions/access-store";
+import { hydrateAccessControl, getAccessSnapshot } from "@/lib/cms/permissions/access-store";
 
 export const ACCESS_CONTROL_DOC_ID = "cms-access-control";
 
@@ -97,5 +97,9 @@ export async function saveAccessControlDurable(
 
 /** Ensure in-memory snapshot is loaded (idempotent per request isolate). */
 export async function ensureAccessControlHydrated(): Promise<AccessControlDoc> {
+  const snap = getAccessSnapshot();
+  if (snap.hydrated) {
+    return { roles: snap.roles, matrix: snap.matrix };
+  }
   return readAccessControlDurable();
 }

@@ -32,6 +32,50 @@ export async function createClient() {
  * CMS writes still bust route cache via `revalidatePath` (see revalidate-site.ts).
  * Keep TTL in sync with `SITE_REVALIDATE_SECONDS` / locale layout `revalidate`.
  */
+const PUBLIC_FETCH_TIMEOUT_MS = 12_000;
+const PUBLIC_FETCH_RETRIES = 1;
+
+async function fetchWithTimeoutRetry(
+  input: RequestInfo | URL,
+  init: RequestInit | undefined,
+  extras: RequestInit
+): Promise<Response> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= PUBLIC_FETCH_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), PUBLIC_FETCH_TIMEOUT_MS);
+    try {
+      const upstream = init?.signal;
+      if (upstream) {
+        if (upstream.aborted) controller.abort();
+        else {
+          upstream.addEventListener("abort", () => controller.abort(), {
+            once: true,
+          });
+        }
+      }
+      return await fetch(input, {
+        ...init,
+        ...extras,
+        signal: controller.signal,
+      });
+    } catch (error) {
+      lastError = error;
+      const retryable =
+        error instanceof Error &&
+        (error.name === "AbortError" ||
+          /ETIMEDOUT|ECONNRESET|fetch failed/i.test(error.message) ||
+          /ETIMEDOUT|ECONNRESET/i.test(String((error as { cause?: unknown }).cause)));
+      if (!retryable || attempt === PUBLIC_FETCH_RETRIES) throw error;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Supabase public fetch failed");
+}
+
 export function createPublicClient() {
   const { url, anonKey } = getSupabaseEnv();
 
@@ -46,8 +90,7 @@ export function createPublicClient() {
         const { cache: _cache, next: _next, ...rest } = init ?? {};
         void _cache;
         void _next;
-        return fetch(input, {
-          ...rest,
+        return fetchWithTimeoutRetry(input, rest, {
           next: {
             revalidate: 3600,
             tags: ["cms-documents"],
