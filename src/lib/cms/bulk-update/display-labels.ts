@@ -2,6 +2,7 @@ import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 import type { BulkUpdateCatalog } from "@/lib/cms/bulk-update/types";
 import type { BulkEditableField } from "@/lib/cms/bulk-update/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
+import { formatPriceInput } from "@/lib/cms/parse-price";
 
 export type LabeledOption = { id: string; name: string };
 
@@ -226,11 +227,11 @@ export function formatFieldDisplayValue(
     case "status":
       return product.status === "published" ? "Yes" : "No";
     case "priceUsd":
-      return String(product.prices?.USD ?? "");
+      return formatPriceInput(product.prices?.USD, "USD");
     case "priceBrl":
-      return String(product.prices?.BRL ?? "");
+      return formatPriceInput(product.prices?.BRL, "BRL");
     case "priceEur":
-      return String(product.prices?.EUR ?? "");
+      return formatPriceInput(product.prices?.EUR, "EUR");
     case "defaultColor":
       return product.defaultColor || "";
     case "defaultColorNameEn":
@@ -247,19 +248,19 @@ export function formatFieldDisplayValue(
       const variant = (product.colorVariants ?? []).find(
         (item) => item.id === variantId
       );
-      return String(variant?.prices?.USD ?? "");
+      return formatPriceInput(variant?.prices?.USD, "USD");
     }
     case "variantPriceBrl": {
       const variant = (product.colorVariants ?? []).find(
         (item) => item.id === variantId
       );
-      return String(variant?.prices?.BRL ?? "");
+      return formatPriceInput(variant?.prices?.BRL, "BRL");
     }
     case "variantPriceEur": {
       const variant = (product.colorVariants ?? []).find(
         (item) => item.id === variantId
       );
-      return String(variant?.prices?.EUR ?? "");
+      return formatPriceInput(variant?.prices?.EUR, "EUR");
     }
     default:
       return "";

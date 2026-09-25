@@ -42,6 +42,7 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
     categories,
     openAddToQuoteDialog,
     getProductById,
+    shopConfig,
   } = useShop();
   const getProductName = useProductName();
   const { getDescriptionHtml, getExcerpt, locale } = useProductDescription();
@@ -165,21 +166,23 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
             </p>
           ) : null}
 
-          <button
-            type="button"
-            onClick={() =>
-              openAddToQuoteDialog(
-                product.id,
-                toCartVariantId(activeVariant?.id)
-              )
-            }
-            className={buttonVariants({
-              className:
-                "mt-6 w-full rounded-full bg-oboya-green text-white hover:bg-oboya-green/90 sm:w-auto sm:px-8",
-            })}
-          >
-            {t("addToQuote")}
-          </button>
+          {shopConfig.rfq.enabled ? (
+            <button
+              type="button"
+              onClick={() =>
+                openAddToQuoteDialog(
+                  product.id,
+                  toCartVariantId(activeVariant?.id)
+                )
+              }
+              className={buttonVariants({
+                className:
+                  "mt-6 w-full rounded-full bg-oboya-green text-white hover:bg-oboya-green/90 sm:w-auto sm:px-8",
+              })}
+            >
+              {t("addToQuote")}
+            </button>
+          ) : null}
         </div>
       </div>
 

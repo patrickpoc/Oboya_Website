@@ -1,12 +1,18 @@
 import "server-only";
 
-import type { CmsLocale, CmsRole, CmsUser } from "@/lib/cms/types";
+import type {
+  CmsLocale,
+  CmsRole,
+  CmsUser,
+  PermissionOverrides,
+} from "@/lib/cms/types";
 import {
   deleteCmsUser,
   getCmsUserById,
   getCmsUsers,
   saveCmsUser,
 } from "@/lib/cms/repositories/users-repository";
+import { isValidRoleId } from "@/lib/cms/permissions/access-types";
 import { createClient } from "@/lib/supabase/server";
 import {
   createServiceClient,
@@ -24,39 +30,43 @@ type ProfileRow = {
   locale: string;
   status: string;
   must_change_password: boolean | null;
+  permission_overrides?: unknown;
   created_at: string;
   updated_at: string;
 };
 
-function isCmsRole(value: string): value is CmsRole {
-  return [
-    "super_admin",
-    "admin",
-    "content_manager",
-    "marketplace_manager",
-    "sales_manager",
-    "hr_manager",
-    "viewer",
-  ].includes(value);
-}
-
 function isCmsLocale(value: string): value is CmsLocale {
   return ["en", "pt-BR", "es", "zh-CN"].includes(value);
+}
+
+function parsePermissionOverrides(
+  raw: unknown
+): PermissionOverrides | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const obj = raw as PermissionOverrides;
+  const grants =
+    obj.grants && typeof obj.grants === "object" ? obj.grants : undefined;
+  const denies =
+    obj.denies && typeof obj.denies === "object" ? obj.denies : undefined;
+  if (!grants && !denies) return undefined;
+  return { grants, denies };
 }
 
 export function profileToCmsUser(
   profile: ProfileRow,
   email: string
 ): CmsUser {
+  const overrides = parsePermissionOverrides(profile.permission_overrides);
   return {
     id: profile.id,
     email,
     name: profile.name || email.split("@")[0] || "User",
     jobTitle: profile.job_title ?? undefined,
-    role: isCmsRole(profile.role) ? profile.role : "viewer",
+    role: isValidRoleId(profile.role) ? profile.role : "viewer",
     locale: isCmsLocale(profile.locale) ? profile.locale : "en",
     status: profile.status === "inactive" ? "inactive" : "active",
     mustChangePassword: Boolean(profile.must_change_password),
+    permissionOverrides: overrides,
     createdAt: profile.created_at,
     updatedAt: profile.updated_at,
   };
@@ -406,16 +416,24 @@ export async function updateCmsUserDurable(
     jobTitle: string;
     status: CmsUser["status"];
     email: string;
+    permissionOverrides: PermissionOverrides | null;
   }>
 ): Promise<CmsUser> {
   if (!isSupabaseConfigured() || !isServiceRoleConfigured()) {
     const existing = getCmsUserById(id);
     if (!existing) throw new Error("User not found");
-    return saveCmsUser({
+    const { permissionOverrides: patchOverrides, ...rest } = patch;
+    const next: CmsUser = {
       ...existing,
-      ...patch,
+      ...rest,
       updatedAt: new Date().toISOString(),
-    });
+    };
+    if (patchOverrides === null) {
+      delete next.permissionOverrides;
+    } else if (patchOverrides !== undefined) {
+      next.permissionOverrides = patchOverrides;
+    }
+    return saveCmsUser(next);
   }
 
   const admin = createServiceClient();
@@ -448,6 +466,11 @@ export async function updateCmsUserDurable(
   if (patch.locale !== undefined) updates.locale = patch.locale;
   if (patch.jobTitle !== undefined) updates.job_title = patch.jobTitle;
   if (patch.status !== undefined) updates.status = patch.status;
+  if (patch.permissionOverrides === null) {
+    updates.permission_overrides = {};
+  } else if (patch.permissionOverrides !== undefined) {
+    updates.permission_overrides = patch.permissionOverrides;
+  }
 
   const { data: profile, error: profileError } = await admin
     .from("cms_user_profiles")

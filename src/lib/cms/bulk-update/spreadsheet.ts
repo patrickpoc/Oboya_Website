@@ -20,6 +20,7 @@ import type {
   BulkUpdateCatalog,
   BulkWorkspaceRow,
 } from "@/lib/cms/bulk-update/types";
+import { parsePriceInput, type PriceCurrencyHint } from "@/lib/cms/parse-price";
 
 export type SpreadsheetImportError = {
   row: number;
@@ -130,17 +131,21 @@ function parseOptionalPrice(
   rowNumber: number,
   sku: string,
   label: string,
-  errors: SpreadsheetImportError[]
+  errors: SpreadsheetImportError[],
+  currency: PriceCurrencyHint
 ): number | null | undefined {
   const value = raw?.trim();
   if (!value) return undefined;
-  const num = Number(value);
-  if (!Number.isFinite(num) || num < 0) {
+  const num = parsePriceInput(value, currency);
+  if (num === null || typeof num !== "number") {
     errors.push({
       row: rowNumber,
       sku,
       message: `Invalid ${label} "${value}".`,
-      suggestedAction: "Use a non-negative number.",
+      suggestedAction:
+        currency === "BRL"
+          ? "Use a non-negative number (e.g. 0,47 or 1.234,56)."
+          : "Use a non-negative number (e.g. 0.47).",
     });
     return undefined;
   }
@@ -312,7 +317,8 @@ function parseRowToPatch(
       rowNumber,
       sku,
       "Price USD",
-      errors
+      errors,
+      "USD"
     );
     if (priceUsd !== undefined) patch.priceUsd = priceUsd;
     const priceBrl = parseOptionalPrice(
@@ -320,7 +326,8 @@ function parseRowToPatch(
       rowNumber,
       sku,
       "Price BRL",
-      errors
+      errors,
+      "BRL"
     );
     if (priceBrl !== undefined) patch.priceBrl = priceBrl;
     const priceEur = parseOptionalPrice(
@@ -328,7 +335,8 @@ function parseRowToPatch(
       rowNumber,
       sku,
       "Price EUR",
-      errors
+      errors,
+      "EUR"
     );
     if (priceEur !== undefined) patch.priceEur = priceEur;
   } else {
@@ -354,9 +362,17 @@ function parseRowToPatch(
         rowNumber,
         sku,
         "Variant price USD",
-        errors
+        errors,
+        "USD"
       ) ??
-      parseOptionalPrice(cells["Price USD"], rowNumber, sku, "Price USD", errors);
+      parseOptionalPrice(
+        cells["Price USD"],
+        rowNumber,
+        sku,
+        "Price USD",
+        errors,
+        "USD"
+      );
     if (variantPriceUsd !== undefined) patch.variantPriceUsd = variantPriceUsd;
 
     const variantPriceBrl = parseOptionalPrice(
@@ -364,7 +380,8 @@ function parseRowToPatch(
       rowNumber,
       sku,
       "Price BRL",
-      errors
+      errors,
+      "BRL"
     );
     if (variantPriceBrl !== undefined) patch.variantPriceBrl = variantPriceBrl;
 
@@ -373,7 +390,8 @@ function parseRowToPatch(
       rowNumber,
       sku,
       "Price EUR",
-      errors
+      errors,
+      "EUR"
     );
     if (variantPriceEur !== undefined) patch.variantPriceEur = variantPriceEur;
   }

@@ -4,14 +4,28 @@ import { useEffect, useState } from "react";
 import { getShopCatalog, updateShopCatalog } from "@/lib/shop/catalog";
 import type {
   ShopBrand,
+  ShopCatalog,
   ShopCategory,
   ShopCountry,
   ShopFilterGroup,
   ShopFilterOptions,
 } from "@/lib/shop/types";
 
+/** Snapshot so React setState sees a new reference after mutating the module singleton. */
+function snapshotCatalog(): ShopCatalog {
+  const current = getShopCatalog();
+  return {
+    countries: current.countries,
+    categories: current.categories,
+    brands: current.brands,
+    filterGroups: current.filterGroups,
+    filterOptions: current.filterOptions,
+    products: current.products,
+  };
+}
+
 export function useAdminMarketplaceCatalog() {
-  const [catalog, setCatalog] = useState(() => getShopCatalog());
+  const [catalog, setCatalog] = useState(() => snapshotCatalog());
   const [currencies, setCurrencies] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,7 +70,7 @@ export function useAdminMarketplaceCatalog() {
         }
 
         if (!cancelled) {
-          setCatalog(getShopCatalog());
+          setCatalog(snapshotCatalog());
         }
       } finally {
         if (!cancelled) setLoading(false);

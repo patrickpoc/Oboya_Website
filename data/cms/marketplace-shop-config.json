@@ -1,0 +1,32 @@
+{
+  "catalog": {
+    "defaultViewMode": "grid",
+    "defaultSort": "relevance",
+    "pageSize": 24
+  },
+  "rfq": {
+    "enabled": true,
+    "fields": {
+      "company": { "visible": true, "required": true },
+      "contactName": { "visible": true, "required": true },
+      "email": { "visible": true, "required": true },
+      "phone": { "visible": true, "required": true },
+      "country": { "visible": true, "required": true },
+      "message": { "visible": true, "required": false },
+      "marketingOptIn": { "visible": true, "required": false }
+    },
+    "introI18n": { "en": "", "pt-BR": "", "es": "", "zh-CN": "" },
+    "confirmationI18n": { "en": "", "pt-BR": "", "es": "", "zh-CN": "" }
+  },
+  "banner": {
+    "enabled": false,
+    "imageUrl": "",
+    "href": "",
+    "titleI18n": { "en": "", "pt-BR": "", "es": "", "zh-CN": "" },
+    "subtitleI18n": { "en": "", "pt-BR": "", "es": "", "zh-CN": "" }
+  },
+  "market": {
+    "defaultCountryCode": null,
+    "defaultCurrencyCode": null
+  }
+}

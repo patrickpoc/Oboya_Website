@@ -84,6 +84,7 @@ export function revalidateShopPages(productId?: string) {
   revalidatePath("/api/cms/products");
   revalidatePath("/api/cms/marketplace/filters");
   revalidatePath("/api/cms/marketplace/currencies");
+  revalidatePath("/api/cms/marketplace/shop-config");
   forEachLocale((locale) => {
     revalidatePath(`/${locale}/shop`);
     revalidatePath(`/${locale}/shop/cart`);

@@ -19,6 +19,11 @@ import {
   updateShopCatalog,
 } from "@/lib/shop/catalog";
 import {
+  DEFAULT_SHOP_CONFIG,
+  normalizeShopConfig,
+} from "@/lib/cms/shop-config/defaults";
+import type { ShopConfig } from "@/lib/cms/shop-config/types";
+import {
   normalizeBrands,
   normalizeCategories,
   normalizeFilterGroups,
@@ -74,6 +79,8 @@ interface ShopContextValue extends ShopState {
   isReady: boolean;
   /** True after marketplace CMS products/filters have hydrated (or failed). */
   catalogReady: boolean;
+  shopConfig: ShopConfig;
+  pageSize: number;
   itemCount: number;
   activeFilterCount: number;
   filteredProducts: ShopProduct[];
@@ -245,6 +252,11 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const [shopProducts, setShopProducts] = useState<ShopProduct[]>([]);
   const [catalogReady, setCatalogReady] = useState(false);
   const [catalogTick, setCatalogTick] = useState(0);
+  const [shopConfig, setShopConfig] = useState<ShopConfig>(DEFAULT_SHOP_CONFIG);
+  const shopConfigRef = useRef(shopConfig);
+  shopConfigRef.current = shopConfig;
+  const marketDefaultsApplied = useRef(false);
+  const pageSize = shopConfig.catalog.pageSize || PRODUCTS_PAGE_SIZE;
   const hydratedFromUrl = useRef(false);
   const skipUrlWrite = useRef(false);
   const lastSyncedQuery = useRef<string | null>(null);
@@ -288,11 +300,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           cache: "no-store",
           headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
         };
-        const [productsRes, filtersRes, currenciesRes] = await Promise.all([
-          fetch("/api/cms/products?fields=list", catalogFetch),
-          fetch("/api/cms/marketplace/filters", catalogFetch),
-          fetch("/api/cms/marketplace/currencies", catalogFetch),
-        ]);
+        const [productsRes, filtersRes, currenciesRes, shopConfigRes] =
+          await Promise.all([
+            fetch("/api/cms/products?fields=list", catalogFetch),
+            fetch("/api/cms/marketplace/filters", catalogFetch),
+            fetch("/api/cms/marketplace/currencies", catalogFetch),
+            fetch("/api/cms/marketplace/shop-config", catalogFetch),
+          ]);
         if (!productsRes.ok) throw new Error("Failed to load products");
 
         if (filtersRes.ok) {
@@ -325,6 +339,34 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           if (currencies.countries) {
             updateShopCatalog({ countries: currencies.countries });
           }
+        }
+
+        let nextShopConfig = DEFAULT_SHOP_CONFIG;
+        if (shopConfigRes.ok) {
+          try {
+            const rawConfig = await shopConfigRes.json();
+            nextShopConfig = normalizeShopConfig(rawConfig, {
+              countries: getShopCatalog().countries,
+            });
+          } catch {
+            nextShopConfig = DEFAULT_SHOP_CONFIG;
+          }
+        }
+        if (!cancelled) {
+          setShopConfig(nextShopConfig);
+          setState((prev) => ({
+            ...prev,
+            visibleCount: nextShopConfig.catalog.pageSize,
+            // Apply catalog defaults only before URL hydration / when still at built-in defaults.
+            sort:
+              prev.sort === defaultState.sort
+                ? nextShopConfig.catalog.defaultSort
+                : prev.sort,
+            viewMode:
+              prev.viewMode === defaultState.viewMode
+                ? nextShopConfig.catalog.defaultViewMode
+                : prev.viewMode,
+          }));
         }
 
         const products = (await productsRes.json()) as CmsProduct[];
@@ -421,9 +463,14 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       }
       lastSyncedQuery.current = query;
 
-      const urlState = parseShopUrlState(new URLSearchParams(query));
+      const urlState = parseShopUrlState(new URLSearchParams(query), {
+        sort: shopConfigRef.current.catalog.defaultSort,
+        view: shopConfigRef.current.catalog.defaultViewMode,
+      });
       const pendingProduct = urlState.product;
       const softOpen = enteringShop && Boolean(pendingProduct);
+      const rfqEnabled = shopConfigRef.current.rfq.enabled;
+      const pageChunk = shopConfigRef.current.catalog.pageSize;
 
       if (softOpenTimer.current) {
         clearTimeout(softOpenTimer.current);
@@ -445,9 +492,9 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           viewMode: urlState.view,
           filters,
           quickViewProductId: null,
-          isCartOpen: urlState.cart,
-          isQuoteModalOpen: urlState.quote,
-          visibleCount: PRODUCTS_PAGE_SIZE,
+          isCartOpen: rfqEnabled ? urlState.cart : false,
+          isQuoteModalOpen: rfqEnabled ? urlState.quote : false,
+          visibleCount: pageChunk,
         };
       });
       hydratedFromUrl.current = true;
@@ -484,6 +531,41 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       }
     };
   }, [isReady, isShopListingRoute, router, searchParams, catalogReady]);
+
+  // Apply market defaults once when visitor has no country from storage/URL.
+  useEffect(() => {
+    if (!catalogReady || !isReady || marketDefaultsApplied.current) return;
+    const defaults = shopConfig.market;
+    if (!defaults.defaultCountryCode) {
+      marketDefaultsApplied.current = true;
+      return;
+    }
+
+    let applied = false;
+    setState((prev) => {
+      if (prev.countryCode) {
+        applied = true;
+        return prev;
+      }
+      const country = getCountryByCode(defaults.defaultCountryCode!);
+      if (!country) {
+        applied = true;
+        return prev;
+      }
+      const currency =
+        defaults.defaultCurrencyCode &&
+        country.currencies.includes(defaults.defaultCurrencyCode)
+          ? defaults.defaultCurrencyCode
+          : country.defaultCurrency;
+      applied = true;
+      return {
+        ...prev,
+        countryCode: country.code,
+        currency,
+      };
+    });
+    if (applied) marketDefaultsApplied.current = true;
+  }, [catalogReady, isReady, shopConfig.market]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -566,12 +648,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
   const setCountry = useCallback((countryCode: string) => {
     const country = getCountryByCode(countryCode);
+    const chunk = shopConfigRef.current.catalog.pageSize;
     setState((prev) => ({
       ...prev,
       countryCode,
       currency: country?.defaultCurrency ?? prev.currency,
       items: [],
-      visibleCount: PRODUCTS_PAGE_SIZE,
+      visibleCount: chunk,
       filters: EMPTY_SHOP_FILTERS,
       search: "",
     }));
@@ -654,13 +737,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       return {
         ...prev,
         search,
-        visibleCount: PRODUCTS_PAGE_SIZE,
+        visibleCount: shopConfigRef.current.catalog.pageSize,
       };
     });
   }, []);
 
   const setSort = useCallback((sort: SortOption) => {
-    setState((prev) => ({ ...prev, sort, visibleCount: PRODUCTS_PAGE_SIZE }));
+    setState((prev) => ({ ...prev, sort, visibleCount: shopConfigRef.current.catalog.pageSize }));
   }, []);
 
   const setViewMode = useCallback((viewMode: ViewMode) => {
@@ -668,14 +751,14 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setFilters = useCallback((filters: ShopFilters) => {
-    setState((prev) => ({ ...prev, filters, visibleCount: PRODUCTS_PAGE_SIZE }));
+    setState((prev) => ({ ...prev, filters, visibleCount: shopConfigRef.current.catalog.pageSize }));
   }, []);
 
   const updateFilters = useCallback((patch: Partial<ShopFilters>) => {
     setState((prev) => ({
       ...prev,
       filters: { ...prev.filters, ...patch },
-      visibleCount: PRODUCTS_PAGE_SIZE,
+      visibleCount: shopConfigRef.current.catalog.pageSize,
     }));
   }, []);
 
@@ -683,12 +766,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     setState((prev) => ({
       ...prev,
       filters: EMPTY_SHOP_FILTERS,
-      visibleCount: PRODUCTS_PAGE_SIZE,
+      visibleCount: shopConfigRef.current.catalog.pageSize,
     }));
   }, []);
 
   const addItem = useCallback(
     (productId: string, quantity = 1, variantId: string | null = null) => {
+      if (!shopConfigRef.current.rfq.enabled) return;
       const product = getProductByIdFromState(productId);
       const normalizedVariantId = variantId || null;
       const moq = getProductMoq(product, normalizedVariantId);
@@ -765,6 +849,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setCartOpen = useCallback((open: boolean) => {
+    if (open && !shopConfigRef.current.rfq.enabled) return;
     setState((prev) => ({ ...prev, isCartOpen: open }));
   }, []);
 
@@ -773,6 +858,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setQuoteModalOpen = useCallback((open: boolean) => {
+    if (open && !shopConfigRef.current.rfq.enabled) return;
     setState((prev) => ({
       ...prev,
       isQuoteModalOpen: open,
@@ -793,6 +879,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
   const openAddToQuoteDialog = useCallback(
     (productId: string, variantId: string | null = null) => {
+      if (!shopConfigRef.current.rfq.enabled) return;
       setAddToQuoteProductId(productId);
       setAddToQuoteVariantId(variantId);
     },
@@ -807,12 +894,12 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const loadMoreProducts = useCallback(() => {
     setState((prev) => ({
       ...prev,
-      visibleCount: prev.visibleCount + PRODUCTS_PAGE_SIZE,
+      visibleCount: prev.visibleCount + shopConfigRef.current.catalog.pageSize,
     }));
   }, []);
 
   const resetVisibleCount = useCallback(() => {
-    setState((prev) => ({ ...prev, visibleCount: PRODUCTS_PAGE_SIZE }));
+    setState((prev) => ({ ...prev, visibleCount: shopConfigRef.current.catalog.pageSize }));
   }, []);
 
   const catalog = useMemo(() => {
@@ -921,6 +1008,9 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       >,
       officeId: string | null = null
     ) => {
+      if (!shopConfigRef.current.rfq.enabled) {
+        throw new Error("Quote requests are disabled");
+      }
       if (!state.countryCode || !state.currency) {
         throw new Error("Country and currency required");
       }
@@ -994,6 +1084,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       ...state,
       isReady,
       catalogReady,
+      shopConfig,
+      pageSize,
       itemCount,
       activeFilterCount,
       filteredProducts,
@@ -1045,6 +1137,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       state,
       isReady,
       catalogReady,
+      shopConfig,
+      pageSize,
       itemCount,
       activeFilterCount,
       filteredProducts,

@@ -102,10 +102,13 @@ function parseCustomFilters(searchParams: URLSearchParams): Record<string, strin
 }
 
 export function parseShopUrlState(
-  searchParams: URLSearchParams
+  searchParams: URLSearchParams,
+  defaults?: { sort?: SortOption; view?: ViewMode }
 ): ShopUrlState {
   const sortParam = searchParams.get("sort");
   const viewParam = searchParams.get("view");
+  const fallbackSort = defaults?.sort ?? "relevance";
+  const fallbackView = defaults?.view ?? "grid";
 
   return {
     country: searchParams.get("country"),
@@ -113,8 +116,13 @@ export function parseShopUrlState(
     q: searchParams.get("q") ?? "",
     sort: SORT_VALUES.includes(sortParam as SortOption)
       ? (sortParam as SortOption)
-      : "relevance",
-    view: viewParam === "list" ? "list" : "grid",
+      : fallbackSort,
+    view:
+      viewParam === "list"
+        ? "list"
+        : viewParam === "grid"
+          ? "grid"
+          : fallbackView,
     filters: {
       ...EMPTY_SHOP_FILTERS,
       categoryId: searchParams.get("category"),

@@ -24,6 +24,11 @@ import type {
   ShopProduct,
 } from "@/lib/shop/types";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import {
+  DEFAULT_SHOP_CONFIG,
+  normalizeShopConfig,
+} from "@/lib/cms/shop-config/defaults";
+import type { ShopConfig } from "@/lib/cms/shop-config/types";
 
 const CATEGORIES_FILE = path.join(process.cwd(), "data", "shop", "categories.json");
 const BRANDS_FILE = path.join(process.cwd(), "data", "shop", "brands.json");
@@ -41,9 +46,16 @@ const FILTER_GROUPS_FILE = path.join(
 );
 const COUNTRIES_FILE = path.join(process.cwd(), "data", "shop", "countries.json");
 const PRODUCTS_FILE = path.join(process.cwd(), "data", "shop", "products.json");
+const SHOP_CONFIG_FILE = path.join(
+  process.cwd(),
+  "data",
+  "cms",
+  "marketplace-shop-config.json"
+);
 
 export const MARKETPLACE_FILTERS_DOC_ID = "marketplace-filters";
 export const MARKETPLACE_CURRENCIES_DOC_ID = "marketplace-currencies";
+export const MARKETPLACE_SHOP_CONFIG_DOC_ID = "marketplace-shop-config";
 
 export type FiltersPayload = {
   categories: ShopCategory[];
@@ -280,4 +292,47 @@ export async function hydrateShopCatalogDurable() {
     filterOptions: filters.filterOptions,
     countries: currencies.countries,
   });
+}
+
+export async function readMarketplaceShopConfig(): Promise<ShopConfig> {
+  const [remote, currencies] = await Promise.all([
+    readCmsDocumentData(MARKETPLACE_SHOP_CONFIG_DOC_ID),
+    readMarketplaceCurrencies().catch(() => null),
+  ]);
+
+  if (remote && typeof remote === "object") {
+    return normalizeShopConfig(remote, {
+      countries: currencies?.countries,
+    });
+  }
+
+  const seed = await readJsonFileOptional<unknown>(SHOP_CONFIG_FILE);
+  if (seed) {
+    return normalizeShopConfig(seed, { countries: currencies?.countries });
+  }
+
+  return normalizeShopConfig(DEFAULT_SHOP_CONFIG, {
+    countries: currencies?.countries,
+  });
+}
+
+export async function saveMarketplaceShopConfig(
+  payload: unknown
+): Promise<ShopConfig> {
+  const currencies = await readMarketplaceCurrencies().catch(() => null);
+  const normalized = normalizeShopConfig(payload, {
+    countries: currencies?.countries,
+  });
+
+  if (isSupabaseConfigured()) {
+    await writeCmsDocumentData(
+      MARKETPLACE_SHOP_CONFIG_DOC_ID,
+      "marketplace",
+      normalized
+    );
+    return normalized;
+  }
+
+  await writeLocalJsonFile(SHOP_CONFIG_FILE, normalized);
+  return normalized;
 }

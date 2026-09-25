@@ -1,0 +1,160 @@
+{
+  "roles": [
+    {
+      "id": "super_admin",
+      "label": "Super Administrator",
+      "system": true,
+      "active": true,
+      "sortOrder": 0
+    },
+    {
+      "id": "admin",
+      "label": "Administrator",
+      "system": true,
+      "active": true,
+      "sortOrder": 1
+    },
+    {
+      "id": "content_manager",
+      "label": "Content Manager",
+      "system": true,
+      "active": true,
+      "sortOrder": 2
+    },
+    {
+      "id": "marketplace_manager",
+      "label": "Marketplace Manager",
+      "system": true,
+      "active": true,
+      "sortOrder": 3
+    },
+    {
+      "id": "sales_manager",
+      "label": "Sales Manager",
+      "system": true,
+      "active": true,
+      "sortOrder": 4
+    },
+    {
+      "id": "hr_manager",
+      "label": "HR Manager",
+      "system": true,
+      "active": true,
+      "sortOrder": 5
+    },
+    {
+      "id": "viewer",
+      "label": "Viewer",
+      "system": true,
+      "active": true,
+      "sortOrder": 6
+    }
+  ],
+  "matrix": {
+    "super_admin": {
+      "dashboard": "full",
+      "website": "full",
+      "marketplace": "full",
+      "global_presence": "full",
+      "case_studies": "full",
+      "blog": "full",
+      "careers": "full",
+      "media": "full",
+      "forms": "full",
+      "users": "full",
+      "settings": "full",
+      "analytics": "full",
+      "audit_logs": "full"
+    },
+    "admin": {
+      "dashboard": ["view"],
+      "website": "full",
+      "marketplace": "full",
+      "global_presence": "full",
+      "case_studies": "full",
+      "blog": "full",
+      "careers": "full",
+      "media": "full",
+      "forms": "full",
+      "users": ["view", "create", "edit", "publish"],
+      "settings": ["view", "create", "edit", "publish"],
+      "analytics": ["view"],
+      "audit_logs": ["view"]
+    },
+    "content_manager": {
+      "dashboard": ["view"],
+      "website": ["view", "create", "edit", "publish"],
+      "marketplace": ["view"],
+      "global_presence": ["view"],
+      "case_studies": ["view", "create", "edit", "publish"],
+      "blog": ["view", "create", "edit", "publish"],
+      "careers": ["view"],
+      "media": ["view", "create", "edit", "publish"],
+      "forms": "none",
+      "users": "none",
+      "settings": "none",
+      "analytics": ["view"],
+      "audit_logs": "none"
+    },
+    "marketplace_manager": {
+      "dashboard": ["view"],
+      "website": ["view"],
+      "marketplace": "full",
+      "global_presence": ["view", "create", "edit", "publish"],
+      "case_studies": ["view"],
+      "blog": ["view"],
+      "careers": ["view"],
+      "media": ["view", "create", "edit", "publish"],
+      "forms": "none",
+      "users": "none",
+      "settings": "none",
+      "analytics": ["view"],
+      "audit_logs": "none"
+    },
+    "sales_manager": {
+      "dashboard": ["view"],
+      "website": ["view"],
+      "marketplace": ["view"],
+      "global_presence": ["view"],
+      "case_studies": ["view"],
+      "blog": ["view"],
+      "careers": ["view"],
+      "media": ["view"],
+      "forms": ["view", "create", "edit", "publish"],
+      "users": "none",
+      "settings": "none",
+      "analytics": ["view"],
+      "audit_logs": "none"
+    },
+    "hr_manager": {
+      "dashboard": ["view"],
+      "website": ["view"],
+      "marketplace": ["view"],
+      "global_presence": ["view"],
+      "case_studies": ["view"],
+      "blog": ["view"],
+      "careers": "full",
+      "media": ["view"],
+      "forms": "none",
+      "users": "none",
+      "settings": "none",
+      "analytics": ["view"],
+      "audit_logs": "none"
+    },
+    "viewer": {
+      "dashboard": ["view"],
+      "website": ["view"],
+      "marketplace": ["view"],
+      "global_presence": ["view"],
+      "case_studies": ["view"],
+      "blog": ["view"],
+      "careers": ["view"],
+      "media": ["view"],
+      "forms": "none",
+      "users": "none",
+      "settings": ["view"],
+      "analytics": ["view"],
+      "audit_logs": ["view"]
+    }
+  }
+}

@@ -1,140 +1,27 @@
-import type { CmsAction, CmsModule, CmsRole } from "@/lib/cms/types";
+import type { CmsAction, CmsModule } from "@/lib/cms/types";
+import { canAccess as resolveCanAccess } from "./access-resolve";
+import { BUILTIN_ROLE_LABELS, BUILTIN_MATRIX } from "./defaults";
+import { FULL_ACTIONS } from "./access-types";
+import { getAccessSnapshot, getRoleLabel } from "./access-store";
 
-type PermissionLevel = CmsAction[] | "full" | "none";
+/** @deprecated Prefer getRoleLabel from access-store; kept for Roles page. */
+export const ROLE_LABELS: Record<string, string> = { ...BUILTIN_ROLE_LABELS };
 
-const FULL: CmsAction[] = ["view", "create", "edit", "delete", "publish"];
-const EDIT: CmsAction[] = ["view", "create", "edit", "publish"];
-const VIEW: CmsAction[] = ["view"];
-
-export const ROLE_LABELS: Record<CmsRole, string> = {
-  super_admin: "Super Administrator",
-  admin: "Administrator",
-  content_manager: "Content Manager",
-  marketplace_manager: "Marketplace Manager",
-  sales_manager: "Sales Manager",
-  hr_manager: "HR Manager",
-  viewer: "Viewer",
-};
-
-const MATRIX: Record<CmsRole, Partial<Record<CmsModule, PermissionLevel>>> = {
-  super_admin: {
-    dashboard: "full",
-    website: "full",
-    marketplace: "full",
-    global_presence: "full",
-    case_studies: "full",
-    blog: "full",
-    careers: "full",
-    media: "full",
-    forms: "full",
-    users: "full",
-    settings: "full",
-    analytics: "full",
-    audit_logs: "full",
-  },
-  admin: {
-    dashboard: VIEW,
-    website: "full",
-    marketplace: "full",
-    global_presence: "full",
-    case_studies: "full",
-    blog: "full",
-    careers: "full",
-    media: "full",
-    forms: "full",
-    users: EDIT,
-    settings: EDIT,
-    analytics: VIEW,
-    audit_logs: VIEW,
-  },
-  content_manager: {
-    dashboard: VIEW,
-    website: EDIT,
-    marketplace: VIEW,
-    global_presence: VIEW,
-    case_studies: EDIT,
-    blog: EDIT,
-    careers: VIEW,
-    media: EDIT,
-    forms: "none",
-    users: "none",
-    settings: "none",
-    analytics: VIEW,
-    audit_logs: "none",
-  },
-  marketplace_manager: {
-    dashboard: VIEW,
-    website: VIEW,
-    marketplace: "full",
-    global_presence: EDIT,
-    case_studies: VIEW,
-    blog: VIEW,
-    careers: VIEW,
-    media: EDIT,
-    forms: "none",
-    users: "none",
-    settings: "none",
-    analytics: VIEW,
-    audit_logs: "none",
-  },
-  sales_manager: {
-    dashboard: VIEW,
-    website: VIEW,
-    marketplace: VIEW,
-    global_presence: VIEW,
-    case_studies: VIEW,
-    blog: VIEW,
-    careers: VIEW,
-    media: VIEW,
-    forms: EDIT,
-    users: "none",
-    settings: "none",
-    analytics: VIEW,
-    audit_logs: "none",
-  },
-  hr_manager: {
-    dashboard: VIEW,
-    website: VIEW,
-    marketplace: VIEW,
-    global_presence: VIEW,
-    case_studies: VIEW,
-    blog: VIEW,
-    careers: "full",
-    media: VIEW,
-    forms: "none",
-    users: "none",
-    settings: "none",
-    analytics: VIEW,
-    audit_logs: "none",
-  },
-  viewer: {
-    dashboard: VIEW,
-    website: VIEW,
-    marketplace: VIEW,
-    global_presence: VIEW,
-    case_studies: VIEW,
-    blog: VIEW,
-    careers: VIEW,
-    media: VIEW,
-    forms: "none",
-    users: "none",
-    settings: VIEW,
-    analytics: VIEW,
-    audit_logs: VIEW,
-  },
-};
-
-export function getPermissions(role: CmsRole, module: CmsModule): CmsAction[] {
-  const level = MATRIX[role]?.[module];
+export function getPermissions(role: string, module: CmsModule): CmsAction[] {
+  const { matrix } = getAccessSnapshot();
+  const level = matrix[role]?.[module] ?? BUILTIN_MATRIX[role]?.[module];
   if (!level || level === "none") return [];
-  if (level === "full") return FULL;
+  if (level === "full") return [...FULL_ACTIONS];
   return level;
 }
 
 export function canAccess(
-  role: CmsRole,
+  role: string,
   module: CmsModule,
   action: CmsAction = "view"
 ): boolean {
-  return getPermissions(role, module).includes(action);
+  return resolveCanAccess(role, module, action);
 }
+
+export { getRoleLabel };
+export { canAccessUser } from "./access-resolve";

@@ -17,8 +17,9 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ mobileOpen = false, onNavigate }: AdminSidebarProps) {
   const pathname = usePathname();
-  const { can } = useAdmin();
+  const { can, user } = useAdmin();
   const t = useTranslations("admin");
+  const isSuperAdmin = user.role === "super_admin";
 
   return (
     <aside
@@ -47,6 +48,7 @@ export function AdminSidebar({ mobileOpen = false, onNavigate }: AdminSidebarPro
       <nav className="flex-1 overflow-y-auto p-3">
         <ul className="space-y-1">
           {adminNavigation.map((item) => {
+            if (item.superAdminOnly && !isSuperAdmin) return null;
             if (item.module && !can(item.module, "view")) return null;
 
             if (!item.children) {

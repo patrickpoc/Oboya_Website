@@ -9,6 +9,7 @@ import {
 } from "@/lib/cms/bulk-import/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { CmsStatus } from "@/lib/cms/types";
+import { parsePriceInput } from "@/lib/cms/parse-price";
 
 export const IMPORT_SPREADSHEET_HEADERS = [
   "sku",
@@ -307,9 +308,18 @@ function rowToProduct(
       "zh-CN": "",
     },
     prices: {
-      USD: Number(cells.price_usd || 0) || 0,
-      BRL: Number(cells.price_brl || 0) || 0,
-      EUR: Number(cells.price_eur || 0) || 0,
+      USD: (() => {
+        const parsed = parsePriceInput(cells.price_usd || "", "USD");
+        return typeof parsed === "number" ? parsed : 0;
+      })(),
+      BRL: (() => {
+        const parsed = parsePriceInput(cells.price_brl || "", "BRL");
+        return typeof parsed === "number" ? parsed : 0;
+      })(),
+      EUR: (() => {
+        const parsed = parsePriceInput(cells.price_eur || "", "EUR");
+        return typeof parsed === "number" ? parsed : 0;
+      })(),
     },
     stockQuantity: cells.stock_quantity
       ? Number(cells.stock_quantity) || 0

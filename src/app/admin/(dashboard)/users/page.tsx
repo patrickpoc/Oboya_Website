@@ -12,18 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CMS_LOCALES } from "@/contexts/AdminContext";
+import { CMS_LOCALES, useAdmin } from "@/contexts/AdminContext";
+import type { AccessRoleDefinition } from "@/lib/cms/permissions/access-types";
 import type { CmsLocale, CmsRole, CmsUser } from "@/lib/cms/types";
-
-const ROLES: CmsRole[] = [
-  "super_admin",
-  "admin",
-  "content_manager",
-  "marketplace_manager",
-  "sales_manager",
-  "hr_manager",
-  "viewer",
-];
+import { SYSTEM_ROLE_IDS } from "@/lib/cms/types";
 
 type DraftUser = {
   id?: string;
@@ -36,30 +28,65 @@ type DraftUser = {
   isNew: boolean;
 };
 
+function displayRoleLabel(
+  roleId: string,
+  roles: AccessRoleDefinition[],
+  tRoles: (key: string) => string
+): string {
+  const found = roles.find((r) => r.id === roleId);
+  if (found) return found.label;
+  if ((SYSTEM_ROLE_IDS as readonly string[]).includes(roleId)) {
+    return tRoles(roleId);
+  }
+  return roleId;
+}
+
 export default function UsersPage() {
   const t = useTranslations("admin.users");
   const tCommon = useTranslations("admin.common");
   const tRoles = useTranslations("admin.roles");
+  const { user: actor } = useAdmin();
+  const isSuperAdmin = actor.role === "super_admin";
   const [users, setUsers] = useState<CmsUser[]>([]);
+  const [roleDefs, setRoleDefs] = useState<AccessRoleDefinition[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editing, setEditing] = useState<DraftUser | null>(null);
 
+  const assignableRoles = useMemo(() => {
+    const active = roleDefs.filter((r) => r.active);
+    if (active.length === 0) {
+      return SYSTEM_ROLE_IDS.filter(
+        (id) => isSuperAdmin || id !== "super_admin"
+      ).map((id) => ({ id, label: id, system: true, active: true, sortOrder: 0 }));
+    }
+    return active.filter((r) => isSuperAdmin || r.id !== "super_admin");
+  }, [roleDefs, isSuperAdmin]);
+
   const loadUsers = useCallback(async () => {
     setLoading(true);
     setLoadError(null);
     try {
-      const res = await fetch("/api/cms/users");
-        const data = (await res.json()) as {
-          users?: CmsUser[];
-          error?: string;
-        };
-        if (!res.ok) {
-          throw new Error(data.error || t("loadFailed"));
-        }
+      const [usersRes, accessRes] = await Promise.all([
+        fetch("/api/cms/users"),
+        fetch("/api/cms/access-control", { cache: "no-store" }),
+      ]);
+      const data = (await usersRes.json()) as {
+        users?: CmsUser[];
+        error?: string;
+      };
+      if (!usersRes.ok) {
+        throw new Error(data.error || t("loadFailed"));
+      }
       setUsers(data.users ?? []);
+      if (accessRes.ok) {
+        const access = (await accessRes.json()) as {
+          roles?: AccessRoleDefinition[];
+        };
+        setRoleDefs(access.roles ?? []);
+      }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : t("loadFailed");
@@ -75,10 +102,14 @@ export default function UsersPage() {
   }, [loadUsers]);
 
   const openCreate = () => {
+    const defaultRole =
+      assignableRoles.find((r) => r.id === "viewer")?.id ??
+      assignableRoles[0]?.id ??
+      "viewer";
     setEditing({
       email: "",
       name: "",
-      role: "viewer",
+      role: defaultRole,
       locale: "en",
       jobTitle: "",
       status: "active",
@@ -202,7 +233,7 @@ export default function UsersPage() {
     () => [
       { key: "name", header: tCommon("name"), sortable: true, cell: (r: CmsUser) => r.name },
       { key: "email", header: tCommon("email"), cell: (r: CmsUser) => r.email },
-      { key: "role", header: tCommon("role"), cell: (r: CmsUser) => tRoles(r.role) },
+      { key: "role", header: tCommon("role"), cell: (r: CmsUser) => displayRoleLabel(r.role, roleDefs, tRoles) },
       {
         key: "status",
         header: tCommon("status"),
@@ -226,7 +257,8 @@ export default function UsersPage() {
               type="button"
               title={tCommon("edit")}
               onClick={() => openEdit(r)}
-              className="rounded p-1 hover:bg-muted"
+              disabled={!isSuperAdmin && r.role === "super_admin"}
+              className="rounded p-1 hover:bg-muted disabled:opacity-40"
             >
               <Pencil className="size-3.5" />
             </button>
@@ -253,7 +285,7 @@ export default function UsersPage() {
         ),
       },
     ],
-    [t, tCommon, tRoles]
+    [t, tCommon, tRoles, roleDefs, isSuperAdmin]
   );
 
   return (
@@ -341,16 +373,24 @@ export default function UsersPage() {
               <Label>{tCommon("role")}</Label>
               <select
                 value={editing.role}
+                disabled={
+                  !isSuperAdmin && editing.role === "super_admin"
+                }
                 onChange={(e) =>
                   setEditing({ ...editing, role: e.target.value as CmsRole })
                 }
                 className="h-8 w-full rounded-lg border border-input px-2.5 text-sm"
               >
-                {ROLES.map((role) => (
-                  <option key={role} value={role}>
-                    {tRoles(role)}
+                {assignableRoles.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {displayRoleLabel(role.id, roleDefs, tRoles)}
                   </option>
                 ))}
+                {!isSuperAdmin && editing.role === "super_admin" ? (
+                  <option value="super_admin">
+                    {displayRoleLabel("super_admin", roleDefs, tRoles)}
+                  </option>
+                ) : null}
               </select>
             </div>
             <div className="space-y-1.5">

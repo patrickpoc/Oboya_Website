@@ -29,7 +29,7 @@ interface ProductCardProps {
   product: ShopProduct;
   currency: string;
   viewMode?: "grid" | "list";
-  onAddToQuote: (variantId?: string | null) => void;
+  onAddToQuote?: (variantId?: string | null) => void;
 }
 
 function ProductCardComponent({
@@ -116,16 +116,18 @@ function ProductCardComponent({
           </p>
         </div>
         <div className="flex shrink-0 flex-col justify-center gap-2 sm:min-w-[10rem]">
-          <button
-            type="button"
-            onClick={() => onAddToQuote(cartVariantId)}
-            className={buttonVariants({
-              size: "cta",
-              className: "w-full bg-oboya-green text-white hover:bg-oboya-green/90",
-            })}
-          >
-            {t("addToQuote")}
-          </button>
+          {onAddToQuote ? (
+            <button
+              type="button"
+              onClick={() => onAddToQuote(cartVariantId)}
+              className={buttonVariants({
+                size: "cta",
+                className: "w-full bg-oboya-green text-white hover:bg-oboya-green/90",
+              })}
+            >
+              {t("addToQuote")}
+            </button>
+          ) : null}
           <Link
             href={detailHref}
             className={buttonVariants({
@@ -194,17 +196,19 @@ function ProductCardComponent({
           </p>
         </div>
         <div className="flex flex-col gap-1.5 pt-2.5">
-          <button
-            type="button"
-            onClick={() => onAddToQuote(cartVariantId)}
-            className={buttonVariants({
-              size: "sm",
-              className:
-                "h-8 w-full rounded-full bg-oboya-green text-xs font-semibold text-white hover:bg-oboya-green/90",
-            })}
-          >
-            {t("addToQuote")}
-          </button>
+          {onAddToQuote ? (
+            <button
+              type="button"
+              onClick={() => onAddToQuote(cartVariantId)}
+              className={buttonVariants({
+                size: "sm",
+                className:
+                  "h-8 w-full rounded-full bg-oboya-green text-xs font-semibold text-white hover:bg-oboya-green/90",
+              })}
+            >
+              {t("addToQuote")}
+            </button>
+          ) : null}
           <Link
             href={detailHref}
             className={buttonVariants({

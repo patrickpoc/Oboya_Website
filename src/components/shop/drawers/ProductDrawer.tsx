@@ -34,6 +34,7 @@ export function ProductDrawer() {
     ensureProductDetail,
     brands,
     categories,
+    shopConfig,
   } = useShop();
   const getProductName = useProductName();
   const { getDescriptionHtml, getShortDescription } = useProductDescription();
@@ -197,16 +198,18 @@ export function ProductDrawer() {
             </div>
 
             <div className="shrink-0 space-y-2 border-t border-border/60 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-              <button
-                type="button"
-                onClick={handleAdd}
-                className={buttonVariants({
-                  className:
-                    "w-full rounded-full bg-oboya-green text-white hover:bg-oboya-green/90",
-                })}
-              >
-                {t("addToQuote")}
-              </button>
+              {shopConfig.rfq.enabled ? (
+                <button
+                  type="button"
+                  onClick={handleAdd}
+                  className={buttonVariants({
+                    className:
+                      "w-full rounded-full bg-oboya-green text-white hover:bg-oboya-green/90",
+                  })}
+                >
+                  {t("addToQuote")}
+                </button>
+              ) : null}
               <button
                 type="button"
                 onClick={handleClose}

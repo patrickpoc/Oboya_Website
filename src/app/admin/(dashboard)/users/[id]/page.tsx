@@ -11,28 +11,36 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CMS_LOCALES } from "@/contexts/AdminContext";
+import { CMS_LOCALES, useAdmin } from "@/contexts/AdminContext";
+import type { AccessRoleDefinition } from "@/lib/cms/permissions/access-types";
 import type { CmsLocale, CmsRole, CmsUser } from "@/lib/cms/types";
+import { SYSTEM_ROLE_IDS } from "@/lib/cms/types";
 
-const ROLES: CmsRole[] = [
-  "super_admin",
-  "admin",
-  "content_manager",
-  "marketplace_manager",
-  "sales_manager",
-  "hr_manager",
-  "viewer",
-];
+function displayRoleLabel(
+  roleId: string,
+  roles: AccessRoleDefinition[],
+  tRoles: (key: string) => string
+): string {
+  const found = roles.find((r) => r.id === roleId);
+  if (found) return found.label;
+  if ((SYSTEM_ROLE_IDS as readonly string[]).includes(roleId)) {
+    return tRoles(roleId);
+  }
+  return roleId;
+}
 
 export default function UserDetailPage() {
   const t = useTranslations("admin.users");
   const tCommon = useTranslations("admin.common");
   const tRoles = useTranslations("admin.roles");
+  const { user: actor } = useAdmin();
+  const isSuperAdmin = actor.role === "super_admin";
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
 
   const [user, setUser] = useState<CmsUser | null>(null);
+  const [roleDefs, setRoleDefs] = useState<AccessRoleDefinition[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [name, setName] = useState("");
@@ -43,12 +51,31 @@ export default function UserDetailPage() {
   const [status, setStatus] = useState<CmsUser["status"]>("active");
   const [customPassword, setCustomPassword] = useState("");
 
+  const assignableRoles = roleDefs.filter(
+    (r) => r.active && (isSuperAdmin || r.id !== "super_admin")
+  );
+  const roleOptions =
+    assignableRoles.length > 0
+      ? assignableRoles
+      : SYSTEM_ROLE_IDS.filter(
+          (rid) => isSuperAdmin || rid !== "super_admin"
+        ).map((rid) => ({
+          id: rid,
+          label: rid,
+          system: true,
+          active: true,
+          sortOrder: 0,
+        }));
+
   const loadUser = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/cms/users/${id}`);
-      const data = (await res.json()) as { user?: CmsUser; error?: string };
-      if (!res.ok) throw new Error(data.error || t("notFound"));
+      const [userRes, accessRes] = await Promise.all([
+        fetch(`/api/cms/users/${id}`),
+        fetch("/api/cms/access-control", { cache: "no-store" }),
+      ]);
+      const data = (await userRes.json()) as { user?: CmsUser; error?: string };
+      if (!userRes.ok) throw new Error(data.error || t("notFound"));
       if (!data.user) throw new Error(t("notFound"));
       setUser(data.user);
       setName(data.user.name);
@@ -57,6 +84,12 @@ export default function UserDetailPage() {
       setRole(data.user.role);
       setLocale(data.user.locale);
       setStatus(data.user.status);
+      if (accessRes.ok) {
+        const access = (await accessRes.json()) as {
+          roles?: AccessRoleDefinition[];
+        };
+        setRoleDefs(access.roles ?? []);
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("loadUserFailed"));
       setUser(null);
@@ -163,7 +196,7 @@ export default function UserDetailPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-2">
-              <Badge>{tRoles(user.role)}</Badge>
+              <Badge>{displayRoleLabel(user.role, roleDefs, tRoles)}</Badge>
               <Badge variant={user.status === "active" ? "default" : "secondary"}>
                 {user.status === "active" ? tCommon("active") : tCommon("inactive")}
               </Badge>
@@ -174,7 +207,11 @@ export default function UserDetailPage() {
 
             <div className="space-y-1.5">
               <Label>{tCommon("name")}</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} />
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={!isSuperAdmin && user.role === "super_admin"}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>{tCommon("email")}</Label>
@@ -182,6 +219,7 @@ export default function UserDetailPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={!isSuperAdmin && user.role === "super_admin"}
               />
             </div>
             <div className="space-y-1.5">
@@ -189,20 +227,27 @@ export default function UserDetailPage() {
               <Input
                 value={jobTitle}
                 onChange={(e) => setJobTitle(e.target.value)}
+                disabled={!isSuperAdmin && user.role === "super_admin"}
               />
             </div>
             <div className="space-y-1.5">
               <Label>{tCommon("role")}</Label>
               <select
                 value={role}
+                disabled={!isSuperAdmin && user.role === "super_admin"}
                 onChange={(e) => setRole(e.target.value as CmsRole)}
                 className="h-8 w-full rounded-lg border border-input px-2.5 text-sm"
               >
-                {ROLES.map((r) => (
-                  <option key={r} value={r}>
-                    {tRoles(r)}
+                {roleOptions.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {displayRoleLabel(r.id, roleDefs, tRoles)}
                   </option>
                 ))}
+                {!isSuperAdmin && user.role === "super_admin" ? (
+                  <option value="super_admin">
+                    {displayRoleLabel("super_admin", roleDefs, tRoles)}
+                  </option>
+                ) : null}
               </select>
             </div>
             <div className="space-y-1.5">

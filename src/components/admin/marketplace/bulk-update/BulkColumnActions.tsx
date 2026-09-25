@@ -225,41 +225,14 @@ export function BulkColumnActions({ catalog, selectedCount, onApply }: Props) {
 
   return (
     <div className="rounded-xl border border-border/60 bg-white p-4">
-      <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
-        <div>
-          <p className="text-sm font-semibold text-oboya-blue-dark">{t("columnTitle")}</p>
-          <p className="text-xs font-normal text-muted-foreground">
-            {t("columnDescription", {
-              count: selectedCount,
-              plural: selectedCount === 1 ? "" : "s",
-            })}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-full"
-            disabled={availableToAdd.length === 0}
-            onClick={addRow}
-            title={
-              availableToAdd.length === 0
-                ? t("allFieldsHaveRow")
-                : t("addAnotherField")
-            }
-          >
-            <Plus className="mr-1.5 size-4" />
-            {t("addField")}
-          </Button>
-          <Button
-            type="button"
-            disabled={selectedCount === 0}
-            onClick={apply}
-            className="rounded-full bg-oboya-green text-white hover:bg-oboya-green/90"
-          >
-            {t("applyToSelected")}
-          </Button>
-        </div>
+      <div className="mb-3">
+        <p className="text-sm font-semibold text-oboya-blue-dark">{t("columnTitle")}</p>
+        <p className="text-xs font-normal text-muted-foreground">
+          {t("columnDescription", {
+            count: selectedCount,
+            plural: selectedCount === 1 ? "" : "s",
+          })}
+        </p>
       </div>
 
       <div className="space-y-3">
@@ -279,6 +252,32 @@ export function BulkColumnActions({ catalog, selectedCount, onApply }: Props) {
             />
           );
         })}
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          className="rounded-full"
+          disabled={availableToAdd.length === 0}
+          onClick={addRow}
+          title={
+            availableToAdd.length === 0
+              ? t("allFieldsHaveRow")
+              : t("addAnotherField")
+          }
+        >
+          <Plus className="mr-1.5 size-4" />
+          {t("addField")}
+        </Button>
+        <Button
+          type="button"
+          disabled={selectedCount === 0}
+          onClick={apply}
+          className="rounded-full bg-oboya-green text-white hover:bg-oboya-green/90"
+        >
+          {t("applyToSelected")}
+        </Button>
       </div>
     </div>
   );

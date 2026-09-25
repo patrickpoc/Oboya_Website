@@ -3,8 +3,9 @@ import "server-only";
 import { cache } from "react";
 import { NextResponse } from "next/server";
 import type { CmsAction, CmsModule, CmsUser } from "@/lib/cms/types";
-import { canAccess } from "@/lib/cms/permissions/matrix";
+import { canAccessUser } from "@/lib/cms/permissions/matrix";
 import { getCmsUsers } from "@/lib/cms/repositories/users-repository";
+import { ensureAccessControlHydrated } from "@/lib/cms/server/access-control.server";
 import { profileToCmsUser } from "@/lib/cms/server/users.server";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -144,14 +145,62 @@ export async function requireCmsAuth(input: {
   action?: CmsAction;
 }): Promise<CmsAuthResult> {
   const action = input.action ?? "view";
+  await ensureAccessControlHydrated();
   const session = await resolveCmsSessionUser();
   if (!session.ok) return session;
 
-  if (!canAccess(session.user.role, input.module, action)) {
+  if (!canAccessUser(session.user, input.module, action)) {
     return { ok: false, status: 403, error: "Forbidden" };
   }
 
   return session;
+}
+
+/** Active CMS session only (no module check) — used to hydrate access matrix. */
+export async function requireCmsSession(): Promise<CmsAuthResult> {
+  await ensureAccessControlHydrated();
+  return resolveCmsSessionUser();
+}
+
+export async function cmsGuardSession(): Promise<
+  { user: CmsUser } | { response: NextResponse }
+> {
+  const result = await requireCmsSession();
+  if (!result.ok) {
+    return {
+      response: NextResponse.json(
+        { error: result.error },
+        { status: result.status }
+      ),
+    };
+  }
+  return { user: result.user };
+}
+
+/** Super Admin only — Access Control APIs/UI. */
+export async function requireSuperAdmin(): Promise<CmsAuthResult> {
+  await ensureAccessControlHydrated();
+  const session = await resolveCmsSessionUser();
+  if (!session.ok) return session;
+  if (session.user.role !== "super_admin") {
+    return { ok: false, status: 403, error: "Forbidden" };
+  }
+  return session;
+}
+
+export async function cmsGuardSuperAdmin(): Promise<
+  { user: CmsUser } | { response: NextResponse }
+> {
+  const result = await requireSuperAdmin();
+  if (!result.ok) {
+    return {
+      response: NextResponse.json(
+        { error: result.error },
+        { status: result.status }
+      ),
+    };
+  }
+  return { user: result.user };
 }
 
 export async function cmsGuard(

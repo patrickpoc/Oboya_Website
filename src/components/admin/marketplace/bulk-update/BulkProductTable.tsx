@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { ChevronDown, ChevronRight, X } from "lucide-react";
+import { BulkPriceInput } from "@/components/admin/marketplace/bulk-update/BulkPriceInput";
 import { PRODUCT_EDITOR_SELECT_CLASS } from "@/components/admin/marketplace/product-editor.constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +29,19 @@ import type {
   BulkValidationIssue,
   BulkWorkspaceRow,
 } from "@/lib/cms/bulk-update/types";
+import {
+  formatPriceInput,
+  type PriceCurrencyHint,
+} from "@/lib/cms/parse-price";
 import { cn } from "@/lib/utils";
+
+function formatPricePlaceholder(
+  value: number | null | undefined,
+  currency: PriceCurrencyHint
+) {
+  const formatted = formatPriceInput(value, currency);
+  return formatted || undefined;
+}
 
 type Props = {
   rows: BulkWorkspaceRow[];
@@ -62,10 +75,15 @@ const STICKY_LEFT_CHECK_BODY =
   "sticky left-0 z-20 w-10 min-w-10 bg-white";
 const STICKY_LEFT_PRODUCT_BODY =
   "sticky left-10 z-20 min-w-[15rem] border-r border-border/70 bg-white shadow-[6px_0_10px_-6px_rgba(1,32,63,0.14)]";
+/** Opaque soft fill for sticky cells on child rows (must not use /40 — scroll content bleeds through). */
+const STICKY_CHILD_BG = "bg-oboya-soft-white";
 const STICKY_RIGHT_HEAD =
   "sticky right-0 z-30 w-12 bg-oboya-soft-white text-center shadow-[-6px_0_8px_-6px_rgba(1,32,63,0.12)]";
 const STICKY_RIGHT_BODY =
   "sticky right-0 z-20 w-12 bg-white shadow-[-6px_0_8px_-6px_rgba(1,32,63,0.12)]";
+const PRICE_CELL_SHELL = "min-w-[10.5rem]";
+const FIELD_CELL_SHELL = "min-w-[9rem]";
+const SELECT_CONTROL = cn(PRODUCT_EDITOR_SELECT_CLASS, CONTROL, "min-w-[9rem]");
 
 function CellShell({
   field,
@@ -74,6 +92,7 @@ function CellShell({
   locale,
   issues,
   children,
+  className,
 }: {
   field: BulkEditableField;
   row: BulkWorkspaceRow;
@@ -81,6 +100,7 @@ function CellShell({
   locale: string;
   issues: BulkValidationIssue[];
   children: ReactNode;
+  className?: string;
 }) {
   const changed = row.changedFields.includes(field);
   const fieldIssues = issuesForProduct(issues, row.productId, field);
@@ -104,15 +124,16 @@ function CellShell({
   return (
     <div
       className={cn(
-        "min-w-[9rem] space-y-1 rounded-md p-1",
+        "space-y-1 rounded-md p-1",
         blocked && "bg-red-50 ring-1 ring-red-200",
         !blocked && warning && "bg-amber-50 ring-1 ring-amber-200",
-        !blocked && !warning && changed && "bg-emerald-50 ring-1 ring-emerald-200"
+        !blocked && !warning && changed && "bg-emerald-50 ring-1 ring-emerald-200",
+        className
       )}
     >
       {children}
       {changed && (
-        <p className="text-[10px] font-normal leading-tight text-emerald-700">
+        <p className="break-words text-[10px] font-normal leading-tight text-emerald-700">
           <span className="text-muted-foreground">{original || "—"}</span>
           {" → "}
           <span className="font-medium">{pending || "—"}</span>
@@ -268,7 +289,7 @@ export function BulkProductTable({
   return (
     <div className="rounded-xl border border-border/60 bg-white">
       <div className="overflow-x-auto">
-        <table className="min-w-[1900px] w-full border-separate border-spacing-0 text-left text-sm">
+        <table className="min-w-[2100px] w-full border-separate border-spacing-0 text-left text-sm">
           <thead className="bg-oboya-soft-white">
             <tr>
               <th className={cn(TH, STICKY_LEFT_CHECK, "border-b border-border/60")}>
@@ -284,37 +305,37 @@ export function BulkProductTable({
                 Product
               </th>
               <th className={cn(TH, "border-b border-border/60")}>{t("sku")}</th>
-              <th className={cn(TH, "border-b border-border/60")}>{BULK_FIELD_LABELS.moq}</th>
-              <th className={cn(TH, "border-b border-border/60")}>
+              <th className={cn(TH, "min-w-[5rem] border-b border-border/60")}>{BULK_FIELD_LABELS.moq}</th>
+              <th className={cn(TH, "min-w-[10rem] border-b border-border/60")}>
                 {BULK_FIELD_LABELS.categoryId}
               </th>
-              <th className={cn(TH, "border-b border-border/60")}>
+              <th className={cn(TH, "min-w-[10rem] border-b border-border/60")}>
                 {BULK_FIELD_LABELS.subcategoryId}
               </th>
-              <th className={cn(TH, "border-b border-border/60")}>
+              <th className={cn(TH, "min-w-[10rem] border-b border-border/60")}>
                 {BULK_FIELD_LABELS.brandId}
               </th>
-              <th className={cn(TH, "border-b border-border/60")}>
+              <th className={cn(TH, "min-w-[10rem] border-b border-border/60")}>
                 {BULK_FIELD_LABELS.application}
               </th>
-              <th className={cn(TH, "border-b border-border/60")}>
+              <th className={cn(TH, "min-w-[10rem] border-b border-border/60")}>
                 {BULK_FIELD_LABELS.cultures}
               </th>
-              <th className={cn(TH, "border-b border-border/60")}>
+              <th className={cn(TH, "min-w-[10rem] border-b border-border/60")}>
                 {BULK_FIELD_LABELS.certifications}
               </th>
-              <th className={cn(TH, "border-b border-border/60")}>
+              <th className={cn(TH, "min-w-[10rem] border-b border-border/60")}>
                 {BULK_FIELD_LABELS.countryOfOrigin}
               </th>
-              <th className={cn(TH, "border-b border-border/60")}>
+              <th className={cn(TH, "min-w-[11rem] border-b border-border/60")}>
                 {BULK_FIELD_LABELS.enabledCountries}
               </th>
-              <th className={cn(TH, "border-b border-border/60")}>
+              <th className={cn(TH, "min-w-[5rem] border-b border-border/60")}>
                 {BULK_FIELD_LABELS.status}
               </th>
-              <th className={cn(TH, "border-b border-border/60")}>USD</th>
-              <th className={cn(TH, "border-b border-border/60")}>BRL</th>
-              <th className={cn(TH, "border-b border-border/60")}>EUR</th>
+              <th className={cn(TH, "min-w-[11rem] border-b border-border/60")}>USD</th>
+              <th className={cn(TH, "min-w-[11rem] border-b border-border/60")}>BRL</th>
+              <th className={cn(TH, "min-w-[11rem] border-b border-border/60")}>EUR</th>
               <th
                 className={cn(TH, STICKY_RIGHT_HEAD, "border-b border-border/60")}
                 aria-label={tCommon("remove")}
@@ -350,7 +371,7 @@ export function BulkProductTable({
                     isFocused && "ring-2 ring-inset ring-oboya-blue-light"
                   )}
                 >
-                  <td className={cn(TD, STICKY_LEFT_CHECK_BODY, !isParent && "bg-oboya-soft-white/40")}>
+                  <td className={cn(TD, STICKY_LEFT_CHECK_BODY, !isParent && STICKY_CHILD_BG)}>
                     {isParent ? (
                       <input
                         type="checkbox"
@@ -367,7 +388,7 @@ export function BulkProductTable({
                     className={cn(
                       TD,
                       STICKY_LEFT_PRODUCT_BODY,
-                      !isParent && "bg-oboya-soft-white/40"
+                      !isParent && STICKY_CHILD_BG
                     )}
                   >
                     <div
@@ -445,11 +466,12 @@ export function BulkProductTable({
                         catalog={catalog}
                         locale={locale}
                         issues={issues}
+                        className={FIELD_CELL_SHELL}
                       >
                         <Input
                           type="number"
                           min={1}
-                          className={CONTROL}
+                          className={cn(CONTROL, "min-w-[5rem]")}
                           value={product.moq}
                           onChange={(event) =>
                             onPatch(row.productId, {
@@ -465,11 +487,12 @@ export function BulkProductTable({
                         catalog={catalog}
                         locale={locale}
                         issues={issues}
+                        className={FIELD_CELL_SHELL}
                       >
                         <Input
                           type="number"
                           min={1}
-                          className={CONTROL}
+                          className={cn(CONTROL, "min-w-[5rem]")}
                           value={variant?.moq ?? 1}
                           onChange={(event) =>
                             onPatch(
@@ -492,9 +515,10 @@ export function BulkProductTable({
                         catalog={catalog}
                         locale={locale}
                         issues={issues}
+                        className={FIELD_CELL_SHELL}
                       >
                         <select
-                          className={cn(PRODUCT_EDITOR_SELECT_CLASS, CONTROL)}
+                          className={SELECT_CONTROL}
                           value={product.categoryId || ""}
                           onChange={(event) => {
                             const nextCategoryId = event.target.value;
@@ -532,9 +556,10 @@ export function BulkProductTable({
                         catalog={catalog}
                         locale={locale}
                         issues={issues}
+                        className={FIELD_CELL_SHELL}
                       >
                         <select
-                          className={cn(PRODUCT_EDITOR_SELECT_CLASS, CONTROL)}
+                          className={SELECT_CONTROL}
                           value={product.subcategoryId || ""}
                           onChange={(event) =>
                             onPatch(row.productId, {
@@ -567,9 +592,10 @@ export function BulkProductTable({
                         catalog={catalog}
                         locale={locale}
                         issues={issues}
+                        className={FIELD_CELL_SHELL}
                       >
                         <select
-                          className={cn(PRODUCT_EDITOR_SELECT_CLASS, CONTROL)}
+                          className={SELECT_CONTROL}
                           value={product.brandId || ""}
                           onChange={(event) =>
                             onPatch(row.productId, { brandId: event.target.value })
@@ -599,6 +625,7 @@ export function BulkProductTable({
                         catalog={catalog}
                         locale={locale}
                         issues={issues}
+                        className={FIELD_CELL_SHELL}
                       >
                         <MultiSelectCell
                           options={withCurrentLabeledOptions(
@@ -625,6 +652,7 @@ export function BulkProductTable({
                         catalog={catalog}
                         locale={locale}
                         issues={issues}
+                        className={FIELD_CELL_SHELL}
                       >
                         <MultiSelectCell
                           options={withCurrentLabeledOptions(
@@ -649,6 +677,7 @@ export function BulkProductTable({
                         catalog={catalog}
                         locale={locale}
                         issues={issues}
+                        className={FIELD_CELL_SHELL}
                       >
                         <MultiSelectCell
                           options={withCurrentLabeledOptions(
@@ -680,9 +709,10 @@ export function BulkProductTable({
                         catalog={catalog}
                         locale={locale}
                         issues={issues}
+                        className={FIELD_CELL_SHELL}
                       >
                         <select
-                          className={cn(PRODUCT_EDITOR_SELECT_CLASS, CONTROL)}
+                          className={SELECT_CONTROL}
                           value={product.countryOfOrigin || ""}
                           onChange={(event) =>
                             onPatch(row.productId, {
@@ -720,6 +750,7 @@ export function BulkProductTable({
                         catalog={catalog}
                         locale={locale}
                         issues={issues}
+                        className={FIELD_CELL_SHELL}
                       >
                         <MultiSelectCell
                           options={withCurrentLabeledOptions(
@@ -756,6 +787,7 @@ export function BulkProductTable({
                         catalog={catalog}
                         locale={locale}
                         issues={issues}
+                        className={FIELD_CELL_SHELL}
                       >
                         <label className="flex h-9 items-center gap-2 text-sm font-normal">
                           <input
@@ -774,121 +806,133 @@ export function BulkProductTable({
                       <DimmedDash />
                     )}
                   </td>
-                  <td className={TD}>
+                  <td className={cn(TD, "min-w-[11rem]")}>
                     {isParent ? (
-                      <Input
-                        type="number"
-                        min={0}
-                        className={CONTROL}
-                        value={product.prices?.USD ?? ""}
-                        onChange={(event) =>
-                          onPatch(row.productId, {
-                            priceUsd:
-                              event.target.value === ""
-                                ? null
-                                : Number(event.target.value),
-                          })
-                        }
-                      />
+                      <CellShell
+                        field="priceUsd"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                        className={PRICE_CELL_SHELL}
+                      >
+                        <BulkPriceInput
+                          currency="USD"
+                          value={product.prices?.USD}
+                          onChange={(next) =>
+                            onPatch(row.productId, { priceUsd: next })
+                          }
+                        />
+                      </CellShell>
                     ) : (
-                      <Input
-                        type="number"
-                        min={0}
-                        className={CONTROL}
-                        value={variant?.prices?.USD ?? ""}
-                        placeholder={String(product.prices?.USD ?? "")}
-                        onChange={(event) =>
-                          onPatch(
-                            row.productId,
-                            {
-                              variantPriceUsd:
-                                event.target.value === ""
-                                  ? null
-                                  : Number(event.target.value),
-                            },
-                            row.variantId
-                          )
-                        }
-                      />
+                      <CellShell
+                        field="variantPriceUsd"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                        className={PRICE_CELL_SHELL}
+                      >
+                        <BulkPriceInput
+                          currency="USD"
+                          value={variant?.prices?.USD}
+                          placeholder={formatPricePlaceholder(product.prices?.USD, "USD")}
+                          onChange={(next) =>
+                            onPatch(
+                              row.productId,
+                              { variantPriceUsd: next },
+                              row.variantId
+                            )
+                          }
+                        />
+                      </CellShell>
                     )}
                   </td>
-                  <td className={TD}>
+                  <td className={cn(TD, "min-w-[11rem]")}>
                     {isParent ? (
-                      <Input
-                        type="number"
-                        min={0}
-                        className={CONTROL}
-                        value={product.prices?.BRL ?? ""}
-                        onChange={(event) =>
-                          onPatch(row.productId, {
-                            priceBrl:
-                              event.target.value === ""
-                                ? null
-                                : Number(event.target.value),
-                          })
-                        }
-                      />
+                      <CellShell
+                        field="priceBrl"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                        className={PRICE_CELL_SHELL}
+                      >
+                        <BulkPriceInput
+                          currency="BRL"
+                          value={product.prices?.BRL}
+                          onChange={(next) =>
+                            onPatch(row.productId, { priceBrl: next })
+                          }
+                        />
+                      </CellShell>
                     ) : (
-                      <Input
-                        type="number"
-                        min={0}
-                        className={CONTROL}
-                        value={variant?.prices?.BRL ?? ""}
-                        placeholder={String(product.prices?.BRL ?? "")}
-                        onChange={(event) =>
-                          onPatch(
-                            row.productId,
-                            {
-                              variantPriceBrl:
-                                event.target.value === ""
-                                  ? null
-                                  : Number(event.target.value),
-                            },
-                            row.variantId
-                          )
-                        }
-                      />
+                      <CellShell
+                        field="variantPriceBrl"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                        className={PRICE_CELL_SHELL}
+                      >
+                        <BulkPriceInput
+                          currency="BRL"
+                          value={variant?.prices?.BRL}
+                          placeholder={formatPricePlaceholder(product.prices?.BRL, "BRL")}
+                          onChange={(next) =>
+                            onPatch(
+                              row.productId,
+                              { variantPriceBrl: next },
+                              row.variantId
+                            )
+                          }
+                        />
+                      </CellShell>
                     )}
                   </td>
-                  <td className={TD}>
+                  <td className={cn(TD, "min-w-[11rem]")}>
                     {isParent ? (
-                      <Input
-                        type="number"
-                        min={0}
-                        className={CONTROL}
-                        value={product.prices?.EUR ?? ""}
-                        onChange={(event) =>
-                          onPatch(row.productId, {
-                            priceEur:
-                              event.target.value === ""
-                                ? null
-                                : Number(event.target.value),
-                          })
-                        }
-                      />
+                      <CellShell
+                        field="priceEur"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                        className={PRICE_CELL_SHELL}
+                      >
+                        <BulkPriceInput
+                          currency="EUR"
+                          value={product.prices?.EUR}
+                          onChange={(next) =>
+                            onPatch(row.productId, { priceEur: next })
+                          }
+                        />
+                      </CellShell>
                     ) : (
-                      <Input
-                        type="number"
-                        min={0}
-                        className={CONTROL}
-                        value={variant?.prices?.EUR ?? ""}
-                        placeholder={String(product.prices?.EUR ?? "")}
-                        onChange={(event) =>
-                          onPatch(
-                            row.productId,
-                            {
-                              variantPriceEur:
-                                event.target.value === ""
-                                  ? null
-                                  : Number(event.target.value),
-                            },
-                            row.variantId
-                          )
-                        }
-                      />
+                      <CellShell
+                        field="variantPriceEur"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                        className={PRICE_CELL_SHELL}
+                      >
+                        <BulkPriceInput
+                          currency="EUR"
+                          value={variant?.prices?.EUR}
+                          placeholder={formatPricePlaceholder(product.prices?.EUR, "EUR")}
+                          onChange={(next) =>
+                            onPatch(
+                              row.productId,
+                              { variantPriceEur: next },
+                              row.variantId
+                            )
+                          }
+                        />
+                      </CellShell>
                     )}
                   </td>
-                  <td className={cn(TD, STICKY_RIGHT_BODY, !isParent && "bg-oboya-soft-white/40")}>
+                  <td className={cn(TD, STICKY_RIGHT_BODY, !isParent && STICKY_CHILD_BG)}>
                     {isParent ? (
                       <Button
                         type="button"

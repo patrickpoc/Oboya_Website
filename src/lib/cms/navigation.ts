@@ -9,6 +9,7 @@ import {
   Newspaper,
   Settings,
   ShoppingBag,
+  Shield,
   Users,
   ClipboardList,
   History,
@@ -23,6 +24,8 @@ export interface AdminNavItem {
   href?: string;
   icon?: LucideIcon;
   module?: CmsModule;
+  /** When true, sidebar shows only for Super Admin (in addition to can()). */
+  superAdminOnly?: boolean;
   children?: AdminNavItem[];
 }
 
@@ -136,6 +139,24 @@ export const adminNavigation: AdminNavItem[] = [
     ],
   },
   {
+    labelKey: "accessControl",
+    label: "Access Control",
+    icon: Shield,
+    superAdminOnly: true,
+    children: [
+      {
+        labelKey: "accessRolesMatrix",
+        label: "Roles & Matrix",
+        href: "/admin/access-control",
+      },
+      {
+        labelKey: "accessUserOverrides",
+        label: "User Overrides",
+        href: "/admin/access-control/users",
+      },
+    ],
+  },
+  {
     labelKey: "settings",
     label: "Settings",
     icon: Settings,
@@ -174,13 +195,25 @@ export function getBreadcrumbs(pathname: string): {
       crumbs.push({ labelKey: group.labelKey, label: group.label });
       return crumbs;
     }
-    for (const child of group.children ?? []) {
-      if (child.href === pathname) {
-        crumbs.push({ labelKey: group.labelKey, label: group.label });
-        crumbs.push({ labelKey: child.labelKey, label: child.label });
-        return crumbs;
-      }
+    const children = group.children ?? [];
+    const exactChild = children.find((c) => c.href === pathname);
+    if (exactChild) {
+      crumbs.push({ labelKey: group.labelKey, label: group.label });
+      crumbs.push({ labelKey: exactChild.labelKey, label: exactChild.label });
+      return crumbs;
+    }
+    for (const child of children) {
       if (child.href && pathname.startsWith(child.href + "/")) {
+        // Skip if another sibling is a longer exact/prefix match
+        const siblingBetter = children.some(
+          (other) =>
+            other !== child &&
+            other.href &&
+            (pathname === other.href ||
+              pathname.startsWith(other.href + "/")) &&
+            (other.href?.length ?? 0) > (child.href?.length ?? 0)
+        );
+        if (siblingBetter) continue;
         crumbs.push({ labelKey: group.labelKey, label: group.label });
         crumbs.push({
           labelKey: child.labelKey,

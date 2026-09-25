@@ -2,14 +2,21 @@ export type CmsLocale = "en" | "pt-BR" | "es" | "zh-CN";
 
 export type CmsStatus = "draft" | "scheduled" | "published" | "archived";
 
-export type CmsRole =
-  | "super_admin"
-  | "admin"
-  | "content_manager"
-  | "marketplace_manager"
-  | "sales_manager"
-  | "hr_manager"
-  | "viewer";
+/** Built-in system role ids (cannot be deleted). */
+export const SYSTEM_ROLE_IDS = [
+  "super_admin",
+  "admin",
+  "content_manager",
+  "marketplace_manager",
+  "sales_manager",
+  "hr_manager",
+  "viewer",
+] as const;
+
+export type CmsSystemRole = (typeof SYSTEM_ROLE_IDS)[number];
+
+/** Role id: system slug or custom slug. */
+export type CmsRole = string;
 
 export type CmsAction = "view" | "create" | "edit" | "delete" | "publish";
 
@@ -27,6 +34,13 @@ export type CmsModule =
   | "settings"
   | "analytics"
   | "audit_logs";
+
+export type PermissionLevel = CmsAction[] | "full" | "none";
+
+export type PermissionOverrides = {
+  grants?: Partial<Record<CmsModule, CmsAction[]>>;
+  denies?: Partial<Record<CmsModule, CmsAction[]>>;
+};
 
 export interface LocalizedString {
   en: string;
@@ -51,6 +65,7 @@ export interface CmsUser {
   locale: CmsLocale;
   status: "active" | "inactive";
   mustChangePassword?: boolean;
+  permissionOverrides?: PermissionOverrides;
   createdAt: string;
   updatedAt: string;
 }

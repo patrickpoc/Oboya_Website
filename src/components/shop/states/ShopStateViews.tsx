@@ -128,16 +128,20 @@ export function OfflineBanner() {
 export function RfqSuccess({
   referenceId,
   onClose,
+  confirmationMessage,
 }: {
   referenceId: string;
   onClose: () => void;
+  confirmationMessage?: string;
 }) {
   const t = useTranslations("shop");
 
   return (
     <div className="rounded-xl border border-oboya-green/30 bg-oboya-green/5 p-6 text-center">
       <PackageOpen className="mx-auto size-10 text-oboya-green" aria-hidden />
-      <h3 className="mt-3 font-semibold text-oboya-blue-dark">{t("quoteConfirmed")}</h3>
+      <h3 className="mt-3 font-semibold text-oboya-blue-dark">
+        {confirmationMessage?.trim() || t("quoteConfirmed")}
+      </h3>
       <p className="mt-2 text-sm text-muted-foreground">
         {t("quoteNumber", { id: referenceId })}
       </p>

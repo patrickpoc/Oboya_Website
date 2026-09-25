@@ -2,6 +2,7 @@
 
 import { Container } from "@/components/ui/container";
 import { useShop } from "@/contexts/ShopContext";
+import { ShopBanner } from "@/components/shop/ShopBanner";
 import { ShopToolbar } from "@/components/shop/toolbar/ShopToolbar";
 import { FilterSidebar, FilterDrawer } from "@/components/shop/catalog/FilterSidebar";
 import { ProductCatalog } from "@/components/shop/catalog/ProductCatalog";
@@ -29,6 +30,7 @@ export function ShopPageContent() {
     <>
       {status === "offline" && <OfflineBanner />}
 
+      <ShopBanner />
       <ShopToolbar />
 
       <section className="py-8 md:py-12">

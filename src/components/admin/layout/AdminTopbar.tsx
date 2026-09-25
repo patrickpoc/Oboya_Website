@@ -9,8 +9,9 @@ import { getBreadcrumbs } from "@/lib/cms/navigation";
 import { useAdmin } from "@/contexts/AdminContext";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { getRoleLabel } from "@/lib/cms/permissions/access-store";
 import { cn } from "@/lib/utils";
-import type { CmsRole } from "@/lib/cms/types";
+import { SYSTEM_ROLE_IDS } from "@/lib/cms/types";
 
 interface AdminTopbarProps {
   onMenuClick?: () => void;
@@ -104,7 +105,9 @@ export function AdminTopbar({ onMenuClick }: AdminTopbarProps) {
           <p className="text-xs font-medium text-oboya-blue-dark">{user.name}</p>
           <p className="text-[10px] text-muted-foreground">{user.email}</p>
           <p className="text-[10px] text-muted-foreground">
-            {t(`roles.${user.role as CmsRole}`)}
+            {(SYSTEM_ROLE_IDS as readonly string[]).includes(user.role)
+              ? t(`roles.${user.role}`)
+              : getRoleLabel(user.role)}
           </p>
         </div>
       </Link>

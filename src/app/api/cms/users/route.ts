@@ -43,6 +43,16 @@ export async function POST(request: Request) {
       );
     }
 
+    if (
+      body.role === "super_admin" &&
+      auth.user.role !== "super_admin"
+    ) {
+      return NextResponse.json(
+        { error: "Only Super Admins can assign the Super Admin role" },
+        { status: 403 }
+      );
+    }
+
     const { user, temporaryPassword } = await createCmsUserDurable({
       email: body.email.trim().toLowerCase(),
       name: body.name.trim(),

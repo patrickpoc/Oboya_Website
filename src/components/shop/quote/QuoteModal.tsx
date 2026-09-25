@@ -17,7 +17,25 @@ import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { RfqError, RfqSuccess } from "@/components/shop/states/ShopStateViews";
 import { formatShopPrice } from "@/lib/shop/format-price";
+import { pickLocalizedLabel } from "@/lib/shop/localized-label";
+import type { ShopConfigRfqFieldKey } from "@/lib/cms/shop-config/types";
 import type { Locale } from "@/i18n/routing";
+
+const TEXT_FIELDS: Array<{
+  key: ShopConfigRfqFieldKey;
+  formKey: "company" | "contactName" | "email" | "phone" | "country" | "message";
+  labelKey: "company" | "contactName" | "email" | "phone" | "country" | "notes";
+  inputType?: string;
+  maxLength?: number;
+  multiline?: boolean;
+}> = [
+  { key: "company", formKey: "company", labelKey: "company", maxLength: 120 },
+  { key: "contactName", formKey: "contactName", labelKey: "contactName", maxLength: 120 },
+  { key: "email", formKey: "email", labelKey: "email", inputType: "email" },
+  { key: "phone", formKey: "phone", labelKey: "phone", maxLength: 32 },
+  { key: "country", formKey: "country", labelKey: "country" },
+  { key: "message", formKey: "message", labelKey: "notes", multiline: true, maxLength: 2000 },
+];
 
 export function QuoteModal() {
   const t = useTranslations("shop");
@@ -35,9 +53,11 @@ export function QuoteModal() {
     rfqReferenceId,
     resetRfqStatus,
     getProductById,
+    shopConfig,
   } = useShop();
   const getProductName = useProductName();
   const { data: mapData } = useMapLocations();
+  const fields = shopConfig.rfq.fields;
 
   const [form, setForm] = useState({
     company: "",
@@ -54,6 +74,12 @@ export function QuoteModal() {
     ? getPrimaryOfficeByCountryCode(countryCode, locale, mapData ?? undefined)
     : null;
   const lineItems = getLineItems();
+  const intro = pickLocalizedLabel(locale, "", shopConfig.rfq.introI18n).trim();
+  const confirmation = pickLocalizedLabel(
+    locale,
+    "",
+    shopConfig.rfq.confirmationI18n
+  ).trim();
 
   const handleClose = () => {
     resetRfqStatus();
@@ -91,11 +117,17 @@ export function QuoteModal() {
       <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("requestQuotation")}</DialogTitle>
-          <DialogDescription>{t("checkoutDescription")}</DialogDescription>
+          <DialogDescription>
+            {intro || t("checkoutDescription")}
+          </DialogDescription>
         </DialogHeader>
 
         {rfqStatus === "success" && rfqReferenceId ? (
-          <RfqSuccess referenceId={rfqReferenceId} onClose={handleClose} />
+          <RfqSuccess
+            referenceId={rfqReferenceId}
+            onClose={handleClose}
+            confirmationMessage={confirmation || undefined}
+          />
         ) : rfqStatus === "error" ? (
           <RfqError onRetry={resetRfqStatus} />
         ) : (
@@ -133,101 +165,54 @@ export function QuoteModal() {
                 </div>
 
                 <form className="mt-4 space-y-3" onSubmit={(e) => void handleSubmit(e)}>
-                  <div className="space-y-1.5">
-                    <label htmlFor="rfq-company" className="text-xs font-medium text-oboya-blue-dark">
-                      {t("company")}
-                    </label>
-                    <input
-                      id="rfq-company"
-                      required
-                      maxLength={120}
-                      value={form.company}
-                      onChange={(e) =>
-                        setForm((p) => ({ ...p, company: e.target.value }))
-                      }
-                      placeholder={t("company")}
-                      className="h-10 w-full rounded-lg border border-border px-3 text-sm"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label htmlFor="rfq-contact" className="text-xs font-medium text-oboya-blue-dark">
-                      {t("contactName")}
-                    </label>
-                    <input
-                      id="rfq-contact"
-                      required
-                      maxLength={120}
-                      value={form.contactName}
-                      onChange={(e) =>
-                        setForm((p) => ({ ...p, contactName: e.target.value }))
-                      }
-                      placeholder={t("contactName")}
-                      className="h-10 w-full rounded-lg border border-border px-3 text-sm"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label htmlFor="rfq-email" className="text-xs font-medium text-oboya-blue-dark">
-                      {t("email")}
-                    </label>
-                    <input
-                      id="rfq-email"
-                      required
-                      type="email"
-                      value={form.email}
-                      onChange={(e) =>
-                        setForm((p) => ({ ...p, email: e.target.value }))
-                      }
-                      placeholder={t("email")}
-                      className="h-10 w-full rounded-lg border border-border px-3 text-sm"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label htmlFor="rfq-phone" className="text-xs font-medium text-oboya-blue-dark">
-                      {t("phone")}
-                    </label>
-                    <input
-                      id="rfq-phone"
-                      required
-                      maxLength={32}
-                      value={form.phone}
-                      onChange={(e) =>
-                        setForm((p) => ({ ...p, phone: e.target.value }))
-                      }
-                      placeholder={t("phone")}
-                      className="h-10 w-full rounded-lg border border-border px-3 text-sm"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label htmlFor="rfq-country" className="text-xs font-medium text-oboya-blue-dark">
-                      {t("country")}
-                    </label>
-                    <input
-                      id="rfq-country"
-                      required
-                      value={form.country}
-                      onChange={(e) =>
-                        setForm((p) => ({ ...p, country: e.target.value }))
-                      }
-                      placeholder={t("country")}
-                      className="h-10 w-full rounded-lg border border-border px-3 text-sm"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label htmlFor="rfq-notes" className="text-xs font-medium text-oboya-blue-dark">
-                      {t("notes")}
-                    </label>
-                    <textarea
-                      id="rfq-notes"
-                      rows={3}
-                      maxLength={2000}
-                      value={form.message}
-                      onChange={(e) =>
-                        setForm((p) => ({ ...p, message: e.target.value }))
-                      }
-                      placeholder={t("notes")}
-                      className="w-full rounded-lg border border-border px-3 py-2 text-sm"
-                    />
-                  </div>
+                  {TEXT_FIELDS.map((field) => {
+                    const config = fields[field.key];
+                    if (!config.visible) return null;
+                    const id = `rfq-${field.formKey}`;
+                    return (
+                      <div key={field.key} className="space-y-1.5">
+                        <label
+                          htmlFor={id}
+                          className="text-xs font-medium text-oboya-blue-dark"
+                        >
+                          {t(field.labelKey)}
+                        </label>
+                        {field.multiline ? (
+                          <textarea
+                            id={id}
+                            rows={3}
+                            required={config.required}
+                            maxLength={field.maxLength}
+                            value={form[field.formKey]}
+                            onChange={(e) =>
+                              setForm((p) => ({
+                                ...p,
+                                [field.formKey]: e.target.value,
+                              }))
+                            }
+                            placeholder={t(field.labelKey)}
+                            className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                          />
+                        ) : (
+                          <input
+                            id={id}
+                            required={config.required}
+                            type={field.inputType ?? "text"}
+                            maxLength={field.maxLength}
+                            value={form[field.formKey]}
+                            onChange={(e) =>
+                              setForm((p) => ({
+                                ...p,
+                                [field.formKey]: e.target.value,
+                              }))
+                            }
+                            placeholder={t(field.labelKey)}
+                            className="h-10 w-full rounded-lg border border-border px-3 text-sm"
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
 
                   <p className="text-xs leading-relaxed text-oboya-blue-dark/70">
                     {t("privacyNotice")}{" "}
@@ -250,17 +235,23 @@ export function QuoteModal() {
                     />
                     <span>{t("privacyAccept")}</span>
                   </label>
-                  <label className="flex items-start gap-2 text-xs text-oboya-blue-dark/80">
-                    <input
-                      type="checkbox"
-                      checked={form.marketingOptIn}
-                      onChange={(e) =>
-                        setForm((p) => ({ ...p, marketingOptIn: e.target.checked }))
-                      }
-                      className="mt-0.5 size-4 accent-oboya-blue-dark"
-                    />
-                    <span>{t("marketingOptIn")}</span>
-                  </label>
+                  {fields.marketingOptIn.visible ? (
+                    <label className="flex items-start gap-2 text-xs text-oboya-blue-dark/80">
+                      <input
+                        type="checkbox"
+                        required={fields.marketingOptIn.required}
+                        checked={form.marketingOptIn}
+                        onChange={(e) =>
+                          setForm((p) => ({
+                            ...p,
+                            marketingOptIn: e.target.checked,
+                          }))
+                        }
+                        className="mt-0.5 size-4 accent-oboya-blue-dark"
+                      />
+                      <span>{t("marketingOptIn")}</span>
+                    </label>
+                  ) : null}
 
                   <div className="flex flex-col gap-2 pt-2 sm:flex-row">
                     <button

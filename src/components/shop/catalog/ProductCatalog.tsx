@@ -24,9 +24,11 @@ export function ProductCatalog() {
     loadMoreProducts,
     status,
     openAddToQuoteDialog,
+    shopConfig,
   } = useShop();
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const activeSkuCount = countActiveSkus(filteredProducts);
+  const rfqEnabled = shopConfig.rfq.enabled;
 
   useEffect(() => {
     const node = loadMoreRef.current;
@@ -74,8 +76,10 @@ export function ProductCatalog() {
               product={product}
               currency={currency}
               viewMode="grid"
-              onAddToQuote={(variantId) =>
-                openAddToQuoteDialog(product.id, variantId)
+              onAddToQuote={
+                rfqEnabled
+                  ? (variantId) => openAddToQuoteDialog(product.id, variantId)
+                  : undefined
               }
             />
           ))}
@@ -88,8 +92,10 @@ export function ProductCatalog() {
               product={product}
               currency={currency}
               viewMode="list"
-              onAddToQuote={(variantId) =>
-                openAddToQuoteDialog(product.id, variantId)
+              onAddToQuote={
+                rfqEnabled
+                  ? (variantId) => openAddToQuoteDialog(product.id, variantId)
+                  : undefined
               }
             />
           ))}

@@ -2,7 +2,9 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import type { CmsUser } from "@/lib/cms/types";
-import { canAccess } from "@/lib/cms/permissions/matrix";
+import { canAccessUser } from "@/lib/cms/permissions/matrix";
+import { hydrateAccessControl } from "@/lib/cms/permissions/access-store";
+import type { AccessControlDoc } from "@/lib/cms/permissions/access-types";
 import type { CmsAction, CmsModule, CmsLocale } from "@/lib/cms/types";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import mockUsers from "@/../data/cms/users.json";
@@ -12,6 +14,7 @@ interface AdminContextValue {
   setUser: (user: CmsUser) => void;
   can: (module: CmsModule, action?: CmsAction) => boolean;
   loading: boolean;
+  accessHydrated: boolean;
 }
 
 const AdminContext = createContext<AdminContextValue | null>(null);
@@ -29,6 +32,30 @@ export function AdminProvider({
 }) {
   const [user, setUser] = useState<CmsUser | null>(initialUser ?? null);
   const [loading, setLoading] = useState(!initialUser);
+  const [accessHydrated, setAccessHydrated] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function hydrateAccess() {
+      try {
+        const res = await fetch("/api/cms/access-control", { cache: "no-store" });
+        if (!res.ok) return;
+        const doc = (await res.json()) as AccessControlDoc;
+        if (!cancelled && doc?.roles && doc?.matrix) {
+          hydrateAccessControl(doc);
+          setAccessHydrated(true);
+        }
+      } catch {
+        // Builtin matrix remains until hydrate succeeds.
+      }
+    }
+
+    void hydrateAccess();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (initialUser) {
@@ -95,7 +122,7 @@ export function AdminProvider({
 
   const can = (module: CmsModule, action: CmsAction = "view") => {
     if (!user) return false;
-    return canAccess(user.role, module, action);
+    return canAccessUser(user, module, action);
   };
 
   return (
@@ -105,6 +132,7 @@ export function AdminProvider({
         setUser: handleSetUser,
         can,
         loading: loading || !user,
+        accessHydrated,
       }}
     >
       {children}

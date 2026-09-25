@@ -5,6 +5,7 @@ import { Trash2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { PRODUCT_EDITOR_SELECT_CLASS } from "@/components/admin/marketplace/product-editor.constants";
+import { BulkPriceInput } from "@/components/admin/marketplace/bulk-update/BulkPriceInput";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -281,54 +282,36 @@ export function BulkImportTable({
                     </select>
                   </CellShell>
                 </td>
-                <td className={TD}>
+                <td className={cn(TD, "min-w-[11rem]")}>
                   <CellShell field="priceUsd" row={row} issues={issues}>
-                    <Input
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      value={product.prices.USD ?? ""}
-                      onChange={(event) =>
-                        onPatch(row.productId, {
-                          priceUsd:
-                            event.target.value === "" ? null : Number(event.target.value),
-                        })
+                    <BulkPriceInput
+                      currency="USD"
+                      value={product.prices.USD}
+                      onChange={(next) =>
+                        onPatch(row.productId, { priceUsd: next })
                       }
-                      className={cn(CONTROL, "w-24")}
                     />
                   </CellShell>
                 </td>
-                <td className={TD}>
+                <td className={cn(TD, "min-w-[11rem]")}>
                   <CellShell field="priceBrl" row={row} issues={issues}>
-                    <Input
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      value={product.prices.BRL ?? ""}
-                      onChange={(event) =>
-                        onPatch(row.productId, {
-                          priceBrl:
-                            event.target.value === "" ? null : Number(event.target.value),
-                        })
+                    <BulkPriceInput
+                      currency="BRL"
+                      value={product.prices.BRL}
+                      onChange={(next) =>
+                        onPatch(row.productId, { priceBrl: next })
                       }
-                      className={cn(CONTROL, "w-24")}
                     />
                   </CellShell>
                 </td>
-                <td className={TD}>
+                <td className={cn(TD, "min-w-[11rem]")}>
                   <CellShell field="priceEur" row={row} issues={issues}>
-                    <Input
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      value={product.prices.EUR ?? ""}
-                      onChange={(event) =>
-                        onPatch(row.productId, {
-                          priceEur:
-                            event.target.value === "" ? null : Number(event.target.value),
-                        })
+                    <BulkPriceInput
+                      currency="EUR"
+                      value={product.prices.EUR}
+                      onChange={(next) =>
+                        onPatch(row.productId, { priceEur: next })
                       }
-                      className={cn(CONTROL, "w-24")}
                     />
                   </CellShell>
                 </td>

@@ -15,12 +15,22 @@ const PREFIXES: Array<{ prefix: string; module: CmsModule }> = [
   { prefix: "/admin/dashboard", module: "dashboard" },
 ];
 
+export function isAccessControlPath(pathname: string): boolean {
+  return (
+    pathname === "/admin/access-control" ||
+    pathname.startsWith("/admin/access-control/")
+  );
+}
+
 export function moduleForAdminPath(pathname: string): CmsModule | null {
   if (pathname === "/admin" || pathname === "/admin/") return "dashboard";
   if (
     pathname.startsWith("/admin/profile") ||
     pathname.startsWith("/admin/change-password")
   ) {
+    return null;
+  }
+  if (isAccessControlPath(pathname)) {
     return null;
   }
   for (const entry of PREFIXES) {
