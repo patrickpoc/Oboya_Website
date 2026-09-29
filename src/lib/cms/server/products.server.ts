@@ -792,6 +792,39 @@ export async function readProductById(
   }
 }
 
+/**
+ * Strict lookup (includes trash) used before creating a product: saves are upserts
+ * keyed by id, so an existing row with the same id or SKU would be overwritten.
+ * Throws on read errors instead of falling back to seed data.
+ */
+export async function findExistingProduct(
+  id: string,
+  sku: string
+): Promise<Pick<CmsProduct, "id" | "sku" | "name"> | null> {
+  const keys = [...new Set([id, sku].map((k) => k?.trim()).filter(Boolean))];
+  if (keys.length === 0) return null;
+
+  if (!isSupabaseConfigured()) {
+    const match = getCmsProducts({ includeDeleted: true }).find(
+      (p) => keys.includes(p.id) || keys.includes(p.sku)
+    );
+    return match ? { id: match.id, sku: match.sku, name: match.name } : null;
+  }
+
+  const supabase = await createClient();
+  for (const column of ["id", "sku"] as const) {
+    const { data, error } = await supabase
+      .from("cms_products")
+      .select("id, sku, name")
+      .in(column, keys)
+      .limit(1);
+    if (error) throw new Error(`Failed to check existing product: ${error.message}`);
+    const row = data?.[0] as { id: string; sku: string; name: CmsProduct["name"] } | undefined;
+    if (row) return { id: row.id, sku: row.sku, name: row.name };
+  }
+  return null;
+}
+
 export async function saveProduct(product: CmsProduct) {
   if (!isSupabaseConfigured()) {
     return product;

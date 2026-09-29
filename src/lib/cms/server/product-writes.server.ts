@@ -9,6 +9,7 @@ import {
   type CmsProduct,
 } from "@/lib/cms/repositories/product-repository";
 import {
+  findExistingProduct,
   hardDeleteProduct,
   persistProductsToFileSafe,
   restoreProduct,
@@ -49,6 +50,26 @@ export async function writeProduct(
   if (!options.skipFileSync) await syncProductsFile();
   if (!options.deferRevalidate) await revalidateShop(saved.id);
   return saved;
+}
+
+export class ProductExistsError extends Error {
+  constructor(sku: string) {
+    super(`A product with SKU ${sku} already exists (including trash). Use a different SKU or edit the existing product.`);
+    this.name = "ProductExistsError";
+  }
+}
+
+export async function assertProductIsNew(product: Pick<CmsProduct, "id" | "sku">) {
+  const existing = await findExistingProduct(product.id, product.sku);
+  if (existing) throw new ProductExistsError(existing.sku || existing.id);
+}
+
+export async function createProductWrite(
+  product: CmsProduct,
+  options: WriteOptions = {}
+): Promise<CmsProduct> {
+  await assertProductIsNew(product);
+  return writeProduct(product, null, options);
 }
 
 export async function deleteProductWrite(

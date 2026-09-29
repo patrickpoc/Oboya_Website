@@ -55,7 +55,6 @@ export default function ProductNewPage() {
     }
     void (async () => {
       try {
-        saveCmsProduct(toSave);
         const response = await fetch("/api/cms/products", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -65,6 +64,7 @@ export default function ProductNewPage() {
         if (!response.ok) {
           throw new Error(payload?.error ?? "failed");
         }
+        saveCmsProduct(toSave);
         if (notifyPending(payload)) {
           router.push("/admin/marketplace/products");
           return;

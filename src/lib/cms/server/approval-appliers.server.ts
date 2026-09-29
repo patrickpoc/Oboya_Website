@@ -24,6 +24,7 @@ import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
 import type { CmsCaseStudy } from "@/lib/cms/repositories/case-studies-repository";
 import { readProductById } from "@/lib/cms/server/products.server";
 import {
+  createProductWrite,
   deleteProductWrite,
   revalidateShop,
   syncProductsFile,
@@ -130,7 +131,7 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
           return (await currentProduct(product.id)) ? ["already_exists"] : [];
         },
         async apply(req) {
-          await writeProduct(req.payloadProposed as CmsProduct, null);
+          await createProductWrite(req.payloadProposed as CmsProduct);
         },
       };
 

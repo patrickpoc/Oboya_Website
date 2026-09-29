@@ -7,7 +7,11 @@ import {
   type ProductReadFields,
 } from "@/lib/cms/server/products.server";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
-import { writeProduct } from "@/lib/cms/server/product-writes.server";
+import {
+  assertProductIsNew,
+  createProductWrite,
+  ProductExistsError,
+} from "@/lib/cms/server/product-writes.server";
 import {
   pendingApprovalResponse,
   stripApprovalMeta,
@@ -124,7 +128,11 @@ export async function POST(request: Request) {
     if ("response" in auth) return auth.response;
 
     const body = stripApprovalMeta((await request.json()) as CmsProduct);
+    if (!body?.id || !body?.sku) {
+      return NextResponse.json({ error: "Product id and SKU are required" }, { status: 400 });
+    }
     const deferRevalidate = shouldDeferRevalidate(request);
+    await assertProductIsNew(body);
     const gate = await submitOrApply({
       user: auth.user,
       changeType: "marketplace.product_create",
@@ -135,11 +143,14 @@ export async function POST(request: Request) {
       snapshot: null,
       diff: () => ({ entries: diffJson(null, body, "", [], 40) }),
       summary: `New product ${body.sku || body.id}`,
-      apply: () => writeProduct(body, null, { deferRevalidate }),
+      apply: () => createProductWrite(body, { deferRevalidate }),
     });
     if (!gate.applied) return pendingApprovalResponse(gate.request, body);
     return NextResponse.json(gate.result, { status: 201 });
   } catch (error) {
+    if (error instanceof ProductExistsError) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
     const message = error instanceof Error ? error.message : "Failed to persist product";
     const status = /exceeds|too many images/i.test(message) ? 400 : 500;
     return NextResponse.json({ error: message }, { status });

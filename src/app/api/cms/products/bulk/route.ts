@@ -5,6 +5,7 @@ import {
   type CmsProduct,
 } from "@/lib/cms/repositories/product-repository";
 import {
+  findExistingProduct,
   persistProductsToFileSafe,
   readProductById,
   saveProduct,
@@ -146,6 +147,20 @@ export async function POST(request: Request) {
           mode === "update"
             ? await readProductById(product.id, { asAdmin: true })
             : null;
+        if (mode === "create") {
+          const existing = await findExistingProduct(product.id, product.sku);
+          if (existing) {
+            results.push({
+              productId: product.id,
+              sku: product.sku,
+              name: displayProductName(product),
+              status: "FAILED",
+              error: `A product with SKU ${existing.sku || existing.id} already exists`,
+              suggestedAction: "Use a different SKU or update the existing product.",
+            });
+            continue;
+          }
+        }
         if (mode === "update" && !previous) {
           results.push({
             productId: product.id,
