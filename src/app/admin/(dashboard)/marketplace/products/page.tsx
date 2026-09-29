@@ -9,10 +9,12 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Can } from "@/components/admin/permissions/Can";
-import { Badge } from "@/components/ui/badge";
+import { EmptyState, FilterTabs, StatusPill, TableSkeleton, useUrlFilters } from "@/components/admin/common";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
+import { usePendingApprovalNotice } from "@/components/admin/approvals/use-pending-approval-notice";
+import { emitApprovalsChanged } from "@/lib/cms/approvals/client";
 
 const PAGE_SIZE = 20;
 
@@ -51,22 +53,28 @@ async function fetchFullProduct(id: string): Promise<CmsProduct | null> {
 export default function ProductsPage() {
   const t = useTranslations("admin.products");
   const tCommon = useTranslations("admin.common");
+  const tApprovals = useTranslations("admin.approvals");
+  const notifyPending = usePendingApprovalNotice();
   const router = useRouter();
   const [products, setProducts] = useState<CmsProduct[]>([]);
   const [total, setTotal] = useState(0);
   const [tabCounts, setTabCounts] = useState({ active: 0, archived: 0, trash: 0 });
   const [unitStats, setUnitStats] = useState({ total: 0, active: 0, draft: 0 });
-  const [tab, setTab] = useState<ViewTab>("active");
+  const { filters, setFilters } = useUrlFilters({ tab: "active", q: "" });
+  const tab = (["active", "archived", "trash"].includes(filters.tab) ? filters.tab : "active") as ViewTab;
   const [selected, setSelected] = useState<string[]>([]);
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [search, setSearch] = useState(filters.q);
+  const [debouncedSearch, setDebouncedSearch] = useState(filters.q);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setDebouncedSearch(search), 250);
+    const timer = window.setTimeout(() => {
+      setDebouncedSearch(search);
+      setFilters({ q: search });
+    }, 250);
     return () => window.clearTimeout(timer);
-  }, [search]);
+  }, [search, setFilters]);
 
   const refresh = async (opts?: { purgeTrash?: boolean }) => {
     setLoading(true);
@@ -120,7 +128,9 @@ export default function ProductsPage() {
     void (async () => {
       const ok = window.confirm(t("deleteConfirm"));
       if (!ok) return;
-      await fetch(`/api/cms/products/${id}`, { method: "DELETE" });
+      const response = await fetch(`/api/cms/products/${id}`, { method: "DELETE" });
+      const payload = await response.json().catch(() => null);
+      if (notifyPending(payload)) return;
       await refresh();
       toast.success(t("deleteSuccess"));
     })();
@@ -131,9 +141,18 @@ export default function ProductsPage() {
       if (selected.length === 0) return;
       const ok = window.confirm(t("bulkDeleteConfirm", { count: selected.length }));
       if (!ok) return;
-      await Promise.all(selected.map((id) => fetch(`/api/cms/products/${id}`, { method: "DELETE" })));
+      const responses = await Promise.all(
+        selected.map((id) => fetch(`/api/cms/products/${id}`, { method: "DELETE" }))
+      );
+      const heldCount = responses.filter((r) => r.status === 202).length;
       await refresh();
-      toast.success(t("bulkDeleteSuccess", { count: selected.length }));
+      if (heldCount > 0) {
+        toast.info(tApprovals("toast.heldCount", { count: heldCount }));
+        emitApprovalsChanged();
+      }
+      if (heldCount < selected.length) {
+        toast.success(t("bulkDeleteSuccess", { count: selected.length - heldCount }));
+      }
     })();
   };
 
@@ -151,6 +170,7 @@ export default function ProductsPage() {
         toast.error(t("archiveFailed"));
         return;
       }
+      if (notifyPending(await response.json().catch(() => null))) return;
       await refresh();
       toast.success(t("archiveSuccess"));
     })();
@@ -168,6 +188,7 @@ export default function ProductsPage() {
         toast.error(t("unarchiveFailed"));
         return;
       }
+      if (notifyPending(await response.json().catch(() => null))) return;
       await refresh();
       toast.success(t("unarchiveSuccess"));
     })();
@@ -215,18 +236,19 @@ export default function ProductsPage() {
         deletedAt: null,
         purgeAt: null,
       };
-      await fetch("/api/cms/products", {
+      const createRes = await fetch("/api/cms/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(copy),
       });
+      if (notifyPending(await createRes.json().catch(() => null))) return;
       await refresh();
       toast.success(t("duplicateSuccess"));
     })();
   };
 
   const switchTab = (next: ViewTab) => {
-    setTab(next);
+    setFilters({ tab: next });
     setPage(1);
     setSelected([]);
     setSearch("");
@@ -274,37 +296,16 @@ export default function ProductsPage() {
         }
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          onClick={() => switchTab("active")}
-          className={buttonVariants({
-            variant: tab === "active" ? "default" : "outline",
-            className: "rounded-full",
-          })}
-        >
-          {t("tabActive")}
-        </button>
-        <button
-          type="button"
-          onClick={() => switchTab("archived")}
-          className={buttonVariants({
-            variant: tab === "archived" ? "default" : "outline",
-            className: "rounded-full",
-          })}
-        >
-          {t("tabArchive", { count: tabCounts.archived })}
-        </button>
-        <button
-          type="button"
-          onClick={() => switchTab("trash")}
-          className={buttonVariants({
-            variant: tab === "trash" ? "default" : "outline",
-            className: "rounded-full",
-          })}
-        >
-          {t("tabTrash", { count: tabCounts.trash })}
-        </button>
+      <div className="mb-4">
+        <FilterTabs
+          value={tab}
+          onChange={(value) => switchTab(value as ViewTab)}
+          options={[
+            { value: "active", label: t("tabActive"), count: tabCounts.active },
+            { value: "archived", label: t("tabArchive", { count: tabCounts.archived }), count: tabCounts.archived },
+            { value: "trash", label: t("tabTrash", { count: tabCounts.trash }), count: tabCounts.trash },
+          ]}
+        />
       </div>
 
       {tab === "trash" ? (
@@ -349,6 +350,7 @@ export default function ProductsPage() {
                         toast.error(t("hardDeleteFailed"));
                         return;
                       }
+                      if (notifyPending(await response.json().catch(() => null))) return;
                       await refresh();
                       toast.success(t("hardDeleteSuccess"));
                     })()
@@ -360,7 +362,7 @@ export default function ProductsPage() {
             </div>
           ))}
           {!loading && products.length === 0 && (
-            <p className="text-sm text-muted-foreground">{t("emptyTrash")}</p>
+            <EmptyState title={t("emptyTrash")} />
           )}
         </div>
       ) : (
@@ -388,10 +390,10 @@ export default function ProductsPage() {
             )}
           </div>
 
-          {paginatedProducts.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {tab === "archived" ? t("emptyArchive") : t("emptyActive")}
-            </p>
+          {loading ? (
+            <TableSkeleton />
+          ) : paginatedProducts.length === 0 ? (
+            <EmptyState title={tab === "archived" ? t("emptyArchive") : t("emptyActive")} />
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-5">
               {paginatedProducts.map((product) => {
@@ -455,10 +457,12 @@ export default function ProductsPage() {
                         {product.prices.EUR ?? 0}
                       </p>
                       <div className="flex flex-wrap gap-1">
-                        <Badge variant={product.status === "published" ? "default" : "secondary"}>
-                          {product.status}
-                        </Badge>
-                        {isUnavailable && <Badge variant="destructive">{t("hiddenInShop")}</Badge>}
+                        <StatusPill tone={product.status === "published" ? "success" : "warning"}>
+                          {product.status === "published" || product.status === "draft"
+                            ? tCommon(product.status)
+                            : product.status}
+                        </StatusPill>
+                        {isUnavailable && <StatusPill tone="danger">{t("hiddenInShop")}</StatusPill>}
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {tab === "active" ? (

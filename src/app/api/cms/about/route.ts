@@ -6,6 +6,7 @@ import {
 } from "@/lib/cms/server/about-page.server";
 import { revalidateAboutPages } from "@/lib/cms/revalidate-site";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
+import { gateSettingsDocument, stripApprovalMeta } from "@/lib/cms/server/approvals.server";
 
 export async function GET() {
   try {
@@ -21,10 +22,17 @@ export async function PUT(request: Request) {
   if ("response" in auth) return auth.response;
 
   try {
-    const body = (await request.json()) as AboutPageSettings;
-    const saved = await saveAboutPageSettingsDurable(body);
-    revalidateAboutPages();
-    return NextResponse.json(saved);
+    const body = stripApprovalMeta((await request.json()) as AboutPageSettings);
+    return await gateSettingsDocument({
+      user: auth.user,
+      changeType: "website.about",
+      entityId: "about",
+      entityLabel: "About Us",
+      body,
+      read: readAboutPageSettingsDurable,
+      save: saveAboutPageSettingsDurable,
+      revalidate: revalidateAboutPages,
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to save about settings";

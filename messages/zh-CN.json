@@ -1416,7 +1416,17 @@
       "imageAlt": "图片替代文本",
       "panelImage": "面板图片",
       "read": "已读",
-      "replied": "已回复"
+      "replied": "已回复",
+      "clearSearch": "清除搜索",
+      "clearFilters": "清除筛选",
+      "comingSoonTitle": "即将推出",
+      "comingSoonDescription": "{module} 正在准备中，很快将在此处提供。",
+      "leaveUnsavedConfirm": "您有未保存的更改。仍要离开此页面吗？",
+      "discard": "放弃",
+      "selectedCount": "已选择 {count} 项",
+      "clearSelection": "清除选择",
+      "showing": "显示第 {from}–{to} 条，共 {total} 条",
+      "readOnlyNotice": "目前为只读——该模块接入后将开放编辑。"
     },
     "topbar": {
       "language": "语言",
@@ -1484,7 +1494,11 @@
       "solutions": "解决方案",
       "accessControl": "访问控制",
       "accessRolesMatrix": "角色与矩阵",
-      "accessUserOverrides": "用户权限覆盖"
+      "accessUserOverrides": "用户权限覆盖",
+      "approvals": "审批",
+      "approvalsReview": "待我审核",
+      "approvalsMine": "我的申请",
+      "accessApprovals": "审批流程"
     },
     "filters": {
       "title": "筛选",
@@ -2030,10 +2044,17 @@
     "roles": {
       "super_admin": "超级管理员",
       "admin": "管理员",
+      "ceo": "首席执行官 (CEO)",
+      "cfo": "首席财务官 (CFO)",
+      "cto": "首席技术官 (CTO)",
       "content_manager": "内容管理员",
       "marketplace_manager": "商城管理员",
       "sales_manager": "销售管理员",
       "hr_manager": "人事管理员",
+      "content_analyst": "内容专员",
+      "marketplace_analyst": "商城专员",
+      "sales_analyst": "销售专员",
+      "hr_analyst": "人事专员",
       "viewer": "只读用户"
     },
     "auth": {
@@ -2093,7 +2114,16 @@
       "visitorsChart": "访客（模拟）",
       "quotesChart": "报价请求（模拟）",
       "chartVisitors": "访客（模拟）",
-      "chartQuotes": "询价请求（模拟）"
+      "chartQuotes": "询价请求（模拟）",
+      "statNewLeads": "新线索",
+      "statOverdueLeads": "待处理线索",
+      "statPendingApprovals": "待审批",
+      "statPublishedProducts": "在售 SKU",
+      "recentLeads": "最近线索",
+      "viewInbox": "打开收件箱",
+      "noRecentLeads": "目前没有待处理的线索。",
+      "recentQuotes": "最近报价请求",
+      "noRecentQuotes": "目前没有待处理的报价请求。"
     },
     "users": {
       "title": "用户",
@@ -2157,18 +2187,49 @@
     },
     "rolesPage": {
       "title": "角色与权限",
-      "description": "按角色和模块划分的权限矩阵。自定义角色将在后续版本中支持。",
+      "description": "各模块中谁可以做什么。将鼠标悬停在标签上可查看具体操作。",
       "matrixTitle": "权限矩阵",
       "module": "模块",
       "full": "全部",
       "roleShort": {
         "super_admin": "超管",
         "admin": "管理员",
+        "ceo": "CEO",
+        "cfo": "CFO",
+        "cto": "CTO",
         "content_manager": "内容",
         "marketplace_manager": "商城",
         "sales_manager": "销售",
         "hr_manager": "人事",
+        "content_analyst": "内容专员",
+        "marketplace_analyst": "商城专员",
+        "sales_analyst": "销售专员",
+        "hr_analyst": "人事专员",
         "viewer": "只读"
+      },
+      "levels": {
+        "full": "全部",
+        "publish": "发布",
+        "edit": "编辑",
+        "view": "查看",
+        "custom": "混合",
+        "none": "无"
+      },
+      "levelHints": {
+        "full": "所有操作",
+        "publish": "创建、编辑、发布",
+        "edit": "创建和编辑，不可发布",
+        "view": "只读",
+        "custom": "混合权限",
+        "none": "无权限"
+      },
+      "tiers": {
+        "all": "全部",
+        "platform": "平台",
+        "c_level": "高管",
+        "manager": "经理",
+        "analyst": "专员",
+        "custom": "自定义"
       }
     },
     "profile": {
@@ -2284,7 +2345,7 @@
       },
       "contact": {
         "title": "联系表单提交",
-        "description": "{unread} 未读 · 网站联系表单共 {total} 条。",
+        "description": "网站联系表单提交的收件箱。",
         "loadFailed": "无法加载联系表单提交",
         "statusUpdated": "状态已更新",
         "empty": "没有符合这些筛选条件的联系提交。",
@@ -2925,10 +2986,254 @@
       "openUserDetail": "打开用户资料",
       "selectUser": "选择用户以编辑覆盖项。",
       "superAdminNoOverrides": "超级管理员始终拥有完整权限；覆盖项将被忽略。",
-      "overridesHelp": "授予会在角色之上增加权限。拒绝会移除权限（拒绝优先）。",
+      "overridesHelp": "点击单元格可仅为此用户授予或移除权限。角色本身不变；禁止始终优先。",
       "grant": "授予",
       "deny": "拒绝",
-      "editInAccessControl": "在访问控制中编辑"
+      "editInAccessControl": "在访问控制中编辑",
+      "searchUsers": "按姓名、邮箱或角色搜索",
+      "noUsersFound": "未找到用户",
+      "overridesCount": "{count} 项例外",
+      "noOverrides": "完全遵循角色权限",
+      "clearOverrides": "清除例外",
+      "legend": {
+        "allowed": "角色允许",
+        "blocked": "角色未包含",
+        "granted": "单独授予此用户",
+        "denied": "单独禁止此用户"
+      },
+      "tipAllowedByRole": "角色允许",
+      "tipBlockedByRole": "角色不允许",
+      "tipGranted": "此用户的额外权限",
+      "tipDenied": "此用户已移除",
+      "clickToGrant": "点击授予",
+      "clickToDeny": "点击禁止",
+      "clickToReset": "点击恢复为角色权限"
+    },
+    "approvals": {
+      "reviewTitle": "待审核的变更",
+      "reviewDescription": "其他团队成员提交、等待你决定的变更。",
+      "mineTitle": "我的申请",
+      "mineDescription": "你提交的、需要另一位经理审批的变更。",
+      "empty": "暂无申请。",
+      "emptyMine": "你暂无申请。",
+      "loadFailed": "无法加载申请",
+      "dashboard": {
+        "title": "待审批",
+        "mineTitle": "我待审批的申请",
+        "viewAll": "查看全部",
+        "empty": "没有等待你审核的内容。"
+      },
+      "types": {
+        "marketplace_price": "产品价格",
+        "marketplace_bulk_update": "产品批量更新",
+        "marketplace_product_edit": "产品编辑",
+        "marketplace_product_create": "新产品",
+        "marketplace_product_delete": "删除产品",
+        "website_homepage": "首页",
+        "website_about": "关于页面",
+        "website_solutions": "解决方案页面",
+        "website_news_page": "新闻页面",
+        "website_faqs": "常见问题",
+        "website_header": "页眉",
+        "website_footer": "页脚",
+        "website_terms": "条款与政策",
+        "website_seo": "SEO",
+        "website_pages": "页面",
+        "blog_upsert": "博客文章",
+        "blog_delete": "删除博客文章",
+        "case_studies_upsert": "案例",
+        "case_studies_delete": "删除案例",
+        "careers_upsert": "职位",
+        "careers_delete": "删除职位"
+      },
+      "status": {
+        "pending": "待处理",
+        "in_review": "审核中",
+        "approved": "已批准",
+        "rejected": "已拒绝",
+        "conflict": "冲突",
+        "cancelled": "已取消",
+        "superseded": "已替代",
+        "failed": "失败"
+      },
+      "actionLabel": {
+        "create": "创建",
+        "update": "更新",
+        "delete": "删除",
+        "bulk": "批量更新"
+      },
+      "actions": {
+        "approve": "批准",
+        "inReview": "标记为审核中",
+        "reject": "拒绝",
+        "cancel": "取消申请",
+        "details": "详情",
+        "forceApply": "仍然应用",
+        "confirmReject": "拒绝变更"
+      },
+      "fields": {
+        "requestedBy": "申请人",
+        "requestedAt": "申请时间",
+        "action": "操作",
+        "status": "状态",
+        "reviewer": "审核人",
+        "comment": "备注",
+        "summary": "摘要",
+        "change": "变更",
+        "byOn": "{name} · {date}"
+      },
+      "filters": {
+        "status": "状态",
+        "module": "模块",
+        "open": "进行中",
+        "closed": "已结束"
+      },
+      "reject": {
+        "title": "拒绝变更",
+        "description": "申请人将看到你的备注。",
+        "placeholder": "说明拒绝此变更的原因…",
+        "commentRequired": "拒绝时必须填写备注。"
+      },
+      "detail": {
+        "title": "变更申请",
+        "loading": "加载中…",
+        "path": "字段",
+        "before": "修改前",
+        "after": "修改后",
+        "current": "当前",
+        "proposed": "拟议",
+        "noChanges": "没有差异。",
+        "moreChanges": "还有 {count} 项变更",
+        "conflictTitle": "提交申请后内容已变化",
+        "conflictDescription": "有人在申请提交后更新了此内容。应用前请核对当前值。",
+        "applyError": "应用错误",
+        "bulkItems": "{count} 个产品"
+      },
+      "toast": {
+        "submitted": "已提交审批",
+        "partial": "已保存 — 部分变更已提交审批",
+        "heldCount": "{count} 项变更已提交审批",
+        "approved": "变更已批准并应用",
+        "rejected": "变更已拒绝",
+        "inReview": "已标记为审核中",
+        "cancelled": "申请已取消",
+        "conflict": "申请后内容已变化 — 请查看冲突",
+        "failed": "无法完成操作"
+      },
+      "banner": {
+        "title": "{count} 项变更等待审批",
+        "by": "提交人 {name}",
+        "viewMine": "查看我的申请"
+      },
+      "policies": {
+        "title": "审批流程",
+        "description": "选择哪些变更在上线前需要另一位经理批准。",
+        "tabPolicies": "策略",
+        "tabRequests": "全部申请",
+        "requiresApproval": "需要审批",
+        "approverRoles": "审批角色",
+        "approverUsers": "审批用户",
+        "exemptRoles": "豁免角色（直接生效）",
+        "requireRejectComment": "拒绝时必须填写备注",
+        "comingSoon": "即将推出",
+        "noUsers": "没有用户",
+        "saved": "审批策略已保存",
+        "saveFailed": "无法保存审批策略",
+        "superAdminNote": "超级管理员始终可以审批，但不能审批自己的申请。"
+      }
+    },
+    "leads": {
+      "inbox": "收件箱",
+      "open": "进行中",
+      "unread": "未读",
+      "status": {
+        "new": "新建",
+        "in_progress": "处理中",
+        "replied": "已回复",
+        "converted": "已转化",
+        "archived": "已归档",
+        "spam": "垃圾"
+      },
+      "priority": {
+        "low": "低",
+        "normal": "普通",
+        "high": "高",
+        "urgent": "紧急"
+      },
+      "filters": {
+        "country": "国家",
+        "assignee": "负责人",
+        "tag": "标签",
+        "priority": "优先级",
+        "from": "从",
+        "to": "至",
+        "unassigned": "未分配"
+      },
+      "columns": {
+        "lead": "线索",
+        "subject": "主题",
+        "status": "状态",
+        "owner": "负责人",
+        "date": "日期",
+        "company": "公司",
+        "total": "预估总额"
+      },
+      "sla": {
+        "warning": "已等待 {hours} 小时",
+        "overdue": "已超时"
+      },
+      "empty": "没有符合筛选条件的线索。",
+      "emptyTitle": "暂无线索",
+      "loadFailed": "无法加载线索",
+      "updated": "线索已更新",
+      "merged": "线索已合并",
+      "noteAdded": "已添加备注",
+      "exported": "已开始导出",
+      "bulk": {
+        "assign": "分配",
+        "status": "更改状态",
+        "spam": "标记为垃圾",
+        "export": "导出 CSV"
+      },
+      "detail": {
+        "title": "线索",
+        "openFull": "打开完整页面",
+        "message": "留言",
+        "contact": "联系人",
+        "meta": "来源",
+        "page": "页面",
+        "locale": "语言",
+        "referrer": "来源页",
+        "campaign": "活动",
+        "history": "该邮箱的其他提交",
+        "merge": "合并到此线索",
+        "timeline": "动态",
+        "addNote": "添加备注",
+        "notePlaceholder": "内部备注…",
+        "saveNote": "保存备注",
+        "reply": "回复",
+        "markReplied": "标记为已回复",
+        "reveal": "显示",
+        "hide": "隐藏",
+        "redacted": "个人数据已匿名化。",
+        "noActivities": "暂无动态。",
+        "assignTo": "负责人",
+        "tags": "标签",
+        "addTag": "添加标签",
+        "lineItems": "明细",
+        "estimatedTotal": "预估总额",
+        "danger": "危险操作",
+        "activity": {
+          "note": "备注",
+          "status": "状态已更改",
+          "assign": "负责人已更改",
+          "tags": "标签已更新",
+          "priority": "优先级已更改",
+          "reply": "已记录回复",
+          "pii": "个人数据操作",
+          "merge": "已合并"
+        }
+      }
     }
   },
   "latestNews": {

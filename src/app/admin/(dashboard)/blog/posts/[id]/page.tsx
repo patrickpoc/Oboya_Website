@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
+import { EditorGuard, FormSkeleton } from "@/components/admin/common";
 import { RichTextEditor } from "@/components/admin/editors/RichTextEditor";
 import { LocaleFieldTabs, emptyLocalizedString } from "@/components/admin/forms/LocaleFieldTabs";
 import { ImageField } from "@/components/admin/media/ImageField";
@@ -22,6 +23,8 @@ import {
   publishedDateToIso,
   slugify,
 } from "@/lib/cms/slugify";
+import { usePendingApprovalNotice } from "@/components/admin/approvals/use-pending-approval-notice";
+import { PendingChangeBanner } from "@/components/admin/approvals/PendingChangeBanner";
 
 function emptyPost(
   authors: BlogAuthor[],
@@ -58,6 +61,7 @@ export default function BlogPostEditPage() {
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [loading, setLoading] = useState(true);
   const [slugTouched, setSlugTouched] = useState(false);
+  const notifyPending = usePendingApprovalNotice();
 
   useEffect(() => {
     void (async () => {
@@ -99,7 +103,7 @@ export default function BlogPostEditPage() {
   }, [id, isNew, router, t]);
 
   if (loading || !post) {
-    return <div className="min-h-[40vh]" aria-hidden />;
+    return <FormSkeleton />;
   }
 
   const handleSave = async () => {
@@ -124,7 +128,7 @@ export default function BlogPostEditPage() {
         body: JSON.stringify(toSave),
       });
       if (!res.ok) throw new Error(tCommon("saveFailed"));
-      toast.success(t("saved"));
+      if (!notifyPending(await res.json().catch(() => null))) toast.success(t("saved"));
       router.push("/admin/blog/posts");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : tCommon("couldNotSave"));
@@ -152,6 +156,8 @@ export default function BlogPostEditPage() {
           </div>
         }
       />
+
+      {!isNew ? <PendingChangeBanner entityType="blog_post" entityId={post.id} /> : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
@@ -295,6 +301,7 @@ export default function BlogPostEditPage() {
           </Card>
         </div>
       </div>
+      <EditorGuard dirty onSave={() => void handleSave()} />
     </div>
   );
 }

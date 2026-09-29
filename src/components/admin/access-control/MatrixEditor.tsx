@@ -75,21 +75,21 @@ export function MatrixEditor({
       {locked ? (
         <p className="mb-3 text-xs text-muted-foreground">{t("superAdminLocked")}</p>
       ) : null}
-      <table className="w-full min-w-[640px] text-xs">
+      <table className="w-full min-w-[480px] text-xs">
         <thead>
           <tr className="border-b border-border/60">
-            <th className="px-2 py-2 text-left font-medium text-oboya-blue-dark">
+            <th className="px-1.5 py-2 text-left font-medium text-oboya-blue-dark">
               {t("module")}
             </th>
             {CMS_ACTIONS.map((action) => (
               <th
                 key={action}
-                className="px-2 py-2 text-center font-normal text-muted-foreground"
+                className="px-1.5 py-2 text-center font-normal text-muted-foreground"
               >
                 {t(`actions.${action}`)}
               </th>
             ))}
-            <th className="px-2 py-2 text-right font-normal text-muted-foreground">
+            <th className="px-1.5 py-2 text-right font-normal text-muted-foreground">
               {t("presets")}
             </th>
           </tr>
@@ -99,7 +99,7 @@ export function MatrixEditor({
             const actions = normalize(row[mod]);
             return (
               <tr key={mod} className="border-b border-border/40">
-                <td className="px-2 py-2 font-medium text-oboya-blue-dark">
+                <td className="px-1.5 py-2 font-medium text-oboya-blue-dark">
                   {MODULE_NAV_KEYS[mod]
                     ? tNav(MODULE_NAV_KEYS[mod]!)
                     : mod.replace(/_/g, " ")}
@@ -107,7 +107,7 @@ export function MatrixEditor({
                 {CMS_ACTIONS.map((action) => {
                   const checked = actions.includes(action);
                   return (
-                    <td key={action} className="px-2 py-2 text-center">
+                    <td key={action} className="px-1.5 py-2 text-center">
                       <input
                         type="checkbox"
                         className="size-3.5 accent-[var(--oboya-blue)]"
@@ -119,7 +119,7 @@ export function MatrixEditor({
                     </td>
                   );
                 })}
-                <td className="px-2 py-2 text-right">
+                <td className="px-1.5 py-2 text-right">
                   <div className="inline-flex gap-1">
                     <button
                       type="button"

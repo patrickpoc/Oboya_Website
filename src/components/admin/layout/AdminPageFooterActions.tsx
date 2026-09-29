@@ -1,12 +1,16 @@
 import { cn } from "@/lib/utils";
+import { useUnsavedChangesGuard } from "@/components/admin/common/unsaved-changes";
 
 export function AdminPageFooterActions({
   children,
   className,
+  dirty,
 }: {
   children: React.ReactNode;
   className?: string;
+  dirty?: boolean;
 }) {
+  useUnsavedChangesGuard(Boolean(dirty));
   return (
     <div
       className={cn(

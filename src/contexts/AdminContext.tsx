@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CmsUser } from "@/lib/cms/types";
 import { canAccessUser } from "@/lib/cms/permissions/matrix";
 import { hydrateAccessControl } from "@/lib/cms/permissions/access-store";
@@ -113,31 +113,35 @@ export function AdminProvider({
     };
   }, [initialUser]);
 
-  const handleSetUser = (next: CmsUser) => {
+  const handleSetUser = useCallback((next: CmsUser) => {
     setUser(next);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  };
+  }, []);
 
   const effectiveUser = user ?? MOCK_FALLBACK;
 
-  const can = (module: CmsModule, action: CmsAction = "view") => {
-    if (!user) return false;
-    return canAccessUser(user, module, action);
-  };
-
-  return (
-    <AdminContext.Provider
-      value={{
-        user: effectiveUser,
-        setUser: handleSetUser,
-        can,
-        loading: loading || !user,
-        accessHydrated,
-      }}
-    >
-      {children}
-    </AdminContext.Provider>
+  // accessHydrated is a dependency because canAccessUser reads the hydrated matrix store.
+  const can = useCallback(
+    (module: CmsModule, action: CmsAction = "view") => {
+      if (!user) return false;
+      return canAccessUser(user, module, action);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [user, accessHydrated]
   );
+
+  const value = useMemo(
+    () => ({
+      user: effectiveUser,
+      setUser: handleSetUser,
+      can,
+      loading: loading || !user,
+      accessHydrated,
+    }),
+    [effectiveUser, handleSetUser, can, loading, user, accessHydrated]
+  );
+
+  return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;
 }
 
 export function useAdmin() {

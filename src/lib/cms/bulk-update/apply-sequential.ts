@@ -8,6 +8,7 @@ import type {
 import { validateColorVariants } from "@/lib/shop/color-variants";
 import { DEFER_REVALIDATE_HEADER } from "@/lib/cms/revalidate-headers";
 import { BULK_APPLY_GAP_MS, sleep } from "@/lib/cms/bulk-apply-pace";
+import { readPendingApprovals } from "@/lib/cms/approvals/client";
 
 const QUIET_HEADER = "x-admin-quiet";
 
@@ -140,12 +141,16 @@ export async function applyBulkUpdatesSequentially(params: {
         continue;
       }
 
-      wroteAny = true;
+      const pendingApproval = readPendingApprovals(
+        await response.json().catch(() => null)
+      ).length > 0;
+      if (response.status !== 202) wroteAny = true;
       const result: BulkApplyResult = {
         productId: parent.productId,
         sku: parent.pending.sku,
         name: displayProductName(parent.pending),
         status: "SUCCESS",
+        ...(pendingApproval ? { pendingApproval } : {}),
       };
       results.push(result);
       onProgress?.({

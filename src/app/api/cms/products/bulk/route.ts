@@ -16,6 +16,14 @@ import { displayProductName } from "@/lib/cms/bulk-update/search-products";
 import type { BulkApplyResult } from "@/lib/cms/bulk-update/types";
 import { BULK_UPDATE_MAX_PRODUCTS } from "@/lib/cms/bulk-update/types";
 import { logCmsPerf } from "@/lib/cms/server/perf-log.server";
+import {
+  pendingApprovalResponse,
+  requiresApprovalFor,
+  submitChangeRequest,
+  toPendingInfo,
+} from "@/lib/cms/server/approvals.server";
+import { submitBulkUpdateRequest } from "@/lib/cms/server/bulk-approval.server";
+import { diffJson } from "@/lib/cms/approvals/diff";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -56,6 +64,43 @@ export async function POST(request: Request) {
           error: `At most ${BULK_CAP} products per bulk request`,
         },
         { status: 400 }
+      );
+    }
+
+    const gateType = mode === "create" ? "marketplace.product_create" : "marketplace.bulk_update";
+    if (await requiresApprovalFor(auth.user, gateType)) {
+      if (mode === "update") {
+        const changeRequest = await submitBulkUpdateRequest(
+          auth.user,
+          products.filter((p) => p?.id && p?.sku)
+        );
+        return pendingApprovalResponse(changeRequest, { results: [], ok: 0, failed: 0 });
+      }
+      const held = [];
+      for (const product of products.filter((p) => p?.id && p?.sku)) {
+        held.push(
+          await submitChangeRequest({
+            user: auth.user,
+            changeType: "marketplace.product_create",
+            entityId: product.id,
+            entityLabel: [product.sku, displayProductName(product)].filter(Boolean).join(" · "),
+            action: "create",
+            payload: product,
+            snapshot: null,
+            diff: { entries: diffJson(null, product, "", [], 40) },
+            summary: `New product ${product.sku}`,
+          })
+        );
+      }
+      return NextResponse.json(
+        {
+          results: [],
+          ok: 0,
+          failed: 0,
+          pendingApproval: held[0] ? toPendingInfo(held[0]) : undefined,
+          pendingApprovals: held.map(toPendingInfo),
+        },
+        { status: 202 }
       );
     }
 

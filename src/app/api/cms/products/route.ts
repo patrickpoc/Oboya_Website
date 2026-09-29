@@ -1,15 +1,20 @@
 import { NextResponse } from "next/server";
-import { getCmsProducts, saveCmsProduct, type CmsProduct } from "@/lib/cms/repositories/product-repository";
+import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import {
   readProducts,
   readProductsPage,
   readProductSkuIndex,
-  saveProduct,
-  persistProductsToFileSafe,
   type ProductReadFields,
 } from "@/lib/cms/server/products.server";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
+import { writeProduct } from "@/lib/cms/server/product-writes.server";
+import {
+  pendingApprovalResponse,
+  stripApprovalMeta,
+  submitOrApply,
+} from "@/lib/cms/server/approvals.server";
+import { diffJson } from "@/lib/cms/approvals/diff";
+import { displayProductName } from "@/lib/cms/bulk-update/search-products";
 import { publicApiError } from "@/lib/security/public-error";
 import { toPublicProduct } from "@/lib/cms/server/public-product";
 import { noStoreHeaders } from "@/lib/security/http-cache";
@@ -118,27 +123,22 @@ export async function POST(request: Request) {
     const auth = await cmsGuard("marketplace", "create");
     if ("response" in auth) return auth.response;
 
-    const body = (await request.json()) as CmsProduct;
+    const body = stripApprovalMeta((await request.json()) as CmsProduct);
     const deferRevalidate = shouldDeferRevalidate(request);
-    const { persistProductWithContent } = await import(
-      "@/lib/cms/server/product-content.server"
-    );
-    const saved = saveCmsProduct(await persistProductWithContent(body));
-
-    if (isSupabaseConfigured()) {
-      await saveProduct(saved);
-    }
-
-    await persistProductsToFileSafe(getCmsProducts({ includeDeleted: true }));
-    if (!deferRevalidate) {
-      try {
-        const { revalidateShopPages } = await import("@/lib/cms/revalidate-site");
-        revalidateShopPages(saved.id);
-      } catch {
-        // Ignore when revalidation is unavailable.
-      }
-    }
-    return NextResponse.json(saved, { status: 201 });
+    const gate = await submitOrApply({
+      user: auth.user,
+      changeType: "marketplace.product_create",
+      entityId: body.id,
+      entityLabel: [body.sku || body.id, displayProductName(body)].filter(Boolean).join(" · "),
+      action: "create",
+      payload: body,
+      snapshot: null,
+      diff: () => ({ entries: diffJson(null, body, "", [], 40) }),
+      summary: `New product ${body.sku || body.id}`,
+      apply: () => writeProduct(body, null, { deferRevalidate }),
+    });
+    if (!gate.applied) return pendingApprovalResponse(gate.request, body);
+    return NextResponse.json(gate.result, { status: 201 });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to persist product";
     const status = /exceeds|too many images/i.test(message) ? 400 : 500;

@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { EditorGuard, FormSkeleton } from "@/components/admin/common";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { ShopConfigForm } from "@/components/admin/marketplace/shop-config/ShopConfigForm";
 import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
 import { Can } from "@/components/admin/permissions/Can";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   DEFAULT_SHOP_CONFIG,
   normalizeShopConfig,
@@ -110,14 +110,11 @@ export default function Page() {
         }
       />
       {loading ? (
-        <Card>
-          <CardContent className="py-12 text-center text-sm text-muted-foreground">
-            {t("loading")}
-          </CardContent>
-        </Card>
+        <FormSkeleton />
       ) : (
         <ShopConfigForm value={config} onChange={setConfig} countries={countries} />
       )}
+      <EditorGuard dirty={!loading} saving={saving} onSave={() => void save()} />
     </Can>
   );
 }

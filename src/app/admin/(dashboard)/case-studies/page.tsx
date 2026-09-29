@@ -7,15 +7,17 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { DataTable } from "@/components/admin/data-table/DataTable";
-import { Badge } from "@/components/ui/badge";
+import { EmptyState, StatusPill } from "@/components/admin/common";
 import { buttonVariants } from "@/components/ui/button";
 import type { CmsCaseStudy } from "@/lib/cms/repositories/case-studies-repository";
+import { usePendingApprovalNotice } from "@/components/admin/approvals/use-pending-approval-notice";
 
 export default function CaseStudiesPage() {
   const t = useTranslations("admin.caseStudies");
   const tCommon = useTranslations("admin.common");
   const [studies, setStudies] = useState<CmsCaseStudy[]>([]);
   const [loading, setLoading] = useState(true);
+  const notifyPending = usePendingApprovalNotice();
 
   const load = async () => {
     const res = await fetch("/api/cms/case-studies?fields=list");
@@ -45,8 +47,9 @@ export default function CaseStudiesPage() {
         { method: "DELETE" }
       );
       if (!res.ok) throw new Error(tCommon("deleteFailed"));
+      const payload = await res.json().catch(() => null);
       await load();
-      toast.success(t("deleted"));
+      if (!notifyPending(payload)) toast.success(t("deleted"));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : tCommon("couldNotDelete"));
     }
@@ -81,13 +84,15 @@ export default function CaseStudiesPage() {
         key: "status",
         header: t("columns.status"),
         cell: (row: CmsCaseStudy) => (
-          <Badge>
-            {row.status === "draft" ||
-            row.status === "published" ||
-            row.status === "archived"
+          <StatusPill
+            tone={
+              row.status === "published" ? "success" : row.status === "archived" ? "muted" : "warning"
+            }
+          >
+            {row.status === "draft" || row.status === "published" || row.status === "archived"
               ? tCommon(row.status)
               : row.status}
-          </Badge>
+          </StatusPill>
         ),
       },
       {
@@ -134,9 +139,13 @@ export default function CaseStudiesPage() {
           </Link>
         }
       />
-      {loading ? null : (
-        <DataTable data={studies} columns={columns} searchKey="country" />
-      )}
+      <DataTable
+        data={studies}
+        columns={columns}
+        searchKey="country"
+        loading={loading}
+        emptyState={<EmptyState title={tCommon("noRecords")} />}
+      />
     </div>
   );
 }

@@ -11,6 +11,7 @@ import {
   ShoppingBag,
   Shield,
   Users,
+  ClipboardCheck,
   ClipboardList,
   History,
 } from "lucide-react";
@@ -26,6 +27,10 @@ export interface AdminNavItem {
   module?: CmsModule;
   /** When true, sidebar shows only for Super Admin (in addition to can()). */
   superAdminOnly?: boolean;
+  /** Sidebar count badge sourced from the approvals or leads counters. */
+  badge?: "approvalsReview" | "approvalsMine" | "leadsUnread";
+  /** Only shown to users who approve at least one active policy. */
+  approversOnly?: boolean;
   children?: AdminNavItem[];
 }
 
@@ -36,6 +41,28 @@ export const adminNavigation: AdminNavItem[] = [
     href: "/admin/dashboard",
     icon: LayoutDashboard,
     module: "dashboard",
+  },
+  {
+    labelKey: "approvals",
+    label: "Approvals",
+    icon: ClipboardCheck,
+    module: "dashboard",
+    badge: "approvalsReview",
+    children: [
+      {
+        labelKey: "approvalsReview",
+        label: "Pending review",
+        href: "/admin/approvals/review",
+        badge: "approvalsReview",
+        approversOnly: true,
+      },
+      {
+        labelKey: "approvalsMine",
+        label: "My requests",
+        href: "/admin/approvals/mine",
+        badge: "approvalsMine",
+      },
+    ],
   },
   {
     labelKey: "website",
@@ -122,8 +149,9 @@ export const adminNavigation: AdminNavItem[] = [
     label: "Forms & Leads",
     icon: ClipboardList,
     module: "forms",
+    badge: "leadsUnread",
     children: [
-      { labelKey: "contact", label: "Contact", href: "/admin/forms/contact" },
+      { labelKey: "contact", label: "Contact", href: "/admin/forms/contact", badge: "leadsUnread" },
       { labelKey: "quoteRequests", label: "Quote Requests", href: "/admin/forms/quotes" },
       { labelKey: "newsletter", label: "Newsletter", href: "/admin/forms/newsletter" },
     ],
@@ -153,6 +181,11 @@ export const adminNavigation: AdminNavItem[] = [
         labelKey: "accessUserOverrides",
         label: "User Overrides",
         href: "/admin/access-control/users",
+      },
+      {
+        labelKey: "accessApprovals",
+        label: "Approvals",
+        href: "/admin/access-control/approvals",
       },
     ],
   },

@@ -6,10 +6,17 @@ export type CmsStatus = "draft" | "scheduled" | "published" | "archived";
 export const SYSTEM_ROLE_IDS = [
   "super_admin",
   "admin",
+  "ceo",
+  "cfo",
+  "cto",
   "content_manager",
   "marketplace_manager",
   "sales_manager",
   "hr_manager",
+  "content_analyst",
+  "marketplace_analyst",
+  "sales_analyst",
+  "hr_analyst",
   "viewer",
 ] as const;
 
@@ -104,7 +111,19 @@ export interface MediaAsset {
   updatedAt: string;
 }
 
-export type FormSubmissionStatus = "new" | "read" | "replied" | "archived";
+export const FORM_SUBMISSION_STATUSES = [
+  "new",
+  "in_progress",
+  "replied",
+  "converted",
+  "archived",
+  "spam",
+] as const;
+
+export type FormSubmissionStatus = (typeof FORM_SUBMISSION_STATUSES)[number];
+
+export const FORM_PRIORITIES = ["low", "normal", "high", "urgent"] as const;
+export type FormPriority = (typeof FORM_PRIORITIES)[number];
 
 export interface FormSubmission {
   id: string;
@@ -112,6 +131,44 @@ export interface FormSubmission {
   status: FormSubmissionStatus;
   data: Record<string, unknown>;
   createdAt: string;
+  assigneeId?: string | null;
+  assigneeName?: string | null;
+  tags?: string[];
+  priority?: FormPriority;
+  readAt?: string | null;
+  updatedAt?: string | null;
+  lastActivityAt?: string | null;
+}
+
+export type FormActivityKind =
+  | "note"
+  | "status"
+  | "assign"
+  | "tags"
+  | "priority"
+  | "reply"
+  | "pii"
+  | "merge";
+
+export interface FormActivity {
+  id: string;
+  submissionId: string;
+  kind: FormActivityKind;
+  body?: string | null;
+  meta?: Record<string, unknown>;
+  actorId?: string | null;
+  actorName?: string | null;
+  createdAt: string;
+}
+
+export interface FormSubmissionPatch {
+  status?: FormSubmissionStatus;
+  assigneeId?: string | null;
+  assigneeName?: string | null;
+  tags?: string[];
+  priority?: FormPriority;
+  /** true marks as read now, false marks as unread */
+  read?: boolean;
 }
 
 export interface ContactSubmissionData {

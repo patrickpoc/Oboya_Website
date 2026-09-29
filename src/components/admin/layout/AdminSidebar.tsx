@@ -9,6 +9,28 @@ import { Logo } from "@/components/brand/Logo";
 import { adminNavigation } from "@/lib/cms/navigation";
 import { useAdmin } from "@/contexts/AdminContext";
 import { cn } from "@/lib/utils";
+import {
+  useApprovalCounts,
+  type ApprovalCounts,
+} from "@/components/admin/approvals/use-approval-counts";
+import { useLeadCounts } from "@/components/admin/leads/use-lead-counts";
+import type { AdminNavItem } from "@/lib/cms/navigation";
+
+function badgeValue(item: AdminNavItem, counts: ApprovalCounts, leadsUnread: number): number {
+  if (item.badge === "approvalsReview") return counts.review;
+  if (item.badge === "approvalsMine") return counts.mine;
+  if (item.badge === "leadsUnread") return leadsUnread;
+  return 0;
+}
+
+function CountBadge({ value }: { value: number }) {
+  if (value <= 0) return null;
+  return (
+    <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-oboya-orange px-1.5 text-[10px] font-semibold leading-5 text-white">
+      {value > 99 ? "99+" : value}
+    </span>
+  );
+}
 
 interface AdminSidebarProps {
   mobileOpen?: boolean;
@@ -20,6 +42,8 @@ export function AdminSidebar({ mobileOpen = false, onNavigate }: AdminSidebarPro
   const { can, user } = useAdmin();
   const t = useTranslations("admin");
   const isSuperAdmin = user.role === "super_admin";
+  const { counts } = useApprovalCounts();
+  const { counts: leadCounts } = useLeadCounts();
 
   return (
     <aside
@@ -68,6 +92,7 @@ export function AdminSidebar({ mobileOpen = false, onNavigate }: AdminSidebarPro
                   >
                     {item.icon && <item.icon className="size-4 shrink-0" />}
                     {t(`nav.${item.labelKey}`)}
+                    <CountBadge value={badgeValue(item, counts, leadCounts.unread)} />
                   </Link>
                 </li>
               );
@@ -79,6 +104,8 @@ export function AdminSidebar({ mobileOpen = false, onNavigate }: AdminSidebarPro
                 item={item}
                 pathname={pathname}
                 onNavigate={onNavigate}
+                counts={counts}
+                leadsUnread={leadCounts.unread}
               />
             );
           })}
@@ -92,10 +119,14 @@ function NavGroup({
   item,
   pathname,
   onNavigate,
+  counts,
+  leadsUnread,
 }: {
   item: (typeof adminNavigation)[number];
   pathname: string;
   onNavigate?: () => void;
+  counts: ApprovalCounts;
+  leadsUnread: number;
 }) {
   const t = useTranslations("admin.nav");
   const isChildActive = item.children?.some(
@@ -117,14 +148,23 @@ function NavGroup({
       >
         {item.icon && <item.icon className="size-4 shrink-0" />}
         <span className="flex-1 text-left">{t(item.labelKey)}</span>
+        {!open ? <CountBadge value={badgeValue(item, counts, leadsUnread)} /> : null}
         {open ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
       </button>
       {open && (
         <ul className="mt-1 ml-4 space-y-0.5 border-l border-border/50 pl-3">
           {item.children?.map((child) => {
+            if (child.approversOnly && !counts.approver) return null;
+            const matches = (href?: string) =>
+              Boolean(href) && (pathname === href || pathname.startsWith(href + "/"));
             const active =
-              child.href &&
-              (pathname === child.href || pathname.startsWith(child.href + "/"));
+              matches(child.href) &&
+              !item.children?.some(
+                (other) =>
+                  other !== child &&
+                  (other.href?.length ?? 0) > (child.href?.length ?? 0) &&
+                  matches(other.href)
+              );
             return (
               <li key={child.labelKey}>
                 <Link
@@ -139,6 +179,7 @@ function NavGroup({
                   )}
                 >
                   {t(child.labelKey)}
+                  <CountBadge value={badgeValue(child, counts, leadsUnread)} />
                 </Link>
               </li>
             );

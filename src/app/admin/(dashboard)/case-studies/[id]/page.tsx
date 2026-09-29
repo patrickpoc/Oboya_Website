@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
+import { EditorGuard, FormSkeleton } from "@/components/admin/common";
 import { RichTextEditor } from "@/components/admin/editors/RichTextEditor";
 import { LocaleFieldTabs, emptyLocalizedString } from "@/components/admin/forms/LocaleFieldTabs";
 import { ImageField } from "@/components/admin/media/ImageField";
@@ -19,6 +20,8 @@ import {
   type CmsCaseStudy,
 } from "@/lib/cms/repositories/case-studies-repository";
 import type { CmsLocale, CmsStatus } from "@/lib/cms/types";
+import { usePendingApprovalNotice } from "@/components/admin/approvals/use-pending-approval-notice";
+import { PendingChangeBanner } from "@/components/admin/approvals/PendingChangeBanner";
 
 const REGIONS: CaseStudyRegion[] = ["europe", "americas", "asia", "other"];
 
@@ -69,6 +72,7 @@ export default function CaseStudyEditPage() {
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+  const notifyPending = usePendingApprovalNotice();
 
   useEffect(() => {
     if (isNew) return;
@@ -115,7 +119,7 @@ export default function CaseStudyEditPage() {
         body: JSON.stringify(study),
       });
       if (!res.ok) throw new Error(tCommon("saveFailed"));
-      toast.success(t("saved"));
+      if (!notifyPending(await res.json().catch(() => null))) toast.success(t("saved"));
       router.push("/admin/case-studies");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : tCommon("couldNotSave"));
@@ -125,7 +129,7 @@ export default function CaseStudyEditPage() {
   };
 
   if (loading || !study) {
-    return <div className="min-h-[40vh]" aria-hidden />;
+    return <FormSkeleton />;
   }
 
   const setImageAt = (index: number, url: string) => {
@@ -157,6 +161,8 @@ export default function CaseStudyEditPage() {
           </div>
         }
       />
+
+      {!isNew ? <PendingChangeBanner entityType="case_study" entityId={study.id} /> : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
@@ -398,6 +404,7 @@ export default function CaseStudyEditPage() {
           </Card>
         </div>
       </div>
+      <EditorGuard dirty saving={saving} onSave={() => void handleSave()} />
     </div>
   );
 }

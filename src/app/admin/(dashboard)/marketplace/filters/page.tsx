@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { FolderTree, Pencil, Plus, Search, Tag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { EditorGuard, FormSkeleton } from "@/components/admin/common";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Can } from "@/components/admin/permissions/Can";
 import { ShopLocalizedNameFields } from "@/components/admin/forms/ShopLocalizedNameFields";
@@ -410,7 +411,7 @@ export default function MarketplaceFiltersPage() {
     return (
       <Can module="marketplace" action="view" fallback={<p className="text-sm text-muted-foreground">{tCommon("accessDenied")}</p>}>
         <AdminPageHeader title={t("title")} description={t("description")} />
-        <div className="min-h-[40vh]" aria-hidden />
+        <FormSkeleton />
       </Can>
     );
   }
@@ -444,7 +445,7 @@ export default function MarketplaceFiltersPage() {
         </TabsList>
 
         <TabsContent value="taxonomy">
-          <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
@@ -594,7 +595,7 @@ export default function MarketplaceFiltersPage() {
         </TabsContent>
 
         <TabsContent value="brands">
-          <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
@@ -687,7 +688,7 @@ export default function MarketplaceFiltersPage() {
         </TabsContent>
 
         <TabsContent value="options">
-          <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
@@ -813,7 +814,8 @@ export default function MarketplaceFiltersPage() {
             </Card>
           </div>
         </TabsContent>
-      </Tabs>
+        </Tabs>
+        <EditorGuard dirty={isDirty} saving={saving} onSave={() => void saveAll()} />
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="right" className="w-full sm:max-w-lg">

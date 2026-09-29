@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AdminPageFooterActions } from "@/components/admin/layout/AdminPageFooterActions";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
+import { FormSkeleton } from "@/components/admin/common";
 import { buttonVariants, Button } from "@/components/ui/button";
 import { useAdminMarketplaceCatalog } from "@/hooks/use-admin-marketplace-catalog";
 import { saveCmsProduct } from "@/lib/cms/repositories/product-repository";
@@ -16,12 +17,14 @@ import {
   ProductEditorForm,
 } from "@/components/admin/marketplace/ProductEditorForm";
 import { validateColorVariants } from "@/lib/shop/color-variants";
+import { usePendingApprovalNotice } from "@/components/admin/approvals/use-pending-approval-notice";
 
 export default function ProductNewPage() {
   const t = useTranslations("admin.products");
   const router = useRouter();
   const { catalog, loading } = useAdminMarketplaceCatalog();
   const [product, setProduct] = useState<CmsProduct | null>(null);
+  const notifyPending = usePendingApprovalNotice();
 
   useEffect(() => {
     if (loading || product) return;
@@ -58,9 +61,13 @@ export default function ProductNewPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(toSave),
         });
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
         if (!response.ok) {
-          const payload = (await response.json().catch(() => null)) as { error?: string } | null;
           throw new Error(payload?.error ?? "failed");
+        }
+        if (notifyPending(payload)) {
+          router.push("/admin/marketplace/products");
+          return;
         }
         toast.success(t("productCreated"));
         router.push(`/admin/marketplace/products/${toSave.id}`);
@@ -80,10 +87,10 @@ export default function ProductNewPage() {
       {product ? (
         <ProductEditorForm product={product} onChange={setProduct} />
       ) : (
-        <p className="text-sm text-muted-foreground">{t("loadingEditor")}</p>
+        <FormSkeleton />
       )}
 
-      <AdminPageFooterActions>
+      <AdminPageFooterActions dirty={Boolean(product)}>
         <Link
           href="/admin/marketplace/products"
           className={buttonVariants({

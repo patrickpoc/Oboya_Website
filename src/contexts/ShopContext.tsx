@@ -66,6 +66,7 @@ import type {
 import { EMPTY_SHOP_FILTERS } from "@/lib/shop/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import { remapCartLine, remapProductId } from "@/lib/shop/product-id-remap";
+import { collectLeadContext } from "@/lib/forms/lead-context";
 
 const STORAGE_KEY = "oboya-shop-quote";
 
@@ -1052,7 +1053,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         const response = await fetch("/api/shop/rfq", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({ ...payload, context: collectLeadContext() }),
         });
         const result = (await response.json()) as {
           referenceId?: string;

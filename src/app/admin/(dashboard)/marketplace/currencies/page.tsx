@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { EditorGuard } from "@/components/admin/common";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Can } from "@/components/admin/permissions/Can";
@@ -207,6 +208,7 @@ export default function Page() {
           </div>
         </CardContent>
       </Card>
+      <EditorGuard dirty saving={saving} onSave={() => void save()} />
     </Can>
   );
 }

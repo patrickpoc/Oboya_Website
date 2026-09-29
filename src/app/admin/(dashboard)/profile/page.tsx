@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { EditorGuard } from "@/components/admin/common";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,12 +24,6 @@ export default function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    setName(user.name);
-    setJobTitle(user.jobTitle ?? "");
-    setLocale(user.locale);
-  }, [user]);
-
   const handleSaveProfile = async () => {
     setSaving(true);
     try {
@@ -39,7 +34,12 @@ export default function ProfilePage() {
       });
       const data = (await res.json()) as { user?: CmsUser; error?: string };
       if (!res.ok) throw new Error(data.error || t("updateFailed"));
-      if (data.user) setUser(data.user);
+      if (data.user) {
+        setUser(data.user);
+        setName(data.user.name);
+        setJobTitle(data.user.jobTitle ?? "");
+        setLocale(data.user.locale);
+      }
       toast.success(t("updated"));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t("updateActionFailed"));
@@ -180,6 +180,11 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
+      <EditorGuard
+        dirty={name !== user.name || jobTitle !== (user.jobTitle ?? "") || locale !== user.locale}
+        saving={saving}
+        onSave={() => void handleSaveProfile()}
+      />
     </div>
   );
 }

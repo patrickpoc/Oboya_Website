@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
+import { EditorGuard, FormSkeleton } from "@/components/admin/common";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -164,7 +165,7 @@ export default function UserDetailPage() {
   };
 
   if (loading) {
-    return <div className="min-h-[40vh]" aria-hidden />;
+    return <FormSkeleton />;
   }
 
   if (!user) {
@@ -340,6 +341,19 @@ export default function UserDetailPage() {
           </CardContent>
         </Card>
       </div>
+      <EditorGuard
+        dirty={
+          Boolean(user) &&
+          (name !== user.name ||
+            email !== user.email ||
+            jobTitle !== (user.jobTitle ?? "") ||
+            role !== user.role ||
+            locale !== user.locale ||
+            status !== user.status)
+        }
+        saving={saving}
+        onSave={() => void handleSave()}
+      />
     </div>
   );
 }

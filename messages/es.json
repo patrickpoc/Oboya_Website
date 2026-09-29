@@ -1416,7 +1416,17 @@
       "imageAlt": "Texto alternativo de la imagen",
       "panelImage": "Imagen del panel",
       "read": "Leído",
-      "replied": "Respondido"
+      "replied": "Respondido",
+      "clearSearch": "Borrar búsqueda",
+      "clearFilters": "Borrar filtros",
+      "comingSoonTitle": "Próximamente",
+      "comingSoonDescription": "{module} está en preparación y estará disponible aquí pronto.",
+      "leaveUnsavedConfirm": "Tienes cambios sin guardar. ¿Salir de todos modos?",
+      "discard": "Descartar",
+      "selectedCount": "{count, plural, one {# seleccionado} other {# seleccionados}}",
+      "clearSelection": "Borrar selección",
+      "showing": "Mostrando {from}–{to} de {total}",
+      "readOnlyNotice": "Solo lectura por ahora: la edición se habilitará cuando este módulo esté conectado."
     },
     "topbar": {
       "language": "Idioma",
@@ -1484,7 +1494,11 @@
       "solutions": "Soluciones",
       "accessControl": "Control de acceso",
       "accessRolesMatrix": "Roles y matriz",
-      "accessUserOverrides": "Excepciones por usuario"
+      "accessUserOverrides": "Excepciones por usuario",
+      "approvals": "Aprobaciones",
+      "approvalsReview": "Por revisar",
+      "approvalsMine": "Mis solicitudes",
+      "accessApprovals": "Flujo de aprobación"
     },
     "filters": {
       "title": "Filtros",
@@ -2030,10 +2044,17 @@
     "roles": {
       "super_admin": "Superadministrador",
       "admin": "Administrador",
+      "ceo": "CEO",
+      "cfo": "CFO",
+      "cto": "CTO",
       "content_manager": "Gestor de contenido",
       "marketplace_manager": "Gestor de marketplace",
       "sales_manager": "Gestor comercial",
       "hr_manager": "Gestor de RR. HH.",
+      "content_analyst": "Analista de contenido",
+      "marketplace_analyst": "Analista de marketplace",
+      "sales_analyst": "Analista comercial",
+      "hr_analyst": "Analista de RR. HH.",
       "viewer": "Visualizador"
     },
     "auth": {
@@ -2093,7 +2114,16 @@
       "visitorsChart": "Visitantes (simulado)",
       "quotesChart": "Solicitudes de presupuesto (simulado)",
       "chartVisitors": "Visitantes (mock)",
-      "chartQuotes": "Solicitudes de presupuesto (mock)"
+      "chartQuotes": "Solicitudes de presupuesto (mock)",
+      "statNewLeads": "Leads nuevos",
+      "statOverdueLeads": "Leads abiertos",
+      "statPendingApprovals": "Aprobaciones pendientes",
+      "statPublishedProducts": "SKUs en la tienda",
+      "recentLeads": "Leads recientes",
+      "viewInbox": "Abrir bandeja",
+      "noRecentLeads": "No hay leads abiertos ahora.",
+      "recentQuotes": "Solicitudes de cotización recientes",
+      "noRecentQuotes": "No hay solicitudes de cotización abiertas ahora."
     },
     "users": {
       "title": "Usuarios",
@@ -2157,18 +2187,49 @@
     },
     "rolesPage": {
       "title": "Roles y permisos",
-      "description": "Matriz de permisos por rol y módulo. Se podrán añadir roles personalizados en futuras versiones.",
+      "description": "Quién puede hacer qué en cada módulo. Pasa el cursor sobre una etiqueta para ver las acciones exactas.",
       "matrixTitle": "Matriz de permisos",
       "module": "Módulo",
       "full": "completo",
       "roleShort": {
         "super_admin": "Super",
         "admin": "Admin",
+        "ceo": "CEO",
+        "cfo": "CFO",
+        "cto": "CTO",
         "content_manager": "Contenido",
         "marketplace_manager": "Market",
         "sales_manager": "Ventas",
         "hr_manager": "RR. HH.",
+        "content_analyst": "Contenido An.",
+        "marketplace_analyst": "Market An.",
+        "sales_analyst": "Ventas An.",
+        "hr_analyst": "RR. HH. An.",
         "viewer": "Viewer"
+      },
+      "levels": {
+        "full": "Total",
+        "publish": "Publicar",
+        "edit": "Editar",
+        "view": "Ver",
+        "custom": "Mixto",
+        "none": "Ninguno"
+      },
+      "levelHints": {
+        "full": "todas las acciones",
+        "publish": "crear, editar, publicar",
+        "edit": "crear y editar, sin publicar",
+        "view": "solo lectura",
+        "custom": "conjunto mixto",
+        "none": "sin acceso"
+      },
+      "tiers": {
+        "all": "Todos",
+        "platform": "Plataforma",
+        "c_level": "C-level",
+        "manager": "Gerentes",
+        "analyst": "Analistas",
+        "custom": "Personalizados"
       }
     },
     "profile": {
@@ -2284,7 +2345,7 @@
       },
       "contact": {
         "title": "Envíos de contacto",
-        "description": "{unread} no leídos · {total} en total del formulario de contacto del sitio.",
+        "description": "Bandeja de envíos del formulario de contacto del sitio.",
         "loadFailed": "No se pudieron cargar los envíos de contacto",
         "statusUpdated": "Estado actualizado",
         "empty": "Ningún envío de contacto coincide con estos filtros.",
@@ -2925,10 +2986,254 @@
       "openUserDetail": "Abrir perfil del usuario",
       "selectUser": "Seleccione un usuario para editar excepciones.",
       "superAdminNoOverrides": "Los usuarios Super Admin siempre tienen acceso total; las excepciones se ignoran.",
-      "overridesHelp": "Las concesiones añaden permisos al rol. Las denegaciones los quitan (las denegaciones ganan).",
+      "overridesHelp": "Haz clic en una celda para conceder o quitar un permiso solo para este usuario. El rol no cambia; las denegaciones siempre prevalecen.",
       "grant": "Conceder",
       "deny": "Denegar",
-      "editInAccessControl": "Editar en Control de acceso"
+      "editInAccessControl": "Editar en Control de acceso",
+      "searchUsers": "Buscar por nombre, correo o rol",
+      "noUsersFound": "No se encontraron usuarios",
+      "overridesCount": "{count, plural, one {# excepción} other {# excepciones}}",
+      "noOverrides": "Sigue exactamente el rol",
+      "clearOverrides": "Limpiar excepciones",
+      "legend": {
+        "allowed": "Permitido por el rol",
+        "blocked": "Fuera del rol",
+        "granted": "Concedido a este usuario",
+        "denied": "Denegado a este usuario"
+      },
+      "tipAllowedByRole": "Permitido por el rol",
+      "tipBlockedByRole": "No permitido por el rol",
+      "tipGranted": "Permiso extra para este usuario",
+      "tipDenied": "Quitado para este usuario",
+      "clickToGrant": "clic para conceder",
+      "clickToDeny": "clic para denegar",
+      "clickToReset": "clic para seguir el rol"
+    },
+    "approvals": {
+      "reviewTitle": "Aprobaciones por revisar",
+      "reviewDescription": "Cambios enviados por otros miembros del equipo que esperan tu decisión.",
+      "mineTitle": "Mis solicitudes",
+      "mineDescription": "Cambios que enviaste y que necesitan la aprobación de otro gerente.",
+      "empty": "No hay solicitudes aquí.",
+      "emptyMine": "No tienes solicitudes aquí.",
+      "loadFailed": "No se pudieron cargar las solicitudes",
+      "dashboard": {
+        "title": "Aprobaciones pendientes",
+        "mineTitle": "Mis solicitudes pendientes",
+        "viewAll": "Ver todas",
+        "empty": "Nada pendiente de tu revisión."
+      },
+      "types": {
+        "marketplace_price": "Precio de producto",
+        "marketplace_bulk_update": "Actualización masiva de productos",
+        "marketplace_product_edit": "Edición de producto",
+        "marketplace_product_create": "Nuevo producto",
+        "marketplace_product_delete": "Eliminación de producto",
+        "website_homepage": "Página de inicio",
+        "website_about": "Página Acerca de",
+        "website_solutions": "Página Soluciones",
+        "website_news_page": "Página de noticias",
+        "website_faqs": "Preguntas frecuentes",
+        "website_header": "Encabezado",
+        "website_footer": "Pie de página",
+        "website_terms": "Términos y políticas",
+        "website_seo": "SEO",
+        "website_pages": "Páginas",
+        "blog_upsert": "Artículo del blog",
+        "blog_delete": "Eliminación de artículo",
+        "case_studies_upsert": "Caso de éxito",
+        "case_studies_delete": "Eliminación de caso de éxito",
+        "careers_upsert": "Vacante",
+        "careers_delete": "Eliminación de vacante"
+      },
+      "status": {
+        "pending": "Pendiente",
+        "in_review": "En revisión",
+        "approved": "Aprobada",
+        "rejected": "Rechazada",
+        "conflict": "Conflicto",
+        "cancelled": "Cancelada",
+        "superseded": "Reemplazada",
+        "failed": "Fallida"
+      },
+      "actionLabel": {
+        "create": "Creación",
+        "update": "Actualización",
+        "delete": "Eliminación",
+        "bulk": "Actualización masiva"
+      },
+      "actions": {
+        "approve": "Aprobar",
+        "inReview": "Marcar en revisión",
+        "reject": "Rechazar",
+        "cancel": "Cancelar solicitud",
+        "details": "Detalles",
+        "forceApply": "Aplicar de todos modos",
+        "confirmReject": "Rechazar cambio"
+      },
+      "fields": {
+        "requestedBy": "Solicitado por",
+        "requestedAt": "Solicitado el",
+        "action": "Acción",
+        "status": "Estado",
+        "reviewer": "Revisor(a)",
+        "comment": "Comentario",
+        "summary": "Resumen",
+        "change": "Cambios",
+        "byOn": "{name} · {date}"
+      },
+      "filters": {
+        "status": "Estado",
+        "module": "Módulo",
+        "open": "Abiertas",
+        "closed": "Cerradas"
+      },
+      "reject": {
+        "title": "Rechazar cambio",
+        "description": "El solicitante verá tu comentario.",
+        "placeholder": "Explica por qué se rechaza este cambio…",
+        "commentRequired": "Se requiere un comentario para rechazar."
+      },
+      "detail": {
+        "title": "Solicitud de cambio",
+        "loading": "Cargando…",
+        "path": "Campo",
+        "before": "Antes",
+        "after": "Después",
+        "current": "Actual",
+        "proposed": "Propuesto",
+        "noChanges": "Sin diferencias.",
+        "moreChanges": "{count, plural, one {# cambio más} other {# cambios más}}",
+        "conflictTitle": "El contenido cambió desde esta solicitud",
+        "conflictDescription": "Alguien actualizó este contenido después de enviar la solicitud. Revisa los valores actuales antes de aplicar.",
+        "applyError": "Error al aplicar",
+        "bulkItems": "{count, plural, one {# producto} other {# productos}}"
+      },
+      "toast": {
+        "submitted": "Enviado para aprobación",
+        "partial": "Guardado — algunos cambios se enviaron para aprobación",
+        "heldCount": "{count, plural, one {# cambio enviado para aprobación} other {# cambios enviados para aprobación}}",
+        "approved": "Cambio aprobado y aplicado",
+        "rejected": "Cambio rechazado",
+        "inReview": "Marcado como en revisión",
+        "cancelled": "Solicitud cancelada",
+        "conflict": "El contenido cambió desde la solicitud — revisa el conflicto",
+        "failed": "No se pudo completar la acción"
+      },
+      "banner": {
+        "title": "{count, plural, one {# cambio pendiente de aprobación} other {# cambios pendientes de aprobación}}",
+        "by": "por {name}",
+        "viewMine": "Ver mis solicitudes"
+      },
+      "policies": {
+        "title": "Flujo de aprobación",
+        "description": "Elige qué cambios necesitan la aprobación de un segundo gerente antes de publicarse.",
+        "tabPolicies": "Políticas",
+        "tabRequests": "Todas las solicitudes",
+        "requiresApproval": "Requiere aprobación",
+        "approverRoles": "Roles aprobadores",
+        "approverUsers": "Usuarios aprobadores",
+        "exemptRoles": "Roles exentos (aplican directo)",
+        "requireRejectComment": "Exigir comentario al rechazar",
+        "comingSoon": "Próximamente",
+        "noUsers": "Sin usuarios",
+        "saved": "Políticas de aprobación guardadas",
+        "saveFailed": "No se pudieron guardar las políticas de aprobación",
+        "superAdminNote": "Los super admins siempre pueden aprobar, pero nunca sus propias solicitudes."
+      }
+    },
+    "leads": {
+      "inbox": "Bandeja",
+      "open": "Abiertos",
+      "unread": "No leídos",
+      "status": {
+        "new": "Nuevo",
+        "in_progress": "En curso",
+        "replied": "Respondido",
+        "converted": "Calificado",
+        "archived": "Archivado",
+        "spam": "Spam"
+      },
+      "priority": {
+        "low": "Baja",
+        "normal": "Normal",
+        "high": "Alta",
+        "urgent": "Urgente"
+      },
+      "filters": {
+        "country": "País",
+        "assignee": "Responsable",
+        "tag": "Etiqueta",
+        "priority": "Prioridad",
+        "from": "Desde",
+        "to": "Hasta",
+        "unassigned": "Sin asignar"
+      },
+      "columns": {
+        "lead": "Lead",
+        "subject": "Asunto",
+        "status": "Estado",
+        "owner": "Responsable",
+        "date": "Fecha",
+        "company": "Empresa",
+        "total": "Total est."
+      },
+      "sla": {
+        "warning": "Esperando {hours}h",
+        "overdue": "Atrasado"
+      },
+      "empty": "Ningún lead coincide con estos filtros.",
+      "emptyTitle": "Aún no hay leads",
+      "loadFailed": "No se pudieron cargar los leads",
+      "updated": "Lead actualizado",
+      "merged": "Leads combinados",
+      "noteAdded": "Nota añadida",
+      "exported": "Exportación iniciada",
+      "bulk": {
+        "assign": "Asignar",
+        "status": "Cambiar estado",
+        "spam": "Marcar como spam",
+        "export": "Exportar CSV"
+      },
+      "detail": {
+        "title": "Lead",
+        "openFull": "Abrir página completa",
+        "message": "Mensaje",
+        "contact": "Contacto",
+        "meta": "Origen",
+        "page": "Página",
+        "locale": "Idioma",
+        "referrer": "Referencia",
+        "campaign": "Campaña",
+        "history": "Otros envíos de este correo",
+        "merge": "Combinar en este lead",
+        "timeline": "Actividad",
+        "addNote": "Añadir nota",
+        "notePlaceholder": "Nota interna…",
+        "saveNote": "Guardar nota",
+        "reply": "Responder",
+        "markReplied": "Marcar como respondido",
+        "reveal": "Mostrar",
+        "hide": "Ocultar",
+        "redacted": "Los datos personales se anonimizaron.",
+        "noActivities": "Aún no hay actividad.",
+        "assignTo": "Responsable",
+        "tags": "Etiquetas",
+        "addTag": "Añadir etiqueta",
+        "lineItems": "Líneas",
+        "estimatedTotal": "Total estimado",
+        "danger": "Zona de riesgo",
+        "activity": {
+          "note": "Nota",
+          "status": "Estado cambiado",
+          "assign": "Responsable cambiado",
+          "tags": "Etiquetas actualizadas",
+          "priority": "Prioridad cambiada",
+          "reply": "Respuesta registrada",
+          "pii": "Acción de datos personales",
+          "merge": "Combinado"
+        }
+      }
     }
   },
   "latestNews": {

@@ -1416,7 +1416,17 @@
       "imageAlt": "Texto alternativo da imagem",
       "panelImage": "Imagem do painel",
       "read": "Lido",
-      "replied": "Respondido"
+      "replied": "Respondido",
+      "clearSearch": "Limpar busca",
+      "clearFilters": "Limpar filtros",
+      "comingSoonTitle": "Em breve",
+      "comingSoonDescription": "{module} está em preparação e ficará disponível aqui em breve.",
+      "leaveUnsavedConfirm": "Você tem alterações não salvas. Deseja sair mesmo assim?",
+      "discard": "Descartar",
+      "selectedCount": "{count, plural, one {# selecionado} other {# selecionados}}",
+      "clearSelection": "Limpar seleção",
+      "showing": "Mostrando {from}–{to} de {total}",
+      "readOnlyNotice": "Somente leitura por enquanto — a edição será habilitada quando este módulo for conectado."
     },
     "topbar": {
       "language": "Idioma",
@@ -1484,7 +1494,11 @@
       "solutions": "Soluções",
       "accessControl": "Controle de acesso",
       "accessRolesMatrix": "Funções e matriz",
-      "accessUserOverrides": "Exceções por usuário"
+      "accessUserOverrides": "Exceções por usuário",
+      "approvals": "Aprovações",
+      "approvalsReview": "Para revisar",
+      "approvalsMine": "Minhas solicitações",
+      "accessApprovals": "Fluxo de aprovação"
     },
     "filters": {
       "title": "Filtros",
@@ -2030,10 +2044,17 @@
     "roles": {
       "super_admin": "Superadministrador",
       "admin": "Administrador",
+      "ceo": "CEO",
+      "cfo": "CFO",
+      "cto": "CTO",
       "content_manager": "Gestor de conteúdo",
       "marketplace_manager": "Gestor de marketplace",
       "sales_manager": "Gestor comercial",
       "hr_manager": "Gestor de RH",
+      "content_analyst": "Analista de conteúdo",
+      "marketplace_analyst": "Analista de marketplace",
+      "sales_analyst": "Analista comercial",
+      "hr_analyst": "Analista de RH",
       "viewer": "Visualizador"
     },
     "auth": {
@@ -2093,7 +2114,16 @@
       "visitorsChart": "Visitantes (simulado)",
       "quotesChart": "Pedidos de orçamento (simulado)",
       "chartVisitors": "Visitantes (mock)",
-      "chartQuotes": "Pedidos de orçamento (mock)"
+      "chartQuotes": "Pedidos de orçamento (mock)",
+      "statNewLeads": "Leads novos",
+      "statOverdueLeads": "Leads abertos",
+      "statPendingApprovals": "Aprovações pendentes",
+      "statPublishedProducts": "SKUs na loja",
+      "recentLeads": "Leads recentes",
+      "viewInbox": "Abrir caixa de entrada",
+      "noRecentLeads": "Nenhum lead em aberto no momento.",
+      "recentQuotes": "Solicitações de cotação recentes",
+      "noRecentQuotes": "Nenhuma solicitação de cotação em aberto no momento."
     },
     "users": {
       "title": "Usuários",
@@ -2157,18 +2187,49 @@
     },
     "rolesPage": {
       "title": "Funções e permissões",
-      "description": "Matriz de permissões por função e módulo. Funções personalizadas poderão ser adicionadas em versões futuras.",
+      "description": "Quem pode fazer o quê em cada módulo. Passe o mouse sobre um selo para ver as ações exatas.",
       "matrixTitle": "Matriz de permissões",
       "module": "Módulo",
       "full": "total",
       "roleShort": {
         "super_admin": "Super",
         "admin": "Admin",
+        "ceo": "CEO",
+        "cfo": "CFO",
+        "cto": "CTO",
         "content_manager": "Conteúdo",
         "marketplace_manager": "Market",
         "sales_manager": "Vendas",
         "hr_manager": "RH",
+        "content_analyst": "Conteúdo An.",
+        "marketplace_analyst": "Market An.",
+        "sales_analyst": "Vendas An.",
+        "hr_analyst": "RH An.",
         "viewer": "Viewer"
+      },
+      "levels": {
+        "full": "Total",
+        "publish": "Publicar",
+        "edit": "Editar",
+        "view": "Ver",
+        "custom": "Misto",
+        "none": "Nenhum"
+      },
+      "levelHints": {
+        "full": "todas as ações",
+        "publish": "criar, editar, publicar",
+        "edit": "criar e editar, sem publicar",
+        "view": "somente leitura",
+        "custom": "conjunto misto",
+        "none": "sem acesso"
+      },
+      "tiers": {
+        "all": "Todos",
+        "platform": "Plataforma",
+        "c_level": "C-level",
+        "manager": "Gerentes",
+        "analyst": "Analistas",
+        "custom": "Personalizados"
       }
     },
     "profile": {
@@ -2284,7 +2345,7 @@
       },
       "contact": {
         "title": "Envios de contato",
-        "description": "{unread} não lidos · {total} no total do formulário de contato do site.",
+        "description": "Caixa de entrada dos envios do formulário de contato.",
         "loadFailed": "Não foi possível carregar os envios de contato",
         "statusUpdated": "Status atualizado",
         "empty": "Nenhum envio de contato corresponde a estes filtros.",
@@ -2925,10 +2986,254 @@
       "openUserDetail": "Abrir perfil do usuário",
       "selectUser": "Selecione um usuário para editar exceções.",
       "superAdminNoOverrides": "Usuários Super Admin sempre têm acesso total; exceções são ignoradas.",
-      "overridesHelp": "Concessões adicionam permissões à função. Negativas removem (negativas vencem).",
+      "overridesHelp": "Clique em uma célula para conceder ou remover uma permissão apenas para este usuário. O perfil não muda; negações sempre prevalecem.",
       "grant": "Conceder",
       "deny": "Negar",
-      "editInAccessControl": "Editar no Controle de acesso"
+      "editInAccessControl": "Editar no Controle de acesso",
+      "searchUsers": "Buscar por nome, e-mail ou perfil",
+      "noUsersFound": "Nenhum usuário encontrado",
+      "overridesCount": "{count, plural, one {# exceção} other {# exceções}}",
+      "noOverrides": "Segue exatamente o perfil",
+      "clearOverrides": "Limpar exceções",
+      "legend": {
+        "allowed": "Permitido pelo perfil",
+        "blocked": "Fora do perfil",
+        "granted": "Concedido a este usuário",
+        "denied": "Negado a este usuário"
+      },
+      "tipAllowedByRole": "Permitido pelo perfil",
+      "tipBlockedByRole": "Não permitido pelo perfil",
+      "tipGranted": "Permissão extra para este usuário",
+      "tipDenied": "Removido para este usuário",
+      "clickToGrant": "clique para conceder",
+      "clickToDeny": "clique para negar",
+      "clickToReset": "clique para seguir o perfil"
+    },
+    "approvals": {
+      "reviewTitle": "Aprovações para revisar",
+      "reviewDescription": "Alterações enviadas por outras pessoas da equipe aguardando sua decisão.",
+      "mineTitle": "Minhas solicitações",
+      "mineDescription": "Alterações que você enviou e que precisam de aprovação de outra pessoa gerente.",
+      "empty": "Nenhuma solicitação aqui.",
+      "emptyMine": "Você não tem solicitações aqui.",
+      "loadFailed": "Não foi possível carregar as solicitações",
+      "dashboard": {
+        "title": "Aprovações pendentes",
+        "mineTitle": "Minhas solicitações pendentes",
+        "viewAll": "Ver todas",
+        "empty": "Nada aguardando sua revisão."
+      },
+      "types": {
+        "marketplace_price": "Preço de produto",
+        "marketplace_bulk_update": "Atualização em massa de produtos",
+        "marketplace_product_edit": "Edição de produto",
+        "marketplace_product_create": "Novo produto",
+        "marketplace_product_delete": "Exclusão de produto",
+        "website_homepage": "Página inicial",
+        "website_about": "Página Sobre",
+        "website_solutions": "Página Soluções",
+        "website_news_page": "Página de notícias",
+        "website_faqs": "FAQs",
+        "website_header": "Cabeçalho",
+        "website_footer": "Rodapé",
+        "website_terms": "Termos e políticas",
+        "website_seo": "SEO",
+        "website_pages": "Páginas",
+        "blog_upsert": "Post do blog",
+        "blog_delete": "Exclusão de post do blog",
+        "case_studies_upsert": "Case",
+        "case_studies_delete": "Exclusão de case",
+        "careers_upsert": "Vaga",
+        "careers_delete": "Exclusão de vaga"
+      },
+      "status": {
+        "pending": "Pendente",
+        "in_review": "Em revisão",
+        "approved": "Aprovada",
+        "rejected": "Rejeitada",
+        "conflict": "Conflito",
+        "cancelled": "Cancelada",
+        "superseded": "Substituída",
+        "failed": "Falhou"
+      },
+      "actionLabel": {
+        "create": "Criação",
+        "update": "Atualização",
+        "delete": "Exclusão",
+        "bulk": "Atualização em massa"
+      },
+      "actions": {
+        "approve": "Aprovar",
+        "inReview": "Marcar em revisão",
+        "reject": "Rejeitar",
+        "cancel": "Cancelar solicitação",
+        "details": "Detalhes",
+        "forceApply": "Aplicar mesmo assim",
+        "confirmReject": "Rejeitar alteração"
+      },
+      "fields": {
+        "requestedBy": "Solicitado por",
+        "requestedAt": "Solicitado em",
+        "action": "Ação",
+        "status": "Status",
+        "reviewer": "Revisor(a)",
+        "comment": "Comentário",
+        "summary": "Resumo",
+        "change": "Alterações",
+        "byOn": "{name} · {date}"
+      },
+      "filters": {
+        "status": "Status",
+        "module": "Módulo",
+        "open": "Abertas",
+        "closed": "Encerradas"
+      },
+      "reject": {
+        "title": "Rejeitar alteração",
+        "description": "O solicitante verá seu comentário.",
+        "placeholder": "Explique por que esta alteração está sendo rejeitada…",
+        "commentRequired": "É necessário um comentário para rejeitar."
+      },
+      "detail": {
+        "title": "Solicitação de alteração",
+        "loading": "Carregando…",
+        "path": "Campo",
+        "before": "Antes",
+        "after": "Depois",
+        "current": "Atual",
+        "proposed": "Proposto",
+        "noChanges": "Sem diferenças.",
+        "moreChanges": "{count, plural, one {mais # alteração} other {mais # alterações}}",
+        "conflictTitle": "O conteúdo mudou desde esta solicitação",
+        "conflictDescription": "Alguém atualizou este conteúdo depois do envio da solicitação. Revise os valores atuais antes de aplicar.",
+        "applyError": "Erro ao aplicar",
+        "bulkItems": "{count, plural, one {# produto} other {# produtos}}"
+      },
+      "toast": {
+        "submitted": "Enviado para aprovação",
+        "partial": "Salvo — algumas alterações foram enviadas para aprovação",
+        "heldCount": "{count, plural, one {# alteração enviada para aprovação} other {# alterações enviadas para aprovação}}",
+        "approved": "Alteração aprovada e aplicada",
+        "rejected": "Alteração rejeitada",
+        "inReview": "Marcada como em revisão",
+        "cancelled": "Solicitação cancelada",
+        "conflict": "O conteúdo mudou desde a solicitação — revise o conflito",
+        "failed": "Não foi possível concluir a ação"
+      },
+      "banner": {
+        "title": "{count, plural, one {# alteração aguardando aprovação} other {# alterações aguardando aprovação}}",
+        "by": "por {name}",
+        "viewMine": "Ver minhas solicitações"
+      },
+      "policies": {
+        "title": "Fluxo de aprovação",
+        "description": "Escolha quais alterações precisam da aprovação de uma segunda pessoa gerente antes de entrar no ar.",
+        "tabPolicies": "Políticas",
+        "tabRequests": "Todas as solicitações",
+        "requiresApproval": "Exige aprovação",
+        "approverRoles": "Perfis aprovadores",
+        "approverUsers": "Usuários aprovadores",
+        "exemptRoles": "Perfis isentos (aplicam direto)",
+        "requireRejectComment": "Exigir comentário na rejeição",
+        "comingSoon": "Em breve",
+        "noUsers": "Nenhum usuário",
+        "saved": "Políticas de aprovação salvas",
+        "saveFailed": "Não foi possível salvar as políticas de aprovação",
+        "superAdminNote": "Super admins sempre podem aprovar, mas nunca as próprias solicitações."
+      }
+    },
+    "leads": {
+      "inbox": "Caixa de entrada",
+      "open": "Abertos",
+      "unread": "Não lidos",
+      "status": {
+        "new": "Novo",
+        "in_progress": "Em atendimento",
+        "replied": "Respondido",
+        "converted": "Qualificado",
+        "archived": "Arquivado",
+        "spam": "Spam"
+      },
+      "priority": {
+        "low": "Baixa",
+        "normal": "Normal",
+        "high": "Alta",
+        "urgent": "Urgente"
+      },
+      "filters": {
+        "country": "País",
+        "assignee": "Responsável",
+        "tag": "Tag",
+        "priority": "Prioridade",
+        "from": "De",
+        "to": "Até",
+        "unassigned": "Sem responsável"
+      },
+      "columns": {
+        "lead": "Lead",
+        "subject": "Assunto",
+        "status": "Status",
+        "owner": "Responsável",
+        "date": "Data",
+        "company": "Empresa",
+        "total": "Total est."
+      },
+      "sla": {
+        "warning": "Aguardando {hours}h",
+        "overdue": "Atrasado"
+      },
+      "empty": "Nenhum lead com esses filtros.",
+      "emptyTitle": "Nenhum lead ainda",
+      "loadFailed": "Não foi possível carregar os leads",
+      "updated": "Lead atualizado",
+      "merged": "Leads mesclados",
+      "noteAdded": "Nota adicionada",
+      "exported": "Exportação iniciada",
+      "bulk": {
+        "assign": "Atribuir",
+        "status": "Alterar status",
+        "spam": "Marcar como spam",
+        "export": "Exportar CSV"
+      },
+      "detail": {
+        "title": "Lead",
+        "openFull": "Abrir página completa",
+        "message": "Mensagem",
+        "contact": "Contato",
+        "meta": "Origem",
+        "page": "Página",
+        "locale": "Idioma",
+        "referrer": "Referência",
+        "campaign": "Campanha",
+        "history": "Outros envios deste e-mail",
+        "merge": "Mesclar neste lead",
+        "timeline": "Atividade",
+        "addNote": "Adicionar nota",
+        "notePlaceholder": "Nota interna…",
+        "saveNote": "Salvar nota",
+        "reply": "Responder",
+        "markReplied": "Marcar como respondido",
+        "reveal": "Revelar",
+        "hide": "Ocultar",
+        "redacted": "Os dados pessoais foram anonimizados.",
+        "noActivities": "Nenhuma atividade ainda.",
+        "assignTo": "Responsável",
+        "tags": "Tags",
+        "addTag": "Adicionar tag",
+        "lineItems": "Itens",
+        "estimatedTotal": "Total estimado",
+        "danger": "Zona de risco",
+        "activity": {
+          "note": "Nota",
+          "status": "Status alterado",
+          "assign": "Responsável alterado",
+          "tags": "Tags atualizadas",
+          "priority": "Prioridade alterada",
+          "reply": "Resposta registrada",
+          "pii": "Ação de dados pessoais",
+          "merge": "Mesclado"
+        }
+      }
     }
   },
   "latestNews": {

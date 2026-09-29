@@ -79,12 +79,14 @@ export async function applyBulkImportsSequentially(params: {
         continue;
       }
 
-      wroteAny = true;
+      const pendingApproval = response.status === 202;
+      if (!pendingApproval) wroteAny = true;
       const result: ImportApplyResult = {
         productId: row.productId,
         sku: row.pending.sku,
         name: displayProductName(row.pending),
         status: "SUCCESS",
+        ...(pendingApproval ? { pendingApproval } : {}),
       };
       results.push(result);
       onProgress?.({

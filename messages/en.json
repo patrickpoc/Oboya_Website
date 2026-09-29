@@ -230,7 +230,7 @@
     "phoneCountrySearch": "Search country or code",
     "phoneCountryEmpty": "No countries found",
     "company": "Company",
-    "companyPlaceholder": "Vestibulum tempor",
+    "companyPlaceholder": "Company name",
     "message": "Message",
     "messagePlaceholder": "",
     "submit": "Send Message",
@@ -1419,7 +1419,17 @@
       "imageAlt": "Image alt",
       "panelImage": "Panel image",
       "read": "Read",
-      "replied": "Replied"
+      "replied": "Replied",
+      "clearSearch": "Clear search",
+      "clearFilters": "Clear filters",
+      "comingSoonTitle": "Coming soon",
+      "comingSoonDescription": "{module} is being prepared and will be available here soon.",
+      "leaveUnsavedConfirm": "You have unsaved changes. Leave this page anyway?",
+      "discard": "Discard",
+      "selectedCount": "{count, plural, one {# selected} other {# selected}}",
+      "clearSelection": "Clear selection",
+      "showing": "Showing {from}–{to} of {total}",
+      "readOnlyNotice": "Read-only for now — editing will be enabled when this module is connected."
     },
     "topbar": {
       "language": "Language",
@@ -1487,7 +1497,11 @@
       "solutions": "Solutions",
       "accessControl": "Access Control",
       "accessRolesMatrix": "Roles & Matrix",
-      "accessUserOverrides": "User Overrides"
+      "accessUserOverrides": "User Overrides",
+      "approvals": "Approvals",
+      "approvalsReview": "To review",
+      "approvalsMine": "My requests",
+      "accessApprovals": "Approval workflow"
     },
     "filters": {
       "title": "Filters",
@@ -2033,10 +2047,17 @@
     "roles": {
       "super_admin": "Super Administrator",
       "admin": "Administrator",
+      "ceo": "CEO",
+      "cfo": "CFO",
+      "cto": "CTO",
       "content_manager": "Content Manager",
       "marketplace_manager": "Marketplace Manager",
       "sales_manager": "Sales Manager",
       "hr_manager": "HR Manager",
+      "content_analyst": "Content Analyst",
+      "marketplace_analyst": "Marketplace Analyst",
+      "sales_analyst": "Sales Analyst",
+      "hr_analyst": "HR Analyst",
       "viewer": "Viewer"
     },
     "auth": {
@@ -2096,7 +2117,16 @@
       "visitorsChart": "Visitors (mock)",
       "quotesChart": "Quote Requests (mock)",
       "chartVisitors": "Visitors (mock)",
-      "chartQuotes": "Quote Requests (mock)"
+      "chartQuotes": "Quote Requests (mock)",
+      "statNewLeads": "New leads",
+      "statOverdueLeads": "Open leads",
+      "statPendingApprovals": "Pending approvals",
+      "statPublishedProducts": "SKUs in shop",
+      "recentLeads": "Recent leads",
+      "viewInbox": "Open inbox",
+      "noRecentLeads": "No open leads right now.",
+      "recentQuotes": "Recent quotation requests",
+      "noRecentQuotes": "No open quotation requests right now."
     },
     "users": {
       "title": "Users",
@@ -2160,18 +2190,49 @@
     },
     "rolesPage": {
       "title": "Roles & Permissions",
-      "description": "Permission matrix by role and module. Custom roles can be added in future releases.",
+      "description": "Who can do what in each module. Hover a badge to see the exact actions.",
       "matrixTitle": "Permission matrix",
       "module": "Module",
       "full": "full",
       "roleShort": {
         "super_admin": "Super",
         "admin": "Admin",
+        "ceo": "CEO",
+        "cfo": "CFO",
+        "cto": "CTO",
         "content_manager": "Content",
         "marketplace_manager": "Market",
         "sales_manager": "Sales",
         "hr_manager": "HR",
+        "content_analyst": "Content An.",
+        "marketplace_analyst": "Market An.",
+        "sales_analyst": "Sales An.",
+        "hr_analyst": "HR An.",
         "viewer": "Viewer"
+      },
+      "levels": {
+        "full": "Full",
+        "publish": "Publish",
+        "edit": "Edit",
+        "view": "View",
+        "custom": "Custom",
+        "none": "None"
+      },
+      "levelHints": {
+        "full": "all actions",
+        "publish": "create, edit, publish",
+        "edit": "create & edit, no publish",
+        "view": "read only",
+        "custom": "mixed set",
+        "none": "no access"
+      },
+      "tiers": {
+        "all": "All",
+        "platform": "Platform",
+        "c_level": "C-level",
+        "manager": "Managers",
+        "analyst": "Analysts",
+        "custom": "Custom"
       }
     },
     "profile": {
@@ -2287,7 +2348,7 @@
       },
       "contact": {
         "title": "Contact Submissions",
-        "description": "{unread} unread · {total} total from the website contact form.",
+        "description": "Inbox for website contact form submissions.",
         "loadFailed": "Could not load contact submissions",
         "statusUpdated": "Status updated",
         "empty": "No contact submissions match these filters.",
@@ -2928,10 +2989,254 @@
       "openUserDetail": "Open user profile",
       "selectUser": "Select a user to edit overrides.",
       "superAdminNoOverrides": "Super Admin users always have full access; overrides are ignored.",
-      "overridesHelp": "Grants add permissions on top of the role. Denies remove them (denies win).",
+      "overridesHelp": "Click a cell to grant or remove a permission for this user only. The role stays unchanged; denies always win.",
       "grant": "Grant",
       "deny": "Deny",
-      "editInAccessControl": "Edit in Access Control"
+      "editInAccessControl": "Edit in Access Control",
+      "searchUsers": "Search by name, email or role",
+      "noUsersFound": "No users found",
+      "overridesCount": "{count, plural, one {# override} other {# overrides}}",
+      "noOverrides": "Following the role exactly",
+      "clearOverrides": "Clear overrides",
+      "legend": {
+        "allowed": "Allowed by role",
+        "blocked": "Not in role",
+        "granted": "Granted to this user",
+        "denied": "Denied for this user"
+      },
+      "tipAllowedByRole": "Allowed by role",
+      "tipBlockedByRole": "Not allowed by role",
+      "tipGranted": "Extra permission for this user",
+      "tipDenied": "Removed for this user",
+      "clickToGrant": "click to grant",
+      "clickToDeny": "click to deny",
+      "clickToReset": "click to follow the role"
+    },
+    "approvals": {
+      "reviewTitle": "Approvals to review",
+      "reviewDescription": "Changes submitted by other team members that are waiting for your decision.",
+      "mineTitle": "My requests",
+      "mineDescription": "Changes you submitted that need approval from another manager.",
+      "empty": "No requests here.",
+      "emptyMine": "You have no requests here.",
+      "loadFailed": "Could not load requests",
+      "dashboard": {
+        "title": "Pending approvals",
+        "mineTitle": "My pending requests",
+        "viewAll": "View all",
+        "empty": "Nothing waiting for your review."
+      },
+      "types": {
+        "marketplace_price": "Product price",
+        "marketplace_bulk_update": "Bulk product update",
+        "marketplace_product_edit": "Product edit",
+        "marketplace_product_create": "New product",
+        "marketplace_product_delete": "Product deletion",
+        "website_homepage": "Homepage",
+        "website_about": "About page",
+        "website_solutions": "Solutions page",
+        "website_news_page": "News page",
+        "website_faqs": "FAQs",
+        "website_header": "Header",
+        "website_footer": "Footer",
+        "website_terms": "Terms & policies",
+        "website_seo": "SEO",
+        "website_pages": "Pages",
+        "blog_upsert": "Blog post",
+        "blog_delete": "Blog post deletion",
+        "case_studies_upsert": "Case study",
+        "case_studies_delete": "Case study deletion",
+        "careers_upsert": "Job opening",
+        "careers_delete": "Job opening deletion"
+      },
+      "status": {
+        "pending": "Pending",
+        "in_review": "In review",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "conflict": "Conflict",
+        "cancelled": "Cancelled",
+        "superseded": "Superseded",
+        "failed": "Failed"
+      },
+      "actionLabel": {
+        "create": "Create",
+        "update": "Update",
+        "delete": "Delete",
+        "bulk": "Bulk update"
+      },
+      "actions": {
+        "approve": "Approve",
+        "inReview": "Mark in review",
+        "reject": "Reject",
+        "cancel": "Cancel request",
+        "details": "Details",
+        "forceApply": "Apply anyway",
+        "confirmReject": "Reject change"
+      },
+      "fields": {
+        "requestedBy": "Requested by",
+        "requestedAt": "Requested at",
+        "action": "Action",
+        "status": "Status",
+        "reviewer": "Reviewer",
+        "comment": "Comment",
+        "summary": "Summary",
+        "change": "Changes",
+        "byOn": "{name} · {date}"
+      },
+      "filters": {
+        "status": "Status",
+        "module": "Module",
+        "open": "Open",
+        "closed": "Closed"
+      },
+      "reject": {
+        "title": "Reject change",
+        "description": "The requester will see your comment.",
+        "placeholder": "Explain why this change is being rejected…",
+        "commentRequired": "A comment is required to reject."
+      },
+      "detail": {
+        "title": "Change request",
+        "loading": "Loading…",
+        "path": "Field",
+        "before": "Before",
+        "after": "After",
+        "current": "Current",
+        "proposed": "Proposed",
+        "noChanges": "No differences.",
+        "moreChanges": "{count, plural, one {# more change} other {# more changes}}",
+        "conflictTitle": "Content changed since this request",
+        "conflictDescription": "Someone updated this content after the request was submitted. Review the current values before applying.",
+        "applyError": "Apply error",
+        "bulkItems": "{count, plural, one {# product} other {# products}}"
+      },
+      "toast": {
+        "submitted": "Sent for approval",
+        "partial": "Saved — some changes were sent for approval",
+        "heldCount": "{count, plural, one {# change sent for approval} other {# changes sent for approval}}",
+        "approved": "Change approved and applied",
+        "rejected": "Change rejected",
+        "inReview": "Marked as in review",
+        "cancelled": "Request cancelled",
+        "conflict": "Content changed since the request — review the conflict",
+        "failed": "Could not complete the action"
+      },
+      "banner": {
+        "title": "{count, plural, one {# change awaiting approval} other {# changes awaiting approval}}",
+        "by": "by {name}",
+        "viewMine": "View my requests"
+      },
+      "policies": {
+        "title": "Approval workflow",
+        "description": "Choose which changes need a second manager's approval before going live.",
+        "tabPolicies": "Policies",
+        "tabRequests": "All requests",
+        "requiresApproval": "Requires approval",
+        "approverRoles": "Approver roles",
+        "approverUsers": "Approver users",
+        "exemptRoles": "Exempt roles (apply directly)",
+        "requireRejectComment": "Require comment on rejection",
+        "comingSoon": "Coming soon",
+        "noUsers": "No users",
+        "saved": "Approval policies saved",
+        "saveFailed": "Could not save approval policies",
+        "superAdminNote": "Super admins can always approve, but never their own requests."
+      }
+    },
+    "leads": {
+      "inbox": "Inbox",
+      "open": "Open",
+      "unread": "Unread",
+      "status": {
+        "new": "New",
+        "in_progress": "In progress",
+        "replied": "Replied",
+        "converted": "Qualified",
+        "archived": "Archived",
+        "spam": "Spam"
+      },
+      "priority": {
+        "low": "Low",
+        "normal": "Normal",
+        "high": "High",
+        "urgent": "Urgent"
+      },
+      "filters": {
+        "country": "Country",
+        "assignee": "Owner",
+        "tag": "Tag",
+        "priority": "Priority",
+        "from": "From",
+        "to": "To",
+        "unassigned": "Unassigned"
+      },
+      "columns": {
+        "lead": "Lead",
+        "subject": "Subject",
+        "status": "Status",
+        "owner": "Owner",
+        "date": "Date",
+        "company": "Company",
+        "total": "Est. total"
+      },
+      "sla": {
+        "warning": "Waiting {hours}h",
+        "overdue": "Overdue"
+      },
+      "empty": "No leads match these filters.",
+      "emptyTitle": "No leads yet",
+      "loadFailed": "Could not load leads",
+      "updated": "Lead updated",
+      "merged": "Leads merged",
+      "noteAdded": "Note added",
+      "exported": "Export started",
+      "bulk": {
+        "assign": "Assign",
+        "status": "Change status",
+        "spam": "Mark as spam",
+        "export": "Export CSV"
+      },
+      "detail": {
+        "title": "Lead",
+        "openFull": "Open full page",
+        "message": "Message",
+        "contact": "Contact",
+        "meta": "Source",
+        "page": "Page",
+        "locale": "Language",
+        "referrer": "Referrer",
+        "campaign": "Campaign",
+        "history": "Other submissions from this email",
+        "merge": "Merge into this lead",
+        "timeline": "Activity",
+        "addNote": "Add a note",
+        "notePlaceholder": "Internal note…",
+        "saveNote": "Save note",
+        "reply": "Reply",
+        "markReplied": "Mark as replied",
+        "reveal": "Reveal",
+        "hide": "Hide",
+        "redacted": "Personal data was anonymized.",
+        "noActivities": "No activity yet.",
+        "assignTo": "Owner",
+        "tags": "Tags",
+        "addTag": "Add tag",
+        "lineItems": "Line items",
+        "estimatedTotal": "Estimated total",
+        "danger": "Danger zone",
+        "activity": {
+          "note": "Note",
+          "status": "Status changed",
+          "assign": "Owner changed",
+          "tags": "Tags updated",
+          "priority": "Priority changed",
+          "reply": "Reply recorded",
+          "pii": "Personal data action",
+          "merge": "Merged"
+        }
+      }
     }
   }
 }

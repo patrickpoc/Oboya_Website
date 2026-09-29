@@ -49,17 +49,35 @@ function normalizeDoc(raw: unknown): AccessControlDoc {
     }
   }
 
+  // System roles keep the canonical hierarchy order; custom roles follow.
+  const systemOrder = new Map(fallback.roles.map((r) => [r.id, r.sortOrder]));
+  roles.sort((a, b) => {
+    const sa = systemOrder.get(a.id);
+    const sb = systemOrder.get(b.id);
+    if (sa !== undefined && sb !== undefined) return sa - sb;
+    if (sa !== undefined) return -1;
+    if (sb !== undefined) return 1;
+    return a.sortOrder - b.sortOrder;
+  });
+  roles.forEach((r, index) => {
+    r.sortOrder = index;
+  });
+
   const matrix =
     data.matrix && typeof data.matrix === "object"
       ? structuredClone(data.matrix)
       : structuredClone(fallback.matrix);
+
+  // Roles added to the built-in set after the doc was saved get their default row.
+  for (const [roleId, row] of Object.entries(fallback.matrix)) {
+    if (!matrix[roleId]) matrix[roleId] = structuredClone(row);
+  }
 
   // Super admin always full on every module.
   matrix.super_admin = Object.fromEntries(
     CMS_MODULES.map((m) => [m, "full" as const])
   );
 
-  roles.sort((a, b) => a.sortOrder - b.sortOrder);
   return { roles, matrix };
 }
 

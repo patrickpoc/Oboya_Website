@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
-import { Card, CardContent } from "@/components/ui/card";
+import { ListSkeleton, MasterDetailLayout } from "@/components/admin/common";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -28,16 +28,21 @@ export default function BlogAuthorsPage() {
   };
 
   useEffect(() => {
+    const controller = new AbortController();
     void (async () => {
       try {
-        await load();
+        const res = await fetch("/api/cms/blog-authors", { signal: controller.signal });
+        if (!res.ok) throw new Error(tCommon("loadFailed"));
+        const data = (await res.json()) as BlogAuthor[];
+        if (!controller.signal.aborted) setAuthors(Array.isArray(data) ? data : []);
       } catch {
-        toast.error(t("loadFailed"));
+        if (!controller.signal.aborted) toast.error(t("loadFailed"));
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     })();
-  }, []);
+    return () => controller.abort();
+  }, [t, tCommon]);
 
   const editing = useMemo(
     () => authors.find((a) => a.id === editingId),
@@ -103,9 +108,12 @@ export default function BlogAuthorsPage() {
           }
         />
 
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Card>
-            <CardContent className="divide-y p-0">
+        <MasterDetailLayout
+          list={
+            loading ? (
+              <ListSkeleton rows={6} />
+            ) : (
+            <div className="divide-y">
               {authors.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm text-muted-foreground">
                   {t("empty")}
@@ -123,12 +131,12 @@ export default function BlogAuthorsPage() {
                   </button>
                 ))
               )}
-            </CardContent>
-          </Card>
-
-          {editing && (
-            <Card>
-              <CardContent className="space-y-4 pt-6">
+            </div>
+            )
+          }
+          detail={
+            editing ? (
+              <div className="space-y-4 p-6">
                 <div className="space-y-1.5">
                   <Label>{tCommon("name")}</Label>
                   <Input
@@ -173,10 +181,12 @@ export default function BlogAuthorsPage() {
                     {tCommon("delete")}
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+              </div>
+            ) : (
+              <div className="p-6 text-sm text-muted-foreground">{tCommon("noRecords")}</div>
+            )
+          }
+        />
       </div>
     </Can>
   );

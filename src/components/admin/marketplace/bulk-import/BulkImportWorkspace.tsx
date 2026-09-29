@@ -17,6 +17,7 @@ import {
   type ImportApplyProgress,
 } from "@/lib/cms/bulk-import/apply-sequential";
 import { displayProductName } from "@/lib/cms/bulk-update/search-products";
+import { emitApprovalsChanged } from "@/lib/cms/approvals/client";
 import {
   applyImportPatch,
   refreshImportChangedFields,
@@ -41,6 +42,7 @@ import { useAdminMarketplaceCatalog } from "@/hooks/use-admin-marketplace-catalo
 export function BulkImportWorkspace() {
   const t = useTranslations("admin.products.bulkImport");
   const tCommon = useTranslations("admin.common");
+  const tApprovals = useTranslations("admin.approvals");
   const { locale } = useAdminLocale();
   const { catalog: liveCatalog, loading: catalogLoading } = useAdminMarketplaceCatalog();
   const [existingProducts, setExistingProducts] = useState<CmsProduct[]>([]);
@@ -233,11 +235,17 @@ export function BulkImportWorkspace() {
         );
       }
       await loadProducts();
-      toast.success(
-        t("importedCount", {
-          count: applyResults.filter((item) => item.status === "SUCCESS").length,
-        })
-      );
+      const heldCount = applyResults.filter((item) => item.pendingApproval).length;
+      const importedCount = applyResults.filter(
+        (item) => item.status === "SUCCESS" && !item.pendingApproval
+      ).length;
+      if (heldCount > 0) {
+        toast.info(tApprovals("toast.heldCount", { count: heldCount }));
+        emitApprovalsChanged();
+      }
+      if (importedCount > 0 || heldCount === 0) {
+        toast.success(t("importedCount", { count: importedCount }));
+      }
     } finally {
       setApplying(false);
     }

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { EditorGuard } from "@/components/admin/common";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { LocaleFieldTabs } from "@/components/admin/forms/LocaleFieldTabs";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,9 @@ import type { HomepageSectionSlug } from "@/lib/cms/homepage-sections";
 import type { CmsLocale } from "@/lib/cms/types";
 import type { HomepageSectionEditorProps } from "./shared";
 import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
+import { usePendingApprovalNotice } from "@/components/admin/approvals/use-pending-approval-notice";
+import { PendingChangeBanner } from "@/components/admin/approvals/PendingChangeBanner";
+import { withoutApprovalMeta } from "@/lib/cms/approvals/client";
 
 type HomepageSectionShellProps = {
   section: HomepageSectionSlug;
@@ -26,8 +30,10 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
   const t = useTranslations("admin.website.home");
   const tCommon = useTranslations("admin.common");
   const [settings, setSettings] = useState<HomepageSettings>(getHomepageSettings());
+  const [baseline, setBaseline] = useState("");
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [saving, setSaving] = useState(false);
+  const notifyPending = usePendingApprovalNotice();
 
   useEffect(() => {
     let cancelled = false;
@@ -38,6 +44,7 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
         const data = (await res.json()) as HomepageSettings;
         if (!cancelled && data?.hero) {
           setSettings(data);
+          setBaseline(JSON.stringify(data));
         }
       } catch {
         // Keep seed defaults.
@@ -62,8 +69,9 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
         if (!res.ok) {
           throw new Error(data.error ?? tCommon("saveFailed"));
         }
-        setSettings(data);
-        toast.success(t("saved"));
+        setSettings(withoutApprovalMeta(data));
+        setBaseline(JSON.stringify(withoutApprovalMeta(data)));
+        if (!notifyPending(data)) toast.success(t("saved"));
         return true;
       } catch (error) {
         toast.error(error instanceof Error ? error.message : t("saveFailed"));
@@ -72,7 +80,7 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
         setSaving(false);
       }
     },
-    [settings, t, tCommon]
+    [settings, t, tCommon, notifyPending]
   );
 
   const handleSave = () => {
@@ -103,6 +111,8 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
           }
         />
 
+        <PendingChangeBanner entityType="homepage" entityId="homepage" />
+
         <LocaleFieldTabs value={locale} onChange={setLocale}>
           {(loc) =>
             children({
@@ -113,6 +123,11 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
             })
           }
         </LocaleFieldTabs>
+        <EditorGuard
+          dirty={Boolean(baseline) && JSON.stringify(settings) !== baseline}
+          saving={saving}
+          onSave={handleSave}
+        />
       </div>
     </Can>
   );

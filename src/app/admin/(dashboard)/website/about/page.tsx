@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
+import { EditorGuard, FormSkeleton } from "@/components/admin/common";
 import { LocaleFieldTabs } from "@/components/admin/forms/LocaleFieldTabs";
 import { ImpactSectionEditor } from "@/components/admin/about/ImpactSectionEditor";
 import { ValuesSectionEditor } from "@/components/admin/about/ValuesSectionEditor";
@@ -13,6 +14,9 @@ import { Can } from "@/components/admin/permissions/Can";
 import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
 import type { CmsLocale } from "@/lib/cms/types";
+import { usePendingApprovalNotice } from "@/components/admin/approvals/use-pending-approval-notice";
+import { PendingChangeBanner } from "@/components/admin/approvals/PendingChangeBanner";
+import { withoutApprovalMeta } from "@/lib/cms/approvals/client";
 
 export default function AboutPageAdmin() {
   const t = useTranslations("admin.website.about");
@@ -21,6 +25,7 @@ export default function AboutPageAdmin() {
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const notifyPending = usePendingApprovalNotice();
 
   useEffect(() => {
     void (async () => {
@@ -51,8 +56,8 @@ export default function AboutPageAdmin() {
       if (!res.ok) {
         throw new Error(data.error ?? tCommon("saveFailed"));
       }
-      setSettings(data);
-      toast.success(t("saved"));
+      setSettings(withoutApprovalMeta(data));
+      if (!notifyPending(data)) toast.success(t("saved"));
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -62,10 +67,10 @@ export default function AboutPageAdmin() {
     } finally {
       setSaving(false);
     }
-  }, [settings]);
+  }, [settings, notifyPending]);
 
   if (loading || !settings) {
-    return <div className="min-h-[40vh]" aria-hidden />;
+    return <FormSkeleton />;
   }
 
   return (
@@ -90,6 +95,8 @@ export default function AboutPageAdmin() {
             </Button>
           }
         />
+
+        <PendingChangeBanner entityType="about_page" entityId="about" />
 
         <LocaleFieldTabs value={locale} onChange={setLocale}>
           {(loc) => (
@@ -138,6 +145,7 @@ export default function AboutPageAdmin() {
             </div>
           )}
         </LocaleFieldTabs>
+        <EditorGuard dirty saving={saving} onSave={() => void handleSave()} />
       </div>
     </Can>
   );

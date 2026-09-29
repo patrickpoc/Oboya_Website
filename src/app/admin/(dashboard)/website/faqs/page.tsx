@@ -12,7 +12,8 @@ import {
   emptyLocalizedString,
 } from "@/components/admin/forms/LocaleFieldTabs";
 import { Can } from "@/components/admin/permissions/Can";
-import { Badge } from "@/components/ui/badge";
+import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
+import { EmptyState, StatusPill, TableSkeleton } from "@/components/admin/common";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,7 +25,7 @@ import type {
 } from "@/lib/cms/repositories/faqs-repository";
 import type { CmsLocale } from "@/lib/cms/types";
 import { cn } from "@/lib/utils";
-import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
+import { usePendingApprovalNotice } from "@/components/admin/approvals/use-pending-approval-notice";
 
 type DrawerMode = "category" | "faq" | null;
 
@@ -35,6 +36,7 @@ async function persistCategory(category: CmsFaqCategory) {
     body: JSON.stringify({ type: "category", data: category }),
   });
   if (!res.ok) throw new Error("saveCategoryFailed");
+  return (await res.json().catch(() => null)) as unknown;
 }
 
 async function persistFaq(faq: CmsFaqItem) {
@@ -44,16 +46,19 @@ async function persistFaq(faq: CmsFaqItem) {
     body: JSON.stringify({ type: "faq", data: faq }),
   });
   if (!res.ok) throw new Error("saveFaqFailed");
+  return (await res.json().catch(() => null)) as unknown;
 }
 
 async function removeCategory(id: string) {
   const res = await fetch(`/api/cms/faqs?type=category&id=${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error("deleteCategoryFailed");
+  return (await res.json().catch(() => null)) as unknown;
 }
 
 async function removeFaq(id: string) {
   const res = await fetch(`/api/cms/faqs?type=faq&id=${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error("deleteFaqFailed");
+  return (await res.json().catch(() => null)) as unknown;
 }
 
 export default function FaqsAdminPage() {
@@ -69,6 +74,7 @@ export default function FaqsAdminPage() {
   const [editingFaq, setEditingFaq] = useState<CmsFaqItem | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
+  const notifyPending = usePendingApprovalNotice();
 
   const refresh = async () => {
     const res = await fetch("/api/cms/faqs");
@@ -162,9 +168,9 @@ export default function FaqsAdminPage() {
   const handleSaveCategory = async () => {
     if (!editingCategoryDraft) return;
     try {
-      await persistCategory(editingCategoryDraft);
+      const payload = await persistCategory(editingCategoryDraft);
       await refresh();
-      toast.success(t("categorySaved"));
+      if (!notifyPending(payload)) toast.success(t("categorySaved"));
       closeDrawer();
     } catch {
       toast.error(t("saveCategoryFailed"));
@@ -173,9 +179,9 @@ export default function FaqsAdminPage() {
 
   const handleDeleteCategory = async (id: string) => {
     try {
-      await removeCategory(id);
+      const payload = await removeCategory(id);
       await refresh();
-      toast.success(t("categoryDeleted"));
+      if (!notifyPending(payload)) toast.success(t("categoryDeleted"));
       if (editingCategoryDraft?.id === id) closeDrawer();
     } catch {
       toast.error(t("deleteCategoryFailed"));
@@ -185,9 +191,9 @@ export default function FaqsAdminPage() {
   const handleSaveFaq = async () => {
     if (!editingFaq) return;
     try {
-      await persistFaq(editingFaq);
+      const payload = await persistFaq(editingFaq);
       await refresh();
-      toast.success(t("faqSaved"));
+      if (!notifyPending(payload)) toast.success(t("faqSaved"));
       closeDrawer();
     } catch {
       toast.error(t("saveFaqFailed"));
@@ -196,9 +202,9 @@ export default function FaqsAdminPage() {
 
   const handleDeleteFaq = async (id: string) => {
     try {
-      await removeFaq(id);
+      const payload = await removeFaq(id);
       await refresh();
-      toast.success(t("faqDeleted"));
+      if (!notifyPending(payload)) toast.success(t("faqDeleted"));
       if (editingFaq?.id === id) closeDrawer();
     } catch {
       toast.error(t("deleteFaqFailed"));
@@ -233,15 +239,15 @@ export default function FaqsAdminPage() {
       key: "status",
       header: tCommon("status"),
       cell: (row: CmsFaqItem) => (
-        <Badge variant={row.status === "published" ? "default" : "secondary"}>
-          {row.status}
-        </Badge>
+        <StatusPill tone={row.status === "published" ? "success" : "warning"}>
+          {row.status === "published" || row.status === "draft" ? tCommon(row.status) : row.status}
+        </StatusPill>
       ),
     },
   ];
 
   if (loading) {
-    return <div className="min-h-[40vh]" aria-hidden />;
+    return <TableSkeleton />;
   }
 
   return (
@@ -351,7 +357,7 @@ export default function FaqsAdminPage() {
               getRowId={(row) => row.id}
               onRowClick={(row) => openEditFaq(row)}
               pageSize={12}
-              emptyMessage={t("emptyCategory")}
+              emptyState={<EmptyState title={t("emptyCategory")} />}
             />
           </div>
         </div>

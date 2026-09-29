@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { QuickAccessGrid } from "@/components/admin/dashboard/QuickAccessGrid";
+import { DashboardOverview } from "@/components/admin/dashboard/DashboardOverview";
+import { PendingApprovalsCard } from "@/components/admin/approvals/PendingApprovalsCard";
 import { useAdmin } from "@/contexts/AdminContext";
 
 export default function DashboardPage() {
@@ -16,6 +18,8 @@ export default function DashboardPage() {
         title={t("title")}
         description={t("welcome", { name: firstName })}
       />
+      <DashboardOverview />
+      <PendingApprovalsCard />
       <QuickAccessGrid />
     </div>
   );

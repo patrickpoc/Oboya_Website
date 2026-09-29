@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
+import { EditorGuard, FormSkeleton } from "@/components/admin/common";
 import { LocaleFieldTabs } from "@/components/admin/forms/LocaleFieldTabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,8 @@ import type { NewsPageSettings } from "@/lib/cms/repositories/news-page-reposito
 import type { CmsLocale } from "@/lib/cms/types";
 import { Can } from "@/components/admin/permissions/Can";
 import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
+import { usePendingApprovalNotice } from "@/components/admin/approvals/use-pending-approval-notice";
+import { PendingChangeBanner } from "@/components/admin/approvals/PendingChangeBanner";
 
 export default function NewsPageAdmin() {
   const t = useTranslations("admin.website.news");
@@ -20,6 +23,7 @@ export default function NewsPageAdmin() {
   const [settings, setSettings] = useState<NewsPageSettings | null>(null);
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [loading, setLoading] = useState(true);
+  const notifyPending = usePendingApprovalNotice();
 
   useEffect(() => {
     void (async () => {
@@ -44,14 +48,14 @@ export default function NewsPageAdmin() {
         body: JSON.stringify(settings),
       });
       if (!res.ok) throw new Error(tCommon("saveFailed"));
-      toast.success(t("saved"));
+      if (!notifyPending(await res.json().catch(() => null))) toast.success(t("saved"));
     } catch {
       toast.error(t("saveFailed"));
     }
   };
 
   if (loading || !settings) {
-    return <div className="min-h-[40vh]" aria-hidden />;
+    return <FormSkeleton />;
   }
 
   return (
@@ -61,6 +65,8 @@ export default function NewsPageAdmin() {
           title={t("title")}
           description={t("description")}
         />
+
+        <PendingChangeBanner entityType="news_page" entityId="news-page" />
 
         <div className="grid max-w-3xl gap-6">
           <Card>
@@ -134,6 +140,7 @@ export default function NewsPageAdmin() {
           <Button onClick={handleSave} className="w-fit rounded-full bg-oboya-green">
             {t("save")}
           </Button>
+          <EditorGuard dirty onSave={() => void handleSave()} />
         </div>
       </div>
     </Can>

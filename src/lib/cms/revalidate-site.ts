@@ -74,6 +74,12 @@ export function revalidateFaqPages() {
   });
 }
 
+export function revalidateSolutionsPages() {
+  forEachLocale((locale) => {
+    revalidatePath(`/${locale}/solutions`);
+  });
+}
+
 export function revalidateNewsPages() {
   forEachLocale((locale) => {
     revalidatePath(`/${locale}/news`);

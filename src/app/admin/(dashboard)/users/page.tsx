@@ -7,6 +7,7 @@ import { KeyRound, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { DataTable } from "@/components/admin/data-table/DataTable";
+import { EntityAvatar, ErrorState, StatusPill } from "@/components/admin/common";
 import { FormDrawer } from "@/components/admin/forms/FormDrawer";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -231,7 +232,12 @@ export default function UsersPage() {
 
   const columns = useMemo(
     () => [
-      { key: "name", header: tCommon("name"), sortable: true, cell: (r: CmsUser) => r.name },
+      { key: "name", header: tCommon("name"), sortable: true, cell: (r: CmsUser) => (
+        <span className="inline-flex items-center gap-2">
+          <EntityAvatar name={r.name} size="sm" />
+          {r.name}
+        </span>
+      ) },
       { key: "email", header: tCommon("email"), cell: (r: CmsUser) => r.email },
       { key: "role", header: tCommon("role"), cell: (r: CmsUser) => displayRoleLabel(r.role, roleDefs, tRoles) },
       {
@@ -239,9 +245,9 @@ export default function UsersPage() {
         header: tCommon("status"),
         cell: (r: CmsUser) => (
           <div className="flex flex-wrap gap-1">
-            <Badge variant={r.status === "active" ? "default" : "secondary"}>
+            <StatusPill tone={r.status === "active" ? "success" : "muted"}>
               {r.status === "active" ? tCommon("active") : tCommon("inactive")}
-            </Badge>
+            </StatusPill>
             {r.mustChangePassword ? (
               <Badge variant="outline">{t("mustChangePassword")}</Badge>
             ) : null}
@@ -308,20 +314,10 @@ export default function UsersPage() {
         }
       />
 
-      {loading ? null : loadError ? (
-        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-          <p className="font-medium">{t("loadErrorTitle")}</p>
-          <p className="mt-1 text-destructive/90">{loadError}</p>
-          <button
-            type="button"
-            className="mt-3 text-oboya-green underline"
-            onClick={() => void loadUsers()}
-          >
-            {tCommon("retry")}
-          </button>
-        </div>
+      {loadError ? (
+        <ErrorState message={loadError} onRetry={() => void loadUsers()} />
       ) : (
-        <DataTable data={users} columns={columns} searchKey="email" />
+        <DataTable data={users} columns={columns} searchKey="email" loading={loading} />
       )}
 
       <FormDrawer

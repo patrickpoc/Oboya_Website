@@ -13,6 +13,7 @@ import {
   sortedColorVariants,
 } from "@/lib/shop/color-variants";
 import { isValidEmail } from "@/lib/security/email";
+import { sanitizeLeadContext } from "@/lib/forms/lead-context";
 import { assertFormRateLimit } from "@/lib/security/rate-limit";
 import { clientIpFromRequest, hashClientIp } from "@/lib/security/client-ip";
 import { PRIVACY_NOTICE_VERSION } from "@/lib/security/privacy-notice";
@@ -275,7 +276,7 @@ export async function POST(request: Request) {
         marketingOptIn,
         privacyNoticeVersion: PRIVACY_NOTICE_VERSION,
         acceptedAt: new Date().toISOString(),
-        meta: { ipHash },
+        meta: { ipHash, ...sanitizeLeadContext(body.context) },
       },
     });
 

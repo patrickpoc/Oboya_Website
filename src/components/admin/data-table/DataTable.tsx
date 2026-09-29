@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { ErrorState, TableSkeleton } from "@/components/admin/common/states";
 import { cn } from "@/lib/utils";
 
 export interface DataTableColumn<T> {
@@ -19,6 +20,8 @@ export interface DataTableColumn<T> {
   header: string;
   cell: (row: T) => React.ReactNode;
   sortable?: boolean;
+  /** Value used for sorting when the column key isn't a plain field */
+  sortValue?: (row: T) => string | number;
   className?: string;
   /** Label for mobile card layout (defaults to header) */
   mobileLabel?: string;
@@ -35,8 +38,20 @@ interface DataTableProps<T> {
   onSelectionChange?: (ids: string[]) => void;
   getRowId?: (row: T) => string;
   emptyMessage?: string;
+  /** Rich empty state; overrides emptyMessage */
+  emptyState?: React.ReactNode;
   /** Stacked cards on viewports below md */
   mobileLayout?: "table" | "cards";
+  loading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
+  /** Keep the header visible while scrolling long tables */
+  stickyHeader?: boolean;
+  /** Rendered in a bar above the table while rows are selected */
+  bulkActions?: (selectedIds: string[]) => React.ReactNode;
+  rowClassName?: (row: T) => string | undefined;
+  /** Extra controls rendered next to the built-in search */
+  toolbar?: React.ReactNode;
 }
 
 export function DataTable<T>({
@@ -50,7 +65,15 @@ export function DataTable<T>({
   onSelectionChange,
   getRowId,
   emptyMessage,
+  emptyState,
   mobileLayout = "cards",
+  loading,
+  error,
+  onRetry,
+  stickyHeader,
+  bulkActions,
+  rowClassName,
+  toolbar,
 }: DataTableProps<T>) {
   const t = useTranslations("admin.common");
   const resolvedSearchPlaceholder = searchPlaceholder ?? t("search");
@@ -71,17 +94,26 @@ export function DataTable<T>({
       );
     }
     if (sortKey) {
+      const column = columns.find((c) => c.key === sortKey);
+      const read = (row: T) =>
+        column?.sortValue ? column.sortValue(row) : String((row as Record<string, unknown>)[sortKey] ?? "");
       rows.sort((a, b) => {
-        const av = String((a as Record<string, unknown>)[sortKey] ?? "");
-        const bv = String((b as Record<string, unknown>)[sortKey] ?? "");
-        return sortDir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+        const av = read(a);
+        const bv = read(b);
+        const cmp =
+          typeof av === "number" && typeof bv === "number"
+            ? av - bv
+            : String(av).localeCompare(String(bv), undefined, { numeric: true, sensitivity: "base" });
+        return sortDir === "asc" ? cmp : -cmp;
       });
     }
     return rows;
-  }, [data, search, searchKey, sortKey, sortDir]);
+  }, [data, columns, search, searchKey, sortKey, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const paged = filtered.slice(page * pageSize, (page + 1) * pageSize);
+  const currentPage = Math.min(page, totalPages - 1);
+  const paged = filtered.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+  const selectable = Boolean(onSelectionChange && getRowId);
 
   const toggleSort = (key: string) => {
     if (sortKey === key) {
@@ -112,27 +144,29 @@ export function DataTable<T>({
     );
   };
 
+  const from = filtered.length === 0 ? 0 : currentPage * pageSize + 1;
+  const to = Math.min(filtered.length, (currentPage + 1) * pageSize);
   const pagination = totalPages > 1 && (
     <div className="flex items-center justify-between text-xs text-muted-foreground">
-      <span>{t("recordCount", { count: filtered.length })}</span>
+      <span>{t("showing", { from, to, total: filtered.length })}</span>
       <div className="flex items-center gap-2">
         <button
           type="button"
-          disabled={page === 0}
-          onClick={() => setPage(page - 1)}
-          className="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border p-2 disabled:opacity-40"
+          disabled={currentPage === 0}
+          onClick={() => setPage(currentPage - 1)}
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border p-2 disabled:opacity-40 md:min-h-8 md:min-w-8"
           aria-label={t("previousPage")}
         >
           <ChevronLeft className="size-3.5" />
         </button>
         <span>
-          {page + 1} / {totalPages}
+          {currentPage + 1} / {totalPages}
         </span>
         <button
           type="button"
-          disabled={page >= totalPages - 1}
-          onClick={() => setPage(page + 1)}
-          className="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border p-2 disabled:opacity-40"
+          disabled={currentPage >= totalPages - 1}
+          onClick={() => setPage(currentPage + 1)}
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-border p-2 disabled:opacity-40 md:min-h-8 md:min-w-8"
           aria-label={t("nextPage")}
         >
           <ChevronRight className="size-3.5" />
@@ -141,10 +175,10 @@ export function DataTable<T>({
     </div>
   );
 
-  return (
-    <div className="space-y-3">
+  const toolbarRow = (searchKey || toolbar) && (
+    <div className="flex flex-wrap items-center gap-2">
       {searchKey && (
-        <div className="relative max-w-xs">
+        <div className="relative w-full sm:max-w-xs">
           <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
@@ -157,13 +191,62 @@ export function DataTable<T>({
           />
         </div>
       )}
+      {toolbar}
+    </div>
+  );
+
+  const bulkBar = bulkActions && selectedIds.length > 0 && (
+    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-oboya-blue/20 bg-oboya-blue/5 px-3 py-2">
+      <span className="text-xs font-semibold text-oboya-blue-dark">
+        {t("selectedCount", { count: selectedIds.length })}
+      </span>
+      <div className="flex flex-1 flex-wrap items-center gap-2">{bulkActions(selectedIds)}</div>
+      <button
+        type="button"
+        onClick={() => onSelectionChange?.([])}
+        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-oboya-blue-dark"
+      >
+        <X className="size-3" />
+        {t("clearSelection")}
+      </button>
+    </div>
+  );
+
+  if (error) {
+    return (
+      <div className="space-y-3">
+        {toolbarRow}
+        <ErrorState message={error} onRetry={onRetry} />
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-3">
+        {toolbarRow}
+        <TableSkeleton columns={Math.min(columns.length, 6)} />
+      </div>
+    );
+  }
+
+  const emptyContent = emptyState ?? (
+    <p className="py-8 text-center text-muted-foreground">{resolvedEmptyMessage}</p>
+  );
+
+  return (
+    <div className="space-y-3">
+      {toolbarRow}
+      {bulkBar}
 
       {mobileLayout === "cards" && (
         <div className="space-y-3 md:hidden">
           {paged.length === 0 ? (
-            <p className="rounded-xl border border-border/60 bg-white py-8 text-center text-muted-foreground">
-              {resolvedEmptyMessage}
-            </p>
+            emptyState ?? (
+              <p className="rounded-xl border border-border/60 bg-white py-8 text-center text-muted-foreground">
+                {resolvedEmptyMessage}
+              </p>
+            )
           ) : (
             paged.map((row, i) => {
               const rowId = getRowId?.(row);
@@ -172,7 +255,8 @@ export function DataTable<T>({
                   key={rowId ?? i}
                   className={cn(
                     "rounded-xl border border-border/60 bg-white p-4 shadow-sm",
-                    onRowClick && "cursor-pointer active:bg-muted/30"
+                    onRowClick && "cursor-pointer active:bg-muted/30",
+                    rowClassName?.(row)
                   )}
                   onClick={() => onRowClick?.(row)}
                 >
@@ -207,20 +291,22 @@ export function DataTable<T>({
 
       <div
         className={cn(
-          "overflow-x-auto rounded-xl border border-border/60 bg-white -mx-4 px-4 sm:mx-0 sm:px-0",
+          "rounded-xl border border-border/60 bg-white -mx-4 px-4 sm:mx-0 sm:px-0",
+          stickyHeader ? "max-h-[70vh] overflow-auto" : "overflow-x-auto",
           mobileLayout === "cards" && "hidden md:block"
         )}
       >
         <Table>
-          <TableHeader>
+          <TableHeader className={cn(stickyHeader && "sticky top-0 z-10 bg-white shadow-[0_1px_0_var(--border)]")}>
             <TableRow>
-              {onSelectionChange && getRowId && (
+              {selectable && (
                 <TableHead className="w-10">
                   <input
                     type="checkbox"
+                    aria-label={t("selectAll")}
                     checked={
                       paged.length > 0 &&
-                      paged.every((r) => selectedIds.includes(getRowId(r)))
+                      paged.every((r) => selectedIds.includes(getRowId!(r)))
                     }
                     onChange={toggleAll}
                   />
@@ -229,26 +315,29 @@ export function DataTable<T>({
               {columns.map((col) => (
                 <TableHead
                   key={col.key}
+                  aria-sort={
+                    sortKey === col.key ? (sortDir === "asc" ? "ascending" : "descending") : undefined
+                  }
                   className={cn(
-                    col.sortable && "cursor-pointer touch-manipulation select-none",
+                    col.sortable && "cursor-pointer touch-manipulation select-none hover:text-oboya-blue-dark",
                     col.className
                   )}
                   onClick={col.sortable ? () => toggleSort(col.key) : undefined}
                 >
-                  {col.header}
-                  {sortKey === col.key && (sortDir === "asc" ? " ↑" : " ↓")}
+                  <span className="inline-flex items-center gap-1">
+                    {col.header}
+                    {sortKey === col.key &&
+                      (sortDir === "asc" ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />)}
+                  </span>
                 </TableHead>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {paged.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length + (onSelectionChange ? 1 : 0)}
-                  className="py-8 text-center text-muted-foreground"
-                >
-                  {resolvedEmptyMessage}
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={columns.length + (selectable ? 1 : 0)} className="p-4">
+                  {emptyContent}
                 </TableCell>
               </TableRow>
             ) : (
@@ -257,7 +346,8 @@ export function DataTable<T>({
                 return (
                   <TableRow
                     key={rowId ?? i}
-                    className={cn(onRowClick && "cursor-pointer")}
+                    data-state={rowId && selectedIds.includes(rowId) ? "selected" : undefined}
+                    className={cn(onRowClick && "cursor-pointer", rowClassName?.(row))}
                     onClick={() => onRowClick?.(row)}
                   >
                     {onSelectionChange && rowId && (

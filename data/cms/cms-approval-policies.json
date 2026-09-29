@@ -1,0 +1,214 @@
+{
+  "policies": [
+    {
+      "changeType": "marketplace.price",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "marketplace.bulk_update",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "marketplace.product_edit",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "marketplace.product_create",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "marketplace.product_delete",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "website.homepage",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "website.about",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "website.solutions",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "website.news_page",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "website.faqs",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "website.header",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "website.footer",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "website.terms",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "website.seo",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "website.pages",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "blog.upsert",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "blog.delete",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "case_studies.upsert",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "case_studies.delete",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "careers.upsert",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    },
+    {
+      "changeType": "careers.delete",
+      "requiresApproval": false,
+      "approverRoleIds": [],
+      "approverUserIds": [],
+      "exemptRoleIds": [
+        "super_admin"
+      ],
+      "requireRejectComment": true
+    }
+  ]
+}

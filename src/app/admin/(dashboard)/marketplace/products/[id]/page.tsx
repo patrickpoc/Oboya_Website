@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AdminPageFooterActions } from "@/components/admin/layout/AdminPageFooterActions";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
+import { FormSkeleton } from "@/components/admin/common";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   saveCmsProduct,
@@ -14,6 +15,8 @@ import {
 import { ProductEditorForm } from "@/components/admin/marketplace/ProductEditorForm";
 import { validateColorVariants } from "@/lib/shop/color-variants";
 import Link from "next/link";
+import { usePendingApprovalNotice } from "@/components/admin/approvals/use-pending-approval-notice";
+import { PendingChangeBanner } from "@/components/admin/approvals/PendingChangeBanner";
 
 export default function ProductDetailPage() {
   const t = useTranslations("admin.products");
@@ -21,7 +24,9 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const id = params.id as string;
   const [product, setProduct] = useState<CmsProduct | null>(null);
+  const [baseline, setBaseline] = useState("");
   const [loading, setLoading] = useState(true);
+  const notifyPending = usePendingApprovalNotice();
 
   useEffect(() => {
     void (async () => {
@@ -33,6 +38,7 @@ export default function ProductDetailPage() {
         }
         const payload = (await response.json()) as CmsProduct;
         setProduct(payload);
+        setBaseline(JSON.stringify(payload));
       } catch {
         setProduct(null);
       } finally {
@@ -42,7 +48,7 @@ export default function ProductDetailPage() {
   }, [id]);
 
   if (loading) {
-    return <div className="min-h-[40vh]" aria-hidden />;
+    return <FormSkeleton />;
   }
 
   if (!product) {
@@ -73,9 +79,14 @@ export default function ProductDetailPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(product),
         });
+        const payload = (await response.json().catch(() => null)) as { error?: string } | null;
         if (!response.ok) {
-          const payload = (await response.json().catch(() => null)) as { error?: string } | null;
           throw new Error(payload?.error ?? "failed");
+        }
+        const held = notifyPending(payload, { partial: response.status === 200 });
+        if (held) {
+          if (response.status === 200) toast.success(t("productSaved"));
+          return;
         }
         toast.success(t("productSaved"));
         router.push("/admin/marketplace/products");
@@ -96,9 +107,11 @@ export default function ProductDetailPage() {
         description={t("skuMoqMeta", { sku: product.sku, moq: product.moq })}
       />
 
+      <PendingChangeBanner entityType="product" entityId={product.id} />
+
       <ProductEditorForm product={product} onChange={setProduct} />
 
-      <AdminPageFooterActions>
+      <AdminPageFooterActions dirty={JSON.stringify(product) !== baseline}>
         <Link
           href="/admin/marketplace/products"
           className={buttonVariants({ variant: "outline", className: "rounded-full" })}

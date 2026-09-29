@@ -15,39 +15,88 @@
       "sortOrder": 1
     },
     {
+      "id": "ceo",
+      "label": "CEO",
+      "system": true,
+      "active": true,
+      "sortOrder": 2
+    },
+    {
+      "id": "cfo",
+      "label": "CFO",
+      "system": true,
+      "active": true,
+      "sortOrder": 3
+    },
+    {
+      "id": "cto",
+      "label": "CTO",
+      "system": true,
+      "active": true,
+      "sortOrder": 4
+    },
+    {
       "id": "content_manager",
       "label": "Content Manager",
       "system": true,
       "active": true,
-      "sortOrder": 2
+      "sortOrder": 5
     },
     {
       "id": "marketplace_manager",
       "label": "Marketplace Manager",
       "system": true,
       "active": true,
-      "sortOrder": 3
+      "sortOrder": 6
     },
     {
       "id": "sales_manager",
       "label": "Sales Manager",
       "system": true,
       "active": true,
-      "sortOrder": 4
+      "sortOrder": 7
     },
     {
       "id": "hr_manager",
       "label": "HR Manager",
       "system": true,
       "active": true,
-      "sortOrder": 5
+      "sortOrder": 8
+    },
+    {
+      "id": "content_analyst",
+      "label": "Content Analyst",
+      "system": true,
+      "active": true,
+      "sortOrder": 9
+    },
+    {
+      "id": "marketplace_analyst",
+      "label": "Marketplace Analyst",
+      "system": true,
+      "active": true,
+      "sortOrder": 10
+    },
+    {
+      "id": "sales_analyst",
+      "label": "Sales Analyst",
+      "system": true,
+      "active": true,
+      "sortOrder": 11
+    },
+    {
+      "id": "hr_analyst",
+      "label": "HR Analyst",
+      "system": true,
+      "active": true,
+      "sortOrder": 12
     },
     {
       "id": "viewer",
       "label": "Viewer",
       "system": true,
       "active": true,
-      "sortOrder": 6
+      "sortOrder": 13
     }
   ],
   "matrix": {
@@ -67,7 +116,9 @@
       "audit_logs": "full"
     },
     "admin": {
-      "dashboard": ["view"],
+      "dashboard": [
+        "view"
+      ],
       "website": "full",
       "marketplace": "full",
       "global_presence": "full",
@@ -76,85 +127,468 @@
       "careers": "full",
       "media": "full",
       "forms": "full",
-      "users": ["view", "create", "edit", "publish"],
-      "settings": ["view", "create", "edit", "publish"],
-      "analytics": ["view"],
-      "audit_logs": ["view"]
+      "users": [
+        "view",
+        "create",
+        "edit",
+        "publish"
+      ],
+      "settings": [
+        "view",
+        "create",
+        "edit",
+        "publish"
+      ],
+      "analytics": [
+        "view"
+      ],
+      "audit_logs": [
+        "view"
+      ]
+    },
+    "ceo": {
+      "dashboard": [
+        "view"
+      ],
+      "website": "full",
+      "marketplace": "full",
+      "global_presence": "full",
+      "case_studies": "full",
+      "blog": "full",
+      "careers": "full",
+      "media": "full",
+      "forms": "full",
+      "users": [
+        "view"
+      ],
+      "settings": [
+        "view"
+      ],
+      "analytics": [
+        "view"
+      ],
+      "audit_logs": [
+        "view"
+      ]
+    },
+    "cfo": {
+      "dashboard": [
+        "view"
+      ],
+      "website": [
+        "view"
+      ],
+      "marketplace": "full",
+      "global_presence": [
+        "view"
+      ],
+      "case_studies": [
+        "view"
+      ],
+      "blog": [
+        "view"
+      ],
+      "careers": [
+        "view"
+      ],
+      "media": [
+        "view"
+      ],
+      "forms": [
+        "view"
+      ],
+      "users": [
+        "view"
+      ],
+      "settings": [
+        "view"
+      ],
+      "analytics": [
+        "view"
+      ],
+      "audit_logs": [
+        "view"
+      ]
+    },
+    "cto": {
+      "dashboard": [
+        "view"
+      ],
+      "website": [
+        "view",
+        "create",
+        "edit",
+        "publish"
+      ],
+      "marketplace": [
+        "view"
+      ],
+      "global_presence": [
+        "view"
+      ],
+      "case_studies": [
+        "view"
+      ],
+      "blog": [
+        "view"
+      ],
+      "careers": [
+        "view"
+      ],
+      "media": "full",
+      "forms": "none",
+      "users": [
+        "view",
+        "create",
+        "edit",
+        "publish"
+      ],
+      "settings": "full",
+      "analytics": [
+        "view"
+      ],
+      "audit_logs": [
+        "view"
+      ]
     },
     "content_manager": {
-      "dashboard": ["view"],
-      "website": ["view", "create", "edit", "publish"],
-      "marketplace": ["view"],
-      "global_presence": ["view"],
-      "case_studies": ["view", "create", "edit", "publish"],
-      "blog": ["view", "create", "edit", "publish"],
-      "careers": ["view"],
-      "media": ["view", "create", "edit", "publish"],
+      "dashboard": [
+        "view"
+      ],
+      "website": [
+        "view",
+        "create",
+        "edit",
+        "publish"
+      ],
+      "marketplace": [
+        "view"
+      ],
+      "global_presence": [
+        "view"
+      ],
+      "case_studies": [
+        "view",
+        "create",
+        "edit",
+        "publish"
+      ],
+      "blog": [
+        "view",
+        "create",
+        "edit",
+        "publish"
+      ],
+      "careers": [
+        "view"
+      ],
+      "media": [
+        "view",
+        "create",
+        "edit",
+        "publish"
+      ],
       "forms": "none",
       "users": "none",
       "settings": "none",
-      "analytics": ["view"],
+      "analytics": [
+        "view"
+      ],
       "audit_logs": "none"
     },
     "marketplace_manager": {
-      "dashboard": ["view"],
-      "website": ["view"],
+      "dashboard": [
+        "view"
+      ],
+      "website": [
+        "view"
+      ],
       "marketplace": "full",
-      "global_presence": ["view", "create", "edit", "publish"],
-      "case_studies": ["view"],
-      "blog": ["view"],
-      "careers": ["view"],
-      "media": ["view", "create", "edit", "publish"],
+      "global_presence": [
+        "view",
+        "create",
+        "edit",
+        "publish"
+      ],
+      "case_studies": [
+        "view"
+      ],
+      "blog": [
+        "view"
+      ],
+      "careers": [
+        "view"
+      ],
+      "media": [
+        "view",
+        "create",
+        "edit",
+        "publish"
+      ],
       "forms": "none",
       "users": "none",
       "settings": "none",
-      "analytics": ["view"],
+      "analytics": [
+        "view"
+      ],
       "audit_logs": "none"
     },
     "sales_manager": {
-      "dashboard": ["view"],
-      "website": ["view"],
-      "marketplace": ["view"],
-      "global_presence": ["view"],
-      "case_studies": ["view"],
-      "blog": ["view"],
-      "careers": ["view"],
-      "media": ["view"],
-      "forms": ["view", "create", "edit", "publish"],
+      "dashboard": [
+        "view"
+      ],
+      "website": [
+        "view"
+      ],
+      "marketplace": [
+        "view"
+      ],
+      "global_presence": [
+        "view"
+      ],
+      "case_studies": [
+        "view"
+      ],
+      "blog": [
+        "view"
+      ],
+      "careers": [
+        "view"
+      ],
+      "media": [
+        "view"
+      ],
+      "forms": [
+        "view",
+        "create",
+        "edit",
+        "publish"
+      ],
       "users": "none",
       "settings": "none",
-      "analytics": ["view"],
+      "analytics": [
+        "view"
+      ],
       "audit_logs": "none"
     },
     "hr_manager": {
-      "dashboard": ["view"],
-      "website": ["view"],
-      "marketplace": ["view"],
-      "global_presence": ["view"],
-      "case_studies": ["view"],
-      "blog": ["view"],
+      "dashboard": [
+        "view"
+      ],
+      "website": [
+        "view"
+      ],
+      "marketplace": [
+        "view"
+      ],
+      "global_presence": [
+        "view"
+      ],
+      "case_studies": [
+        "view"
+      ],
+      "blog": [
+        "view"
+      ],
       "careers": "full",
-      "media": ["view"],
+      "media": [
+        "view"
+      ],
       "forms": "none",
       "users": "none",
       "settings": "none",
-      "analytics": ["view"],
+      "analytics": [
+        "view"
+      ],
+      "audit_logs": "none"
+    },
+    "content_analyst": {
+      "dashboard": [
+        "view"
+      ],
+      "website": [
+        "view",
+        "create",
+        "edit"
+      ],
+      "marketplace": [
+        "view"
+      ],
+      "global_presence": [
+        "view"
+      ],
+      "case_studies": [
+        "view",
+        "create",
+        "edit"
+      ],
+      "blog": [
+        "view",
+        "create",
+        "edit"
+      ],
+      "careers": [
+        "view"
+      ],
+      "media": [
+        "view",
+        "create",
+        "edit"
+      ],
+      "forms": "none",
+      "users": "none",
+      "settings": "none",
+      "analytics": [
+        "view"
+      ],
+      "audit_logs": "none"
+    },
+    "marketplace_analyst": {
+      "dashboard": [
+        "view"
+      ],
+      "website": [
+        "view"
+      ],
+      "marketplace": [
+        "view",
+        "create",
+        "edit"
+      ],
+      "global_presence": [
+        "view",
+        "create",
+        "edit"
+      ],
+      "case_studies": [
+        "view"
+      ],
+      "blog": [
+        "view"
+      ],
+      "careers": [
+        "view"
+      ],
+      "media": [
+        "view",
+        "create",
+        "edit"
+      ],
+      "forms": "none",
+      "users": "none",
+      "settings": "none",
+      "analytics": [
+        "view"
+      ],
+      "audit_logs": "none"
+    },
+    "sales_analyst": {
+      "dashboard": [
+        "view"
+      ],
+      "website": [
+        "view"
+      ],
+      "marketplace": [
+        "view"
+      ],
+      "global_presence": [
+        "view"
+      ],
+      "case_studies": [
+        "view"
+      ],
+      "blog": [
+        "view"
+      ],
+      "careers": [
+        "view"
+      ],
+      "media": [
+        "view"
+      ],
+      "forms": [
+        "view",
+        "edit"
+      ],
+      "users": "none",
+      "settings": "none",
+      "analytics": [
+        "view"
+      ],
+      "audit_logs": "none"
+    },
+    "hr_analyst": {
+      "dashboard": [
+        "view"
+      ],
+      "website": [
+        "view"
+      ],
+      "marketplace": [
+        "view"
+      ],
+      "global_presence": [
+        "view"
+      ],
+      "case_studies": [
+        "view"
+      ],
+      "blog": [
+        "view"
+      ],
+      "careers": [
+        "view",
+        "create",
+        "edit"
+      ],
+      "media": [
+        "view"
+      ],
+      "forms": "none",
+      "users": "none",
+      "settings": "none",
+      "analytics": [
+        "view"
+      ],
       "audit_logs": "none"
     },
     "viewer": {
-      "dashboard": ["view"],
-      "website": ["view"],
-      "marketplace": ["view"],
-      "global_presence": ["view"],
-      "case_studies": ["view"],
-      "blog": ["view"],
-      "careers": ["view"],
-      "media": ["view"],
+      "dashboard": [
+        "view"
+      ],
+      "website": [
+        "view"
+      ],
+      "marketplace": [
+        "view"
+      ],
+      "global_presence": [
+        "view"
+      ],
+      "case_studies": [
+        "view"
+      ],
+      "blog": [
+        "view"
+      ],
+      "careers": [
+        "view"
+      ],
+      "media": [
+        "view"
+      ],
       "forms": "none",
       "users": "none",
-      "settings": ["view"],
-      "analytics": ["view"],
-      "audit_logs": ["view"]
+      "settings": [
+        "view"
+      ],
+      "analytics": [
+        "view"
+      ],
+      "audit_logs": [
+        "view"
+      ]
     }
   }
 }

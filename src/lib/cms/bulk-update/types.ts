@@ -125,6 +125,8 @@ export type BulkApplyResult = {
   currentValue?: string;
   requestedValue?: string;
   suggestedAction?: string;
+  /** Some or all of the change was held for manager approval. */
+  pendingApproval?: boolean;
 };
 
 export type BulkValidateRequest = {

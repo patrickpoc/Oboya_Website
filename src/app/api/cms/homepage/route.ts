@@ -6,6 +6,7 @@ import {
 } from "@/lib/cms/server/homepage.server";
 import { revalidateHomePages } from "@/lib/cms/revalidate-site";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
+import { gateSettingsDocument, stripApprovalMeta } from "@/lib/cms/server/approvals.server";
 
 export async function GET() {
   const auth = await cmsGuard("website", "view");
@@ -20,10 +21,17 @@ export async function PUT(request: Request) {
   if ("response" in auth) return auth.response;
 
   try {
-    const body = (await request.json()) as HomepageSettings;
-    const saved = await saveHomepageSettingsDurable(body);
-    revalidateHomePages();
-    return NextResponse.json(saved);
+    const body = stripApprovalMeta((await request.json()) as HomepageSettings);
+    return await gateSettingsDocument({
+      user: auth.user,
+      changeType: "website.homepage",
+      entityId: "homepage",
+      entityLabel: "Home",
+      body,
+      read: readHomepageSettingsDurable,
+      save: saveHomepageSettingsDurable,
+      revalidate: revalidateHomePages,
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to save homepage settings";

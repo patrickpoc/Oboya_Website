@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
+import { EditorGuard, FormSkeleton } from "@/components/admin/common";
 import { RoleList } from "@/components/admin/access-control/RoleList";
 import { MatrixEditor } from "@/components/admin/access-control/MatrixEditor";
 import { Button } from "@/components/ui/button";
@@ -140,7 +141,7 @@ export default function AccessControlPage() {
   };
 
   if (loading || !doc) {
-    return <div className="min-h-[40vh]" aria-hidden />;
+    return <FormSkeleton />;
   }
 
   return (
@@ -160,8 +161,8 @@ export default function AccessControlPage() {
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-        <div className="rounded-xl border border-border/60 bg-white p-4">
+      <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+        <div className="min-w-0 rounded-xl border border-border/60 bg-white p-4">
           <RoleList
             roles={doc.roles}
             selectedId={selectedId}
@@ -171,7 +172,7 @@ export default function AccessControlPage() {
             onToggleActive={handleToggleActive}
           />
         </div>
-        <div className="rounded-xl border border-border/60 bg-white p-4">
+        <div className="min-w-0 rounded-xl border border-border/60 bg-white p-4">
           <h2 className="mb-3 text-sm font-semibold text-oboya-blue-dark">
             {t("matrixTitle", {
               role:
@@ -192,6 +193,7 @@ export default function AccessControlPage() {
           )}
         </div>
       </div>
+      <EditorGuard dirty={dirty} saving={saving} onSave={() => void handleSave()} />
     </div>
   );
 }

@@ -6,11 +6,12 @@ import { useTranslations } from "next-intl";
 import { GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
-import { Badge } from "@/components/ui/badge";
+import { EmptyState, ListSkeleton, SearchInput, StatusPill, type PillTone } from "@/components/admin/common";
 import { buttonVariants } from "@/components/ui/button";
 import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
 import { sortBlogPostsForDisplay } from "@/lib/cms/repositories/blog-repository";
 import { cn } from "@/lib/utils";
+import { usePendingApprovalNotice } from "@/components/admin/approvals/use-pending-approval-notice";
 
 export default function BlogPostsPage() {
   const t = useTranslations("admin.blog.posts");
@@ -18,7 +19,10 @@ export default function BlogPostsPage() {
   const [posts, setPosts] = useState<CmsBlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
   const [savingOrder, setSavingOrder] = useState(false);
+  const notifyPending = usePendingApprovalNotice();
 
   const load = async () => {
     const res = await fetch("/api/cms/blog-posts?fields=list");
@@ -32,7 +36,7 @@ export default function BlogPostsPage() {
       try {
         await load();
       } catch {
-        toast.error(t("loadFailed"));
+        setError(t("loadFailed"));
       } finally {
         setLoading(false);
       }
@@ -47,8 +51,9 @@ export default function BlogPostsPage() {
         method: "DELETE",
       });
       if (!res.ok) throw new Error(tCommon("deleteFailed"));
+      const payload = await res.json().catch(() => null);
       await load();
-      toast.success(t("deleted"));
+      if (!notifyPending(payload)) toast.success(t("deleted"));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : tCommon("couldNotDelete"));
     }
@@ -97,6 +102,19 @@ export default function BlogPostsPage() {
     () => t("reorderHint"),
     [t]
   );
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return posts;
+    return posts.filter((post) =>
+      `${post.title.en} ${post.slug} ${post.status}`.toLowerCase().includes(q)
+    );
+  }, [posts, query]);
+  const statusTone = (status: string): PillTone => {
+    if (status === "published") return "success";
+    if (status === "scheduled") return "info";
+    if (status === "archived") return "muted";
+    return "warning";
+  };
 
   return (
     <div>
@@ -115,11 +133,19 @@ export default function BlogPostsPage() {
           </Link>
         }
       />
-      {loading ? null : (
+      {loading ? (
+        <ListSkeleton />
+      ) : error ? (
+        <EmptyState title={error} />
+      ) : (
         <div className="space-y-3">
           <p className="text-xs text-muted-foreground">{orderedHint}</p>
+          <SearchInput value={query} onChange={setQuery} />
+          {filtered.length === 0 ? (
+            <EmptyState title={tCommon("noRecords")} />
+          ) : (
           <ul className="divide-y divide-border/60 overflow-hidden rounded-xl border border-border/60 bg-white">
-            {posts.map((post) => (
+            {filtered.map((post) => (
               <li
                 key={post.id}
                 draggable
@@ -153,9 +179,11 @@ export default function BlogPostsPage() {
                     /{post.slug}
                   </p>
                 </div>
-                <Badge variant={post.status === "published" ? "default" : "secondary"}>
-                  {post.status}
-                </Badge>
+                <StatusPill tone={statusTone(post.status)}>
+                  {post.status === "draft" || post.status === "published" || post.status === "scheduled" || post.status === "archived"
+                    ? tCommon(post.status)
+                    : post.status}
+                </StatusPill>
                 <span className="hidden text-xs text-muted-foreground sm:inline">
                   {post.publishedAt?.slice(0, 10) ?? "—"}
                 </span>
@@ -179,6 +207,7 @@ export default function BlogPostsPage() {
               </li>
             ))}
           </ul>
+          )}
         </div>
       )}
     </div>

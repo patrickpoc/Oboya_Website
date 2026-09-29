@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
+import { EditorGuard, FormSkeleton } from "@/components/admin/common";
 import { LocaleFieldTabs } from "@/components/admin/forms/LocaleFieldTabs";
 import { ShopFilterTargetFields } from "@/components/admin/solutions/ShopFilterTargetFields";
 import { Can } from "@/components/admin/permissions/Can";
@@ -32,6 +33,9 @@ import {
 } from "@/lib/shop/filter-groups";
 import { updateShopCatalog } from "@/lib/shop/catalog";
 import { buildShopHrefForSolution } from "@/lib/solutions/solutions-shop-linking";
+import { usePendingApprovalNotice } from "@/components/admin/approvals/use-pending-approval-notice";
+import { PendingChangeBanner } from "@/components/admin/approvals/PendingChangeBanner";
+import { withoutApprovalMeta } from "@/lib/cms/approvals/client";
 
 function emptyLocalized(en = ""): LocalizedString {
   return { en, "pt-BR": "", es: "", "zh-CN": "" };
@@ -52,6 +56,7 @@ export default function SolutionsPageAdmin() {
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const notifyPending = usePendingApprovalNotice();
   const [categories, setCategories] = useState<ShopCategory[]>([]);
   const [brands, setBrands] = useState<ShopBrand[]>([]);
   const [filterOptions, setFilterOptions] = useState<ShopFilterOptions>({
@@ -109,8 +114,8 @@ export default function SolutionsPageAdmin() {
         error?: string;
       };
       if (!res.ok) throw new Error(data.error ?? tCommon("saveFailed"));
-      setSettings(data);
-      toast.success(t("saved"));
+      setSettings(withoutApprovalMeta(data));
+      if (!notifyPending(data)) toast.success(t("saved"));
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : t("saveFailed")
@@ -118,7 +123,7 @@ export default function SolutionsPageAdmin() {
     } finally {
       setSaving(false);
     }
-  }, [settings]);
+  }, [settings, notifyPending]);
 
   const updateCrop = (index: number, patch: Partial<SolutionsPageCrop>) => {
     setSettings((prev) => {
@@ -175,7 +180,7 @@ export default function SolutionsPageAdmin() {
   };
 
   if (loading || !settings) {
-    return <div className="min-h-[40vh]" aria-hidden />;
+    return <FormSkeleton />;
   }
 
   return (
@@ -200,6 +205,8 @@ export default function SolutionsPageAdmin() {
             </Button>
           }
         />
+
+        <PendingChangeBanner entityType="solutions_page" entityId="solutions" />
 
         <LocaleFieldTabs value={locale} onChange={setLocale}>
           {() => (
@@ -504,6 +511,7 @@ export default function SolutionsPageAdmin() {
         </div>
           )}
         </LocaleFieldTabs>
+        <EditorGuard dirty saving={saving} onSave={() => void handleSave()} />
       </div>
     </Can>
   );

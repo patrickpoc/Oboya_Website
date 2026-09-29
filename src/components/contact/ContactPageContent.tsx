@@ -11,9 +11,11 @@ import {
   type WorldCountry,
 } from "@/lib/contact/world-countries";
 import { cn } from "@/lib/utils";
+import { collectLeadContext } from "@/lib/forms/lead-context";
 
 const SUBJECT_MAX = 50;
 const MESSAGE_MAX = 500;
+const COMPANY_MAX = 120;
 const OTHER_COUNTRY_CODE = "OTHER";
 
 const underlineField =
@@ -403,10 +405,12 @@ export function ContactPageContent() {
       phone,
       countryCode: country?.code ?? countryCode,
       countryName: country?.name ?? countryCode,
+      company: String(formData.get("company") ?? "").trim(),
       subject: subject.trim(),
       message: message.trim(),
       privacyAccepted: true,
       marketingOptIn: false,
+      context: collectLeadContext(),
     };
 
     try {
@@ -565,22 +569,41 @@ export function ContactPageContent() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="countryCode"
-                      className="text-sm font-semibold text-oboya-blue-dark"
-                    >
-                      {t("country")}
-                    </label>
-                    <CountrySelect
-                      value={countryCode}
-                      onChange={setCountryCode}
-                      label={t("country")}
-                      placeholder={t("countryPlaceholder")}
-                      otherLabel={t("countryOther")}
-                      searchPlaceholder={t("countrySearch")}
-                      emptyLabel={t("countryEmpty")}
-                    />
+                  <div className="grid gap-8 sm:grid-cols-2">
+                    <div className="flex flex-col gap-2">
+                      <label
+                        htmlFor="company"
+                        className="text-sm font-semibold text-oboya-blue-dark"
+                      >
+                        {t("company")}
+                      </label>
+                      <input
+                        id="company"
+                        name="company"
+                        type="text"
+                        maxLength={COMPANY_MAX}
+                        autoComplete="organization"
+                        placeholder={t("companyPlaceholder")}
+                        className={underlineField}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label
+                        htmlFor="countryCode"
+                        className="text-sm font-semibold text-oboya-blue-dark"
+                      >
+                        {t("country")}
+                      </label>
+                      <CountrySelect
+                        value={countryCode}
+                        onChange={setCountryCode}
+                        label={t("country")}
+                        placeholder={t("countryPlaceholder")}
+                        otherLabel={t("countryOther")}
+                        searchPlaceholder={t("countrySearch")}
+                        emptyLabel={t("countryEmpty")}
+                      />
+                    </div>
                   </div>
 
                   <div className="flex flex-col gap-2">

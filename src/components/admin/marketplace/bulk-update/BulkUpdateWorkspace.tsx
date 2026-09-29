@@ -43,10 +43,14 @@ import {
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import { useAdminLocale } from "@/contexts/AdminLocaleContext";
 import { useAdminMarketplaceCatalog } from "@/hooks/use-admin-marketplace-catalog";
+import { usePendingApprovalNotice } from "@/components/admin/approvals/use-pending-approval-notice";
+import { emitApprovalsChanged } from "@/lib/cms/approvals/client";
 
 export function BulkUpdateWorkspace() {
   const t = useTranslations("admin.products.bulk");
   const tCommon = useTranslations("admin.common");
+  const tApprovals = useTranslations("admin.approvals");
+  const notifyPending = usePendingApprovalNotice();
   const { locale } = useAdminLocale();
   const { catalog: liveCatalog, loading: catalogLoading } = useAdminMarketplaceCatalog();
   const [products, setProducts] = useState<CmsProduct[]>([]);
@@ -361,6 +365,34 @@ export function BulkUpdateWorkspace() {
       return;
     }
 
+    setApplying(true);
+    try {
+      const submitRes = await fetch("/api/cms/products/bulk-submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ products: queueSource.map((row) => row.pending) }),
+      });
+      const submitPayload = (await submitRes.json().catch(() => null)) as {
+        approvalRequired?: boolean;
+        error?: string;
+      } | null;
+      if (!submitRes.ok) {
+        throw new Error(submitPayload?.error || `HTTP ${submitRes.status}`);
+      }
+      if (notifyPending(submitPayload)) {
+        setRows([]);
+        setSelectedIds(new Set());
+        setServerIssues(null);
+        setFocusRowId(null);
+        setApplying(false);
+        return;
+      }
+    } catch (error) {
+      setApplying(false);
+      toast.error(error instanceof Error ? error.message : tCommon("requestFailed"));
+      return;
+    }
+
     const initialQueue: BulkQueueItem[] = queueSource.map((row) => {
       const variants = (row.pending.colorVariants ?? [])
         .map((variant) => variant.sku?.trim())
@@ -419,6 +451,11 @@ export function BulkUpdateWorkspace() {
         },
       });
       setResults(applyResults);
+      const heldCount = applyResults.filter((item) => item.pendingApproval).length;
+      if (heldCount > 0) {
+        toast.info(tApprovals("toast.heldCount", { count: heldCount }));
+        emitApprovalsChanged();
+      }
       for (const item of applyResults) {
         markQueue(
           item.productId,

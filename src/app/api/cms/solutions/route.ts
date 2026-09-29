@@ -4,9 +4,9 @@ import {
   readSolutionsPageSettingsDurable,
   saveSolutionsPageSettingsDurable,
 } from "@/lib/cms/server/solutions-page.server";
-import { locales } from "@/i18n/routing";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
-import { revalidatePath } from "next/cache";
+import { revalidateSolutionsPages } from "@/lib/cms/revalidate-site";
+import { gateSettingsDocument, stripApprovalMeta } from "@/lib/cms/server/approvals.server";
 
 export async function GET() {
   try {
@@ -25,16 +25,17 @@ export async function PUT(request: Request) {
   if ("response" in auth) return auth.response;
 
   try {
-    const body = (await request.json()) as SolutionsPageSettings;
-    const saved = await saveSolutionsPageSettingsDurable(body);
-    try {
-      for (const locale of locales) {
-        revalidatePath(`/${locale}/solutions`);
-      }
-    } catch {
-      // Ignore when revalidation is unavailable.
-    }
-    return NextResponse.json(saved);
+    const body = stripApprovalMeta((await request.json()) as SolutionsPageSettings);
+    return await gateSettingsDocument({
+      user: auth.user,
+      changeType: "website.solutions",
+      entityId: "solutions",
+      entityLabel: "Solutions",
+      body,
+      read: readSolutionsPageSettingsDurable,
+      save: saveSolutionsPageSettingsDurable,
+      revalidate: revalidateSolutionsPages,
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to save solutions settings";
