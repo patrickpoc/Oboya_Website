@@ -10,11 +10,12 @@ import { ProductDescriptionContent } from "@/components/shop/product/ProductDesc
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
+import type { ProductPatch } from "@/components/admin/marketplace/ProductEditorForm";
 import type { CmsLocale } from "@/lib/cms/types";
 
 interface ProductDescriptionCardProps {
   product: CmsProduct;
-  onUpdate: (patch: Partial<CmsProduct>) => void;
+  onUpdate: (patch: ProductPatch) => void;
 }
 
 export function ProductDescriptionCard({ product, onUpdate }: ProductDescriptionCardProps) {
@@ -23,15 +24,15 @@ export function ProductDescriptionCard({ product, onUpdate }: ProductDescription
   const [previewLocale, setPreviewLocale] = useState<CmsLocale>("en");
 
   const updateShortDescription = (locale: CmsLocale, value: string) => {
-    onUpdate({
-      shortDescription: { ...product.shortDescription, [locale]: value },
-    });
+    onUpdate((current) => ({
+      shortDescription: { ...current.shortDescription, [locale]: value },
+    }));
   };
 
   const updateDescription = (locale: CmsLocale, value: string) => {
-    onUpdate({
-      description: { ...product.description, [locale]: value },
-    });
+    onUpdate((current) => ({
+      description: { ...current.description, [locale]: value },
+    }));
   };
 
   const enEmpty =

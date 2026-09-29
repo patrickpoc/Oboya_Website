@@ -27,6 +27,7 @@ import {
 import { uploadMediaFile } from "@/lib/cms/client/upload-media";
 import { FOLDER_ECOVASO_PRODUCTS } from "@/lib/cms/media-folder-ids";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
+import type { ProductPatch } from "@/components/admin/marketplace/ProductEditorForm";
 import {
   DEFAULT_COLOR_VARIANT_ID,
   getVariantDisplayName,
@@ -43,7 +44,7 @@ import { cn } from "@/lib/utils";
 
 interface ProductImagesCardProps {
   product: CmsProduct;
-  onUpdate: (patch: Partial<CmsProduct>) => void;
+  onUpdate: (patch: ProductPatch) => void;
 }
 
 export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps) {
@@ -215,7 +216,14 @@ export function ProductImagesCard({ product, onUpdate }: ProductImagesCardProps)
           folder: FOLDER_ECOVASO_PRODUCTS,
         });
         saveMediaAsset(asset);
-        setImageAt(index, asset.url);
+        onUpdate((current) => {
+          const images = [...current.images];
+          images[index] = asset.url;
+          return {
+            images,
+            imageColorIds: normalizeImageColorIds(current.imageColorIds, images.length),
+          };
+        });
         toast.success(t("imageUploaded"));
       } catch (error) {
         toast.error(error instanceof Error ? error.message : tProducts("uploadFailed"));

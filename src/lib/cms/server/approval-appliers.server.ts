@@ -26,6 +26,7 @@ import { readProductById } from "@/lib/cms/server/products.server";
 import {
   createProductWrite,
   deleteProductWrite,
+  mergeProductUpdate,
   revalidateShop,
   syncProductsFile,
   writeProduct,
@@ -169,7 +170,7 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
             const item = items.find((i) => i.productId === product.id);
             try {
               const current = await currentProduct(product.id);
-              await writeProduct(product, current, {
+              await writeProduct(mergeProductUpdate(product, current), current, {
                 deferRevalidate: true,
                 skipFileSync: true,
               });

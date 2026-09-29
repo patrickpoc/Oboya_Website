@@ -11,9 +11,17 @@ import { ProductSeoCard } from "@/components/admin/marketplace/ProductSeoCard";
 import { ProductTaxonomyCard } from "@/components/admin/marketplace/ProductTaxonomyCard";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 
+export type ProductPatch =
+  | Partial<CmsProduct>
+  | ((current: CmsProduct) => Partial<CmsProduct>);
+
 interface ProductEditorFormProps {
   product: CmsProduct;
-  onChange: (next: CmsProduct) => void;
+  /**
+   * Receives an updater so patches merge into the latest state. Merging into the
+   * rendered `product` loses edits made meanwhile (e.g. typing while an image uploads).
+   */
+  onChange: (updater: (current: CmsProduct) => CmsProduct) => void;
 }
 
 export function createEmptyCmsProduct(seed?: {
@@ -65,7 +73,11 @@ export function createEmptyCmsProduct(seed?: {
 export function ProductEditorForm({ product, onChange }: ProductEditorFormProps) {
   const { catalog, currencies, loading: catalogLoading } = useAdminMarketplaceCatalog();
 
-  const update = (patch: Partial<CmsProduct>) => onChange({ ...product, ...patch });
+  const update = (patch: ProductPatch) =>
+    onChange((current) => ({
+      ...current,
+      ...(typeof patch === "function" ? patch(current) : patch),
+    }));
 
   return (
     <div className="space-y-6">

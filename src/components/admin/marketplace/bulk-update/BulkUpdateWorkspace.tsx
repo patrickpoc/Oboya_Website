@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { countProductGroups } from "@/lib/cms/admin-sku-lookup";
 import {
   applyBulkUpdatesSequentially,
+  toBulkWritePayload,
   type SequentialApplyProgress,
 } from "@/lib/cms/bulk-update/apply-sequential";
 import {
@@ -370,7 +371,9 @@ export function BulkUpdateWorkspace() {
       const submitRes = await fetch("/api/cms/products/bulk-submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ products: queueSource.map((row) => row.pending) }),
+        body: JSON.stringify({
+          products: queueSource.map((row) => toBulkWritePayload(row.pending)),
+        }),
       });
       const submitPayload = (await submitRes.json().catch(() => null)) as {
         approvalRequired?: boolean;

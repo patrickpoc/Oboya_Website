@@ -160,11 +160,10 @@ export default function ProductsPage() {
     void (async () => {
       const ok = window.confirm(t("archiveConfirm"));
       if (!ok) return;
-      const full = (await fetchFullProduct(product.id)) ?? product;
       const response = await fetch(`/api/cms/products/${product.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...full, status: "archived" }),
+        body: JSON.stringify({ id: product.id, status: "archived" }),
       });
       if (!response.ok) {
         toast.error(t("archiveFailed"));
@@ -178,11 +177,10 @@ export default function ProductsPage() {
 
   const handleUnarchive = (product: CmsProduct) => {
     void (async () => {
-      const full = (await fetchFullProduct(product.id)) ?? product;
       const response = await fetch(`/api/cms/products/${product.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...full, status: "draft" }),
+        body: JSON.stringify({ id: product.id, status: "draft" }),
       });
       if (!response.ok) {
         toast.error(t("unarchiveFailed"));

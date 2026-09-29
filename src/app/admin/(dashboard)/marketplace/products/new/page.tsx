@@ -85,7 +85,10 @@ export default function ProductNewPage() {
     <div className="pb-24">
       <AdminPageHeader title={t("newTitle")} description={t("newDescription")} />
       {product ? (
-        <ProductEditorForm product={product} onChange={setProduct} />
+        <ProductEditorForm
+          product={product}
+          onChange={(updater) => setProduct((current) => (current ? updater(current) : current))}
+        />
       ) : (
         <FormSkeleton />
       )}

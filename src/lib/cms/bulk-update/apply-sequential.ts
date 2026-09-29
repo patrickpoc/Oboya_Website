@@ -19,6 +19,16 @@ export type SequentialApplyProgress = {
   lastResult?: BulkApplyResult;
 };
 
+/**
+ * Bulk rows are loaded with `fields=list`, which blanks the long description.
+ * Omit it so the server keeps the stored value instead of overwriting it with "".
+ */
+export function toBulkWritePayload(product: CmsProduct): Omit<CmsProduct, "description"> {
+  const payload: Partial<CmsProduct> = { ...product };
+  delete payload.description;
+  return payload as Omit<CmsProduct, "description">;
+}
+
 async function revalidateShopOnce() {
   try {
     await fetch("/api/cms/products/revalidate", {
@@ -105,7 +115,7 @@ export async function applyBulkUpdatesSequentially(params: {
       continue;
     }
 
-    const body: CmsProduct = parent.pending;
+    const body = toBulkWritePayload(parent.pending);
 
     try {
       const response = await fetch(`/api/cms/products/${parent.productId}`, {

@@ -24,6 +24,7 @@ import {
   toPendingInfo,
 } from "@/lib/cms/server/approvals.server";
 import { submitBulkUpdateRequest } from "@/lib/cms/server/bulk-approval.server";
+import { mergeProductUpdate } from "@/lib/cms/server/product-writes.server";
 import { diffJson } from "@/lib/cms/approvals/diff";
 
 export const dynamic = "force-dynamic";
@@ -174,7 +175,7 @@ export async function POST(request: Request) {
         }
 
         const saved = saveCmsProduct(
-          await persistProductWithContent(product, previous ?? undefined)
+          await persistProductWithContent(mergeProductUpdate(product, previous), previous ?? undefined)
         );
 
         if (isSupabaseConfigured()) {

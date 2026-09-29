@@ -52,6 +52,17 @@ export async function writeProduct(
   return saved;
 }
 
+/**
+ * Update payloads may omit fields (bulk update never sends the long description);
+ * omitted keys keep the stored value instead of being wiped.
+ */
+export function mergeProductUpdate(
+  incoming: Partial<CmsProduct> & Pick<CmsProduct, "id">,
+  previous: CmsProduct | null | undefined
+): CmsProduct {
+  return (previous ? { ...previous, ...incoming } : incoming) as CmsProduct;
+}
+
 export class ProductExistsError extends Error {
   constructor(sku: string) {
     super(`A product with SKU ${sku} already exists (including trash). Use a different SKU or edit the existing product.`);

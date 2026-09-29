@@ -109,7 +109,10 @@ export default function ProductDetailPage() {
 
       <PendingChangeBanner entityType="product" entityId={product.id} />
 
-      <ProductEditorForm product={product} onChange={setProduct} />
+      <ProductEditorForm
+        product={product}
+        onChange={(updater) => setProduct((current) => (current ? updater(current) : current))}
+      />
 
       <AdminPageFooterActions dirty={JSON.stringify(product) !== baseline}>
         <Link

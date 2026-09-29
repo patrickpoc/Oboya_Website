@@ -8,6 +8,7 @@ import { noStoreHeaders } from "@/lib/security/http-cache";
 import { shouldDeferRevalidate } from "@/lib/cms/revalidate-site";
 import {
   deleteProductWrite,
+  mergeProductUpdate,
   restoreProductWrite,
   writeProduct,
 } from "@/lib/cms/server/product-writes.server";
@@ -69,12 +70,13 @@ export async function PUT(
     if ("response" in auth) return auth.response;
 
     const { id } = await params;
-    const body = stripApprovalMeta((await request.json()) as CmsProduct);
-    if (body.id !== id) {
+    const incoming = stripApprovalMeta((await request.json()) as CmsProduct);
+    if (incoming.id !== id) {
       return NextResponse.json({ error: "ID mismatch" }, { status: 400 });
     }
     const deferRevalidate = shouldDeferRevalidate(request);
     const previous = (await readProductById(id, { asAdmin: true })) ?? null;
+    const body = mergeProductUpdate(incoming, previous);
     const label = productLabel(body);
     const pending: ChangeRequest[] = [];
 
