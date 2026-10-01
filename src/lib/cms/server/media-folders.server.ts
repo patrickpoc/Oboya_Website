@@ -9,6 +9,8 @@ import {
   replaceMediaFoldersCache,
 } from "@/lib/cms/repositories/media-repository";
 import { LEGACY_WEBSITE_FOLDER_IDS } from "@/lib/cms/media-folder-ids";
+import { docTag } from "@/lib/cms/cache-tags";
+import { invalidateDocument } from "@/lib/cms/server/cache-invalidation.server";
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
@@ -59,7 +61,7 @@ function mergeWithDefaults(stored: MediaFolder[]): MediaFolder[] {
 }
 
 async function readFoldersFromSupabase(): Promise<MediaFolder[] | null> {
-  const supabase = createPublicClient();
+  const supabase = createPublicClient({ tags: [docTag(MEDIA_FOLDERS_DOC_ID)] });
   const { data, error } = await supabase
     .from("cms_documents")
     .select("data")
@@ -88,6 +90,7 @@ async function writeFoldersToSupabase(folders: MediaFolder[]) {
   if (error) {
     throw new Error(error.message || "Failed to save media folders");
   }
+  invalidateDocument(MEDIA_FOLDERS_DOC_ID);
 }
 
 async function readFoldersFromDisk(): Promise<MediaFolder[] | null> {

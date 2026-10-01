@@ -8,6 +8,8 @@ import {
   saveHomepageSettings,
   type HomepageSettings,
 } from "@/lib/cms/repositories/homepage-repository";
+import { docTag } from "@/lib/cms/cache-tags";
+import { invalidateDocument } from "@/lib/cms/server/cache-invalidation.server";
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { rethrowNextSignals } from "@/lib/cms/server/rethrow-next-signals";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -39,7 +41,7 @@ async function hydrateFromDisk() {
 }
 
 async function readHomepageFromSupabase(): Promise<HomepageSettings | null> {
-  const supabase = createPublicClient();
+  const supabase = createPublicClient({ tags: [docTag(HOMEPAGE_DOC_ID)] });
   const { data, error } = await supabase
     .from("cms_documents")
     .select("data")
@@ -72,6 +74,7 @@ async function writeHomepageToSupabase(settings: HomepageSettings) {
   if (error) {
     throw new Error(error.message || "Failed to save homepage to Supabase");
   }
+  invalidateDocument(HOMEPAGE_DOC_ID);
 }
 
 export async function readHomepageSettingsDurable(): Promise<HomepageSettings> {

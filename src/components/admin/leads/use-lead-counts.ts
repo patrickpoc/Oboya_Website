@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { createSharedPoller } from "@/components/admin/common/shared-poll";
 
 export const LEADS_CHANGED_EVENT = "oboya:leads-changed";
 
@@ -25,31 +25,14 @@ export function emitLeadsChanged() {
   window.dispatchEvent(new Event(LEADS_CHANGED_EVENT));
 }
 
+const poller = createSharedPoller({
+  initial: EMPTY,
+  fetch: fetchCounts,
+  intervalMs: POLL_MS,
+  refreshEvent: LEADS_CHANGED_EVENT,
+});
+
 export function useLeadCounts() {
-  const [counts, setCounts] = useState<LeadCounts>(EMPTY);
-
-  const refresh = useCallback(() => {
-    void fetchCounts().then((next) => {
-      if (next) setCounts(next);
-    });
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    const handler = () => {
-      void fetchCounts().then((next) => {
-        if (next && !cancelled) setCounts(next);
-      });
-    };
-    handler();
-    window.addEventListener(LEADS_CHANGED_EVENT, handler);
-    const timer = window.setInterval(handler, POLL_MS);
-    return () => {
-      cancelled = true;
-      window.removeEventListener(LEADS_CHANGED_EVENT, handler);
-      window.clearInterval(timer);
-    };
-  }, []);
-
-  return { counts, refresh };
+  const { value, refresh } = poller.use();
+  return { counts: value, refresh };
 }

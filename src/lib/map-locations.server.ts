@@ -4,6 +4,8 @@ import { readFile } from "fs/promises";
 import path from "path";
 import type { MapLocationsData } from "@/lib/map-locations";
 import { normalizeMapLocations } from "@/lib/map-locations";
+import { MAP_LOCATIONS_TAG } from "@/lib/cms/cache-tags";
+import { invalidateMapLocations } from "@/lib/cms/server/cache-invalidation.server";
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { rethrowNextSignals } from "@/lib/cms/server/rethrow-next-signals";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -29,7 +31,7 @@ export async function readMapLocations(): Promise<MapLocationsData> {
 
   try {
     // Public read must not call cookies() or /[locale] cannot prerender.
-    const supabase = createPublicClient();
+    const supabase = createPublicClient({ tags: [MAP_LOCATIONS_TAG] });
     const query = supabase
       .from("map_locations_config")
       .select("data")
@@ -100,5 +102,6 @@ export async function writeMapLocations(data: MapLocationsData): Promise<void> {
     console.error("Supabase write map locations failed:", error);
     throw new Error("Failed to write map locations to Supabase");
   }
+  invalidateMapLocations();
 }
 

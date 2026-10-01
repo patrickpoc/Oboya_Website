@@ -2,6 +2,10 @@ import { createServerClient } from "@supabase/ssr";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { getSupabaseEnv } from "@/lib/supabase/env";
+import {
+  PUBLIC_DATA_REVALIDATE_SECONDS,
+  PUBLIC_DATA_TAG,
+} from "@/lib/cms/cache-tags";
 
 /** Cookie-backed client for auth-aware server routes / admin actions. */
 export async function createClient() {
@@ -27,10 +31,9 @@ export async function createClient() {
 }
 
 /**
- * Cookie-free anon client for public reads.
- * Uses ISR-aligned Data Cache (`revalidate`) so public pages can prerender.
- * CMS writes still bust route cache via `revalidatePath` (see revalidate-site.ts).
- * Keep TTL in sync with `SITE_REVALIDATE_SECONDS` / locale layout `revalidate`.
+ * Cookie-free anon client for public reads, cached in the Data Cache.
+ * Pass the tags the read depends on (see `@/lib/cms/cache-tags`); writes
+ * invalidate exactly those tags (see `cache-invalidation.server.ts`).
  */
 const PUBLIC_FETCH_TIMEOUT_MS = 12_000;
 const PUBLIC_FETCH_RETRIES = 1;
@@ -76,8 +79,9 @@ async function fetchWithTimeoutRetry(
     : new Error("Supabase public fetch failed");
 }
 
-export function createPublicClient() {
+export function createPublicClient(options?: { tags?: string[] }) {
   const { url, anonKey } = getSupabaseEnv();
+  const tags = [PUBLIC_DATA_TAG, ...(options?.tags ?? [])];
 
   return createSupabaseClient(url, anonKey, {
     auth: {
@@ -92,8 +96,8 @@ export function createPublicClient() {
         void _next;
         return fetchWithTimeoutRetry(input, rest, {
           next: {
-            revalidate: 3600,
-            tags: ["cms-documents"],
+            revalidate: PUBLIC_DATA_REVALIDATE_SECONDS,
+            tags,
           },
         });
       },

@@ -35,12 +35,6 @@ export async function PUT(request: Request) {
     }
 
     const saved = await saveMarketplaceShopConfig(payload);
-    try {
-      const { revalidateShopPages } = await import("@/lib/cms/revalidate-site");
-      revalidateShopPages();
-    } catch {
-      // Ignore when revalidation is unavailable.
-    }
     return NextResponse.json(saved);
   } catch (error) {
     return NextResponse.json(

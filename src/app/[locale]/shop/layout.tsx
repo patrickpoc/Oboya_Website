@@ -1,11 +1,8 @@
 /**
- * Shop catalog and PDPs must never inherit the locale layout ISR (3600s).
- * Product JSON is loaded client-side, but HTML/RSC payloads still age
- * if this segment stays static.
+ * Shop HTML is a static shell: the catalog loads client-side from the
+ * tag-invalidated `/api/shop/catalog`, and PDPs are cached per product until
+ * a CMS write busts that product's tag.
  */
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 export default function ShopLayout({
   children,
 }: {

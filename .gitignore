@@ -25,6 +25,7 @@
 *.pem
 __pycache__/
 *.pyc
+/.tmp/
 
 # debug
 npm-debug.log*

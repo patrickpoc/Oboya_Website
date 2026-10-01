@@ -5,9 +5,6 @@ import { SiteLayout } from "@/components/layouts/SiteLayout";
 import { ShopPageContent } from "@/components/shop/ShopPageContent";
 import { routing } from "@/i18n/routing";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

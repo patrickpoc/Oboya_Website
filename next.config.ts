@@ -29,8 +29,25 @@ const securityHeaders = [
   },
 ];
 
+const localePattern = ":locale(en|pt-BR|es|zh-CN)";
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Served by the router without invoking a function (pages kept as fallback).
+  async redirects() {
+    return [
+      {
+        source: `/${localePattern}/shop/cart`,
+        destination: "/:locale/shop?cart=open",
+        permanent: false,
+      },
+      {
+        source: `/${localePattern}/shop/checkout`,
+        destination: "/:locale/shop?quote=open",
+        permanent: false,
+      },
+    ];
+  },
   async headers() {
     return [
       {
@@ -50,31 +67,16 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/api/:path*",
+        headers: [{ key: "X-Content-Type-Options", value: "nosniff" }],
+      },
+      {
+        // Public shop catalog / product detail are ISR-cached at the edge and
+        // tag-invalidated on CMS writes; every other API response stays uncacheable.
+        source: "/api/:path((?!shop/catalog$|shop/products/).*)",
         headers: [
-          { key: "X-Content-Type-Options", value: "nosniff" },
           {
             key: "Cache-Control",
             value: "private, no-cache, no-store, must-revalidate",
-          },
-        ],
-      },
-      {
-        source: "/:locale/shop",
-        headers: [
-          ...securityHeaders,
-          {
-            key: "Cache-Control",
-            value: "private, no-store, max-age=0, must-revalidate",
-          },
-        ],
-      },
-      {
-        source: "/:locale/shop/:path*",
-        headers: [
-          ...securityHeaders,
-          {
-            key: "Cache-Control",
-            value: "private, no-store, max-age=0, must-revalidate",
           },
         ],
       },

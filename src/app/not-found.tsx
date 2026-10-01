@@ -10,7 +10,8 @@ import { cn } from "@/lib/utils";
 
 export default async function GlobalNotFound() {
   const locale = routing.defaultLocale;
-  const messages = (await import(`../../messages/${locale}.json`)).default;
+  const messages = { ...(await import(`../../messages/${locale}.json`)).default };
+  delete messages.admin;
   const t = await getTranslations({ locale, namespace: "common" });
 
   return (

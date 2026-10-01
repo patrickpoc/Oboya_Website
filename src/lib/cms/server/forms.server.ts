@@ -10,6 +10,7 @@ import type {
   FormSubmissionStatus,
 } from "@/lib/cms/types";
 import {
+  OPEN_LEAD_STATUSES,
   leadEmail,
   normalizePriority,
   normalizeSubmissionStatus,
@@ -189,6 +190,41 @@ async function readFormsFromSupabase(): Promise<FormSubmission[]> {
 
   if (error) throw new Error(error.message);
   return ((data as unknown as FormRow[] | null) ?? []).map(rowToSubmission);
+}
+
+/** Sidebar badge counts — reads only status/read_at, never the lead payloads. */
+export async function readLeadCounts(): Promise<{ unread: number; open: number }> {
+  if (!isSupabaseConfigured()) {
+    return countLeads(await readFormSubmissions());
+  }
+  const client = requireWriteClient();
+  const run = (columns: string) =>
+    client.from("cms_form_submissions").select(columns);
+  let { data, error } = await run(
+    crmColumnsAvailable === false ? "status" : "status, read_at"
+  );
+  if (isMissingColumn(error) && crmColumnsAvailable !== false) {
+    crmColumnsAvailable = false;
+    ({ data, error } = await run("status"));
+  }
+  if (error) throw new Error(error.message);
+  const rows = (data as unknown as Array<{ status: string; read_at?: string | null }> | null) ?? [];
+  return countLeads(
+    rows.map((row) => ({
+      status: normalizeSubmissionStatus(row.status),
+      readAt: row.read_at ?? null,
+    }))
+  );
+}
+
+function countLeads(rows: Array<Pick<FormSubmission, "status" | "readAt">>) {
+  let unread = 0;
+  let open = 0;
+  for (const row of rows) {
+    if (OPEN_LEAD_STATUSES.includes(row.status)) open += 1;
+    if (!row.readAt && row.status === "new") unread += 1;
+  }
+  return { unread, open };
 }
 
 export function isCrmStorageReady() {

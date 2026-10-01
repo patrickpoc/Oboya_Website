@@ -9,7 +9,7 @@ export { DEFER_REVALIDATE_HEADER } from "@/lib/cms/revalidate-headers";
  * On-demand `revalidatePath` after CMS saves remains the primary invalidation.
  * This TTL is only a fallback if a write path forgets to bust cache.
  */
-export const SITE_REVALIDATE_SECONDS = 3600;
+export const SITE_REVALIDATE_SECONDS = 86400;
 function forEachLocale(run: (locale: string) => void) {
   for (const locale of locales) {
     run(locale);
@@ -86,17 +86,4 @@ export function revalidateNewsPages() {
   });
 }
 
-export function revalidateShopPages(productId?: string) {
-  revalidatePath("/api/cms/products");
-  revalidatePath("/api/cms/marketplace/filters");
-  revalidatePath("/api/cms/marketplace/currencies");
-  revalidatePath("/api/cms/marketplace/shop-config");
-  forEachLocale((locale) => {
-    revalidatePath(`/${locale}/shop`);
-    revalidatePath(`/${locale}/shop/cart`);
-    revalidatePath(`/${locale}/shop/checkout`);
-    if (productId) {
-      revalidatePath(`/${locale}/shop/products/${productId}`);
-    }
-  });
-}
+// Shop/product freshness is tag-based: see cache-invalidation.server.ts.

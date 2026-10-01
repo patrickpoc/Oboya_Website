@@ -61,7 +61,12 @@ export async function PUT(request: Request) {
     const current = await readMarketplaceCurrencies();
     const removedCurrencies = current.currencies.filter((code) => !uniqueCurrencies.includes(code));
     if (removedCurrencies.length > 0) {
-      const products = await readProducts({ includeDeleted: false });
+      const products = await readProducts({
+        includeDeleted: false,
+        fields: "list",
+        skipPurge: true,
+        asAdmin: true,
+      });
       for (const code of removedCurrencies) {
         const activeUsage = products.filter((product) => (product.prices[code] ?? 0) > 0).length;
         if (activeUsage > 0) {
@@ -81,12 +86,6 @@ export async function PUT(request: Request) {
       countries: normalizedCountries,
       currencies: uniqueCurrencies,
     });
-    try {
-      const { revalidateShopPages } = await import("@/lib/cms/revalidate-site");
-      revalidateShopPages();
-    } catch {
-      // Ignore when revalidation is unavailable.
-    }
     logCmsPerf("PUT /api/cms/marketplace/currencies", started, {
       currencies: uniqueCurrencies.length,
       countries: normalizedCountries.length,

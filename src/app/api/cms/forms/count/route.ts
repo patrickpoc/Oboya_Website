@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
-import { readFormSubmissions } from "@/lib/cms/server/forms.server";
-import { countByStatus } from "@/lib/cms/forms/crm";
+import { readLeadCounts } from "@/lib/cms/server/forms.server";
 import { noStoreHeaders } from "@/lib/security/http-cache";
 
 export const dynamic = "force-dynamic";
@@ -13,11 +12,8 @@ export async function GET() {
     if ("response" in auth) {
       return NextResponse.json({ unread: 0, open: 0 }, { headers: noStoreHeaders });
     }
-    const counts = countByStatus(await readFormSubmissions());
-    return NextResponse.json(
-      { unread: counts.unread, open: counts.open },
-      { headers: noStoreHeaders }
-    );
+    const counts = await readLeadCounts();
+    return NextResponse.json(counts, { headers: noStoreHeaders });
   } catch {
     return NextResponse.json({ unread: 0, open: 0 }, { headers: noStoreHeaders });
   }

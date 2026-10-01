@@ -17,15 +17,32 @@ import {
   softDeleteProduct,
 } from "@/lib/cms/server/products.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import {
+  invalidateCatalog,
+  invalidateProducts,
+} from "@/lib/cms/server/cache-invalidation.server";
 
+/**
+ * `deferRevalidate`: batch writers (bulk update/import) still bust each
+ * product's own pages, but leave the shared catalog tag for one final
+ * `invalidateCatalog()` after the batch.
+ */
 type WriteOptions = { deferRevalidate?: boolean; skipFileSync?: boolean };
 
-async function revalidateShop(productId?: string) {
+function invalidateWritten(
+  keys: Array<string | null | undefined>,
+  options: WriteOptions
+) {
+  invalidateProducts(keys, { catalog: !options.deferRevalidate });
+}
+
+/** Resolve id → sku before delete/restore so the SKU-addressed PDP is busted too. */
+async function productKeys(id: string): Promise<string[]> {
   try {
-    const { revalidateShopPages } = await import("@/lib/cms/revalidate-site");
-    revalidateShopPages(productId);
+    const existing = await findExistingProduct(id, id);
+    return [id, existing?.id ?? "", existing?.sku ?? ""];
   } catch {
-    // Ignore when revalidation is unavailable.
+    return [id];
   }
 }
 
@@ -48,7 +65,7 @@ export async function writeProduct(
     await saveProduct(saved);
   }
   if (!options.skipFileSync) await syncProductsFile();
-  if (!options.deferRevalidate) await revalidateShop(saved.id);
+  invalidateWritten([saved.id, saved.sku, previous?.id, previous?.sku], options);
   return saved;
 }
 
@@ -88,6 +105,7 @@ export async function deleteProductWrite(
   hard: boolean,
   options: WriteOptions = {}
 ): Promise<void> {
+  const keys = isSupabaseConfigured() ? await productKeys(id) : [id];
   if (hard) hardDeleteCmsProduct(id);
   else softDeleteCmsProduct(id);
   if (isSupabaseConfigured()) {
@@ -95,7 +113,7 @@ export async function deleteProductWrite(
     else await softDeleteProduct(id);
   }
   await syncProductsFile();
-  if (!options.deferRevalidate) await revalidateShop(id);
+  invalidateWritten(keys, options);
 }
 
 export async function restoreProductWrite(
@@ -107,7 +125,7 @@ export async function restoreProductWrite(
     await restoreProduct(id);
   }
   await syncProductsFile();
-  if (!options.deferRevalidate) await revalidateShop(id);
+  invalidateWritten(isSupabaseConfigured() ? await productKeys(id) : [id], options);
 }
 
-export { revalidateShop };
+export { invalidateCatalog };

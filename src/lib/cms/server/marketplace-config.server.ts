@@ -6,6 +6,7 @@ import {
   readCmsDocumentData,
   writeCmsDocumentData,
 } from "@/lib/cms/server/cms-document.server";
+import { invalidateProducts } from "@/lib/cms/server/cache-invalidation.server";
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { readProducts, saveProduct } from "@/lib/cms/server/products.server";
 import { updateShopCatalog } from "@/lib/shop/catalog";
@@ -251,6 +252,9 @@ export async function saveMarketplaceCurrencies(payload: {
     });
     const normalizedChanged = changed.map((product) => normalizePrices(product));
     await Promise.all(normalizedChanged.map((product) => saveProduct(product)));
+    if (normalizedChanged.length > 0) {
+      invalidateProducts(normalizedChanged.flatMap((product) => [product.id, product.sku]));
+    }
 
     updateShopCatalog({ countries: payload.countries });
     const productsOut = products.map((product) => normalizePrices(product));

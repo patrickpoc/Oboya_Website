@@ -25,6 +25,10 @@ import {
 } from "@/lib/cms/server/approvals.server";
 import { submitBulkUpdateRequest } from "@/lib/cms/server/bulk-approval.server";
 import { mergeProductUpdate } from "@/lib/cms/server/product-writes.server";
+import {
+  invalidateCatalog,
+  invalidateProducts,
+} from "@/lib/cms/server/cache-invalidation.server";
 import { diffJson } from "@/lib/cms/approvals/diff";
 
 export const dynamic = "force-dynamic";
@@ -183,6 +187,9 @@ export async function POST(request: Request) {
         }
 
         wroteAny = true;
+        invalidateProducts([saved.id, saved.sku, previous?.id, previous?.sku], {
+          catalog: false,
+        });
         results.push({
           productId: saved.id,
           sku: saved.sku,
@@ -205,14 +212,7 @@ export async function POST(request: Request) {
 
     if (wroteAny) {
       await persistProductsToFileSafe(getCmsProducts({ includeDeleted: true }));
-      try {
-        const { revalidateShopPages } = await import(
-          "@/lib/cms/revalidate-site"
-        );
-        revalidateShopPages();
-      } catch {
-        // Ignore when revalidation is unavailable.
-      }
+      invalidateCatalog();
     }
 
     const ok = results.filter((r) => r.status === "SUCCESS").length;

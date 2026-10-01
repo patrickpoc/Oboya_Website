@@ -18,8 +18,11 @@ import {
 } from "@/lib/supabase/admin";
 import { normalizeColorVariants, normalizeImageColorIds, normalizeLocalizedColorName } from "@/lib/shop/color-variants";
 import { logCmsPerf } from "@/lib/cms/server/perf-log.server";
+import { ALL_PRODUCTS_TAG, CATALOG_TAG, productTag } from "@/lib/cms/cache-tags";
 
 const PRODUCTS_FILE = path.join(process.cwd(), "data", "shop", "products.json");
+
+const CATALOG_READ_TAGS = [CATALOG_TAG, ALL_PRODUCTS_TAG];
 
 type ProductRow = {
   id: string;
@@ -334,7 +337,7 @@ export async function readProducts(options?: {
   try {
     const supabase = options?.asAdmin
       ? await createClient()
-      : createPublicClient();
+      : createPublicClient({ tags: CATALOG_READ_TAGS });
 
     let query = supabase
       .from("cms_products")
@@ -405,7 +408,7 @@ export async function readProductSkuIndex(options?: {
     const supabase =
       options?.asAdmin !== false
         ? await createClient()
-        : createPublicClient();
+        : createPublicClient({ tags: CATALOG_READ_TAGS });
     const { data, error } = await supabase
       .from("cms_products")
       .select("id, sku, color_variants, deleted_at");
@@ -564,7 +567,7 @@ export async function readProductsPage(options: {
   try {
     const supabase = options.asAdmin !== false
       ? await createClient()
-      : createPublicClient();
+      : createPublicClient({ tags: CATALOG_READ_TAGS });
 
     const from = (page - 1) * limit;
     const to = from + limit - 1;
@@ -751,9 +754,10 @@ export async function readProductById(
   }
 
   try {
+    // Tagged by the requested key: writes bust both the product id and SKU.
     const supabase = options?.asAdmin
       ? await createClient()
-      : createPublicClient();
+      : createPublicClient({ tags: [productTag(id), ALL_PRODUCTS_TAG] });
 
     const byId = await Promise.race([
       supabase.from("cms_products").select("*").eq("id", id).maybeSingle(),

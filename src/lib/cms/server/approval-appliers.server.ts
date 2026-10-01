@@ -27,7 +27,7 @@ import {
   createProductWrite,
   deleteProductWrite,
   mergeProductUpdate,
-  revalidateShop,
+  invalidateCatalog,
   syncProductsFile,
   writeProduct,
 } from "@/lib/cms/server/product-writes.server";
@@ -184,7 +184,7 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
             }
           }
           await syncProductsFile();
-          await revalidateShop();
+          invalidateCatalog();
           if (failed === payload.products.length && failed > 0) {
             throw new Error("All products in the batch failed to apply");
           }

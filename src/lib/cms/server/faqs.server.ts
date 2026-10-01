@@ -17,8 +17,6 @@ import {
   readCmsDocumentData,
   writeCmsDocumentData,
 } from "@/lib/cms/server/cms-document.server";
-import { rethrowNextSignals } from "@/lib/cms/server/rethrow-next-signals";
-
 export const FAQS_DOC_ID = "faqs";
 
 type FaqsDoc = { categories: CmsFaqCategory[]; faqs: CmsFaqItem[] };
@@ -55,23 +53,14 @@ async function persistCurrent(): Promise<FaqsDoc> {
   return doc;
 }
 
+/**
+ * Missing seeds are merged in memory on read and persisted by the next admin
+ * save; public (ISR) renders must not write or invalidate cache.
+ */
 export async function readFaqsDurable(): Promise<FaqsDoc> {
   const remote = await readCmsDocumentData(FAQS_DOC_ID);
   if (isFaqsDoc(remote)) {
-    const { doc, changed } = mergeMissingSeeds(remote);
-    replaceFaqsCache(doc);
-    if (changed) {
-      try {
-        await writeCmsDocumentData(FAQS_DOC_ID, "website", doc);
-      } catch (error) {
-        rethrowNextSignals(error);
-        // Public reads may lack write auth; in-memory merge still serves new seeds.
-        console.error(
-          "faqs seed merge persist skipped:",
-          error instanceof Error ? error.message : error
-        );
-      }
-    }
+    replaceFaqsCache(mergeMissingSeeds(remote).doc);
   }
   return { categories: getCategories(), faqs: getFaqs() };
 }

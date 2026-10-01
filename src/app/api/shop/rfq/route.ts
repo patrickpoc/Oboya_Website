@@ -132,7 +132,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: limited.error }, { status: 429 });
     }
 
-    const products = await readProducts({ includeDeleted: false });
+    const products = await readProducts({
+      includeDeleted: false,
+      fields: "list",
+      skipPurge: true,
+    });
     const published = new Map(
       products
         .filter((product) => product.status === "published" && !product.deletedAt)

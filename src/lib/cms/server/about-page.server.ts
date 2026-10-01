@@ -17,32 +17,14 @@ function isAbout(value: unknown): value is AboutPageSettings {
   return Boolean(value && typeof value === "object" && "hero" in value);
 }
 
+/**
+ * Content migrations are applied in memory on read and persisted by the next
+ * admin save; public (ISR) renders must not write or invalidate cache.
+ */
 export async function readAboutPageSettingsDurable(): Promise<AboutPageSettings> {
   const remote = await readCmsDocumentData(ABOUT_DOC_ID);
   if (isAbout(remote)) {
-    const beforeYears = (remote.timeline?.events ?? [])
-      .map((event) => event.year)
-      .join(",");
-    const beforeCallout = remote.callout?.body?.en ?? "";
-    const beforeHero = remote.hero?.title?.en ?? "";
     replaceAboutPageSettingsCache(remote);
-    const normalized = getAboutPageSettings();
-    const afterYears = (normalized.timeline?.events ?? [])
-      .map((event) => event.year)
-      .join(",");
-    const afterCallout = normalized.callout?.body?.en ?? "";
-    const afterHero = normalized.hero?.title?.en ?? "";
-
-    // Persist one-time content migrations so live CMS stays in sync.
-    if (
-      beforeYears !== afterYears ||
-      beforeCallout !== afterCallout ||
-      beforeHero !== afterHero
-    ) {
-      await writeCmsDocumentData(ABOUT_DOC_ID, "website", normalized);
-    }
-
-    return normalized;
   }
   return getAboutPageSettings();
 }

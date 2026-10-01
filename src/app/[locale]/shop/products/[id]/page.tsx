@@ -8,29 +8,18 @@ import { ShopOverlays } from "@/components/shop/ShopOverlays";
 import { readPublishedProductByParam } from "@/lib/cms/readers";
 import { pickLocalized } from "@/lib/cms/utils";
 import { stripHtmlToPlainText } from "@/lib/cms/sanitize-rich-html.shared";
-import { routing } from "@/i18n/routing";
 import { remapProductId } from "@/lib/shop/product-id-remap";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
 
-/** Always read fresh product data (color variants, prices, images). */
-export const dynamic = "force-dynamic";
-
+/** Nothing prebuilt: each PDP renders on first visit and is cached until its product changes. */
 export async function generateStaticParams() {
-  const { readProducts: readProductsFromStore } = await import(
-    "@/lib/cms/server/products.server"
-  );
-  const products = await readProductsFromStore();
-  return routing.locales.flatMap((locale) =>
-    products
-      .filter((product) => product.status === "published" && !product.deletedAt)
-      .map((product) => ({ locale, id: product.sku || product.id }))
-  );
+  return [];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, id } = await params;
-  const product = await readPublishedProductByParam(id);
+  const product = await readPublishedProductByParam(remapProductId(id));
   if (!product) return { title: "Not Found" };
 
   const seoTitle = pickLocalized(product.seo.title, locale);

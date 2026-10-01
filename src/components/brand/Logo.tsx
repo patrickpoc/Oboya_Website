@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 import NextLink from "next/link";
 import { Link as IntlLink } from "@/i18n/navigation";

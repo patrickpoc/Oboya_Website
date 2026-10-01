@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Search, ZoomOut } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type SyntheticEvent } from "react";
 import { cn } from "@/lib/utils";
 
 const ZOOM_SCALE = 1.8;
@@ -39,23 +39,12 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
     setOrigin({ x: 50, y: 50 });
   }, [active]);
 
-  useEffect(() => {
-    let cancelled = false;
-    const probe = new window.Image();
-    probe.onload = () => {
-      if (cancelled) return;
-      const w = probe.naturalWidth;
-      const h = probe.naturalHeight;
-      if (w > 0 && h > 0) setRatio(w / h);
-    };
-    probe.onerror = () => {
-      if (!cancelled) setRatio(FALLBACK_RATIO);
-    };
-    probe.src = src;
-    return () => {
-      cancelled = true;
-    };
-  }, [src]);
+  // Ratio comes from the optimized image itself (resizing keeps proportions),
+  // so the full-size original is never downloaded just to measure it.
+  const onImageLoad = useCallback((event: SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth: w, naturalHeight: h } = event.currentTarget;
+    if (w > 0 && h > 0) setRatio(w / h);
+  }, []);
 
   const updateOrigin = useCallback((clientX: number, clientY: number) => {
     const frame = frameRef.current;
@@ -92,6 +81,8 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
           fill
           sizes="(max-width: 640px) 100vw, 36rem"
           className="object-contain object-center will-change-transform"
+          onLoad={onImageLoad}
+          onError={() => setRatio(FALLBACK_RATIO)}
           style={
             zoomOn
               ? {

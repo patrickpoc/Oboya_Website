@@ -263,6 +263,9 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const lastSyncedQuery = useRef<string | null>(null);
   const wasOnShop = useRef(false);
   const softOpenTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Survives effect re-runs (e.g. catalogReady flipping before the timer fires),
+  // which would otherwise cancel the `?product=` → PDP redirect.
+  const pendingSoftOpen = useRef<string | null>(null);
   const isShopListingRoute =
     pathname === "/shop" || pathname.endsWith("/shop");
   /** Catalog + cart overlays: listing, PDP, cart, checkout. */
@@ -297,26 +300,26 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
     void (async () => {
       try {
-        const catalogFetch: RequestInit = {
-          cache: "no-store",
-          headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
-        };
-        const [productsRes, filtersRes, currenciesRes, shopConfigRes] =
-          await Promise.all([
-            fetch("/api/cms/products?fields=list", catalogFetch),
-            fetch("/api/cms/marketplace/filters", catalogFetch),
-            fetch("/api/cms/marketplace/currencies", catalogFetch),
-            fetch("/api/cms/marketplace/shop-config", catalogFetch),
-          ]);
-        if (!productsRes.ok) throw new Error("Failed to load products");
-
-        if (filtersRes.ok) {
-          const filters = (await filtersRes.json()) as {
+        // Edge-cached and tag-invalidated on CMS writes; a plain GET lets the
+        // CDN serve it instead of re-running the function per visitor.
+        const catalogRes = await fetch("/api/shop/catalog");
+        if (!catalogRes.ok) throw new Error("Failed to load products");
+        const catalog = (await catalogRes.json()) as {
+          products?: CmsProduct[];
+          filters?: {
             categories?: ReturnType<typeof getShopCatalog>["categories"];
             brands?: ReturnType<typeof getShopCatalog>["brands"];
             filterGroups?: ReturnType<typeof getShopCatalog>["filterGroups"];
             filterOptions?: ReturnType<typeof getShopCatalog>["filterOptions"];
           };
+          currencies?: {
+            countries?: ReturnType<typeof getShopCatalog>["countries"];
+          };
+          shopConfig?: unknown;
+        };
+
+        const filters = catalog.filters;
+        if (filters) {
           updateShopCatalog({
             categories: filters.categories
               ? normalizeCategories(filters.categories)
@@ -333,20 +336,14 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
               : undefined,
           });
         }
-        if (currenciesRes.ok) {
-          const currencies = (await currenciesRes.json()) as {
-            countries?: ReturnType<typeof getShopCatalog>["countries"];
-          };
-          if (currencies.countries) {
-            updateShopCatalog({ countries: currencies.countries });
-          }
+        if (catalog.currencies?.countries) {
+          updateShopCatalog({ countries: catalog.currencies.countries });
         }
 
         let nextShopConfig = DEFAULT_SHOP_CONFIG;
-        if (shopConfigRes.ok) {
+        if (catalog.shopConfig) {
           try {
-            const rawConfig = await shopConfigRes.json();
-            nextShopConfig = normalizeShopConfig(rawConfig, {
+            nextShopConfig = normalizeShopConfig(catalog.shopConfig, {
               countries: getShopCatalog().countries,
             });
           } catch {
@@ -370,7 +367,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           }));
         }
 
-        const products = (await productsRes.json()) as CmsProduct[];
+        const products = catalog.products ?? [];
         const published = products
           .filter(
             (product) => product.status === "published" && !product.deletedAt
@@ -447,6 +444,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       hydratedFromUrl.current = false;
       lastSyncedQuery.current = null;
       skipUrlWrite.current = false;
+      pendingSoftOpen.current = null;
       if (softOpenTimer.current) {
         clearTimeout(softOpenTimer.current);
         softOpenTimer.current = null;
@@ -469,7 +467,9 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         view: shopConfigRef.current.catalog.defaultViewMode,
       });
       const pendingProduct = urlState.product;
-      const softOpen = enteringShop && Boolean(pendingProduct);
+      const softOpen =
+        Boolean(pendingProduct) &&
+        (enteringShop || pendingSoftOpen.current === pendingProduct);
       const rfqEnabled = shopConfigRef.current.rfq.enabled;
       const pageChunk = shopConfigRef.current.catalog.pageSize;
 
@@ -501,12 +501,15 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       hydratedFromUrl.current = true;
 
       if (softOpen && pendingProduct) {
+        pendingSoftOpen.current = pendingProduct;
         softOpenTimer.current = setTimeout(() => {
           softOpenTimer.current = null;
+          pendingSoftOpen.current = null;
           skipUrlWrite.current = false;
           router.replace(`/shop/products/${remapProductId(pendingProduct)}`);
         }, 100);
       } else {
+        pendingSoftOpen.current = null;
         queueMicrotask(() => {
           skipUrlWrite.current = false;
         });
@@ -686,9 +689,9 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       if (existing && hasDescription) return existing;
 
       try {
-        const response = await fetch(`/api/cms/products/${productId}`, {
-          cache: "no-store",
-        });
+        const response = await fetch(
+          `/api/shop/products/${encodeURIComponent(productId)}`
+        );
         if (!response.ok) return existing;
         const product = (await response.json()) as CmsProduct;
         if (product.status !== "published" || product.deletedAt) {

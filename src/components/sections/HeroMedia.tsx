@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useHomeIntro } from "@/components/layout/HomeIntroGate";
 
 interface HeroMediaProps {
@@ -35,6 +35,26 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
+type NetworkInformationLike = { saveData?: boolean; effectiveType?: string };
+
+function readPrefersReducedData() {
+  const connection = (navigator as Navigator & { connection?: NetworkInformationLike })
+    .connection;
+  if (!connection) return false;
+  return (
+    Boolean(connection.saveData) ||
+    connection.effectiveType === "slow-2g" ||
+    connection.effectiveType === "2g"
+  );
+}
+
+const subscribeNoop = () => () => {};
+
+/** Data Saver or a 2G-class connection: show the poster image instead of video. */
+function usePrefersReducedData() {
+  return useSyncExternalStore(subscribeNoop, readPrefersReducedData, () => false);
+}
+
 function HeroMediaInner({
   mediaType,
   imageSrc,
@@ -45,13 +65,18 @@ function HeroMediaInner({
   const intro = useHomeIntro();
   const markHeroReady = intro?.markHeroReady;
   const reducedMotion = usePrefersReducedMotion();
+  const reducedData = usePrefersReducedData();
   const videoRef = useRef<HTMLVideoElement>(null);
   const notified = useRef(false);
   const [showVideo, setShowVideo] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
 
   const wantsVideo =
-    mediaType === "video" && Boolean(videoSrc) && !reducedMotion && !videoFailed;
+    mediaType === "video" &&
+    Boolean(videoSrc) &&
+    !reducedMotion &&
+    !reducedData &&
+    !videoFailed;
 
   const notifyReady = useCallback(() => {
     if (notified.current) return;
@@ -59,26 +84,14 @@ function HeroMediaInner({
     markHeroReady?.();
   }, [markHeroReady]);
 
+  const [imageSettled, setImageSettled] = useState(false);
+  const onImageSettled = useCallback(() => setImageSettled(true), []);
+
+  // Settled is tracked as state: the image may finish loading while video is
+  // still wanted, and wantsVideo can flip afterwards (failure, Data Saver).
   useEffect(() => {
-    if (wantsVideo) return;
-
-    if (imageSrc) {
-      let cancelled = false;
-      const img = new window.Image();
-      const done = () => {
-        if (!cancelled) notifyReady();
-      };
-      img.onload = done;
-      img.onerror = done;
-      img.src = imageSrc;
-      if (img.complete) done();
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    notifyReady();
-  }, [wantsVideo, imageSrc, notifyReady]);
+    if (!wantsVideo && (imageSettled || !imageSrc)) notifyReady();
+  }, [wantsVideo, imageSettled, imageSrc, notifyReady]);
 
   useEffect(() => {
     if (!wantsVideo || !videoSrc) return;
@@ -133,6 +146,8 @@ function HeroMediaInner({
           priority
           className="size-full object-cover object-center"
           sizes="100vw"
+          onLoad={onImageSettled}
+          onError={onImageSettled}
         />
       ) : null}
 

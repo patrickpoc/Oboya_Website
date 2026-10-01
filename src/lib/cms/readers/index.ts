@@ -3,6 +3,7 @@
  * Currently delegates to existing data sources with CMS layer on top where available.
  */
 
+import { cache } from "react";
 import { getShopCatalog, getProductById as getShopProductById } from "@/lib/shop/catalog";
 import { readMapLocations } from "@/lib/map-locations.server";
 import { getCmsProducts, getCmsProductById } from "@/lib/cms/repositories/product-repository";
@@ -52,8 +53,11 @@ export async function readPublishedProductById(id: string) {
   return product;
 }
 
-/** Resolve PDP param as id or sku (post id=sku migration + legacy bookmarks). */
-export async function readPublishedProductByParam(param: string) {
+/**
+ * Resolve PDP param as id or sku (post id=sku migration + legacy bookmarks).
+ * Memoized per render: generateMetadata and the page share one lookup.
+ */
+export const readPublishedProductByParam = cache(async (param: string) => {
   const { readProductById: readProductByIdFromStore } = await import(
     "@/lib/cms/server/products.server"
   );
@@ -62,7 +66,7 @@ export async function readPublishedProductByParam(param: string) {
     return undefined;
   }
   return product;
-}
+});
 
 export function readProductById(id: string) {
   const cms = getCmsProductById(id);
@@ -79,18 +83,16 @@ export async function readBlogPosts() {
   );
 }
 
-export async function readBlogPostBySlug(slug: string) {
+export const readBlogPostBySlug = cache(async (slug: string) => {
   const post = (await readBlogPostsDurable()).find((p) => p.slug === slug);
   return post?.status === "published" ? post : undefined;
-}
+});
 
 export async function readBlogCategories() {
   return readBlogCategoriesDurable();
 }
 
-export async function readNewsPageSettings() {
-  return readNewsPageSettingsDurable();
-}
+export const readNewsPageSettings = cache(async () => readNewsPageSettingsDurable());
 
 export async function readHomepageSettings() {
   return readHomepageSettingsDurable();
@@ -104,20 +106,22 @@ export async function readCaseStudies() {
   return (await readCaseStudiesDurable()).filter((c) => c.status === "published");
 }
 
-export async function readCaseStudyBySlug(slug: string) {
-  return (await readCaseStudiesDurable()).find(
+export const readCaseStudyBySlug = cache(async (slug: string) =>
+  (await readCaseStudiesDurable()).find(
     (c) => c.slug === slug && c.status === "published"
-  );
-}
+  )
+);
 
 export function readSiteSettings() {
   return siteConfig;
 }
 
+const readFaqsDoc = cache(async () => readFaqsDurable());
+
 export async function readFaqCategories() {
-  return (await readFaqsDurable()).categories;
+  return (await readFaqsDoc()).categories;
 }
 
 export async function readFaqs() {
-  return (await readFaqsDurable()).faqs.filter((f) => f.status === "published");
+  return (await readFaqsDoc()).faqs.filter((f) => f.status === "published");
 }

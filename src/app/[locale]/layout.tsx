@@ -12,11 +12,12 @@ import { CookieConsentBanner } from "@/components/privacy/CookieConsentBanner";
 import "../globals.css";
 
 /**
- * Safety ISR fallback (seconds); CMS writes still bust cache via revalidatePath.
+ * Safety ISR fallback (seconds); CMS writes bust pages on demand via cache
+ * tags / revalidatePath, so this only bounds staleness if a write path forgets.
  * Must be a literal — Next cannot statically analyze imported segment configs.
  * Keep in sync with SITE_REVALIDATE_SECONDS in src/lib/cms/revalidate-site.ts.
  */
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -65,7 +66,10 @@ export default async function LocaleLayout({
   }
 
   setRequestLocale(locale);
-  const messages = await getMessages();
+  // `admin` (~half of each locale file) is served by AdminLocaleContext under
+  // /admin; public client components never read it.
+  const messages = { ...(await getMessages()) };
+  delete messages.admin;
 
   return (
     <html

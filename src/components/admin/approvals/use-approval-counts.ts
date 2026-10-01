@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import { APPROVALS_CHANGED_EVENT } from "@/lib/cms/approvals/client";
+import { createSharedPoller } from "@/components/admin/common/shared-poll";
 
 export type ApprovalCounts = { approver: boolean; review: number; mine: number };
 
@@ -22,31 +22,14 @@ async function fetchCounts(): Promise<ApprovalCounts | null> {
   }
 }
 
+const poller = createSharedPoller({
+  initial: EMPTY,
+  fetch: fetchCounts,
+  intervalMs: POLL_MS,
+  refreshEvent: APPROVALS_CHANGED_EVENT,
+});
+
 export function useApprovalCounts() {
-  const [counts, setCounts] = useState<ApprovalCounts>(EMPTY);
-
-  const refresh = useCallback(() => {
-    void fetchCounts().then((next) => {
-      if (next) setCounts(next);
-    });
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    const handler = () => {
-      void fetchCounts().then((next) => {
-        if (next && !cancelled) setCounts(next);
-      });
-    };
-    handler();
-    window.addEventListener(APPROVALS_CHANGED_EVENT, handler);
-    const timer = window.setInterval(handler, POLL_MS);
-    return () => {
-      cancelled = true;
-      window.removeEventListener(APPROVALS_CHANGED_EVENT, handler);
-      window.clearInterval(timer);
-    };
-  }, []);
-
-  return { counts, refresh };
+  const { value, refresh } = poller.use();
+  return { counts: value, refresh };
 }
