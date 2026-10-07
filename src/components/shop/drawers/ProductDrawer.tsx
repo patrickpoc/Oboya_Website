@@ -17,6 +17,7 @@ import { DownloadsList } from "@/components/shop/drawers/DownloadsList";
 import { RelatedProducts } from "@/components/shop/drawers/RelatedProducts";
 import { buttonVariants } from "@/components/ui/button";
 import { formatShopPrice } from "@/lib/shop/format-price";
+import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 
 const panelEase = [0.22, 1, 0.36, 1] as const;
 
@@ -131,7 +132,9 @@ export function ProductDrawer() {
 
               <div className="mt-5">
                 <p className="text-xs font-medium uppercase tracking-wide text-oboya-green">
-                  {category?.name}
+                  {category
+                    ? pickLocalizedLabel(locale, category.name, category.nameI18n)
+                    : null}
                 </p>
                 <h3 className="mt-1 text-xl font-semibold text-oboya-blue-dark">
                   {name}

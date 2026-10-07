@@ -38,7 +38,9 @@ import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { CmsLocale, LocalizedString } from "@/lib/cms/types";
 import type { ProductColorVariant } from "@/lib/shop/types";
 import {
+  DEFAULT_COLOR_VARIANT_ID,
   createEmptyColorVariant,
+  getFeaturedColorVariantId,
   normalizeLocalizedColorName,
 } from "@/lib/shop/color-variants";
 import { useTranslations } from "next-intl";
@@ -121,12 +123,18 @@ export function ProductColorVariantsCard({
     [folderNameById, libraryTick]
   );
 
-  const setVariants = (next: ProductColorVariant[]) => {
+  const featuredColorId = getFeaturedColorVariantId(product);
+
+  const setVariants = (
+    next: ProductColorVariant[],
+    extra: Partial<CmsProduct> = {}
+  ) => {
     onUpdate({
       colorVariants: next.map((variant, index) => ({
         ...variant,
         sortOrder: index,
       })),
+      ...extra,
     });
   };
 
@@ -134,10 +142,15 @@ export function ProductColorVariantsCard({
     id: string,
     patch: Partial<ProductColorVariant>
   ) => {
+    const renamedFeatured =
+      patch.id && patch.id !== id && product.featuredColorId === id
+        ? { featuredColorId: patch.id }
+        : {};
     setVariants(
       variants.map((variant) =>
         variant.id === id ? { ...variant, ...patch } : variant
-      )
+      ),
+      renamedFeatured
     );
   };
 
@@ -149,7 +162,37 @@ export function ProductColorVariantsCard({
   };
 
   const removeVariant = (id: string) => {
-    setVariants(variants.filter((variant) => variant.id !== id));
+    setVariants(
+      variants.filter((variant) => variant.id !== id),
+      product.featuredColorId === id ? { featuredColorId: "" } : {}
+    );
+  };
+
+  const featuredToggle = (colorId: string) => {
+    if (variants.length === 0) return null;
+    const checked = featuredColorId === colorId;
+    return (
+      <label className="ml-auto flex shrink-0 cursor-pointer items-center gap-2 text-xs font-medium text-oboya-blue-dark">
+        <input
+          type="radio"
+          name={`featured-color-${product.id || "new"}`}
+          checked={checked}
+          onChange={() =>
+            onUpdate({
+              featuredColorId: colorId === DEFAULT_COLOR_VARIANT_ID ? "" : colorId,
+            })
+          }
+          className="size-4 accent-oboya-green"
+        />
+        {checked ? (
+          <span className="rounded-full bg-oboya-green/15 px-2 py-0.5 text-oboya-green">
+            {t("featuredColorBadge")}
+          </span>
+        ) : (
+          <span className="text-muted-foreground">{t("featuredColor")}</span>
+        )}
+      </label>
+    );
   };
 
   const moveVariant = (id: string, direction: -1 | 1) => {
@@ -229,6 +272,7 @@ export function ProductColorVariantsCard({
                 {t("defaultProductColorHint")}
               </p>
             </div>
+            {featuredToggle(DEFAULT_COLOR_VARIANT_ID)}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -268,9 +312,12 @@ export function ProductColorVariantsCard({
           </p>
         ) : (
           <div className="space-y-4">
-            <p className="text-sm font-medium text-oboya-blue-dark">
-              {t("additionalColors")}
-            </p>
+            <div>
+              <p className="text-sm font-medium text-oboya-blue-dark">
+                {t("additionalColors")}
+              </p>
+              <p className="text-xs text-muted-foreground">{t("featuredColorHint")}</p>
+            </div>
             {variants.map((variant, index) => {
               const nameI18n = toLocalizedString(
                 normalizeLocalizedColorName(variant.nameI18n, variant.name)
@@ -280,6 +327,12 @@ export function ProductColorVariantsCard({
                   key={variant.id}
                   className="rounded-xl border border-border/60 bg-muted/20 p-4"
                 >
+                  <div className="mb-3 flex items-center gap-2">
+                    <p className="min-w-0 truncate text-sm font-semibold text-oboya-blue-dark">
+                      {variant.name || t("colorFallback")}
+                    </p>
+                    {featuredToggle(variant.id)}
+                  </div>
                   <div className="flex flex-wrap items-start gap-4">
                     <div className="flex items-center gap-2 pt-1">
                       <span

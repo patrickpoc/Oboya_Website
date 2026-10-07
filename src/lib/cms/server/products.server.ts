@@ -49,6 +49,7 @@ type ProductRow = {
   related_product_ids: unknown;
   default_color?: unknown;
   default_color_name?: unknown;
+  featured_color_id?: unknown;
   color_variants: unknown;
   name: unknown;
   short_description: unknown;
@@ -105,6 +106,8 @@ function rowToProduct(row: ProductRow): CmsProduct {
     relatedProductIds: parseArray<string>(row.related_product_ids),
     defaultColor: typeof row.default_color === "string" ? row.default_color : "",
     defaultColorName: normalizeLocalizedColorName(row.default_color_name),
+    featuredColorId:
+      typeof row.featured_color_id === "string" ? row.featured_color_id : "",
     colorVariants: normalizeColorVariants(row.color_variants),
     name: parseObject<CmsProduct["name"]>(row.name, { en: "", "pt-BR": "", es: "", "zh-CN": "" }),
     shortDescription: parseObject<CmsProduct["shortDescription"]>(row.short_description, {
@@ -129,7 +132,28 @@ function rowToProduct(row: ProductRow): CmsProduct {
   };
 }
 
+/**
+ * featured_color_id ships with migration 20261007_product_featured_color.sql.
+ * Until it is applied, reads and writes retry without the column.
+ */
+let featuredColorColumnAvailable = true;
+const FEATURED_COLOR_COLUMN = "featured_color_id";
+
+function isMissingFeaturedColorColumn(
+  error: { code?: string; message?: string } | null | undefined
+) {
+  if (!error) return false;
+  const missingColumn = error.code === "42703" || error.code === "PGRST204";
+  return missingColumn && String(error.message ?? "").includes(FEATURED_COLOR_COLUMN);
+}
+
 function productToRow(product: CmsProduct): ProductRow {
+  const row = productToRowWithFeatured(product);
+  if (!featuredColorColumnAvailable) delete row.featured_color_id;
+  return row;
+}
+
+function productToRowWithFeatured(product: CmsProduct): ProductRow {
   return {
     id: product.id,
     sku: product.sku,
@@ -163,6 +187,7 @@ function productToRow(product: CmsProduct): ProductRow {
       es: "",
       "zh-CN": "",
     },
+    featured_color_id: product.featuredColorId ?? "",
     color_variants: product.colorVariants ?? [],
     name: product.name,
     short_description: product.shortDescription,
@@ -221,6 +246,7 @@ const PRODUCT_LIST_COLUMNS = [
   "related_product_ids",
   "default_color",
   "default_color_name",
+  FEATURED_COLOR_COLUMN,
   "color_variants",
   "name",
   "short_description",
@@ -262,7 +288,13 @@ function projectFields(product: CmsProduct, fields: ProductReadFields): CmsProdu
 
 function selectColumns(fields: ProductReadFields): string {
   if (fields === "table") return PRODUCT_TABLE_COLUMNS;
-  if (fields === "list") return PRODUCT_LIST_COLUMNS;
+  if (fields === "list") {
+    return featuredColorColumnAvailable
+      ? PRODUCT_LIST_COLUMNS
+      : PRODUCT_LIST_COLUMNS.split(",")
+          .filter((column) => column !== FEATURED_COLOR_COLUMN)
+          .join(",");
+  }
   return "*";
 }
 
@@ -339,22 +371,27 @@ export async function readProducts(options?: {
       ? await createClient()
       : createPublicClient({ tags: CATALOG_READ_TAGS });
 
-    let query = supabase
-      .from("cms_products")
-      .select(selectColumns(fields))
-      .order("updated_at", { ascending: false });
-    if (!options?.includeDeleted) {
-      query = query.is("deleted_at", null);
+    const runQuery = () => {
+      let query = supabase
+        .from("cms_products")
+        .select(selectColumns(fields))
+        .order("updated_at", { ascending: false });
+      if (!options?.includeDeleted) {
+        query = query.is("deleted_at", null);
+      }
+      return Promise.race([
+        query,
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Supabase products timeout")), 15000)
+        ),
+      ]);
+    };
+
+    let { data, error } = await runQuery();
+    if (isMissingFeaturedColorColumn(error) && featuredColorColumnAvailable) {
+      featuredColorColumnAvailable = false;
+      ({ data, error } = await runQuery());
     }
-
-    const result = await Promise.race([
-      query,
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Supabase products timeout")), 15000)
-      ),
-    ]);
-
-    const { data, error } = result;
     if (error) throw new Error(error.message);
 
     const products = (data ?? [])
@@ -608,6 +645,10 @@ export async function readProductsPage(options: {
         supabase.rpc("cms_product_unit_stats"),
       ]);
 
+    if (isMissingFeaturedColorColumn(pageResult.error) && featuredColorColumnAvailable) {
+      featuredColorColumnAvailable = false;
+      return readProductsPage(options);
+    }
     if (pageResult.error) throw new Error(pageResult.error.message);
 
     const items = (pageResult.data ?? [])
@@ -834,7 +875,11 @@ export async function saveProduct(product: CmsProduct) {
     return product;
   }
   const supabase = await createClient();
-  const { error } = await supabase.from("cms_products").upsert(productToRow(product));
+  let { error } = await supabase.from("cms_products").upsert(productToRow(product));
+  if (isMissingFeaturedColorColumn(error) && featuredColorColumnAvailable) {
+    featuredColorColumnAvailable = false;
+    ({ error } = await supabase.from("cms_products").upsert(productToRow(product)));
+  }
   if (error) throw new Error(`Failed to save product: ${error.message}`);
   return product;
 }

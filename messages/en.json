@@ -495,6 +495,52 @@
       "p6": "Sunbelt Supply"
     }
   },
+  "checkout": {
+    "metaTitle": "My quotation",
+    "metaDescription": "Review your quotation and send it to the Oboya commercial team. No payment is collected online.",
+    "title": "My quotation",
+    "greeting": "Your market is {country}.",
+    "greetingNoMarket": "Choose a market in the shop to see local pricing.",
+    "freightTitle": "Calculate freight",
+    "freightHint": "Enter your postal code to see delivery options and lead times.",
+    "freightUnavailable": "Freight calculation is not available yet.",
+    "freightUnknownPostal": "I don't know my postal code",
+    "postalLabel": "Postal code",
+    "cepLabel": "Postal code (CEP)",
+    "calculate": "Calculate",
+    "couponTitle": "Have a coupon?",
+    "couponPlaceholder": "Enter the code here",
+    "apply": "Apply",
+    "couponUnavailable": "Coupons are not available yet.",
+    "summaryTitle": "Quotation summary",
+    "subtotal": "Subtotal ({count, plural, one {# item} other {# items}})",
+    "discounts": "Discounts",
+    "freight": "Freight",
+    "freightPrompt": "Calculate postal code",
+    "estimatedTotal": "Estimated total",
+    "totalNote": "This amount is an estimate. Your local sales team confirms the final price.",
+    "requestQuotation": "Request quotation",
+    "continueShopping": "Continue shopping",
+    "trust": "Your data is secure and will be used only for this quotation.",
+    "itemsTitle": "Quotation products",
+    "itemCount": "{count, plural, one {# item} other {# items}}",
+    "unitPrice": "unit price",
+    "lineSubtotal": "Subtotal",
+    "color": "Color",
+    "moq": "MOQ: {count, plural, one {# unit} other {# units}}",
+    "upsellTitle": "See more products",
+    "upsellHint": "Other products that may interest your crop.",
+    "seeAll": "See all",
+    "upsellPrev": "Previous products",
+    "upsellNext": "Next products",
+    "emptyTitle": "Your quotation is empty",
+    "emptyBody": "Add products from the shop to request a quotation.",
+    "backToShop": "Back to shop",
+    "goToQuotation": "Go to quotation",
+    "submitting": "Sending…",
+    "remove": "Remove",
+    "quotesDisabled": "Quote requests are turned off."
+  },
   "shop": {
     "eyebrow": "B2B Shop",
     "title": "International product showcase",
@@ -662,7 +708,11 @@
       "limited": "Limited",
       "on_request": "On request"
     },
-    "metaTitle": "Shop"
+    "metaTitle": "Shop",
+    "quoteSentTitle": "Quotation request sent!",
+    "quoteSentBody": "Thank you. Our sales team will review your request and contact you shortly.",
+    "quoteSentReference": "Your reference",
+    "quoteSentClose": "Continue browsing"
   },
   "blog": {
     "eyebrow": "Blog",
@@ -1462,6 +1512,7 @@
       "specifications": "Specifications",
       "currencies": "Currencies",
       "shopConfig": "Shop Config",
+      "checkout": "Checkout",
       "globalPresence": "Global Presence",
       "countries": "Countries",
       "offices": "Offices",
@@ -1782,9 +1833,9 @@
         "defaultColorLabel": "{name} (default)",
         "defaultColorFallback": "Default",
         "colorsTitle": "Color variations",
-        "colorsDescription": "The product default color is always the first swatch in the shop. Additional colors appear after it. Leave additional colors empty for products without options.",
+        "colorsDescription": "The product default color is the first swatch in the shop unless another color is marked to show first. Leave additional colors empty for products without options.",
         "defaultProductColor": "Default product color",
-        "defaultProductColorHint": "Uses the product gallery image, base prices, and product SKU. Shown first when additional colors exist.",
+        "defaultProductColorHint": "Uses the product gallery image, base prices, and product SKU. Shown first by default when additional colors exist.",
         "swatchColor": "Swatch color",
         "defaultColorName": "Default color name",
         "defaultColorNamePlaceholder": "e.g. Black / Preto",
@@ -1856,7 +1907,10 @@
         "colorHex": "Color hex",
         "pickColor": "Pick color from screen",
         "pickColorTitle": "Pick color from page (scroll freely, then click)",
-        "eyedropperUnsupported": "Eyedropper is not supported in this browser."
+        "eyedropperUnsupported": "Eyedropper is not supported in this browser.",
+        "featuredColor": "Show first in shop",
+        "featuredColorBadge": "Shop default",
+        "featuredColorHint": "Pick which color shows first and preselected on shop cards, the product page and checkout suggestions."
       },
       "stubs": {
         "brands": {
@@ -2890,6 +2944,18 @@
       "alreadyExists": "This currency already exists.",
       "toggleAria": "Toggle {code} for {country}"
     },
+    "checkout": {
+      "title": "Checkout page",
+      "description": "Edit quotation page copy, section visibility, upsell, and SEO. Freight, coupons, and payments are not enabled.",
+      "save": "Save checkout page",
+      "saved": "Checkout page saved.",
+      "loadFailed": "Failed to load the checkout page.",
+      "saveFailed": "Failed to save the checkout page.",
+      "freightTitle": "Freight",
+      "couponsTitle": "Coupons",
+      "paymentsTitle": "Payments",
+      "notEnabled": "Not enabled. This area is reserved for a later integration."
+    },
     "shopConfig": {
       "title": "Shop Configuration",
       "description": "Configure catalog defaults, quote form, storefront banner, and market defaults.",
@@ -3235,7 +3301,14 @@
           "reply": "Reply recorded",
           "pii": "Personal data action",
           "merge": "Merged"
-        }
+        },
+        "reference": "Reference",
+        "sku": "SKU",
+        "color": "Color",
+        "quantity": "Qty",
+        "unitPrice": "Unit price",
+        "lineTotal": "Line total",
+        "itemsCount": "{count, plural, one {# item} other {# items}}"
       }
     }
   }

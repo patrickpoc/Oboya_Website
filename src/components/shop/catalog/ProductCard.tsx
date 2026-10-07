@@ -12,6 +12,7 @@ import {
   DEFAULT_COLOR_VARIANT_ID,
   getActiveVariant,
   getDisplayColorVariants,
+  getFeaturedColorVariantId,
   hasColorVariants,
   resolveVariantImage,
   resolveVariantPrice,
@@ -24,6 +25,7 @@ import { useProductDescription } from "@/lib/shop/use-product-description";
 import type { ShopProduct } from "@/lib/shop/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import { formatShopPrice } from "@/lib/shop/format-price";
+import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 
 interface ProductCardProps {
   product: ShopProduct;
@@ -48,9 +50,13 @@ function ProductCardComponent({
   );
   const brand = getBrandById(product.brandId);
   const category = getCategoryById(product.categoryId);
+  const categoryLabel = category
+    ? pickLocalizedLabel(locale, category.name, category.nameI18n)
+    : "";
   const variants = useMemo(() => getDisplayColorVariants(product), [product]);
+  const featuredVariantId = getFeaturedColorVariantId(product);
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
-    () => (variants[0]?.id ?? null)
+    () => (variants.length > 0 ? featuredVariantId : null)
   );
   const activeVariant = getActiveVariant(product, selectedVariantId);
   const price = resolveVariantPrice(product, activeVariant, currency);
@@ -59,8 +65,14 @@ function ProductCardComponent({
   const displayMoq = resolveVariantMoq(product, activeVariant);
   const showSwatches = hasColorVariants(product);
   const cartVariantId = toCartVariantId(activeVariant?.id);
+  // The detail page opens on the featured color, so the base color needs an explicit param.
+  const detailVariantParam =
+    cartVariantId ??
+    (activeVariant && featuredVariantId !== DEFAULT_COLOR_VARIANT_ID
+      ? DEFAULT_COLOR_VARIANT_ID
+      : null);
   const detailHref = `/shop/products/${product.sku || product.id}${
-    cartVariantId ? `?variant=${encodeURIComponent(cartVariantId)}` : ""
+    detailVariantParam ? `?variant=${encodeURIComponent(detailVariantParam)}` : ""
   }`;
 
   if (viewMode === "list") {
@@ -79,7 +91,7 @@ function ProductCardComponent({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-xs font-medium uppercase tracking-wide text-oboya-green">
-              {category?.name}
+              {categoryLabel}
             </p>
           </div>
           <h3 className="mt-0.5 leading-snug font-semibold text-oboya-blue-dark">
@@ -158,7 +170,7 @@ function ProductCardComponent({
       <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-2.5 sm:p-3.5">
         {category ? (
           <p className="text-[10px] font-medium uppercase tracking-wide text-oboya-green">
-            {category.name}
+            {categoryLabel}
           </p>
         ) : null}
         <h3 className="line-clamp-2 text-sm leading-snug font-semibold text-oboya-blue-dark sm:text-[0.9375rem]">

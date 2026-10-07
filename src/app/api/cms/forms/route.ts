@@ -10,6 +10,7 @@ import {
   readSubmissionsByEmail,
 } from "@/lib/cms/server/forms.server";
 import { applyFormPatch, parseFormPatch } from "@/lib/cms/server/form-patch.server";
+import { withQuoteItemImages } from "@/lib/cms/server/quote-items.server";
 import type { FormSubmission } from "@/lib/cms/types";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 import { isValidEmail } from "@/lib/security/email";
@@ -43,8 +44,9 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   if (id) {
-    const item = await readFormSubmissionById(id);
-    if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const stored = await readFormSubmissionById(id);
+    if (!stored) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const item = await withQuoteItemImages(stored);
     const related = leadEmail(item)
       ? await readSubmissionsByEmail(leadEmail(item), item.id)
       : [];

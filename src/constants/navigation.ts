@@ -36,7 +36,7 @@ export function getFooterNavigation(t: Translator) {
     ],
     shop: [
       { label: t("footer.shop"), href: "/shop" },
-      { label: t("footer.askForQuotation"), href: "/shop?quote=open" },
+      { label: t("footer.askForQuotation"), href: "/checkout" },
     ],
     legal: [
       { label: t("footer.privacy"), href: "/privacy" },

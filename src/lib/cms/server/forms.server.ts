@@ -302,6 +302,68 @@ export async function addFormSubmissionDurable(
   return entry;
 }
 
+const QUOTE_REFERENCE_ATTEMPTS = 5;
+
+export function quoteReferencePrefix(countryCode: string) {
+  return `OBOYA-${countryCode.trim().toUpperCase()}-`;
+}
+
+function quoteSequence(reference: unknown, prefix: string): number {
+  const value = String(reference ?? "");
+  if (!value.startsWith(prefix)) return 0;
+  const n = Number(value.slice(prefix.length));
+  return Number.isInteger(n) && n > 0 ? n : 0;
+}
+
+async function highestQuoteSequence(prefix: string): Promise<number> {
+  if (isSupabaseConfigured()) {
+    const client = requireWriteClient();
+    const { data, error } = await client
+      .from("cms_form_submissions")
+      .select("ref:data->>referenceId")
+      .eq("type", "quote")
+      .like("data->>referenceId", `${prefix}%`);
+    if (error) throw new Error(error.message);
+    return ((data as unknown as Array<{ ref: string | null }> | null) ?? []).reduce(
+      (max, row) => Math.max(max, quoteSequence(row.ref, prefix)),
+      0
+    );
+  }
+  await hydrateFromDisk();
+  return getFromMemory("quote").reduce(
+    (max, entry) => Math.max(max, quoteSequence(entry.data.referenceId, prefix)),
+    0
+  );
+}
+
+/**
+ * Stores a quote with a per-market sequential reference (OBOYA-BR-1, OBOYA-BR-2, OBOYA-US-1…).
+ * The unique index on data->>referenceId turns a concurrent collision into a retry.
+ */
+export async function addQuoteSubmissionWithReference(
+  countryCode: string,
+  data: Record<string, unknown>
+): Promise<{ entry: FormSubmission; referenceId: string }> {
+  const prefix = quoteReferencePrefix(countryCode);
+  let lastError: unknown = null;
+  for (let attempt = 0; attempt < QUOTE_REFERENCE_ATTEMPTS; attempt += 1) {
+    const referenceId = `${prefix}${(await highestQuoteSequence(prefix)) + 1}`;
+    try {
+      const entry = await addFormSubmissionDurable({
+        type: "quote",
+        status: "new",
+        data: { ...data, referenceId },
+      });
+      return { entry, referenceId };
+    } catch (error) {
+      lastError = error;
+      const message = error instanceof Error ? error.message : "";
+      if (!/duplicate key|23505|unique/i.test(message)) throw error;
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("Could not allocate quote reference");
+}
+
 function patchToRow(patch: FormSubmissionPatch, now: string) {
   const row: Record<string, unknown> = { updated_at: now, last_activity_at: now };
   if (patch.status) row.status = patch.status;

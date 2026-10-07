@@ -34,12 +34,89 @@ import { cn } from "@/lib/utils";
 export type StaffOption = Pick<CmsUser, "id" | "name">;
 
 type QuoteLineItem = {
+  productId?: string;
+  variantId?: string | null;
+  variantName?: string | null;
+  variantColor?: string | null;
+  image?: string;
   sku?: string;
   name?: string;
   quantity?: number;
   unitPrice?: number;
   lineTotal?: number;
 };
+
+function QuoteLineRow({ item, currency }: { item: QuoteLineItem; currency: string }) {
+  const t = useTranslations("admin.leads.detail");
+  const quantity = Number(item.quantity ?? 1);
+  const unitPrice = Number(item.unitPrice ?? 0);
+  const lineTotal = Number(item.lineTotal ?? unitPrice * quantity);
+  const variantSuffix = item.variantName ? ` (${item.variantName})` : "";
+  const title =
+    item.name && variantSuffix && item.name.endsWith(variantSuffix)
+      ? item.name.slice(0, -variantSuffix.length)
+      : (item.name ?? item.sku ?? "—");
+
+  return (
+    <li className="grid grid-cols-[4rem_minmax(0,1fr)] items-center gap-3 bg-white p-3 sm:grid-cols-[4.5rem_minmax(0,1fr)_auto]">
+      <div className="relative size-16 overflow-hidden rounded-md bg-oboya-soft-white sm:size-[4.5rem]">
+        {item.image ? (
+          // eslint-disable-next-line @next/next/no-img-element -- catalog URLs from CMS storage
+          <img src={item.image} alt={title} className="size-full object-contain p-1" loading="lazy" />
+        ) : null}
+      </div>
+      <div className="min-w-0 space-y-1">
+        <p className="truncate text-sm font-semibold text-oboya-blue-dark">{title}</p>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          {item.sku ? (
+            <span>
+              {t("sku")}: <span className="font-medium text-oboya-blue-dark">{item.sku}</span>
+            </span>
+          ) : null}
+          {item.variantName ? (
+            <span className="inline-flex items-center gap-1.5">
+              {t("color")}:
+              {item.variantColor ? (
+                <span
+                  className="size-3 rounded-full ring-1 ring-border"
+                  style={{ backgroundColor: item.variantColor }}
+                  aria-hidden
+                />
+              ) : null}
+              <span className="font-medium text-oboya-blue-dark">{item.variantName}</span>
+            </span>
+          ) : null}
+        </div>
+        <p className="text-xs text-muted-foreground sm:hidden">
+          {quantity.toLocaleString()} × {formatShopPrice(unitPrice, currency)} ={" "}
+          <span className="font-semibold text-oboya-blue-dark">
+            {formatShopPrice(lineTotal, currency)}
+          </span>
+        </p>
+      </div>
+      <dl className="hidden grid-cols-3 gap-5 text-right text-xs sm:grid">
+        <div>
+          <dt className="text-muted-foreground">{t("quantity")}</dt>
+          <dd className="mt-0.5 font-medium tabular-nums text-oboya-blue-dark">
+            {quantity.toLocaleString()}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">{t("unitPrice")}</dt>
+          <dd className="mt-0.5 font-medium tabular-nums text-oboya-blue-dark">
+            {formatShopPrice(unitPrice, currency)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">{t("lineTotal")}</dt>
+          <dd className="mt-0.5 font-semibold tabular-nums text-oboya-blue-dark">
+            {formatShopPrice(lineTotal, currency)}
+          </dd>
+        </div>
+      </dl>
+    </li>
+  );
+}
 
 function leadMeta(row: FormSubmission) {
   const raw = row.data.meta;
@@ -160,6 +237,14 @@ export function LeadDetail({
           <p className="text-sm text-muted-foreground">
             {leadCompany(submission) || leadCountry(submission) || email}
           </p>
+          {submission.type === "quote" && submission.data.referenceId ? (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {t("detail.reference")}:{" "}
+              <span className="font-mono font-semibold text-oboya-blue-dark">
+                {String(submission.data.referenceId)}
+              </span>
+            </p>
+          ) : null}
         </div>
         {compact ? (
           <Link href={`${baseHref}/${submission.id}`} className="text-xs font-medium text-oboya-blue-light hover:underline">
@@ -258,21 +343,30 @@ export function LeadDetail({
       </section>
 
       {items.length > 0 ? (
-        <section className="space-y-2">
-          <h3 className="text-sm font-semibold text-oboya-blue-dark">{t("detail.lineItems")}</h3>
-          <ul className="space-y-1 text-sm">
+        <section className="space-y-3">
+          <div className="flex items-baseline justify-between gap-3">
+            <h3 className="text-sm font-semibold text-oboya-blue-dark">{t("detail.lineItems")}</h3>
+            <span className="text-xs text-muted-foreground">
+              {t("detail.itemsCount", { count: items.length })}
+            </span>
+          </div>
+          <ul className="divide-y divide-border/60 overflow-hidden rounded-lg border border-border/60">
             {items.map((item, i) => (
-              <li key={`${item.sku ?? i}`} className="flex justify-between gap-3">
-                <span>
-                  {item.name ?? item.sku} × {item.quantity ?? 1}
-                </span>
-                <span>{formatShopPrice(Number(item.lineTotal ?? 0), currency)}</span>
-              </li>
+              <QuoteLineRow
+                key={`${item.sku ?? item.productId ?? i}-${item.variantId ?? i}`}
+                item={item}
+                currency={currency}
+              />
             ))}
           </ul>
-          <p className="text-sm font-medium">
-            {t("detail.estimatedTotal")}: {formatShopPrice(Number(submission.data.total ?? 0), currency)}
-          </p>
+          <div className="flex items-center justify-between rounded-lg bg-oboya-soft-white px-4 py-3">
+            <span className="text-sm font-medium text-oboya-blue-dark">
+              {t("detail.estimatedTotal")}
+            </span>
+            <span className="text-base font-semibold text-oboya-green">
+              {formatShopPrice(Number(submission.data.total ?? 0), currency)}
+            </span>
+          </div>
         </section>
       ) : null}
 

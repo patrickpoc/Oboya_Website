@@ -234,6 +234,15 @@ export function LeadsInbox({
     ...(type === "quote"
       ? [
           {
+            key: "reference",
+            header: t("detail.reference"),
+            cell: (row: FormSubmission) => (
+              <span className="block max-w-[11rem] truncate whitespace-nowrap font-mono text-xs">
+                {String(row.data.referenceId ?? "—")}
+              </span>
+            ),
+          },
+          {
             key: "total",
             header: t("columns.total"),
             cell: (row: FormSubmission) =>

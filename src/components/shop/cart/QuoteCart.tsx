@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ShoppingBag } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { useShop } from "@/contexts/ShopContext";
 import { CartItemRow } from "@/components/shop/cart/CartItem";
 import { QuoteCartMinimizedButton } from "@/components/shop/cart/QuoteCartMinimizedButton";
@@ -16,6 +17,8 @@ import { formatShopPrice } from "@/lib/shop/format-price";
 
 export function QuoteCart() {
   const t = useTranslations("shop");
+  const tCheckout = useTranslations("checkout");
+  const router = useRouter();
   const {
     countryCode,
     currency,
@@ -26,7 +29,6 @@ export function QuoteCart() {
     getLineItems,
     updateQuantity,
     removeItem,
-    setQuoteModalOpen,
   } = useShop();
 
   if (!countryCode || !currency) return null;
@@ -108,13 +110,16 @@ export function QuoteCart() {
               </p>
               <button
                 type="button"
-                onClick={() => setQuoteModalOpen(true)}
+                onClick={() => {
+                  setCartOpen(false);
+                  router.push("/checkout");
+                }}
                 className={buttonVariants({
                   className:
                     "mt-4 w-full rounded-full bg-oboya-green text-white hover:bg-oboya-green/90",
                 })}
               >
-                {t("requestQuotation")}
+                {tCheckout("goToQuotation")}
               </button>
             </div>
           )}

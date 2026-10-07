@@ -492,6 +492,52 @@
       "p6": "Sunbelt Supply"
     }
   },
+  "checkout": {
+    "metaTitle": "我的报价",
+    "metaDescription": "查看报价并发送给 Oboya 商务团队。网站不收取付款。",
+    "title": "我的报价",
+    "greeting": "您的市场是 {country}。",
+    "greetingNoMarket": "请先在商店中选择市场以查看当地价格。",
+    "freightTitle": "计算运费",
+    "freightHint": "输入邮政编码以查看配送方式和时效。",
+    "freightUnavailable": "运费计算暂未开放。",
+    "freightUnknownPostal": "我不知道邮政编码",
+    "postalLabel": "邮政编码",
+    "cepLabel": "邮政编码 (CEP)",
+    "calculate": "计算",
+    "couponTitle": "有优惠码？",
+    "couponPlaceholder": "在此输入代码",
+    "apply": "使用",
+    "couponUnavailable": "优惠码暂未开放。",
+    "summaryTitle": "报价摘要",
+    "subtotal": "小计（{count, plural, other {# 件}}）",
+    "discounts": "折扣",
+    "freight": "运费",
+    "freightPrompt": "计算邮政编码",
+    "estimatedTotal": "预估合计",
+    "totalNote": "此金额为估算。最终价格由当地销售团队确认。",
+    "requestQuotation": "申请报价",
+    "continueShopping": "继续选购",
+    "trust": "您的数据是安全的，仅用于本次报价。",
+    "itemsTitle": "报价产品",
+    "itemCount": "{count, plural, other {# 件}}",
+    "unitPrice": "单价",
+    "lineSubtotal": "小计",
+    "color": "颜色",
+    "moq": "起订量：{count, plural, other {# 件}}",
+    "upsellTitle": "查看更多产品",
+    "upsellHint": "其他可能适合您种植的产品。",
+    "seeAll": "查看全部",
+    "upsellPrev": "上一组产品",
+    "upsellNext": "下一组产品",
+    "emptyTitle": "您的报价是空的",
+    "emptyBody": "请先在商店中添加产品，再申请报价。",
+    "backToShop": "返回商店",
+    "goToQuotation": "查看报价",
+    "submitting": "正在发送…",
+    "remove": "移除",
+    "quotesDisabled": "报价申请已关闭。"
+  },
   "shop": {
     "eyebrow": "B2B 商城",
     "title": "国际产品展示",
@@ -518,11 +564,11 @@
     "checkoutTitle": "Request a quotation",
     "checkoutDescription": "No payment is collected online. Submit your request to the local commercial team.",
     "orderSummary": "Order summary",
-    "company": "Company",
-    "country": "Country",
-    "phone": "Phone",
-    "email": "Email",
-    "notes": "Additional notes",
+    "company": "公司",
+    "country": "国家",
+    "phone": "电话",
+    "email": "电子邮箱",
+    "notes": "补充说明",
     "privacyNotice": "我们使用这些信息准备报价（LGPD 第 7 条 V/IX — 缔约前程序与合法利益）。",
     "privacyLink": "隐私政策",
     "privacyAccept": "我已阅读隐私说明，并同意为本次报价请求处理我的数据。",
@@ -638,7 +684,7 @@
     "productDescriptionFallback": "Professional-grade horticulture solution designed for commercial growers and distributors. Contact your local office for detailed technical information and market-specific availability.",
     "productInformation": "产品信息",
     "viewFullDetails": "查看完整详情",
-    "contactName": "Contact name",
+    "contactName": "联系人",
     "submitting": "Submitting…",
     "continueBrowsing": "Continue browsing",
     "rfqError": "We could not submit your request. Please try again or contact your local office.",
@@ -659,7 +705,11 @@
       "limited": "Limited",
       "on_request": "On request"
     },
-    "metaTitle": "商店"
+    "metaTitle": "商店",
+    "quoteSentTitle": "询价请求已发送！",
+    "quoteSentBody": "感谢您的询价。我们的销售团队将审核您的请求并尽快与您联系。",
+    "quoteSentReference": "您的编号",
+    "quoteSentClose": "继续浏览"
   },
   "blog": {
     "eyebrow": "博客",
@@ -1459,6 +1509,7 @@
       "specifications": "规格",
       "currencies": "货币",
       "shopConfig": "商店配置",
+      "checkout": "结账页",
       "globalPresence": "全球布局",
       "countries": "国家",
       "offices": "办事处",
@@ -1779,9 +1830,9 @@
         "defaultColorLabel": "{name}（默认）",
         "defaultColorFallback": "默认",
         "colorsTitle": "颜色变体",
-        "colorsDescription": "产品默认颜色始终是商店中的第一个色板。其他颜色显示在其后。无选项的产品请保持其他颜色为空。",
+        "colorsDescription": "产品默认颜色是商店中的第一个色板，除非将其他颜色设为优先显示。无选项的产品请保持其他颜色为空。",
         "defaultProductColor": "产品默认颜色",
-        "defaultProductColorHint": "使用产品图库图片、基础价格和产品 SKU。存在其他颜色时优先显示。",
+        "defaultProductColorHint": "使用产品图库图片、基础价格和产品 SKU。存在其他颜色时默认优先显示。",
         "swatchColor": "色板颜色",
         "defaultColorName": "默认颜色名称",
         "defaultColorNamePlaceholder": "例如 Black / Preto",
@@ -1853,7 +1904,10 @@
         "colorHex": "颜色十六进制",
         "pickColor": "从屏幕取色",
         "pickColorTitle": "从页面取色（可自由滚动后点击）",
-        "eyedropperUnsupported": "此浏览器不支持取色器。"
+        "eyedropperUnsupported": "此浏览器不支持取色器。",
+        "featuredColor": "在商店中优先显示",
+        "featuredColorBadge": "商店默认",
+        "featuredColorHint": "选择在商店卡片、产品页面和结账推荐中优先显示并默认选中的颜色。"
       },
       "stubs": {
         "brands": {
@@ -2887,6 +2941,18 @@
       "alreadyExists": "该货币已存在。",
       "toggleAria": "为 {country} 切换 {code}"
     },
+    "checkout": {
+      "title": "报价页面",
+      "description": "编辑文案、版块开关、推荐产品和 SEO。运费、优惠码和付款尚未启用。",
+      "save": "保存页面",
+      "saved": "报价页面已保存。",
+      "loadFailed": "无法加载报价页面。",
+      "saveFailed": "无法保存报价页面。",
+      "freightTitle": "运费",
+      "couponsTitle": "优惠码",
+      "paymentsTitle": "付款",
+      "notEnabled": "尚未启用。此区域预留给以后的接入。"
+    },
     "shopConfig": {
       "title": "商店配置",
       "description": "配置目录默认值、询价表单、店面横幅与默认市场。",
@@ -3232,7 +3298,14 @@
           "reply": "已记录回复",
           "pii": "个人数据操作",
           "merge": "已合并"
-        }
+        },
+        "reference": "编号",
+        "sku": "SKU",
+        "color": "颜色",
+        "quantity": "数量",
+        "unitPrice": "单价",
+        "lineTotal": "小计",
+        "itemsCount": "{count} 件商品"
       }
     }
   },

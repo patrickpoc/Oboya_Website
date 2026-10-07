@@ -19,7 +19,7 @@ export const PRIVACY_CONTACT: LegalContact = {
   legalEntity: "OBOYA HORTICULTURE SOLUTIONS TRADING FZCO",
   registeredAddress: "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis",
   registrationNumber: "",
-  privacyEmail: "Robert@shopquip.se",
+  privacyEmail: "info@oboya-horticulture.com",
 };
 
 export const PRIVACY_SECTIONS: LegalSection[] = [
@@ -703,7 +703,7 @@ export function getPrivacyDocument(locale: string) {
     intro:
       locale === "es" || locale === "zh-CN"
         ? [
-            "The controlling versions of this Privacy Policy are English and Portuguese (Brazil). This page is shown in English; contact Robert@shopquip.se if you need assistance.",
+            "The controlling versions of this Privacy Policy are English and Portuguese (Brazil). This page is shown in English; contact info@oboya-horticulture.com if you need assistance.",
           ]
         : undefined,
   };

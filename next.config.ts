@@ -43,7 +43,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: `/${localePattern}/shop/checkout`,
-        destination: "/:locale/shop?quote=open",
+        destination: "/:locale/checkout",
         permanent: false,
       },
     ];

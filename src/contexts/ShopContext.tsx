@@ -268,9 +268,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const pendingSoftOpen = useRef<string | null>(null);
   const isShopListingRoute =
     pathname === "/shop" || pathname.endsWith("/shop");
-  /** Catalog + cart overlays: listing, PDP, cart, checkout. */
+  const isCheckoutRoute =
+    pathname === "/checkout" || pathname.endsWith("/checkout");
+  /** Catalog + cart overlays: listing, PDP, cart, and the quotation page. */
   const isShopAreaRoute =
-    isShopListingRoute || /(?:^|\/)shop\//.test(pathname);
+    isShopListingRoute ||
+    isCheckoutRoute ||
+    /(?:^|\/)shop\//.test(pathname);
 
   // Persist cart/country from localStorage once
   useEffect(() => {
@@ -472,6 +476,12 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         (enteringShop || pendingSoftOpen.current === pendingProduct);
       const rfqEnabled = shopConfigRef.current.rfq.enabled;
       const pageChunk = shopConfigRef.current.catalog.pageSize;
+
+      // Bookmarked ?quote=open used to open the RFQ modal. The quotation page is the only send step.
+      if (rfqEnabled && urlState.quote) {
+        router.replace("/checkout");
+        return;
+      }
 
       if (softOpenTimer.current) {
         clearTimeout(softOpenTimer.current);
@@ -1071,8 +1081,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           rfqStatus: "success",
           rfqReferenceId: referenceId,
           items: [],
-          // Keep modal open so RfqSuccess is visible.
-          isQuoteModalOpen: true,
+          isQuoteModalOpen: false,
         }));
         return referenceId;
       } catch {

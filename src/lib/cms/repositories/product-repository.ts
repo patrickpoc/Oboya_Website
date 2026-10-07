@@ -60,6 +60,8 @@ function withDefaults(p: ShopProduct): CmsProduct {
     defaultColorName: normalizeLocalizedColorName(
       existing.defaultColorName ?? p.defaultColorName
     ),
+    featuredColorId:
+      typeof existing.featuredColorId === "string" ? existing.featuredColorId : "",
     colorVariants: normalizeColorVariants(p.colorVariants ?? existing.colorVariants),
     name: existing.name ?? normalizeLocalizedById(p.id),
     shortDescription: existing.shortDescription ?? emptyLocalizedString(),
@@ -122,10 +124,12 @@ export function duplicateCmsProduct(id: string): CmsProduct | null {
   });
   const newSku = buildUniqueDuplicateSku(original.sku, existingSkus);
   existingSkus.add(newSku.toLowerCase());
+  let featuredColorId = original.featuredColorId ?? "";
   const colorVariants = (original.colorVariants ?? []).map((variant) => {
     const base = variant.sku?.trim() || `${newSku}-COLOR`;
     const variantSku = buildUniqueDuplicateSku(base, existingSkus);
     existingSkus.add(variantSku.toLowerCase());
+    if (featuredColorId === variant.id) featuredColorId = variantSku;
     return {
       ...variant,
       sku: variantSku,
@@ -137,6 +141,7 @@ export function duplicateCmsProduct(id: string): CmsProduct | null {
     id: newSku,
     sku: newSku,
     colorVariants,
+    featuredColorId,
     status: "draft",
     deletedAt: null,
     purgeAt: null,
@@ -167,6 +172,7 @@ export function saveCmsProduct(product: CmsProduct): CmsProduct {
     enabledCountries: product.enabledCountries ?? { ...product.availability },
     defaultColor: product.defaultColor ?? "",
     defaultColorName: normalizeLocalizedColorName(product.defaultColorName),
+    featuredColorId: product.featuredColorId ?? "",
     images: product.images?.length ? product.images : [""],
     imageColorIds: normalizeImageColorIds(
       product.imageColorIds,

@@ -92,7 +92,13 @@ export default function LeadDetailPage() {
             staff={staff}
             canEdit={can("forms", "edit")}
             canDelete={can("forms", "delete")}
-            onUpdated={(next) => setItem(next)}
+            onUpdated={(next) =>
+              setItem((prev) =>
+                prev && prev.id === next.id && Array.isArray(prev.data.items)
+                  ? { ...next, data: { ...next.data, items: prev.data.items } }
+                  : next
+              )
+            }
           />
         </div>
       ) : null}

@@ -95,6 +95,7 @@ export const adminNavigation: AdminNavItem[] = [
       { labelKey: "specifications", label: "Specifications", href: "/admin/marketplace/specifications" },
       { labelKey: "currencies", label: "Currencies", href: "/admin/marketplace/currencies" },
       { labelKey: "shopConfig", label: "Shop Config", href: "/admin/marketplace/shop-config" },
+      { labelKey: "checkout", label: "Checkout", href: "/admin/marketplace/checkout" },
     ],
   },
   {

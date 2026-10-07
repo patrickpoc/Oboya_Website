@@ -142,8 +142,27 @@ export function buildDefaultColorVariant(
 }
 
 /**
- * Swatches for storefront: default product color first, then additional
- * variants. Empty when the product has no additional color options.
+ * Storefront display color: the admin-chosen `featuredColorId` when it still
+ * exists, otherwise the base color.
+ */
+export function getFeaturedColorVariantId(
+  product: Pick<ShopProduct, "colorVariants" | "featuredColorId">
+): string {
+  const featured = product.featuredColorId?.trim();
+  if (
+    featured &&
+    !isDefaultColorVariantId(featured) &&
+    (product.colorVariants ?? []).some((variant) => variant.id === featured)
+  ) {
+    return featured;
+  }
+  return DEFAULT_COLOR_VARIANT_ID;
+}
+
+/**
+ * Swatches for storefront: the featured color first, then the base color and
+ * the remaining variants in admin order. Empty when the product has no
+ * additional color options.
  */
 export function getDisplayColorVariants(
   product: Pick<
@@ -155,10 +174,15 @@ export function getDisplayColorVariants(
     | "defaultColorName"
     | "images"
     | "prices"
+    | "featuredColorId"
   >
 ): ProductColorVariant[] {
   if (!hasColorVariants(product)) return [];
-  return [buildDefaultColorVariant(product), ...sortedColorVariants(product)];
+  const all = [buildDefaultColorVariant(product), ...sortedColorVariants(product)];
+  const featuredId = getFeaturedColorVariantId(product);
+  if (featuredId === DEFAULT_COLOR_VARIANT_ID) return all;
+  const featured = all.find((variant) => variant.id === featuredId);
+  return featured ? [featured, ...all.filter((variant) => variant !== featured)] : all;
 }
 
 export function getActiveVariant(

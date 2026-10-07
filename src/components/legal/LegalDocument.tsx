@@ -54,7 +54,7 @@ function ContactBlock({ contact }: { contact: LegalContact }) {
   }
   rows.push({
     label: "Legal Contact",
-    value: contact.privacyEmail || "Robert@shopquip.se",
+    value: contact.privacyEmail || "info@oboya-horticulture.com",
   });
   if (contact.website) {
     rows.push({ label: "Website", value: contact.website });

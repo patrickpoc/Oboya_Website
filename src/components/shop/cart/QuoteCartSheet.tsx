@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { useShop } from "@/contexts/ShopContext";
 import { useOverlayA11y } from "@/hooks/use-overlay-a11y";
 import { CartItemRow } from "@/components/shop/cart/CartItem";
@@ -46,6 +47,8 @@ function useIsLgUp() {
 
 export function QuoteCartSheet() {
   const t = useTranslations("shop");
+  const tCheckout = useTranslations("checkout");
+  const router = useRouter();
   const {
     isCartOpen,
     setCartOpen,
@@ -55,7 +58,6 @@ export function QuoteCartSheet() {
     getLineItems,
     updateQuantity,
     removeItem,
-    setQuoteModalOpen,
   } = useShop();
   const panelRef = useRef<HTMLDivElement>(null);
   const handleClose = useCallback(() => setCartOpen(false), [setCartOpen]);
@@ -154,14 +156,14 @@ export function QuoteCartSheet() {
                     type="button"
                     onClick={() => {
                       setCartOpen(false);
-                      setQuoteModalOpen(true);
+                      router.push("/checkout");
                     }}
                     className={buttonVariants({
                       className:
                         "min-h-11 w-full rounded-full bg-oboya-green text-white hover:bg-oboya-green/90",
                     })}
                   >
-                    {t("requestQuotation")}
+                    {tCheckout("goToQuotation")}
                   </button>
                 </>
               ) : null}

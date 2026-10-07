@@ -7,7 +7,7 @@ export const siteConfig = {
   locale: "en",
   company: {
     address: "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis",
-    email: "Robert@shopquip.se",
+    email: "info@oboya-horticulture.com",
     phone: "+86 18669728621",
   },
   social: {

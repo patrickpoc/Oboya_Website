@@ -56,6 +56,7 @@ export function createEmptyCmsProduct(seed?: {
     relatedProductIds: [],
     defaultColor: "",
     defaultColorName: { en: "", "pt-BR": "", es: "", "zh-CN": "" },
+    featuredColorId: "",
     colorVariants: [],
     name: { en: "", "pt-BR": "", es: "", "zh-CN": "" },
     shortDescription: { en: "", "pt-BR": "", es: "", "zh-CN": "" },

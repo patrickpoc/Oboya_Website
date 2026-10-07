@@ -848,7 +848,7 @@ export const TERMS_CONTACT = {
   website: "https://www.oboya-horticulture.com",
   legalEntity: "OBOYA HORTICULTURE SOLUTIONS TRADING FZCO",
   registeredAddress: "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis",
-  privacyEmail: "Robert@shopquip.se",
+  privacyEmail: "info@oboya-horticulture.com",
   privacyNote:
     "For questions concerning personal data and privacy, please refer to the applicable Privacy Policy and legal contact information.",
 };

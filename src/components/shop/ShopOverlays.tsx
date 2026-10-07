@@ -3,7 +3,6 @@
 import { ProductDrawer } from "@/components/shop/drawers/ProductDrawer";
 import { QuoteCart } from "@/components/shop/cart/QuoteCart";
 import { QuoteCartFab, QuoteCartSheet } from "@/components/shop/cart/QuoteCartSheet";
-import { QuoteModal } from "@/components/shop/quote/QuoteModal";
 import { AddToQuoteDialog } from "@/components/shop/quote/AddToQuoteDialog";
 import { useShop } from "@/contexts/ShopContext";
 
@@ -20,7 +19,6 @@ export function ShopOverlays() {
           <QuoteCart />
           <QuoteCartFab />
           <QuoteCartSheet />
-          <QuoteModal />
           <AddToQuoteDialog />
         </>
       ) : null}

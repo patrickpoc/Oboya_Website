@@ -492,6 +492,52 @@
       "p6": "Sunbelt Supply"
     }
   },
+  "checkout": {
+    "metaTitle": "Mi cotización",
+    "metaDescription": "Revise su cotización y envíela al equipo comercial de Oboya. No se cobra ningún pago en línea.",
+    "title": "Mi cotización",
+    "greeting": "Su mercado es {country}.",
+    "greetingNoMarket": "Elija un mercado en la tienda para ver precios locales.",
+    "freightTitle": "Calcular flete",
+    "freightHint": "Ingrese su código postal para ver opciones de entrega y plazos.",
+    "freightUnavailable": "El cálculo de flete aún no está disponible.",
+    "freightUnknownPostal": "No sé mi código postal",
+    "postalLabel": "Código postal",
+    "cepLabel": "Código postal (CEP)",
+    "calculate": "Calcular",
+    "couponTitle": "¿Tiene un cupón?",
+    "couponPlaceholder": "Ingrese el código aquí",
+    "apply": "Aplicar",
+    "couponUnavailable": "Los cupones aún no están disponibles.",
+    "summaryTitle": "Resumen de la cotización",
+    "subtotal": "Subtotal ({count, plural, one {# artículo} other {# artículos}})",
+    "discounts": "Descuentos",
+    "freight": "Flete",
+    "freightPrompt": "Calcular código postal",
+    "estimatedTotal": "Total estimado",
+    "totalNote": "Este importe es una estimación. El equipo comercial confirma el precio final.",
+    "requestQuotation": "Solicitar cotización",
+    "continueShopping": "Seguir comprando",
+    "trust": "Sus datos están seguros y se usarán solo para esta cotización.",
+    "itemsTitle": "Productos de la cotización",
+    "itemCount": "{count, plural, one {# artículo} other {# artículos}}",
+    "unitPrice": "precio unitario",
+    "lineSubtotal": "Subtotal",
+    "color": "Color",
+    "moq": "MOQ: {count, plural, one {# unidad} other {# unidades}}",
+    "upsellTitle": "Ver más productos",
+    "upsellHint": "Otros productos que pueden interesar a su cultivo.",
+    "seeAll": "Ver todos",
+    "upsellPrev": "Productos anteriores",
+    "upsellNext": "Productos siguientes",
+    "emptyTitle": "Su cotización está vacía",
+    "emptyBody": "Agregue productos en la tienda para solicitar una cotización.",
+    "backToShop": "Volver a la tienda",
+    "goToQuotation": "Ver cotización",
+    "submitting": "Enviando…",
+    "remove": "Quitar",
+    "quotesDisabled": "Las solicitudes de cotización están desactivadas."
+  },
   "shop": {
     "eyebrow": "Tienda B2B",
     "title": "Escaparate internacional de productos",
@@ -518,11 +564,11 @@
     "checkoutTitle": "Request a quotation",
     "checkoutDescription": "No payment is collected online. Submit your request to the local commercial team.",
     "orderSummary": "Order summary",
-    "company": "Company",
-    "country": "Country",
-    "phone": "Phone",
-    "email": "Email",
-    "notes": "Additional notes",
+    "company": "Empresa",
+    "country": "País",
+    "phone": "Teléfono",
+    "email": "Correo electrónico",
+    "notes": "Notas adicionales",
     "privacyNotice": "Usamos esta información para preparar una cotización (LGPD art. 7 V/IX — trámites precontractuales e interés legítimo).",
     "privacyLink": "Política de Privacidad",
     "privacyAccept": "He leído el aviso de privacidad y acepto el tratamiento de mis datos para esta solicitud de cotización.",
@@ -638,7 +684,7 @@
     "productDescriptionFallback": "Professional-grade horticulture solution designed for commercial growers and distributors. Contact your local office for detailed technical information and market-specific availability.",
     "productInformation": "Información del producto",
     "viewFullDetails": "Ver detalles completos",
-    "contactName": "Contact name",
+    "contactName": "Nombre de contacto",
     "submitting": "Submitting…",
     "continueBrowsing": "Continue browsing",
     "rfqError": "We could not submit your request. Please try again or contact your local office.",
@@ -659,7 +705,11 @@
       "limited": "Limited",
       "on_request": "On request"
     },
-    "metaTitle": "Tienda"
+    "metaTitle": "Tienda",
+    "quoteSentTitle": "¡Solicitud de cotización enviada!",
+    "quoteSentBody": "Gracias. Nuestro equipo comercial revisará su solicitud y se pondrá en contacto pronto.",
+    "quoteSentReference": "Su referencia",
+    "quoteSentClose": "Seguir navegando"
   },
   "blog": {
     "eyebrow": "Blog",
@@ -1459,6 +1509,7 @@
       "specifications": "Especificaciones",
       "currencies": "Monedas",
       "shopConfig": "Config. de tienda",
+      "checkout": "Checkout",
       "globalPresence": "Presencia global",
       "countries": "Países",
       "offices": "Oficinas",
@@ -1779,9 +1830,9 @@
         "defaultColorLabel": "{name} (predeterminado)",
         "defaultColorFallback": "Predeterminado",
         "colorsTitle": "Variaciones de color",
-        "colorsDescription": "El color predeterminado del producto siempre es la primera muestra en la tienda. Los colores adicionales aparecen después. Déjalos vacíos si el producto no tiene opciones.",
+        "colorsDescription": "El color predeterminado del producto es la primera muestra en la tienda, salvo que se marque otro color para mostrarse primero. Déjalos vacíos si el producto no tiene opciones.",
         "defaultProductColor": "Color predeterminado del producto",
-        "defaultProductColorHint": "Usa la imagen de la galería, precios base y SKU del producto. Se muestra primero cuando hay colores adicionales.",
+        "defaultProductColorHint": "Usa la imagen de la galería, precios base y SKU del producto. Se muestra primero por defecto cuando hay colores adicionales.",
         "swatchColor": "Color de muestra",
         "defaultColorName": "Nombre del color predeterminado",
         "defaultColorNamePlaceholder": "ej.: Black / Preto",
@@ -1853,7 +1904,10 @@
         "colorHex": "Hex del color",
         "pickColor": "Elegir color de la pantalla",
         "pickColorTitle": "Elegir color de la página (desplázate libremente y haz clic)",
-        "eyedropperUnsupported": "El gotero no es compatible con este navegador."
+        "eyedropperUnsupported": "El gotero no es compatible con este navegador.",
+        "featuredColor": "Mostrar primero en la tienda",
+        "featuredColorBadge": "Predeterminado en la tienda",
+        "featuredColorHint": "Elija qué color aparece primero y preseleccionado en las tarjetas de la tienda, la página del producto y las sugerencias del checkout."
       },
       "stubs": {
         "brands": {
@@ -2887,6 +2941,18 @@
       "alreadyExists": "Esta moneda ya existe.",
       "toggleAria": "Alternar {code} para {country}"
     },
+    "checkout": {
+      "title": "Página de cotización",
+      "description": "Edite los textos, la visibilidad de las secciones, los productos sugeridos y el SEO. Flete, cupones y pagos no están activos.",
+      "save": "Guardar página",
+      "saved": "Página de cotización guardada.",
+      "loadFailed": "No se pudo cargar la página de cotización.",
+      "saveFailed": "No se pudo guardar la página de cotización.",
+      "freightTitle": "Flete",
+      "couponsTitle": "Cupones",
+      "paymentsTitle": "Pagos",
+      "notEnabled": "Aún no activado. Esta área queda reservada para una integración futura."
+    },
     "shopConfig": {
       "title": "Configuración de la tienda",
       "description": "Configura el catálogo, el formulario de cotización, el banner y el mercado por defecto.",
@@ -3232,7 +3298,14 @@
           "reply": "Respuesta registrada",
           "pii": "Acción de datos personales",
           "merge": "Combinado"
-        }
+        },
+        "reference": "Referencia",
+        "sku": "SKU",
+        "color": "Color",
+        "quantity": "Cant.",
+        "unitPrice": "Precio unitario",
+        "lineTotal": "Total de línea",
+        "itemsCount": "{count, plural, one {# artículo} other {# artículos}}"
       }
     }
   },

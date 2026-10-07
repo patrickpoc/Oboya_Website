@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { addFormSubmissionDurable } from "@/lib/cms/server/forms.server";
+import { addQuoteSubmissionWithReference } from "@/lib/cms/server/forms.server";
 import { readProducts } from "@/lib/cms/server/products.server";
 import { readMarketplaceCurrencies } from "@/lib/cms/server/marketplace-config.server";
 import { readMapLocations } from "@/lib/map-locations.server";
@@ -8,6 +8,7 @@ import {
   getActiveVariant,
   getVariantDisplayName,
   hasColorVariants,
+  resolveVariantImage,
   resolveVariantPrice,
   resolveVariantSku,
   sortedColorVariants,
@@ -23,7 +24,7 @@ import { isServiceRoleConfigured } from "@/lib/supabase/admin";
 const COMPANY_MAX = 120;
 const NAME_MAX = 120;
 const PHONE_MAX = 32;
-const MESSAGE_MAX = 2000;
+const MESSAGE_MAX = 500;
 const ITEMS_MAX = 50;
 
 function asString(value: unknown): string {
@@ -147,6 +148,8 @@ export async function POST(request: Request) {
       productId: string;
       variantId: string | null;
       variantName: string | null;
+      variantColor: string | null;
+      image: string;
       sku: string;
       name: string;
       quantity: number;
@@ -243,6 +246,8 @@ export async function POST(request: Request) {
         productId: product.id,
         variantId,
         variantName: hasColorVariants(product) ? variantName : null,
+        variantColor: displayVariant?.color ?? null,
+        image: resolveVariantImage(product, displayVariant),
         sku: resolveVariantSku(product, displayVariant),
         name:
           hasColorVariants(product) && variantName
@@ -258,30 +263,24 @@ export async function POST(request: Request) {
       (sum, item) => sum + item.lineTotal,
       0
     );
-    const referenceId = `RFQ-${crypto.randomUUID()}`;
-
-    await addFormSubmissionDurable({
-      type: "quote",
-      status: "new",
-      data: {
-        referenceId,
-        company,
-        contactName,
-        email,
-        phone,
-        country: country || market.name,
-        countryCode,
-        message,
-        currency,
-        officeId,
-        items: validatedItems,
-        itemCount: validatedItems.length,
-        total: estimatedTotal,
-        marketingOptIn,
-        privacyNoticeVersion: PRIVACY_NOTICE_VERSION,
-        acceptedAt: new Date().toISOString(),
-        meta: { ipHash, ...sanitizeLeadContext(body.context) },
-      },
+    const { referenceId } = await addQuoteSubmissionWithReference(countryCode, {
+      company,
+      contactName,
+      email,
+      phone,
+      country: country || market.name,
+      countryCode,
+      message,
+      currency,
+      officeId,
+      items: validatedItems,
+      itemCount: validatedItems.length,
+      total: estimatedTotal,
+      // freight and coupon stay absent until a provider re-validates them server-side.
+      marketingOptIn,
+      privacyNoticeVersion: PRIVACY_NOTICE_VERSION,
+      acceptedAt: new Date().toISOString(),
+      meta: { ipHash, ...sanitizeLeadContext(body.context) },
     });
 
     return NextResponse.json({

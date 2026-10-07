@@ -142,6 +142,11 @@ export interface ShopProduct {
   defaultColor: string;
   /** Localized labels for the base/default color (e.g. Black / Preto). */
   defaultColorName: ShopLocalizedText;
+  /**
+   * Swatch shown first and preselected on the storefront: `__default__` or a
+   * `colorVariants` id. Empty/unknown falls back to the base color.
+   */
+  featuredColorId?: string;
   /** Additional color options after the default. Empty = no color selection UI. */
   colorVariants: ProductColorVariant[];
 }

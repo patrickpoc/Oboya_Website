@@ -17,6 +17,7 @@ import {
   DEFAULT_COLOR_VARIANT_ID,
   getActiveVariant,
   getDisplayColorVariants,
+  getFeaturedColorVariantId,
   getGalleryImagesForVariant,
   hasColorVariants,
   resolveVariantPrice,
@@ -27,6 +28,7 @@ import {
 import { useProductDescription } from "@/lib/shop/use-product-description";
 import { useProductName } from "@/lib/shop/use-product-name";
 import { formatShopPrice } from "@/lib/shop/format-price";
+import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 import { buttonVariants } from "@/components/ui/button";
 
 interface ProductDetailViewProps {
@@ -72,8 +74,8 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
   }, [initialProduct, liveProduct]);
 
   const variants = useMemo(() => getDisplayColorVariants(product), [product]);
-  const initialVariantId =
-    searchParams.get("variant") || DEFAULT_COLOR_VARIANT_ID;
+  const featuredVariantId = getFeaturedColorVariantId(product);
+  const initialVariantId = searchParams.get("variant") || featuredVariantId;
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     initialVariantId
   );
@@ -85,9 +87,9 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
       return;
     }
     if (!fromUrl && hasColorVariants(product)) {
-      setSelectedVariantId(DEFAULT_COLOR_VARIANT_ID);
+      setSelectedVariantId(featuredVariantId);
     }
-  }, [product, searchParams, variants]);
+  }, [featuredVariantId, product, searchParams, variants]);
 
   const activeVariant = getActiveVariant(product, selectedVariantId);
   const name = getProductName(product);
@@ -121,7 +123,9 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
 
         <div className="md:sticky md:top-24 md:self-start">
           <p className="text-xs font-medium uppercase tracking-wide text-oboya-green">
-            {category?.name}
+            {category
+              ? pickLocalizedLabel(locale, category.name, category.nameI18n)
+              : null}
           </p>
           <h1 className="mt-2 font-display text-2xl font-semibold text-oboya-blue-dark md:text-3xl">
             {name}

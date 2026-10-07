@@ -6,5 +6,5 @@ type Props = { params: Promise<{ locale: string }> };
 export default async function ShopCheckoutPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  redirect({ href: "/shop?quote=open", locale });
+  redirect({ href: "/checkout", locale });
 }
