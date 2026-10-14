@@ -9,10 +9,11 @@ import { Link } from "@/i18n/navigation";
 import { Container } from "@/components/ui/container";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { pickLocalized } from "@/lib/cms/utils";
-import type {
-  SolutionsPageBanner,
-  SolutionsPageCrop,
-  SolutionsPageSettings,
+import {
+  resolveBannerImage,
+  type SolutionsPageBanner,
+  type SolutionsPageCrop,
+  type SolutionsPageSettings,
 } from "@/lib/cms/repositories/solutions-page-repository";
 import { cropFilterFromAreaParam } from "@/lib/solutions/solutions-data";
 import type { SolutionsCropFilterId } from "@/lib/solutions/types";
@@ -148,7 +149,7 @@ export function SolutionsExplorer({ settings }: SolutionsExplorerProps) {
                 >
                   <div className="relative aspect-[5/4] overflow-hidden bg-oboya-soft-white sm:aspect-[4/3]">
                     <Image
-                      src={card.image}
+                      src={resolveBannerImage(card, activeFilter)}
                       alt={pickLocalized(card.title, locale)}
                       fill
                       className={cn(

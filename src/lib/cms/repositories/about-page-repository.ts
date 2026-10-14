@@ -550,8 +550,8 @@ const defaultSettings = (): AboutPageSettings => ({
         name: "Elena Nordström",
         role: loc(
           "Chief Executive Officer",
-          "Chief Executive Officer",
-          "Chief Executive Officer",
+          "Diretor-executivo",
+          "Director ejecutivo",
           "首席执行官"
         ),
         image:
@@ -562,8 +562,8 @@ const defaultSettings = (): AboutPageSettings => ({
         name: "James Whitfield",
         role: loc(
           "Chief Operating Officer",
-          "Chief Operating Officer",
-          "Chief Operating Officer",
+          "Diretor de operações",
+          "Director de operaciones",
           "首席运营官"
         ),
         image:
@@ -574,8 +574,8 @@ const defaultSettings = (): AboutPageSettings => ({
         name: "Ana Ribeiro",
         role: loc(
           "Chief Commercial Officer",
-          "Chief Commercial Officer",
-          "Chief Commercial Officer",
+          "Diretor comercial",
+          "Director comercial",
           "首席商务官"
         ),
         image:
@@ -586,8 +586,8 @@ const defaultSettings = (): AboutPageSettings => ({
         name: "Li Wei",
         role: loc(
           "Head of Asia-Pacific",
-          "Head of Asia-Pacific",
-          "Head of Asia-Pacific",
+          "Diretor da Ásia-Pacífico",
+          "Director de Asia-Pacífico",
           "亚太区负责人"
         ),
         image:
@@ -921,8 +921,8 @@ const defaultSettings = (): AboutPageSettings => ({
   honors: {
     title: loc(
       "Honor & Certification",
-      "Honor & Certification",
-      "Honor & Certification",
+      "Honrarias e certificações",
+      "Honores y certificaciones",
       "荣誉与认证"
     ),
     items: [

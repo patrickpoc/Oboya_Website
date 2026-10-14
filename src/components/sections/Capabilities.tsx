@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useCallback, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -27,6 +28,7 @@ export function Capabilities({
   locale,
   animationsEnabled = true,
 }: CapabilitiesProps) {
+  const t = useTranslations("common");
   const items = data.items;
   const [index, setIndex] = useState(0);
   const pointerStartX = useRef<number | null>(null);
@@ -155,7 +157,7 @@ export function Capabilities({
               <button
                 type="button"
                 onClick={() => go(-1)}
-                aria-label="Previous slide"
+                aria-label={t("a11y.previousSlide")}
                 className="flex size-10 items-center justify-center rounded-full border border-white/70 bg-transparent text-white transition-colors hover:bg-white/10 sm:size-11"
               >
                 <ChevronLeft className="size-4" />
@@ -163,7 +165,7 @@ export function Capabilities({
               <button
                 type="button"
                 onClick={() => go(1)}
-                aria-label="Next slide"
+                aria-label={t("a11y.nextSlide")}
                 className="flex size-10 items-center justify-center rounded-full border border-white/70 bg-transparent text-white transition-colors hover:bg-white/10 sm:size-11"
               >
                 <ChevronRight className="size-4" />

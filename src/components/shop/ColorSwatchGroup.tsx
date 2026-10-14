@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { ProductColorVariant } from "@/lib/shop/types";
 import { getVariantDisplayName } from "@/lib/shop/color-variants";
@@ -55,6 +55,7 @@ export function ColorSwatchGroup({
   size = "sm",
 }: ColorSwatchGroupProps) {
   const locale = useLocale();
+  const t = useTranslations("common");
   const panelId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -127,7 +128,7 @@ export function ColorSwatchGroup({
     <div
       ref={rootRef}
       role="radiogroup"
-      aria-label="Color options"
+      aria-label={t("a11y.colorOptions")}
       className={cn("relative flex flex-nowrap items-center gap-1.5", className)}
     >
       {visible.map(renderSwatch)}
@@ -138,7 +139,7 @@ export function ColorSwatchGroup({
             type="button"
             aria-expanded={open}
             aria-controls={panelId}
-            aria-label={`Show ${overflow.length} more colors`}
+            aria-label={t("a11y.showMoreColors", { count: overflow.length })}
             onClick={(event) => {
               event.preventDefault();
               event.stopPropagation();
@@ -158,7 +159,7 @@ export function ColorSwatchGroup({
             <div
               id={panelId}
               role="group"
-              aria-label="More color options"
+              aria-label={t("a11y.moreColorOptions")}
               className="absolute top-full left-1/2 z-20 mt-1.5 flex -translate-x-1/2 flex-wrap content-start gap-1.5 rounded-lg border border-border/60 bg-white p-1.5 shadow-[var(--shadow-card)]"
               style={{ width: "max-content", maxWidth: "9.5rem" }}
             >

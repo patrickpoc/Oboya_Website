@@ -210,7 +210,24 @@
     "loremP1": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tempor, massa eu auctor pharetra, leo est efficitur orci, sed faucibus ligula erat eget magna. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
     "loremP2": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
     "loremP3": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.",
-    "loremP4": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet."
+    "loremP4": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet.",
+    "a11y": {
+      "previousTestimonials": "Previous testimonials",
+      "nextTestimonials": "Next testimonials",
+      "testimonialPage": "Testimonial page",
+      "previousSlide": "Previous slide",
+      "nextSlide": "Next slide",
+      "heroSlides": "Hero slides",
+      "previousSolutions": "Previous solutions",
+      "nextSolutions": "Next solutions",
+      "cropFilters": "Crop filters",
+      "colorOptions": "Color options",
+      "moreColorOptions": "More color options",
+      "showMoreColors": "Show {count} more colors",
+      "pagination": "Pagination",
+      "pageNumber": "Page {page}",
+      "exploreSolutions": "Explore Solutions"
+    }
   },
   "contact": {
     "sidebarTitle": "We would love to hear from you.",

@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 interface PaginationProps {
@@ -20,13 +21,14 @@ export function Pagination({
   prevLabel = "Previous page",
   nextLabel = "Next page",
 }: PaginationProps) {
+  const t = useTranslations("common");
   if (totalPages <= 1) return null;
 
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
     <nav
-      aria-label="Pagination"
+      aria-label={t("a11y.pagination")}
       className={cn("flex items-center justify-center gap-2", className)}
     >
       <button
@@ -44,7 +46,7 @@ export function Pagination({
           key={page}
           type="button"
           onClick={() => onPageChange(page)}
-          aria-label={`Page ${page}`}
+          aria-label={t("a11y.pageNumber", { page })}
           aria-current={page === currentPage ? "page" : undefined}
           className={cn(
             "flex size-9 items-center justify-center rounded-full text-sm font-medium transition-colors",

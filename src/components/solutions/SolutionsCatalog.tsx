@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Container } from "@/components/ui/container";
 import { cn } from "@/lib/utils";
@@ -43,6 +44,7 @@ function isCategoryId(value: string | null): value is SolutionsCategoryId {
 }
 
 export function SolutionsCatalog({ categories, cards }: SolutionsCatalogProps) {
+  const t = useTranslations("common");
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category");
   const [active, setActive] = useState<SolutionsCategoryId>(() =>
@@ -77,7 +79,7 @@ export function SolutionsCatalog({ categories, cards }: SolutionsCatalogProps) {
         <div
           className="flex flex-wrap gap-3"
           role="tablist"
-          aria-label="Crop filters"
+          aria-label={t("a11y.cropFilters")}
         >
           {categories.map((item) => {
             const isActive = item.id === active;

@@ -261,7 +261,7 @@ export const HOME_I18N = {
       "We needed one partner for cultivation support and outbound logistics. Oboya connected both ends of the chain with clear accountability.",
       "Precisávamos de um parceiro para apoio ao cultivo e logística de saída. A Oboya conectou as duas pontas da cadeia com responsabilidade clara.",
       "Necesitábamos un socio para el apoyo al cultivo y la logística de salida. Oboya conectó ambos extremos de la cadena con una responsabilidad clara.",
-      "我们需要一个合作伙伴同时支持种植与 outbound 物流。Oboya 以清晰的责任衔接了链条两端。"
+      "我们需要一个合作伙伴同时支持种植与出货物流。Oboya 以清晰的责任衔接了链条两端。"
     ),
     t4Author: homeLoc("Elena Rossi", "Elena Rossi", "Elena Rossi", "Elena Rossi"),
     t4Role: homeLoc(
@@ -298,9 +298,9 @@ export const HOME_I18N = {
     ),
   },
   latestNews: {
-    eyebrow: homeLoc("Blog", "Blog", "Blog", "博客"),
+    eyebrow: homeLoc("Latest News", "Blog", "Blog", "博客"),
     headline: homeLoc(
-      "Learn more about our latest developments and stories from the field in our Blog.",
+      "Learn more about our latest developments and stories from the field in our Latest News section.",
       "Saiba mais sobre nossos últimos desenvolvimentos e histórias do campo no nosso Blog.",
       "Conozca más sobre nuestros últimos desarrollos e historias del campo en nuestro Blog.",
       "在我们的博客中，了解更多最新动态与一线故事。"

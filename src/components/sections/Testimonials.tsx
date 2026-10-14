@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
@@ -44,6 +45,7 @@ export function Testimonials({
   locale,
   animationsEnabled = true,
 }: TestimonialsProps) {
+  const t = useTranslations("common");
   const items = data.items;
   const [perPage, setPerPage] = useState(1);
   const [cardWidth, setCardWidth] = useState(0);
@@ -232,7 +234,7 @@ export function Testimonials({
             <button
               type="button"
               onClick={() => carousel.go(-1)}
-              aria-label="Previous testimonials"
+              aria-label={t("a11y.previousTestimonials")}
               className="flex size-9 items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:border-white hover:bg-white/5"
             >
               <ChevronLeft className="size-3.5" />
@@ -240,7 +242,7 @@ export function Testimonials({
             <button
               type="button"
               onClick={() => carousel.go(1)}
-              aria-label="Next testimonials"
+              aria-label={t("a11y.nextTestimonials")}
               className="flex size-9 items-center justify-center rounded-full border border-white/50 text-white transition-colors hover:border-white hover:bg-white/5"
             >
               <ChevronRight className="size-3.5" />
@@ -253,7 +255,7 @@ export function Testimonials({
             aria-valuenow={activePage + 1}
             aria-valuemin={1}
             aria-valuemax={pageCount}
-            aria-label="Testimonial page"
+            aria-label={t("a11y.testimonialPage")}
           >
             {Array.from({ length: pageCount }, (_, i) => (
               <div

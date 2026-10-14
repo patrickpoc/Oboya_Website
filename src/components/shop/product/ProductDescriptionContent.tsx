@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { sanitizeRichHtml } from "@/lib/cms/sanitize-rich-html.client";
 import { enhanceDescriptionHtmlForDisplay } from "@/lib/cms/enhance-description-html";
 import { useDescriptionImageFit } from "@/lib/shop/use-description-image-fit";
@@ -17,8 +18,10 @@ export function ProductDescriptionContent({
   html,
   fallbackHtml = "",
   className,
-  title = "Product information",
+  title,
 }: ProductDescriptionContentProps) {
+  const t = useTranslations("shop");
+  const heading = title ?? t("productInformation");
   const content = useMemo(() => {
     const primary = sanitizeRichHtml(html);
     const resolved = primary.trim() ? primary : sanitizeRichHtml(fallbackHtml);
@@ -31,8 +34,8 @@ export function ProductDescriptionContent({
 
   return (
     <section className={cn("product-description-content", className)}>
-      {title ? (
-        <h2 className="font-display text-lg font-semibold text-oboya-blue-dark">{title}</h2>
+      {heading ? (
+        <h2 className="font-display text-lg font-semibold text-oboya-blue-dark">{heading}</h2>
       ) : null}
       <div
         ref={contentRef}

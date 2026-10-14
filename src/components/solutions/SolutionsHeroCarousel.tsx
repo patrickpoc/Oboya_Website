@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useReducedMotion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +18,7 @@ export function SolutionsHeroCarousel({
   images,
   alt,
 }: SolutionsHeroCarouselProps) {
+  const t = useTranslations("common");
   const reduceMotion = useReducedMotion();
   const slides = images.length > 0 ? images : ["/assets/homepage/solutions-integrated.jpg"];
   const [active, setActive] = useState(0);
@@ -79,11 +81,11 @@ export function SolutionsHeroCarousel({
             type="button"
             onClick={() => go(-1)}
             className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/60 bg-black/30 text-white"
-            aria-label="Previous slide"
+            aria-label={t("a11y.previousSlide")}
           >
             <ChevronLeft className="size-4" />
           </button>
-          <div className="flex gap-1.5" role="tablist" aria-label="Hero slides">
+          <div className="flex gap-1.5" role="tablist" aria-label={t("a11y.heroSlides")}>
             {slides.map((src, index) => (
               <button
                 key={src}
@@ -105,7 +107,7 @@ export function SolutionsHeroCarousel({
             type="button"
             onClick={() => go(1)}
             className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/60 bg-black/30 text-white"
-            aria-label="Next slide"
+            aria-label={t("a11y.nextSlide")}
           >
             <ChevronRight className="size-4" />
           </button>

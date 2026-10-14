@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
@@ -32,6 +33,7 @@ export function BusinessSolutions({
   locale,
   animationsEnabled = true,
 }: BusinessSolutionsProps) {
+  const t = useTranslations("common");
   const items = data.items;
   const [perView, setPerView] = useState(3.15);
   const [cardWidth, setCardWidth] = useState(0);
@@ -125,7 +127,7 @@ export function BusinessSolutions({
               const cta =
                 item.ctaLabel != null
                   ? pickLocalized(item.ctaLabel, locale)
-                  : "Explore Solutions";
+                  : t("a11y.exploreSolutions");
               const href = solutionsHrefForBusinessCard({
                 id: item.id,
                 href: item.href,
@@ -180,7 +182,7 @@ export function BusinessSolutions({
           <button
             type="button"
             onClick={() => carousel.go(-1)}
-            aria-label="Previous solutions"
+            aria-label={t("a11y.previousSolutions")}
             className="flex size-10 items-center justify-center rounded-full border border-oboya-blue-dark/40 text-oboya-blue-dark transition-colors hover:border-oboya-blue-dark hover:bg-oboya-blue-dark/5"
           >
             <ChevronLeft className="size-4" />
@@ -188,7 +190,7 @@ export function BusinessSolutions({
           <button
             type="button"
             onClick={() => carousel.go(1)}
-            aria-label="Next solutions"
+            aria-label={t("a11y.nextSolutions")}
             className="flex size-10 items-center justify-center rounded-full border border-oboya-blue-dark/40 text-oboya-blue-dark transition-colors hover:border-oboya-blue-dark hover:bg-oboya-blue-dark/5"
           >
             <ChevronRight className="size-4" />
