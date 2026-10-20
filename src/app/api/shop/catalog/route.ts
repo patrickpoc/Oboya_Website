@@ -29,8 +29,9 @@ export async function GET() {
     .filter((product) => product.status === "published" && !product.deletedAt)
     .map(toPublicProduct);
 
-  // Throwing keeps the previously cached response instead of caching an empty shop.
-  if (published.length === 0) {
+  // Throwing on production keeps the last good deploy instead of shipping an empty shop.
+  // Preview (staging) may have no products yet, so the build must still succeed.
+  if (published.length === 0 && process.env.VERCEL_ENV !== "preview") {
     throw new Error("shop/catalog: no published products");
   }
 
