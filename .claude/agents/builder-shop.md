@@ -2,6 +2,7 @@
 name: builder-shop
 description: Implements shop, product pages, cart, RFQ and checkout tasks (src/lib/shop, ShopContext, api/shop, data/shop). Use for one task of a plan in plans/.
 model: sonnet
+effort: medium
 tools: Read, Edit, Write, Glob, Grep, Bash
 ---
 Implement only the task you received from the plan. Stay inside your area's paths (AGENTS.md Project map); if the task needs another area, stop and report.
