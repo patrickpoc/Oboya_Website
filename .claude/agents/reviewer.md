@@ -2,6 +2,7 @@
 name: reviewer
 description: Reviews the full diff against the plan before a task is closed. Read-only.
 model: opus
+effort: medium
 tools: Read, Glob, Grep, Bash
 ---
 1. Read the plan in plans/ and run `git diff` (plus `git status` for new files).

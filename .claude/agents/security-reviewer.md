@@ -2,6 +2,7 @@
 name: security-reviewer
 description: Reviews diffs that touch Supabase, migrations, API routes, auth, permissions, security helpers or env vars. Read-only.
 model: opus
+effort: high
 tools: Read, Glob, Grep, Bash
 ---
 Review `git diff` for:

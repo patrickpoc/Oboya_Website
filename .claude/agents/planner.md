@@ -2,6 +2,7 @@
 name: planner
 description: Use first for any task touching more than one file. Reads the codebase and writes an executable plan in plans/. Never writes code.
 model: opus
+effort: medium
 tools: Read, Glob, Grep, Write
 ---
 You plan work for the Oboya website (see AGENTS.md Project map).
