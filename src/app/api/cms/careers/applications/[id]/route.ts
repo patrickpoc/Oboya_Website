@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { toAdminApplication } from "@/lib/cms/careers/admin-view";
 import {
   anonymizeApplication,
   deleteApplication,
@@ -32,7 +33,7 @@ export async function GET(_request: Request, context: Ctx) {
   try {
     const item = await getApplication((await context.params).id);
     if (!item) throw new CareersError(404, "not_found");
-    return NextResponse.json({ item }, { headers: noStoreHeaders });
+    return NextResponse.json({ item: toAdminApplication(item) }, { headers: noStoreHeaders });
   } catch (error) {
     return careersErrorResponse(error, "Failed to load application");
   }
@@ -45,13 +46,13 @@ export async function PATCH(request: Request, context: Ctx) {
     const body = await request.json().catch(() => null);
     if ((body as { markRead?: unknown } | null)?.markRead === true) {
       const marked = await markApplicationRead((await context.params).id);
-      return NextResponse.json({ item: marked }, { headers: noStoreHeaders });
+      return NextResponse.json({ item: toAdminApplication(marked) }, { headers: noStoreHeaders });
     }
     const item = await patchApplication((await context.params).id, body, {
       id: auth.user.id,
       name: auth.user.name,
     });
-    return NextResponse.json({ item }, { headers: noStoreHeaders });
+    return NextResponse.json({ item: toAdminApplication(item) }, { headers: noStoreHeaders });
   } catch (error) {
     return careersErrorResponse(error, "Failed to update application");
   }
@@ -80,7 +81,7 @@ export async function POST(request: Request, context: Ctx) {
     const { id } = await context.params;
     const item = await anonymizeApplication(id, { id: auth.user.id, name: auth.user.name });
     await audit(auth.user, "careers.application.anonymize", id);
-    return NextResponse.json({ item }, { headers: noStoreHeaders });
+    return NextResponse.json({ item: toAdminApplication(item) }, { headers: noStoreHeaders });
   } catch (error) {
     return careersErrorResponse(error, "Failed to anonymize application");
   }

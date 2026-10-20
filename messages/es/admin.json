@@ -1352,6 +1352,7 @@
           "closeBeforePublish": "La fecha de cierre debe ser posterior a la de publicación.",
           "positionsMin": "Se requiere al menos un puesto.",
           "slugRequired": "El slug es obligatorio.",
+          "slugReserved": "Este slug está reservado. Elige otro.",
           "salaryNegative": "El salario no puede ser negativo."
         }
       }

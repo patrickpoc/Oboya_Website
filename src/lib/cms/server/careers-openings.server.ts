@@ -16,6 +16,7 @@ import {
   type OpeningFilters,
   type PipelineCounts,
 } from "@/lib/cms/careers/types";
+import { revalidateCareersPages } from "@/lib/cms/revalidate-site";
 import {
   CareersError,
   UUID_RE,
@@ -150,6 +151,33 @@ async function readStats(): Promise<Map<string, Stats>> {
   return map;
 }
 
+/** Columns the public site may read: no owners, audit ids or seo internals. */
+const PUBLIC_COLUMNS =
+  "id,slug,title,summary,description,responsibilities,requirements,nice_to_have,benefits,department,country_code,city,work_model,employment_type,seniority,positions,salary_min,salary_max,salary_currency,salary_period,show_salary,status,publish_at,close_at,published_at,created_at,updated_at";
+
+/** Published rows only, explicit columns. Callers still apply isOpeningPublic (embargo / close date). */
+export async function readPublishedOpenings(): Promise<JobOpening[]> {
+  const db = careersClient();
+  if (!db) return (await readAll()).filter((o) => o.status === "published");
+  const { data, error } = await db
+    .from("cms_job_openings")
+    .select(PUBLIC_COLUMNS)
+    .eq("status", "published")
+    .order("published_at", { ascending: false })
+    .limit(500);
+  throwIfDbError(error);
+  return ((data ?? []) as unknown as Row[]).map(fromRow);
+}
+
+/** Best-effort: cache busting must never fail a save. Logs the error name only. */
+function bustPublicPages(...slugs: Array<string | undefined>) {
+  try {
+    revalidateCareersPages(slugs.filter((s): s is string => !!s));
+  } catch (error) {
+    console.warn("[careers] revalidate skipped", error instanceof Error ? error.name : "unknown");
+  }
+}
+
 export async function listOpenings(filters: OpeningFilters = {}): Promise<JobOpeningWithStats[]> {
   const [all, stats] = await Promise.all([readAll(), readStats()]);
   const empty = { total: 0, ...Object.fromEntries(PIPELINE_STATUSES.map((s) => [s, 0])) } as PipelineCounts;
@@ -203,11 +231,13 @@ export async function saveOpening(input: unknown, actor: { id: string }): Promis
   const db = careersClient();
   if (!db) {
     await writeLocalJson(OPENINGS_FILE, [opening, ...all.filter((o) => o.id !== id)]);
+    bustPublicPages(opening.slug, existing?.slug);
     return opening;
   }
   const { error } = await db.from("cms_job_openings").upsert(toRow(opening)).select("id").single();
   if (error?.code === "23505") throw new CareersError(409, "slugTaken");
   throwIfDbError(error);
+  bustPublicPages(opening.slug, existing?.slug);
   return (await getOpening(id)) ?? opening;
 }
 
@@ -245,9 +275,12 @@ export async function deleteOpening(id: string): Promise<void> {
     if ((file.applications ?? []).some((a) => a.openingId === id)) throw new CareersError(409, "hasApplications");
     const all = await readAll();
     await writeLocalJson(OPENINGS_FILE, all.filter((o) => o.id !== id));
+    bustPublicPages(all.find((o) => o.id === id)?.slug);
     return;
   }
+  const slug = (await getOpening(id))?.slug;
   const { error } = await db.from("cms_job_openings").delete().eq("id", id);
   if (error?.code === "23503") throw new CareersError(409, "hasApplications");
   throwIfDbError(error);
+  bustPublicPages(slug);
 }

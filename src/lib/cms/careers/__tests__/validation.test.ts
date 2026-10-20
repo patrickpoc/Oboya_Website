@@ -55,6 +55,12 @@ describe("opening validation", () => {
     });
     expect(errorsOf(validateOpening(o))).toEqual(["positionsMin", "salaryRange", "closeBeforePublish"]);
   });
+
+  it("rejects reserved slugs", () => {
+    const o = normalizeOpening({ title: { en: "Apply" }, slug: "apply" });
+    expect(errorsOf(validateOpening(o))).toContain("slugReserved");
+    expect(errorsOf(validateOpening(normalizeOpening({ title: { en: "Apply" }, slug: "applying" })))).not.toContain("slugReserved");
+  });
 });
 
 describe("application validation", () => {

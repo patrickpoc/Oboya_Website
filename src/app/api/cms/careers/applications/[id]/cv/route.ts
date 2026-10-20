@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { toAdminApplication } from "@/lib/cms/careers/admin-view";
 import { validateCvFile } from "@/lib/cms/careers/validation";
 import {
   clearApplicationCv,
@@ -61,7 +62,7 @@ export async function PUT(request: Request, context: Ctx) {
       { path, filename, mime: verified.mime, size: verified.size },
       { id: auth.user.id, name: auth.user.name }
     );
-    return NextResponse.json({ item }, { headers: noStoreHeaders });
+    return NextResponse.json({ item: toAdminApplication(item) }, { headers: noStoreHeaders });
   } catch (error) {
     return careersErrorResponse(error, "Failed to save CV");
   }
@@ -88,7 +89,7 @@ export async function DELETE(_request: Request, context: Ctx) {
       id: auth.user.id,
       name: auth.user.name,
     });
-    return NextResponse.json({ item }, { headers: noStoreHeaders });
+    return NextResponse.json({ item: toAdminApplication(item) }, { headers: noStoreHeaders });
   } catch (error) {
     return careersErrorResponse(error, "Failed to remove CV");
   }

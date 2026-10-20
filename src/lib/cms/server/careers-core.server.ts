@@ -18,6 +18,15 @@ export class CareersError extends Error {
   }
 }
 
+/** Rejects with 503 if `work` has not settled in `ms`, so a stalled backend call never hangs a request. */
+export function withTimeout<T>(work: PromiseLike<T>, ms = 15_000): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new CareersError(503, "cv_storage_unavailable")), ms);
+  });
+  return Promise.race([work, timeout]).finally(() => clearTimeout(timer));
+}
+
 /** Service-role client on hosted; null = local JSON fallback. Throws 503 when the key is missing. */
 export function careersClient() {
   if (!isSupabaseConfigured()) return null;

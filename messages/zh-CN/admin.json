@@ -1352,6 +1352,7 @@
           "closeBeforePublish": "关闭日期必须晚于发布日期。",
           "positionsMin": "至少需要一个招聘名额。",
           "slugRequired": "必须填写 slug。",
+          "slugReserved": "此 slug 为保留字，请选择其他 slug。",
           "salaryNegative": "薪资不能为负数。"
         }
       }

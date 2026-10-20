@@ -16,6 +16,9 @@ import {
   type LanguageSkill,
 } from "./types";
 
+/** Static route segments under /work that would shadow an opening slug. */
+export const RESERVED_OPENING_SLUGS: readonly string[] = ["apply"];
+
 export const CV_MAX_BYTES = 10 * 1024 * 1024;
 export const CV_MIME_TYPES = [
   "application/pdf",
@@ -123,6 +126,7 @@ export function validateOpening(opening: JobOpening): ValidationResult {
   const errors: string[] = [];
   if (!opening.title.en.trim()) errors.push("titleRequired");
   if (!opening.slug) errors.push("slugRequired");
+  else if (RESERVED_OPENING_SLUGS.includes(opening.slug)) errors.push("slugReserved");
   if (!Number.isInteger(opening.positions) || opening.positions < 1) errors.push("positionsMin");
   const { salaryMin: min, salaryMax: max } = opening;
   if ((min !== undefined && min < 0) || (max !== undefined && max < 0)) errors.push("salaryNegative");

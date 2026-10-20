@@ -3,6 +3,14 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { matchesApplicationFilters } from "@/lib/cms/careers/filters";
+import {
+  DAY_MS,
+  PENDING_CV_TTL_MS,
+  RETENTION_DAYS,
+  TALENT_POOL_RETENTION_DAYS,
+  isExpiredPending,
+  isRetentionExpired,
+} from "@/lib/cms/careers/retention";
 import { normalizeApplication, validateApplication } from "@/lib/cms/careers/validation";
 import type {
   ActivityKind,
@@ -442,7 +450,7 @@ export async function anonymizeApplication(id: string, actor: CareersActor): Pro
 export async function setApplicationCv(
   id: string,
   cv: { path: string; filename: string; mime: string; size: number },
-  actor: CareersActor
+  actor: CareersActor | null
 ): Promise<JobApplication> {
   const current = await getApplication(id);
   if (!current) throw new CareersError(404, "not_found");
@@ -477,4 +485,181 @@ export async function clearApplicationCv(id: string, actor: CareersActor): Promi
   await persist(next, false);
   await addActivity(id, "cv_removed", actor);
   return next;
+}
+
+/** Anonymous website submission: the caller has already forced source/status/consent. */
+export async function insertPublicApplication(app: JobApplication): Promise<void> {
+  await persist(app, true);
+  await addActivity(app.id, "created", null);
+}
+
+/**
+ * Replaces only the `extra` column. With `ifNoTicket` the write applies only while no CV ticket hash is stored,
+ * so a restore can never overwrite a concurrent state. Returns whether a row was written.
+ */
+export async function patchApplicationExtra(
+  id: string,
+  extra: Record<string, unknown>,
+  opts: { ifNoTicket?: boolean } = {}
+): Promise<boolean> {
+  const db = careersClient();
+  if (!db) {
+    const file = await readLocal();
+    const found = file.applications.find((a) => a.id === id);
+    if (!found) throw new CareersError(404, "not_found");
+    if (opts.ifNoTicket && (found.extra as { cvTicketHash?: unknown })?.cvTicketHash) return false;
+    file.applications = file.applications.map((a) => (a.id === id ? { ...a, extra } : a));
+    await writeLocal(file);
+    return true;
+  }
+  let query = db.from("cms_job_applications").update({ extra, updated_at: new Date().toISOString() }).eq("id", id);
+  if (opts.ifNoTicket) query = query.is("extra->>cvTicketHash", null);
+  const { data, error } = await query.select("id");
+  throwIfDbError(error);
+  return (data ?? []).length === 1;
+}
+
+/** Public confirm: sets the CV columns and the cleaned `extra` in ONE write, then logs the activity (best-effort). */
+export async function attachPublicCv(
+  id: string,
+  cv: { path: string; filename: string; mime: string; size: number },
+  extra: Record<string, unknown>
+): Promise<void> {
+  const updatedAt = new Date().toISOString();
+  const db = careersClient();
+  if (!db) {
+    const file = await readLocal();
+    if (!file.applications.some((a) => a.id === id)) throw new CareersError(404, "not_found");
+    file.applications = file.applications.map((a) =>
+      a.id === id
+        ? { ...a, cvPath: cv.path, cvFilename: cv.filename, cvMime: cv.mime, cvSize: cv.size, extra, updatedAt }
+        : a
+    );
+    await writeLocal(file);
+  } else {
+    const { data, error } = await db
+      .from("cms_job_applications")
+      .update({
+        cv_path: cv.path,
+        cv_filename: cv.filename.slice(0, 255),
+        cv_mime: cv.mime,
+        cv_size: cv.size,
+        extra,
+        updated_at: updatedAt,
+      })
+      .eq("id", id)
+      .is("anonymized_at", null)
+      .select("id");
+    throwIfDbError(error);
+    if ((data ?? []).length !== 1) throw new CareersError(409, "anonymized");
+  }
+  try {
+    await addActivity(id, "cv_uploaded", null, { meta: { mime: cv.mime, size: cv.size } });
+  } catch (error) {
+    console.error("[careers] cv_uploaded activity failed", { id, code: error instanceof Error ? error.message : "unknown" });
+  }
+}
+
+type PurgeRows = Array<{ id: string }>;
+
+/** Website rows whose CV was never confirmed (> 24 h, no cv_path), oldest first. */
+export async function listExpiredPendingIds(now: number, limit: number): Promise<string[]> {
+  const cutoff = new Date(now - PENDING_CV_TTL_MS).toISOString();
+  const db = careersClient();
+  if (!db) {
+    return (await readLocal()).applications
+      .filter((a) => isExpiredPending(a, now))
+      .sort((a, b) => (a.createdAt ?? "").localeCompare(b.createdAt ?? ""))
+      .slice(0, limit)
+      .map((a) => a.id);
+  }
+  const { data, error } = await db
+    .from("cms_job_applications")
+    .select("id")
+    .eq("source", "website")
+    .eq("extra->>cvPending", "true")
+    .is("cv_path", null)
+    .lt("created_at", cutoff)
+    .order("created_at", { ascending: true })
+    .limit(limit);
+  throwIfDbError(error);
+  return ((data ?? []) as PurgeRows).map((r) => r.id);
+}
+
+/** Not-yet-anonymized rows past retention (365 d, 730 d with talent pool consent), oldest first. */
+export async function listRetentionExpiredIds(now: number, limit: number): Promise<string[]> {
+  const db = careersClient();
+  if (!db) {
+    return (await readLocal()).applications
+      .filter((a) => isRetentionExpired(a, now))
+      .sort((a, b) => (a.createdAt ?? "").localeCompare(b.createdAt ?? ""))
+      .slice(0, limit)
+      .map((a) => a.id);
+  }
+  const ids: Array<{ id: string; created_at: string }> = [];
+  for (const [talentPool, days] of [[false, RETENTION_DAYS], [true, TALENT_POOL_RETENTION_DAYS]] as const) {
+    const { data, error } = await db
+      .from("cms_job_applications")
+      .select("id, created_at")
+      .is("anonymized_at", null)
+      .eq("consent_talent_pool", talentPool)
+      .lt("created_at", new Date(now - days * DAY_MS).toISOString())
+      .order("created_at", { ascending: true })
+      .limit(limit);
+    throwIfDbError(error);
+    ids.push(...((data ?? []) as typeof ids));
+  }
+  return ids.sort((a, b) => a.created_at.localeCompare(b.created_at)).slice(0, limit).map((r) => r.id);
+}
+
+/** Id of a recent website application by the same email for this opening (null = talent pool); unconfirmed (cvPending) rows are ignored. */
+export async function findRecentDuplicate(email: string, openingId: string | null, windowMs: number): Promise<string | null> {
+  const mail = email.trim().toLowerCase();
+  const since = new Date(Date.now() - windowMs).toISOString();
+  const db = careersClient();
+  let rows: Array<{ id: string; extra?: unknown }>;
+  if (!db) {
+    rows = (await readLocal()).applications.filter(
+      (a) => a.source === "website" && a.email === mail && (a.openingId ?? null) === openingId && (a.createdAt ?? "") >= since
+    );
+  } else {
+    let query = db
+      .from("cms_job_applications")
+      .select("id, extra")
+      .eq("source", "website")
+      .eq("email", mail)
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(20);
+    query = openingId ? query.eq("opening_id", openingId) : query.is("opening_id", null);
+    const { data, error } = await query;
+    throwIfDbError(error);
+    rows = (data ?? []) as typeof rows;
+  }
+  const hit = rows.find((r) => (r.extra as { cvPending?: unknown } | null)?.cvPending !== true);
+  return hit?.id ?? null;
+}
+
+/**
+ * Atomically consumes the CV ticket: succeeds only if the stored ticket hash still equals `ticketHash`.
+ * Returns false when another request already consumed it.
+ */
+export async function consumeCvTicket(id: string, ticketHash: string, nextExtra: Record<string, unknown>): Promise<boolean> {
+  const db = careersClient();
+  if (!db) {
+    const file = await readLocal();
+    const app = file.applications.find((a) => a.id === id);
+    if (!app || (app.extra as { cvTicketHash?: unknown })?.cvTicketHash !== ticketHash) return false;
+    file.applications = file.applications.map((a) => (a.id === id ? { ...a, extra: nextExtra } : a));
+    await writeLocal(file);
+    return true;
+  }
+  const { data, error } = await db
+    .from("cms_job_applications")
+    .update({ extra: nextExtra, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("extra->>cvTicketHash", ticketHash)
+    .select("id");
+  throwIfDbError(error);
+  return (data ?? []).length === 1;
 }

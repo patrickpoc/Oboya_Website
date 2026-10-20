@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { toAdminApplication } from "@/lib/cms/careers/admin-view";
 import {
   applicationFiltersFromQuery,
   createApplication,
@@ -16,7 +17,7 @@ export async function GET(request: Request) {
   if ("response" in auth) return auth.response;
   try {
     const items = await listApplications(applicationFiltersFromQuery(new URL(request.url).searchParams));
-    return NextResponse.json({ items }, { headers: noStoreHeaders });
+    return NextResponse.json({ items: items.map(toAdminApplication) }, { headers: noStoreHeaders });
   } catch (error) {
     return careersErrorResponse(error, "Failed to load applications");
   }
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => null);
     const item = await createApplication(body, { id: auth.user.id, name: auth.user.name });
-    return NextResponse.json({ item }, { status: 201, headers: noStoreHeaders });
+    return NextResponse.json({ item: toAdminApplication(item) }, { status: 201, headers: noStoreHeaders });
   } catch (error) {
     return careersErrorResponse(error, "Failed to create application");
   }

@@ -1,11 +1,13 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
+import { CV_HEAD_BYTES, headMatchesMime } from "@/lib/cms/careers/cv-signature";
 import { CV_MAX_BYTES, CV_MIME_TYPES, cvExtensionForMime, isValidCvObjectPath, validateCvFile } from "@/lib/cms/careers/validation";
 import { CareersError, careersClient } from "@/lib/cms/server/careers-core.server";
 
 export const CV_BUCKET = "careers-cv";
 export const CV_DOWNLOAD_TTL_SECONDS = 60;
+const CV_HEAD_TIMEOUT_MS = 8000;
 
 function storage() {
   const client = careersClient();
@@ -44,20 +46,39 @@ export async function verifyCvObject(applicationId: string, path: string) {
   return { size, mime };
 }
 
-const SIGNATURES: Record<string, number[]> = {
-  "application/pdf": [0x25, 0x50, 0x44, 0x46, 0x2d],
-  "application/msword": [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [0x50, 0x4b, 0x03, 0x04],
-};
-
-/** Compares the first bytes of the stored object with the claimed mime type. */
+/** Fetches only the first ~4 KB through a short-lived signed URL (Range) and checks them against the claimed mime. */
 async function hasExpectedSignature(path: string, mime: string) {
-  const expected = SIGNATURES[mime];
-  if (!expected) return false;
-  const { data, error } = await storage().download(path);
+  const { data, error } = await storage().createSignedUrl(path, 30);
   if (error || !data) throw new CareersError(503, "cv_storage_unavailable");
-  const head = new Uint8Array(await data.slice(0, expected.length).arrayBuffer());
-  return expected.every((byte, i) => head[i] === byte);
+  const head = new Uint8Array(CV_HEAD_BYTES);
+  let len = 0;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), CV_HEAD_TIMEOUT_MS);
+  try {
+    const res = await fetch(data.signedUrl, {
+      headers: { Range: `bytes=0-${CV_HEAD_BYTES - 1}` },
+      cache: "no-store",
+      signal: ctrl.signal,
+    });
+    if (!res.ok || !res.body) throw new CareersError(503, "cv_storage_unavailable");
+    // A server that ignores Range answers 200 with the full body: stop after the head.
+    const reader = res.body.getReader();
+    while (len < CV_HEAD_BYTES) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = value.subarray(0, CV_HEAD_BYTES - len);
+      head.set(chunk, len);
+      len += chunk.length;
+    }
+  } catch (error) {
+    if (error instanceof CareersError) throw error;
+    throw new CareersError(503, "cv_storage_unavailable");
+  } finally {
+    clearTimeout(timer);
+    // Abort tears down the connection without waiting for the rest of the body.
+    ctrl.abort();
+  }
+  return headMatchesMime(head.subarray(0, len), mime);
 }
 
 export async function createCvDownloadUrl(path: string, filename?: string) {
