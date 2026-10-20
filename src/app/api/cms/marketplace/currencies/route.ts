@@ -18,7 +18,7 @@ export async function GET() {
   try {
     const data = await readMarketplaceCurrencies();
     return NextResponse.json(data, { headers: noStoreHeaders });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to load currencies" },
       { status: 500 }

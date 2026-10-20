@@ -26,6 +26,7 @@ import {
 } from "@/lib/map-locations";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { hardNavigate } from "@/lib/cms/hard-navigate";
 
 const isSupabaseConfigured =
   Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
@@ -75,7 +76,7 @@ export function MapLocationEditor() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [t, tCommon]);
 
   const selectedLocation = useMemo(
     () => data?.locations.find((location) => location.id === selectedId) ?? null,
@@ -266,13 +267,13 @@ export function MapLocationEditor() {
       setSaveState("error");
       setError(saveErr instanceof Error ? saveErr.message : tCommon("saveFailed"));
     }
-  }, [data]);
+  }, [data, tCommon]);
 
   const handleLogout = useCallback(async () => {
     if (!isSupabaseConfigured) return;
     const supabase = createClient();
     await supabase.auth.signOut();
-    window.location.href = "/admin/login";
+    hardNavigate("/admin/login");
   }, []);
 
   if (loadError) {

@@ -358,7 +358,6 @@ function NewFolderDialog({
 
 export default function MediaLibraryPage() {
   const t = useTranslations("admin.media");
-  const tCommon = useTranslations("admin.common");
   const [currentFolderId, setCurrentFolderId] = useState<string>("folder-root");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -461,8 +460,11 @@ export default function MediaLibraryPage() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refreshKey busts the module-level media cache
   const allTags = useMemo(() => getAllTags(), [refreshKey]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refreshKey busts the module-level media cache
   const breadcrumb = useMemo(() => getFolderBreadcrumb(currentFolderId), [currentFolderId, refreshKey]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refreshKey busts the module-level media cache
   const childFolders = useMemo(() => getChildFolders(currentFolderId), [currentFolderId, refreshKey]);
 
   const isSearching = searchQuery.trim().length > 0 || selectedTags.length > 0;
@@ -478,6 +480,7 @@ export default function MediaLibraryPage() {
       results = results.filter((a) => a.type === typeFilter);
     }
     return results;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refreshKey/libraryVersion bust the module-level media cache
   }, [currentFolderId, searchQuery, selectedTags, typeFilter, refreshKey, isSearching, libraryVersion]);
 
   const toggleTag = (tag: string) => {

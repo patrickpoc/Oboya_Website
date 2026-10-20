@@ -97,6 +97,7 @@ export default function FaqsAdminPage() {
         setLoading(false);
       }
     })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- initial load only; refresh is recreated every render
   }, []);
 
   const editingCategoryDraft = editingCategory;

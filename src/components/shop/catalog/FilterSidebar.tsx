@@ -7,7 +7,6 @@ import { useShop } from "@/contexts/ShopContext";
 import { useOverlayA11y } from "@/hooks/use-overlay-a11y";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { ShopLocalizedText } from "@/lib/shop/types";
 import { BrandLabel } from "@/components/shop/BrandLabel";
 import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 

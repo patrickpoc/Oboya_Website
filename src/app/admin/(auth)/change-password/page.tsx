@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/brand/Logo";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { useAdminDocumentTitle } from "@/lib/cms/admin-document-title";
+import { hardNavigate } from "@/lib/cms/hard-navigate";
 
 export default function ChangePasswordPage() {
   const t = useTranslations("admin.auth");
@@ -37,7 +38,7 @@ export default function ChangePasswordPage() {
 
     try {
       if (!isSupabaseConfigured()) {
-        window.location.href = "/admin/dashboard";
+        hardNavigate("/admin/dashboard");
         return;
       }
 
@@ -59,7 +60,7 @@ export default function ChangePasswordPage() {
       await supabase.auth.refreshSession();
       localStorage.removeItem("oboya-admin-user");
 
-      window.location.href = "/admin/dashboard";
+      hardNavigate("/admin/dashboard");
     } catch {
       setError(t("updatePasswordFailed"));
       setLoading(false);

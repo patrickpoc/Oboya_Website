@@ -89,6 +89,7 @@ export function ShopToolbarSelect<T extends string>({
       window.removeEventListener("resize", onReposition);
       window.removeEventListener("scroll", onReposition, true);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- updateMenuBox is recreated each render and sets state; effect must only re-run on open/listId
   }, [listId, open]);
 
   return (
