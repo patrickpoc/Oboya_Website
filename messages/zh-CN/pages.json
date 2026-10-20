@@ -1,0 +1,140 @@
+{
+  "about": {
+    "title": "关于我们",
+    "eyebrow": "公司",
+    "description": "我们的历史、使命和全球园艺布局。"
+  },
+  "caseStudies": {
+    "title": "案例研究",
+    "eyebrow": "故事"
+  },
+  "blog": {
+    "title": "博客",
+    "eyebrow": "洞察"
+  },
+  "contact": {
+    "title": "联系我们",
+    "eyebrow": "联系",
+    "description": "无论是产品指导、合作支持，还是联系本地团队——我们随时准备为您提供帮助。"
+  },
+  "careers": {
+    "title": "职业发展",
+    "eyebrow": "公司"
+  },
+  "privacy": {
+    "title": "隐私政策",
+    "eyebrow": "法律",
+    "description": "Oboya Horticulture 如何收集、使用、存储和保护个人数据。"
+  },
+  "terms": {
+    "title": "使用条款",
+    "eyebrow": "法律",
+    "description": "Oboya 网站和服务的使用条款与条件。"
+  },
+  "sustainability": {
+    "title": "可持续发展",
+    "eyebrow": "可持续发展"
+  },
+  "solutions": {
+    "title": "解决方案",
+    "eyebrow": "解决方案"
+  },
+  "solutionsVegetables": {
+    "title": "蔬菜与香草",
+    "eyebrow": "解决方案"
+  },
+  "solutionsFlowers": {
+    "title": "花卉与观赏植物",
+    "eyebrow": "解决方案"
+  },
+  "solutionsFruits": {
+    "title": "水果与浆果",
+    "eyebrow": "解决方案"
+  },
+  "solutionsPropagation": {
+    "title": "繁殖与种植",
+    "eyebrow": "解决方案"
+  },
+  "solutionsPackaging": {
+    "title": "包装与物流",
+    "eyebrow": "解决方案"
+  },
+  "solutionsSustainability": {
+    "title": "可持续实践",
+    "eyebrow": "解决方案"
+  },
+  "solutionsDistribution": {
+    "title": "分销网络",
+    "eyebrow": "解决方案"
+  },
+  "solutionsCircularEconomy": {
+    "title": "循环经济",
+    "eyebrow": "解决方案"
+  },
+  "products": {
+    "title": "产品",
+    "eyebrow": "产品"
+  },
+  "productsGrowingMedia": {
+    "title": "栽培基质",
+    "eyebrow": "产品"
+  },
+  "productsPackaging": {
+    "title": "包装",
+    "eyebrow": "产品"
+  },
+  "productsEquipment": {
+    "title": "设备",
+    "eyebrow": "产品"
+  },
+  "productsStrawberryPackaging": {
+    "title": "草莓零售包装",
+    "eyebrow": "产品"
+  },
+  "productsFlowerTrolley": {
+    "title": "花卉展示手推车",
+    "eyebrow": "产品"
+  },
+  "news": {
+    "title": "新闻",
+    "eyebrow": "新闻"
+  },
+  "newsGreenhouseTechnology": {
+    "title": "新一代温室技术",
+    "eyebrow": "新闻"
+  },
+  "newsAsiaPacificExpansion": {
+    "title": "亚太市场拓展",
+    "eyebrow": "新闻"
+  },
+  "industries": {
+    "title": "行业",
+    "eyebrow": "行业"
+  },
+  "industriesGreenhouses": {
+    "title": "商业温室",
+    "eyebrow": "行业"
+  },
+  "industriesNurseries": {
+    "title": "苗圃与繁殖",
+    "eyebrow": "行业"
+  },
+  "industriesRetail": {
+    "title": "零售与分销",
+    "eyebrow": "行业"
+  },
+  "industriesBerries": {
+    "title": "浆果与软质水果",
+    "eyebrow": "行业"
+  },
+  "faqs": {
+    "title": "常见问题",
+    "eyebrow": "支持",
+    "description": "关于产品、运输和报价的常见问题解答。"
+  },
+  "workWithUs": {
+    "title": "加入我们",
+    "eyebrow": "招聘",
+    "description": "加入构建综合园艺解决方案的全球团队。"
+  }
+}

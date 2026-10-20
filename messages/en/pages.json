@@ -1,0 +1,140 @@
+{
+  "about": {
+    "title": "About Us",
+    "eyebrow": "Company",
+    "description": "Our history, mission, and global horticulture footprint."
+  },
+  "caseStudies": {
+    "title": "Case Studies",
+    "eyebrow": "Stories"
+  },
+  "blog": {
+    "title": "Blog",
+    "eyebrow": "Insights"
+  },
+  "workWithUs": {
+    "title": "Work with us",
+    "eyebrow": "Careers",
+    "description": "Join a global team building integrated horticulture solutions."
+  },
+  "faqs": {
+    "title": "FAQs",
+    "eyebrow": "Support",
+    "description": "Answers to common questions about products, shipping, and quotations."
+  },
+  "contact": {
+    "title": "Contact Us",
+    "eyebrow": "Contact",
+    "description": "Whether you need product guidance, partnership support, or a conversation with our local team — we are ready to help."
+  },
+  "careers": {
+    "title": "Careers",
+    "eyebrow": "Company"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "eyebrow": "Legal",
+    "description": "How Oboya Horticulture collects, uses, stores, and protects personal data."
+  },
+  "terms": {
+    "title": "Terms of Use",
+    "eyebrow": "Legal",
+    "description": "Please read these Terms of Use carefully before accessing or using Oboya websites and digital services."
+  },
+  "sustainability": {
+    "title": "Sustainability",
+    "eyebrow": "Sustainability"
+  },
+  "solutions": {
+    "title": "Solutions",
+    "eyebrow": "Solutions"
+  },
+  "solutionsVegetables": {
+    "title": "Vegetables & Herbs",
+    "eyebrow": "Solutions"
+  },
+  "solutionsFlowers": {
+    "title": "Flowers & Ornamentals",
+    "eyebrow": "Solutions"
+  },
+  "solutionsFruits": {
+    "title": "Fruits & Berries",
+    "eyebrow": "Solutions"
+  },
+  "solutionsPropagation": {
+    "title": "Propagation & Growing",
+    "eyebrow": "Solutions"
+  },
+  "solutionsPackaging": {
+    "title": "Packaging & Logistics",
+    "eyebrow": "Solutions"
+  },
+  "solutionsSustainability": {
+    "title": "Sustainable Practices",
+    "eyebrow": "Solutions"
+  },
+  "solutionsDistribution": {
+    "title": "Distribution Network",
+    "eyebrow": "Solutions"
+  },
+  "solutionsCircularEconomy": {
+    "title": "Circular Economy",
+    "eyebrow": "Solutions"
+  },
+  "products": {
+    "title": "Products",
+    "eyebrow": "Products"
+  },
+  "productsGrowingMedia": {
+    "title": "Growing Media",
+    "eyebrow": "Products"
+  },
+  "productsPackaging": {
+    "title": "Packaging",
+    "eyebrow": "Products"
+  },
+  "productsEquipment": {
+    "title": "Equipment",
+    "eyebrow": "Products"
+  },
+  "productsStrawberryPackaging": {
+    "title": "Strawberry Retail Packaging",
+    "eyebrow": "Products"
+  },
+  "productsFlowerTrolley": {
+    "title": "Flower Display Trolley",
+    "eyebrow": "Products"
+  },
+  "news": {
+    "title": "News",
+    "eyebrow": "News"
+  },
+  "newsGreenhouseTechnology": {
+    "title": "Next-generation greenhouse technology",
+    "eyebrow": "News"
+  },
+  "newsAsiaPacificExpansion": {
+    "title": "Asia-Pacific expansion",
+    "eyebrow": "News"
+  },
+  "industries": {
+    "title": "Industries",
+    "eyebrow": "Industries"
+  },
+  "industriesGreenhouses": {
+    "title": "Commercial Greenhouses",
+    "eyebrow": "Industries"
+  },
+  "industriesNurseries": {
+    "title": "Nurseries & Propagation",
+    "eyebrow": "Industries"
+  },
+  "industriesRetail": {
+    "title": "Retail & Distribution",
+    "eyebrow": "Industries"
+  },
+  "industriesBerries": {
+    "title": "Berry & Soft Fruit",
+    "eyebrow": "Industries"
+  }
+}

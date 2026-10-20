@@ -391,9 +391,39 @@ function deepMerge(target, source) {
   }
 }
 
-for (const locale of ["en", "pt-BR", "es", "zh-CN"]) {
+function readLocaleMessages(locale) {
   const file = path.join(messagesDir, `${locale}.json`);
-  const data = JSON.parse(fs.readFileSync(file, "utf8"));
+  if (fs.existsSync(file)) {
+    return { data: JSON.parse(fs.readFileSync(file, "utf8")), mode: "file" };
+  }
+  const dir = path.join(messagesDir, locale);
+  const index = fs.readFileSync(path.join(dir, "index.ts"), "utf8");
+  const order = [...index.matchAll(/from "\.\/([^"]+)\.json"/g)].map((match) => match[1]);
+  const data = {};
+  for (const name of order) {
+    data[name] = JSON.parse(fs.readFileSync(path.join(dir, `${name}.json`), "utf8"));
+  }
+  return { data, mode: "folder", order };
+}
+
+function writeLocaleMessages(locale, data, meta) {
+  if (meta.mode === "file") {
+    fs.writeFileSync(path.join(messagesDir, `${locale}.json`), `${JSON.stringify(data, null, 2)}\n`);
+    return;
+  }
+  const dir = path.join(messagesDir, locale);
+  const names = [...meta.order];
+  for (const name of Object.keys(data)) {
+    if (!names.includes(name)) names.push(name);
+  }
+  for (const name of names) {
+    fs.writeFileSync(path.join(dir, `${name}.json`), `${JSON.stringify(data[name], null, 2)}\n`);
+  }
+}
+
+for (const locale of ["en", "pt-BR", "es", "zh-CN"]) {
+  const stored = readLocaleMessages(locale);
+  const data = stored.data;
   deepMerge(data, shared[locale]);
   if (locale === "en") {
     data.aboutPage = aboutPage.en;
@@ -465,7 +495,7 @@ for (const locale of ["en", "pt-BR", "es", "zh-CN"]) {
     data.workWithUsPage = { intro: shared[locale].pages.workWithUs.description, benefits: { b1: { title: "Global", description: "..." } }, openings: { title: "Openings", o1: { title: "Role", location: "City", type: "Full-time" } }, application: { title: "Apply", description: "...", name: "Name", email: "Email", message: "Message", submit: "Submit", success: "..." } };
     data.legalPage = { updated: "Last Updated: September 14, 2026", heroTitle: "Terms of Use", heroBody: shared[locale].pages.terms.description };
   }
-  fs.writeFileSync(file, `${JSON.stringify(data, null, 2)}\n`);
+  writeLocaleMessages(locale, data, stored);
 }
 
 console.log("Merged i18n content");

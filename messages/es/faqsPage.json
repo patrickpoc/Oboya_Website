@@ -1,0 +1,61 @@
+{
+  "intro": "Encuentre respuestas rápidas sobre productos, logística, cotizaciones y soporte.",
+  "searchPlaceholder": "Buscar FAQs por palabra clave o términos similares…",
+  "noResults": "Ninguna FAQ coincide con su búsqueda. Pruebe otras palabras clave o explore por categoría.",
+  "categories": {
+    "products": "Products",
+    "shipping": "Shipping",
+    "quotations": "Quotations",
+    "support": "Support"
+  },
+  "products": {
+    "q1": {
+      "question": "How do I know which products are available in my country?",
+      "answer": "Use the B2B shop to select your country and currency. Only available SKUs will be shown."
+    },
+    "q2": {
+      "question": "Are all products available in the shop?",
+      "answer": "The complete product range may vary by region. The shop shows only items currently available in your market."
+    },
+    "q3": {
+      "question": "Can I request samples?",
+      "answer": "Yes. Contact your local office or submit a quotation request with sample notes."
+    }
+  },
+  "shipping": {
+    "q1": {
+      "question": "Do you ship internationally?",
+      "answer": "Yes. Availability and lead times vary by product and destination."
+    },
+    "q2": {
+      "question": "How are lead times estimated?",
+      "answer": "Your local sales team confirms lead times after quotation review."
+    }
+  },
+  "quotations": {
+    "q1": {
+      "question": "Does checkout process payment?",
+      "answer": "No. Checkout creates a quotation request for the local commercial team."
+    },
+    "q2": {
+      "question": "What information should I include?",
+      "answer": "Company, country, contact details, quantities, and any project notes."
+    },
+    "q3": {
+      "question": "How fast will I receive a response?",
+      "answer": "Most requests receive a response within two business days."
+    }
+  },
+  "support": {
+    "q1": {
+      "question": "How do I contact a specific office?",
+      "answer": "Use the interactive map on the homepage or the contact form with an office reference."
+    },
+    "q2": {
+      "question": "Which languages are supported?",
+      "answer": "Our site is available in English, Portuguese, Spanish, and Chinese."
+    }
+  },
+  "heroTitle": "FAQ",
+  "heroSubtitle": "Preguntas frecuentes sobre nuestros productos y servicios"
+}

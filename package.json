@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "i18n:check": "node scripts/check-i18n.mjs",
     "seed:map": "node scripts/seed-map-locations.mjs",
     "seed:products": "node scripts/seed-products.mjs",
     "migrate:product-ids": "node scripts/migrate-product-ids-to-sku.mjs",

@@ -1,0 +1,10 @@
+{
+  "metaTitle": "Últimas notícias",
+  "allNews": "Todas as notícias",
+  "filterLabel": "Filtrar por categoria",
+  "articleLabel": "Artigo do blog",
+  "empty": "Nenhum artigo corresponde a esta categoria.",
+  "prevPage": "Página anterior",
+  "nextPage": "Próxima página",
+  "detailPlaceholder": "O conteúdo completo do artigo aparecerá aqui quando adicionado no painel."
+}

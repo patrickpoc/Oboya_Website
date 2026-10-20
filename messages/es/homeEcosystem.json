@@ -1,0 +1,21 @@
+{
+  "ariaLabel": "Ecosistema hortícola Oboya",
+  "title": "De la Propagación al\nPunto de Venta",
+  "body": {
+    "p1": "El éxito en la horticultura depende de más que productos individuales. Depende de cómo el cultivo, el embalaje, la logística, el transporte, la presentación en retail y los procesos operativos trabajan juntos.",
+    "p2": "Oboya Horticulture ofrece soluciones en múltiples etapas del recorrido hortícola, ayudando a los clientes a acceder a los productos y la expertise que necesitan a través de un solo socio de confianza."
+  },
+  "closingLine1": "Un Socio. Un Ecosistema.",
+  "closingLine2": "Oportunidades Infinitas para Rendir Mejor.",
+  "prev": "Etapa anterior",
+  "next": "Siguiente etapa",
+  "restart": "Reiniciar desde Propagación",
+  "stages": {
+    "propagation": "Propagación",
+    "growing": "Cultivo",
+    "packaging": "Empaque",
+    "logistics": "Logística",
+    "retail": "Exhibición en Retail",
+    "pos": "Punto de Venta"
+  }
+}

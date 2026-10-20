@@ -1,0 +1,37 @@
+{
+  "eyebrow": "Blog",
+  "title": "Ideas y noticias",
+  "description": "Tendencias, innovación e historias de toda la cadena de suministro hortícola.",
+  "readMore": "Leer artículo",
+  "allPosts": "Todos",
+  "filterLabel": "Filtrar por categoría",
+  "articleLabel": "Artículo",
+  "empty": "Ningún artículo coincide con esta categoría.",
+  "emptyAll": "Aún no hay artículos publicados.",
+  "featuredLabel": "Destacado",
+  "detailPlaceholder": "El contenido completo del artículo aparecerá aquí cuando se añada en el panel.",
+  "posts": {
+    "post1": {
+      "title": "Sustainable packaging trends in fresh produce",
+      "excerpt": "How retailers and growers are aligning packaging with circular economy goals.",
+      "p1": "Retailers are demanding packaging that protects product quality while reducing environmental impact.",
+      "p2": "Oboya partners with growers to pilot recyclable formats and optimize shelf presentation.",
+      "p3": "Early pilots show improved waste recovery without compromising freshness."
+    },
+    "post2": {
+      "title": "Greenhouse innovation in 2026",
+      "excerpt": "Climate control, substrates, and logistics are converging in modern greenhouse design.",
+      "p1": "Integrated systems help growers manage humidity, irrigation, and crop cycles with greater precision.",
+      "p2": "Digital monitoring and modular equipment reduce downtime across large facilities.",
+      "p3": "The next wave of investment focuses on energy efficiency and automation."
+    },
+    "post3": {
+      "title": "Berry category growth in retail",
+      "excerpt": "Packaging and display solutions supporting premium berry programs.",
+      "p1": "Berry sales continue to outperform broader produce categories in many markets.",
+      "p2": "Retail-ready packs and display trolleys improve visibility and reduce handling damage.",
+      "p3": "Localized assortments help chains tailor pack sizes to regional demand."
+    }
+  },
+  "backToBlog": "Volver al blog"
+}

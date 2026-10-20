@@ -1,0 +1,48 @@
+{
+  "intro": "Build your career with a global horticulture company focused on innovation, sustainability, and local impact.",
+  "benefits": {
+    "b1": {
+      "title": "Global reach",
+      "description": "Work with teams and growers across 25 countries."
+    },
+    "b2": {
+      "title": "Learning culture",
+      "description": "Continuous development in products, operations, and sustainability."
+    },
+    "b3": {
+      "title": "Local impact",
+      "description": "Support growers in your region with integrated solutions."
+    },
+    "b4": {
+      "title": "Inclusive teams",
+      "description": "Collaborative teams across disciplines and markets."
+    }
+  },
+  "openings": {
+    "title": "Open positions",
+    "o1": {
+      "title": "Regional Sales Manager",
+      "location": "São Paulo, Brazil",
+      "type": "Full-time"
+    },
+    "o2": {
+      "title": "Packaging Product Specialist",
+      "location": "Malmö, Sweden",
+      "type": "Full-time"
+    },
+    "o3": {
+      "title": "Greenhouse Solutions Engineer",
+      "location": "Shanghai, China",
+      "type": "Full-time"
+    }
+  },
+  "application": {
+    "title": "Spontaneous application",
+    "description": "Don't see a matching role? Send your profile and we'll keep it on file.",
+    "name": "Full name",
+    "email": "Email",
+    "message": "Tell us about your experience",
+    "submit": "Submit application",
+    "success": "Thank you. Our HR team has received your application."
+  }
+}

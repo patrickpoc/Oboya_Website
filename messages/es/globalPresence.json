@@ -1,0 +1,13 @@
+{
+  "title": "Operamos en 25 países, con centros de producción en Asia, América del Sur y Europa, además de equipos de soporte local en todo el mundo.",
+  "badge": "Global",
+  "mapAlt": "Mapa global interactivo de Oboya con oficinas, fábricas y almacenes en 25 países",
+  "interactiveHint": "Mapa interactivo — pase el cursor para explorar",
+  "interactiveHintTouch": "Mapa interactivo — toque para explorar",
+  "panelPhone": "Teléfono",
+  "panelFacility": "Instalación",
+  "panelExplore": "Pase el cursor sobre una ubicación en el mapa para explorar nuestra presencia global.",
+  "panelSegments": "Segmentos atendidos",
+  "panelContactOffice": "Contactar esta oficina",
+  "panelOfficeCount": "{count, plural, one {# oficina} other {# oficinas}}"
+}

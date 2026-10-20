@@ -1,0 +1,83 @@
+{
+  "eyebrow": "Case Studies",
+  "title": "Proven results worldwide — partnerships that scale growers, logistics, and retail outcomes.",
+  "description": "Partnerships across South Africa, Colombia, and Ecuador — from pot plant wrapping automation and integrated post-harvest logistics to RFID and AGV pilots and inclusive bouquet equipment.",
+  "heroEyebrow": "Real Challenges. Measurable Results.",
+  "heroTitle": "Discover how growers, exporters, distributors, and retailers have partnered with Oboya to improve efficiency, strengthen supply chains, and achieve meaningful business outcomes.",
+  "introTitle": "Every Operation Has<br></br>Its Own Challenges.",
+  "introBody": "From greenhouse floors to retail shelves, every partner faces distinct operational pressures. These stories show how Oboya collaborates locally to unlock efficiency, resilience, and lasting results.",
+  "findOutMore": "Find out more",
+  "emptyState": "Case studies are coming soon.",
+  "hubTitle": "Proof from growers, packers, and distributors worldwide",
+  "hubDescription": "Browse featured partnerships below, then filter by country to explore more stories from your market.",
+  "featuredLabel": "Featured",
+  "filterAll": "All regions",
+  "filterAllCountries": "All countries",
+  "carouselEyebrow": "Browse by market",
+  "byCountryTitle": "Explore stories by country",
+  "emptyFilter": "No case studies in this country yet.",
+  "readMore": "View case study",
+  "closePanel": "Close",
+  "previous": "Previous case",
+  "next": "Next case",
+  "showcaseTitle": "Featured stories",
+  "calloutGreen": "From greenhouse floors to retail shelves,",
+  "calloutWhite": "we help teams turn operational complexity into measurable results.",
+  "calloutBody": "Each case study reflects local expertise, integrated products, and long-term partnership — not one-off deliveries.",
+  "storiesEyebrow": "Stories in detail",
+  "allCasesTitle": "Success stories worldwide",
+  "byRegionTitle": "More by region",
+  "ctaTitle": "Working on a similar challenge?",
+  "ctaDescription": "Talk with our local team about logistics, packaging, substrates, or distribution support for your market.",
+  "ctaPrimary": "Contact us",
+  "ctaSecondary": "Ask for a quotation",
+  "backToHub": "All case studies",
+  "relatedTitle": "Related stories",
+  "factClient": "Client",
+  "factIndustry": "Industry",
+  "factTimeline": "Timeline",
+  "factCountry": "Country",
+  "factRegion": "Region",
+  "regions": {
+    "europe": "Europe",
+    "americas": "Americas",
+    "asia": "Asia",
+    "other": "Other regions"
+  },
+  "challengeLabel": "Challenge",
+  "solutionLabel": "Solution",
+  "implementationLabel": "Implementation",
+  "resultLabel": "Results",
+  "clientPerspective": "Client Perspective",
+  "items": {
+    "case1": {
+      "title": "Automating Efficiency in Ornamental Horticulture",
+      "excerpt": "LVG Plants partnered with Oboya Horticulture South Africa to automate pot plant wrapping.",
+      "challenge": "Manual wrapping was labor-intensive and limited daily dispatch capacity.",
+      "solution": "Four automatic pot plant wrapping machines, with phased installation through 2026.",
+      "result": "Expected higher capacity, consistency, and lower packing costs."
+    },
+    "case2": {
+      "title": "Improving Post-Harvest Efficiency Through Integrated Logistics",
+      "excerpt": "Elite Flowers Colombia optimized internal logistics with trolleys, buckets, and tractors.",
+      "challenge": "Excessive manual movement of stems and materials slowed post-harvest operations.",
+      "solution": "Oboya Horticulture trolleys and buckets from 2020, with tractors added in 2025.",
+      "result": "Faster transportation, less fatigue, and smoother workflow performance."
+    },
+    "case3": {
+      "title": "Advancing Traceability with RFID and AGV Automation",
+      "excerpt": "Elite Flowers Colombia pilots RFID tracking and AGV pallet systems with Oboya.",
+      "challenge": "Manual registration and pallet handling limited traceability and efficiency.",
+      "solution": "Pilot program evaluating RFID Tracking Systems and AGV Pallet Systems.",
+      "result": "Faster identification, improved traceability, and data for future deployment."
+    },
+    "case4": {
+      "title": "Improving Productivity Through Inclusive Automation",
+      "excerpt": "Flor de Azama Farm achieved a 70% productivity gain with bouquet-tying automation.",
+      "challenge": "Manual sachet attachment caused discomfort and limited post-harvest output.",
+      "solution": "Automatic bouquet-tying machine with technical support and follow-up.",
+      "result": "70% higher productivity with improved ergonomics and workplace inclusion."
+    }
+  },
+  "metaTitle": "Case Studies"
+}

@@ -1,0 +1,32 @@
+{
+  "learnMore": "Más Información",
+  "loremLink": "Lorem ipsum",
+  "backHome": "Volver al Inicio",
+  "notFoundTitle": "Página no encontrada",
+  "notFoundDesc": "La página que busca no existe.",
+  "errorTitle": "Algo salió mal",
+  "errorDesc": "No pudimos cargar esta página. Inténtalo de nuevo.",
+  "tryAgain": "Reintentar",
+  "loremShort": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tempor, massa eu auctor pharetra, leo est efficitur orci.",
+  "loremP1": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum tempor, massa eu auctor pharetra, leo est efficitur orci.",
+  "loremP2": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+  "loremP3": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.",
+  "loremP4": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.",
+  "a11y": {
+    "previousTestimonials": "Testimonios anteriores",
+    "nextTestimonials": "Testimonios siguientes",
+    "testimonialPage": "Página de testimonios",
+    "previousSlide": "Diapositiva anterior",
+    "nextSlide": "Diapositiva siguiente",
+    "heroSlides": "Diapositivas principales",
+    "previousSolutions": "Soluciones anteriores",
+    "nextSolutions": "Soluciones siguientes",
+    "cropFilters": "Filtros de cultivo",
+    "colorOptions": "Opciones de color",
+    "moreColorOptions": "Más opciones de color",
+    "showMoreColors": "Mostrar {count} colores más",
+    "pagination": "Paginación",
+    "pageNumber": "Página {page}",
+    "exploreSolutions": "Explorar soluciones"
+  }
+}

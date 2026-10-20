@@ -10,10 +10,10 @@ import {
 } from "react";
 import { NextIntlClientProvider, type AbstractIntlMessages } from "next-intl";
 import type { CmsLocale } from "@/lib/cms/types";
-import enMessages from "@/../messages/en.json";
-import ptBRMessages from "@/../messages/pt-BR.json";
-import esMessages from "@/../messages/es.json";
-import zhCNMessages from "@/../messages/zh-CN.json";
+import enMessages from "@/../messages/en/index";
+import ptBRMessages from "@/../messages/pt-BR/index";
+import esMessages from "@/../messages/es/index";
+import zhCNMessages from "@/../messages/zh-CN/index";
 
 const STORAGE_KEY = "oboya-admin-locale";
 

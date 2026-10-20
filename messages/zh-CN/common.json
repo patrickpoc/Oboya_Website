@@ -1,0 +1,32 @@
+{
+  "learnMore": "了解更多",
+  "loremLink": "Lorem ipsum",
+  "backHome": "返回首页",
+  "notFoundTitle": "页面未找到",
+  "notFoundDesc": "您访问的页面不存在。",
+  "errorTitle": "出了点问题",
+  "errorDesc": "无法加载此页面。请重试。",
+  "tryAgain": "重试",
+  "loremShort": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  "loremP1": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  "loremP2": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
+  "loremP3": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem.",
+  "loremP4": "Nemo enim ipsam voluptatem quia voluptas sit aspernatur.",
+  "a11y": {
+    "previousTestimonials": "上一条客户评价",
+    "nextTestimonials": "下一条客户评价",
+    "testimonialPage": "客户评价页",
+    "previousSlide": "上一张",
+    "nextSlide": "下一张",
+    "heroSlides": "主视觉幻灯片",
+    "previousSolutions": "上一组方案",
+    "nextSolutions": "下一组方案",
+    "cropFilters": "作物筛选",
+    "colorOptions": "颜色选项",
+    "moreColorOptions": "更多颜色选项",
+    "showMoreColors": "再显示 {count} 种颜色",
+    "pagination": "分页",
+    "pageNumber": "第 {page} 页",
+    "exploreSolutions": "探索解决方案"
+  }
+}

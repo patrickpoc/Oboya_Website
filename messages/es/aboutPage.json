@@ -1,0 +1,100 @@
+{
+  "nav": {
+    "history": "History",
+    "mission": "Mission & Values",
+    "timeline": "Timeline",
+    "presence": "Global Presence",
+    "certifications": "Certifications",
+    "leadership": "Leadership",
+    "partners": "Partners"
+  },
+  "history": {
+    "title": "Our history",
+    "p1": "Founded as a regional horticulture supplier, Oboya has grown into a global partner supporting propagation, growing, packaging, and retail display.",
+    "p2": "Today we operate across 25 countries with local teams, production hubs, and strategic partners serving growers worldwide.",
+    "imageAlt": "Oboya greenhouse operations"
+  },
+  "mission": {
+    "title": "Mission, vision & values",
+    "description": "We help growers deliver quality, efficiency, and sustainability across the supply chain."
+  },
+  "vision": {
+    "title": "Vision",
+    "description": "To be the most trusted integrated horticulture partner worldwide."
+  },
+  "values": {
+    "title": "Values",
+    "description": "Integrity, innovation, and sustainability guide every decision we make."
+  },
+  "valuesList": {
+    "integrity": "Integrity in every partnership",
+    "innovation": "Innovation for growers",
+    "sustainability": "Sustainability by design"
+  },
+  "timeline": {
+    "title": "Milestones",
+    "m1": {
+      "year": "1998",
+      "title": "Company founded",
+      "description": "Oboya begins as a regional horticulture supplier."
+    },
+    "m2": {
+      "year": "2005",
+      "title": "European expansion",
+      "description": "First distribution hubs open across Northern Europe."
+    },
+    "m3": {
+      "year": "2012",
+      "title": "Packaging innovation",
+      "description": "Retail-ready packaging line launched for berries and vegetables."
+    },
+    "m4": {
+      "year": "2017",
+      "title": "Asia-Pacific growth",
+      "description": "Production and sales offices established in key APAC markets."
+    },
+    "m5": {
+      "year": "2021",
+      "title": "Sustainability program",
+      "description": "Circular packaging and waste-reduction initiatives scaled globally."
+    },
+    "m6": {
+      "year": "2025",
+      "title": "Digital B2B shop",
+      "description": "International quotation platform launched for commercial buyers."
+    }
+  },
+  "presence": {
+    "title": "Global presence",
+    "description": "With offices, warehouses, and partners across continents, we support growers close to their operations.",
+    "cta": "Explore the interactive map"
+  },
+  "leadership": {
+    "title": "Leadership team",
+    "l1": {
+      "name": "Elena Nordström",
+      "role": "Chief Executive Officer"
+    },
+    "l2": {
+      "name": "James Whitfield",
+      "role": "Chief Operating Officer"
+    },
+    "l3": {
+      "name": "Ana Ribeiro",
+      "role": "Chief Commercial Officer"
+    },
+    "l4": {
+      "name": "Li Wei",
+      "role": "Head of Asia-Pacific"
+    }
+  },
+  "partners": {
+    "title": "Strategic partners",
+    "p1": "GreenHouse Pro",
+    "p2": "AgriPack",
+    "p3": "FloraLogix",
+    "p4": "BerryChain",
+    "p5": "Nordic Grow",
+    "p6": "Sunbelt Supply"
+  }
+}

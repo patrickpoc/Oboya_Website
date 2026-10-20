@@ -1,0 +1,10 @@
+{
+  "metaTitle": "Latest News",
+  "allNews": "All news",
+  "filterLabel": "Filter by category",
+  "articleLabel": "Blog article",
+  "empty": "No articles match this category.",
+  "prevPage": "Previous page",
+  "nextPage": "Next page",
+  "detailPlaceholder": "Full article content will appear here once added in the dashboard."
+}

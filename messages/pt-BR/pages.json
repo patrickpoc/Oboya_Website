@@ -1,0 +1,140 @@
+{
+  "about": {
+    "title": "Sobre Nós",
+    "eyebrow": "Empresa",
+    "description": "Nossa história, missão e presença global em horticultura."
+  },
+  "caseStudies": {
+    "title": "Cases",
+    "eyebrow": "Histórias"
+  },
+  "blog": {
+    "title": "Blog",
+    "eyebrow": "Insights"
+  },
+  "contact": {
+    "title": "Fale Conosco",
+    "eyebrow": "Contato",
+    "description": "Seja orientação de produtos, apoio a parcerias ou contato com nossa equipe local — estamos prontos para ajudar."
+  },
+  "careers": {
+    "title": "Carreiras",
+    "eyebrow": "Empresa"
+  },
+  "privacy": {
+    "title": "Política de Privacidade",
+    "eyebrow": "Jurídico",
+    "description": "Como a Oboya Horticulture coleta, usa, armazena e protege dados pessoais."
+  },
+  "terms": {
+    "title": "Termos de Uso",
+    "eyebrow": "Jurídico",
+    "description": "Termos e condições de uso do site e serviços Oboya."
+  },
+  "sustainability": {
+    "title": "Sustentabilidade",
+    "eyebrow": "Sustentabilidade"
+  },
+  "solutions": {
+    "title": "Soluções",
+    "eyebrow": "Soluções"
+  },
+  "solutionsVegetables": {
+    "title": "Vegetais e Ervas",
+    "eyebrow": "Soluções"
+  },
+  "solutionsFlowers": {
+    "title": "Flores e Ornamentais",
+    "eyebrow": "Soluções"
+  },
+  "solutionsFruits": {
+    "title": "Frutas e Bagas",
+    "eyebrow": "Soluções"
+  },
+  "solutionsPropagation": {
+    "title": "Propagação e Cultivo",
+    "eyebrow": "Soluções"
+  },
+  "solutionsPackaging": {
+    "title": "Embalagem e Logística",
+    "eyebrow": "Soluções"
+  },
+  "solutionsSustainability": {
+    "title": "Práticas Sustentáveis",
+    "eyebrow": "Soluções"
+  },
+  "solutionsDistribution": {
+    "title": "Rede de Distribuição",
+    "eyebrow": "Soluções"
+  },
+  "solutionsCircularEconomy": {
+    "title": "Economia Circular",
+    "eyebrow": "Soluções"
+  },
+  "products": {
+    "title": "Produtos",
+    "eyebrow": "Produtos"
+  },
+  "productsGrowingMedia": {
+    "title": "Substratos",
+    "eyebrow": "Produtos"
+  },
+  "productsPackaging": {
+    "title": "Embalagens",
+    "eyebrow": "Produtos"
+  },
+  "productsEquipment": {
+    "title": "Equipamentos",
+    "eyebrow": "Produtos"
+  },
+  "productsStrawberryPackaging": {
+    "title": "Embalagem de Morango para Varejo",
+    "eyebrow": "Produtos"
+  },
+  "productsFlowerTrolley": {
+    "title": "Carrinho de Exposição de Flores",
+    "eyebrow": "Produtos"
+  },
+  "news": {
+    "title": "Notícias",
+    "eyebrow": "Notícias"
+  },
+  "newsGreenhouseTechnology": {
+    "title": "Tecnologia de estufa de nova geração",
+    "eyebrow": "Notícias"
+  },
+  "newsAsiaPacificExpansion": {
+    "title": "Expansão na Ásia-Pacífico",
+    "eyebrow": "Notícias"
+  },
+  "industries": {
+    "title": "Setores",
+    "eyebrow": "Setores"
+  },
+  "industriesGreenhouses": {
+    "title": "Estufas Comerciais",
+    "eyebrow": "Setores"
+  },
+  "industriesNurseries": {
+    "title": "Viveiros e Propagação",
+    "eyebrow": "Setores"
+  },
+  "industriesRetail": {
+    "title": "Varejo e Distribuição",
+    "eyebrow": "Setores"
+  },
+  "industriesBerries": {
+    "title": "Bagas e Frutas Vermelhas",
+    "eyebrow": "Setores"
+  },
+  "faqs": {
+    "title": "Perguntas frequentes",
+    "eyebrow": "Suporte",
+    "description": "Respostas sobre produtos, envio e cotações."
+  },
+  "workWithUs": {
+    "title": "Trabalhe conosco",
+    "eyebrow": "Carreiras",
+    "description": "Junte-se a uma equipe global de soluções hortícolas integradas."
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "ariaLabel": "Oboya horticulture ecosystem",
+  "title": "From Propagation to\nPoint of Sale",
+  "body": {
+    "p1": "Success in horticulture depends on more than individual products. It depends on how growing, packaging, logistics, transport, retail presentation, and operational processes work together.",
+    "p2": "Oboya Horticulture offers solutions across multiple stages of the horticultural journey, helping customers access the products and expertise they need through a single trusted partner."
+  },
+  "closingLine1": "One Partner. One Ecosystem.",
+  "closingLine2": "Endless Opportunities to Perform Better.",
+  "prev": "Previous stage",
+  "next": "Next stage",
+  "restart": "Restart from Propagation",
+  "stages": {
+    "propagation": "Propagation",
+    "growing": "Growing",
+    "packaging": "Packaging",
+    "logistics": "Logistics",
+    "retail": "Retail Display",
+    "pos": "Point of Sale"
+  }
+}

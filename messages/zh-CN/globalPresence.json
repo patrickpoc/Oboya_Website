@@ -1,0 +1,13 @@
+{
+  "title": "我们在25个国家开展业务，在亚洲、南美洲和欧洲设有生产中心，并在全球设有本地支持团队。",
+  "badge": "全球",
+  "mapAlt": "Oboya 全球互动布局图，展示25个国家的办事处、工厂和仓库",
+  "interactiveHint": "互动地图 — 悬停探索",
+  "interactiveHintTouch": "互动地图 — 点击探索",
+  "panelPhone": "电话",
+  "panelFacility": "设施",
+  "panelExplore": "将鼠标悬停在地图上的位置，探索我们的全球布局。",
+  "panelSegments": "服务领域",
+  "panelContactOffice": "联系该办事处",
+  "panelOfficeCount": "{count, plural, other {# 个办事处}}"
+}

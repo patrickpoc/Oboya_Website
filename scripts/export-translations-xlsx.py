@@ -50,6 +50,15 @@ def flatten(obj, prefix=""):
 def load_messages():
     by_locale = {}
     for loc in LOCALES:
+        folder = ROOT / "messages" / loc
+        if folder.is_dir():
+            data = {}
+            index = (folder / "index.ts").read_text(encoding="utf-8")
+            names = re.findall(r'from "\./([^"]+)\.json"', index)
+            for name in names:
+                data[name] = json.loads((folder / f"{name}.json").read_text(encoding="utf-8"))
+            by_locale[loc] = data
+            continue
         path = ROOT / "messages" / f"{loc}.json"
         by_locale[loc] = json.loads(path.read_text(encoding="utf-8"))
     return by_locale

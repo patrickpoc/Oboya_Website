@@ -1,0 +1,10 @@
+{
+  "metaTitle": "最新资讯",
+  "allNews": "全部资讯",
+  "filterLabel": "按类别筛选",
+  "articleLabel": "博客文章",
+  "empty": "没有符合此类别的文章。",
+  "prevPage": "上一页",
+  "nextPage": "下一页",
+  "detailPlaceholder": "在后台添加后，完整文章内容将显示在此处。"
+}

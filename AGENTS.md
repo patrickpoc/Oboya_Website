@@ -27,3 +27,9 @@ Canonical tokens live in `src/styles/tokens.css` and `.cursor/rules/oboya-brand-
 
 Use these for accents and collapsed UI strips; do not invent off-brand colors when a palette swatch fits.
 <!-- END:oboya-brand-palette -->
+
+# i18n
+
+UI copy lives in `messages/{locale}/{namespace}.json` for `en`, `pt-BR`, `es`, and `zh-CN`. `messages/{locale}/index.ts` assembles those files. Do not recreate the monolithic `messages/{locale}.json`.
+
+To add a key, put the same path in all four locales, keep ICU placeholders identical (`{count}`, `{id}`, and the argument of `plural` / `select`), then run `npm run i18n:check`. `node scripts/i18n-split.mjs join` rebuilds a single JSON, and `split` reverses it.
