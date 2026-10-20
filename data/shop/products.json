@@ -1,1 +1,47 @@
-[]
+[
+  {
+    "id": "SKU-001",
+    "sku": "SKU-001",
+    "moq": 1,
+    "brandId": "oboya",
+    "categoryId": "pots",
+    "subcategoryId": "containers",
+    "images": ["/assets/logo.svg"],
+    "tags": ["demo"],
+    "availability": { "US": true, "BR": true },
+    "enabledCountries": { "US": true, "BR": true },
+    "prices": { "USD": 10, "BRL": 50, "EUR": 9 },
+    "application": [],
+    "cultures": [],
+    "certifications": [],
+    "countryOfOrigin": "BR",
+    "stockStatus": "in_stock",
+    "stockQuantity": null,
+    "unlimitedStock": true,
+    "specs": [],
+    "documents": [],
+    "relatedProductIds": [],
+    "defaultColor": "",
+    "defaultColorName": { "en": "", "pt-BR": "", "es": "", "zh-CN": "" },
+    "colorVariants": [],
+    "name": {
+      "en": "Demo pot",
+      "pt-BR": "Vaso demo",
+      "es": "Maceta demo",
+      "zh-CN": "演示花盆"
+    },
+    "shortDescription": {
+      "en": "Local demo product for the shop.",
+      "pt-BR": "Produto demo local da loja.",
+      "es": "Producto demo local de la tienda.",
+      "zh-CN": "商店本地演示产品。"
+    },
+    "description": {
+      "en": "Local demo product for the shop.",
+      "pt-BR": "Produto demo local da loja.",
+      "es": "Producto demo local de la tienda.",
+      "zh-CN": "商店本地演示产品。"
+    },
+    "status": "published"
+  }
+]

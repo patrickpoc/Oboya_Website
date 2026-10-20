@@ -102,7 +102,7 @@ export function isProductPurgeDue(product: Pick<CmsProduct, "purgeAt">): boolean
 }
 
 function seedProducts(): CmsProduct[] {
-  return (productsData as ShopProduct[]).map(withDefaults);
+  return (productsData as unknown as ShopProduct[]).map(withDefaults);
 }
 
 function buildUniqueDuplicateSku(baseSku: string, existingSkus: Set<string>) {
