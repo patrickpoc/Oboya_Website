@@ -15,7 +15,7 @@ import { hydrateAccessControl, getAccessSnapshot } from "@/lib/cms/permissions/a
 
 export const ACCESS_CONTROL_DOC_ID = "cms-access-control";
 
-function normalizeDoc(raw: unknown): AccessControlDoc {
+export function normalizeDoc(raw: unknown): AccessControlDoc {
   const fallback = buildDefaultAccessControlDoc();
   if (!raw || typeof raw !== "object") return fallback;
 

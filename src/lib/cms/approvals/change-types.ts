@@ -28,8 +28,8 @@ export const CHANGE_TYPES = [
   { id: "blog.delete", module: "blog", entityType: "blog_post", available: true },
   { id: "case_studies.upsert", module: "case_studies", entityType: "case_study", available: true },
   { id: "case_studies.delete", module: "case_studies", entityType: "case_study", available: true },
-  { id: "careers.upsert", module: "careers", entityType: "job_opening", available: false },
-  { id: "careers.delete", module: "careers", entityType: "job_opening", available: false },
+  { id: "careers.upsert", module: "careers", entityType: "job_opening", available: true },
+  { id: "careers.delete", module: "careers", entityType: "job_opening", available: true },
 ] as const satisfies readonly ChangeTypeDefinition[];
 
 export type ChangeTypeId = (typeof CHANGE_TYPES)[number]["id"];

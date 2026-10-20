@@ -92,11 +92,18 @@
       "sortOrder": 12
     },
     {
+      "id": "recruiter",
+      "label": "Recruiter",
+      "system": true,
+      "active": true,
+      "sortOrder": 13
+    },
+    {
       "id": "viewer",
       "label": "Viewer",
       "system": true,
       "active": true,
-      "sortOrder": 13
+      "sortOrder": 14
     }
   ],
   "matrix": {
@@ -551,6 +558,28 @@
       "analytics": [
         "view"
       ],
+      "audit_logs": "none"
+    },
+    "recruiter": {
+      "dashboard": [
+        "view"
+      ],
+      "website": "none",
+      "marketplace": "none",
+      "global_presence": "none",
+      "case_studies": "none",
+      "blog": "none",
+      "careers": [
+        "view",
+        "create",
+        "edit",
+        "publish"
+      ],
+      "media": "none",
+      "forms": "none",
+      "users": "none",
+      "settings": "none",
+      "analytics": "none",
       "audit_logs": "none"
     },
     "viewer": {

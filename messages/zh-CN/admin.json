@@ -782,7 +782,8 @@
     "marketplace_analyst": "商城专员",
     "sales_analyst": "销售专员",
     "hr_analyst": "人事专员",
-    "viewer": "只读用户"
+    "viewer": "只读用户",
+    "recruiter": "招聘专员"
   },
   "auth": {
     "signInTitle": "登录管理后台",
@@ -932,7 +933,8 @@
       "marketplace_analyst": "商城专员",
       "sales_analyst": "销售专员",
       "hr_analyst": "人事专员",
-      "viewer": "只读"
+      "viewer": "只读",
+      "recruiter": "招聘专员"
     },
     "levels": {
       "full": "全部",
@@ -1252,11 +1254,325 @@
   "careers": {
     "openings": {
       "title": "招聘职位",
-      "description": "管理职业机会。"
+      "description": "管理职业机会。",
+      "newOpening": "新建职位",
+      "searchPlaceholder": "按标题、slug 或部门搜索",
+      "applicationsCount": "{count, plural, other {# 份申请}}",
+      "filters": {
+        "status": "状态",
+        "department": "部门",
+        "country": "国家/地区",
+        "workModel": "工作模式",
+        "all": "全部（含已归档）",
+        "active": "进行中"
+      },
+      "columns": {
+        "title": "职位",
+        "department": "部门",
+        "location": "工作地点",
+        "workModel": "工作模式",
+        "status": "状态",
+        "applications": "申请",
+        "publishedAt": "发布时间",
+        "updatedAt": "更新时间",
+        "actions": "操作"
+      },
+      "actions": {
+        "edit": "编辑",
+        "duplicate": "复制",
+        "close": "关闭",
+        "reopen": "重新开放",
+        "archive": "归档",
+        "publish": "发布",
+        "delete": "删除",
+        "viewApplications": "查看申请"
+      },
+      "confirm": {
+        "delete": "删除“{title}”？此操作无法撤销。",
+        "archive": "归档“{title}”？该职位将从进行中列表中隐藏。",
+        "close": "关闭“{title}”？该职位将不再接收申请。"
+      },
+      "toasts": {
+        "saved": "职位已保存。",
+        "duplicated": "职位已复制为草稿。",
+        "closed": "职位已关闭。",
+        "reopened": "职位已重新开放。",
+        "archived": "职位已归档。",
+        "published": "职位已发布。",
+        "deleted": "职位已删除。",
+        "deleteBlocked": "该职位已有申请，无法删除，请改为归档。",
+        "invalidTransition": "当前职位状态下无法执行此操作。"
+      },
+      "empty": {
+        "title": "未找到职位",
+        "description": "请创建职位或调整筛选条件。"
+      },
+      "editor": {
+        "titleNew": "新建职位",
+        "titleEdit": "编辑职位",
+        "sections": {
+          "basics": "基本信息",
+          "location": "地点与模式",
+          "content": "内容",
+          "compensation": "薪酬",
+          "publishing": "发布",
+          "ownership": "负责人"
+        },
+        "fields": {
+          "title": "标题",
+          "slug": "Slug",
+          "department": "部门",
+          "country": "国家/地区",
+          "city": "城市",
+          "workModel": "工作模式",
+          "employmentType": "雇佣类型",
+          "seniority": "职级",
+          "positions": "招聘人数",
+          "summary": "摘要",
+          "description": "职位描述",
+          "responsibilities": "工作职责",
+          "requirements": "任职要求",
+          "niceToHave": "加分项",
+          "benefits": "福利待遇",
+          "salaryMin": "最低薪资",
+          "salaryMax": "最高薪资",
+          "salaryCurrency": "币种（ISO 代码）",
+          "salaryPeriod": "周期",
+          "showSalary": "公开显示薪资",
+          "status": "状态",
+          "publishAt": "发布时间",
+          "closeAt": "关闭时间",
+          "hiringManager": "用人经理",
+          "recruiter": "招聘专员"
+        },
+        "validation": {
+          "titleRequired": "必须填写英文标题。",
+          "slugTaken": "该 slug 已被其他职位使用。",
+          "salaryRange": "最高薪资必须大于或等于最低薪资。",
+          "closeBeforePublish": "关闭日期必须晚于发布日期。",
+          "positionsMin": "至少需要一个招聘名额。",
+          "slugRequired": "必须填写 slug。",
+          "salaryNegative": "薪资不能为负数。"
+        }
+      }
     },
     "applications": {
       "title": "申请",
-      "description": "审阅职位申请。"
+      "description": "审阅职位申请。",
+      "newApplication": "新建申请",
+      "searchPlaceholder": "按姓名、邮箱、公司或职位搜索",
+      "exportCsv": "导出 CSV",
+      "duplicateEmailWarning": "该职位已存在使用此邮箱的其他申请。",
+      "filters": {
+        "opening": "职位",
+        "status": "状态",
+        "source": "来源",
+        "allOpenings": "全部职位",
+        "allStatuses": "全部",
+        "allSources": "全部来源",
+        "talentPool": "人才库（无对应职位）"
+      },
+      "columns": {
+        "candidate": "候选人",
+        "opening": "职位",
+        "status": "状态",
+        "rating": "评分",
+        "source": "来源",
+        "appliedAt": "申请时间"
+      },
+      "empty": {
+        "title": "未找到申请",
+        "description": "候选人投递或您手动添加后，申请将显示在此处。"
+      },
+      "toasts": {
+        "created": "申请已创建",
+        "updated": "申请已更新",
+        "deleted": "申请已删除",
+        "anonymized": "申请已匿名化",
+        "cvUploaded": "简历已上传",
+        "cvRemoved": "简历已移除",
+        "cvUploadFailed": "无法上传简历。"
+      },
+      "confirm": {
+        "delete": "永久删除 {name} 的申请？同时将删除其简历。",
+        "anonymize": "匿名化 {name} 的申请？个人数据和简历将被清除。",
+        "removeCv": "移除 {name} 的简历？"
+      },
+      "detail": {
+        "titleNew": "新建申请",
+        "titleEdit": "申请",
+        "anonymizedNotice": "此申请已匿名化。个人数据已被清除，无法再编辑。",
+        "saveFirst": "请先保存申请，再上传简历。",
+        "sections": {
+          "candidate": "候选人",
+          "professional": "职业信息",
+          "preferences": "偏好",
+          "consent": "同意声明",
+          "cv": "简历",
+          "pipeline": "招聘流程",
+          "notes": "备注与动态",
+          "dangerZone": "危险操作"
+        },
+        "fields": {
+          "opening": "职位",
+          "fullName": "姓名",
+          "email": "邮箱",
+          "phone": "电话",
+          "country": "国家/地区",
+          "city": "城市",
+          "linkedinUrl": "LinkedIn 链接",
+          "portfolioUrl": "作品集链接",
+          "currentCompany": "现任公司",
+          "currentTitle": "现任职位",
+          "yearsExperience": "工作年限",
+          "salaryExpectation": "期望薪资",
+          "salaryCurrency": "币种",
+          "salaryPeriod": "周期",
+          "availabilityDate": "可到岗日期",
+          "noticePeriodDays": "离职通知期（天）",
+          "workAuthorization": "工作许可",
+          "willingToRelocate": "是否愿意搬迁",
+          "remotePreference": "工作模式偏好",
+          "languages": "语言",
+          "addLanguage": "添加语言",
+          "coverLetter": "求职信",
+          "source": "来源",
+          "sourceDetail": "来源详情",
+          "referrerName": "推荐人",
+          "consentPrivacy": "候选人已同意隐私政策",
+          "consentVersion": "同意版本",
+          "consentAt": "同意时间",
+          "consentTalentPool": "同意保留至人才库",
+          "status": "状态",
+          "rating": "评分",
+          "assignee": "负责人",
+          "rejectionReason": "淘汰原因",
+          "tags": "标签（以逗号分隔）"
+        },
+        "cv": {
+          "upload": "上传简历",
+          "replace": "替换简历",
+          "download": "下载",
+          "remove": "移除",
+          "hint": "PDF、DOC 或 DOCX，最大 10 MB。",
+          "invalidType": "仅接受 PDF、DOC 或 DOCX 文件。",
+          "tooLarge": "文件大小不得超过 10 MB。",
+          "none": "尚未上传简历。",
+          "unavailable": "简历存储不可用，请检查 Supabase 配置。"
+        },
+        "ratingStar": "评分 {value}/5",
+        "notes": {
+          "placeholder": "为团队添加备注",
+          "add": "添加备注",
+          "empty": "暂无动态。"
+        },
+        "timeline": {
+          "created": "申请已创建",
+          "note": "备注",
+          "status_change": "状态已变更",
+          "rating": "评分已变更",
+          "cv_uploaded": "简历已上传",
+          "cv_removed": "简历已移除",
+          "updated": "详情已更新",
+          "anonymized": "已匿名化"
+        },
+        "actions": {
+          "anonymize": "匿名化",
+          "delete": "删除申请"
+        },
+        "validation": {
+          "nameRequired": "必须填写姓名。",
+          "emailInvalid": "请输入有效的邮箱地址。",
+          "urlInvalid": "请输入以 http:// 或 https:// 开头的有效链接。",
+          "consentRequired": "必须获得候选人同意。",
+          "yearsRange": "工作年限必须在 0 到 70 之间。",
+          "ratingRange": "评分必须在 1 到 5 之间。",
+          "noticeRange": "离职通知期必须为不小于 0 的整数天数。",
+          "openingInvalid": "请选择有效的职位。",
+          "dateInvalid": "请输入有效的可到岗日期。",
+          "salaryNegative": "期望薪资不能为负数。"
+        }
+      }
+    },
+    "common": {
+      "status": {
+        "draft": "草稿",
+        "published": "已发布",
+        "closed": "已关闭",
+        "archived": "已归档"
+      },
+      "workModel": {
+        "onsite": "现场办公",
+        "hybrid": "混合办公",
+        "remote": "远程"
+      },
+      "employmentType": {
+        "full_time": "全职",
+        "part_time": "兼职",
+        "contract": "合同工",
+        "temporary": "临时工",
+        "internship": "实习",
+        "apprenticeship": "学徒"
+      },
+      "seniority": {
+        "intern": "实习生",
+        "junior": "初级",
+        "mid": "中级",
+        "senior": "高级",
+        "lead": "主管",
+        "manager": "经理",
+        "director": "总监",
+        "executive": "高管"
+      },
+      "salaryPeriod": {
+        "hour": "每小时",
+        "month": "每月",
+        "year": "每年"
+      },
+      "pipeline": {
+        "new": "新申请",
+        "screening": "初筛",
+        "interview": "面试",
+        "offer": "录用意向",
+        "hired": "已入职",
+        "rejected": "已淘汰",
+        "withdrawn": "已撤回"
+      },
+      "source": {
+        "website": "官网",
+        "linkedin": "LinkedIn",
+        "referral": "内推",
+        "job_board": "招聘网站",
+        "agency": "猎头机构",
+        "event": "活动",
+        "manual": "手动录入",
+        "other": "其他"
+      },
+      "workAuthorization": {
+        "citizen": "公民",
+        "permanent_resident": "永久居民",
+        "work_visa": "工作签证",
+        "needs_sponsorship": "需要担保",
+        "other": "其他"
+      },
+      "languageLevel": {
+        "A1": "A1 - 入门",
+        "A2": "A2 - 初级",
+        "B1": "B1 - 中级",
+        "B2": "B2 - 中高级",
+        "C1": "C1 - 高级",
+        "C2": "C2 - 精通",
+        "native": "母语"
+      },
+      "save": "保存",
+      "saving": "保存中…",
+      "cancel": "取消",
+      "back": "返回",
+      "loadFailed": "无法加载数据。",
+      "saveFailed": "无法保存。",
+      "notFound": "未找到。",
+      "pendingApproval": "对此项的更改正在等待审批。",
+      "remove": "移除"
     }
   },
   "settings": {

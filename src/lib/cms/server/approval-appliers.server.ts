@@ -319,6 +319,25 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
       };
     }
 
+    case "careers.upsert":
+    case "careers.delete": {
+      const careers = await import("@/lib/cms/server/careers-openings.server");
+      return {
+        async detectConflicts(req) {
+          return deepEqual(await careers.getOpening(req.entityId), req.snapshotBefore ?? null)
+            ? []
+            : ["job_opening"];
+        },
+        async apply(req) {
+          if (changeType === "careers.delete") {
+            await careers.deleteOpening(req.entityId);
+            return;
+          }
+          await careers.saveOpening(req.payloadProposed, { id: req.requestedBy });
+        },
+      };
+    }
+
     default:
       return null;
   }
@@ -370,6 +389,10 @@ export async function currentVsProposed(req: ChangeRequest): Promise<ChangeDiffE
       const current =
         (await studies.readCaseStudiesDurable()).find((s) => s.id === req.entityId) ?? null;
       return diffJson(current, req.payloadProposed);
+    }
+    case "careers.upsert": {
+      const careers = await import("@/lib/cms/server/careers-openings.server");
+      return diffJson(await careers.getOpening(req.entityId), req.payloadProposed);
     }
     default:
       return [];
