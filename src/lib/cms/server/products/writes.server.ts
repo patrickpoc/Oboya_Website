@@ -7,9 +7,8 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import {
   PRODUCTS_FILE,
-  disableFeaturedColorColumn,
-  featuredColorColumnIsAvailable,
-  isMissingFeaturedColorColumn,
+  OPTIONAL_COLUMN_RETRIES,
+  disableMissingOptionalColumn,
   productToRow,
 } from "@/lib/cms/server/products/row.server";
 
@@ -19,8 +18,7 @@ export async function saveProduct(product: CmsProduct) {
   }
   const supabase = await createClient();
   let { error } = await supabase.from("cms_products").upsert(productToRow(product));
-  if (isMissingFeaturedColorColumn(error) && featuredColorColumnIsAvailable()) {
-    disableFeaturedColorColumn();
+  for (let i = 0; i < OPTIONAL_COLUMN_RETRIES && disableMissingOptionalColumn(error); i++) {
     ({ error } = await supabase.from("cms_products").upsert(productToRow(product)));
   }
   if (error) throw new Error(`Failed to save product: ${error.message}`);

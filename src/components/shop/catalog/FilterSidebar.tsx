@@ -230,14 +230,31 @@ export function FilterSidebar({ className }: { className?: string }) {
       })}
 
       <FilterGroup title={t("filterAvailability")}>
-        <CheckboxRow
-          id="available-only"
-          label={t("inStockOnly")}
-          checked={filters.availabilityOnly}
-          onChange={() =>
-            updateFilters({ availabilityOnly: !filters.availabilityOnly })
-          }
-        />
+        <div role="radiogroup" aria-label={t("filterAvailability")} className="space-y-2">
+          {([null, "priced", "quote"] as const).map((value) => (
+            <label
+              key={value ?? "all"}
+              className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground hover:text-oboya-blue-dark"
+            >
+              <input
+                type="radio"
+                name="shop-availability"
+                checked={filters.availability === value}
+                onChange={() => updateFilters({ availability: value })}
+                className="size-4 shrink-0 border-border text-oboya-green focus:ring-oboya-green/30"
+              />
+              <span className="min-w-0">
+                {t(
+                  value === "priced"
+                    ? "availabilityPriced"
+                    : value === "quote"
+                      ? "availabilityQuote"
+                      : "availabilityAll"
+                )}
+              </span>
+            </label>
+          ))}
+        </div>
       </FilterGroup>
 
       {currency && (

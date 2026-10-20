@@ -26,6 +26,7 @@ export type ProductRow = {
   certifications: unknown;
   country_of_origin: string;
   stock_status: CmsProduct["stockStatus"];
+  sale_mode?: unknown;
   stock_quantity: number | null;
   unlimited_stock: boolean;
   specs: unknown;
@@ -83,6 +84,7 @@ export function rowToProduct(row: ProductRow): CmsProduct {
     certifications: parseArray<string>(row.certifications),
     countryOfOrigin: row.country_of_origin ?? "",
     stockStatus: row.stock_status ?? "in_stock",
+    saleMode: row.sale_mode === "quote" ? "quote" : "stock",
     stockQuantity: row.stock_quantity,
     unlimitedStock: row.unlimited_stock ?? true,
     specs: parseArray<CmsProduct["specs"][number]>(row.specs),
@@ -117,31 +119,60 @@ export function rowToProduct(row: ProductRow): CmsProduct {
 }
 
 /**
- * featured_color_id ships with migration 20261007_product_featured_color.sql.
- * Until it is applied, reads and writes retry without the column.
+ * featured_color_id and sale_mode ship with later migrations. Until they are
+ * applied, reads and writes retry without the missing column.
  */
-let featuredColorColumnAvailable = true;
-
-export function featuredColorColumnIsAvailable() {
-  return featuredColorColumnAvailable;
-}
-
-export function disableFeaturedColorColumn() {
-  featuredColorColumnAvailable = false;
-}
 export const FEATURED_COLOR_COLUMN = "featured_color_id";
+export const SALE_MODE_COLUMN = "sale_mode";
+const OPTIONAL_COLUMNS = [FEATURED_COLOR_COLUMN, SALE_MODE_COLUMN];
+export const OPTIONAL_COLUMN_RETRIES = OPTIONAL_COLUMNS.length;
+const disabledOptionalColumns = new Set<string>();
 
-export function isMissingFeaturedColorColumn(
+function missingOptionalColumn(
   error: { code?: string; message?: string } | null | undefined
 ) {
-  if (!error) return false;
+  if (!error) return undefined;
   const missingColumn = error.code === "42703" || error.code === "PGRST204";
-  return missingColumn && String(error.message ?? "").includes(FEATURED_COLOR_COLUMN);
+  if (!missingColumn) return undefined;
+  return OPTIONAL_COLUMNS.find(
+    (column) =>
+      !disabledOptionalColumns.has(column) && String(error.message ?? "").includes(column)
+  );
+}
+
+/** Disables the missing optional column named in `error`; true when a retry makes sense. */
+export function disableMissingOptionalColumn(
+  error: { code?: string; message?: string } | null | undefined
+) {
+  const column = missingOptionalColumn(error);
+  if (!column) return false;
+  disabledOptionalColumns.add(column);
+  return true;
+}
+
+export function withoutDisabledColumns(columns: string) {
+  return columns
+    .split(",")
+    .filter((column) => !disabledOptionalColumns.has(column))
+    .join(",");
+}
+
+export function resetOptionalColumnsForTests() {
+  disabledOptionalColumns.clear();
 }
 
 export function productToRow(product: CmsProduct): ProductRow {
+  if (product.saleMode === "quote" && disabledOptionalColumns.has(SALE_MODE_COLUMN)) {
+    // Fail closed: dropping sale_mode would silently turn a quote product into a priced one.
+    throw Object.assign(
+      new Error("Apply migration 20261021_product_sale_mode first"),
+      { status: 503 }
+    );
+  }
   const row = productToRowWithFeatured(product);
-  if (!featuredColorColumnAvailable) delete row.featured_color_id;
+  for (const column of disabledOptionalColumns) {
+    delete (row as Record<string, unknown>)[column];
+  }
   return row;
 }
 
@@ -167,6 +198,7 @@ export function productToRowWithFeatured(product: CmsProduct): ProductRow {
     certifications: product.certifications ?? [],
     country_of_origin: product.countryOfOrigin ?? "",
     stock_status: product.stockStatus,
+    sale_mode: product.saleMode === "quote" ? "quote" : "stock",
     stock_quantity: product.stockQuantity,
     unlimited_stock: product.unlimitedStock,
     specs: product.specs ?? [],
@@ -204,6 +236,7 @@ export const PRODUCT_TABLE_COLUMNS = [
   "name",
   "status",
   "stock_status",
+  "sale_mode",
   "stock_quantity",
   "unlimited_stock",
   "deleted_at",
@@ -231,6 +264,7 @@ export const PRODUCT_LIST_COLUMNS = [
   "certifications",
   "country_of_origin",
   "stock_status",
+  "sale_mode",
   "stock_quantity",
   "unlimited_stock",
   "specs",

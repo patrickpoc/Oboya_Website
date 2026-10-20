@@ -310,7 +310,7 @@ function validateParentRow(
         "Enable at least one market, or leave Shop off until markets are configured."
       );
     }
-    if (!hasAnyPrice(product)) {
+    if (product.saleMode !== "quote" && !hasAnyPrice(product)) {
       pushIssue(
         issues,
         row,
@@ -320,6 +320,24 @@ function validateParentRow(
         "Add prices in the product editor if the product should be purchasable/quotable."
       );
     }
+  }
+
+  if (
+    changed.has("saleMode") &&
+    !changed.has("status") &&
+    product.saleMode !== "quote" &&
+    product.status === "published" &&
+    hasAnyMarket(product) &&
+    !hasAnyPrice(product)
+  ) {
+    pushIssue(
+      issues,
+      row,
+      "saleMode",
+      "warning",
+      "In-stock products need at least one positive price to appear in the Shop.",
+      "Add a price, or keep the product On request (RFQ)."
+    );
   }
 
   return issues;

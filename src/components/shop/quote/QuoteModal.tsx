@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { PendingItemsLine, PricingNotice } from "@/components/shop/cart/QuotePricingNotice";
 import { RfqError, RfqSuccess } from "@/components/shop/states/ShopStateViews";
 import { formatShopPrice } from "@/lib/shop/format-price";
 import { pickLocalizedLabel } from "@/lib/shop/localized-label";
@@ -47,6 +48,8 @@ export function QuoteModal() {
     currency,
     getLineItems,
     estimatedTotal,
+    pendingCount,
+    pricing,
     itemCount,
     submitRfq,
     rfqStatus,
@@ -154,14 +157,28 @@ export function QuoteModal() {
                           {item.quantity}
                         </span>
                         <span className="shrink-0">
-                          {formatShopPrice(item.lineTotal, currency)}
+                          {item.unavailable
+                            ? t("unavailableInCurrency", { currency: currency ?? "" })
+                            : item.lineTotal === null
+                            ? t("pricePending")
+                            : formatShopPrice(item.lineTotal, currency)}
                         </span>
                       </li>
                     ))}
                   </ul>
-                  <p className="mt-3 text-right font-semibold text-oboya-blue-dark">
-                    {formatShopPrice(estimatedTotal, currency)}
-                  </p>
+                  {pricing !== "quote_only" ? (
+                    <div className="mt-3 text-right">
+                      <p className="font-semibold text-oboya-blue-dark">
+                        {pricing === "mixed"
+                          ? t("partialTotalWithAmount", {
+                              amount: formatShopPrice(estimatedTotal, currency),
+                            })
+                          : formatShopPrice(estimatedTotal, currency)}
+                      </p>
+                      <PendingItemsLine count={pendingCount} />
+                    </div>
+                  ) : null}
+                  <PricingNotice pricing={pricing} className="mt-3" />
                 </div>
 
                 <form className="mt-4 space-y-3" onSubmit={(e) => void handleSubmit(e)}>
@@ -253,10 +270,18 @@ export function QuoteModal() {
                     </label>
                   ) : null}
 
+                  {lineItems.some((item) => item.unavailable) ? (
+                    <p className="text-xs text-oboya-orange" role="alert">
+                      {t("unavailableBlock", { currency: currency ?? "" })}
+                    </p>
+                  ) : null}
                   <div className="flex flex-col gap-2 pt-2 sm:flex-row">
                     <button
                       type="submit"
-                      disabled={rfqStatus === "submitting"}
+                      disabled={
+                        rfqStatus === "submitting" ||
+                        lineItems.some((item) => item.unavailable)
+                      }
                       className={buttonVariants({
                         className:
                           "flex-1 rounded-full bg-oboya-green text-white hover:bg-oboya-green/90",

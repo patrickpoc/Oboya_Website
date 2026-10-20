@@ -24,6 +24,8 @@ import { useProductName } from "@/lib/shop/use-product-name";
 import { useProductDescription } from "@/lib/shop/use-product-description";
 import type { ShopProduct } from "@/lib/shop/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
+import { RfqBadge } from "@/components/shop/product/RfqBadge";
+import { getEffectiveSaleMode } from "@/lib/shop/sale-mode";
 import { formatShopPrice } from "@/lib/shop/format-price";
 import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 
@@ -60,6 +62,7 @@ function ProductCardComponent({
   );
   const activeVariant = getActiveVariant(product, selectedVariantId);
   const price = resolveVariantPrice(product, activeVariant, currency);
+  const isQuote = getEffectiveSaleMode(product) === "quote";
   const imageSrc = resolveVariantImage(product, activeVariant);
   const displaySku = resolveVariantSku(product, activeVariant);
   const displayMoq = resolveVariantMoq(product, activeVariant);
@@ -103,7 +106,7 @@ function ProductCardComponent({
               variants={variants}
               selectedId={activeVariant?.id ?? DEFAULT_COLOR_VARIANT_ID}
               onSelect={setSelectedVariantId}
-              currency={currency}
+              currency={isQuote ? null : currency}
             />
           ) : null}
           {shortDescription ? (
@@ -120,9 +123,13 @@ function ProductCardComponent({
               </>
             ) : null}
           </p>
-          <p className="mt-2 text-sm font-semibold text-oboya-blue-dark">
-            {t("estimatedPrice")}: {formatShopPrice(price, currency)}
-          </p>
+          {isQuote ? (
+            <RfqBadge size="compact" className="mt-2" />
+          ) : (
+            <p className="mt-2 text-sm font-semibold text-oboya-blue-dark">
+              {t("estimatedPrice")}: {formatShopPrice(price, currency)}
+            </p>
+          )}
           <p className="text-[11px] text-oboya-green">
             {t("moq", { count: displayMoq })}
           </p>
@@ -192,7 +199,7 @@ function ProductCardComponent({
             variants={variants}
             selectedId={activeVariant?.id ?? DEFAULT_COLOR_VARIANT_ID}
             onSelect={setSelectedVariantId}
-            currency={currency}
+            currency={isQuote ? null : currency}
           />
         ) : (
           <div className="flex min-h-5 flex-1 items-center" aria-hidden>
@@ -200,9 +207,13 @@ function ProductCardComponent({
           </div>
         )}
         <div className={showSwatches ? "mt-auto space-y-0.5 pt-2" : "space-y-0.5"}>
-          <p className="text-base font-semibold tabular-nums text-oboya-blue-dark">
-            {formatShopPrice(price, currency)}
-          </p>
+          {isQuote ? (
+            <RfqBadge size="compact" />
+          ) : (
+            <p className="text-base font-semibold tabular-nums text-oboya-blue-dark">
+              {formatShopPrice(price, currency)}
+            </p>
+          )}
           <p className="text-[11px] leading-tight text-oboya-green">
             {t("moq", { count: displayMoq })}
           </p>

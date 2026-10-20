@@ -1,4 +1,5 @@
 import type { ShopProduct } from "@/lib/shop/types";
+import { getEffectiveSaleMode } from "@/lib/shop/sale-mode";
 import {
   getActiveVariant,
   isDefaultColorVariantId,
@@ -36,6 +37,7 @@ export function getProductMaxQuantity(
 ): number {
   const moq = getProductMoq(product, variantId);
   if (!product || product.unlimitedStock) return MAX_QUANTITY;
+  if (getEffectiveSaleMode(product) === "quote") return MAX_QUANTITY;
   if (product.stockQuantity != null && product.stockQuantity > 0) {
     return Math.max(moq, product.stockQuantity);
   }

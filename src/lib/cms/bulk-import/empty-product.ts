@@ -27,6 +27,7 @@ export function createEmptyImportProduct(seed?: {
     certifications: [],
     countryOfOrigin: "",
     stockStatus: "in_stock",
+    saleMode: "stock",
     stockQuantity: null,
     unlimitedStock: true,
     specs: [],

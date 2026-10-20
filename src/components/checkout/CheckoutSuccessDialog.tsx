@@ -2,6 +2,7 @@
 
 import { CheckCircle2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import type { QuotePricing } from "@/lib/shop/quote-pricing";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,10 +14,12 @@ import {
 export function CheckoutSuccessDialog({
   referenceId,
   confirmationMessage,
+  pricing,
   onClose,
 }: {
   referenceId: string | null;
   confirmationMessage?: string;
+  pricing?: QuotePricing;
   onClose: () => void;
 }) {
   const t = useTranslations("shop");
@@ -34,7 +37,11 @@ export function CheckoutSuccessDialog({
           {confirmationMessage?.trim() || t("quoteSentTitle")}
         </DialogTitle>
         <DialogDescription className="mt-3 text-sm leading-relaxed text-oboya-blue-dark/70">
-          {t("quoteSentBody")}
+          {pricing === "mixed"
+            ? t("quoteSentBodyMixed")
+            : pricing === "quote_only"
+              ? t("quoteSentBodyQuoteOnly")
+              : t("quoteSentBody")}
         </DialogDescription>
         <div className="mt-6 rounded-xl bg-oboya-soft-white px-4 py-3">
           <p className="text-xs uppercase tracking-wide text-oboya-blue-dark/60">

@@ -9,6 +9,7 @@ import type {
   CartItem,
   CurrencyCode,
   RfqPayload,
+  SaleMode,
   ShopFilters,
   ShopProduct,
   ShopState,
@@ -16,6 +17,7 @@ import type {
   ViewMode,
 } from "@/lib/shop/types";
 import { EMPTY_SHOP_FILTERS } from "@/lib/shop/types";
+import type { QuotePricing } from "@/lib/shop/quote-pricing";
 import { remapCartLine } from "@/lib/shop/product-id-remap";
 
 export const STORAGE_KEY = "oboya-shop-quote";
@@ -37,7 +39,10 @@ export interface ShopContextValue extends ShopState {
   filteredProducts: ShopProduct[];
   displayedProducts: ShopProduct[];
   hasMoreProducts: boolean;
+  /** Sum of priced lines only (quote lines are excluded). */
   estimatedTotal: number;
+  pendingCount: number;
+  pricing: QuotePricing;
   countries: ReturnType<typeof getShopCatalog>["countries"];
   categories: ReturnType<typeof getShopCatalog>["categories"];
   brands: ReturnType<typeof getShopCatalog>["brands"];
@@ -79,8 +84,11 @@ export interface ShopContextValue extends ShopState {
     variantId: string | null;
     variantName: string | null;
     quantity: number;
-    unitPrice: number;
-    lineTotal: number;
+    saleMode: SaleMode;
+    /** Stock product without a price in the current currency (cannot be quoted). */
+    unavailable: boolean;
+    unitPrice: number | null;
+    lineTotal: number | null;
     sku: string;
     image: string;
     categoryId: string;

@@ -20,6 +20,8 @@ import {
   resolveVariantPrice,
   resolveVariantSku,
 } from "@/lib/shop/color-variants";
+import { getEffectiveSaleMode, isPricedLine, isUnavailableLine } from "@/lib/shop/sale-mode";
+import { summarizeQuoteLines } from "@/lib/shop/quote-pricing";
 import type { ShopState } from "@/lib/shop/types";
 import {
   defaultState,
@@ -166,18 +168,33 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           resolvedVariant && hasColorVariants(product)
             ? getVariantDisplayName(resolvedVariant, locale)
             : null;
-        const unitPrice = resolveVariantPrice(
+        const saleMode = getEffectiveSaleMode(product);
+        const priced = isPricedLine(
           product,
           item.variantId ? resolvedVariant : null,
           state.currency!
         );
+        const unavailable = isUnavailableLine(
+          product,
+          item.variantId ? resolvedVariant : null,
+          state.currency!
+        );
+        const unitPrice = priced
+          ? resolveVariantPrice(
+              product,
+              item.variantId ? resolvedVariant : null,
+              state.currency!
+            )
+          : null;
         return {
           productId: item.productId,
           variantId: item.variantId ?? null,
           variantName: colorLabel,
           quantity: item.quantity,
+          saleMode,
+          unavailable,
           unitPrice,
-          lineTotal: unitPrice * item.quantity,
+          lineTotal: unitPrice === null ? null : unitPrice * item.quantity,
           sku: resolveVariantSku(product, resolvedVariant),
           image: resolveVariantImage(
             product,
@@ -195,10 +212,12 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       : never;
   }, [commands, locale, state.currency, state.items]);
 
-  const estimatedTotal = useMemo(
-    () => getLineItems().reduce((sum, item) => sum + item.lineTotal, 0),
-    [getLineItems]
-  );
+  const {
+    pricedTotal: estimatedTotal,
+    pendingCount,
+    pricing,
+  } = useMemo(() => summarizeQuoteLines(getLineItems().filter((line) => !line.unavailable)),
+    [getLineItems]);
 
   const itemCount = useMemo(() => getLineItems().length, [getLineItems]);
 
@@ -228,6 +247,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       displayedProducts,
       hasMoreProducts: state.visibleCount < filteredProducts.length,
       estimatedTotal,
+      pendingCount,
+      pricing,
       countries: catalog.countries,
       // Hide taxonomy until live CMS filters arrive — never flash seed/demo.
       categories: catalogReady ? catalog.categories : [],
@@ -280,6 +301,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       filteredProducts,
       displayedProducts,
       estimatedTotal,
+      pendingCount,
+      pricing,
       catalog,
       commands,
       submitRfq,

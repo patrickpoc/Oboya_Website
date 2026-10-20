@@ -13,6 +13,7 @@ import {
 } from "@/components/shop/cart/quote-cart-transitions";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyQuote } from "@/components/shop/states/ShopStateViews";
+import { PendingItemsLine, PricingNotice } from "@/components/shop/cart/QuotePricingNotice";
 import { formatShopPrice } from "@/lib/shop/format-price";
 
 export function QuoteCart() {
@@ -24,6 +25,8 @@ export function QuoteCart() {
     currency,
     itemCount,
     estimatedTotal,
+    pendingCount,
+    pricing,
     isCartOpen,
     setCartOpen,
     getLineItems,
@@ -85,6 +88,7 @@ export function QuoteCart() {
                   variantName={item.variantName}
                   quantity={item.quantity}
                   unitPrice={item.unitPrice}
+                  unavailable={item.unavailable}
                   currency={currency}
                   image={item.image}
                   sku={item.sku}
@@ -99,15 +103,26 @@ export function QuoteCart() {
 
           {lineItems.length > 0 && (
             <div className="shrink-0 border-t border-border/50 p-4">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{t("estimatedTotal")}</span>
-                <span className="font-semibold text-oboya-blue-dark">
-                  {formatShopPrice(estimatedTotal, currency)}
-                </span>
-              </div>
-              <p className="mt-1 text-[11px] text-muted-foreground">
-                {t("estimateDisclaimer")}
-              </p>
+              {pricing !== "quote_only" ? (
+                <>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      {pricing === "mixed" ? t("partialTotal") : t("estimatedTotal")}
+                    </span>
+                    <span className="font-semibold text-oboya-blue-dark">
+                      {formatShopPrice(estimatedTotal, currency)}
+                    </span>
+                  </div>
+                  <PendingItemsLine count={pendingCount} className="mt-0.5" />
+                </>
+              ) : null}
+              {pricing === "estimated" ? (
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  {t("estimateDisclaimer")}
+                </p>
+              ) : (
+                <PricingNotice pricing={pricing} className="mt-2" />
+              )}
               <button
                 type="button"
                 onClick={() => {

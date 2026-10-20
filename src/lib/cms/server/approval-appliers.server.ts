@@ -14,6 +14,7 @@ import {
   withPricesFrom,
   type ProductPricePatch,
 } from "@/lib/cms/approvals/diff";
+import type { StoreCountry } from "@/lib/cms/marketplace-countries";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
@@ -34,6 +35,7 @@ import {
 
 export type ProductEditPayload = { product: CmsProduct; preserveCurrentPrices: boolean };
 export type ProductPricePayload = { productId: string; patch: ProductPricePatch };
+export type CountriesChangePayload = { deactivate: string[]; remove: string[] };
 export type ProductDeletePayload = { productId: string; hard: boolean };
 export type BulkUpdatePayload = { products: CmsProduct[] };
 export type FaqPayload =
@@ -133,6 +135,38 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
         },
         async apply(req) {
           await createProductWrite(req.payloadProposed as CmsProduct);
+        },
+      };
+
+    case "marketplace.countries":
+      return {
+        async detectConflicts(req) {
+          const { readMarketplaceCurrencies } = await import(
+            "@/lib/cms/server/marketplace-config.server"
+          );
+          const { detectCountryConflicts, parseCountryChanges } = await import(
+            "@/lib/cms/marketplace-countries"
+          );
+          const changes = parseCountryChanges(req.payloadProposed);
+          const current = await readMarketplaceCurrencies({ includeInactive: true });
+          const snapshot = Array.isArray(req.snapshotBefore)
+            ? (req.snapshotBefore as StoreCountry[])
+            : [];
+          return detectCountryConflicts(current.countries, snapshot, changes);
+        },
+        async apply(req) {
+          const { readMarketplaceCurrencies, saveMarketplaceCurrencies } = await import(
+            "@/lib/cms/server/marketplace-config.server"
+          );
+          const { applyRestrictiveCountryChanges, parseCountryChanges } = await import(
+            "@/lib/cms/marketplace-countries"
+          );
+          const changes = parseCountryChanges(req.payloadProposed);
+          const current = await readMarketplaceCurrencies({ includeInactive: true });
+          await saveMarketplaceCurrencies({
+            countries: applyRestrictiveCountryChanges(current.countries, changes),
+            currencies: current.currencies,
+          });
         },
       };
 

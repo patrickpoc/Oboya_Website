@@ -93,7 +93,7 @@ export const adminNavigation: AdminNavItem[] = [
       { labelKey: "bulkUpdate", label: "Bulk Update", href: "/admin/marketplace/products/bulk-update" },
       { labelKey: "filters", label: "Filters", href: "/admin/marketplace/filters" },
       { labelKey: "specifications", label: "Specifications", href: "/admin/marketplace/specifications" },
-      { labelKey: "currencies", label: "Currencies", href: "/admin/marketplace/currencies" },
+      { labelKey: "currencies", label: "Countries & currencies", href: "/admin/marketplace/currencies" },
       { labelKey: "shopConfig", label: "Shop Config", href: "/admin/marketplace/shop-config" },
       { labelKey: "checkout", label: "Checkout", href: "/admin/marketplace/checkout" },
     ],

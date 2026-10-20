@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { RfqBadge } from "@/components/shop/product/RfqBadge";
 import { QuantityInput } from "@/components/shop/QuantityInput";
 import { useShop } from "@/contexts/ShopContext";
 import { formatShopPrice } from "@/lib/shop/format-price";
@@ -17,6 +18,7 @@ export function CheckoutLineItem({
   variantName,
   quantity,
   unitPrice,
+  unavailable = false,
   currency,
   image,
   sku,
@@ -27,7 +29,8 @@ export function CheckoutLineItem({
   variantId?: string | null;
   variantName?: string | null;
   quantity: number;
-  unitPrice: number;
+  unitPrice: number | null;
+  unavailable?: boolean;
   currency: string;
   image: string;
   sku: string;
@@ -64,10 +67,18 @@ export function CheckoutLineItem({
           </p>
         ) : null}
         <p className="text-xs text-oboya-green">{t("moq", { count: moq })}</p>
-        <p className="mt-1 text-sm text-oboya-blue-dark">
-          <span className="font-semibold">{formatShopPrice(unitPrice, currency)}</span>{" "}
-          <span className="text-[11px] text-oboya-blue-dark/50">{t("unitPrice")}</span>
-        </p>
+        {unavailable ? (
+          <p className="mt-1 text-sm font-medium text-oboya-orange">
+            {t("unavailableInCurrency", { currency })}
+          </p>
+        ) : unitPrice === null ? (
+          <RfqBadge size="compact" className="mt-1" />
+        ) : (
+          <p className="mt-1 text-sm text-oboya-blue-dark">
+            <span className="font-semibold">{formatShopPrice(unitPrice, currency)}</span>{" "}
+            <span className="text-[11px] text-oboya-blue-dark/50">{t("unitPrice")}</span>
+          </p>
+        )}
       </div>
       <div className="col-span-2 flex items-center justify-between gap-4 md:contents">
         <QuantityInput
@@ -82,9 +93,17 @@ export function CheckoutLineItem({
             <span className="block text-[10px] font-semibold uppercase tracking-wider text-oboya-blue-dark/45">
               {t("lineSubtotal")}
             </span>
-            <span className="text-xl font-semibold leading-tight tabular-nums text-oboya-blue-dark">
-              {formatShopPrice(unitPrice * quantity, currency)}
-            </span>
+            {unavailable ? (
+              <span className="text-sm font-medium text-oboya-blue-dark/70">—</span>
+            ) : unitPrice === null ? (
+              <span className="text-sm font-medium text-oboya-blue-dark/70">
+                {t("pricePending")}
+              </span>
+            ) : (
+              <span className="text-xl font-semibold leading-tight tabular-nums text-oboya-blue-dark">
+                {formatShopPrice(unitPrice * quantity, currency)}
+              </span>
+            )}
           </p>
           <button
             type="button"

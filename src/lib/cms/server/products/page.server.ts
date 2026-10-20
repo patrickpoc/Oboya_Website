@@ -12,9 +12,7 @@ import { logCmsPerf } from "@/lib/cms/server/perf-log.server";
 import { ALL_PRODUCTS_TAG, productTag } from "@/lib/cms/cache-tags";
 import {
   CATALOG_READ_TAGS,
-  disableFeaturedColorColumn,
-  featuredColorColumnIsAvailable,
-  isMissingFeaturedColorColumn,
+  disableMissingOptionalColumn,
   rowToProduct,
   type ProductRow,
 } from "@/lib/cms/server/products/row.server";
@@ -196,8 +194,7 @@ export async function readProductsPage(options: {
         supabase.rpc("cms_product_unit_stats"),
       ]);
 
-    if (isMissingFeaturedColorColumn(pageResult.error) && featuredColorColumnIsAvailable()) {
-      disableFeaturedColorColumn();
+    if (disableMissingOptionalColumn(pageResult.error)) {
       return readProductsPage(options);
     }
     if (pageResult.error) throw new Error(pageResult.error.message);

@@ -5,6 +5,7 @@ import type {
   ShopCategory,
   ShopCountry,
   ShopFilterOptions,
+  SaleMode,
 } from "@/lib/shop/types";
 
 /** Max parent products / color groups in one bulk-update session (not each color row). */
@@ -21,6 +22,7 @@ export const BULK_PARENT_TAXONOMY_FIELDS = [
   "countryOfOrigin",
   "enabledCountries",
   "status",
+  "saleMode",
 ] as const;
 
 export const BULK_PARENT_PRICE_FIELDS = [
@@ -78,6 +80,7 @@ export type BulkProductPatch = Partial<{
   countryOfOrigin: string;
   enabledCountries: Record<string, boolean>;
   status: CmsStatus;
+  saleMode: SaleMode;
   priceUsd: number | null;
   priceBrl: number | null;
   priceEur: number | null;

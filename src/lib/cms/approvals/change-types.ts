@@ -14,6 +14,7 @@ export const CHANGE_TYPES = [
   { id: "marketplace.product_edit", module: "marketplace", entityType: "product", available: true },
   { id: "marketplace.product_create", module: "marketplace", entityType: "product", available: true },
   { id: "marketplace.product_delete", module: "marketplace", entityType: "product", available: true },
+  { id: "marketplace.countries", module: "marketplace", entityType: "countries", available: true },
   { id: "website.homepage", module: "website", entityType: "homepage", available: true },
   { id: "website.about", module: "website", entityType: "about_page", available: true },
   { id: "website.solutions", module: "website", entityType: "solutions_page", available: true },

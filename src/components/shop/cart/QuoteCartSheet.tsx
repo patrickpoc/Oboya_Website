@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useShop } from "@/contexts/ShopContext";
 import { useOverlayA11y } from "@/hooks/use-overlay-a11y";
+import { PendingItemsLine, PricingNotice } from "@/components/shop/cart/QuotePricingNotice";
 import { CartItemRow } from "@/components/shop/cart/CartItem";
 import { QuoteCartMinimizedButton } from "@/components/shop/cart/QuoteCartMinimizedButton";
 import { mobileSheetTransition } from "@/components/shop/cart/quote-cart-transitions";
@@ -55,6 +56,8 @@ export function QuoteCartSheet() {
     currency,
     itemCount,
     estimatedTotal,
+    pendingCount,
+    pricing,
     getLineItems,
     updateQuantity,
     removeItem,
@@ -134,6 +137,7 @@ export function QuoteCartSheet() {
                     variantName={item.variantName}
                     quantity={item.quantity}
                     unitPrice={item.unitPrice}
+                  unavailable={item.unavailable}
                     currency={currency ?? "USD"}
                     image={item.image}
                     sku={item.sku}
@@ -148,10 +152,18 @@ export function QuoteCartSheet() {
             <div className="shrink-0 space-y-2 border-t border-border/50 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
               {lineItems.length > 0 && currency ? (
                 <>
-                  <div className="flex justify-between text-sm font-semibold text-oboya-blue-dark">
-                    <span>{t("estimatedTotal")}</span>
-                    <span>{formatShopPrice(estimatedTotal, currency)}</span>
-                  </div>
+                  {pricing !== "quote_only" ? (
+                    <div>
+                      <div className="flex justify-between text-sm font-semibold text-oboya-blue-dark">
+                        <span>
+                          {pricing === "mixed" ? t("partialTotal") : t("estimatedTotal")}
+                        </span>
+                        <span>{formatShopPrice(estimatedTotal, currency)}</span>
+                      </div>
+                      <PendingItemsLine count={pendingCount} />
+                    </div>
+                  ) : null}
+                  <PricingNotice pricing={pricing} />
                   <button
                     type="button"
                     onClick={() => {

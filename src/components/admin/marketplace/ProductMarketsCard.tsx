@@ -28,7 +28,8 @@ export function ProductMarketsCard({ product, countries, onUpdate }: ProductMark
   };
 
   const setAllCountries = (enabled: boolean) => {
-    const next: Record<string, boolean> = {};
+    // Keep flags of inactive countries (not listed here) untouched.
+    const next: Record<string, boolean> = { ...(product.enabledCountries ?? {}) };
     countries.forEach((country) => {
       next[country.code] = enabled;
     });

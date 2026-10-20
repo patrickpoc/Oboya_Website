@@ -233,7 +233,23 @@ export function BulkUpdateWorkspace() {
       for (const productId of selectedIds) {
         const sample = next.find((row) => row.productId === productId);
         if (!sample) continue;
-        const pending = applyPatchToProduct(sample.pending, patch);
+        let productPatch = patch;
+        if (patch.enabledCountries) {
+          // Keep flags for inactive countries (not offered in the catalog) intact.
+          const activeCodes = new Set(
+            liveCatalog.countries.map((country) => country.code)
+          );
+          const previous =
+            sample.pending.enabledCountries ?? sample.pending.availability ?? {};
+          const kept = Object.fromEntries(
+            Object.entries(previous).filter(([code]) => !activeCodes.has(code))
+          );
+          productPatch = {
+            ...patch,
+            enabledCountries: { ...kept, ...patch.enabledCountries },
+          };
+        }
+        const pending = applyPatchToProduct(sample.pending, productPatch);
         next = syncGroupPending(next, productId, pending);
       }
       return next;

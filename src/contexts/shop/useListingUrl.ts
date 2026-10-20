@@ -8,6 +8,7 @@ import type { ShopConfig } from "@/lib/cms/shop-config/types";
 import { resolveShopFilters, toPublicShopFilters } from "@/lib/shop/filter-groups";
 import { buildShopSearchParams, parseShopUrlState } from "@/lib/shop/url-state";
 import type { ShopState } from "@/lib/shop/types";
+import { getCountryByCode } from "@/lib/shop/catalog";
 import { remapProductId } from "@/lib/shop/product-id-remap";
 import {
   catalogTaxonomy,
@@ -93,6 +94,10 @@ export function useListingHydration({
         softOpenTimer.current = null;
       }
 
+      // Ignore a country that is not active (stale bookmark).
+      const urlCountryValid =
+        !urlState.country || !catalogReady || Boolean(getCountryByCode(urlState.country));
+
       skipUrlWriteRef.current = true;
       setState((prev) => {
         const rawFilters = urlState.filters;
@@ -101,8 +106,8 @@ export function useListingHydration({
           : rawFilters;
         return {
           ...prev,
-          countryCode: urlState.country ?? prev.countryCode,
-          currency: urlState.currency ?? prev.currency,
+          countryCode: urlCountryValid ? (urlState.country ?? prev.countryCode) : prev.countryCode,
+          currency: urlCountryValid ? (urlState.currency ?? prev.currency) : prev.currency,
           search: urlState.q,
           sort: urlState.sort,
           viewMode: urlState.view,
