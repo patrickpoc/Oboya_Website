@@ -92,6 +92,7 @@ export function MapLocationEditor() {
 
   useEffect(() => {
     if (!selectedLocation) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- keep the selected office valid when the selected location changes
       setSelectedOfficeId(null);
       return;
     }

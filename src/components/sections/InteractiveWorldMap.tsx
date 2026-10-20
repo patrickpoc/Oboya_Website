@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   MAP_VIEWBOX,
   type MapConnection,
@@ -70,9 +70,13 @@ export function InteractiveWorldMap({
     {}
   );
   const locationsRef = useRef(locations);
-  locationsRef.current = locations;
+  useLayoutEffect(() => {
+    locationsRef.current = locations;
+  });
   const activeIdRef = useRef(activeId);
-  activeIdRef.current = activeId;
+  useLayoutEffect(() => {
+    activeIdRef.current = activeId;
+  });
 
   const highlightedId = editable ? selectedId : activeId;
   const autoPlayEnabled =
@@ -226,6 +230,7 @@ export function InteractiveWorldMap({
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- matchMedia is only available after hydration
     setIsTouch(window.matchMedia("(hover: none)").matches);
     setPrefersReducedMotion(
       window.matchMedia("(prefers-reduced-motion: reduce)").matches

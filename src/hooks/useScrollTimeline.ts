@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
@@ -36,17 +36,25 @@ export function useScrollTimeline({
   const lenisRef = useRef<Lenis | null>(null);
   const triggerRef = useRef<ScrollTrigger | null>(null);
   const onIndexChangeRef = useRef(onIndexChange);
+  useLayoutEffect(() => {
+    onIndexChangeRef.current = onIndexChange;
+  });
   const onProgressChangeRef = useRef(onProgressChange);
-  onIndexChangeRef.current = onIndexChange;
-  onProgressChangeRef.current = onProgressChange;
+  useLayoutEffect(() => {
+    onProgressChangeRef.current = onProgressChange;
+  });
 
   const indexRef = useRef(0);
   const lockRef = useRef(false);
   const lockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countRef = useRef(count);
-  countRef.current = count;
+  useLayoutEffect(() => {
+    countRef.current = count;
+  });
   const reducedMotionRef = useRef(reducedMotion);
-  reducedMotionRef.current = reducedMotion;
+  useLayoutEffect(() => {
+    reducedMotionRef.current = reducedMotion;
+  });
   const releasingRef = useRef(false);
   /** Brief ignore after re-enter so entry wheel momentum doesn’t eject. */
   const reenterGuardRef = useRef(false);

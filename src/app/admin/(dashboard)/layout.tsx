@@ -41,8 +41,8 @@ export default async function DashboardLayout({
     return <AdminShell user={auth.user}>{children}</AdminShell>;
   }
 
-  const module = moduleForAdminPath(pathname);
-  if (module == null) {
+  const adminModule = moduleForAdminPath(pathname);
+  if (adminModule == null) {
     const auth = await requireCmsSession();
     if (!auth.ok) {
       if (auth.status === 401) {
@@ -64,7 +64,7 @@ export default async function DashboardLayout({
     return <AdminShell user={auth.user}>{children}</AdminShell>;
   }
 
-  const auth = await requireCmsAuth({ module, action: "view" });
+  const auth = await requireCmsAuth({ module: adminModule, action: "view" });
   if (!auth.ok) {
     if (auth.status === 401) {
       redirect(`/admin/login?next=${encodeURIComponent(pathname)}`);

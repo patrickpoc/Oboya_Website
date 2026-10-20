@@ -32,6 +32,7 @@ export function QuantityInput({
   const [draft, setDraft] = useState(String(value));
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- resync the text draft when the committed quantity changes
     setDraft(String(value));
   }, [value]);
 

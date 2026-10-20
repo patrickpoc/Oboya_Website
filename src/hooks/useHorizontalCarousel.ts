@@ -67,6 +67,7 @@ export function useHorizontalCarousel({
   }, [onNativeTouchMove]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- clamp the offset when the track size changes
     setScrollOffset((prev) => clamp(prev, 0, maxScroll));
   }, [maxScroll]);
 

@@ -380,6 +380,7 @@ export default function MediaLibraryPage() {
   useEffect(() => {
     let cancelled = false;
     clearMediaAssetsCache();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset library state before refetching when refreshKey changes
     setLibraryReady(false);
     setLibraryError(null);
     setLibraryVersion((n) => n + 1);

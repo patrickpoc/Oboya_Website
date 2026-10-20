@@ -53,6 +53,7 @@ export function SolutionsCatalog({ categories, cards }: SolutionsCatalogProps) {
 
   useEffect(() => {
     if (isCategoryId(categoryParam)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- follow ?category= on client-side navigation
       setActive(categoryParam);
     }
   }, [categoryParam]);

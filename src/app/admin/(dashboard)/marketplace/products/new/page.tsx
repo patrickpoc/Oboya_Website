@@ -28,6 +28,7 @@ export default function ProductNewPage() {
 
   useEffect(() => {
     if (loading || product) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- seed the draft once the async catalog finishes loading
     setProduct(
       createEmptyCmsProduct({
         categoryId: catalog.categories[0]?.id,

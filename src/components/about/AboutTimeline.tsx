@@ -78,10 +78,12 @@ export function AboutTimeline({
   locale,
 }: AboutTimelineProps) {
   const events = data.events;
-  const [active, setActive] = useState(0);
+  const [storedActive, setActive] = useState(0);
+  const active = storedActive >= events.length ? 0 : storedActive;
   const [hasCompletedLoop, setHasCompletedLoop] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const reduceMotion = useReducedMotion();
+  const grainFilterId = `timeline-grain-${useId().replace(/:/g, "")}`;
 
   const go = useCallback(
     (next: number) => {
@@ -115,10 +117,6 @@ export function AboutTimeline({
     },
     [active, events.length, isAnimating]
   );
-
-  useEffect(() => {
-    if (active >= events.length) setActive(0);
-  }, [active, events.length]);
 
   if (events.length === 0) return null;
 
@@ -189,8 +187,6 @@ export function AboutTimeline({
       </motion.div>
     </div>
   );
-
-  const grainFilterId = `timeline-grain-${useId().replace(/:/g, "")}`;
 
   return (
     <section

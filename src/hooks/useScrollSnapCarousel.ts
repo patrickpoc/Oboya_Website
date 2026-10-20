@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, type RefObject } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 
 /**
  * Keeps activeIndex in sync with native horizontal scroll on a snap track (mobile).
@@ -14,7 +14,9 @@ export function useScrollSnapCarousel(
   enabled: boolean
 ) {
   const activeIndexRef = useRef(activeIndex);
-  activeIndexRef.current = activeIndex;
+  useLayoutEffect(() => {
+    activeIndexRef.current = activeIndex;
+  });
   const programmaticScroll = useRef(false);
 
   useEffect(() => {

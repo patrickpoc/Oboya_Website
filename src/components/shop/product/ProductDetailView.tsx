@@ -83,6 +83,7 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
   useEffect(() => {
     const fromUrl = searchParams.get("variant");
     if (fromUrl && variants.some((variant) => variant.id === fromUrl)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- follow ?variant= on client-side navigation
       setSelectedVariantId(fromUrl);
       return;
     }
@@ -108,6 +109,7 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
 
   const galleryImages = useMemo(() => {
     return getGalleryImagesForVariant(product, activeVariant?.id ?? null);
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization -- stable identity is required: ProductGallery resets the active image whenever `images` changes
   }, [activeVariant, product]);
 
   return (

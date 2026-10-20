@@ -45,6 +45,7 @@ export function QuickAccessGrid() {
 
   useEffect(() => {
     const stored = loadPinned(user.id);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage is read after hydration to avoid an SSR mismatch
     setPinnedHrefs(new Set(stored));
     setMounted(true);
   }, [user.id]);

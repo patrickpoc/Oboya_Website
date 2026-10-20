@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -255,7 +256,9 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const [catalogTick, setCatalogTick] = useState(0);
   const [shopConfig, setShopConfig] = useState<ShopConfig>(DEFAULT_SHOP_CONFIG);
   const shopConfigRef = useRef(shopConfig);
-  shopConfigRef.current = shopConfig;
+  useLayoutEffect(() => {
+    shopConfigRef.current = shopConfig;
+  });
   const marketDefaultsApplied = useRef(false);
   const pageSize = shopConfig.catalog.pageSize || PRODUCTS_PAGE_SIZE;
   const hydratedFromUrl = useRef(false);
@@ -297,6 +300,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     if (!isShopAreaRoute) return;
 
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- mark the catalog as loading before fetching it
     setCatalogReady(false);
     setState((prev) =>
       prev.status === "offline" ? prev : { ...prev, status: "loading" }
@@ -556,6 +560,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     }
 
     let applied = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- apply CMS market defaults once, after the catalog and URL state are ready
     setState((prev) => {
       if (prev.countryCode) {
         applied = true;

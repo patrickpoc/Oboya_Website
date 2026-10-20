@@ -92,12 +92,12 @@ export function AdminLoginForm() {
           <p className="mt-2 text-sm text-muted-foreground">
             {t("mockDevNote")}
           </p>
-          <a
+          <Link
             href="/admin/dashboard"
             className={buttonVariants({ className: "mt-6 w-full rounded-full" })}
           >
             {t("openDashboard")}
-          </a>
+          </Link>
         </div>
       </Container>
     );

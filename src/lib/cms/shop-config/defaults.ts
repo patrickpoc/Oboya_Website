@@ -90,7 +90,7 @@ function normalizeRfqField(raw: unknown, fallback: ShopConfigRfqField): ShopConf
   const source = asRecord(raw);
   const visible =
     typeof source.visible === "boolean" ? source.visible : fallback.visible;
-  let required =
+  const required =
     typeof source.required === "boolean" ? source.required : fallback.required;
   if (required) {
     return { visible: true, required: true };

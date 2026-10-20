@@ -58,9 +58,11 @@ export function Timeline({ events, labels }: TimelineProps) {
 
   const { activeIndex, activeEvent, count, setActiveIndex } = useTimeline(events);
 
+  /* eslint-disable react-hooks/refs -- slide direction must be derived in the same render that receives the new index; moving it to state adds a frame with the wrong slide animation */
   if (activeIndex > prevIndexRef.current) directionRef.current = "forward";
   else if (activeIndex < prevIndexRef.current) directionRef.current = "back";
   const direction = directionRef.current;
+  /* eslint-enable react-hooks/refs */
 
   useEffect(() => {
     prevIndexRef.current = activeIndex;
@@ -79,6 +81,7 @@ export function Timeline({ events, labels }: TimelineProps) {
 
   useEffect(() => {
     if (!isMobile && !isTouchTablet && !reducedMotion) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- without scroll pinning, progress follows the active index
     setScrollProgress(count <= 1 ? 0 : activeIndex / (count - 1));
   }, [isMobile, isTouchTablet, reducedMotion, activeIndex, count]);
 

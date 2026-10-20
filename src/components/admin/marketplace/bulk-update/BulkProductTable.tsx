@@ -255,6 +255,7 @@ export function BulkProductTable({
     if (!focusRowId) return;
     const focused = rows.find((row) => row.rowId === focusRowId);
     if (!focused || focused.kind !== "variant") return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- expand the parent row when a variant row receives focus
     setCollapsedIds((prev) => {
       if (!prev.has(focused.productId)) return prev;
       const next = new Set(prev);

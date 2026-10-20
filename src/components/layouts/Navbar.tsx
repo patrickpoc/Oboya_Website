@@ -74,6 +74,7 @@ function useStoryExitHandoff(elementId: string) {
   useEffect(() => {
     const el = document.getElementById(elementId);
     if (!el) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset when the observed element is absent on this route
       setPast(false);
       return;
     }

@@ -75,6 +75,7 @@ export function AdminLoadingProvider({ children }: { children: React.ReactNode }
     clearTimers();
     if (busy) {
       if (forced) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- forced overlay shows immediately; delayed show/hide is timer-driven
         setVisible(true);
         return;
       }

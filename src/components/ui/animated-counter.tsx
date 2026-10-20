@@ -23,6 +23,7 @@ export function AnimatedCounter({
 
   useEffect(() => {
     if (!active) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset the counter when it leaves the active state
       setCount(0);
       return;
     }

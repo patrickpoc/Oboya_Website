@@ -100,6 +100,7 @@ export default function UserDetailPage() {
   }, [id, t]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount; the loader sets loading state before awaiting the API
     void loadUser();
   }, [loadUser]);
 

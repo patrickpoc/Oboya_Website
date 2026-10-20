@@ -32,6 +32,15 @@ export function TypewriterText({
       })),
     [segments]
   );
+  const lineStarts = useMemo(() => {
+    const starts: number[] = [];
+    let offset = 0;
+    for (const segment of lines) {
+      starts.push(offset);
+      offset += segment.text.length;
+    }
+    return starts;
+  }, [lines]);
   const totalChars = useMemo(
     () => lines.reduce((sum, segment) => sum + segment.text.length, 0),
     [lines]
@@ -40,6 +49,7 @@ export function TypewriterText({
 
   useEffect(() => {
     if (!active) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset the typed text when it leaves the active state
       setVisibleChars(0);
       return;
     }
@@ -57,13 +67,11 @@ export function TypewriterText({
     requestAnimationFrame(tick);
   }, [active, duration, totalChars]);
 
-  let consumed = 0;
-
   return (
     <span className={cn("inline", className)}>
       {lines.map((segment, index) => {
-        const lineStart = consumed;
-        consumed += segment.text.length;
+        const lineStart = lineStarts[index];
+        const consumed = lineStart + segment.text.length;
         const lineVisible = Math.max(
           0,
           Math.min(segment.text.length, visibleChars - lineStart)

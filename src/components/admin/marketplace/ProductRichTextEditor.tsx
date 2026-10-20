@@ -191,7 +191,7 @@ export function ProductRichTextEditor({
     setPendingImage({ src, name });
     setAltDraft(name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim());
     setAlignDraft("center");
-  }, []);
+  }, [setPendingImage, setAltDraft, setAlignDraft]);
 
   const handleUpload = useCallback(
     async (file: File) => {
@@ -267,6 +267,7 @@ export function ProductRichTextEditor({
         {toolbarButton(t("richHorizontalRule"), <Minus className="size-3.5" />, () =>
           editor?.chain().focus().setHorizontalRule().run()
         )}
+        {/* eslint-disable-next-line react-hooks/refs -- toolbarButton only wires the callback to onClick; the ref is read on click */}
         {toolbarButton(t("richInsertImage"), <ImageIcon className="size-3.5" />, () =>
           fileRef.current?.click()
         )}

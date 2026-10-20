@@ -38,18 +38,18 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const scope = url.searchParams.get("scope") ?? "mine";
     const statuses = parseStatuses(url.searchParams.get("status"));
-    const module = url.searchParams.get("module") ?? undefined;
+    const moduleFilter = url.searchParams.get("module") ?? undefined;
     const requestedBy = url.searchParams.get("requestedBy") ?? undefined;
 
     let items: ChangeRequest[];
     if (scope === "review") {
       items = await listReviewableRequests(user, statuses ?? OPEN_CHANGE_REQUEST_STATUSES);
-      if (module) items = items.filter((r) => r.module === module);
+      if (moduleFilter) items = items.filter((r) => r.module === moduleFilter);
     } else if (scope === "all") {
       if (user.role !== "super_admin") {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
-      items = await listChangeRequests({ statuses, module, requestedBy, limit: 500 });
+      items = await listChangeRequests({ statuses, module: moduleFilter, requestedBy, limit: 500 });
     } else if (scope === "entity") {
       const entityType = url.searchParams.get("entityType");
       const entityId = url.searchParams.get("entityId");
@@ -62,7 +62,7 @@ export async function GET(request: Request) {
         entityId,
       });
     } else {
-      items = await listChangeRequests({ statuses, module, requestedBy: user.id });
+      items = await listChangeRequests({ statuses, module: moduleFilter, requestedBy: user.id });
     }
 
     return NextResponse.json(

@@ -59,6 +59,7 @@ export function AdminIntlProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (isCmsLocale(stored)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage is read after hydration to avoid an SSR mismatch
       setLocaleState(stored);
       document.documentElement.lang = stored;
     }

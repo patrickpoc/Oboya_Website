@@ -1,0 +1,10 @@
+# Sensitive areas: database schema, server routes, auth, security, Supabase
+# clients and runtime config. Changes here require review from the owner.
+
+/supabase/            @patrickpoc
+/src/app/api/         @patrickpoc
+/src/app/auth/        @patrickpoc
+/src/lib/security/    @patrickpoc
+/src/lib/supabase/    @patrickpoc
+/next.config.ts       @patrickpoc
+/.env.example         @patrickpoc

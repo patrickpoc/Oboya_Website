@@ -29,12 +29,14 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
   const aspect = ratio && ratio > 0 ? ratio : FALLBACK_RATIO;
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset gallery state when the image set changes
     setActive(0);
     setZoomOn(false);
     setOrigin({ x: 50, y: 50 });
   }, [images]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset zoom when the active image changes
     setZoomOn(false);
     setOrigin({ x: 50, y: 50 });
   }, [active]);

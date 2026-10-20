@@ -32,6 +32,7 @@ export function BulkPriceInput({
 
   useEffect(() => {
     if (focused) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- resync the draft from the committed value while the input is not focused
     setDraft(formatPriceInput(value, currency));
   }, [value, currency, focused]);
 

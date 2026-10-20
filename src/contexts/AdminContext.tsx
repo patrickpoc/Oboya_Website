@@ -59,6 +59,7 @@ export function AdminProvider({
 
   useEffect(() => {
     if (initialUser) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- adopt the server-provided user and mirror it to localStorage
       setUser(initialUser);
       setLoading(false);
       try {

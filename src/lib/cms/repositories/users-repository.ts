@@ -2,7 +2,7 @@ import type { CmsUser, AuditLogEntry } from "@/lib/cms/types";
 import usersData from "@/../data/cms/users.json";
 import auditData from "@/../data/cms/audit-logs.json";
 
-let usersCache: CmsUser[] = [...(usersData as CmsUser[])];
+const usersCache: CmsUser[] = [...(usersData as CmsUser[])];
 let auditCache: AuditLogEntry[] = [...(auditData as AuditLogEntry[])];
 
 export function getCmsUsers(): CmsUser[] {

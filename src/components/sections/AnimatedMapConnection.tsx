@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useId, useLayoutEffect, useRef } from "react";
 import {
   CONNECTION_CYCLE_DURATION_MS,
   MAP_CONNECTION_STYLE,
@@ -94,7 +94,9 @@ export function AnimatedMapConnection({
   const pathRef = useRef<SVGPathElement>(null);
   const arrowRef = useRef<SVGPolygonElement>(null);
   const onCompleteRef = useRef(onCycleComplete);
-  onCompleteRef.current = onCycleComplete;
+  useLayoutEffect(() => {
+    onCompleteRef.current = onCycleComplete;
+  });
   const reactId = useId();
   const filterId = `map-conn-glow-${reactId.replace(/:/g, "")}`;
 

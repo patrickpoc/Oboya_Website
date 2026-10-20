@@ -88,6 +88,7 @@ export function BulkImportWorkspace() {
   }, [t]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount; the loader sets loading state before awaiting the API
     void loadProducts();
   }, [loadProducts]);
 
