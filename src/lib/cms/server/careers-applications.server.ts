@@ -291,32 +291,6 @@ async function persist(app: JobApplication, isNew: boolean) {
   throwIfDbError(error);
 }
 
-/** Manual create: source defaults to "manual", consent is required by validation. */
-export async function createApplication(input: unknown, actor: CareersActor): Promise<JobApplication> {
-  const now = new Date().toISOString();
-  const raw = (input && typeof input === "object" ? input : {}) as Record<string, unknown>;
-  const app = normalizeApplication({
-    ...raw,
-    id: randomUUID(),
-    source: raw.source ?? "manual",
-    status: "new",
-    consentPrivacyAt: now,
-    cvPath: undefined,
-    cvFilename: undefined,
-    cvMime: undefined,
-    cvSize: undefined,
-    anonymizedAt: undefined,
-    createdBy: actor.id,
-    createdAt: now,
-    updatedAt: now,
-  });
-  const valid = validateApplication(app);
-  if (!valid.ok) throw new CareersError(400, valid.errors[0]);
-  await persist({ ...app, lastActivityAt: now, readAt: now }, true);
-  await addActivity(app.id, "created", actor);
-  return app;
-}
-
 export async function patchApplication(id: string, patch: unknown, actor: CareersActor): Promise<JobApplication> {
   const current = await getApplication(id);
   if (!current) throw new CareersError(404, "not_found");

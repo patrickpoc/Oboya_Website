@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Can } from "@/components/admin/permissions/Can";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { JobOpeningWithStats } from "@/lib/cms/careers/types";
 import { OpeningRowActions, type RowAction } from "./OpeningRowActions";
 import { OpeningStatusPill } from "./OpeningStatusPill";
 
-const date = (iso?: string) => (iso ? iso.slice(0, 10) : "—");
 
 export function OpeningsTable({
   items,
@@ -17,17 +16,17 @@ export function OpeningsTable({
   items: JobOpeningWithStats[];
   onAction: (action: RowAction, opening: JobOpeningWithStats) => void;
 }) {
+  const locale = useLocale();
+  const date = (iso?: string) => iso ? new Date(iso).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" }) : "—";
   const t = useTranslations("admin.careers.openings");
   const tWork = useTranslations("admin.careers.common.workModel");
   return (
     <div className="overflow-x-auto rounded-xl border border-border/60 bg-white">
-      <Table>
+      <Table className="min-w-[960px]">
         <TableHeader>
           <TableRow>
             <TableHead>{t("columns.title")}</TableHead>
-            <TableHead>{t("columns.department")}</TableHead>
             <TableHead>{t("columns.location")}</TableHead>
-            <TableHead>{t("columns.workModel")}</TableHead>
             <TableHead>{t("columns.status")}</TableHead>
             <TableHead>{t("columns.applications")}</TableHead>
             <TableHead>{t("columns.publishedAt")}</TableHead>
@@ -41,15 +40,16 @@ export function OpeningsTable({
               <TableCell>
                 <Link
                   href={`/admin/careers/openings/${o.id}`}
-                  className="font-medium text-oboya-blue-dark hover:underline"
+                  className="inline-block py-1 font-medium text-oboya-blue-dark underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-oboya-blue"
                 >
                   {o.title.en || o.slug}
                 </Link>
-                <p className="font-mono text-xs text-muted-foreground">/{o.slug}</p>
+                <p className="text-xs text-muted-foreground">{o.department || "—"}</p>
               </TableCell>
-              <TableCell>{o.department ?? "—"}</TableCell>
-              <TableCell>{[o.city, o.countryCode].filter(Boolean).join(", ") || "—"}</TableCell>
-              <TableCell>{o.workModel ? tWork(o.workModel) : "—"}</TableCell>
+              <TableCell>
+                <p>{[o.city, o.countryCode].filter(Boolean).join(", ") || "—"}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{o.workModel ? tWork(o.workModel) : "—"}</p>
+              </TableCell>
               <TableCell>
                 <OpeningStatusPill status={o.status} />
               </TableCell>

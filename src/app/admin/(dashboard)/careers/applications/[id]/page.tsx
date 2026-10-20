@@ -6,17 +6,17 @@ import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
-import { EditorGuard, FormSkeleton } from "@/components/admin/common";
+import { EditorGuard, FormSkeleton, StatusPill } from "@/components/admin/common";
 import { Can } from "@/components/admin/permissions/Can";
 import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
 import { ApplicationForm } from "@/components/admin/careers/ApplicationForm";
 import { ApplicationPipeline } from "@/components/admin/careers/ApplicationPipeline";
 import { ApplicationTimeline } from "@/components/admin/careers/ApplicationTimeline";
+import { PIPELINE_TONES } from "@/components/admin/careers/ApplicationsTable";
 import { CvUploadField } from "@/components/admin/careers/CvUploadField";
 import {
   CareersApiError,
   anonymizeApplication,
-  createApplication,
   deleteApplication,
   getApplication,
   listActivities,
@@ -35,10 +35,10 @@ const LIST = "/admin/careers/applications";
 
 export default function ApplicationDetailPage() {
   const t = useTranslations("admin.careers.applications");
+  const tPipe = useTranslations("admin.careers.common.pipeline");
   const tc = useTranslations("admin.careers.common");
   const router = useRouter();
   const id = useParams().id as string;
-  const isNew = id === "new";
 
   const [application, setApplication] = useState<JobApplication | null>(null);
   const [initial, setInitial] = useState("");
@@ -57,20 +57,16 @@ export default function ApplicationDetailPage() {
   useEffect(() => {
     void (async () => {
       try {
-        if (isNew) {
-          load(normalizeApplication({ source: "manual", openingId: new URLSearchParams(window.location.search).get("opening") }));
-        } else {
-          const [loaded, acts] = await Promise.all([getApplication(id), listActivities(id)]);
-          load(loaded);
-          setActivities(acts);
-          if (!loaded.readAt && !loaded.anonymizedAt) {
-            markApplicationRead(id)
-              .then(({ readAt }) => {
-                setApplication((cur) => cur && { ...cur, readAt });
-                setInitial((cur) => JSON.stringify({ ...(JSON.parse(cur) as JobApplication), readAt }));
-              })
-              .catch(() => undefined);
-          }
+        const [loaded, acts] = await Promise.all([getApplication(id), listActivities(id)]);
+        load(loaded);
+        setActivities(acts);
+        if (!loaded.readAt && !loaded.anonymizedAt) {
+          markApplicationRead(id)
+            .then(({ readAt }) => {
+              setApplication((cur) => cur && { ...cur, readAt });
+              setInitial((cur) => JSON.stringify({ ...(JSON.parse(cur) as JobApplication), readAt }));
+            })
+            .catch(() => undefined);
         }
       } catch {
         toast.error(tc("notFound"));
@@ -88,7 +84,7 @@ export default function ApplicationDetailPage() {
         )
         .catch(() => undefined);
     })();
-  }, [id, isNew, router, tc]);
+  }, [id, router, tc]);
 
   const email = application?.email.trim().toLowerCase() ?? "";
   const openingId = application?.openingId ?? null;
@@ -120,15 +116,9 @@ export default function ApplicationDetailPage() {
     setErrors([]);
     setSaving(true);
     try {
-      if (isNew) {
-        const created = await createApplication(candidate);
-        toast.success(t("toasts.created"));
-        router.replace(`${LIST}/${created.id}`);
-      } else {
-        load(await updateApplication(id, candidate));
-        setActivities(await listActivities(id));
-        toast.success(t("toasts.updated"));
-      }
+      load(await updateApplication(id, candidate));
+      setActivities(await listActivities(id));
+      toast.success(t("toasts.updated"));
     } catch (error) {
       if (error instanceof CareersApiError && error.status === 400) setErrors([error.code]);
       else toast.error(tc("saveFailed"));
@@ -163,12 +153,15 @@ export default function ApplicationDetailPage() {
   return (
     <Can module="careers" action="edit" fallback={<AccessDenied />}>
       <AdminPageHeader
-        title={isNew ? t("detail.titleNew") : t("detail.titleEdit")}
-        description={isNew ? undefined : application.fullName}
+        title={application.fullName || t("detail.titleEdit")}
+        description={openings.find((opening) => opening.id === application.openingId)?.title.en || t("filters.talentPool")}
         actions={
+          <>
+          <StatusPill tone={PIPELINE_TONES[application.status]}>{tPipe(application.status)}</StatusPill>
           <Link href={LIST} className={buttonVariants({ variant: "outline", className: "rounded-full" })}>
             {tc("back")}
           </Link>
+          </>
         }
       />
       {anonymized ? (
@@ -180,18 +173,17 @@ export default function ApplicationDetailPage() {
             onChange={setApplication}
             openings={openings}
             errors={errors}
-            isNew={isNew}
             duplicateEmail={duplicateEmail}
+            sidebar={
+              <>
+                <ApplicationPipeline application={application} onChange={setApplication} users={users} />
+                <CvUploadField application={application} onChange={handleCv} />
+              </>
+            }
           />
-          <ApplicationPipeline application={application} onChange={setApplication} users={users} isNew={isNew} />
-          {isNew ? (
-            <p className="text-sm text-muted-foreground">{t("detail.saveFirst")}</p>
-          ) : (
-            <CvUploadField application={application} onChange={handleCv} />
-          )}
+
         </div>
       )}
-      {!isNew ? (
         <div className="mt-6 space-y-6">
           <ApplicationTimeline
             applicationId={id}
@@ -221,7 +213,6 @@ export default function ApplicationDetailPage() {
             </Card>
           </Can>
         </div>
-      ) : null}
       {anonymized ? null : <EditorGuard dirty={dirty} saving={saving} onSave={() => void handleSave()} />}
     </Can>
   );

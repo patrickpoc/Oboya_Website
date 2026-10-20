@@ -1,9 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Download, Plus } from "lucide-react";
+import { Download } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import {
   EmptyState,
@@ -97,22 +96,13 @@ export default function Page() {
               <Download className="size-4" />
               {t("exportCsv")}
             </a>
-            <Can module="careers" action="edit">
-              <Link
-                href="/admin/careers/applications/new"
-                className={buttonVariants({
-                  className: "gap-1.5 rounded-full bg-oboya-green text-white hover:bg-oboya-green/90",
-                })}
-              >
-                <Plus className="size-4" />
-                {t("newApplication")}
-              </Link>
-            </Can>
           </>
         }
       />
-      <div className="space-y-4">
+      <div className="min-w-0 space-y-6">
+        <section aria-label={t("filters.allStatuses")} className="min-w-0 space-y-4 rounded-xl border border-border/60 bg-white p-4 sm:p-5">
         <FilterTabs
+          className="w-full [&_button]:min-h-9"
           value={status}
           onChange={(v) => setFilters({ status: v })}
           options={[
@@ -120,8 +110,8 @@ export default function Page() {
             ...PIPELINE_STATUSES.map((s) => ({ value: s, label: tPipe(s), count: counts[s] })),
           ]}
         />
-        <FilterBar showReset={dirty} onReset={reset}>
-          <SearchInput value={q} onChange={(v) => setFilters({ q: v })} placeholder={t("searchPlaceholder")} />
+        <FilterBar className="[&_label]:min-w-0 [&_label]:flex-1 [&_label]:flex-col [&_label]:items-start [&_label]:gap-2 [&_select]:h-10 [&_select]:w-full [&_select]:max-w-none [&>div]:gap-4" showReset={dirty} onReset={reset}>
+          <SearchInput className="self-end sm:max-w-none sm:flex-[2] [&_input]:h-10" value={q} onChange={(v) => setFilters({ q: v })} placeholder={t("searchPlaceholder")} />
           <FilterSelect
             label={t("filters.opening")}
             value={opening}
@@ -140,12 +130,14 @@ export default function Page() {
             options={APPLICATION_SOURCES.map((s) => ({ value: s, label: tSource(s) }))}
           />
         </FilterBar>
+        </section>
+        {items && !error ? <p className="text-sm text-muted-foreground" role="status">{t("resultCount", { count: visible.length })}</p> : null}
         {error ? (
           <EmptyState title={tCommon("loadFailed")} />
         ) : items === null ? (
           <ListSkeleton />
         ) : visible.length === 0 ? (
-          <EmptyState title={t("empty.title")} description={t("empty.description")} />
+          <EmptyState title={dirty ? t("empty.filteredTitle") : t("empty.title")} description={dirty ? t("empty.filteredDescription") : t("empty.description")} />
         ) : (
           <ApplicationsTable items={visible} openingTitles={openingTitles} />
         )}

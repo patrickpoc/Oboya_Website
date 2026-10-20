@@ -1305,7 +1305,9 @@
       },
       "empty": {
         "title": "未找到职位",
-        "description": "请创建职位或调整筛选条件。"
+        "description": "请创建职位或调整筛选条件。",
+        "filteredTitle": "没有符合筛选条件的职位",
+        "filteredDescription": "请尝试其他搜索词或清除筛选条件。"
       },
       "editor": {
         "titleNew": "新建职位",
@@ -1355,7 +1357,8 @@
           "slugReserved": "此 slug 为保留字，请选择其他 slug。",
           "salaryNegative": "薪资不能为负数。"
         }
-      }
+      },
+      "resultCount": "{count, plural, other {# 个职位}}"
     },
     "applications": {
       "title": "申请",
@@ -1383,7 +1386,9 @@
       },
       "empty": {
         "title": "未找到申请",
-        "description": "候选人投递或您手动添加后，申请将显示在此处。"
+        "description": "候选人投递后，申请将显示在此处。",
+        "filteredTitle": "没有符合筛选条件的申请",
+        "filteredDescription": "请尝试其他搜索词或清除筛选条件。"
       },
       "toasts": {
         "created": "申请已创建",
@@ -1459,7 +1464,8 @@
           "invalidType": "仅接受 PDF、DOC 或 DOCX 文件。",
           "tooLarge": "文件大小不得超过 10 MB。",
           "none": "尚未上传简历。",
-          "unavailable": "简历存储不可用，请检查 Supabase 配置。"
+          "unavailable": "简历存储不可用，请检查 Supabase 配置。",
+          "processing": "处理中…"
         },
         "ratingStar": "评分 {value}/5",
         "notes": {
@@ -1493,7 +1499,9 @@
           "dateInvalid": "请输入有效的可到岗日期。",
           "salaryNegative": "期望薪资不能为负数。"
         }
-      }
+      },
+      "resultCount": "{count, plural, other {# 份申请}}",
+      "unread": "未读"
     },
     "common": {
       "status": {

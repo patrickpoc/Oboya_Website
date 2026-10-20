@@ -116,9 +116,10 @@ export default function Page() {
           </Can>
         }
       />
-      <div className="space-y-4">
-        <FilterBar showReset={dirty} onReset={reset}>
-          <SearchInput value={q} onChange={(v) => setFilters({ q: v })} placeholder={t("searchPlaceholder")} />
+      <div className="space-y-6">
+        <FilterBar showReset={dirty} onReset={reset} className="rounded-xl border border-border/60 bg-white p-4 sm:p-5 [&>div:first-child]:gap-4">
+          <SearchInput className="sm:max-w-none [&_input]:h-10" value={q} onChange={(v) => setFilters({ q: v })} placeholder={t("searchPlaceholder")} />
+          <div className="grid w-full min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-4 [&_label]:min-w-0 [&_label]:flex-col [&_label]:items-start [&_label]:gap-2 [&_select]:h-10 [&_select]:w-full [&_select]:max-w-none">
           <FilterSelect
             label={t("filters.status")}
             value={status}
@@ -147,13 +148,15 @@ export default function Page() {
             onChange={(v) => setFilters({ workModel: v })}
             options={WORK_MODELS.map((m) => ({ value: m, label: tWork(m) }))}
           />
+          </div>
         </FilterBar>
+        {items !== null && !error ? <p className="text-sm text-muted-foreground" aria-live="polite">{t("resultCount", { count: visible.length })}</p> : null}
         {error ? (
           <EmptyState title={tCommon("loadFailed")} />
         ) : items === null ? (
           <ListSkeleton />
         ) : visible.length === 0 ? (
-          <EmptyState title={t("empty.title")} description={t("empty.description")} />
+          <EmptyState title={t(dirty ? "empty.filteredTitle" : "empty.title")} description={t(dirty ? "empty.filteredDescription" : "empty.description")} />
         ) : (
           <OpeningsTable items={visible} onAction={(a, o) => void handleAction(a, o)} />
         )}

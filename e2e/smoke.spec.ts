@@ -102,7 +102,7 @@ test.describe("public smoke", () => {
     });
 
     test("country filter updates the URL", async ({ page }) => {
-      await page.getByRole("button", { name: /Brazil/ }).first().click();
+      await page.locator("#openings-country").selectOption("BR");
       await expect(page).toHaveURL(/[?&]country=BR/);
     });
   });

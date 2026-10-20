@@ -51,10 +51,13 @@ export function CvUploadField({
   };
 
   const handleDownload = async () => {
+    setBusy(true);
     try {
       window.location.assign(await getCvUrl(application.id));
     } catch (error) {
       fail(error);
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -76,13 +79,18 @@ export function CvUploadField({
       <CardHeader>
         <CardTitle>{t("detail.sections.cv")}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-4" aria-busy={busy}>
+        {busy ? <p role="status" className="text-sm text-oboya-blue">{t("detail.cv.processing")}</p> : null}
         {application.cvPath ? (
           <div className="flex flex-wrap items-center gap-3 text-sm">
-            <FileText className="size-4 text-oboya-blue" />
-            <span className="font-medium">{application.cvFilename}</span>
-            <span className="text-muted-foreground">{formatSize(application.cvSize)}</span>
-            <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => void handleDownload()}>
+            <div className="flex w-full min-w-0 items-start gap-2">
+              <FileText className="mt-0.5 size-4 shrink-0 text-oboya-blue" />
+              <div className="min-w-0">
+                <p className="break-words font-medium">{application.cvFilename}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{formatSize(application.cvSize)}</p>
+              </div>
+            </div>
+            <Button type="button" variant="outline" size="sm" className="gap-1.5" disabled={busy} onClick={() => void handleDownload()}>
               <Download className="size-3.5" />
               {t("detail.cv.download")}
             </Button>

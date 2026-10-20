@@ -10,15 +10,13 @@ import { PIPELINE_STATUSES, type JobApplication } from "@/lib/cms/careers/types"
 import { normalizeApplication } from "@/lib/cms/careers/validation";
 import type { CmsUser } from "@/lib/cms/types";
 
-const SELECT = "h-8 w-full rounded-lg border border-input bg-white px-2.5 text-sm";
+const SELECT = "h-9 w-full rounded-lg border border-input bg-white px-2.5 text-sm";
 
 export function ApplicationPipeline({
   application,
   onChange,
   users,
-  isNew = false,
 }: {
-  isNew?: boolean;
   application: JobApplication;
   onChange: (next: JobApplication) => void;
   users: CmsUser[];
@@ -34,8 +32,7 @@ export function ApplicationPipeline({
       <CardHeader>
         <CardTitle>{t("sections.pipeline")}</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4 sm:grid-cols-2">
-        {isNew ? null : (
+      <CardContent className="grid gap-4">
           <Field label={t("fields.status")}>
             <select
               className={SELECT}
@@ -49,7 +46,6 @@ export function ApplicationPipeline({
               ))}
             </select>
           </Field>
-        )}
         <div className="space-y-1.5">
           <span id={ratingId} className="text-sm font-medium">
             {t("fields.rating")}
@@ -59,6 +55,7 @@ export function ApplicationPipeline({
               <button
                 key={n}
                 type="button"
+                className="inline-flex size-8 items-center justify-center rounded-md hover:bg-oboya-yellow-light/20 focus-visible:outline-2 focus-visible:outline-oboya-blue"
                 aria-label={t("ratingStar", { value: n })}
                 aria-pressed={application.rating === n}
                 onClick={() => set({ rating: application.rating === n ? undefined : n })}
@@ -86,6 +83,9 @@ export function ApplicationPipeline({
               }}
             >
               <option value="">—</option>
+              {application.assigneeId && !users.some((user) => user.id === application.assigneeId) ? (
+                <option value={application.assigneeId}>{application.assigneeName || application.assigneeId}</option>
+              ) : null}
               {users.map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.name}
@@ -104,7 +104,7 @@ export function ApplicationPipeline({
           />
         </Field>
         {application.status === "rejected" ? (
-          <Field label={t("fields.rejectionReason")} className="sm:col-span-2">
+          <Field label={t("fields.rejectionReason")} >
             <textarea
               rows={2}
               value={application.rejectionReason ?? ""}

@@ -40,7 +40,7 @@ export default async function WorkPage({ params }: Props) {
   return (
     <SiteLayout navbarSolidTone="dark">
       <div className="bg-oboya-soft-white">
-        <CareersHero openingsCount={openings.length} countriesCount={countryFacets(openings).length} />
+        <CareersHero countriesCount={countryFacets(openings).length} />
         <section className="relative -mt-20 pb-16 md:-mt-36 md:pb-24" aria-labelledby="openings-title">
           <Container size="wide">
             <div className="rounded-sm bg-white p-4 shadow-[var(--shadow-card)] sm:p-8 md:p-10">

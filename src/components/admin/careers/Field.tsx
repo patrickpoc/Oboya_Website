@@ -16,12 +16,14 @@ export function Field({
   const id = useId();
   const items = Children.toArray(children);
   const first = items.findIndex((child) => isValidElement(child));
+  const firstElement = items[first];
+  const controlId = isValidElement<{ id?: string }>(firstElement) ? firstElement.props.id ?? id : id;
   const content = items.map((child, i) =>
-    i === first && isValidElement<{ id?: string }>(child) ? cloneElement(child, { id: child.props.id ?? id }) : child
+    i === first && isValidElement<{ id?: string }>(child) ? cloneElement(child, { id: controlId }) : child
   );
   return (
-    <div className={`space-y-1.5 ${className ?? ""}`}>
-      <Label htmlFor={id}>{label}</Label>
+    <div className={`min-w-0 space-y-1.5 [&_input]:min-h-10 [&_select]:min-h-10 [&_select]:max-w-full [&_textarea]:focus-visible:outline-oboya-blue ${className ?? ""}`}>
+      <Label htmlFor={controlId}>{label}</Label>
       {content}
     </div>
   );

@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Search, X } from "lucide-react";
-import { CountryFlag } from "@/components/ui/country-flag";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import {
   countryFacets,
@@ -115,25 +114,7 @@ export function OpeningsBoard({ openings }: { openings: PublicJobOpening[] }) {
         </button>
       </form>
 
-      {countries.length > 0 ? (
-        <div role="group" aria-label={t("filters.country")} className="-mx-4 mt-5 flex snap-x flex-nowrap gap-2 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
-          <CountryChip active={!current.country} onClick={() => update({ country: "" })}>
-            {t("filters.allCountries")} ({openings.length})
-          </CountryChip>
-          {countries.map((c) => (
-            <CountryChip
-              key={c.code}
-              active={current.country === c.code}
-              onClick={() => update({ country: current.country === c.code ? "" : c.code })}
-            >
-              <CountryFlag code={c.code} className="h-3.5 w-5 rounded-[2px]" />
-              {t("filters.countryOption", { country: c.name, count: c.count })}
-            </CountryChip>
-          ))}
-        </div>
-      ) : null}
-
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <FilterSelect
           id="openings-department"
           label={t("filters.department")}
@@ -157,6 +138,19 @@ export function OpeningsBoard({ openings }: { openings: PublicJobOpening[] }) {
           anyLabel={t("filters.any")}
           options={EMPLOYMENT_TYPES.map((v) => ({ value: v, label: tl(`employmentType.${v}`) }))}
           onChange={(v) => update({ type: v })}
+        />
+        <FilterSelect
+          id="openings-country"
+          label={t("filters.country")}
+          value={current.country}
+          anyLabel={t("filters.allCountries")}
+          options={[
+            ...countries.map((c) => ({ value: c.code, label: c.name })),
+            ...(current.country && !countries.some((c) => c.code === current.country)
+              ? [{ value: current.country, label: countryLabel }]
+              : []),
+          ]}
+          onChange={(v) => update({ country: v })}
         />
       </div>
 
@@ -216,32 +210,6 @@ export function OpeningsBoard({ openings }: { openings: PublicJobOpening[] }) {
         </div>
       )}
     </div>
-  );
-}
-
-function CountryChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={onClick}
-      className={cn(
-        "inline-flex min-h-9 shrink-0 snap-start items-center gap-2 whitespace-nowrap rounded-full border px-3.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oboya-blue",
-        active
-          ? "border-oboya-blue-dark bg-oboya-blue-dark text-white"
-          : "border-border/70 bg-white text-oboya-blue-dark hover:border-oboya-blue-dark/50"
-      )}
-    >
-      {children}
-    </button>
   );
 }
 

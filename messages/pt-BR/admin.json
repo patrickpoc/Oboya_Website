@@ -1305,7 +1305,9 @@
       },
       "empty": {
         "title": "Nenhuma vaga encontrada",
-        "description": "Crie uma vaga ou ajuste os filtros."
+        "description": "Crie uma vaga ou ajuste os filtros.",
+        "filteredTitle": "Nenhuma vaga corresponde aos filtros",
+        "filteredDescription": "Tente outra busca ou limpe os filtros."
       },
       "editor": {
         "titleNew": "Nova vaga",
@@ -1355,7 +1357,8 @@
           "slugReserved": "Este slug é reservado. Escolha outro.",
           "salaryNegative": "O salário não pode ser negativo."
         }
-      }
+      },
+      "resultCount": "{count, plural, one {# vaga} other {# vagas}}"
     },
     "applications": {
       "title": "Candidaturas",
@@ -1383,7 +1386,9 @@
       },
       "empty": {
         "title": "Nenhuma candidatura encontrada",
-        "description": "As candidaturas aparecerão aqui quando candidatos se inscreverem ou você adicionar uma manualmente."
+        "description": "As candidaturas aparecerão aqui quando candidatos se inscreverem.",
+        "filteredTitle": "Nenhuma candidatura corresponde aos filtros",
+        "filteredDescription": "Tente outra busca ou limpe os filtros."
       },
       "toasts": {
         "created": "Candidatura criada",
@@ -1459,7 +1464,8 @@
           "invalidType": "Somente arquivos PDF, DOC ou DOCX são aceitos.",
           "tooLarge": "O arquivo deve ter no máximo 10 MB.",
           "none": "Nenhum CV enviado.",
-          "unavailable": "O armazenamento de CVs não está disponível. Verifique a configuração do Supabase."
+          "unavailable": "O armazenamento de CVs não está disponível. Verifique a configuração do Supabase.",
+          "processing": "Processando…"
         },
         "ratingStar": "Avaliação {value} de 5",
         "notes": {
@@ -1493,7 +1499,9 @@
           "dateInvalid": "Informe uma data de disponibilidade válida.",
           "salaryNegative": "A pretensão salarial não pode ser negativa."
         }
-      }
+      },
+      "resultCount": "{count, plural, one {# candidatura} other {# candidaturas}}",
+      "unread": "Não lida"
     },
     "common": {
       "status": {

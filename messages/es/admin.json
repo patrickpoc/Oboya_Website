@@ -1305,7 +1305,9 @@
       },
       "empty": {
         "title": "No se encontraron vacantes",
-        "description": "Crea una vacante o ajusta los filtros."
+        "description": "Crea una vacante o ajusta los filtros.",
+        "filteredTitle": "Ninguna vacante coincide con los filtros",
+        "filteredDescription": "Prueba otra búsqueda o borra los filtros."
       },
       "editor": {
         "titleNew": "Nueva vacante",
@@ -1355,7 +1357,8 @@
           "slugReserved": "Este slug está reservado. Elige otro.",
           "salaryNegative": "El salario no puede ser negativo."
         }
-      }
+      },
+      "resultCount": "{count, plural, one {# vacante} other {# vacantes}}"
     },
     "applications": {
       "title": "Candidaturas",
@@ -1383,7 +1386,9 @@
       },
       "empty": {
         "title": "No se encontraron candidaturas",
-        "description": "Las candidaturas aparecerán aquí cuando los candidatos se postulen o añadas una manualmente."
+        "description": "Las candidaturas aparecerán aquí cuando los candidatos se postulen.",
+        "filteredTitle": "Ninguna candidatura coincide con los filtros",
+        "filteredDescription": "Prueba otra búsqueda o borra los filtros."
       },
       "toasts": {
         "created": "Candidatura creada",
@@ -1459,7 +1464,8 @@
           "invalidType": "Solo se aceptan archivos PDF, DOC o DOCX.",
           "tooLarge": "El archivo debe pesar 10 MB o menos.",
           "none": "No se ha subido ningún CV.",
-          "unavailable": "El almacenamiento de CV no está disponible. Revisa la configuración de Supabase."
+          "unavailable": "El almacenamiento de CV no está disponible. Revisa la configuración de Supabase.",
+          "processing": "Procesando…"
         },
         "ratingStar": "Valoración {value} de 5",
         "notes": {
@@ -1493,7 +1499,9 @@
           "dateInvalid": "Introduce una fecha de disponibilidad válida.",
           "salaryNegative": "La expectativa salarial no puede ser negativa."
         }
-      }
+      },
+      "resultCount": "{count, plural, one {# candidatura} other {# candidaturas}}",
+      "unread": "Sin leer"
     },
     "common": {
       "status": {

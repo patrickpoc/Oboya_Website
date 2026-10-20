@@ -1305,7 +1305,9 @@
       },
       "empty": {
         "title": "No job openings found",
-        "description": "Create an opening or adjust the filters."
+        "description": "Create an opening or adjust the filters.",
+        "filteredTitle": "No openings match your filters",
+        "filteredDescription": "Try a different search or clear the filters."
       },
       "editor": {
         "titleNew": "New job opening",
@@ -1355,7 +1357,8 @@
           "slugReserved": "This slug is reserved. Choose a different one.",
           "salaryNegative": "Salary cannot be negative."
         }
-      }
+      },
+      "resultCount": "{count, plural, one {# opening} other {# openings}}"
     },
     "applications": {
       "title": "Applications",
@@ -1383,7 +1386,9 @@
       },
       "empty": {
         "title": "No applications found",
-        "description": "Applications will appear here when candidates apply or you add one manually."
+        "description": "Applications will appear here when candidates apply.",
+        "filteredTitle": "No applications match your filters",
+        "filteredDescription": "Try a different search or clear the filters."
       },
       "toasts": {
         "created": "Application created",
@@ -1459,7 +1464,8 @@
           "invalidType": "Only PDF, DOC or DOCX files are accepted.",
           "tooLarge": "The file must be 10 MB or smaller.",
           "none": "No CV uploaded.",
-          "unavailable": "CV storage is not available. Check the Supabase configuration."
+          "unavailable": "CV storage is not available. Check the Supabase configuration.",
+          "processing": "Processing…"
         },
         "ratingStar": "Rating {value} of 5",
         "notes": {
@@ -1493,7 +1499,9 @@
           "dateInvalid": "Enter a valid availability date.",
           "salaryNegative": "Salary expectation cannot be negative."
         }
-      }
+      },
+      "resultCount": "{count, plural, one {# application} other {# applications}}",
+      "unread": "Unread"
     },
     "common": {
       "status": {

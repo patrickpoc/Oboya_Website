@@ -1,6 +1,7 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useEffect, useId, useRef } from "react";
+import { useFormatter, useTranslations } from "next-intl";
 import { Plus, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,23 +20,29 @@ import {
 } from "@/lib/cms/careers/types";
 import { WORLD_COUNTRIES } from "@/lib/contact/world-countries";
 
-const SELECT = "h-8 w-full rounded-lg border border-input bg-white px-2.5 text-sm";
+const SELECT = "h-9 w-full rounded-lg border border-input bg-white px-3 text-sm focus-visible:outline-2 focus-visible:outline-oboya-blue";
 
 export function ApplicationForm({
   application,
   onChange,
   openings,
   errors,
-  isNew,
   duplicateEmail,
+  sidebar,
 }: {
   application: JobApplication;
   onChange: (next: JobApplication) => void;
   openings: JobOpening[];
   errors: string[];
-  isNew: boolean;
   duplicateEmail: boolean;
+  sidebar?: React.ReactNode;
 }) {
+  const errorRef = useRef<HTMLUListElement>(null);
+  const duplicateId = useId();
+  const format = useFormatter();
+  useEffect(() => {
+    if (errors.length > 0) errorRef.current?.focus();
+  }, [errors]);
   const t = useTranslations("admin.careers.applications");
   const tc = useTranslations("admin.careers.common");
   const f = (key: string) => t(`detail.fields.${key}`);
@@ -80,14 +87,15 @@ export function ApplicationForm({
   return (
     <div className="space-y-6">
       {errors.length > 0 ? (
-        <ul role="alert" className="rounded-lg border border-oboya-orange/40 bg-oboya-orange/5 p-3 text-sm text-oboya-orange">
+        <ul ref={errorRef} tabIndex={-1} role="alert" className="rounded-lg border border-oboya-orange/40 bg-oboya-orange/5 p-3 text-sm text-oboya-orange">
           {errors.map((code) => (
             <li key={code}>{t.has(`detail.validation.${code}`) ? t(`detail.validation.${code}`) : code}</li>
           ))}
         </ul>
       ) : null}
 
-      <Card>
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
+      <Card className="min-w-0 xl:col-start-1">
         <CardHeader>
           <CardTitle>{t("detail.sections.candidate")}</CardTitle>
         </CardHeader>
@@ -108,8 +116,8 @@ export function ApplicationForm({
           </Field>
           <Field label={f("fullName")}>{str("fullName")}</Field>
           <Field label={f("email")}>
-            <Input type="email" value={application.email} onChange={(e) => set({ email: e.target.value })} />
-            {duplicateEmail ? <p className="text-xs text-oboya-orange">{t("duplicateEmailWarning")}</p> : null}
+            <Input type="email" aria-describedby={duplicateEmail ? duplicateId : undefined} value={application.email} onChange={(e) => set({ email: e.target.value })} />
+            {duplicateEmail ? <p id={duplicateId} className="text-xs text-oboya-orange">{t("duplicateEmailWarning")}</p> : null}
           </Field>
           <Field label={f("phone")}>{str("phone")}</Field>
           <Field label={f("country")}>
@@ -132,7 +140,9 @@ export function ApplicationForm({
         </CardContent>
       </Card>
 
-      <Card>
+      {sidebar ? <aside className="min-w-0 space-y-6 xl:col-start-2 xl:row-start-1 xl:row-span-4">{sidebar}</aside> : null}
+
+      <Card className="min-w-0 xl:col-start-1">
         <CardHeader>
           <CardTitle>{t("detail.sections.professional")}</CardTitle>
         </CardHeader>
@@ -198,7 +208,7 @@ export function ApplicationForm({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="min-w-0 xl:col-start-1">
         <CardHeader>
           <CardTitle>{t("detail.sections.preferences")}</CardTitle>
         </CardHeader>
@@ -238,41 +248,42 @@ export function ApplicationForm({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="min-w-0 xl:col-start-1">
         <CardHeader>
           <CardTitle>{t("detail.sections.consent")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <fieldset disabled={!isNew} className="contents">
+          <fieldset disabled className="contents">
           <label className="flex items-center gap-2 text-sm sm:col-span-2">
             <Switch
               checked={application.consentPrivacy}
-              onCheckedChange={(checked) => isNew && set({ consentPrivacy: checked })}
+              onCheckedChange={(checked) => set({ consentPrivacy: checked })}
             />
             {f("consentPrivacy")}
           </label>
           <Field label={f("consentVersion")}>
             <Input
-              disabled={!isNew}
+              disabled
               value={application.consentVersion ?? ""}
               onChange={(e) => set({ consentVersion: e.target.value || undefined })}
             />
           </Field>
-          {!isNew && application.consentPrivacyAt ? (
+          {application.consentPrivacyAt ? (
             <Field label={f("consentAt")}>
-              <p className="text-sm">{application.consentPrivacyAt.slice(0, 16).replace("T", " ")}</p>
+              <p className="text-sm">{format.dateTime(new Date(application.consentPrivacyAt), { dateStyle: "medium", timeStyle: "short" })}</p>
             </Field>
           ) : null}
           <label className="flex items-center gap-2 text-sm sm:col-span-2">
             <Switch
               checked={application.consentTalentPool}
-              onCheckedChange={(checked) => isNew && set({ consentTalentPool: checked })}
+              onCheckedChange={(checked) => set({ consentTalentPool: checked })}
             />
             {f("consentTalentPool")}
           </label>
         </fieldset>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

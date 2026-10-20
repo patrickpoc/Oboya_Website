@@ -108,9 +108,6 @@ export const applicationsExportUrl = (filters: ApplicationFilters) =>
 
 export const getApplication = (id: string) => item(call(appUrl(id)));
 
-export const createApplication = (application: JobApplication) =>
-  item(call(`${BASE}/applications`, json("POST", application)));
-
 export const updateApplication = (id: string, patch: Partial<JobApplication>) =>
   item(call(appUrl(id), json("PATCH", patch)));
 

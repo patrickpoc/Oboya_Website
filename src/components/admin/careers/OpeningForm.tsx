@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { RichTextEditor } from "@/components/admin/editors/RichTextEditor";
 import { LocaleFieldTabs } from "@/components/admin/forms/LocaleFieldTabs";
@@ -96,7 +97,12 @@ export function OpeningForm({
 }) {
   const t = useTranslations("admin.careers.openings.editor");
   const tc = useTranslations("admin.careers.common");
+  const errorSummary = useRef<HTMLUListElement>(null);
+  useEffect(() => {
+    if (errors.length > 0) errorSummary.current?.focus();
+  }, [errors]);
   const [locale, setLocale] = useState<CmsLocale>("en");
+  const [expandedFields, setExpandedFields] = useState<OpeningLocalizedField[]>(["description"]);
   const [slugTouched, setSlugTouched] = useState(Boolean(opening.slug));
   const set = (patch: Partial<JobOpening>) => onChange({ ...opening, ...patch });
   const setLoc = (field: OpeningLocalizedField, loc: CmsLocale, value: string) =>
@@ -123,14 +129,45 @@ export function OpeningForm({
   return (
     <div className="space-y-6">
       {errors.length > 0 ? (
-        <ul role="alert" className="rounded-lg border border-oboya-orange/40 bg-oboya-orange/5 p-3 text-sm text-oboya-orange">
+        <ul ref={errorSummary} tabIndex={-1} role="alert" className="rounded-lg border border-oboya-orange/40 bg-oboya-orange/5 p-3 text-sm text-oboya-orange">
           {errors.map((code) => (
             <li key={code}>{t.has(`validation.${code}`) ? t(`validation.${code}`) : code}</li>
           ))}
         </ul>
       ) : null}
 
-      <fieldset disabled={readOnly} className="contents">
+      <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="min-w-0 space-y-6">
+      <Card>
+        <CardHeader><CardTitle>{f("title")}</CardTitle></CardHeader>
+        <CardContent>
+          <LocaleFieldTabs value={locale} onChange={setLocale}>
+            {(loc) => <div className="space-y-4">
+                <Field label={f("title")}>
+                  <Input
+                    disabled={readOnly}
+                    value={opening.title[loc]}
+                    onChange={(e) => {
+                      const patch: Partial<JobOpening> = { title: { ...opening.title, [loc]: e.target.value } };
+                      if (loc === "en" && !slugTouched) patch.slug = slugify(e.target.value);
+                      set(patch);
+                    }}
+                  />
+                </Field>
+                <Field label={f("summary")}>
+                  <textarea
+                    rows={3}
+                    disabled={readOnly}
+                    value={opening.summary[loc]}
+                    onChange={(e) => setLoc("summary", loc, e.target.value)}
+                    className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                  />
+                </Field>
+            </div>}
+          </LocaleFieldTabs>
+        </CardContent>
+      </Card>
+      <fieldset disabled={readOnly} className="grid min-w-0 gap-6 border-0 p-0">
       <Card>
         <CardHeader>
           <CardTitle>{t("sections.basics")}</CardTitle>
@@ -197,32 +234,20 @@ export function OpeningForm({
           <LocaleFieldTabs value={locale} onChange={setLocale}>
             {(loc) => (
               <div className="space-y-4">
-                <Field label={f("title")}>
-                  <Input
-                    disabled={readOnly}
-                    value={opening.title[loc]}
-                    onChange={(e) => {
-                      const patch: Partial<JobOpening> = { title: { ...opening.title, [loc]: e.target.value } };
-                      if (loc === "en" && !slugTouched) patch.slug = slugify(e.target.value);
-                      set(patch);
-                    }}
-                  />
-                </Field>
-                <Field label={f("summary")}>
-                  <textarea
-                    rows={3}
-                    disabled={readOnly}
-                    value={opening.summary[loc]}
-                    onChange={(e) => setLoc("summary", loc, e.target.value)}
-                    className="w-full rounded-lg border border-input px-3 py-2 text-sm"
-                  />
-                </Field>
                 {RICH_FIELDS.map((field) => (
-                  <Field key={field} label={f(field)}>
-                    <div inert={readOnly}>
+                  <details key={field} open={expandedFields.includes(field) || errors.length > 0} onToggle={(event) => {
+                    const open = event.currentTarget.open;
+                    setExpandedFields((current) => open
+                      ? current.includes(field) ? current : [...current, field]
+                      : current.filter((value) => value !== field));
+                  }} className="group rounded-lg border border-border/60">
+                    <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-lg bg-oboya-soft-white/70 px-4 py-3 text-sm font-medium text-oboya-blue-dark focus-visible:outline-2 focus-visible:outline-oboya-blue">
+                      {f(field)}<ChevronDown aria-hidden="true" className="size-4 transition-transform group-open:rotate-180" />
+                    </summary>
+                    <div className="p-4" inert={readOnly}>
                       <RichTextEditor value={opening[field][loc]} onChange={(html) => setLoc(field, loc, html)} />
                     </div>
-                  </Field>
+                  </details>
                 ))}
               </div>
             )}
@@ -230,42 +255,13 @@ export function OpeningForm({
         </CardContent>
       </Card>
 
-      <fieldset disabled={readOnly} className="contents">
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("sections.compensation")}</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-4">
-          <Field label={f("salaryMin")}>
-            <Input type="number" min={0} value={opening.salaryMin ?? ""} onChange={(e) => set({ salaryMin: num(e.target.value) })} />
-          </Field>
-          <Field label={f("salaryMax")}>
-            <Input type="number" min={0} value={opening.salaryMax ?? ""} onChange={(e) => set({ salaryMax: num(e.target.value) })} />
-          </Field>
-          <Field label={f("salaryCurrency")}>
-            <Input
-              maxLength={3}
-              value={opening.salaryCurrency ?? ""}
-              onChange={(e) => set({ salaryCurrency: e.target.value.toUpperCase() || undefined })}
-            />
-          </Field>
-          <Field label={f("salaryPeriod")}>
-            {enumSelect(opening.salaryPeriod, SALARY_PERIODS, "salaryPeriod", (v) =>
-              set({ salaryPeriod: v as JobOpening["salaryPeriod"] })
-            )}
-          </Field>
-          <label className="flex items-center gap-2 text-sm sm:col-span-4">
-            <Switch checked={opening.showSalary} onCheckedChange={(checked) => set({ showSalary: checked })} />
-            {f("showSalary")}
-          </label>
-        </CardContent>
-      </Card>
-
+      </div>
+      <fieldset disabled={readOnly} className="grid min-w-0 content-start gap-6 border-0 p-0">
       <Card>
         <CardHeader>
           <CardTitle>{t("sections.publishing")}</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
           <Field label={f("status")}>
             <Can module="careers" action="publish" fallback={<OpeningStatusPill status={opening.status} />}>
               <select
@@ -310,7 +306,7 @@ export function OpeningForm({
         <CardHeader>
           <CardTitle>{t("sections.ownership")}</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
           <OwnerField
             label={f("hiringManager")}
             users={users}
@@ -327,7 +323,38 @@ export function OpeningForm({
           />
         </CardContent>
       </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("sections.compensation")}</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+          <Field label={f("salaryMin")}>
+            <Input type="number" min={0} value={opening.salaryMin ?? ""} onChange={(e) => set({ salaryMin: num(e.target.value) })} />
+          </Field>
+          <Field label={f("salaryMax")}>
+            <Input type="number" min={0} value={opening.salaryMax ?? ""} onChange={(e) => set({ salaryMax: num(e.target.value) })} />
+          </Field>
+          <Field label={f("salaryCurrency")}>
+            <Input
+              maxLength={3}
+              value={opening.salaryCurrency ?? ""}
+              onChange={(e) => set({ salaryCurrency: e.target.value.toUpperCase() || undefined })}
+            />
+          </Field>
+          <Field label={f("salaryPeriod")}>
+            {enumSelect(opening.salaryPeriod, SALARY_PERIODS, "salaryPeriod", (v) =>
+              set({ salaryPeriod: v as JobOpening["salaryPeriod"] })
+            )}
+          </Field>
+          <label className="flex items-center gap-2 text-sm sm:col-span-2 xl:col-span-1">
+            <Switch checked={opening.showSalary} onCheckedChange={(checked) => set({ showSalary: checked })} />
+            {f("showSalary")}
+          </label>
+        </CardContent>
+      </Card>
+
       </fieldset>
+      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { Star } from "lucide-react";
 import { StatusPill, type PillTone } from "@/components/admin/common";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -24,6 +24,7 @@ export function ApplicationsTable({
   items: JobApplication[];
   openingTitles: Record<string, string>;
 }) {
+  const format = useFormatter();
   const t = useTranslations("admin.careers.applications");
   const tPipe = useTranslations("admin.careers.common.pipeline");
   const tSource = useTranslations("admin.careers.common.source");
@@ -43,16 +44,17 @@ export function ApplicationsTable({
         <TableBody>
           {items.map((a) => (
             <TableRow key={a.id}>
-              <TableCell>
+              <TableCell className="min-w-56 py-4">
                 <Link
                   href={`/admin/careers/applications/${a.id}`}
                   className={`text-oboya-blue-dark hover:underline ${a.readAt ? "font-medium" : "font-bold"}`}
                 >
+                  {!a.readAt ? <span className="mr-2 inline-block size-2 rounded-full bg-oboya-blue" aria-label={t("unread")} /> : null}
                   {a.fullName || "—"}
                 </Link>
-                <p className="text-xs text-muted-foreground">{a.email || "—"}</p>
+                <p className="mt-1 break-all text-xs text-muted-foreground">{a.email || "—"}</p>
               </TableCell>
-              <TableCell>
+              <TableCell className="min-w-52 max-w-80 whitespace-normal">
                 {a.openingId ? (openingTitles[a.openingId] ?? a.openingId) : t("filters.talentPool")}
               </TableCell>
               <TableCell>
@@ -69,7 +71,7 @@ export function ApplicationsTable({
                 )}
               </TableCell>
               <TableCell>{a.source ? tSource(a.source) : "—"}</TableCell>
-              <TableCell>{a.createdAt.slice(0, 10)}</TableCell>
+              <TableCell><time dateTime={a.createdAt}>{format.dateTime(new Date(a.createdAt), { dateStyle: "medium" })}</time></TableCell>
             </TableRow>
           ))}
         </TableBody>

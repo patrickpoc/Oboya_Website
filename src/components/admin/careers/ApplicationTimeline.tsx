@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useId, useState } from "react";
+import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Can } from "@/components/admin/permissions/Can";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,8 @@ export function ApplicationTimeline({
   activities: JobApplicationActivity[];
   onAdded: (activity: JobApplicationActivity) => void;
 }) {
+  const noteId = useId();
+  const format = useFormatter();
   const t = useTranslations("admin.careers.applications.detail");
   const tc = useTranslations("admin.careers.common");
   const tPipe = useTranslations("admin.careers.common.pipeline");
@@ -50,7 +52,10 @@ export function ApplicationTimeline({
       <CardContent className="space-y-4">
         {anonymized ? null : (
         <Can module="careers" action="edit">
+          <label htmlFor={noteId} className="block text-sm font-medium">{t("notes.placeholder")}</label>
           <textarea
+            id={noteId}
+            disabled={busy}
             rows={3}
             value={draft}
             maxLength={4000}
@@ -68,7 +73,7 @@ export function ApplicationTimeline({
         ) : (
           <ol className="space-y-3 border-l border-border pl-4">
             {activities.map((a) => (
-              <li key={a.id} className="text-sm">
+              <li key={a.id} className="relative rounded-lg bg-oboya-soft-white/60 p-3 text-sm">
                 <p className="font-medium text-oboya-blue-dark">{t(`timeline.${a.kind}`)}</p>
                 {a.kind === "status_change" && a.meta ? (
                   <p className="text-xs text-muted-foreground">
@@ -82,7 +87,8 @@ export function ApplicationTimeline({
                 ) : null}
                 {a.body ? <p className="whitespace-pre-wrap">{a.body}</p> : null}
                 <p className="text-xs text-muted-foreground">
-                  {[a.actorName, a.createdAt.slice(0, 16).replace("T", " ")].filter(Boolean).join(" · ")}
+                  {a.actorName ? <>{a.actorName} · </> : null}
+                  <time dateTime={a.createdAt}>{format.dateTime(new Date(a.createdAt), { dateStyle: "medium", timeStyle: "short" })}</time>
                 </p>
               </li>
             ))}
