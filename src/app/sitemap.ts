@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
 import { getAllPageSlugs } from "@/constants/pages";
-import { readBlogPosts, readProducts } from "@/lib/cms/readers";
+import { readBlogPosts, readCaseStudies, readProducts } from "@/lib/cms/readers";
 
 const baseUrl = "https://www.oboya-horticulture.com";
 
@@ -13,28 +13,49 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 1,
   }));
 
+  const contentPaths = [
+    "solutions",
+    ...getAllPageSlugs().map((slug) => slug.join("/")),
+  ];
   const pageEntries = routing.locales.flatMap((locale) =>
-    getAllPageSlugs().map((slug) => ({
-      url: `${baseUrl}/${locale}/${slug.join("/")}`,
+    contentPaths.map((path) => ({
+      url: `${baseUrl}/${locale}/${path}`,
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
-      priority: 0.7,
+      priority: path === "solutions" ? 0.9 : 0.7,
     }))
   );
 
   const posts = await readBlogPosts();
-  const newsEntries = routing.locales.flatMap((locale) => {
+  const blogEntries = routing.locales.flatMap((locale) => {
     const index = {
-      url: `${baseUrl}/${locale}/news`,
+      url: `${baseUrl}/${locale}/blog`,
       lastModified: new Date(),
       changeFrequency: "weekly" as const,
       priority: 0.85,
     };
     const articles = posts.map((post) => ({
-      url: `${baseUrl}/${locale}/news/${post.slug}`,
+      url: `${baseUrl}/${locale}/blog/${post.slug}`,
       lastModified: post.updatedAt ? new Date(post.updatedAt) : new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.75,
+    }));
+    return [index, ...articles];
+  });
+
+  const studies = await readCaseStudies();
+  const caseStudyEntries = routing.locales.flatMap((locale) => {
+    const index = {
+      url: `${baseUrl}/${locale}/case-studies`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    };
+    const articles = studies.map((study) => ({
+      url: `${baseUrl}/${locale}/case-studies/${study.slug}`,
+      lastModified: study.updatedAt ? new Date(study.updatedAt) : new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
     }));
     return [index, ...articles];
   });
@@ -56,5 +77,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
-  return [...homeEntries, ...shopIndexEntries, ...productEntries, ...newsEntries, ...pageEntries];
+  return [
+    ...homeEntries,
+    ...shopIndexEntries,
+    ...productEntries,
+    ...blogEntries,
+    ...caseStudyEntries,
+    ...pageEntries,
+  ];
 }

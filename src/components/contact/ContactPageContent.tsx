@@ -11,6 +11,7 @@ import {
 } from "@/components/contact/ContactFieldControls";
 import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/constants/site";
+import { Link } from "@/i18n/navigation";
 import { getWorldCountryByCode } from "@/lib/contact/world-countries";
 import { cn } from "@/lib/utils";
 import { collectLeadContext } from "@/lib/forms/lead-context";
@@ -31,6 +32,8 @@ export function ContactPageContent() {
   const [phoneLocal, setPhoneLocal] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
 
   const dialCode = useMemo(() => {
     return getWorldCountryByCode(phoneCountryCode)?.dial ?? "+1";
@@ -42,6 +45,11 @@ export function ContactPageContent() {
 
     if (!countryCode) {
       setError(t("countryPlaceholder"));
+      return;
+    }
+
+    if (!privacyAccepted) {
+      setError(t("privacyAccept"));
       return;
     }
 
@@ -67,8 +75,8 @@ export function ContactPageContent() {
       company: String(formData.get("company") ?? "").trim(),
       subject: subject.trim(),
       message: message.trim(),
-      privacyAccepted: true,
-      marketingOptIn: false,
+      privacyAccepted,
+      marketingOptIn,
       context: collectLeadContext(),
     };
 
@@ -305,6 +313,37 @@ export function ContactPageContent() {
                       className={cn(underlineField, "resize-none")}
                     />
                     <CharCount remaining={MESSAGE_MAX - message.length} />
+                  </div>
+
+                  <div className="flex flex-col gap-3">
+                    <p className="text-xs leading-relaxed text-oboya-blue-dark/70">
+                      {t("privacyNotice")}{" "}
+                      <Link
+                        href="/privacy"
+                        className="text-oboya-blue-light underline-offset-2 hover:underline"
+                      >
+                        {t("privacyLink")}
+                      </Link>
+                    </p>
+                    <label className="flex items-start gap-2 text-xs text-oboya-blue-dark/80">
+                      <input
+                        type="checkbox"
+                        required
+                        checked={privacyAccepted}
+                        onChange={(event) => setPrivacyAccepted(event.target.checked)}
+                        className="mt-0.5 size-4 accent-oboya-blue-dark"
+                      />
+                      <span>{t("privacyAccept")}</span>
+                    </label>
+                    <label className="flex items-start gap-2 text-xs text-oboya-blue-dark/80">
+                      <input
+                        type="checkbox"
+                        checked={marketingOptIn}
+                        onChange={(event) => setMarketingOptIn(event.target.checked)}
+                        className="mt-0.5 size-4 accent-oboya-blue-dark"
+                      />
+                      <span>{t("marketingOptIn")}</span>
+                    </label>
                   </div>
 
                   {error && (

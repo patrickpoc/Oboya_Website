@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { addQuoteSubmissionWithReference } from "@/lib/cms/server/forms.server";
 import { readProducts } from "@/lib/cms/server/products.server";
-import { readMarketplaceCurrencies } from "@/lib/cms/server/marketplace-config.server";
+import {
+  readMarketplaceCurrencies,
+  readMarketplaceShopConfig,
+} from "@/lib/cms/server/marketplace-config.server";
 import { readMapLocations } from "@/lib/map-locations.server";
 import { clampQuantity, getProductMoq, MAX_QUANTITY } from "@/lib/shop/quantity";
 import {
@@ -37,6 +40,11 @@ export async function POST(request: Request) {
   }
 
   try {
+    const shopConfig = await readMarketplaceShopConfig();
+    if (!shopConfig.rfq.enabled) {
+      return NextResponse.json({ error: "Quote requests are disabled" }, { status: 403 });
+    }
+
     const body = (await request.json()) as Record<string, unknown>;
 
     const company = asString(body.company);

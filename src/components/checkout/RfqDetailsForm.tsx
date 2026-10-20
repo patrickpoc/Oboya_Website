@@ -9,6 +9,7 @@ import {
   PhoneCountrySelect,
 } from "@/components/contact/ContactFieldControls";
 import { useShop } from "@/contexts/ShopContext";
+import { Link } from "@/i18n/navigation";
 import { getWorldCountryByCode } from "@/lib/contact/world-countries";
 import type { ShopConfigRfqFieldKey } from "@/lib/cms/shop-config/types";
 import type { RfqPayload } from "@/lib/shop/types";
@@ -198,6 +199,37 @@ export function RfqDetailsForm({
           <CharCount remaining={NOTES_MAX - form.message.length} />
         </div>
       ) : null}
+
+      <div className="space-y-3 pt-1">
+        <p className="text-xs leading-relaxed text-oboya-blue-dark/70">
+          {t("privacyNotice")}{" "}
+          <Link
+            href="/privacy"
+            className="text-oboya-blue-light underline-offset-2 hover:underline"
+          >
+            {t("privacyLink")}
+          </Link>
+        </p>
+        <label className="flex items-start gap-2 text-xs text-oboya-blue-dark/80">
+          <input
+            type="checkbox"
+            required
+            checked={form.privacyAccepted}
+            onChange={(event) => onChange({ ...form, privacyAccepted: event.target.checked })}
+            className="mt-0.5 size-4 accent-oboya-blue-dark"
+          />
+          <span>{t("privacyAccept")}</span>
+        </label>
+        <label className="flex items-start gap-2 text-xs text-oboya-blue-dark/80">
+          <input
+            type="checkbox"
+            checked={form.marketingOptIn}
+            onChange={(event) => onChange({ ...form, marketingOptIn: event.target.checked })}
+            className="mt-0.5 size-4 accent-oboya-blue-dark"
+          />
+          <span>{t("marketingOptIn")}</span>
+        </label>
+      </div>
     </div>
   );
 }

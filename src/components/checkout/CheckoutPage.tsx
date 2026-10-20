@@ -2,10 +2,10 @@
 
 import { Lock } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { AddToQuoteDialog } from "@/components/shop/quote/AddToQuoteDialog";
 import { CatalogLoading, RfqError } from "@/components/shop/states/ShopStateViews";
-import { CheckoutCouponCard } from "@/components/checkout/CheckoutCouponCard";
 import { CheckoutSuccessDialog } from "@/components/checkout/CheckoutSuccessDialog";
 import { CheckoutLineItem } from "@/components/checkout/CheckoutLineItem";
 import { CheckoutUpsell } from "@/components/checkout/CheckoutUpsell";
@@ -28,7 +28,7 @@ const EMPTY_FORM: RfqFormState = {
   phone: "",
   country: "",
   message: "",
-  privacyAccepted: true,
+  privacyAccepted: false,
   marketingOptIn: false,
 };
 
@@ -68,14 +68,26 @@ export function CheckoutPage({
   } = useShop();
   const { data: mapData } = useMapLocations();
   const [form, setForm] = useState<RfqFormState>(EMPTY_FORM);
+  const searchParams = useSearchParams();
+  const refParam = searchParams.get("ref")?.trim() ?? "";
+  const urlReference = /^OBOYA-[A-Z]{2,5}-\d{1,8}$/.test(refParam) ? refParam : null;
 
   if (!catalogReady) {
     return (
-      <section className="bg-oboya-soft-white py-8 md:py-12">
-        <Container size="wide">
-          <CatalogLoading />
-        </Container>
-      </section>
+      <>
+        <section className="bg-oboya-soft-white py-8 md:py-12">
+          <Container size="wide">
+            <CatalogLoading />
+          </Container>
+        </section>
+        <CheckoutSuccessDialog
+          referenceId={urlReference}
+          onClose={() => {
+            resetRfqStatus();
+            router.push("/shop");
+          }}
+        />
+      </>
     );
   }
 
@@ -92,8 +104,9 @@ export function CheckoutPage({
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      await submitRfq(form, office?.officeId ?? null);
+      const referenceId = await submitRfq(form, office?.officeId ?? null);
       setForm(EMPTY_FORM);
+      router.replace(`/checkout?ref=${encodeURIComponent(referenceId)}`);
     } catch {
       // rfqStatus is set in ShopContext
     }
@@ -168,17 +181,6 @@ export function CheckoutPage({
           </div>
 
           <aside className="min-w-0 space-y-4 lg:sticky lg:top-24">
-            {settings.sections.coupon ? (
-              <CheckoutCouponCard
-                title={cmsCopy(locale, t("couponTitle"), settings.copy.couponTitleI18n)}
-                unavailable={cmsCopy(
-                  locale,
-                  t("couponUnavailable"),
-                  settings.copy.couponUnavailableI18n
-                )}
-              />
-            ) : null}
-
             <form
               className="rounded-2xl border border-border/60 bg-white p-5 shadow-[var(--shadow-card)]"
               onSubmit={(event) => void handleSubmit(event)}
@@ -246,7 +248,9 @@ export function CheckoutPage({
       </Container>
       <AddToQuoteDialog />
       <CheckoutSuccessDialog
-        referenceId={rfqStatus === "success" ? rfqReferenceId : null}
+        referenceId={
+          rfqStatus === "success" && rfqReferenceId ? rfqReferenceId : urlReference
+        }
         confirmationMessage={confirmation || undefined}
         onClose={() => {
           resetRfqStatus();

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { CheckoutPage } from "@/components/checkout/CheckoutPage";
 import { SiteLayout } from "@/components/layouts/SiteLayout";
@@ -42,7 +43,9 @@ export default async function CheckoutRoute({ params }: Props) {
 
   return (
     <SiteLayout>
-      <CheckoutPage settings={settings} popularProductIds={popularProductIds} />
+      <Suspense fallback={null}>
+        <CheckoutPage settings={settings} popularProductIds={popularProductIds} />
+      </Suspense>
     </SiteLayout>
   );
 }

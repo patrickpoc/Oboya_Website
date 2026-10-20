@@ -33,8 +33,8 @@ export const DEFAULT_CHECKOUT_PAGE: CheckoutPageSettings = {
   },
   sections: {
     greeting: true,
-    freight: true,
-    coupon: true,
+    freight: false,
+    coupon: false,
     upsell: true,
     trust: true,
   },
@@ -77,8 +77,8 @@ export function normalizeCheckoutPage(raw: unknown): CheckoutPageSettings {
     },
     sections: {
       greeting: normalizeFlag(sections.greeting, true),
-      freight: normalizeFlag(sections.freight, true),
-      coupon: normalizeFlag(sections.coupon, true),
+      freight: normalizeFlag(sections.freight, false),
+      coupon: normalizeFlag(sections.coupon, false),
       upsell: normalizeFlag(sections.upsell, true),
       trust: normalizeFlag(sections.trust, true),
     },

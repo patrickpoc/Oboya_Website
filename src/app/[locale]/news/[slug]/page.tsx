@@ -26,6 +26,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: pickLocalized(post.title, locale),
     description: pickLocalized(post.excerpt, locale),
+    alternates: {
+      canonical: `/${locale}/blog/${slug}`,
+    },
   };
 }
 

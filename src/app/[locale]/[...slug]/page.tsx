@@ -9,34 +9,21 @@ import { WorkWithUsPageContent } from "@/components/work-with-us/WorkWithUsPageC
 import { LegalPageContent } from "@/components/legal/LegalPageContent";
 import { PrivacyPageContent } from "@/components/legal/PrivacyPageContent";
 import { InnerPageHero } from "@/components/sections/InnerPageHero";
-import { LoremContent } from "@/components/sections/LoremContent";
-import { PageListing } from "@/components/sections/PageListing";
 import {
   getAllPageSlugs,
-  getChildPages,
   getPageConfig,
   getPageSlug,
 } from "@/constants/pages";
 import { routing } from "@/i18n/routing";
 import { siteConfig } from "@/constants/site";
-import { SOLUTION_CATEGORY_IDS } from "@/lib/solutions/category-stages";
-
-const solutionCategoryPaths = new Set(
-  SOLUTION_CATEGORY_IDS.map((id) => `solutions/${id}`)
-);
 
 interface PageProps {
   params: Promise<{ locale: string; slug: string[] }>;
 }
 
 export function generateStaticParams() {
-  const slugs = getAllPageSlugs().filter((slug) => {
-    if (slug.length === 1 && slug[0] === "solutions") return false;
-    if (solutionCategoryPaths.has(slug.join("/"))) return false;
-    return true;
-  });
   return routing.locales.flatMap((locale) =>
-    slugs.map((slug) => ({ locale, slug }))
+    getAllPageSlugs().map((slug) => ({ locale, slug }))
   );
 }
 
@@ -73,9 +60,7 @@ export default async function InnerPage({ params }: PageProps) {
   }
 
   const t = await getTranslations("pages");
-  const tCommon = await getTranslations("common");
   const pageSlug = getPageSlug(slug);
-  const children = getChildPages(pageSlug);
 
   const title = t(`${config.messageKey}.title`);
   const eyebrow = t(`${config.messageKey}.eyebrow`);
@@ -87,11 +72,9 @@ export default async function InnerPage({ params }: PageProps) {
         ? t("faqs.description")
         : config.template === "workWithUs"
           ? t("workWithUs.description")
-          : config.template === "legal"
-            ? pageSlug === "privacy"
-              ? t("privacy.description")
-              : t("terms.description")
-            : tCommon("loremShort");
+          : pageSlug === "privacy"
+            ? t("privacy.description")
+            : t("terms.description");
 
   if (config.template === "about") {
     return (
@@ -132,9 +115,7 @@ export default async function InnerPage({ params }: PageProps) {
   return (
     <SiteLayout>
       <InnerPageHero eyebrow={eyebrow} title={title} description={description} />
-      {config.template === "workWithUs" && <WorkWithUsPageContent />}
-      {config.template === "listing" && <PageListing items={children} />}
-      {(!config.template || config.template === "default") && <LoremContent />}
+      <WorkWithUsPageContent />
     </SiteLayout>
   );
 }

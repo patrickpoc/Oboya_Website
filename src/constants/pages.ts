@@ -1,47 +1,18 @@
-export type PageTemplate =
-  | "default"
-  | "contact"
-  | "listing"
-  | "about"
-  | "faqs"
-  | "workWithUs"
-  | "legal";
+export type PageTemplate = "contact" | "about" | "faqs" | "workWithUs" | "legal";
 
 export interface PageConfig {
   messageKey: string;
-  parent?: string;
-  template?: PageTemplate;
+  template: PageTemplate;
 }
 
+/** Public pages with real content. Stub routes (careers, products, industries, old solution children) 404. */
 export const pageRegistry: Record<string, PageConfig> = {
   about: { messageKey: "about", template: "about" },
   contact: { messageKey: "contact", template: "contact" },
   "work-with-us": { messageKey: "workWithUs", template: "workWithUs" },
   faqs: { messageKey: "faqs", template: "faqs" },
-  careers: { messageKey: "careers" },
   privacy: { messageKey: "privacy", template: "legal" },
   terms: { messageKey: "terms", template: "legal" },
-  sustainability: { messageKey: "sustainability" },
-
-  solutions: { messageKey: "solutions", template: "listing" },
-  "solutions/propagation": { messageKey: "solutionsPropagation", parent: "solutions" },
-  "solutions/packaging": { messageKey: "solutionsPackaging", parent: "solutions" },
-  "solutions/sustainability": { messageKey: "solutionsSustainability", parent: "solutions" },
-  "solutions/distribution": { messageKey: "solutionsDistribution", parent: "solutions" },
-  "solutions/circular-economy": { messageKey: "solutionsCircularEconomy", parent: "solutions" },
-
-  products: { messageKey: "products", template: "listing" },
-  "products/growing-media": { messageKey: "productsGrowingMedia", parent: "products" },
-  "products/packaging": { messageKey: "productsPackaging", parent: "products" },
-  "products/equipment": { messageKey: "productsEquipment", parent: "products" },
-  "products/strawberry-packaging": { messageKey: "productsStrawberryPackaging", parent: "products" },
-  "products/flower-trolley": { messageKey: "productsFlowerTrolley", parent: "products" },
-
-  industries: { messageKey: "industries", template: "listing" },
-  "industries/greenhouses": { messageKey: "industriesGreenhouses", parent: "industries" },
-  "industries/nurseries": { messageKey: "industriesNurseries", parent: "industries" },
-  "industries/retail": { messageKey: "industriesRetail", parent: "industries" },
-  "industries/berries": { messageKey: "industriesBerries", parent: "industries" },
 };
 
 export function getPageSlug(slug: string[]): string {
@@ -50,12 +21,6 @@ export function getPageSlug(slug: string[]): string {
 
 export function getPageConfig(slug: string[]): PageConfig | undefined {
   return pageRegistry[getPageSlug(slug)];
-}
-
-export function getChildPages(parentSlug: string) {
-  return Object.entries(pageRegistry)
-    .filter(([, config]) => config.parent === parentSlug)
-    .map(([path, config]) => ({ path: `/${path}`, messageKey: config.messageKey }));
 }
 
 export function getAllPageSlugs(): string[][] {
