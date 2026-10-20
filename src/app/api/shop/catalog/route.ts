@@ -6,6 +6,7 @@ import {
   readMarketplaceShopConfig,
 } from "@/lib/cms/server/marketplace-config.server";
 import { toPublicProduct } from "@/lib/cms/server/public-product";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 /**
  * Public shop bootstrap: products + taxonomy + currencies + shop config in one
@@ -29,9 +30,13 @@ export async function GET() {
     .filter((product) => product.status === "published" && !product.deletedAt)
     .map(toPublicProduct);
 
-  // Throwing on production keeps the last good deploy instead of shipping an empty shop.
-  // Preview (staging) may have no products yet, so the build must still succeed.
-  if (published.length === 0 && process.env.VERCEL_ENV !== "preview") {
+  // A configured production catalog must not ship empty: the failed build keeps the
+  // last good deploy. CI has no Supabase, and preview may have no products yet.
+  if (
+    published.length === 0 &&
+    isSupabaseConfigured() &&
+    process.env.VERCEL_ENV !== "preview"
+  ) {
     throw new Error("shop/catalog: no published products");
   }
 
