@@ -1,21 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronDown, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/brand/Logo";
 import { buttonVariants } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { getMainNavigation } from "@/constants/navigation";
 import { Link } from "@/i18n/navigation";
 import { useScrollPosition } from "@/hooks/use-scroll-position";
 import { cn } from "@/lib/utils";
-import type { NavItem } from "@/types";
 import {
   LanguageSwitcher,
-  LanguageSwitcherMobile,
-} from "@/components/layouts/LanguageSwitcher";
+} from "@/components/layouts/navbar/NavLanguage";
+import {
+  usePastTransitionMarker,
+  useStoryExitHandoff,
+} from "@/components/layouts/navbar/useNavChrome";
+import { NavDropdown } from "@/components/layouts/navbar/DesktopNav";
+import {
+  HeroMenuButton,
+  MobileNavSheetContent,
+} from "@/components/layouts/navbar/MobileNav";
 
 interface NavbarProps {
   transparent?: boolean;
@@ -30,269 +37,6 @@ interface NavbarProps {
   solidTone?: "light" | "dark";
   /** Element id that ends storytelling (default: about-continue). */
   storyExitId?: string;
-}
-
-/**
- * Bidirectional: solid when the hero pill guide reaches the top band;
- * back to transparent when scrolling up into the hero again.
- */
-function usePastTransitionMarker(elementId = "hero") {
-  const [past, setPast] = useState(false);
-
-  useEffect(() => {
-    const update = () => {
-      const el = document.getElementById(elementId);
-      if (!el) {
-        setPast(false);
-        return;
-      }
-      // Mid-hero: solid nav when the hero's vertical center crosses the top
-      const rect = el.getBoundingClientRect();
-      setPast(rect.top + rect.height * 0.5 < 0);
-    };
-
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => {
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [elementId]);
-
-  return past;
-}
-
-/**
- * Storytelling → CMS handoff (mid-viewport), same moment the dark
- * timeline and the white Impact section meet on screen.
- * Bidirectional: light banner while continue intersects the upper half.
- */
-function useStoryExitHandoff(elementId: string) {
-  const [past, setPast] = useState(false);
-
-  useEffect(() => {
-    const el = document.getElementById(elementId);
-    if (!el) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset when the observed element is absent on this route
-      setPast(false);
-      return;
-    }
-
-    // Observation zone = top 50% of the viewport (handoff line in the screenshot)
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setPast(entry.isIntersecting);
-      },
-      { root: null, rootMargin: "0px 0px -50% 0px", threshold: 0 }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [elementId]);
-
-  return past;
-}
-
-function NavDropdown({
-  item,
-  light,
-  align = "start",
-}: {
-  item: NavItem;
-  light?: boolean;
-  align?: "start" | "end";
-}) {
-  const [open, setOpen] = useState(false);
-
-  const linkClass = cn(
-    "text-sm font-medium transition-colors",
-    light
-      ? "text-white/90 hover:text-white"
-      : "text-oboya-blue-dark hover:text-oboya-green"
-  );
-
-  if (!item.children?.length) {
-    return (
-      <Link href={item.href} className={linkClass}>
-        {item.label}
-      </Link>
-    );
-  }
-
-  return (
-    <div
-      className="relative"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-    >
-      <button
-        type="button"
-        className={cn("flex items-center gap-1", linkClass)}
-        aria-expanded={open}
-        aria-haspopup="true"
-      >
-        {item.label}
-        <ChevronDown
-          className={cn(
-            "size-4 transition-transform duration-200",
-            open && "rotate-180"
-          )}
-        />
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.2 }}
-            className={cn(
-              "absolute top-full z-50 mt-3 w-[22rem] max-w-[min(22rem,calc(100vw-2.5rem))] rounded-xl border border-border bg-white p-2 shadow-[var(--shadow-card)]",
-              align === "end" ? "right-0" : "left-0"
-            )}
-          >
-            {item.children.map((child) => (
-              <Link
-                key={child.href}
-                href={child.href}
-                className="block rounded-lg px-4 py-3 transition-colors hover:bg-oboya-soft-white"
-              >
-                <span className="block text-sm font-semibold text-oboya-blue-dark">
-                  {child.label}
-                </span>
-                {child.description && (
-                  <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
-                    {child.description}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-function MobileNavLink({
-  item,
-  onNavigate,
-}: {
-  item: NavItem;
-  onNavigate: () => void;
-}) {
-  return (
-    <div className="border-b border-border/60 py-4">
-      <Link
-        href={item.href}
-        onClick={onNavigate}
-        className="block text-lg leading-snug font-semibold text-oboya-blue-dark"
-      >
-        {item.label}
-      </Link>
-      {item.children && (
-        <div className="mt-3 flex flex-col gap-2 pl-3 sm:pl-4">
-          {item.children.map((child) => (
-            <Link
-              key={child.href}
-              href={child.href}
-              onClick={onNavigate}
-              className="text-sm text-muted-foreground transition-colors hover:text-oboya-green"
-            >
-              {child.label}
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function MobileNavSheetContent({
-  side = "right",
-  mainNavigation,
-  contactLabel,
-  contactClassName,
-  onNavigate,
-  menuTitle,
-}: {
-  side?: "left" | "right";
-  mainNavigation: NavItem[];
-  contactLabel: string;
-  contactClassName: string;
-  onNavigate: () => void;
-  menuTitle: string;
-}) {
-  return (
-    <SheetContent
-      side={side}
-      className="w-full max-w-sm gap-0 overflow-hidden p-0"
-    >
-      <SheetTitle className="sr-only">{menuTitle}</SheetTitle>
-      <div className="flex h-full min-h-0 flex-col bg-white">
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-14 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8">
-          <nav className="flex flex-col" aria-label={menuTitle}>
-            {mainNavigation.map((item) => (
-              <MobileNavLink
-                key={item.href}
-                item={item}
-                onNavigate={onNavigate}
-              />
-            ))}
-            <LanguageSwitcherMobile onNavigate={onNavigate} />
-            <Link
-              href="/contact"
-              onClick={onNavigate}
-              className={buttonVariants({
-                size: "cta",
-                className: cn("mt-6 w-full", contactClassName),
-              })}
-            >
-              {contactLabel}
-            </Link>
-          </nav>
-        </div>
-      </div>
-    </SheetContent>
-  );
-}
-
-function HeroMenuButton({
-  open,
-  onOpenChange,
-  mainNavigation,
-  contactLabel,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  mainNavigation: NavItem[];
-  contactLabel: string;
-}) {
-  const t = useTranslations();
-
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetTrigger
-        className="inline-flex size-10 items-center justify-center rounded-md border border-white/80 text-white transition-colors hover:bg-white/10"
-        aria-label={t("nav.openMenu")}
-      >
-        <span className="flex w-4 flex-col gap-1.5" aria-hidden>
-          <span className="h-px w-full bg-white" />
-          <span className="h-px w-full bg-white" />
-        </span>
-      </SheetTrigger>
-      <MobileNavSheetContent
-        side="left"
-        mainNavigation={mainNavigation}
-        contactLabel={contactLabel}
-        contactClassName="bg-oboya-blue-dark text-white hover:bg-oboya-blue"
-        onNavigate={() => onOpenChange(false)}
-        menuTitle={t("nav.menuTitle")}
-      />
-    </Sheet>
-  );
 }
 
 export function Navbar({
@@ -651,3 +395,4 @@ export function Navbar({
     </header>
   );
 }
+
