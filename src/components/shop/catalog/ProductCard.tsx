@@ -175,10 +175,12 @@ function ProductCardComponent({
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
         />
       </Link>
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5 p-2.5 sm:p-3.5">
-        <p className="min-h-[1lh] truncate text-[10px] font-medium uppercase tracking-wide text-oboya-green">
-          {category ? categoryLabel : null}
-        </p>
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5 px-2.5 pb-2.5 pt-2 sm:px-3.5 sm:pb-3.5 sm:pt-2.5">
+        {category ? (
+          <p className="truncate text-[10px] font-medium uppercase tracking-wide text-oboya-green">
+            {categoryLabel}
+          </p>
+        ) : null}
         <h3 className="line-clamp-2 min-h-[2lh] text-sm leading-snug font-semibold text-oboya-blue-dark sm:text-[0.9375rem]">
           <Link href={detailHref} className="hover:text-oboya-blue">
             {name}
