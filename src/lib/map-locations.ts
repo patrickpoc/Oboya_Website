@@ -115,8 +115,6 @@ export type ResolvedMapLocation = {
   offices: ResolvedMapOffice[];
 };
 
-const LEGACY_OFFICE_KEYS = MAP_OFFICE_FIELDS.map((field) => field.key);
-
 const emptyCountryTranslation = (): MapCountryTranslation => ({ country: "" });
 
 const emptyOfficeTranslation = (): MapOfficeTranslation =>
@@ -178,12 +176,6 @@ export function createEmptyLocation(existingIds: string[]): MapLocation {
     translations,
     offices: [createEmptyOffice(id, [])],
   };
-}
-
-function isLegacyTranslation(
-  translation: Record<string, unknown>
-): translation is MapLocationTranslation {
-  return LEGACY_OFFICE_KEYS.some((key) => typeof translation[key] === "string");
 }
 
 export function normalizeMapOffice(

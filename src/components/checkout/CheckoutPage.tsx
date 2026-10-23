@@ -50,7 +50,6 @@ export function CheckoutPage({
   popularProductIds: string[];
 }) {
   const t = useTranslations("checkout");
-  const tShop = useTranslations("shop");
   const locale = useLocale() as Locale;
   const router = useRouter();
   const {

@@ -120,6 +120,7 @@ export function ProductColorVariantsCard({
           folder: asset.folder,
           folderName: folderNameById.get(asset.folder),
         })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- libraryTick busts the module-level media cache
     [folderNameById, libraryTick]
   );
 

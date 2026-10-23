@@ -114,6 +114,7 @@ export function ProductRichTextEditor({
           folder: asset.folder,
           folderName: folderNameById.get(asset.folder),
         })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- libraryTick busts the module-level media cache
     [folderNameById, libraryTick]
   );
 
@@ -203,7 +204,7 @@ export function ProductRichTextEditor({
         toast.error(error instanceof Error ? error.message : tProducts("uploadFailed"));
       }
     },
-    [openImageDialog, refreshLibrary]
+    [openImageDialog, refreshLibrary, tProducts]
   );
 
   const setLink = useCallback(() => {
