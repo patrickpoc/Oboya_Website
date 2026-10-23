@@ -42,5 +42,10 @@
   "goToQuotation": "查看报价",
   "submitting": "正在发送…",
   "remove": "移除",
-  "quotesDisabled": "报价申请已关闭。"
+  "quotesDisabled": "报价申请已关闭。",
+  "pricePending": "价格待确认",
+  "partialTotal": "预估部分总计",
+  "subtotalPriced": "小计({count, plural, other {# 件已定价商品}})",
+  "unavailableInCurrency": "不支持 {currency}",
+  "unavailableBlock": "请移除不支持 {currency} 的商品后再提交请求。"
 }

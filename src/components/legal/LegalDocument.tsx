@@ -9,6 +9,7 @@ export type LegalBlock =
   | { type: "contact" };
 
 export interface LegalSection {
+  id?: string;
   title: string;
   blocks: LegalBlock[];
 }
@@ -174,7 +175,7 @@ export function LegalDocument({
 
           <div className={intro && intro.length > 0 ? "mt-12 space-y-12" : "space-y-12"}>
             {sections.map((section) => (
-              <article key={section.title}>
+              <article key={section.title} id={section.id} className="scroll-mt-24">
                 <h2 className="font-display text-lg font-medium tracking-[-0.01em] text-oboya-blue-dark md:text-xl">
                   {section.title}
                 </h2>

@@ -6,7 +6,7 @@ import {
   PRIVACY_UPDATED_PT,
 } from "@/content/privacy-policy.pt-BR";
 
-export const PRIVACY_UPDATED = "September 14, 2026";
+export const PRIVACY_UPDATED = "October 20, 2026";
 export const PRIVACY_HERO_TITLE = "Privacy Policy";
 export const PRIVACY_HERO_BODY =
   "Oboya Horticulture respects your privacy and is committed to protecting the personal data and information you provide when using our websites, online services, communication channels, and digital platforms.";
@@ -606,7 +606,60 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "17. Business Information and B2B Contacts",
+    id: "recruitment",
+    title: "17. Recruitment and Job Applicants",
+    blocks: [
+      {
+        type: "p",
+        text: "This section applies to individuals who apply for a job opening at Oboya through our website.",
+      },
+      { type: "h3", text: "Data we collect" },
+      {
+        type: "ul",
+        items: [
+          "identification and contact details (such as name, email, phone, and location);",
+          "professional information (such as experience, education, and links to professional profiles);",
+          "your CV file and any other documents you choose to upload;",
+          "optional information such as salary expectations and availability;",
+          "records of the consents you give, including date and time.",
+        ],
+      },
+      { type: "h3", text: "Purpose and legal basis" },
+      {
+        type: "p",
+        text: "We use applicant data to evaluate your application for the opening you applied to. We keep your data in our talent pool for future openings only if you give your explicit consent. Our legal basis is your consent and the steps taken at your request before a possible employment contract, under the LGPD and the GDPR where applicable.",
+      },
+      { type: "h3", text: "Storage and access" },
+      {
+        type: "p",
+        text: "Applications and CV files are stored in private, access-controlled storage. Access is limited to HR and recruiting staff who need it to run the selection process.",
+      },
+      { type: "h3", text: "Retention" },
+      {
+        type: "ul",
+        items: [
+          "12 months after the application date for the selection process;",
+          "24 months for data kept in the talent pool under your consent.",
+        ],
+      },
+      {
+        type: "p",
+        text: "After these periods, we delete or anonymize your data, unless the law requires us to keep it longer.",
+      },
+      { type: "h3", text: "Your rights" },
+      {
+        type: "p",
+        text: "You may request access, correction, deletion or anonymization of your data, and withdraw your consent at any time, using the contact details in Section 21. Withdrawing consent does not affect processing carried out before the withdrawal.",
+      },
+      { type: "h3", text: "International transfers" },
+      {
+        type: "p",
+        text: "Applicant data may be processed by hosting and infrastructure providers located outside your country, subject to the safeguards described in Section 6.",
+      },
+    ],
+  },
+  {
+    title: "18. Business Information and B2B Contacts",
     blocks: [
       {
         type: "p",
@@ -639,7 +692,7 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "18. No Sale of Personal Data",
+    title: "19. No Sale of Personal Data",
     blocks: [
       {
         type: "p",
@@ -652,7 +705,7 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "19. Changes to this Privacy Policy",
+    title: "20. Changes to this Privacy Policy",
     blocks: [
       {
         type: "p",
@@ -680,7 +733,7 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
     ],
   },
   {
-    title: "20. Contact Information",
+    title: "21. Contact Information",
     blocks: [
       {
         type: "p",

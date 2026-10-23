@@ -44,6 +44,7 @@ function withDefaults(p: ShopProduct): CmsProduct {
     ...p,
     moq,
     enabledCountries: p.enabledCountries ?? { ...p.availability },
+    saleMode: p.saleMode === "quote" ? "quote" : "stock",
     stockQuantity: p.stockQuantity ?? null,
     unlimitedStock: p.unlimitedStock ?? true,
     images: Array.isArray(p.images) && p.images.length > 0 ? p.images : [""],

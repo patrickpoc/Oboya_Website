@@ -16,6 +16,8 @@ import { SpecificationTable } from "@/components/shop/drawers/SpecificationTable
 import { DownloadsList } from "@/components/shop/drawers/DownloadsList";
 import { RelatedProducts } from "@/components/shop/drawers/RelatedProducts";
 import { buttonVariants } from "@/components/ui/button";
+import { RfqBadge } from "@/components/shop/product/RfqBadge";
+import { getEffectiveSaleMode } from "@/lib/shop/sale-mode";
 import { formatShopPrice } from "@/lib/shop/format-price";
 import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 
@@ -58,6 +60,8 @@ export function ProductDrawer() {
   const category = product ? categories.find((item) => item.id === product.categoryId) : null;
   const price =
     product && currency ? (product.prices[currency] ?? 0) : 0;
+
+  const isQuote = product ? getEffectiveSaleMode(product) === "quote" : false;
 
   const descriptionHtml = product ? getDescriptionHtml(product.description) : "";
   const shortDescription = product
@@ -148,12 +152,23 @@ export function ProductDrawer() {
                     </>
                   ) : null}
                 </p>
-                <p className="mt-3 text-lg font-semibold text-oboya-blue-dark">
-                  {formatShopPrice(price, currency)}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {t("estimatedPrice")}
-                </p>
+                {isQuote ? (
+                  <div className="mt-3">
+                    <RfqBadge />
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {t("rfqHelper")}
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <p className="mt-3 text-lg font-semibold text-oboya-blue-dark">
+                      {formatShopPrice(price, currency)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t("estimatedPrice")}
+                    </p>
+                  </>
+                )}
                 <p className="mt-1 text-xs font-medium text-oboya-green">
                   {t("moq", { count: product.moq })}
                 </p>

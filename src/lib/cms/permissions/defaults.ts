@@ -25,6 +25,7 @@ export const BUILTIN_ROLE_LABELS: Record<string, string> = {
   marketplace_analyst: "Marketplace Analyst",
   sales_analyst: "Sales Analyst",
   hr_analyst: "HR Analyst",
+  recruiter: "Recruiter",
   viewer: "Viewer",
 };
 
@@ -213,6 +214,21 @@ export const BUILTIN_MATRIX: AccessMatrix = {
     analytics: VIEW,
     audit_logs: NONE,
   },
+  recruiter: {
+    dashboard: VIEW,
+    website: NONE,
+    marketplace: NONE,
+    global_presence: NONE,
+    case_studies: NONE,
+    blog: NONE,
+    careers: EDIT,
+    media: NONE,
+    forms: NONE,
+    users: NONE,
+    settings: NONE,
+    analytics: NONE,
+    audit_logs: NONE,
+  },
   viewer: {
     dashboard: VIEW,
     website: VIEW,
@@ -266,6 +282,7 @@ const BUILTIN_ROLE_TIER: Record<string, RoleTier> = {
   marketplace_analyst: "analyst",
   sales_analyst: "analyst",
   hr_analyst: "analyst",
+  recruiter: "analyst",
 };
 
 export function roleTier(roleId: string): RoleTier {

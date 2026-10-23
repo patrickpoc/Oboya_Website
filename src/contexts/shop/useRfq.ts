@@ -59,6 +59,11 @@ export function useRfq({
         throw new Error("Quote list is empty");
       }
 
+      if (lineItems.some((item) => item.unavailable)) {
+        setState((prev) => ({ ...prev, rfqStatus: "error" }));
+        throw new Error("Unavailable items in quote list");
+      }
+
       const payload: RfqPayload = {
         ...form,
         countryCode: state.countryCode,
@@ -69,6 +74,7 @@ export function useRfq({
           variantId: item.variantId,
           variantName: item.variantName,
           quantity: item.quantity,
+          saleMode: item.saleMode,
           unitPrice: item.unitPrice,
         })),
         estimatedTotal,

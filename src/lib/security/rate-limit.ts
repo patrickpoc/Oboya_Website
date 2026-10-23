@@ -53,3 +53,48 @@ export async function assertFormRateLimit(input: {
 
   return { ok: true };
 }
+
+/**
+ * Known, accepted limitation: the counts are read before the insert (check-then-insert), so concurrent requests
+ * can briefly exceed the limits. An atomic counter needs a migration and is out of scope. The global brake is
+ * deliberately high (300 / 10 min) to limit lockout risk. Recommended: also add a Vercel WAF rate-limit rule on
+ * `/api/careers/*`.
+ */
+const MAX_GLOBAL_CAREERS = 300;
+
+/** Exact head counts (no row fetch, no user input in filter strings) plus a global brake. */
+export async function assertCareersApplyRateLimit(input: {
+  email: string;
+  ipHash: string;
+}): Promise<RateLimitResult> {
+  if (!isSupabaseConfigured() || !isServiceRoleConfigured()) return { ok: true };
+
+  const since = new Date(Date.now() - WINDOW_MS).toISOString();
+  const admin = createServiceClient();
+  const base = () =>
+    admin
+      .from("cms_job_applications")
+      .select("id", { count: "exact", head: true })
+      .eq("source", "website")
+      .gte("created_at", since);
+
+  const [global, byEmail, byIp] = await Promise.all([
+    base(),
+    base().eq("email", input.email.trim().toLowerCase()),
+    base().eq("extra->meta->>ipHash", input.ipHash),
+  ]);
+
+  const failure = global.error ?? byEmail.error ?? byIp.error;
+  if (failure) {
+    console.error("Careers rate limit lookup failed:", failure.code ?? "db_error");
+    return { ok: false, error: "Too many requests. Please try again later." };
+  }
+  if (
+    (global.count ?? 0) > MAX_GLOBAL_CAREERS ||
+    (byEmail.count ?? 0) >= MAX_PER_EMAIL ||
+    (byIp.count ?? 0) >= MAX_PER_IP
+  ) {
+    return { ok: false, error: "Too many requests. Please try again later." };
+  }
+  return { ok: true };
+}

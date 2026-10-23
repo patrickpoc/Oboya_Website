@@ -16,12 +16,11 @@ import {
 import { logCmsPerf } from "@/lib/cms/server/perf-log.server";
 import {
   CATALOG_READ_TAGS,
-  FEATURED_COLOR_COLUMN,
   PRODUCT_LIST_COLUMNS,
   PRODUCT_TABLE_COLUMNS,
-  disableFeaturedColorColumn,
-  featuredColorColumnIsAvailable,
-  isMissingFeaturedColorColumn,
+  OPTIONAL_COLUMN_RETRIES,
+  disableMissingOptionalColumn,
+  withoutDisabledColumns,
   rowToProduct,
   type ProductRow,
 } from "@/lib/cms/server/products/row.server";
@@ -58,14 +57,8 @@ export function projectFields(product: CmsProduct, fields: ProductReadFields): C
 }
 
 export function selectColumns(fields: ProductReadFields): string {
-  if (fields === "table") return PRODUCT_TABLE_COLUMNS;
-  if (fields === "list") {
-    return featuredColorColumnIsAvailable()
-      ? PRODUCT_LIST_COLUMNS
-      : PRODUCT_LIST_COLUMNS.split(",")
-          .filter((column) => column !== FEATURED_COLOR_COLUMN)
-          .join(",");
-  }
+  if (fields === "table") return withoutDisabledColumns(PRODUCT_TABLE_COLUMNS);
+  if (fields === "list") return withoutDisabledColumns(PRODUCT_LIST_COLUMNS);
   return "*";
 }
 
@@ -159,8 +152,7 @@ export async function readProducts(options?: {
     };
 
     let { data, error } = await runQuery();
-    if (isMissingFeaturedColorColumn(error) && featuredColorColumnIsAvailable()) {
-      disableFeaturedColorColumn();
+    for (let i = 0; i < OPTIONAL_COLUMN_RETRIES && disableMissingOptionalColumn(error); i++) {
       ({ data, error } = await runQuery());
     }
     if (error) throw new Error(error.message);

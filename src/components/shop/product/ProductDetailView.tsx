@@ -27,6 +27,8 @@ import {
 } from "@/lib/shop/color-variants";
 import { useProductDescription } from "@/lib/shop/use-product-description";
 import { useProductName } from "@/lib/shop/use-product-name";
+import { RfqBadge } from "@/components/shop/product/RfqBadge";
+import { getEffectiveSaleMode } from "@/lib/shop/sale-mode";
 import { formatShopPrice } from "@/lib/shop/format-price";
 import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 import { buttonVariants } from "@/components/ui/button";
@@ -99,6 +101,7 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
   const price = currency
     ? resolveVariantPrice(product, activeVariant, currency)
     : 0;
+  const isQuote = getEffectiveSaleMode(product) === "quote";
   const displaySku = resolveVariantSku(product, activeVariant);
   const displayMoq = resolveVariantMoq(product, activeVariant);
   const descriptionHtml = getDescriptionHtml(product.description);
@@ -142,7 +145,12 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
             ) : null}
           </p>
 
-          {currency ? (
+          {isQuote ? (
+            <div className="mt-4">
+              <RfqBadge />
+              <p className="mt-2 text-xs text-muted-foreground">{t("rfqHelper")}</p>
+            </div>
+          ) : currency ? (
             <>
               <p className="mt-4 text-2xl font-semibold text-oboya-blue-dark">
                 {formatShopPrice(price, currency)}

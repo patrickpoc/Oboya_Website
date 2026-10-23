@@ -27,7 +27,7 @@ export function getFooterNavigation(t: Translator) {
     company: [
       { label: t("footer.aboutUs"), href: "/about" },
       { label: t("footer.caseStudies"), href: "/case-studies" },
-      { label: t("footer.workWithUs"), href: "/work-with-us" },
+      { label: t("footer.workWithUs"), href: "/work" },
       { label: t("footer.contact"), href: "/contact" },
     ],
     resources: [

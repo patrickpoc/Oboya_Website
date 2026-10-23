@@ -402,3 +402,42 @@ describe("spreadsheet empty cells", () => {
     expect(result.errors.some((error) => error.message.includes("Duplicate"))).toBe(true);
   });
 });
+
+describe("sale mode", () => {
+  const product = makeProduct({ id: "1", sku: "SKU-001", status: "published" });
+  const merge = (value: string) =>
+    mergeSpreadsheetIntoWorkspace({
+      records: [{ SKU: "SKU-001", "Sale mode": value }],
+      productsBySku: new Map([["sku-001", product]]),
+      existingRows: [],
+      catalog,
+    });
+
+  it("parses On request / quote into the pending product", () => {
+    for (const value of ["quote", "On request (RFQ)", "RFQ"]) {
+      const result = merge(value);
+      expect(result.errors).toEqual([]);
+      expect(result.rows.find((r) => r.kind === "parent")?.pending.saleMode).toBe("quote");
+    }
+  });
+
+  it("reports invalid values", () => {
+    expect(merge("maybe").errors[0]?.message).toMatch(/Invalid Sale mode/);
+  });
+
+  it("skips the no-price warning for quote products", () => {
+    const noPrice = makeProduct({ id: "2", sku: "B", status: "draft" });
+    noPrice.prices = { USD: 0 };
+    const row = createWorkspaceRow(noPrice);
+    row.pending = applyPatchToProduct(row.pending, { status: "published", saleMode: "quote" });
+    row.changedFields = getChangedFields(row.original, row.pending);
+    const issues = validateBulkUpdate([row], catalog);
+    expect(issues.some((i) => /No positive prices|positive price/.test(i.message))).toBe(false);
+
+    const stock = createWorkspaceRow(noPrice);
+    stock.pending = applyPatchToProduct(stock.pending, { status: "published" });
+    stock.changedFields = getChangedFields(stock.original, stock.pending);
+    const stockIssues = validateBulkUpdate([stock], catalog);
+    expect(stockIssues.some((i) => /positive price/.test(i.message))).toBe(true);
+  });
+});

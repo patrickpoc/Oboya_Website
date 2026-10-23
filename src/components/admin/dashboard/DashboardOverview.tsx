@@ -147,7 +147,12 @@ export function DashboardOverview() {
                         {tab === "quote"
                           ? [
                               leadCompany(row),
-                              formatShopPrice(Number(row.data.total ?? 0), String(row.data.currency ?? "USD")),
+                              row.data.total === null
+                                ? tLeads("detail.onRequest")
+                                : formatShopPrice(Number(row.data.total ?? 0), String(row.data.currency ?? "USD")) +
+                                  (Number(row.data.pendingItemCount ?? 0) > 0
+                                    ? ` (${tLeads("detail.partialEstimate")})`
+                                    : ""),
                             ]
                               .filter(Boolean)
                               .join(" · ")

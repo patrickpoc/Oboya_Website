@@ -1,48 +1,331 @@
 {
-  "intro": "Build your career with a global horticulture company focused on innovation, sustainability, and local impact.",
+  "meta": {
+    "listTitle": "Carreras",
+    "listDescription": "Únete a Oboya Horticulture. Explora las vacantes abiertas en nuestros equipos globales y postula en minutos.",
+    "applyTitle": "Postulación: {title}",
+    "talentPoolTitle": "Únete a nuestra bolsa de talento",
+    "thanksTitle": "Candidatura recibida"
+  },
+  "hero": {
+    "eyebrow": "Carreras en Oboya",
+    "title": "Crece con un equipo global de horticultura",
+    "description": "Encuentra una vacante en la que tu trabajo llegue a productores, plantas y comunidades de muchos países.",
+    "openingsCount": "{count, plural, =0 {Sin vacantes abiertas} one {# vacante abierta} other {# vacantes abiertas}}",
+    "countriesCount": "{count, plural, one {# país} other {# países}}",
+    "ctaTalentPool": "Unirme a la bolsa de talento"
+  },
+  "about": {
+    "title": "Por qué Oboya",
+    "body": "Construye tu carrera en una empresa global de horticultura enfocada en la innovación, la sostenibilidad y el impacto local.",
+    "highlightsTitle": "Qué puedes esperar"
+  },
   "benefits": {
     "b1": {
-      "title": "Global reach",
-      "description": "Work with teams and growers across 25 countries."
+      "title": "Alcance global",
+      "description": "Trabaja con equipos y productores en 25 países."
     },
     "b2": {
-      "title": "Learning culture",
-      "description": "Continuous development in products, operations, and sustainability."
+      "title": "Cultura de aprendizaje",
+      "description": "Desarrollo continuo en productos, operaciones y sostenibilidad."
     },
     "b3": {
-      "title": "Local impact",
-      "description": "Support growers in your region with integrated solutions."
+      "title": "Impacto local",
+      "description": "Apoya a los productores de tu región con soluciones integradas."
     },
     "b4": {
-      "title": "Inclusive teams",
-      "description": "Collaborative teams across disciplines and markets."
+      "title": "Equipos inclusivos",
+      "description": "Equipos colaborativos entre disciplinas y mercados."
     }
   },
-  "openings": {
-    "title": "Open positions",
-    "o1": {
-      "title": "Regional Sales Manager",
-      "location": "São Paulo, Brazil",
-      "type": "Full-time"
-    },
-    "o2": {
-      "title": "Packaging Product Specialist",
-      "location": "Malmö, Sweden",
-      "type": "Full-time"
-    },
-    "o3": {
-      "title": "Greenhouse Solutions Engineer",
-      "location": "Shanghai, China",
-      "type": "Full-time"
+  "process": {
+    "title": "Cómo contratamos",
+    "description": "Un proceso claro y respetuoso, desde tu primer clic hasta tu primer día.",
+    "steps": {
+      "s1": {
+        "title": "Postulación",
+        "description": "Envía tus datos y tu CV. Toma unos cinco minutos."
+      },
+      "s2": {
+        "title": "Revisión",
+        "description": "Nuestros reclutadores leen cada postulación y te responden."
+      },
+      "s3": {
+        "title": "Entrevistas",
+        "description": "Conoce a la persona responsable de la vacante y al equipo con el que trabajarías."
+      },
+      "s4": {
+        "title": "Oferta",
+        "description": "Te presentamos una oferta clara y te ayudamos a empezar."
+      }
     }
   },
-  "application": {
-    "title": "Spontaneous application",
-    "description": "Don't see a matching role? Send your profile and we'll keep it on file.",
-    "name": "Full name",
-    "email": "Email",
-    "message": "Tell us about your experience",
-    "submit": "Submit application",
-    "success": "Thank you. Our HR team has received your application."
+  "faq": {
+    "title": "Preguntas frecuentes",
+    "items": {
+      "q1": {
+        "question": "¿Cuánto dura el proceso?",
+        "answer": "Depende de la vacante, pero la mayoría de los procesos toma entre dos y seis semanas desde la postulación hasta la oferta."
+      },
+      "q2": {
+        "question": "¿Puedo postular a más de una vacante?",
+        "answer": "Sí. Postula a todas las vacantes que encajen con tu perfil, una postulación por vacante."
+      },
+      "q3": {
+        "question": "¿Y si hoy no hay una vacante para mí?",
+        "answer": "Únete a nuestra bolsa de talento. Conservamos tu perfil y te contactamos cuando se abra una vacante afín."
+      },
+      "q4": {
+        "question": "¿Cómo se usan mis datos?",
+        "answer": "Usamos tus datos solo para reclutamiento y los conservamos por un tiempo limitado. Consulta nuestra política de privacidad para más detalles."
+      }
+    }
+  },
+  "board": {
+    "title": "Vacantes abiertas",
+    "resultCount": "{count, plural, =0 {No se encontraron vacantes} one {# vacante encontrada} other {# vacantes encontradas}}",
+    "searchLabel": "Buscar vacantes",
+    "searchPlaceholder": "Cargo, palabra clave o ciudad",
+    "searchSubmit": "Buscar",
+    "clearFilters": "Borrar todos los filtros",
+    "activeFilters": "Filtros activos",
+    "removeFilter": "Quitar filtro: {label}",
+    "loadError": "No pudimos cargar las vacantes abiertas en este momento. Inténtalo de nuevo más tarde.",
+    "filters": {
+      "country": "País",
+      "allCountries": "Todos los países",
+      "countryOption": "{country} ({count})",
+      "department": "Área",
+      "allDepartments": "Todas las áreas",
+      "workModel": "Modalidad de trabajo",
+      "employmentType": "Tipo de contrato",
+      "any": "Cualquiera"
+    },
+    "empty": {
+      "title": "Ninguna vacante coincide con tu búsqueda",
+      "description": "Prueba con otras palabras clave o quita algunos filtros.",
+      "countryTitle": "No hay vacantes abiertas en {country} por ahora",
+      "clearFilters": "Borrar filtros",
+      "talentPoolCta": "Unirme a la bolsa de talento"
+    }
+  },
+  "card": {
+    "viewOpening": "Ver vacante",
+    "posted": "Publicada el {date}",
+    "positions": "{count, plural, one {# puesto} other {# puestos}}"
+  },
+  "labels": {
+    "workModel": {
+      "onsite": "Presencial",
+      "hybrid": "Híbrido",
+      "remote": "Remoto"
+    },
+    "employmentType": {
+      "full_time": "Tiempo completo",
+      "part_time": "Medio tiempo",
+      "contract": "Por contrato",
+      "temporary": "Temporal",
+      "internship": "Prácticas",
+      "apprenticeship": "Aprendizaje"
+    },
+    "seniority": {
+      "intern": "Practicante",
+      "junior": "Junior",
+      "mid": "Semi senior",
+      "senior": "Senior",
+      "lead": "Líder",
+      "manager": "Gerente",
+      "director": "Director",
+      "executive": "Ejecutivo"
+    },
+    "salaryPeriod": {
+      "hour": "hora",
+      "month": "mes",
+      "year": "año"
+    },
+    "workAuthorization": {
+      "citizen": "Ciudadano",
+      "permanent_resident": "Residente permanente",
+      "work_visa": "Visa de trabajo",
+      "needs_sponsorship": "Requiere patrocinio de visa",
+      "other": "Otro"
+    },
+    "languageLevel": {
+      "A1": "A1 - Principiante",
+      "A2": "A2 - Elemental",
+      "B1": "B1 - Intermedio",
+      "B2": "B2 - Intermedio alto",
+      "C1": "C1 - Avanzado",
+      "C2": "C2 - Dominio",
+      "native": "Nativo"
+    }
+  },
+  "detail": {
+    "breadcrumbLabel": "Ruta de navegación",
+    "breadcrumbHome": "Inicio",
+    "breadcrumbWork": "Carreras",
+    "backToOpenings": "Volver a todas las vacantes",
+    "posted": "Publicada el {date}",
+    "closes": "Postulaciones hasta el {date}",
+    "positions": "{count, plural, one {# puesto} other {# puestos}}",
+    "salary": "Salario",
+    "salaryRange": "{min} - {max} por {period}",
+    "salaryFrom": "Desde {min} por {period}",
+    "salaryUpTo": "Hasta {max} por {period}",
+    "sections": {
+      "summary": "Resumen",
+      "description": "Sobre la vacante",
+      "responsibilities": "Qué harás",
+      "requirements": "Qué buscamos",
+      "niceToHave": "Deseable",
+      "benefits": "Qué ofrecemos"
+    },
+    "apply": {
+      "title": "¿Te interesa esta vacante?",
+      "description": "Postula en pocos minutos. El CV es obligatorio.",
+      "cta": "Postular ahora",
+      "mobileCta": "Postular"
+    },
+    "share": {
+      "title": "Compartir esta vacante",
+      "copyLink": "Copiar enlace",
+      "copied": "Enlace copiado",
+      "linkedin": "Compartir en LinkedIn"
+    },
+    "other": {
+      "title": "Otras vacantes abiertas",
+      "viewAll": "Ver todas las vacantes"
+    },
+    "notFound": {
+      "title": "Esta vacante ya no está disponible",
+      "description": "Es posible que el puesto se haya cubierto o cerrado. Echa un vistazo a nuestras otras vacantes abiertas.",
+      "cta": "Ver vacantes abiertas"
+    }
+  },
+  "apply": {
+    "title": "Postula a esta vacante",
+    "subtitle": "Cuéntanos sobre ti. Los campos marcados con * son obligatorios.",
+    "talentPoolTitle": "Únete a nuestra bolsa de talento",
+    "talentPoolSubtitle": "¿Ninguna vacante encaja hoy? Comparte tu perfil y te contactaremos cuando se abra una oportunidad afín.",
+    "backToOpening": "Volver a la vacante",
+    "applyingFor": "Postulando a: {title}",
+    "nextStepsTitle": "Qué sigue",
+    "submit": "Enviar postulación",
+    "sections": {
+      "personal": "Datos personales",
+      "professional": "Trayectoria profesional",
+      "preferences": "Preferencias",
+      "languages": "Idiomas",
+      "documents": "Documentos",
+      "consent": "Privacidad"
+    },
+    "fields": {
+      "fullName": "Nombre completo",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "phoneCountry": "Código de país del teléfono",
+      "country": "País de residencia",
+      "city": "Ciudad",
+      "linkedinUrl": "Perfil de LinkedIn",
+      "portfolioUrl": "Portafolio o sitio web",
+      "currentCompany": "Empresa actual",
+      "currentTitle": "Cargo actual",
+      "yearsExperience": "Años de experiencia",
+      "salaryExpectation": "Expectativa salarial",
+      "salaryCurrency": "Moneda",
+      "salaryPeriod": "Periodo",
+      "availabilityDate": "Disponible desde",
+      "noticePeriodDays": "Preaviso (días)",
+      "workAuthorization": "Autorización de trabajo",
+      "willingToRelocate": "Disponibilidad para reubicarme",
+      "remotePreference": "Modalidad de trabajo preferida",
+      "addLanguage": "Agregar idioma",
+      "removeLanguage": "Quitar idioma",
+      "languageCode": "Idioma",
+      "languageLevel": "Nivel",
+      "coverLetter": "Carta de presentación o mensaje",
+      "heardFrom": "¿Cómo supiste de nosotros?",
+      "referrerName": "¿Quién te recomendó?",
+      "cv": "CV / Currículum",
+      "cvHint": "PDF, DOC o DOCX, hasta {size}.",
+      "cvDrop": "Arrastra tu CV aquí o haz clic para elegir un archivo",
+      "cvReplace": "Reemplazar archivo",
+      "cvSelected": "{name} ({size})",
+      "consentPrivacy": "He leído el aviso de privacidad y acepto el tratamiento de mis datos para este proceso de selección.",
+      "consentTalentPool": "Conservar mi perfil para futuras oportunidades hasta por 24 meses.",
+      "privacyNotice": "Tus datos se usan solo para reclutamiento y se conservan durante 12 meses, o 24 meses si te unes a la bolsa de talento.",
+      "privacyLink": "Leer el aviso de privacidad de reclutamiento",
+      "optional": "Opcional",
+      "yes": "Sí",
+      "no": "No"
+    },
+    "heardFrom": {
+      "linkedin": "LinkedIn",
+      "job_board": "Portal de empleo",
+      "referral": "Recomendación",
+      "event": "Evento",
+      "search": "Búsqueda en internet",
+      "social": "Redes sociales",
+      "other": "Otro"
+    },
+    "validation": {
+      "required": "Este campo es obligatorio.",
+      "emailInvalid": "Introduce un correo electrónico válido.",
+      "urlInvalid": "Introduce un enlace válido que empiece por https://.",
+      "yearsRange": "Introduce un número válido.",
+      "noticeRange": "Introduce un número de días válido.",
+      "dateInvalid": "Introduce una fecha válida.",
+      "cvRequired": "Adjunta tu CV.",
+      "cvType": "Usa un archivo PDF, DOC o DOCX.",
+      "cvTooLarge": "El archivo es demasiado grande.",
+      "consentRequired": "Debes aceptar para continuar.",
+      "coverLetterTooLong": "El mensaje es demasiado largo.",
+      "summary": "Revisa los campos resaltados."
+    },
+    "status": {
+      "submitting": "Enviando tu postulación...",
+      "uploading": "Subiendo tu CV...",
+      "confirming": "Finalizando...",
+      "retryUpload": "Reintentar la subida"
+    },
+    "errors": {
+      "generic": "Algo salió mal. Inténtalo de nuevo.",
+      "rateLimited": "Demasiados intentos. Espera unos minutos e inténtalo de nuevo.",
+      "openingClosed": "Esta vacante ya no acepta postulaciones.",
+      "uploadFailed": "Tus datos se guardaron, pero la subida del CV falló. Reintenta para completar tu postulación.",
+      "invalidTicket": "Tu sesión expiró. Envía el formulario de nuevo."
+    },
+    "success": {
+      "title": "Postulación recibida",
+      "description": "Gracias. Nuestro equipo de reclutamiento revisará tu perfil y te responderá.",
+      "talentPoolNote": "Conservaremos tu perfil y te contactaremos cuando se abra una vacante afín.",
+      "backToOpenings": "Volver a las vacantes abiertas"
+    }
+  },
+  "thanks": {
+    "title": "¡Gracias por postularte!",
+    "eyebrow": "Candidatura recibida",
+    "openingLine": "Hemos recibido tu candidatura para {title}.",
+    "genericLine": "Hemos recibido tu candidatura. Gracias por tu interés en Oboya.",
+    "talentPoolTitle": "¡Ya formas parte de nuestra bolsa de talento!",
+    "talentPoolLine": "Tu perfil se ha guardado para futuras oportunidades. Lo conservaremos durante 24 meses y te contactaremos cuando surja una vacante afín.",
+    "nextTitle": "Qué ocurre ahora",
+    "steps": {
+      "review": {
+        "title": "Revisamos tu candidatura",
+        "description": "Nuestro equipo de selección lee cada candidatura con atención."
+      },
+      "contact": {
+        "title": "Te contactamos si hay coincidencia",
+        "description": "Si tu perfil encaja, el equipo de selección se pondrá en contacto contigo para hablar de los siguientes pasos."
+      },
+      "email": {
+        "title": "Atento a tu correo",
+        "description": "Las respuestas pueden tardar unos días. Recuerda revisar tu carpeta de spam."
+      }
+    },
+    "privacy": "Tus datos se tratan de acuerdo con nuestro aviso de privacidad de selección de personal.",
+    "privacyLink": "Lee el aviso de privacidad de selección de personal",
+    "seeOpenings": "Ver otras vacantes",
+    "backHome": "Volver al inicio"
   }
 }

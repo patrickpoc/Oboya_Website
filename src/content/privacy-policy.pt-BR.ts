@@ -3,7 +3,7 @@ import type { LegalSection } from "@/components/legal/LegalDocument";
 export const PRIVACY_HERO_TITLE_PT = "Política de Privacidade";
 export const PRIVACY_HERO_BODY_PT =
   "A Oboya Horticulture respeita a sua privacidade e está comprometida em proteger os dados pessoais que você fornece ao utilizar nossos sites, serviços online, canais de comunicação e plataformas digitais.";
-export const PRIVACY_UPDATED_PT = "14 de setembro de 2026";
+export const PRIVACY_UPDATED_PT = "20 de outubro de 2026";
 
 export const PRIVACY_SECTIONS_PT: LegalSection[] = [
   {
@@ -207,11 +207,55 @@ export const PRIVACY_SECTIONS_PT: LegalSection[] = [
     ],
   },
   {
+    id: "recruitment",
     title: "16. Candidatos a vagas",
     blocks: [
       {
         type: "p",
-        text: "Se você se candidatar a uma vaga, os dados serão usados apenas para recrutamento e processos correlatos, pelo tempo necessário à avaliação e a obrigações legais.",
+        text: "Esta seção se aplica a quem se candidata a uma vaga na Oboya por meio do nosso site.",
+      },
+      { type: "h3", text: "Dados que coletamos" },
+      {
+        type: "ul",
+        items: [
+          "dados de identificação e contato (como nome, e-mail, telefone e localização);",
+          "informações profissionais (como experiência, formação e links de perfis profissionais);",
+          "seu currículo (arquivo) e outros documentos que você optar por enviar;",
+          "informações opcionais, como pretensão salarial e disponibilidade;",
+          "registros dos consentimentos concedidos, incluindo data e hora.",
+        ],
+      },
+      { type: "h3", text: "Finalidade e base legal" },
+      {
+        type: "p",
+        text: "Usamos os dados do candidato para avaliar sua candidatura à vaga indicada. Mantemos seus dados em nosso banco de talentos para vagas futuras somente se você der consentimento explícito. A base legal é o seu consentimento e a realização de procedimentos preliminares relacionados a possível contrato de trabalho, a pedido do titular, nos termos da LGPD (e do GDPR, quando aplicável).",
+      },
+      { type: "h3", text: "Armazenamento e acesso" },
+      {
+        type: "p",
+        text: "As candidaturas e os currículos são armazenados em ambiente privado, com controle de acesso. O acesso é restrito à equipe de RH e recrutamento que necessita dele para conduzir o processo seletivo.",
+      },
+      { type: "h3", text: "Retenção" },
+      {
+        type: "ul",
+        items: [
+          "12 meses após a data da candidatura, para o processo seletivo;",
+          "24 meses para dados mantidos no banco de talentos mediante consentimento.",
+        ],
+      },
+      {
+        type: "p",
+        text: "Após esses prazos, excluímos ou anonimizamos os dados, salvo se a lei exigir a guarda por mais tempo.",
+      },
+      { type: "h3", text: "Seus direitos" },
+      {
+        type: "p",
+        text: "Você pode solicitar acesso, correção, exclusão ou anonimização dos seus dados e revogar o consentimento a qualquer momento, pelos canais indicados na seção 20. A revogação não afeta o tratamento realizado antes dela.",
+      },
+      { type: "h3", text: "Transferências internacionais" },
+      {
+        type: "p",
+        text: "Os dados de candidatos podem ser tratados por provedores de hospedagem e infraestrutura localizados fora do seu país, observadas as garantias descritas na seção 6.",
       },
     ],
   },

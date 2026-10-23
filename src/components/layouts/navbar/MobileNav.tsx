@@ -57,6 +57,18 @@ export function MobileNavSheetContent({
   onNavigate: () => void;
   menuTitle: string;
 }) {
+  const t = useTranslations();
+  const workItem: NavItem = { label: t("nav.workWithUs"), href: "/work" };
+  const shopIndex = mainNavigation.findIndex((item) => item.href === "/shop");
+  const drawerItems =
+    shopIndex === -1
+      ? [...mainNavigation, workItem]
+      : [
+          ...mainNavigation.slice(0, shopIndex + 1),
+          workItem,
+          ...mainNavigation.slice(shopIndex + 1),
+        ];
+
   return (
     <SheetContent
       side={side}
@@ -66,7 +78,7 @@ export function MobileNavSheetContent({
       <div className="flex h-full min-h-0 flex-col bg-white">
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-14 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8">
           <nav className="flex flex-col" aria-label={menuTitle}>
-            {mainNavigation.map((item) => (
+            {drawerItems.map((item) => (
               <MobileNavLink
                 key={item.href}
                 item={item}

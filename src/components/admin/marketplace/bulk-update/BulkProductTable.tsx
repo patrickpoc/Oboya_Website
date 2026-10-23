@@ -334,6 +334,9 @@ export function BulkProductTable({
               <th className={cn(TH, "min-w-[5rem] border-b border-border/60")}>
                 {BULK_FIELD_LABELS.status}
               </th>
+              <th className={cn(TH, "min-w-[8rem] border-b border-border/60")}>
+                {BULK_FIELD_LABELS.saleMode}
+              </th>
               <th className={cn(TH, "min-w-[11rem] border-b border-border/60")}>USD</th>
               <th className={cn(TH, "min-w-[11rem] border-b border-border/60")}>BRL</th>
               <th className={cn(TH, "min-w-[11rem] border-b border-border/60")}>EUR</th>
@@ -347,6 +350,7 @@ export function BulkProductTable({
             {visibleRows.map((row) => {
               const product = row.pending;
               const isParent = row.kind === "parent";
+              const isQuote = product.saleMode === "quote";
               const variant = !isParent
                 ? (product.colorVariants ?? []).find((item) => item.id === row.variantId)
                 : null;
@@ -807,7 +811,38 @@ export function BulkProductTable({
                       <DimmedDash />
                     )}
                   </td>
-                  <td className={cn(TD, "min-w-[11rem]")}>
+                  <td className={TD}>
+                    {isParent ? (
+                      <CellShell
+                        field="saleMode"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                        className={FIELD_CELL_SHELL}
+                      >
+                        <select
+                          className={SELECT_CONTROL}
+                          value={product.saleMode === "quote" ? "quote" : "stock"}
+                          onChange={(event) =>
+                            onPatch(row.productId, {
+                              saleMode: event.target.value === "quote" ? "quote" : "stock",
+                            })
+                          }
+                        >
+                          <option value="stock">{t("saleModeStock")}</option>
+                          <option value="quote">{t("saleModeQuote")}</option>
+                        </select>
+                      </CellShell>
+                    ) : (
+                      <DimmedDash />
+                    )}
+                  </td>
+                  <td
+                    className={cn(TD, "min-w-[11rem]", isQuote && "pointer-events-none opacity-40")}
+                    inert={isQuote || undefined}
+                    title={isQuote ? t("priceDisabledOnRequest") : undefined}
+                  >
                     {isParent ? (
                       <CellShell
                         field="priceUsd"
@@ -849,7 +884,11 @@ export function BulkProductTable({
                       </CellShell>
                     )}
                   </td>
-                  <td className={cn(TD, "min-w-[11rem]")}>
+                  <td
+                    className={cn(TD, "min-w-[11rem]", isQuote && "pointer-events-none opacity-40")}
+                    inert={isQuote || undefined}
+                    title={isQuote ? t("priceDisabledOnRequest") : undefined}
+                  >
                     {isParent ? (
                       <CellShell
                         field="priceBrl"
@@ -891,7 +930,11 @@ export function BulkProductTable({
                       </CellShell>
                     )}
                   </td>
-                  <td className={cn(TD, "min-w-[11rem]")}>
+                  <td
+                    className={cn(TD, "min-w-[11rem]", isQuote && "pointer-events-none opacity-40")}
+                    inert={isQuote || undefined}
+                    title={isQuote ? t("priceDisabledOnRequest") : undefined}
+                  >
                     {isParent ? (
                       <CellShell
                         field="priceEur"

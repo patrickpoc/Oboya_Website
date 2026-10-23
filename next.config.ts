@@ -37,6 +37,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: `/${localePattern}/work-with-us`,
+        destination: "/:locale/work",
+        permanent: true,
+      },
+      {
         source: `/${localePattern}/shop/cart`,
         destination: "/:locale/shop?cart=open",
         permanent: false,

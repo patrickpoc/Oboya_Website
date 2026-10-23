@@ -121,7 +121,18 @@ export function useCatalogLoader({
           });
         }
         if (catalog.currencies?.countries) {
+          const activeCodes = new Set(
+            catalog.currencies.countries.map((country) => country.code)
+          );
           updateShopCatalog({ countries: catalog.currencies.countries });
+          // A restored country that is no longer active is cleared together with its quote list.
+          if (activeCodes.size > 0) {
+            setState((prev) =>
+              prev.countryCode && !activeCodes.has(prev.countryCode)
+                ? { ...prev, countryCode: null, currency: null, items: [] }
+                : prev
+            );
+          }
         }
 
         let nextShopConfig = DEFAULT_SHOP_CONFIG;

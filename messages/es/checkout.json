@@ -42,5 +42,10 @@
   "goToQuotation": "Ver cotización",
   "submitting": "Enviando…",
   "remove": "Quitar",
-  "quotesDisabled": "Las solicitudes de cotización están desactivadas."
+  "quotesDisabled": "Las solicitudes de cotización están desactivadas.",
+  "pricePending": "Precio por confirmar",
+  "partialTotal": "Total parcial estimado",
+  "subtotalPriced": "Subtotal ({count, plural, one {# artículo con precio} other {# artículos con precio}})",
+  "unavailableInCurrency": "No disponible en {currency}",
+  "unavailableBlock": "Elimine los artículos no disponibles en {currency} para enviar su solicitud."
 }

@@ -30,6 +30,10 @@ import {
   normalizeShopConfig,
 } from "@/lib/cms/shop-config/defaults";
 import type { ShopConfig } from "@/lib/cms/shop-config/types";
+import {
+  filterActiveCountries,
+  type StoreCountry,
+} from "@/lib/cms/marketplace-countries";
 
 const CATEGORIES_FILE = path.join(process.cwd(), "data", "shop", "categories.json");
 const BRANDS_FILE = path.join(process.cwd(), "data", "shop", "brands.json");
@@ -66,7 +70,7 @@ export type FiltersPayload = {
 };
 
 type CurrenciesPayload = {
-  countries: ShopCountry[];
+  countries: StoreCountry[];
   currencies: string[];
 };
 
@@ -192,13 +196,22 @@ async function readCurrenciesSeed(): Promise<{
   return { countries, products };
 }
 
-export async function readMarketplaceCurrencies() {
+/**
+ * Reads store countries and the global currency list.
+ * Public/store callers get active countries only; the admin passes
+ * `includeInactive` to manage every configured country.
+ */
+export async function readMarketplaceCurrencies(
+  options: { includeInactive?: boolean } = {}
+): Promise<{ countries: StoreCountry[]; currencies: string[] }> {
   const remote = await readCmsDocumentData(MARKETPLACE_CURRENCIES_DOC_ID);
+  const visible = (countries: StoreCountry[]) =>
+    options.includeInactive ? countries : filterActiveCountries(countries);
 
   if (isCurrenciesPayload(remote)) {
-    updateShopCatalog({ countries: remote.countries });
+    updateShopCatalog({ countries: filterActiveCountries(remote.countries) });
     return {
-      countries: remote.countries,
+      countries: visible(remote.countries),
       currencies: remote.currencies.length
         ? remote.currencies
         : deriveCurrencies(remote.countries, []),
@@ -207,12 +220,15 @@ export async function readMarketplaceCurrencies() {
 
   const seed = await readCurrenciesSeed();
   const currencies = deriveCurrencies(seed.countries, seed.products);
-  updateShopCatalog({ countries: seed.countries, products: seed.products });
-  return { countries: seed.countries, currencies };
+  updateShopCatalog({
+    countries: filterActiveCountries(seed.countries),
+    products: seed.products,
+  });
+  return { countries: visible(seed.countries), currencies };
 }
 
 export async function saveMarketplaceCurrencies(payload: {
-  countries: ShopCountry[];
+  countries: StoreCountry[];
   currencies: string[];
 }) {
   const currencySet = new Set(payload.currencies);
@@ -256,7 +272,7 @@ export async function saveMarketplaceCurrencies(payload: {
       invalidateProducts(normalizedChanged.flatMap((product) => [product.id, product.sku]));
     }
 
-    updateShopCatalog({ countries: payload.countries });
+    updateShopCatalog({ countries: filterActiveCountries(payload.countries) });
     const productsOut = products.map((product) => normalizePrices(product));
     const { logCmsPerf } = await import("@/lib/cms/server/perf-log.server");
     logCmsPerf("saveMarketplaceCurrencies", started, {
@@ -277,7 +293,7 @@ export async function saveMarketplaceCurrencies(payload: {
   ]);
 
   updateShopCatalog({
-    countries: payload.countries,
+    countries: filterActiveCountries(payload.countries),
     products: normalizedProducts,
   });
   return { countries: payload.countries, products: normalizedProducts };

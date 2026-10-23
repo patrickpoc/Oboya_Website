@@ -9,6 +9,7 @@ import {
 } from "@/lib/cms/bulk-import/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { CmsStatus } from "@/lib/cms/types";
+import { parseSaleMode } from "@/lib/cms/bulk-update/spreadsheet";
 import { parsePriceInput } from "@/lib/cms/parse-price";
 
 export const IMPORT_SPREADSHEET_HEADERS = [
@@ -26,6 +27,7 @@ export const IMPORT_SPREADSHEET_HEADERS = [
   "price_eur",
   "stock_quantity",
   "unlimited_stock",
+  "sale_mode",
   "status",
   "main_image",
   "image_2",
@@ -70,6 +72,9 @@ const HEADER_ALIASES: Record<string, ImportSpreadsheetHeader> = {
   stock: "stock_quantity",
   unlimited_stock: "unlimited_stock",
   unlimited: "unlimited_stock",
+  sale_mode: "sale_mode",
+  salemode: "sale_mode",
+  "sale mode": "sale_mode",
   status: "status",
   shop: "status",
   main_image: "main_image",
@@ -259,6 +264,17 @@ function rowToProduct(
   );
 
   const status = parseShopStatus(cells.status ?? "") ?? "draft";
+  const saleModeRaw = cells.sale_mode?.trim() ?? "";
+  const parsedSaleMode = parseSaleMode(saleModeRaw);
+  const saleMode = parsedSaleMode ?? "stock";
+  if (saleModeRaw && !parsedSaleMode) {
+    errors.push({
+      row: rowNumber,
+      sku,
+      message: `Invalid sale_mode "${saleModeRaw}".`,
+      suggestedAction: "Use stock or quote.",
+    });
+  }
   const moqRaw = cells.moq?.trim();
   let moq = 1;
   if (moqRaw) {
@@ -289,6 +305,7 @@ function rowToProduct(
     sku,
     moq,
     status,
+    saleMode,
     name: {
       en: cells.name_en ?? "",
       "pt-BR": cells.name_ptBR ?? "",
@@ -383,6 +400,7 @@ export function downloadBulkImportTemplate() {
     "0",
     "10",
     "0",
+    "stock",
     "draft",
     "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800",
     "",
