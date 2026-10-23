@@ -124,7 +124,7 @@ function ProductCardComponent({
             ) : null}
           </p>
           {isQuote ? (
-            <RfqBadge size="compact" className="mt-2" />
+            <div className="mt-2 flex h-5 items-center"><RfqBadge size="compact" /></div>
           ) : (
             <p className="mt-2 text-sm font-semibold text-oboya-blue-dark">
               {t("estimatedPrice")}: {formatShopPrice(price, currency)}
@@ -208,7 +208,9 @@ function ProductCardComponent({
         )}
         <div className={showSwatches ? "mt-auto space-y-0.5 pt-2" : "space-y-0.5"}>
           {isQuote ? (
-            <RfqBadge size="compact" />
+            <div className="flex h-6 items-center">
+              <RfqBadge size="compact" />
+            </div>
           ) : (
             <p className="text-base font-semibold tabular-nums text-oboya-blue-dark">
               {formatShopPrice(price, currency)}
