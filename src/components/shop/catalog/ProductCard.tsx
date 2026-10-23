@@ -123,7 +123,7 @@ function ProductCardComponent({
             ) : null}
           </p>
           {isQuote ? (
-            <p className="mt-2 text-sm font-semibold text-oboya-blue-dark">
+            <p className="mt-2 text-xs leading-5 font-semibold text-oboya-blue-dark">
               {t("rfqBadge")}
             </p>
           ) : (
@@ -209,7 +209,7 @@ function ProductCardComponent({
         )}
         <div className={showSwatches ? "mt-auto space-y-0.5 pt-2" : "space-y-0.5"}>
           {isQuote ? (
-            <p className="text-base font-semibold tabular-nums text-oboya-blue-dark">
+            <p className="text-sm leading-6 font-semibold text-oboya-blue-dark">
               {t("rfqBadge")}
             </p>
           ) : (
