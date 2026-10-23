@@ -53,3 +53,6 @@ next-env.d.ts
 /data/cms/homepage-settings.json
 # Claude Code local overrides
 /.claude/settings.local.json
+
+# Candidate PII (local fallback only)
+/data/cms/careers-applications.json

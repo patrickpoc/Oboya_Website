@@ -1,6 +1,7 @@
 import * as XLSX from "xlsx";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { CmsStatus } from "@/lib/cms/types";
+import type { SaleMode } from "@/lib/shop/types";
 import { buildSkuIndex, resolveSku } from "@/lib/cms/admin-sku-lookup";
 import {
   applyPatchToProduct,
@@ -123,6 +124,17 @@ function parseShopStatus(raw: string): CmsStatus | null {
   if (!value) return null;
   if (["yes", "true", "1", "published", "on"].includes(value)) return "published";
   if (["no", "false", "0", "draft", "off"].includes(value)) return "draft";
+  return null;
+}
+
+export function parseSaleMode(raw: string): SaleMode | null {
+  const value = raw.trim().toLowerCase();
+  if (["stock", "in stock", "instock", "com estoque"].includes(value)) return "stock";
+  if (
+    ["quote", "on request", "on request (rfq)", "request", "rfq", "sob consulta"].includes(value)
+  ) {
+    return "quote";
+  }
   return null;
 }
 
@@ -309,6 +321,21 @@ function parseRowToPatch(
         });
       } else {
         patch.status = status;
+      }
+    }
+
+    const saleModeRaw = cells["Sale mode"]?.trim();
+    if (saleModeRaw) {
+      const saleMode = parseSaleMode(saleModeRaw);
+      if (!saleMode) {
+        errors.push({
+          row: rowNumber,
+          sku,
+          message: `Invalid Sale mode value "${saleModeRaw}".`,
+          suggestedAction: "Use stock/quote, or In stock / On request.",
+        });
+      } else {
+        patch.saleMode = saleMode;
       }
     }
 
@@ -660,6 +687,7 @@ export function buildTemplateWorkbook(): ArrayBuffer {
     "",
     "BR;US",
     "yes",
+    "stock",
     "10",
     "",
     "",

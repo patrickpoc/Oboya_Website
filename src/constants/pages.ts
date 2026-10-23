@@ -1,4 +1,4 @@
-export type PageTemplate = "contact" | "about" | "faqs" | "workWithUs" | "legal";
+export type PageTemplate = "contact" | "about" | "faqs" | "legal";
 
 export interface PageConfig {
   messageKey: string;
@@ -9,7 +9,6 @@ export interface PageConfig {
 export const pageRegistry: Record<string, PageConfig> = {
   about: { messageKey: "about", template: "about" },
   contact: { messageKey: "contact", template: "contact" },
-  "work-with-us": { messageKey: "workWithUs", template: "workWithUs" },
   faqs: { messageKey: "faqs", template: "faqs" },
   privacy: { messageKey: "privacy", template: "legal" },
   terms: { messageKey: "terms", template: "legal" },

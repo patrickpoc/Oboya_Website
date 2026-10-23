@@ -68,6 +68,18 @@ export function revalidateBlogPages(slug?: string) {
   });
 }
 
+/** Careers list + detail + apply pages for the given opening slugs, and the sitemap. */
+export function revalidateCareersPages(slugs: string[]) {
+  forEachLocale((locale) => {
+    revalidatePath(`/${locale}/work`);
+    for (const slug of slugs) {
+      revalidatePath(`/${locale}/work/${slug}`);
+      revalidatePath(`/${locale}/work/${slug}/apply`);
+    }
+  });
+  revalidatePath("/sitemap.xml");
+}
+
 export function revalidateFaqPages() {
   forEachLocale((locale) => {
     revalidatePath(`/${locale}/faqs`);

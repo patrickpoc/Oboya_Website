@@ -174,7 +174,7 @@ function validateRow(
   }
 
   if (product.status === "published") {
-    if (!hasAnyPrice(product)) {
+    if (product.saleMode !== "quote" && !hasAnyPrice(product)) {
       pushIssue(
         issues,
         row,

@@ -8,8 +8,10 @@ import { PRODUCT_EDITOR_SELECT_CLASS } from "@/components/admin/marketplace/prod
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { stockProductNeedsPrice } from "@/lib/cms/product-sale-mode";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { CmsLocale } from "@/lib/cms/types";
+import { cn } from "@/lib/utils";
 
 interface ProductRegistrationCardProps {
   product: CmsProduct;
@@ -36,6 +38,12 @@ export function ProductRegistrationCard({
     onUpdate({ prices: nextPrices });
   };
 
+  const isQuote = product.saleMode === "quote";
+  const saleModes = [
+    { value: "stock", label: t("saleModeStock") },
+    { value: "quote", label: t("saleModeQuote") },
+  ] as const;
+
   const updateName = (locale: CmsLocale, value: string) => {
     onUpdate({ name: { ...product.name, [locale]: value } });
   };
@@ -49,9 +57,47 @@ export function ProductRegistrationCard({
 
       <CardContent className="space-y-5">
         <RegistrationSection
+          title={t("saleMode")}
+          description={t("saleModeHint")}
+          isFirst
+        >
+          <div role="radiogroup" aria-label={t("saleMode")} className="inline-flex rounded-lg border border-border/70 p-0.5">
+            {saleModes.map((mode) => (
+              <button
+                key={mode.value}
+                type="button"
+                role="radio"
+                aria-checked={(product.saleMode ?? "stock") === mode.value}
+                tabIndex={(product.saleMode ?? "stock") === mode.value ? 0 : -1}
+                onClick={() => onUpdate({ saleMode: mode.value })}
+                onKeyDown={(event) => {
+                  if (!event.key.startsWith("Arrow")) return;
+                  event.preventDefault();
+                  // Two options: any arrow key moves to the other one (roving tabindex).
+                  const other = saleModes.find((m) => m.value !== mode.value);
+                  if (!other) return;
+                  onUpdate({ saleMode: other.value });
+                  const buttons = event.currentTarget.parentElement?.querySelectorAll<HTMLElement>(
+                    '[role="radio"]'
+                  );
+                  buttons?.[saleModes.indexOf(other)]?.focus();
+                }}
+                className={cn(
+                  "rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
+                  (product.saleMode ?? "stock") === mode.value
+                    ? "bg-oboya-blue text-white"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {mode.label}
+              </button>
+            ))}
+          </div>
+        </RegistrationSection>
+
+        <RegistrationSection
           title={t("productName")}
           description={t("productNameHint")}
-          isFirst
         >
           <LocalizedFieldGrid
             label={t("name")}
@@ -93,7 +139,16 @@ export function ProductRegistrationCard({
           </div>
         </RegistrationSection>
 
+        {isQuote ? (
+          <p className="rounded-lg bg-oboya-blue/5 px-4 py-3 text-sm text-oboya-blue-dark">
+            {t("quoteModeNote")}
+          </p>
+        ) : (
+        <>
         <RegistrationSection title={t("price")} description={t("priceHint")}>
+          {stockProductNeedsPrice(product) ? (
+            <p className="mb-3 text-sm text-oboya-orange">{t("stockPriceRequired")}</p>
+          ) : null}
           {currenciesLoading ? (
             <p className="text-sm text-muted-foreground">{t("loadingCurrencies")}</p>
           ) : currencies.length === 0 ? (
@@ -171,6 +226,8 @@ export function ProductRegistrationCard({
             )}
           </div>
         </RegistrationSection>
+        </>
+        )}
       </CardContent>
     </Card>
   );

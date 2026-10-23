@@ -14,6 +14,7 @@ export const CHANGE_TYPES = [
   { id: "marketplace.product_edit", module: "marketplace", entityType: "product", available: true },
   { id: "marketplace.product_create", module: "marketplace", entityType: "product", available: true },
   { id: "marketplace.product_delete", module: "marketplace", entityType: "product", available: true },
+  { id: "marketplace.countries", module: "marketplace", entityType: "countries", available: true },
   { id: "website.homepage", module: "website", entityType: "homepage", available: true },
   { id: "website.about", module: "website", entityType: "about_page", available: true },
   { id: "website.solutions", module: "website", entityType: "solutions_page", available: true },
@@ -28,8 +29,8 @@ export const CHANGE_TYPES = [
   { id: "blog.delete", module: "blog", entityType: "blog_post", available: true },
   { id: "case_studies.upsert", module: "case_studies", entityType: "case_study", available: true },
   { id: "case_studies.delete", module: "case_studies", entityType: "case_study", available: true },
-  { id: "careers.upsert", module: "careers", entityType: "job_opening", available: false },
-  { id: "careers.delete", module: "careers", entityType: "job_opening", available: false },
+  { id: "careers.upsert", module: "careers", entityType: "job_opening", available: true },
+  { id: "careers.delete", module: "careers", entityType: "job_opening", available: true },
 ] as const satisfies readonly ChangeTypeDefinition[];
 
 export type ChangeTypeId = (typeof CHANGE_TYPES)[number]["id"];

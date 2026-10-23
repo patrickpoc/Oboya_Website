@@ -15,6 +15,8 @@ import {
   resolveVariantSku,
   toCartVariantId,
 } from "@/lib/shop/color-variants";
+import { RfqBadge } from "@/components/shop/product/RfqBadge";
+import { getEffectiveSaleMode } from "@/lib/shop/sale-mode";
 import { formatShopPrice } from "@/lib/shop/format-price";
 import { QuantityInput } from "@/components/shop/QuantityInput";
 import { buttonVariants } from "@/components/ui/button";
@@ -67,6 +69,7 @@ export function AddToQuoteDialog() {
   const unitPrice = currency
     ? resolveVariantPrice(product, activeVariant, currency)
     : 0;
+  const isQuote = getEffectiveSaleMode(product) === "quote";
   const imageSrc = resolveVariantImage(product, activeVariant);
   const displaySku = resolveVariantSku(product, activeVariant);
 
@@ -114,7 +117,9 @@ export function AddToQuoteDialog() {
             <p className="mt-2 text-xs font-medium text-oboya-green">
               {t("moq", { count: moq })}
             </p>
-            {currency && (
+            {isQuote ? (
+              <RfqBadge size="compact" className="mt-2" />
+            ) : currency && (
               <p className="mt-1 text-sm font-medium text-oboya-blue-dark">
                 {formatShopPrice(unitPrice, currency)}
               </p>
@@ -131,7 +136,7 @@ export function AddToQuoteDialog() {
             moq={moq}
             showQuickIncrements
           />
-          {currency && quantity > 0 && (
+          {currency && !isQuote && quantity > 0 && (
             <p className="text-xs text-muted-foreground">
               {t("lineTotal")}: {formatShopPrice(unitPrice * quantity, currency)}
             </p>

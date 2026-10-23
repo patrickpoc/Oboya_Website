@@ -1,0 +1,44 @@
+[
+  {
+    "id": "5b0f6a3e-7c1d-4e52-9a64-2f8d1c3b9e01",
+    "slug": "sample-greenhouse-technician",
+    "title": { "en": "Greenhouse Technician", "pt-BR": "", "es": "", "zh-CN": "" },
+    "summary": {
+      "en": "Help us run and optimise modern greenhouse operations for professional growers in the São Paulo region.",
+      "pt-BR": "", "es": "", "zh-CN": ""
+    },
+    "description": {
+      "en": "<p>Oboya Horticulture supplies climate control, irrigation and growing solutions to professional growers worldwide. As a Greenhouse Technician you will support installations and day-to-day operation of customer greenhouses, working closely with our agronomy and sales teams.</p>",
+      "pt-BR": "", "es": "", "zh-CN": ""
+    },
+    "responsibilities": {
+      "en": "<ul><li>Install, calibrate and maintain climate, fertigation and irrigation systems.</li><li>Monitor crop environment data and recommend adjustments.</li><li>Train grower teams on equipment and best practices.</li><li>Report site visits and spare-part needs.</li></ul>",
+      "pt-BR": "", "es": "", "zh-CN": ""
+    },
+    "requirements": {
+      "en": "<ul><li>Technical degree in agronomy, horticulture, mechatronics or similar.</li><li>2+ years of hands-on experience with greenhouse or irrigation systems.</li><li>Willingness to travel to customer sites.</li><li>Working English is a plus.</li></ul>",
+      "pt-BR": "", "es": "", "zh-CN": ""
+    },
+    "niceToHave": {
+      "en": "<ul><li>Experience with climate computers or automation controllers.</li><li>Valid driver's license.</li></ul>",
+      "pt-BR": "", "es": "", "zh-CN": ""
+    },
+    "benefits": {
+      "en": "<ul><li>Health and dental insurance.</li><li>Meal allowance.</li><li>Ongoing technical training.</li></ul>",
+      "pt-BR": "", "es": "", "zh-CN": ""
+    },
+    "department": "Operations",
+    "countryCode": "BR",
+    "city": "São Paulo",
+    "workModel": "hybrid",
+    "employmentType": "full_time",
+    "seniority": "mid",
+    "positions": 1,
+    "showSalary": false,
+    "status": "published",
+    "publishedAt": "2026-10-01T09:00:00.000Z",
+    "seo": { "title": { "en": "", "pt-BR": "", "es": "", "zh-CN": "" }, "description": { "en": "", "pt-BR": "", "es": "", "zh-CN": "" }, "noindex": false },
+    "createdAt": "2026-10-01T09:00:00.000Z",
+    "updatedAt": "2026-10-01T09:00:00.000Z"
+  }
+]

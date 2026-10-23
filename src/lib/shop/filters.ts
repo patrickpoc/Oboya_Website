@@ -5,6 +5,7 @@ import type {
   SortOption,
 } from "@/lib/shop/types";
 import { resolveCatalogPrice } from "@/lib/shop/color-variants";
+import { getEffectiveSaleMode } from "@/lib/shop/sale-mode";
 
 function matchesSearch(product: ShopProduct, query: string): boolean {
   if (!query.trim()) return true;
@@ -37,7 +38,7 @@ function matchesSearch(product: ShopProduct, query: string): boolean {
 function matchesFilters(
   product: ShopProduct,
   filters: ShopFilters,
-  countryCode: string | null
+  currency: CurrencyCode | null
 ): boolean {
   if (filters.categoryId && product.categoryId !== filters.categoryId) {
     return false;
@@ -85,11 +86,20 @@ function matchesFilters(
       return false;
     }
   }
-  if (filters.availabilityOnly && countryCode) {
-    const enabledMap = product.enabledCountries ?? product.availability;
-    if (!enabledMap[countryCode]) return false;
-  }
+  if (!matchesAvailability(product, filters.availability, currency)) return false;
   return true;
+}
+
+function matchesAvailability(
+  product: ShopProduct,
+  availability: ShopFilters["availability"],
+  currency: CurrencyCode | null
+): boolean {
+  if (!availability) return true;
+  const mode = getEffectiveSaleMode(product);
+  if (availability === "quote") return mode === "quote";
+  if (mode !== "stock") return false;
+  return !currency || resolveCatalogPrice(product, currency) > 0;
 }
 
 function isVisibleByBusinessRules(
@@ -100,10 +110,25 @@ function isVisibleByBusinessRules(
   if (!countryCode || !currency) return true;
   const enabledMap = product.enabledCountries ?? product.availability;
   if (!enabledMap[countryCode]) return false;
-  const price = resolveCatalogPrice(product, currency);
-  if (price <= 0) return false;
-  if (!product.unlimitedStock && (product.stockQuantity ?? 0) <= 0) return false;
-  return true;
+  if (getEffectiveSaleMode(product) === "quote") return true;
+  return resolveCatalogPrice(product, currency) > 0;
+}
+
+/** Priced products first (by direction); quote products always last. */
+function comparePrice(
+  a: ShopProduct,
+  b: ShopProduct,
+  currency: CurrencyCode | null,
+  direction: 1 | -1
+): number {
+  const aQuote = getEffectiveSaleMode(a) === "quote";
+  const bQuote = getEffectiveSaleMode(b) === "quote";
+  if (aQuote || bQuote) return Number(aQuote) - Number(bQuote);
+  return (
+    direction *
+    (resolveCatalogPrice(a, currency ?? "USD") -
+      resolveCatalogPrice(b, currency ?? "USD"))
+  );
 }
 
 function matchesPriceRange(
@@ -113,6 +138,7 @@ function matchesPriceRange(
   priceMax: number | null
 ): boolean {
   if (!currency || (priceMin === null && priceMax === null)) return true;
+  if (getEffectiveSaleMode(product) === "quote") return false;
   const price = resolveCatalogPrice(product, currency);
   if (price <= 0) return false;
   if (priceMin !== null && price < priceMin) return false;
@@ -134,7 +160,7 @@ export function filterProducts(
   return products.filter((product) => {
     if (!isVisibleByBusinessRules(product, countryCode, currency)) return false;
     if (!matchesSearch(product, search)) return false;
-    if (!matchesFilters(product, filters, countryCode)) return false;
+    if (!matchesFilters(product, filters, currency)) return false;
     if (!matchesPriceRange(product, currency, filters.priceMin, filters.priceMax)) {
       return false;
     }
@@ -167,17 +193,9 @@ export function sortProducts(
         return bName.localeCompare(aName);
       });
     case "price_asc":
-      return list.sort(
-        (a, b) =>
-          resolveCatalogPrice(a, currency ?? "USD") -
-          resolveCatalogPrice(b, currency ?? "USD")
-      );
+      return list.sort((a, b) => comparePrice(a, b, currency, 1));
     case "price_desc":
-      return list.sort(
-        (a, b) =>
-          resolveCatalogPrice(b, currency ?? "USD") -
-          resolveCatalogPrice(a, currency ?? "USD")
-      );
+      return list.sort((a, b) => comparePrice(a, b, currency, -1));
     case "availability":
       return list.sort((a, b) => {
         const order = { in_stock: 0, limited: 1, on_request: 2 };
@@ -201,7 +219,7 @@ export function countActiveFilters(filters: ShopFilters): number {
   for (const selectedIds of Object.values(filters.customFilters ?? {})) {
     count += selectedIds.length;
   }
-  if (filters.availabilityOnly) count += 1;
+  if (filters.availability) count += 1;
   if (filters.priceMin !== null) count += 1;
   if (filters.priceMax !== null) count += 1;
   return count;

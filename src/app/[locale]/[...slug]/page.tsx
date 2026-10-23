@@ -5,10 +5,8 @@ import { SiteLayout } from "@/components/layouts/SiteLayout";
 import { AboutPageContent } from "@/components/about/AboutPageContent";
 import { ContactPageContent } from "@/components/contact/ContactPageContent";
 import { FaqsPageContent } from "@/components/faqs/FaqsPageContent";
-import { WorkWithUsPageContent } from "@/components/work-with-us/WorkWithUsPageContent";
 import { LegalPageContent } from "@/components/legal/LegalPageContent";
 import { PrivacyPageContent } from "@/components/legal/PrivacyPageContent";
-import { InnerPageHero } from "@/components/sections/InnerPageHero";
 import {
   getAllPageSlugs,
   getPageConfig,
@@ -59,22 +57,7 @@ export default async function InnerPage({ params }: PageProps) {
     notFound();
   }
 
-  const t = await getTranslations("pages");
   const pageSlug = getPageSlug(slug);
-
-  const title = t(`${config.messageKey}.title`);
-  const eyebrow = t(`${config.messageKey}.eyebrow`);
-
-  const description =
-    config.template === "about"
-      ? t("about.description")
-      : config.template === "faqs"
-        ? t("faqs.description")
-        : config.template === "workWithUs"
-          ? t("workWithUs.description")
-          : pageSlug === "privacy"
-            ? t("privacy.description")
-            : t("terms.description");
 
   if (config.template === "about") {
     return (
@@ -100,22 +83,13 @@ export default async function InnerPage({ params }: PageProps) {
     );
   }
 
-  if (config.template === "legal") {
-    return (
-      <SiteLayout>
-        {pageSlug === "privacy" ? (
-          <PrivacyPageContent locale={locale} />
-        ) : (
-          <LegalPageContent />
-        )}
-      </SiteLayout>
-    );
-  }
-
   return (
     <SiteLayout>
-      <InnerPageHero eyebrow={eyebrow} title={title} description={description} />
-      <WorkWithUsPageContent />
+      {pageSlug === "privacy" ? (
+        <PrivacyPageContent locale={locale} />
+      ) : (
+        <LegalPageContent />
+      )}
     </SiteLayout>
   );
 }

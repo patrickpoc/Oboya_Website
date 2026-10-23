@@ -48,6 +48,7 @@ export function createEmptyCmsProduct(seed?: {
     cultures: [],
     certifications: [],
     countryOfOrigin: "",
+    saleMode: "stock",
     stockStatus: "in_stock",
     stockQuantity: null,
     unlimitedStock: true,

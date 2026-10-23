@@ -13,6 +13,7 @@ import {
   type CmsProduct,
 } from "@/lib/cms/repositories/product-repository";
 import { ProductEditorForm } from "@/components/admin/marketplace/ProductEditorForm";
+import { stockProductNeedsPrice } from "@/lib/cms/product-sale-mode";
 import { validateColorVariants } from "@/lib/shop/color-variants";
 import Link from "next/link";
 import { usePendingApprovalNotice } from "@/components/admin/approvals/use-pending-approval-notice";
@@ -69,6 +70,10 @@ export default function ProductDetailPage() {
     });
     if (variantError) {
       toast.error(variantError);
+      return;
+    }
+    if (stockProductNeedsPrice(product)) {
+      toast.error(t("editor.stockPriceRequired"));
       return;
     }
     void (async () => {

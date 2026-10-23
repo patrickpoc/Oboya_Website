@@ -246,7 +246,12 @@ export function LeadsInbox({
             key: "total",
             header: t("columns.total"),
             cell: (row: FormSubmission) =>
-              formatShopPrice(Number(row.data.total ?? 0), String(row.data.currency ?? "USD")),
+              row.data.total === null
+                ? t("detail.onRequest")
+                : formatShopPrice(Number(row.data.total ?? 0), String(row.data.currency ?? "USD")) +
+                  (Number(row.data.pendingItemCount ?? 0) > 0
+                    ? ` (${t("detail.partialEstimate")})`
+                    : ""),
           },
         ]
       : []),

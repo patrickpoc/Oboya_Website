@@ -42,15 +42,18 @@ type QuoteLineItem = {
   sku?: string;
   name?: string;
   quantity?: number;
-  unitPrice?: number;
-  lineTotal?: number;
+  unitPrice?: number | null;
+  lineTotal?: number | null;
 };
 
 function QuoteLineRow({ item, currency }: { item: QuoteLineItem; currency: string }) {
   const t = useTranslations("admin.leads.detail");
   const quantity = Number(item.quantity ?? 1);
+  const onRequest = item.unitPrice === null && item.lineTotal === null;
   const unitPrice = Number(item.unitPrice ?? 0);
   const lineTotal = Number(item.lineTotal ?? unitPrice * quantity);
+  const unitLabel = onRequest ? t("onRequest") : formatShopPrice(unitPrice, currency);
+  const lineLabel = onRequest ? t("onRequest") : formatShopPrice(lineTotal, currency);
   const variantSuffix = item.variantName ? ` (${item.variantName})` : "";
   const title =
     item.name && variantSuffix && item.name.endsWith(variantSuffix)
@@ -88,10 +91,17 @@ function QuoteLineRow({ item, currency }: { item: QuoteLineItem; currency: strin
           ) : null}
         </div>
         <p className="text-xs text-muted-foreground sm:hidden">
-          {quantity.toLocaleString()} × {formatShopPrice(unitPrice, currency)} ={" "}
-          <span className="font-semibold text-oboya-blue-dark">
-            {formatShopPrice(lineTotal, currency)}
-          </span>
+          {onRequest ? (
+            <>
+              {quantity.toLocaleString()} ×{" "}
+              <span className="font-semibold text-oboya-blue-dark">{lineLabel}</span>
+            </>
+          ) : (
+            <>
+              {quantity.toLocaleString()} × {unitLabel} ={" "}
+              <span className="font-semibold text-oboya-blue-dark">{lineLabel}</span>
+            </>
+          )}
         </p>
       </div>
       <dl className="hidden grid-cols-3 gap-5 text-right text-xs sm:grid">
@@ -104,13 +114,13 @@ function QuoteLineRow({ item, currency }: { item: QuoteLineItem; currency: strin
         <div>
           <dt className="text-muted-foreground">{t("unitPrice")}</dt>
           <dd className="mt-0.5 font-medium tabular-nums text-oboya-blue-dark">
-            {formatShopPrice(unitPrice, currency)}
+            {unitLabel}
           </dd>
         </div>
         <div>
           <dt className="text-muted-foreground">{t("lineTotal")}</dt>
           <dd className="mt-0.5 font-semibold tabular-nums text-oboya-blue-dark">
-            {formatShopPrice(lineTotal, currency)}
+            {lineLabel}
           </dd>
         </div>
       </dl>
@@ -361,10 +371,14 @@ export function LeadDetail({
           </ul>
           <div className="flex items-center justify-between rounded-lg bg-oboya-soft-white px-4 py-3">
             <span className="text-sm font-medium text-oboya-blue-dark">
-              {t("detail.estimatedTotal")}
+              {Number(submission.data.pendingItemCount ?? 0) > 0
+                ? t("detail.partialEstimate")
+                : t("detail.estimatedTotal")}
             </span>
             <span className="text-base font-semibold text-oboya-green">
-              {formatShopPrice(Number(submission.data.total ?? 0), currency)}
+              {submission.data.total === null
+                ? t("detail.onRequest")
+                : formatShopPrice(Number(submission.data.total ?? 0), currency)}
             </span>
           </div>
         </section>

@@ -8,6 +8,7 @@ import { ShopOverlays } from "@/components/shop/ShopOverlays";
 import { readPublishedProductByParam } from "@/lib/cms/readers";
 import { pickLocalized } from "@/lib/cms/utils";
 import { stripHtmlToPlainText } from "@/lib/cms/sanitize-rich-html.shared";
+import { toPublicProduct } from "@/lib/cms/server/public-product";
 import { remapProductId } from "@/lib/shop/product-id-remap";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
@@ -53,7 +54,7 @@ export default async function ProductDetailPage({ params }: Props) {
   return (
     <SiteLayout>
       <Suspense>
-        <ProductDetailView product={product} />
+        <ProductDetailView product={toPublicProduct(product)} />
         <ShopOverlays />
       </Suspense>
     </SiteLayout>

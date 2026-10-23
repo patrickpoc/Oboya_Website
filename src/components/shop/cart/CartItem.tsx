@@ -6,6 +6,7 @@ import { useShop } from "@/contexts/ShopContext";
 import { useProductName } from "@/lib/shop/use-product-name";
 import { getProductMoq } from "@/lib/shop/quantity";
 import { formatShopPrice } from "@/lib/shop/format-price";
+import { RfqBadge } from "@/components/shop/product/RfqBadge";
 import { QuantityInput } from "@/components/shop/QuantityInput";
 
 const FALLBACK_IMAGE = "/assets/homepage/greenhouse-technology.webp";
@@ -15,7 +16,8 @@ interface CartItemProps {
   variantId?: string | null;
   variantName?: string | null;
   quantity: number;
-  unitPrice: number;
+  unitPrice: number | null;
+  unavailable?: boolean;
   currency: string;
   image: string;
   sku: string;
@@ -29,6 +31,7 @@ export function CartItemRow({
   variantName,
   quantity,
   unitPrice,
+  unavailable = false,
   currency,
   image,
   sku,
@@ -65,9 +68,17 @@ export function CartItemRow({
           </p>
         ) : null}
         <p className="text-[10px] text-oboya-green">{t("moq", { count: moq })}</p>
-        <p className="mt-1 text-xs font-medium text-oboya-blue-dark">
-          {formatShopPrice(unitPrice * quantity, currency)}
-        </p>
+        {unavailable ? (
+          <p className="mt-1 text-xs font-medium text-oboya-orange">
+            {t("unavailableInCurrency", { currency })}
+          </p>
+        ) : unitPrice === null ? (
+          <RfqBadge size="compact" className="mt-1" />
+        ) : (
+          <p className="mt-1 text-xs font-medium text-oboya-blue-dark">
+            {formatShopPrice(unitPrice * quantity, currency)}
+          </p>
+        )}
         <div className="mt-2 flex items-end justify-between gap-2">
           <QuantityInput
             value={quantity}

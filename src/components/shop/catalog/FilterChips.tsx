@@ -132,12 +132,16 @@ export function FilterChips() {
     }
   }
 
-  if (filters.availabilityOnly) {
+  if (filters.availability) {
     chips.push({
       key: "available",
-      label: t("inStockOnly"),
-      ariaLabel: t("inStockOnly"),
-      onRemove: () => updateFilters({ availabilityOnly: false }),
+      label: t(
+        filters.availability === "quote" ? "availabilityQuote" : "availabilityPriced"
+      ),
+      ariaLabel: t(
+        filters.availability === "quote" ? "availabilityQuote" : "availabilityPriced"
+      ),
+      onRemove: () => updateFilters({ availability: null }),
     });
   }
 

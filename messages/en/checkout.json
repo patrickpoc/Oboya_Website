@@ -42,5 +42,10 @@
   "goToQuotation": "Go to quotation",
   "submitting": "Sending…",
   "remove": "Remove",
-  "quotesDisabled": "Quote requests are turned off."
+  "quotesDisabled": "Quote requests are turned off.",
+  "pricePending": "Price to be confirmed",
+  "partialTotal": "Estimated partial total",
+  "subtotalPriced": "Subtotal ({count, plural, one {# priced item} other {# priced items}})",
+  "unavailableInCurrency": "Not available in {currency}",
+  "unavailableBlock": "Remove the items not available in {currency} to send your request."
 }

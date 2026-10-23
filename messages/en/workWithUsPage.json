@@ -1,5 +1,24 @@
 {
-  "intro": "Build your career with a global horticulture company focused on innovation, sustainability, and local impact.",
+  "meta": {
+    "listTitle": "Careers",
+    "listDescription": "Join Oboya Horticulture. Explore open roles across our global teams and apply in minutes.",
+    "applyTitle": "Apply: {title}",
+    "talentPoolTitle": "Join our talent pool",
+    "thanksTitle": "Application received"
+  },
+  "hero": {
+    "eyebrow": "Careers at Oboya",
+    "title": "Grow with a global horticulture team",
+    "description": "Find a role where your work reaches growers, plants and communities in many countries.",
+    "openingsCount": "{count, plural, =0 {No open roles} one {# open role} other {# open roles}}",
+    "countriesCount": "{count, plural, one {# country} other {# countries}}",
+    "ctaTalentPool": "Join the talent pool"
+  },
+  "about": {
+    "title": "Why Oboya",
+    "body": "Build your career with a global horticulture company focused on innovation, sustainability, and local impact.",
+    "highlightsTitle": "What you can expect"
+  },
   "benefits": {
     "b1": {
       "title": "Global reach",
@@ -18,31 +37,295 @@
       "description": "Collaborative teams across disciplines and markets."
     }
   },
-  "openings": {
-    "title": "Open positions",
-    "o1": {
-      "title": "Regional Sales Manager",
-      "location": "São Paulo, Brazil",
-      "type": "Full-time"
-    },
-    "o2": {
-      "title": "Packaging Product Specialist",
-      "location": "Malmö, Sweden",
-      "type": "Full-time"
-    },
-    "o3": {
-      "title": "Greenhouse Solutions Engineer",
-      "location": "Shanghai, China",
-      "type": "Full-time"
+  "process": {
+    "title": "How we hire",
+    "description": "A clear, respectful process from your first click to your first day.",
+    "steps": {
+      "s1": {
+        "title": "Apply",
+        "description": "Send your details and CV. It takes about five minutes."
+      },
+      "s2": {
+        "title": "Review",
+        "description": "Our recruiters read every application and get back to you."
+      },
+      "s3": {
+        "title": "Conversations",
+        "description": "Meet the hiring manager and the team you would work with."
+      },
+      "s4": {
+        "title": "Offer",
+        "description": "We share a clear offer and help you get started."
+      }
     }
   },
-  "application": {
-    "title": "Spontaneous application",
-    "description": "Don't see a matching role? Send your profile and we'll keep it on file.",
-    "name": "Full name",
-    "email": "Email",
-    "message": "Tell us about your experience",
+  "faq": {
+    "title": "Frequently asked questions",
+    "items": {
+      "q1": {
+        "question": "How long does the process take?",
+        "answer": "It depends on the role, but most processes take between two and six weeks from application to offer."
+      },
+      "q2": {
+        "question": "Can I apply to more than one role?",
+        "answer": "Yes. Apply to every role that fits your profile, one application per role."
+      },
+      "q3": {
+        "question": "What if there is no role for me today?",
+        "answer": "Join our talent pool. We keep your profile on file and contact you when a matching role opens."
+      },
+      "q4": {
+        "question": "How is my data used?",
+        "answer": "We use your data only for recruitment and keep it for a limited time. See our privacy policy for details."
+      }
+    }
+  },
+  "board": {
+    "title": "Open positions",
+    "resultCount": "{count, plural, =0 {No roles found} one {# role found} other {# roles found}}",
+    "searchLabel": "Search roles",
+    "searchPlaceholder": "Job title, keyword or city",
+    "searchSubmit": "Search",
+    "clearFilters": "Clear all filters",
+    "activeFilters": "Active filters",
+    "removeFilter": "Remove filter: {label}",
+    "loadError": "We could not load the open positions right now. Please try again later.",
+    "filters": {
+      "country": "Country",
+      "allCountries": "All countries",
+      "countryOption": "{country} ({count})",
+      "department": "Department",
+      "allDepartments": "All departments",
+      "workModel": "Work model",
+      "employmentType": "Employment type",
+      "any": "Any"
+    },
+    "empty": {
+      "title": "No roles match your search",
+      "description": "Try different keywords or remove some filters.",
+      "countryTitle": "No open roles in {country} right now",
+      "clearFilters": "Clear filters",
+      "talentPoolCta": "Join the talent pool"
+    }
+  },
+  "card": {
+    "viewOpening": "View role",
+    "posted": "Posted {date}",
+    "positions": "{count, plural, one {# position} other {# positions}}"
+  },
+  "labels": {
+    "workModel": {
+      "onsite": "On-site",
+      "hybrid": "Hybrid",
+      "remote": "Remote"
+    },
+    "employmentType": {
+      "full_time": "Full-time",
+      "part_time": "Part-time",
+      "contract": "Contract",
+      "temporary": "Temporary",
+      "internship": "Internship",
+      "apprenticeship": "Apprenticeship"
+    },
+    "seniority": {
+      "intern": "Intern",
+      "junior": "Junior",
+      "mid": "Mid-level",
+      "senior": "Senior",
+      "lead": "Lead",
+      "manager": "Manager",
+      "director": "Director",
+      "executive": "Executive"
+    },
+    "salaryPeriod": {
+      "hour": "hour",
+      "month": "month",
+      "year": "year"
+    },
+    "workAuthorization": {
+      "citizen": "Citizen",
+      "permanent_resident": "Permanent resident",
+      "work_visa": "Work visa",
+      "needs_sponsorship": "Needs sponsorship",
+      "other": "Other"
+    },
+    "languageLevel": {
+      "A1": "A1 - Beginner",
+      "A2": "A2 - Elementary",
+      "B1": "B1 - Intermediate",
+      "B2": "B2 - Upper intermediate",
+      "C1": "C1 - Advanced",
+      "C2": "C2 - Proficient",
+      "native": "Native"
+    }
+  },
+  "detail": {
+    "breadcrumbLabel": "Breadcrumb",
+    "breadcrumbHome": "Home",
+    "breadcrumbWork": "Careers",
+    "backToOpenings": "Back to all roles",
+    "posted": "Posted {date}",
+    "closes": "Applications close {date}",
+    "positions": "{count, plural, one {# position} other {# positions}}",
+    "salary": "Salary",
+    "salaryRange": "{min} - {max} per {period}",
+    "salaryFrom": "From {min} per {period}",
+    "salaryUpTo": "Up to {max} per {period}",
+    "sections": {
+      "summary": "Overview",
+      "description": "About the role",
+      "responsibilities": "What you will do",
+      "requirements": "What we are looking for",
+      "niceToHave": "Nice to have",
+      "benefits": "What we offer"
+    },
+    "apply": {
+      "title": "Interested in this role?",
+      "description": "Apply in a few minutes. A CV is required.",
+      "cta": "Apply now",
+      "mobileCta": "Apply"
+    },
+    "share": {
+      "title": "Share this role",
+      "copyLink": "Copy link",
+      "copied": "Link copied",
+      "linkedin": "Share on LinkedIn"
+    },
+    "other": {
+      "title": "Other open roles",
+      "viewAll": "View all roles"
+    },
+    "notFound": {
+      "title": "This role is no longer available",
+      "description": "The position may have been filled or closed. Have a look at our other open roles.",
+      "cta": "See open roles"
+    }
+  },
+  "apply": {
+    "title": "Apply for this role",
+    "subtitle": "Tell us about yourself. Fields marked with * are required.",
+    "talentPoolTitle": "Join our talent pool",
+    "talentPoolSubtitle": "No role fits today? Share your profile and we will contact you when a match opens.",
+    "backToOpening": "Back to the role",
+    "applyingFor": "Applying for: {title}",
+    "nextStepsTitle": "What happens next",
     "submit": "Submit application",
-    "success": "Thank you. Our HR team has received your application."
+    "sections": {
+      "personal": "Personal details",
+      "professional": "Professional background",
+      "preferences": "Preferences",
+      "languages": "Languages",
+      "documents": "Documents",
+      "consent": "Privacy"
+    },
+    "fields": {
+      "fullName": "Full name",
+      "email": "Email",
+      "phone": "Phone",
+      "phoneCountry": "Phone country code",
+      "country": "Country of residence",
+      "city": "City",
+      "linkedinUrl": "LinkedIn profile",
+      "portfolioUrl": "Portfolio or website",
+      "currentCompany": "Current company",
+      "currentTitle": "Current job title",
+      "yearsExperience": "Years of experience",
+      "salaryExpectation": "Salary expectation",
+      "salaryCurrency": "Currency",
+      "salaryPeriod": "Period",
+      "availabilityDate": "Available from",
+      "noticePeriodDays": "Notice period (days)",
+      "workAuthorization": "Work authorization",
+      "willingToRelocate": "Willing to relocate",
+      "remotePreference": "Preferred work model",
+      "addLanguage": "Add language",
+      "removeLanguage": "Remove language",
+      "languageCode": "Language",
+      "languageLevel": "Level",
+      "coverLetter": "Cover letter or message",
+      "heardFrom": "How did you hear about us?",
+      "referrerName": "Who referred you?",
+      "cv": "CV / Resume",
+      "cvHint": "PDF, DOC or DOCX, up to {size}.",
+      "cvDrop": "Drag your CV here or click to choose a file",
+      "cvReplace": "Replace file",
+      "cvSelected": "{name} ({size})",
+      "consentPrivacy": "I have read the privacy notice and agree to the processing of my data for this recruitment process.",
+      "consentTalentPool": "Keep my profile for future opportunities for up to 24 months.",
+      "privacyNotice": "Your data is used only for recruitment, kept for 12 months, and 24 months if you join the talent pool.",
+      "privacyLink": "Read the recruitment privacy notice",
+      "optional": "Optional",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "heardFrom": {
+      "linkedin": "LinkedIn",
+      "job_board": "Job board",
+      "referral": "Referral",
+      "event": "Event",
+      "search": "Web search",
+      "social": "Social media",
+      "other": "Other"
+    },
+    "validation": {
+      "required": "This field is required.",
+      "emailInvalid": "Enter a valid email address.",
+      "urlInvalid": "Enter a valid link starting with https://.",
+      "yearsRange": "Enter a valid number.",
+      "noticeRange": "Enter a valid number of days.",
+      "dateInvalid": "Enter a valid date.",
+      "cvRequired": "Attach your CV.",
+      "cvType": "Use a PDF, DOC or DOCX file.",
+      "cvTooLarge": "The file is too large.",
+      "consentRequired": "You must accept to continue.",
+      "coverLetterTooLong": "The message is too long.",
+      "summary": "Please review the highlighted fields."
+    },
+    "status": {
+      "submitting": "Sending your application...",
+      "uploading": "Uploading your CV...",
+      "confirming": "Finishing up...",
+      "retryUpload": "Retry upload"
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "rateLimited": "Too many attempts. Please wait a few minutes and try again.",
+      "openingClosed": "This role is no longer accepting applications.",
+      "uploadFailed": "Your details were saved but the CV upload failed. Retry to finish your application.",
+      "invalidTicket": "Your session expired. Please submit the form again."
+    },
+    "success": {
+      "title": "Application received",
+      "description": "Thank you. Our recruiting team will review your profile and get back to you.",
+      "talentPoolNote": "We will keep your profile on file and contact you when a matching role opens.",
+      "backToOpenings": "Back to open roles"
+    }
+  },
+  "thanks": {
+    "title": "Thank you for applying!",
+    "eyebrow": "Application received",
+    "openingLine": "We received your application for {title}.",
+    "genericLine": "We received your application. Thank you for your interest in Oboya.",
+    "talentPoolTitle": "You are in our talent pool!",
+    "talentPoolLine": "Your profile is saved for future opportunities. We will keep it for 24 months and reach out when a role matches.",
+    "nextTitle": "What happens next",
+    "steps": {
+      "review": {
+        "title": "We review your application",
+        "description": "Our recruiting team reads every application carefully."
+      },
+      "contact": {
+        "title": "We contact you if there is a match",
+        "description": "If your profile fits, the recruiting team will get in touch to talk next steps."
+      },
+      "email": {
+        "title": "Keep an eye on your email",
+        "description": "Replies may take a few days. Remember to check your spam folder."
+      }
+    },
+    "privacy": "Your data is handled according to our recruitment privacy notice.",
+    "privacyLink": "Read the recruitment privacy notice",
+    "seeOpenings": "See other openings",
+    "backHome": "Back to home"
   }
 }

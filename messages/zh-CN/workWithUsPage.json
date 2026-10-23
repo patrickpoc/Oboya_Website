@@ -1,48 +1,331 @@
 {
-  "intro": "Build your career with a global horticulture company focused on innovation, sustainability, and local impact.",
+  "meta": {
+    "listTitle": "招聘",
+    "listDescription": "加入 Oboya Horticulture。浏览我们全球团队的在招职位，几分钟即可投递。",
+    "applyTitle": "应聘：{title}",
+    "talentPoolTitle": "加入我们的人才库",
+    "thanksTitle": "已收到申请"
+  },
+  "hero": {
+    "eyebrow": "Oboya 招聘",
+    "title": "与全球园艺团队一起成长",
+    "description": "找到一个职位，让你的工作惠及多个国家的种植者、植物与社区。",
+    "openingsCount": "{count, plural, =0 {暂无在招职位} other {# 个在招职位}}",
+    "countriesCount": "{count, plural, other {# 个国家}}",
+    "ctaTalentPool": "加入人才库"
+  },
+  "about": {
+    "title": "为什么选择 Oboya",
+    "body": "在一家专注于创新、可持续发展和本地影响力的全球园艺企业中打造你的职业生涯。",
+    "highlightsTitle": "你可以期待"
+  },
   "benefits": {
     "b1": {
-      "title": "Global reach",
-      "description": "Work with teams and growers across 25 countries."
+      "title": "全球视野",
+      "description": "与 25 个国家的团队和种植者合作。"
     },
     "b2": {
-      "title": "Learning culture",
-      "description": "Continuous development in products, operations, and sustainability."
+      "title": "学习文化",
+      "description": "在产品、运营和可持续发展方面持续成长。"
     },
     "b3": {
-      "title": "Local impact",
-      "description": "Support growers in your region with integrated solutions."
+      "title": "本地影响力",
+      "description": "以整合方案支持你所在地区的种植者。"
     },
     "b4": {
-      "title": "Inclusive teams",
-      "description": "Collaborative teams across disciplines and markets."
+      "title": "包容的团队",
+      "description": "跨专业、跨市场的协作团队。"
     }
   },
-  "openings": {
-    "title": "Open positions",
-    "o1": {
-      "title": "Regional Sales Manager",
-      "location": "São Paulo, Brazil",
-      "type": "Full-time"
-    },
-    "o2": {
-      "title": "Packaging Product Specialist",
-      "location": "Malmö, Sweden",
-      "type": "Full-time"
-    },
-    "o3": {
-      "title": "Greenhouse Solutions Engineer",
-      "location": "Shanghai, China",
-      "type": "Full-time"
+  "process": {
+    "title": "招聘流程",
+    "description": "从你的第一次点击到入职第一天，流程清晰、相互尊重。",
+    "steps": {
+      "s1": {
+        "title": "投递",
+        "description": "提交你的资料和简历，大约需要五分钟。"
+      },
+      "s2": {
+        "title": "筛选",
+        "description": "我们的招聘人员会阅读每一份申请并给你回复。"
+      },
+      "s3": {
+        "title": "面谈",
+        "description": "与用人经理及未来的团队成员见面交流。"
+      },
+      "s4": {
+        "title": "录用",
+        "description": "我们会提供清晰的录用通知，并帮助你顺利入职。"
+      }
     }
   },
-  "application": {
-    "title": "Spontaneous application",
-    "description": "Don't see a matching role? Send your profile and we'll keep it on file.",
-    "name": "Full name",
-    "email": "Email",
-    "message": "Tell us about your experience",
-    "submit": "Submit application",
-    "success": "Thank you. Our HR team has received your application."
+  "faq": {
+    "title": "常见问题",
+    "items": {
+      "q1": {
+        "question": "招聘流程需要多长时间？",
+        "answer": "视职位而定，大多数流程从投递到录用需要两到六周。"
+      },
+      "q2": {
+        "question": "我可以申请多个职位吗？",
+        "answer": "可以。欢迎申请所有与你背景相符的职位，每个职位提交一份申请。"
+      },
+      "q3": {
+        "question": "如果目前没有适合我的职位怎么办？",
+        "answer": "加入我们的人才库。我们会保存你的资料，并在出现合适职位时联系你。"
+      },
+      "q4": {
+        "question": "我的数据将如何使用？",
+        "answer": "我们仅将你的数据用于招聘，并在有限期限内保存。详情请参阅我们的隐私政策。"
+      }
+    }
+  },
+  "board": {
+    "title": "在招职位",
+    "resultCount": "{count, plural, =0 {未找到职位} other {找到 # 个职位}}",
+    "searchLabel": "搜索职位",
+    "searchPlaceholder": "职位名称、关键词或城市",
+    "searchSubmit": "搜索",
+    "clearFilters": "清除所有筛选",
+    "activeFilters": "已选筛选条件",
+    "removeFilter": "移除筛选：{label}",
+    "loadError": "暂时无法加载在招职位，请稍后再试。",
+    "filters": {
+      "country": "国家",
+      "allCountries": "所有国家",
+      "countryOption": "{country}（{count}）",
+      "department": "部门",
+      "allDepartments": "所有部门",
+      "workModel": "工作方式",
+      "employmentType": "雇佣类型",
+      "any": "不限"
+    },
+    "empty": {
+      "title": "没有符合搜索条件的职位",
+      "description": "请尝试其他关键词或移除部分筛选条件。",
+      "countryTitle": "{country} 目前暂无在招职位",
+      "clearFilters": "清除筛选",
+      "talentPoolCta": "加入人才库"
+    }
+  },
+  "card": {
+    "viewOpening": "查看职位",
+    "posted": "发布于 {date}",
+    "positions": "{count, plural, other {# 个名额}}"
+  },
+  "labels": {
+    "workModel": {
+      "onsite": "现场办公",
+      "hybrid": "混合办公",
+      "remote": "远程办公"
+    },
+    "employmentType": {
+      "full_time": "全职",
+      "part_time": "兼职",
+      "contract": "合同制",
+      "temporary": "临时",
+      "internship": "实习",
+      "apprenticeship": "学徒"
+    },
+    "seniority": {
+      "intern": "实习生",
+      "junior": "初级",
+      "mid": "中级",
+      "senior": "高级",
+      "lead": "负责人",
+      "manager": "经理",
+      "director": "总监",
+      "executive": "高管"
+    },
+    "salaryPeriod": {
+      "hour": "小时",
+      "month": "月",
+      "year": "年"
+    },
+    "workAuthorization": {
+      "citizen": "公民",
+      "permanent_resident": "永久居民",
+      "work_visa": "工作签证",
+      "needs_sponsorship": "需要签证担保",
+      "other": "其他"
+    },
+    "languageLevel": {
+      "A1": "A1 - 入门",
+      "A2": "A2 - 初级",
+      "B1": "B1 - 中级",
+      "B2": "B2 - 中高级",
+      "C1": "C1 - 高级",
+      "C2": "C2 - 精通",
+      "native": "母语"
+    }
+  },
+  "detail": {
+    "breadcrumbLabel": "面包屑导航",
+    "breadcrumbHome": "首页",
+    "breadcrumbWork": "招聘",
+    "backToOpenings": "返回所有职位",
+    "posted": "发布于 {date}",
+    "closes": "申请截止日期：{date}",
+    "positions": "{count, plural, other {# 个名额}}",
+    "salary": "薪资",
+    "salaryRange": "每{period} {min} - {max}",
+    "salaryFrom": "每{period} {min} 起",
+    "salaryUpTo": "每{period}最高 {max}",
+    "sections": {
+      "summary": "概述",
+      "description": "关于该职位",
+      "responsibilities": "你将负责",
+      "requirements": "我们期待的你",
+      "niceToHave": "加分项",
+      "benefits": "我们提供"
+    },
+    "apply": {
+      "title": "对该职位感兴趣？",
+      "description": "几分钟即可完成申请，需提交简历。",
+      "cta": "立即申请",
+      "mobileCta": "申请"
+    },
+    "share": {
+      "title": "分享该职位",
+      "copyLink": "复制链接",
+      "copied": "链接已复制",
+      "linkedin": "分享到 LinkedIn"
+    },
+    "other": {
+      "title": "其他在招职位",
+      "viewAll": "查看所有职位"
+    },
+    "notFound": {
+      "title": "该职位已不再开放",
+      "description": "该职位可能已招满或关闭。请看看我们的其他在招职位。",
+      "cta": "查看在招职位"
+    }
+  },
+  "apply": {
+    "title": "申请该职位",
+    "subtitle": "请介绍一下你自己。标有 * 的字段为必填项。",
+    "talentPoolTitle": "加入我们的人才库",
+    "talentPoolSubtitle": "目前没有合适的职位？请分享你的资料，出现匹配职位时我们会联系你。",
+    "backToOpening": "返回职位",
+    "applyingFor": "应聘职位：{title}",
+    "nextStepsTitle": "后续流程",
+    "submit": "提交申请",
+    "sections": {
+      "personal": "个人信息",
+      "professional": "职业背景",
+      "preferences": "偏好",
+      "languages": "语言能力",
+      "documents": "文件",
+      "consent": "隐私"
+    },
+    "fields": {
+      "fullName": "姓名",
+      "email": "电子邮箱",
+      "phone": "电话",
+      "phoneCountry": "电话国家区号",
+      "country": "居住国家",
+      "city": "城市",
+      "linkedinUrl": "LinkedIn 主页",
+      "portfolioUrl": "作品集或网站",
+      "currentCompany": "当前公司",
+      "currentTitle": "当前职位",
+      "yearsExperience": "工作年限",
+      "salaryExpectation": "期望薪资",
+      "salaryCurrency": "币种",
+      "salaryPeriod": "周期",
+      "availabilityDate": "可入职日期",
+      "noticePeriodDays": "通知期（天）",
+      "workAuthorization": "工作许可",
+      "willingToRelocate": "是否愿意搬迁",
+      "remotePreference": "偏好的工作方式",
+      "addLanguage": "添加语言",
+      "removeLanguage": "移除语言",
+      "languageCode": "语言",
+      "languageLevel": "水平",
+      "coverLetter": "求职信或留言",
+      "heardFrom": "你是如何了解我们的？",
+      "referrerName": "推荐人是谁？",
+      "cv": "简历",
+      "cvHint": "PDF、DOC 或 DOCX，最大 {size}。",
+      "cvDrop": "将简历拖到此处，或点击选择文件",
+      "cvReplace": "更换文件",
+      "cvSelected": "{name}（{size}）",
+      "consentPrivacy": "我已阅读隐私声明，并同意为本次招聘流程处理我的数据。",
+      "consentTalentPool": "将我的资料保留最长 24 个月，以便未来的机会。",
+      "privacyNotice": "你的数据仅用于招聘，保存 12 个月；若加入人才库，则保存 24 个月。",
+      "privacyLink": "阅读招聘隐私声明",
+      "optional": "选填",
+      "yes": "是",
+      "no": "否"
+    },
+    "heardFrom": {
+      "linkedin": "LinkedIn",
+      "job_board": "招聘网站",
+      "referral": "内部推荐",
+      "event": "活动",
+      "search": "网络搜索",
+      "social": "社交媒体",
+      "other": "其他"
+    },
+    "validation": {
+      "required": "此项为必填。",
+      "emailInvalid": "请输入有效的电子邮箱地址。",
+      "urlInvalid": "请输入以 https:// 开头的有效链接。",
+      "yearsRange": "请输入有效的数字。",
+      "noticeRange": "请输入有效的天数。",
+      "dateInvalid": "请输入有效的日期。",
+      "cvRequired": "请上传你的简历。",
+      "cvType": "请使用 PDF、DOC 或 DOCX 文件。",
+      "cvTooLarge": "文件过大。",
+      "consentRequired": "你必须同意后才能继续。",
+      "coverLetterTooLong": "留言内容过长。",
+      "summary": "请检查高亮显示的字段。"
+    },
+    "status": {
+      "submitting": "正在提交你的申请...",
+      "uploading": "正在上传你的简历...",
+      "confirming": "即将完成...",
+      "retryUpload": "重新上传"
+    },
+    "errors": {
+      "generic": "出了点问题，请重试。",
+      "rateLimited": "尝试次数过多，请等待几分钟后再试。",
+      "openingClosed": "该职位已停止接收申请。",
+      "uploadFailed": "你的信息已保存，但简历上传失败。请重试以完成申请。",
+      "invalidTicket": "会话已过期，请重新提交表单。"
+    },
+    "success": {
+      "title": "已收到你的申请",
+      "description": "感谢你的申请。我们的招聘团队将审核你的资料并回复你。",
+      "talentPoolNote": "我们会保存你的资料，并在出现匹配职位时联系你。",
+      "backToOpenings": "返回在招职位"
+    }
+  },
+  "thanks": {
+    "title": "感谢你的申请！",
+    "eyebrow": "已收到申请",
+    "openingLine": "我们已收到你对「{title}」的申请。",
+    "genericLine": "我们已收到你的申请，感谢你对 Oboya 的关注。",
+    "talentPoolTitle": "你已加入我们的人才库！",
+    "talentPoolLine": "你的资料已保存，以便未来的机会。我们会保留 24 个月，并在出现匹配职位时联系你。",
+    "nextTitle": "接下来会怎样",
+    "steps": {
+      "review": {
+        "title": "我们会审阅你的申请",
+        "description": "招聘团队会认真阅读每一份申请。"
+      },
+      "contact": {
+        "title": "如有匹配，我们会联系你",
+        "description": "如果你的资料合适，招聘团队会与你联系，沟通后续步骤。"
+      },
+      "email": {
+        "title": "请留意你的邮箱",
+        "description": "回复可能需要几天时间。请记得查看垃圾邮件文件夹。"
+      }
+    },
+    "privacy": "你的数据将按照我们的招聘隐私声明进行处理。",
+    "privacyLink": "阅读招聘隐私声明",
+    "seeOpenings": "查看其他职位",
+    "backHome": "返回首页"
   }
 }

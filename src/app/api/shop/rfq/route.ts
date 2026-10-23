@@ -16,6 +16,9 @@ import {
   resolveVariantSku,
   sortedColorVariants,
 } from "@/lib/shop/color-variants";
+import { getEffectiveSaleMode } from "@/lib/shop/sale-mode";
+import { summarizeQuoteLines } from "@/lib/shop/quote-pricing";
+import type { SaleMode } from "@/lib/shop/types";
 import { isValidEmail } from "@/lib/security/email";
 import { sanitizeLeadContext } from "@/lib/forms/lead-context";
 import { assertFormRateLimit } from "@/lib/security/rate-limit";
@@ -161,8 +164,9 @@ export async function POST(request: Request) {
       sku: string;
       name: string;
       quantity: number;
-      unitPrice: number;
-      lineTotal: number;
+      saleMode: SaleMode;
+      unitPrice: number | null;
+      lineTotal: number | null;
     }> = [];
 
     for (const rawItem of items) {
@@ -203,23 +207,19 @@ export async function POST(request: Request) {
         ? getVariantDisplayName(displayVariant, "en")
         : null;
 
-      const unitPrice = resolveVariantPrice(product, variant, currency);
-      if (unitPrice <= 0) {
+      // Mode is decided from the stored product; client-sent price/mode is ignored.
+      const saleMode = getEffectiveSaleMode(product);
+      const isQuoteLine = saleMode === "quote";
+      const resolvedPrice = isQuoteLine
+        ? 0
+        : resolveVariantPrice(product, variant, currency);
+      if (!isQuoteLine && resolvedPrice <= 0) {
         return NextResponse.json(
           { error: `No price for product ${product.sku} in ${currency}` },
           { status: 400 }
         );
       }
-
-      if (!product.unlimitedStock) {
-        const stock = product.stockQuantity ?? 0;
-        if (stock <= 0) {
-          return NextResponse.json(
-            { error: `Product out of stock: ${product.sku}` },
-            { status: 400 }
-          );
-        }
-      }
+      const unitPrice = isQuoteLine ? null : resolvedPrice;
 
       const moq = getProductMoq(product);
       const requestedQty = Number(item.quantity);
@@ -237,6 +237,7 @@ export async function POST(request: Request) {
         );
       }
       if (
+        !isQuoteLine &&
         !product.unlimitedStock &&
         product.stockQuantity != null &&
         quantity > product.stockQuantity
@@ -262,15 +263,14 @@ export async function POST(request: Request) {
             ? `${name} (${variantName})`
             : name,
         quantity,
+        saleMode,
         unitPrice,
-        lineTotal: unitPrice * quantity,
+        lineTotal: unitPrice === null ? null : unitPrice * quantity,
       });
     }
 
-    const estimatedTotal = validatedItems.reduce(
-      (sum, item) => sum + item.lineTotal,
-      0
-    );
+    const { pricedTotal: estimatedTotal, pendingCount, pricing } =
+      summarizeQuoteLines(validatedItems);
     const { referenceId } = await addQuoteSubmissionWithReference(countryCode, {
       company,
       contactName,
@@ -283,7 +283,9 @@ export async function POST(request: Request) {
       officeId,
       items: validatedItems,
       itemCount: validatedItems.length,
-      total: estimatedTotal,
+      total: pricing === "quote_only" ? null : estimatedTotal,
+      pricing,
+      pendingItemCount: pendingCount,
       // freight and coupon stay absent until a provider re-validates them server-side.
       marketingOptIn,
       privacyNoticeVersion: PRIVACY_NOTICE_VERSION,
@@ -294,7 +296,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       referenceId,
       ok: true,
-      estimatedTotal,
+      estimatedTotal: pricing === "quote_only" ? null : estimatedTotal,
+      pricing,
       itemCount: validatedItems.length,
     });
   } catch (error) {

@@ -49,7 +49,8 @@ export async function POST(request: Request) {
 
     const [filters, currencies] = await Promise.all([
       readMarketplaceFilters(),
-      readMarketplaceCurrencies(),
+      // Inactive countries stay valid so existing product flags are preserved.
+      readMarketplaceCurrencies({ includeInactive: true }),
     ]);
 
     const catalogBase: BulkUpdateCatalog = {

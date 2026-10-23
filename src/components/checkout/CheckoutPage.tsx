@@ -10,6 +10,7 @@ import { CheckoutSuccessDialog } from "@/components/checkout/CheckoutSuccessDial
 import { CheckoutLineItem } from "@/components/checkout/CheckoutLineItem";
 import { CheckoutUpsell } from "@/components/checkout/CheckoutUpsell";
 import { RfqDetailsForm, type RfqFormState } from "@/components/checkout/RfqDetailsForm";
+import { PendingItemsLine, PricingNotice } from "@/components/shop/cart/QuotePricingNotice";
 import { buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { useShop } from "@/contexts/ShopContext";
@@ -17,6 +18,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import type { CheckoutPageSettings } from "@/lib/cms/checkout-page/types";
 import { getPrimaryOfficeByCountryCode } from "@/lib/shop/office-resolver";
+import type { QuotePricing } from "@/lib/shop/quote-pricing";
 import { formatShopPrice } from "@/lib/shop/format-price";
 import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 import { useMapLocations } from "@/lib/shop/use-map-locations";
@@ -57,6 +59,8 @@ export function CheckoutPage({
     shopConfig,
     getLineItems,
     estimatedTotal,
+    pendingCount,
+    pricing,
     itemCount,
     updateQuantity,
     removeItem,
@@ -67,6 +71,7 @@ export function CheckoutPage({
   } = useShop();
   const { data: mapData } = useMapLocations();
   const [form, setForm] = useState<RfqFormState>(EMPTY_FORM);
+  const [submittedPricing, setSubmittedPricing] = useState<QuotePricing | undefined>();
   const searchParams = useSearchParams();
   const refParam = searchParams.get("ref")?.trim() ?? "";
   const urlReference = /^OBOYA-[A-Z]{2,5}-\d{1,8}$/.test(refParam) ? refParam : null;
@@ -103,6 +108,7 @@ export function CheckoutPage({
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
+      setSubmittedPricing(pricing);
       const referenceId = await submitRfq(form, office?.officeId ?? null);
       setForm(EMPTY_FORM);
       router.replace(`/checkout?ref=${encodeURIComponent(referenceId)}`);
@@ -111,7 +117,10 @@ export function CheckoutPage({
     }
   };
 
-  const canSubmit = shopConfig.rfq.enabled && lineItems.length > 0 && Boolean(currency);
+  const hasUnavailable = lineItems.some((item) => item.unavailable);
+  const pricedCount = lineItems.filter((item) => item.lineTotal !== null).length;
+  const canSubmit =
+    shopConfig.rfq.enabled && lineItems.length > 0 && Boolean(currency) && !hasUnavailable;
 
   return (
     <section className="bg-oboya-soft-white py-8 md:py-12">
@@ -162,6 +171,7 @@ export function CheckoutPage({
                     variantName={item.variantName}
                     quantity={item.quantity}
                     unitPrice={item.unitPrice}
+                    unavailable={item.unavailable}
                     currency={currency ?? "USD"}
                     image={item.image}
                     sku={item.sku}
@@ -188,10 +198,16 @@ export function CheckoutPage({
               <dl className="mt-4 space-y-2 text-sm">
                 <div className="flex justify-between gap-3">
                   <dt className="text-oboya-blue-dark/70">
-                    {t("subtotal", { count: itemCount })}
+                    {pricing === "mixed"
+                      ? t("subtotalPriced", { count: pricedCount })
+                      : t("subtotal", { count: itemCount - (hasUnavailable ? lineItems.filter((i) => i.unavailable).length : 0) })}
                   </dt>
                   <dd className="font-medium text-oboya-blue-dark">
-                    {currency ? formatShopPrice(estimatedTotal, currency) : "—"}
+                    {pricing === "quote_only"
+                      ? "—"
+                      : currency
+                        ? formatShopPrice(estimatedTotal, currency)
+                        : "—"}
                   </dd>
                 </div>
                 <div className="flex justify-between gap-3">
@@ -199,13 +215,30 @@ export function CheckoutPage({
                   <dd className="text-oboya-blue-dark/50">—</dd>
                 </div>
               </dl>
-              <div className="mt-4 flex items-end justify-between border-t border-border/60 pt-4">
-                <p className="font-semibold text-oboya-blue-dark">{t("estimatedTotal")}</p>
-                <p className="text-xl font-semibold text-oboya-green">
-                  {currency ? formatShopPrice(estimatedTotal, currency) : "—"}
+              {pricing !== "quote_only" ? (
+                <div className="mt-4 border-t border-border/60 pt-4">
+                  <div className="flex items-end justify-between">
+                    <p className="font-semibold text-oboya-blue-dark">
+                      {pricing === "mixed" ? t("partialTotal") : t("estimatedTotal")}
+                    </p>
+                    <p className="text-xl font-semibold text-oboya-green">
+                      {currency ? formatShopPrice(estimatedTotal, currency) : "—"}
+                    </p>
+                  </div>
+                  <PendingItemsLine count={pendingCount} className="mt-1 text-right" />
+                </div>
+              ) : null}
+              {pricing === "estimated" ? (
+                <p className="mt-1 text-xs text-oboya-blue-dark/50">{t("totalNote")}</p>
+              ) : (
+                <PricingNotice pricing={pricing} className="mt-4" />
+              )}
+
+              {hasUnavailable ? (
+                <p className="mt-4 text-sm text-oboya-orange" role="alert">
+                  {t("unavailableBlock", { currency: currency ?? "" })}
                 </p>
-              </div>
-              <p className="mt-1 text-xs text-oboya-blue-dark/50">{t("totalNote")}</p>
+              ) : null}
 
               {rfqStatus === "error" ? (
                 <div className="mt-4">
@@ -251,6 +284,7 @@ export function CheckoutPage({
           rfqStatus === "success" && rfqReferenceId ? rfqReferenceId : urlReference
         }
         confirmationMessage={confirmation || undefined}
+        pricing={submittedPricing}
         onClose={() => {
           resetRfqStatus();
           router.push("/shop");

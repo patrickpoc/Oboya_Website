@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { routing } from "@/i18n/routing";
 import { getAllPageSlugs } from "@/constants/pages";
+import { listPublicOpenings } from "@/lib/cms/server/careers-public.server";
 import { readBlogPosts, readCaseStudies, readProducts } from "@/lib/cms/readers";
 
 const baseUrl = "https://www.oboya-horticulture.com";
@@ -77,8 +78,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.9,
   }));
 
+  const openings = await listPublicOpenings("en");
+  const workEntries = routing.locales.flatMap((locale) => [
+    {
+      url: `${baseUrl}/${locale}/work`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    },
+    ...openings.map((opening) => ({
+      url: `${baseUrl}/${locale}/work/${opening.slug}`,
+      lastModified: new Date(opening.updatedAt),
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    })),
+  ]);
+
   return [
     ...homeEntries,
+    ...workEntries,
     ...shopIndexEntries,
     ...productEntries,
     ...blogEntries,

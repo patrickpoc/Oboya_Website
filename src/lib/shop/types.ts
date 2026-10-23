@@ -1,6 +1,11 @@
 export type CurrencyCode = string;
 export type ShopLocalizedText = Partial<Record<"en" | "pt-BR" | "es" | "zh-CN", string>>;
 
+export type SaleMode = "stock" | "quote";
+
+/** Catalog availability filter: priced (in stock) vs on request. */
+export type AvailabilityFilter = "priced" | "quote";
+
 export type StockStatus = "in_stock" | "limited" | "on_request";
 
 export type SortOption =
@@ -129,6 +134,8 @@ export interface ShopProduct {
    * Built-in groups use the dedicated fields above.
    */
   customFilters?: Record<string, string[]>;
+  /** Optional on read; missing means "stock". Use getEffectiveSaleMode(). */
+  saleMode?: SaleMode;
   stockStatus: StockStatus;
   stockQuantity: number | null;
   unlimitedStock: boolean;
@@ -177,7 +184,7 @@ export interface ShopFilters {
   countriesOfOrigin: string[];
   /** Selected option ids for custom filter groups. */
   customFilters: Record<string, string[]>;
-  availabilityOnly: boolean;
+  availability: AvailabilityFilter | null;
   priceMin: number | null;
   priceMax: number | null;
 }
@@ -191,7 +198,7 @@ export const EMPTY_SHOP_FILTERS: ShopFilters = {
   certifications: [],
   countriesOfOrigin: [],
   customFilters: {},
-  availabilityOnly: false,
+  availability: null,
   priceMin: null,
   priceMax: null,
 };
@@ -234,7 +241,8 @@ export interface RfqPayload {
     variantId?: string | null;
     variantName?: string | null;
     quantity: number;
-    unitPrice: number;
+    saleMode: SaleMode;
+    unitPrice: number | null;
   }[];
   estimatedTotal: number;
 }

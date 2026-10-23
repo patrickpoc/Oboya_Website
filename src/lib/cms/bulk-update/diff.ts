@@ -86,6 +86,8 @@ export function isBulkFieldEqual(
       );
     case "status":
       return original.status === pending.status;
+    case "saleMode":
+      return (original.saleMode ?? "stock") === (pending.saleMode ?? "stock");
     case "priceUsd":
       return priceValue(original.prices, "USD") === priceValue(pending.prices, "USD");
     case "priceBrl":
@@ -242,6 +244,7 @@ export function applyPatchToProduct(
     next.availability = { ...patch.enabledCountries };
   }
   if (patch.status !== undefined) next.status = patch.status;
+  if (patch.saleMode !== undefined) next.saleMode = patch.saleMode;
   if (patch.priceUsd !== undefined) {
     next.prices = setCurrencyPrice(next.prices, "USD", patch.priceUsd);
   }
@@ -319,6 +322,9 @@ export function buildPatchFromPending(
       case "status":
         patch.status = pending.status;
         break;
+      case "saleMode":
+        patch.saleMode = pending.saleMode ?? "stock";
+        break;
       case "priceUsd":
         patch.priceUsd = pending.prices?.USD ?? null;
         break;
@@ -366,6 +372,7 @@ export function normalizeProductForBulk(product: CmsProduct): CmsProduct {
     enabledCountries,
     availability: { ...enabledCountries },
     status: product.status ?? "draft",
+    saleMode: product.saleMode === "quote" ? "quote" : "stock",
     prices: { ...(product.prices ?? {}) },
     defaultColor: product.defaultColor ?? "",
     defaultColorName: normalizeLocalizedColorName(product.defaultColorName),
@@ -510,6 +517,8 @@ export function formatFieldValue(
     }
     case "status":
       return product.status === "published" ? "yes" : "no";
+    case "saleMode":
+      return product.saleMode === "quote" ? "quote" : "stock";
     case "priceUsd":
       return String(priceValue(product.prices, "USD") || "");
     case "priceBrl":

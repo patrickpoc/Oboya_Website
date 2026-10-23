@@ -20,6 +20,7 @@ import {
 } from "@/lib/shop/color-variants";
 import { formatShopPrice } from "@/lib/shop/format-price";
 import { getProductMoq } from "@/lib/shop/quantity";
+import { getEffectiveSaleMode } from "@/lib/shop/sale-mode";
 import { useProductName } from "@/lib/shop/use-product-name";
 import { cn } from "@/lib/utils";
 
@@ -71,6 +72,7 @@ export function CheckoutUpsell({ popularProductIds }: { popularProductIds: strin
         const enabled = product.enabledCountries ?? product.availability;
         if (!enabled[countryCode]) return false;
         if (inQuote.has(product.id)) return false;
+        if (getEffectiveSaleMode(product) !== "stock") return false;
         return (product.prices[currency] ?? 0) > 0;
       })
       .map((product) => {

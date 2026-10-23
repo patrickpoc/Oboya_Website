@@ -499,7 +499,9 @@ export function ProductColorVariantsCard({
 
                     <div className="space-y-2">
                       <Label>{t("prices")}</Label>
-                      {currenciesLoading ? (
+                      {product.saleMode === "quote" ? (
+                        <p className="text-xs text-muted-foreground">{t("quoteModeNote")}</p>
+                      ) : currenciesLoading ? (
                         <p className="text-sm text-muted-foreground">
                           {t("loadingCurrencies")}
                         </p>
@@ -540,9 +542,11 @@ export function ProductColorVariantsCard({
                           ))}
                         </div>
                       )}
-                      <p className="text-xs text-muted-foreground">
-                        {t("variantPriceFallback")}
-                      </p>
+                      {product.saleMode === "quote" ? null : (
+                        <p className="text-xs text-muted-foreground">
+                          {t("variantPriceFallback")}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>

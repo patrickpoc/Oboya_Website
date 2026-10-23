@@ -1,4 +1,5 @@
 import type {
+  AvailabilityFilter,
   CurrencyCode,
   ShopFilters,
   SortOption,
@@ -17,6 +18,13 @@ export interface ShopUrlState {
   product: string | null;
   cart: boolean;
   quote: boolean;
+}
+
+/** Legacy `available=1` (in stock only) maps to "priced". */
+function parseAvailability(value: string | null): AvailabilityFilter | null {
+  if (value === "1" || value === "priced") return "priced";
+  if (value === "quote") return "quote";
+  return null;
 }
 
 const SORT_VALUES: SortOption[] = [
@@ -133,7 +141,7 @@ export function parseShopUrlState(
       certifications: parseList(searchParams.get("certification")),
       countriesOfOrigin: parseList(searchParams.get("origin")),
       customFilters: parseCustomFilters(searchParams),
-      availabilityOnly: searchParams.get("available") === "1",
+      availability: parseAvailability(searchParams.get("available")),
       priceMin: parseNumber(searchParams.get("priceMin")),
       priceMax: parseNumber(searchParams.get("priceMax")),
     },
@@ -182,7 +190,7 @@ export function buildShopSearchParams(state: {
     setList(params, customFilterParamKey(groupId), values);
   }
 
-  if (filters.availabilityOnly) params.set("available", "1");
+  if (filters.availability) params.set("available", filters.availability);
   if (filters.priceMin !== null) params.set("priceMin", String(filters.priceMin));
   if (filters.priceMax !== null) params.set("priceMax", String(filters.priceMax));
 

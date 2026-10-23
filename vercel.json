@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/purge-forms",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/purge-careers",
+      "schedule": "30 4 * * *"
     }
   ]
 }

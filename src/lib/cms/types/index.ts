@@ -17,6 +17,7 @@ export const SYSTEM_ROLE_IDS = [
   "marketplace_analyst",
   "sales_analyst",
   "hr_analyst",
+  "recruiter",
   "viewer",
 ] as const;
 

@@ -226,6 +226,8 @@ export function formatFieldDisplayValue(
     }
     case "status":
       return product.status === "published" ? "Yes" : "No";
+    case "saleMode":
+      return product.saleMode === "quote" ? "On request (RFQ)" : "In stock";
     case "priceUsd":
       return formatPriceInput(product.prices?.USD, "USD");
     case "priceBrl":

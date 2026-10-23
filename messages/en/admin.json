@@ -180,7 +180,7 @@
     "bulkUpdate": "Bulk Update",
     "filters": "Filters",
     "specifications": "Specifications",
-    "currencies": "Currencies",
+    "currencies": "Countries & currencies",
     "shopConfig": "Shop Config",
     "checkout": "Checkout",
     "globalPresence": "Global Presence",
@@ -459,6 +459,12 @@
       "price": "Price",
       "priceHint": "Currencies configured in Marketplace → Currencies. Empty or 0 hides the product in that currency.",
       "loadingCurrencies": "Loading currencies…",
+      "saleMode": "Sale mode",
+      "saleModeHint": "In stock products show a price. On request products never show a price.",
+      "saleModeStock": "In stock",
+      "saleModeQuote": "On request (RFQ)",
+      "quoteModeNote": "Products on request never show a price; customers request a quotation.",
+      "stockPriceRequired": "In-stock products need at least one price above 0 before they can be published in an enabled country.",
       "noCurrencies": "No currencies configured.",
       "addCurrenciesLink": "Add them in Currencies",
       "priceHidden": "Hidden",
@@ -707,6 +713,9 @@
       "selectAll": "Select all",
       "selectProduct": "Select {sku}",
       "removeProduct": "Remove {sku}",
+      "saleModeStock": "In stock",
+      "saleModeQuote": "On request (RFQ)",
+      "priceDisabledOnRequest": "Products on request never show a price.",
       "noOptions": "No options",
       "updating": "Updating products…",
       "current": "Current:",
@@ -782,6 +791,7 @@
     "marketplace_analyst": "Marketplace Analyst",
     "sales_analyst": "Sales Analyst",
     "hr_analyst": "HR Analyst",
+    "recruiter": "Recruiter",
     "viewer": "Viewer"
   },
   "auth": {
@@ -932,6 +942,7 @@
       "marketplace_analyst": "Market An.",
       "sales_analyst": "Sales An.",
       "hr_analyst": "HR An.",
+      "recruiter": "Recruiter",
       "viewer": "Viewer"
     },
     "levels": {
@@ -1252,11 +1263,334 @@
   "careers": {
     "openings": {
       "title": "Job Openings",
-      "description": "Manage career opportunities."
+      "description": "Manage career opportunities.",
+      "newOpening": "New opening",
+      "searchPlaceholder": "Search by title, slug or department",
+      "applicationsCount": "{count, plural, one {# application} other {# applications}}",
+      "filters": {
+        "status": "Status",
+        "department": "Department",
+        "country": "Country",
+        "workModel": "Work model",
+        "all": "All (incl. archived)",
+        "active": "Active"
+      },
+      "columns": {
+        "title": "Opening",
+        "department": "Department",
+        "location": "Location",
+        "workModel": "Work model",
+        "status": "Status",
+        "applications": "Applications",
+        "publishedAt": "Published",
+        "updatedAt": "Updated",
+        "actions": "Actions"
+      },
+      "actions": {
+        "edit": "Edit",
+        "duplicate": "Duplicate",
+        "close": "Close",
+        "reopen": "Reopen",
+        "archive": "Archive",
+        "publish": "Publish",
+        "delete": "Delete",
+        "viewApplications": "View applications"
+      },
+      "confirm": {
+        "delete": "Delete \"{title}\"? This cannot be undone.",
+        "archive": "Archive \"{title}\"? It will be hidden from the active list.",
+        "close": "Close \"{title}\"? It will stop accepting applications."
+      },
+      "toasts": {
+        "saved": "Opening saved.",
+        "duplicated": "Opening duplicated as a draft.",
+        "closed": "Opening closed.",
+        "reopened": "Opening reopened.",
+        "archived": "Opening archived.",
+        "published": "Opening published.",
+        "deleted": "Opening deleted.",
+        "deleteBlocked": "This opening has applications and cannot be deleted. Archive it instead.",
+        "invalidTransition": "This action is not available for the opening's current status."
+      },
+      "empty": {
+        "title": "No job openings found",
+        "description": "Create an opening or adjust the filters.",
+        "filteredTitle": "No openings match your filters",
+        "filteredDescription": "Try a different search or clear the filters."
+      },
+      "editor": {
+        "titleNew": "New job opening",
+        "titleEdit": "Edit job opening",
+        "sections": {
+          "basics": "Basics",
+          "location": "Location & model",
+          "content": "Content",
+          "compensation": "Compensation",
+          "publishing": "Publishing",
+          "ownership": "Ownership"
+        },
+        "fields": {
+          "title": "Title",
+          "slug": "Slug",
+          "department": "Department",
+          "country": "Country",
+          "city": "City",
+          "workModel": "Work model",
+          "employmentType": "Employment type",
+          "seniority": "Seniority",
+          "positions": "Open positions",
+          "summary": "Summary",
+          "description": "Description",
+          "responsibilities": "Responsibilities",
+          "requirements": "Requirements",
+          "niceToHave": "Nice to have",
+          "benefits": "Benefits",
+          "salaryMin": "Minimum salary",
+          "salaryMax": "Maximum salary",
+          "salaryCurrency": "Currency (ISO code)",
+          "salaryPeriod": "Period",
+          "showSalary": "Show salary publicly",
+          "status": "Status",
+          "publishAt": "Publish at",
+          "closeAt": "Close at",
+          "hiringManager": "Hiring manager",
+          "recruiter": "Recruiter"
+        },
+        "validation": {
+          "titleRequired": "The English title is required.",
+          "slugTaken": "This slug is already used by another opening.",
+          "salaryRange": "Maximum salary must be greater than or equal to the minimum.",
+          "closeBeforePublish": "The close date must be after the publish date.",
+          "positionsMin": "At least one position is required.",
+          "slugRequired": "A slug is required.",
+          "slugReserved": "This slug is reserved. Choose a different one.",
+          "salaryNegative": "Salary cannot be negative."
+        }
+      },
+      "resultCount": "{count, plural, one {# opening} other {# openings}}"
     },
     "applications": {
       "title": "Applications",
-      "description": "Review job applications."
+      "description": "Review job applications.",
+      "newApplication": "New application",
+      "searchPlaceholder": "Search by name, email, company or title",
+      "exportCsv": "Export CSV",
+      "duplicateEmailWarning": "Another application with this email already exists for this opening.",
+      "filters": {
+        "opening": "Opening",
+        "status": "Status",
+        "source": "Source",
+        "allOpenings": "All openings",
+        "allStatuses": "All",
+        "allSources": "All sources",
+        "talentPool": "Talent pool (no opening)"
+      },
+      "columns": {
+        "candidate": "Candidate",
+        "opening": "Opening",
+        "status": "Status",
+        "rating": "Rating",
+        "source": "Source",
+        "appliedAt": "Applied"
+      },
+      "empty": {
+        "title": "No applications found",
+        "description": "Applications will appear here when candidates apply.",
+        "filteredTitle": "No applications match your filters",
+        "filteredDescription": "Try a different search or clear the filters."
+      },
+      "toasts": {
+        "created": "Application created",
+        "updated": "Application updated",
+        "deleted": "Application deleted",
+        "anonymized": "Application anonymized",
+        "cvUploaded": "CV uploaded",
+        "cvRemoved": "CV removed",
+        "cvUploadFailed": "Could not upload the CV."
+      },
+      "confirm": {
+        "delete": "Permanently delete the application from {name}? This also removes the CV.",
+        "anonymize": "Anonymize the application from {name}? Personal data and the CV will be erased.",
+        "removeCv": "Remove the CV of {name}?"
+      },
+      "detail": {
+        "titleNew": "New application",
+        "titleEdit": "Application",
+        "anonymizedNotice": "This application was anonymized. Personal data was erased and it can no longer be edited.",
+        "saveFirst": "Save the application first to upload a CV.",
+        "sections": {
+          "candidate": "Candidate",
+          "professional": "Professional",
+          "preferences": "Preferences",
+          "consent": "Consent",
+          "cv": "CV",
+          "pipeline": "Pipeline",
+          "notes": "Notes and activity",
+          "dangerZone": "Danger zone"
+        },
+        "fields": {
+          "opening": "Opening",
+          "fullName": "Full name",
+          "email": "Email",
+          "phone": "Phone",
+          "country": "Country",
+          "city": "City",
+          "linkedinUrl": "LinkedIn URL",
+          "portfolioUrl": "Portfolio URL",
+          "currentCompany": "Current company",
+          "currentTitle": "Current title",
+          "yearsExperience": "Years of experience",
+          "salaryExpectation": "Salary expectation",
+          "salaryCurrency": "Currency",
+          "salaryPeriod": "Period",
+          "availabilityDate": "Available from",
+          "noticePeriodDays": "Notice period (days)",
+          "workAuthorization": "Work authorization",
+          "willingToRelocate": "Willing to relocate",
+          "remotePreference": "Work model preference",
+          "languages": "Languages",
+          "addLanguage": "Add language",
+          "coverLetter": "Cover letter",
+          "source": "Source",
+          "sourceDetail": "Source detail",
+          "referrerName": "Referrer",
+          "consentPrivacy": "Candidate gave consent to the privacy policy",
+          "consentVersion": "Consent version",
+          "consentAt": "Consent given at",
+          "consentTalentPool": "Consent to keep in the talent pool",
+          "status": "Status",
+          "rating": "Rating",
+          "assignee": "Assignee",
+          "rejectionReason": "Rejection reason",
+          "tags": "Tags (comma separated)"
+        },
+        "cv": {
+          "upload": "Upload CV",
+          "replace": "Replace CV",
+          "download": "Download",
+          "remove": "Remove",
+          "hint": "PDF, DOC or DOCX, up to 10 MB.",
+          "invalidType": "Only PDF, DOC or DOCX files are accepted.",
+          "tooLarge": "The file must be 10 MB or smaller.",
+          "none": "No CV uploaded.",
+          "unavailable": "CV storage is not available. Check the Supabase configuration.",
+          "processing": "Processing…"
+        },
+        "ratingStar": "Rating {value} of 5",
+        "notes": {
+          "placeholder": "Add a note for the team",
+          "add": "Add note",
+          "empty": "No activity yet."
+        },
+        "timeline": {
+          "created": "Application created",
+          "note": "Note",
+          "status_change": "Status changed",
+          "rating": "Rating changed",
+          "cv_uploaded": "CV uploaded",
+          "cv_removed": "CV removed",
+          "updated": "Details updated",
+          "anonymized": "Anonymized"
+        },
+        "actions": {
+          "anonymize": "Anonymize",
+          "delete": "Delete application"
+        },
+        "validation": {
+          "nameRequired": "Full name is required.",
+          "emailInvalid": "Enter a valid email address.",
+          "urlInvalid": "Enter a valid URL starting with http:// or https://.",
+          "consentRequired": "Candidate consent is required.",
+          "yearsRange": "Years of experience must be between 0 and 70.",
+          "ratingRange": "Rating must be between 1 and 5.",
+          "noticeRange": "Notice period must be a whole number of days, 0 or more.",
+          "openingInvalid": "Select a valid job opening.",
+          "dateInvalid": "Enter a valid availability date.",
+          "salaryNegative": "Salary expectation cannot be negative."
+        }
+      },
+      "resultCount": "{count, plural, one {# application} other {# applications}}",
+      "unread": "Unread"
+    },
+    "common": {
+      "status": {
+        "draft": "Draft",
+        "published": "Published",
+        "closed": "Closed",
+        "archived": "Archived"
+      },
+      "workModel": {
+        "onsite": "On-site",
+        "hybrid": "Hybrid",
+        "remote": "Remote"
+      },
+      "employmentType": {
+        "full_time": "Full-time",
+        "part_time": "Part-time",
+        "contract": "Contract",
+        "temporary": "Temporary",
+        "internship": "Internship",
+        "apprenticeship": "Apprenticeship"
+      },
+      "seniority": {
+        "intern": "Intern",
+        "junior": "Junior",
+        "mid": "Mid-level",
+        "senior": "Senior",
+        "lead": "Lead",
+        "manager": "Manager",
+        "director": "Director",
+        "executive": "Executive"
+      },
+      "salaryPeriod": {
+        "hour": "Per hour",
+        "month": "Per month",
+        "year": "Per year"
+      },
+      "pipeline": {
+        "new": "New",
+        "screening": "Screening",
+        "interview": "Interview",
+        "offer": "Offer",
+        "hired": "Hired",
+        "rejected": "Rejected",
+        "withdrawn": "Withdrawn"
+      },
+      "source": {
+        "website": "Website",
+        "linkedin": "LinkedIn",
+        "referral": "Referral",
+        "job_board": "Job board",
+        "agency": "Agency",
+        "event": "Event",
+        "manual": "Manual entry",
+        "other": "Other"
+      },
+      "workAuthorization": {
+        "citizen": "Citizen",
+        "permanent_resident": "Permanent resident",
+        "work_visa": "Work visa",
+        "needs_sponsorship": "Needs sponsorship",
+        "other": "Other"
+      },
+      "languageLevel": {
+        "A1": "A1 - Beginner",
+        "A2": "A2 - Elementary",
+        "B1": "B1 - Intermediate",
+        "B2": "B2 - Upper intermediate",
+        "C1": "C1 - Advanced",
+        "C2": "C2 - Proficient",
+        "native": "Native"
+      },
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "back": "Back",
+      "loadFailed": "Could not load data.",
+      "saveFailed": "Could not save.",
+      "notFound": "Not found.",
+      "pendingApproval": "A change to this item is awaiting approval.",
+      "remove": "Remove"
     }
   },
   "settings": {
@@ -1598,12 +1932,23 @@
     }
   },
   "currencies": {
-    "title": "Currencies",
-    "description": "Create/edit currencies, connect them to countries, and reflect availability in product pricing.",
-    "saveCurrencies": "Save currencies",
+    "title": "Countries & currencies",
+    "description": "Manage the countries served by the shop, their currencies, default currency and primary office.",
+    "saveCurrencies": "Save changes",
+    "searchPlaceholder": "Search countries…",
+    "addCountry": "Add country",
+    "addCountryHint": "Pick a country that is not in the store yet.",
+    "noCountries": "No countries found.",
+    "activeInStore": "Active in store",
+    "primaryOffice": "Primary office",
+    "selectOffice": "Select office",
+    "automaticOffice": "Automatic",
+    "noOffice": "No office for this country",
+    "removeTitle": "Remove {country}?",
+    "removeBody": "{count, plural, =0 {No products have this country enabled.} one {# product has this country enabled.} other {# products have this country enabled.}} Products are not edited: their flag for this country simply stops mattering in the store.",
     "registry": "Currency registry",
     "addPlaceholder": "Add currency code (e.g. GBP)",
-    "mapping": "Country currency mapping",
+    "mapping": "Countries",
     "allowed": "Allowed currencies",
     "defaultCurrency": "Default currency",
     "selectCurrency": "Select currency",
@@ -1768,6 +2113,7 @@
       "marketplace_product_edit": "Product edit",
       "marketplace_product_create": "New product",
       "marketplace_product_delete": "Product deletion",
+      "marketplace_countries": "Country deactivation or removal",
       "website_homepage": "Homepage",
       "website_about": "About page",
       "website_solutions": "Solutions page",
@@ -1961,6 +2307,8 @@
       "addTag": "Add tag",
       "lineItems": "Line items",
       "estimatedTotal": "Estimated total",
+      "partialEstimate": "Partial estimate",
+      "onRequest": "On request",
       "danger": "Danger zone",
       "activity": {
         "note": "Note",

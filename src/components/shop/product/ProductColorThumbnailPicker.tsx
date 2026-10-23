@@ -10,6 +10,7 @@ import {
   resolveVariantImage,
   resolveVariantPrice,
 } from "@/lib/shop/color-variants";
+import { getEffectiveSaleMode } from "@/lib/shop/sale-mode";
 import { formatShopPrice } from "@/lib/shop/format-price";
 
 interface ProductColorThumbnailPickerProps {
@@ -23,6 +24,9 @@ interface ProductColorThumbnailPickerProps {
     | "defaultColor"
     | "defaultColorName"
     | "prices"
+    | "saleMode"
+    | "unlimitedStock"
+    | "stockQuantity"
   >;
   variants: ProductColorVariant[];
   selectedId: string | null;
@@ -46,6 +50,7 @@ export function ProductColorThumbnailPicker({
   const locale = useLocale();
   const { currency } = useShop();
   if (variants.length === 0) return null;
+  const isQuote = getEffectiveSaleMode(product) === "quote";
 
   return (
     <div className={cn(className)}>
@@ -62,7 +67,7 @@ export function ProductColorThumbnailPicker({
           const price = currency
             ? resolveVariantPrice(product, variant, currency)
             : 0;
-          const priceLabel = currency
+          const priceLabel = currency && !isQuote
             ? formatShopPrice(price, currency)
             : null;
 

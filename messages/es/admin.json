@@ -180,7 +180,7 @@
     "bulkUpdate": "Actualización masiva",
     "filters": "Filtros",
     "specifications": "Especificaciones",
-    "currencies": "Monedas",
+    "currencies": "Países y monedas",
     "shopConfig": "Config. de tienda",
     "checkout": "Checkout",
     "globalPresence": "Presencia global",
@@ -459,6 +459,12 @@
       "price": "Precio",
       "priceHint": "Monedas configuradas en Marketplace → Monedas. Vacío o 0 oculta el producto en esa moneda.",
       "loadingCurrencies": "Cargando monedas…",
+      "saleMode": "Modo de venta",
+      "saleModeHint": "Los productos en stock muestran precio. Los productos bajo consulta nunca muestran precio.",
+      "saleModeStock": "En stock",
+      "saleModeQuote": "Bajo consulta (RFQ)",
+      "quoteModeNote": "Los productos bajo consulta nunca muestran precio; los clientes solicitan una cotización.",
+      "stockPriceRequired": "Los productos en stock necesitan al menos un precio superior a 0 antes de publicarse en un país habilitado.",
       "noCurrencies": "No hay monedas configuradas.",
       "addCurrenciesLink": "Añádelas en Monedas",
       "priceHidden": "Oculto",
@@ -700,6 +706,9 @@
       "selectAll": "Seleccionar todo",
       "selectProduct": "Seleccionar {sku}",
       "removeProduct": "Eliminar {sku}",
+      "saleModeStock": "En stock",
+      "saleModeQuote": "Bajo consulta (RFQ)",
+      "priceDisabledOnRequest": "Los productos bajo consulta nunca muestran precio.",
       "noOptions": "Sin opciones",
       "updating": "Actualizando productos…",
       "current": "Actual:",
@@ -782,7 +791,8 @@
     "marketplace_analyst": "Analista de marketplace",
     "sales_analyst": "Analista comercial",
     "hr_analyst": "Analista de RR. HH.",
-    "viewer": "Visualizador"
+    "viewer": "Visualizador",
+    "recruiter": "Reclutador"
   },
   "auth": {
     "signInTitle": "Iniciar sesión en Admin",
@@ -932,7 +942,8 @@
       "marketplace_analyst": "Market An.",
       "sales_analyst": "Ventas An.",
       "hr_analyst": "RR. HH. An.",
-      "viewer": "Viewer"
+      "viewer": "Viewer",
+      "recruiter": "Reclutador"
     },
     "levels": {
       "full": "Total",
@@ -1252,11 +1263,334 @@
   "careers": {
     "openings": {
       "title": "Ofertas de empleo",
-      "description": "Gestiona oportunidades profesionales."
+      "description": "Gestiona oportunidades profesionales.",
+      "newOpening": "Nueva vacante",
+      "searchPlaceholder": "Buscar por título, slug o departamento",
+      "applicationsCount": "{count, plural, one {# candidatura} other {# candidaturas}}",
+      "filters": {
+        "status": "Estado",
+        "department": "Departamento",
+        "country": "País",
+        "workModel": "Modalidad de trabajo",
+        "all": "Todas (incl. archivadas)",
+        "active": "Activas"
+      },
+      "columns": {
+        "title": "Vacante",
+        "department": "Departamento",
+        "location": "Ubicación",
+        "workModel": "Modalidad de trabajo",
+        "status": "Estado",
+        "applications": "Candidaturas",
+        "publishedAt": "Publicada",
+        "updatedAt": "Actualizada",
+        "actions": "Acciones"
+      },
+      "actions": {
+        "edit": "Editar",
+        "duplicate": "Duplicar",
+        "close": "Cerrar",
+        "reopen": "Reabrir",
+        "archive": "Archivar",
+        "publish": "Publicar",
+        "delete": "Eliminar",
+        "viewApplications": "Ver candidaturas"
+      },
+      "confirm": {
+        "delete": "¿Eliminar \"{title}\"? Esta acción no se puede deshacer.",
+        "archive": "¿Archivar \"{title}\"? Se ocultará de la lista de activas.",
+        "close": "¿Cerrar \"{title}\"? Dejará de recibir candidaturas."
+      },
+      "toasts": {
+        "saved": "Vacante guardada.",
+        "duplicated": "Vacante duplicada como borrador.",
+        "closed": "Vacante cerrada.",
+        "reopened": "Vacante reabierta.",
+        "archived": "Vacante archivada.",
+        "published": "Vacante publicada.",
+        "deleted": "Vacante eliminada.",
+        "deleteBlocked": "Esta vacante tiene candidaturas y no se puede eliminar. Archívala.",
+        "invalidTransition": "Esta acción no está disponible para el estado actual de la vacante."
+      },
+      "empty": {
+        "title": "No se encontraron vacantes",
+        "description": "Crea una vacante o ajusta los filtros.",
+        "filteredTitle": "Ninguna vacante coincide con los filtros",
+        "filteredDescription": "Prueba otra búsqueda o borra los filtros."
+      },
+      "editor": {
+        "titleNew": "Nueva vacante",
+        "titleEdit": "Editar vacante",
+        "sections": {
+          "basics": "Datos básicos",
+          "location": "Ubicación y modalidad",
+          "content": "Contenido",
+          "compensation": "Remuneración",
+          "publishing": "Publicación",
+          "ownership": "Responsables"
+        },
+        "fields": {
+          "title": "Título",
+          "slug": "Slug",
+          "department": "Departamento",
+          "country": "País",
+          "city": "Ciudad",
+          "workModel": "Modalidad de trabajo",
+          "employmentType": "Tipo de contratación",
+          "seniority": "Nivel de experiencia",
+          "positions": "Puestos abiertos",
+          "summary": "Resumen",
+          "description": "Descripción",
+          "responsibilities": "Responsabilidades",
+          "requirements": "Requisitos",
+          "niceToHave": "Deseable",
+          "benefits": "Beneficios",
+          "salaryMin": "Salario mínimo",
+          "salaryMax": "Salario máximo",
+          "salaryCurrency": "Moneda (código ISO)",
+          "salaryPeriod": "Período",
+          "showSalary": "Mostrar salario públicamente",
+          "status": "Estado",
+          "publishAt": "Publicar el",
+          "closeAt": "Cerrar el",
+          "hiringManager": "Responsable de contratación",
+          "recruiter": "Reclutador"
+        },
+        "validation": {
+          "titleRequired": "El título en inglés es obligatorio.",
+          "slugTaken": "Este slug ya está en uso en otra vacante.",
+          "salaryRange": "El salario máximo debe ser mayor o igual al mínimo.",
+          "closeBeforePublish": "La fecha de cierre debe ser posterior a la de publicación.",
+          "positionsMin": "Se requiere al menos un puesto.",
+          "slugRequired": "El slug es obligatorio.",
+          "slugReserved": "Este slug está reservado. Elige otro.",
+          "salaryNegative": "El salario no puede ser negativo."
+        }
+      },
+      "resultCount": "{count, plural, one {# vacante} other {# vacantes}}"
     },
     "applications": {
       "title": "Candidaturas",
-      "description": "Revisa candidaturas a empleos."
+      "description": "Revisa candidaturas a empleos.",
+      "newApplication": "Nueva candidatura",
+      "searchPlaceholder": "Buscar por nombre, correo, empresa o cargo",
+      "exportCsv": "Exportar CSV",
+      "duplicateEmailWarning": "Ya existe otra candidatura con este correo para esta vacante.",
+      "filters": {
+        "opening": "Vacante",
+        "status": "Estado",
+        "source": "Origen",
+        "allOpenings": "Todas las vacantes",
+        "allStatuses": "Todos",
+        "allSources": "Todos los orígenes",
+        "talentPool": "Banco de talento (sin vacante)"
+      },
+      "columns": {
+        "candidate": "Candidato",
+        "opening": "Vacante",
+        "status": "Estado",
+        "rating": "Valoración",
+        "source": "Origen",
+        "appliedAt": "Fecha de candidatura"
+      },
+      "empty": {
+        "title": "No se encontraron candidaturas",
+        "description": "Las candidaturas aparecerán aquí cuando los candidatos se postulen.",
+        "filteredTitle": "Ninguna candidatura coincide con los filtros",
+        "filteredDescription": "Prueba otra búsqueda o borra los filtros."
+      },
+      "toasts": {
+        "created": "Candidatura creada",
+        "updated": "Candidatura actualizada",
+        "deleted": "Candidatura eliminada",
+        "anonymized": "Candidatura anonimizada",
+        "cvUploaded": "CV subido",
+        "cvRemoved": "CV eliminado",
+        "cvUploadFailed": "No se pudo subir el CV."
+      },
+      "confirm": {
+        "delete": "¿Eliminar permanentemente la candidatura de {name}? También se eliminará el CV.",
+        "anonymize": "¿Anonimizar la candidatura de {name}? Se borrarán los datos personales y el CV.",
+        "removeCv": "¿Eliminar el CV de {name}?"
+      },
+      "detail": {
+        "titleNew": "Nueva candidatura",
+        "titleEdit": "Candidatura",
+        "anonymizedNotice": "Esta candidatura fue anonimizada. Se borraron los datos personales y ya no se puede editar.",
+        "saveFirst": "Guarda la candidatura antes de subir un CV.",
+        "sections": {
+          "candidate": "Candidato",
+          "professional": "Perfil profesional",
+          "preferences": "Preferencias",
+          "consent": "Consentimiento",
+          "cv": "CV",
+          "pipeline": "Proceso de selección",
+          "notes": "Notas y actividad",
+          "dangerZone": "Zona de peligro"
+        },
+        "fields": {
+          "opening": "Vacante",
+          "fullName": "Nombre completo",
+          "email": "Correo electrónico",
+          "phone": "Teléfono",
+          "country": "País",
+          "city": "Ciudad",
+          "linkedinUrl": "URL de LinkedIn",
+          "portfolioUrl": "URL del portafolio",
+          "currentCompany": "Empresa actual",
+          "currentTitle": "Cargo actual",
+          "yearsExperience": "Años de experiencia",
+          "salaryExpectation": "Expectativa salarial",
+          "salaryCurrency": "Moneda",
+          "salaryPeriod": "Período",
+          "availabilityDate": "Disponible desde",
+          "noticePeriodDays": "Preaviso (días)",
+          "workAuthorization": "Autorización de trabajo",
+          "willingToRelocate": "Dispuesto a reubicarse",
+          "remotePreference": "Preferencia de modalidad de trabajo",
+          "languages": "Idiomas",
+          "addLanguage": "Añadir idioma",
+          "coverLetter": "Carta de presentación",
+          "source": "Origen",
+          "sourceDetail": "Detalle del origen",
+          "referrerName": "Referido por",
+          "consentPrivacy": "El candidato dio su consentimiento a la política de privacidad",
+          "consentVersion": "Versión del consentimiento",
+          "consentAt": "Consentimiento otorgado el",
+          "consentTalentPool": "Consentimiento para mantenerlo en el banco de talento",
+          "status": "Estado",
+          "rating": "Valoración",
+          "assignee": "Responsable",
+          "rejectionReason": "Motivo de rechazo",
+          "tags": "Etiquetas (separadas por comas)"
+        },
+        "cv": {
+          "upload": "Subir CV",
+          "replace": "Reemplazar CV",
+          "download": "Descargar",
+          "remove": "Eliminar",
+          "hint": "PDF, DOC o DOCX, hasta 10 MB.",
+          "invalidType": "Solo se aceptan archivos PDF, DOC o DOCX.",
+          "tooLarge": "El archivo debe pesar 10 MB o menos.",
+          "none": "No se ha subido ningún CV.",
+          "unavailable": "El almacenamiento de CV no está disponible. Revisa la configuración de Supabase.",
+          "processing": "Procesando…"
+        },
+        "ratingStar": "Valoración {value} de 5",
+        "notes": {
+          "placeholder": "Añade una nota para el equipo",
+          "add": "Añadir nota",
+          "empty": "Aún no hay actividad."
+        },
+        "timeline": {
+          "created": "Candidatura creada",
+          "note": "Nota",
+          "status_change": "Estado modificado",
+          "rating": "Valoración modificada",
+          "cv_uploaded": "CV subido",
+          "cv_removed": "CV eliminado",
+          "updated": "Datos actualizados",
+          "anonymized": "Anonimizada"
+        },
+        "actions": {
+          "anonymize": "Anonimizar",
+          "delete": "Eliminar candidatura"
+        },
+        "validation": {
+          "nameRequired": "El nombre completo es obligatorio.",
+          "emailInvalid": "Introduce un correo electrónico válido.",
+          "urlInvalid": "Introduce una URL válida que empiece por http:// o https://.",
+          "consentRequired": "El consentimiento del candidato es obligatorio.",
+          "yearsRange": "Los años de experiencia deben estar entre 0 y 70.",
+          "ratingRange": "La valoración debe estar entre 1 y 5.",
+          "noticeRange": "El preaviso debe ser un número entero de días, igual o mayor que 0.",
+          "openingInvalid": "Selecciona una vacante válida.",
+          "dateInvalid": "Introduce una fecha de disponibilidad válida.",
+          "salaryNegative": "La expectativa salarial no puede ser negativa."
+        }
+      },
+      "resultCount": "{count, plural, one {# candidatura} other {# candidaturas}}",
+      "unread": "Sin leer"
+    },
+    "common": {
+      "status": {
+        "draft": "Borrador",
+        "published": "Publicada",
+        "closed": "Cerrada",
+        "archived": "Archivada"
+      },
+      "workModel": {
+        "onsite": "Presencial",
+        "hybrid": "Híbrido",
+        "remote": "Remoto"
+      },
+      "employmentType": {
+        "full_time": "Jornada completa",
+        "part_time": "Media jornada",
+        "contract": "Contrato",
+        "temporary": "Temporal",
+        "internship": "Prácticas",
+        "apprenticeship": "Aprendizaje"
+      },
+      "seniority": {
+        "intern": "Becario",
+        "junior": "Júnior",
+        "mid": "Semisénior",
+        "senior": "Sénior",
+        "lead": "Líder",
+        "manager": "Gerente",
+        "director": "Director",
+        "executive": "Ejecutivo"
+      },
+      "salaryPeriod": {
+        "hour": "Por hora",
+        "month": "Por mes",
+        "year": "Por año"
+      },
+      "pipeline": {
+        "new": "Nuevo",
+        "screening": "Preselección",
+        "interview": "Entrevista",
+        "offer": "Oferta",
+        "hired": "Contratado",
+        "rejected": "Rechazado",
+        "withdrawn": "Retirado"
+      },
+      "source": {
+        "website": "Sitio web",
+        "linkedin": "LinkedIn",
+        "referral": "Referido",
+        "job_board": "Portal de empleo",
+        "agency": "Agencia",
+        "event": "Evento",
+        "manual": "Alta manual",
+        "other": "Otro"
+      },
+      "workAuthorization": {
+        "citizen": "Ciudadano",
+        "permanent_resident": "Residente permanente",
+        "work_visa": "Visa de trabajo",
+        "needs_sponsorship": "Requiere patrocinio",
+        "other": "Otro"
+      },
+      "languageLevel": {
+        "A1": "A1 - Principiante",
+        "A2": "A2 - Elemental",
+        "B1": "B1 - Intermedio",
+        "B2": "B2 - Intermedio alto",
+        "C1": "C1 - Avanzado",
+        "C2": "C2 - Dominio",
+        "native": "Nativo"
+      },
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "cancel": "Cancelar",
+      "back": "Volver",
+      "loadFailed": "No se pudieron cargar los datos.",
+      "saveFailed": "No se pudo guardar.",
+      "notFound": "No encontrado.",
+      "pendingApproval": "Un cambio en este elemento está pendiente de aprobación.",
+      "remove": "Eliminar"
     }
   },
   "settings": {
@@ -1598,12 +1932,23 @@
     }
   },
   "currencies": {
-    "title": "Monedas",
-    "description": "Crea/edita monedas, conéctalas a países y refleja la disponibilidad en los precios de productos.",
-    "saveCurrencies": "Guardar monedas",
+    "title": "Países y monedas",
+    "description": "Gestione los países atendidos por la tienda, sus monedas, moneda predeterminada y oficina principal.",
+    "saveCurrencies": "Guardar cambios",
+    "searchPlaceholder": "Buscar países…",
+    "addCountry": "Añadir país",
+    "addCountryHint": "Elija un país que aún no esté en la tienda.",
+    "noCountries": "No se encontraron países.",
+    "activeInStore": "Activo en la tienda",
+    "primaryOffice": "Oficina principal",
+    "selectOffice": "Seleccionar oficina",
+    "automaticOffice": "Automática",
+    "noOffice": "Sin oficina para este país",
+    "removeTitle": "¿Eliminar {country}?",
+    "removeBody": "{count, plural, =0 {Ningún producto tiene este país habilitado.} one {# producto tiene este país habilitado.} other {# productos tienen este país habilitado.}} Los productos no se editan: su configuración para este país simplemente deja de aplicarse en la tienda.",
     "registry": "Registro de monedas",
     "addPlaceholder": "Añadir código de moneda (ej.: GBP)",
-    "mapping": "Asignación de moneda por país",
+    "mapping": "Países",
     "allowed": "Monedas permitidas",
     "defaultCurrency": "Moneda predeterminada",
     "selectCurrency": "Seleccionar moneda",
@@ -1783,7 +2128,8 @@
       "case_studies_upsert": "Caso de éxito",
       "case_studies_delete": "Eliminación de caso de éxito",
       "careers_upsert": "Vacante",
-      "careers_delete": "Eliminación de vacante"
+      "careers_delete": "Eliminación de vacante",
+      "marketplace_countries": "Desactivación o eliminación de país"
     },
     "status": {
       "pending": "Pendiente",
@@ -1961,6 +2307,8 @@
       "addTag": "Añadir etiqueta",
       "lineItems": "Líneas",
       "estimatedTotal": "Total estimado",
+      "partialEstimate": "Estimación parcial",
+      "onRequest": "Bajo consulta",
       "danger": "Zona de riesgo",
       "activity": {
         "note": "Nota",
