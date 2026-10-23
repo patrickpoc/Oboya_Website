@@ -1,5 +1,4 @@
 import localFont from "next/font/local";
-import { Noto_Sans_SC } from "next/font/google";
 
 /**
  * Brand typography (Brandbook 2026):
@@ -115,13 +114,6 @@ export const plusJakartaDisplay = localFont({
   variable: "--font-body",
   display: "swap",
   fallback: ["system-ui", "sans-serif"],
-});
-
-export const notoSansSC = Noto_Sans_SC({
-  variable: "--font-chinese",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
 });
 
 export const fontVariables = `${neueHaasDisplay.variable} ${plusJakartaDisplay.variable}`;
