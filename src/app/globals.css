@@ -134,7 +134,7 @@
   }
 
   .font-chinese {
-    font-family: var(--font-chinese), var(--font-body), system-ui, sans-serif;
+    font-family: "Noto Sans SC", var(--font-body), system-ui, sans-serif;
   }
 
   .text-balance {
