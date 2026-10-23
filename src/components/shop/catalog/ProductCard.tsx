@@ -24,7 +24,6 @@ import { useProductName } from "@/lib/shop/use-product-name";
 import { useProductDescription } from "@/lib/shop/use-product-description";
 import type { ShopProduct } from "@/lib/shop/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
-import { RfqBadge } from "@/components/shop/product/RfqBadge";
 import { getEffectiveSaleMode } from "@/lib/shop/sale-mode";
 import { formatShopPrice } from "@/lib/shop/format-price";
 import { pickLocalizedLabel } from "@/lib/shop/localized-label";
@@ -124,7 +123,9 @@ function ProductCardComponent({
             ) : null}
           </p>
           {isQuote ? (
-            <div className="mt-2 flex h-5 items-center"><RfqBadge size="compact" /></div>
+            <p className="mt-2 text-sm font-semibold text-oboya-blue-dark">
+              {t("rfqBadge")}
+            </p>
           ) : (
             <p className="mt-2 text-sm font-semibold text-oboya-blue-dark">
               {t("estimatedPrice")}: {formatShopPrice(price, currency)}
@@ -208,9 +209,9 @@ function ProductCardComponent({
         )}
         <div className={showSwatches ? "mt-auto space-y-0.5 pt-2" : "space-y-0.5"}>
           {isQuote ? (
-            <div className="flex h-6 items-center">
-              <RfqBadge size="compact" />
-            </div>
+            <p className="text-base font-semibold tabular-nums text-oboya-blue-dark">
+              {t("rfqBadge")}
+            </p>
           ) : (
             <p className="text-base font-semibold tabular-nums text-oboya-blue-dark">
               {formatShopPrice(price, currency)}
