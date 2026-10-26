@@ -1692,11 +1692,22 @@
         "partner": "Socio local",
         "operationType": "Tipo de operación",
         "city": "Ciudad",
+        "registeredAddress": "Domicilio social",
         "facility": "Instalación",
         "segments": "Segmentos atendidos",
         "phone": "Teléfono",
         "businessHours": "Horario comercial"
-      }
+      },
+      "showEmail": "Mostrar correo electrónico",
+      "showEmailHint": "Si está desactivado, el correo no se muestra en el sitio",
+      "showPhone": "Mostrar teléfono",
+      "showPhoneHint": "Si está desactivado, el teléfono no se muestra en el sitio (todos los idiomas)",
+      "importOverseas": "Importar empresas en el extranjero",
+      "importOverseasConfirmTitle": "¿Importar empresas en el extranjero?",
+      "importOverseasConfirmBody": "Las oficinas provisionales (@oboya.example) de los países afectados se reemplazarán por la lista de empresas. Las demás oficinas se mantienen. No se guarda nada hasta que haga clic en Guardar.",
+      "importOverseasConfirm": "Importar",
+      "importOverseasDone": "{added, plural, one {# oficina añadida} other {# oficinas añadidas}}, {removed, plural, one {# provisional eliminada} other {# provisionales eliminadas}}. Revise y haga clic en Guardar para publicar.",
+      "importOverseasNothing": "Ya está actualizado. Nada que importar."
     }
   },
   "website": {

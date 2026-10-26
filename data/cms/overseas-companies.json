@@ -1,0 +1,170 @@
+[
+  {
+    "row": 1,
+    "locationId": "hongKong",
+    "company": "Oboya Japan Hong Kong Limited",
+    "city": "Kowloon",
+    "registeredAddress": "Room 508, David House, 8-20 Nanking Street, Jordan, Kowloon, Hong Kong"
+  },
+  {
+    "row": 2,
+    "locationId": "hongKong",
+    "company": "Oboya Horticulture Industries Limited",
+    "city": "Kowloon",
+    "registeredAddress": "Room 508, David House, 8-20 Nanking Street, Jordan, Kowloon, Hong Kong"
+  },
+  {
+    "row": 3,
+    "locationId": "india",
+    "company": "Oboya SI Global Private Limited",
+    "city": "Pollachi",
+    "registeredAddress": "34, Rathina Vinayagar St, Venkatesa Colony, Pollachi, Coimbatore-642001"
+  },
+  {
+    "row": 4,
+    "locationId": "uae",
+    "company": "Oboya Horticulture Solutions Trading-FZCO",
+    "city": "Dubai",
+    "registeredAddress": "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis, Dubai"
+  },
+  {
+    "row": 5,
+    "locationId": "uae",
+    "company": "Oboya N Bio-FZCO",
+    "city": "Dubai",
+    "registeredAddress": "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis, Dubai"
+  },
+  {
+    "row": 6,
+    "locationId": "uae",
+    "company": "Oboya Agri-Tech LATAM - F.Z.C",
+    "city": "",
+    "registeredAddress": ""
+  },
+  {
+    "row": 7,
+    "locationId": "uae",
+    "company": "QX Automotive Parts Trading FZ-LLC",
+    "city": "Ras Al Khaimah",
+    "registeredAddress": "FOB50923, Compass Building, Al Shohada Road, Al Hamra Industrial Zone-FZ, Ras Al Khaimah"
+  },
+  {
+    "row": 8,
+    "locationId": "uae",
+    "company": "SHX Retail Solutions FZ-LLC",
+    "city": "Ras Al Khaimah",
+    "registeredAddress": "FOB50870, Compass Building, Al Shohada Road, Al Hamra Industrial Zone-FZ, Ras Al Khaimah"
+  },
+  {
+    "row": 9,
+    "locationId": "sweden",
+    "company": "Wallbo AB",
+    "city": "Billdal",
+    "registeredAddress": "Box 27, 427 21 Billdal"
+  },
+  {
+    "row": 10,
+    "locationId": "sweden",
+    "company": "SHX Shopquip AB",
+    "city": "Billdal",
+    "registeredAddress": "Box 27, 427 21 Billdal"
+  },
+  {
+    "row": 11,
+    "locationId": "norway",
+    "company": "Larsen Trading International AS",
+    "city": "Tjodalyng",
+    "registeredAddress": "Tjøllingveien 665, 3280 Tjodalyng"
+  },
+  {
+    "row": 12,
+    "locationId": "poland",
+    "company": "PSC Poland Sp. z o.o.",
+    "city": "Toszek",
+    "registeredAddress": "Strzelecka 35, 44-180 Toszek"
+  },
+  {
+    "row": 13,
+    "locationId": "kenya",
+    "company": "Oboya Africa Limited",
+    "city": "Nairobi",
+    "registeredAddress": "Bellway Industrial Park, Go Down 1, P.O. Box 1176-00521, Nairobi"
+  },
+  {
+    "row": 14,
+    "locationId": "usa",
+    "company": "Oboya USA LLC",
+    "city": "",
+    "registeredAddress": ""
+  },
+  {
+    "row": 15,
+    "locationId": "colombia",
+    "company": "Oboya Teknum S.A.S.",
+    "city": "",
+    "registeredAddress": ""
+  },
+  {
+    "row": 16,
+    "locationId": "colombia",
+    "company": "Teknum SHX S.A.S.",
+    "city": "Bogotá",
+    "registeredAddress": "Cr 63 # 17 B 65, Bogotá"
+  },
+  {
+    "row": 17,
+    "locationId": "brazil",
+    "company": "Oboya Soluções em Reciclagem Co. LTDA",
+    "city": "Fortaleza",
+    "registeredAddress": "22º andar, sala 2210, CXP 481, Aldeota, Fortaleza, 60.135-270"
+  },
+  {
+    "row": 18,
+    "locationId": "brazil",
+    "company": "Oboya Qingshu Ecovaso LTDA",
+    "city": "Jaguariúna",
+    "registeredAddress": "Rodovia Prefeito Aziz Lian (SP 107), km 2, Borda da Mata, Jaguariúna"
+  },
+  {
+    "row": 19,
+    "locationId": "peru",
+    "company": "Oboya Peru S.A.C.",
+    "city": "Lima",
+    "registeredAddress": ""
+  },
+  {
+    "row": 20,
+    "locationId": "ecuador",
+    "company": "Oboya Ecuador S.A.S.",
+    "city": "Quito",
+    "registeredAddress": ""
+  },
+  {
+    "row": 21,
+    "locationId": "chile",
+    "company": "Oboya Chile SpA",
+    "city": "Santiago",
+    "registeredAddress": ""
+  },
+  {
+    "row": 23,
+    "locationId": "england",
+    "company": "Oboya UK Co Ltd",
+    "city": "",
+    "registeredAddress": ""
+  },
+  {
+    "row": 24,
+    "locationId": "netherlands",
+    "company": "Oboya Agri-Tech The Netherlands B.V.",
+    "city": "Rotterdam",
+    "registeredAddress": ""
+  },
+  {
+    "row": 25,
+    "locationId": "southAfrica",
+    "company": "Oboya South Africa",
+    "city": "De Deur",
+    "registeredAddress": "166 South Street, Walkers Fruit Farms, Ophir AH, De Deur, Gauteng 1994"
+  }
+]

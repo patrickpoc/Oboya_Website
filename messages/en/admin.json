@@ -1692,11 +1692,22 @@
         "partner": "Local Partner",
         "operationType": "Operation Type",
         "city": "City",
+        "registeredAddress": "Registered address",
         "facility": "Facility",
         "segments": "Segments Served",
         "phone": "Phone",
         "businessHours": "Business Hours"
-      }
+      },
+      "showEmail": "Show email",
+      "showEmailHint": "When off, the email is not displayed on the site",
+      "showPhone": "Show phone",
+      "showPhoneHint": "When off, the phone is not displayed on the site (all languages)",
+      "importOverseas": "Import overseas companies",
+      "importOverseasConfirmTitle": "Import overseas companies?",
+      "importOverseasConfirmBody": "Placeholder offices (@oboya.example) in the affected countries will be replaced with the company list. Other offices are kept. Nothing is saved until you click Save.",
+      "importOverseasConfirm": "Import",
+      "importOverseasDone": "{added, plural, one {# office added} other {# offices added}}, {removed, plural, one {# placeholder removed} other {# placeholders removed}}. Review and click Save to publish.",
+      "importOverseasNothing": "Already up to date. Nothing to import."
     }
   },
   "website": {

@@ -9,6 +9,8 @@
       "x": 158.91,
       "y": 115.22,
       "flag": "US",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "USA"
@@ -26,101 +28,65 @@
       "offices": [
         {
           "id": "usa-office",
-          "email": "usa@oboya.example",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Sales office and warehouse",
-              "city": "Atlanta",
-              "facility": "Sales office and warehouse",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000",
-              "businessHours": "Mon–Fri 08:00–17:00"
+              "company": "Oboya USA LLC",
+              "partner": "",
+              "operationType": "",
+              "city": "",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "pt-BR": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Escritório comercial e armazém",
-              "city": "Atlanta",
-              "facility": "Escritório comercial e armazém",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000",
-              "businessHours": "Seg–Sex 08:00–17:00"
+              "company": "Oboya USA LLC",
+              "partner": "",
+              "operationType": "",
+              "city": "",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "es": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Oficina comercial y almacén",
-              "city": "Atlanta",
-              "facility": "Oficina comercial y almacén",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000",
-              "businessHours": "Lun–Vie 08:00–17:00"
+              "company": "Oboya USA LLC",
+              "partner": "",
+              "operationType": "",
+              "city": "",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "zh-CN": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "销售办事处和仓库",
-              "city": "Atlanta",
-              "facility": "销售办事处和仓库",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000",
-              "businessHours": "周一至周五 08:00–17:00"
-            }
-          }
-        },
-        {
-          "id": "usa-west",
-          "email": "usa-west@oboya.example",
-          "translations": {
-            "en": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya West Distribution",
-              "operationType": "Regional warehouse",
-              "city": "Los Angeles",
-              "facility": "West coast distribution center",
-              "segments": "Packaging, Equipment",
-              "phone": "+00 (00) 0000-0001"
-            },
-            "pt-BR": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya West Distribution",
-              "operationType": "Armazém regional",
-              "city": "Los Angeles",
-              "facility": "Centro de distribuição da costa oeste",
-              "segments": "Embalagens, Equipamentos",
-              "phone": "+00 (00) 0000-0001"
-            },
-            "es": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya West Distribution",
-              "operationType": "Almacén regional",
-              "city": "Los Ángeles",
-              "facility": "Centro de distribución de la costa oeste",
-              "segments": "Embalaje, Equipamiento",
-              "phone": "+00 (00) 0000-0001"
-            },
-            "zh-CN": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya West Distribution",
-              "operationType": "区域仓库",
-              "city": "洛杉矶",
-              "facility": "西海岸配送中心",
-              "segments": "包装, 设备",
-              "phone": "+00 (00) 0000-0001"
+              "company": "Oboya USA LLC",
+              "partner": "",
+              "operationType": "",
+              "city": "",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": false,
-      "sendOnly": false
+      ]
     },
     {
       "id": "mexico",
       "x": 107.26,
       "y": 192.03,
       "flag": "MX",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "Mexico"
@@ -139,12 +105,15 @@
         {
           "id": "mexico-office",
           "email": "mexico@oboya.example",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
               "company": "Oboya Horticulture",
               "partner": "Oboya Horticulture",
               "operationType": "Office",
               "city": "Mexico City",
+              "registeredAddress": "",
               "facility": "Office",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
               "phone": "+00 (00) 0000-0000",
@@ -155,6 +124,7 @@
               "partner": "Oboya Horticulture",
               "operationType": "Escritório",
               "city": "Mexico City",
+              "registeredAddress": "",
               "facility": "Escritório",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
               "phone": "+00 (00) 0000-0000",
@@ -165,6 +135,7 @@
               "partner": "Oboya Horticulture",
               "operationType": "Oficina",
               "city": "Mexico City",
+              "registeredAddress": "",
               "facility": "Oficina",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
               "phone": "+00 (00) 0000-0000",
@@ -175,6 +146,7 @@
               "partner": "Oboya Horticulture",
               "operationType": "办事处",
               "city": "Mexico City",
+              "registeredAddress": "",
               "facility": "办事处",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
               "phone": "+00 (00) 0000-0000",
@@ -182,15 +154,15 @@
             }
           }
         }
-      ],
-      "hasFactories": false,
-      "sendOnly": false
+      ]
     },
     {
       "id": "ecuador",
       "x": 140.37,
       "y": 254.27,
       "flag": "EC",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "Ecuador"
@@ -208,55 +180,65 @@
       "offices": [
         {
           "id": "ecuador-office",
-          "email": "ecuador@oboya.example",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Office",
+              "company": "Oboya Ecuador S.A.S.",
+              "partner": "",
+              "operationType": "",
               "city": "Quito",
-              "facility": "Office",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "pt-BR": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Escritório",
+              "company": "Oboya Ecuador S.A.S.",
+              "partner": "",
+              "operationType": "",
               "city": "Quito",
-              "facility": "Escritório",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "es": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Oficina",
+              "company": "Oboya Ecuador S.A.S.",
+              "partner": "",
+              "operationType": "",
               "city": "Quito",
-              "facility": "Oficina",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "zh-CN": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "办事处",
+              "company": "Oboya Ecuador S.A.S.",
+              "partner": "",
+              "operationType": "",
               "city": "Quito",
-              "facility": "办事处",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": false,
-      "sendOnly": false
+      ]
     },
     {
       "id": "colombia",
       "x": 149.64,
       "y": 219.84,
       "flag": "CO",
+      "hasFactories": true,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "Colombia"
@@ -274,55 +256,117 @@
       "offices": [
         {
           "id": "colombia-office",
-          "email": "colombia@oboya.example",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Office & Factory",
-              "city": "Bogotá",
-              "facility": "Office & Factory",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Oboya Teknum S.A.S.",
+              "partner": "",
+              "operationType": "",
+              "city": "",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "pt-BR": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Escritório e fábrica",
-              "city": "Bogotá",
-              "facility": "Escritório e fábrica",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Oboya Teknum S.A.S.",
+              "partner": "",
+              "operationType": "",
+              "city": "",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "es": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Oficina y fábrica",
-              "city": "Bogotá",
-              "facility": "Oficina y fábrica",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Oboya Teknum S.A.S.",
+              "partner": "",
+              "operationType": "",
+              "city": "",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "zh-CN": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "办事处和工厂",
+              "company": "Oboya Teknum S.A.S.",
+              "partner": "",
+              "operationType": "",
+              "city": "",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            }
+          }
+        },
+        {
+          "id": "colombiateknumshxsas",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
+          "translations": {
+            "en": {
+              "company": "Teknum SHX S.A.S.",
+              "partner": "",
+              "operationType": "",
               "city": "Bogotá",
-              "facility": "办事处和工厂",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "Cr 63 # 17 B 65, Bogotá",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "pt-BR": {
+              "company": "Teknum SHX S.A.S.",
+              "partner": "",
+              "operationType": "",
+              "city": "Bogotá",
+              "registeredAddress": "Cr 63 # 17 B 65, Bogotá",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "es": {
+              "company": "Teknum SHX S.A.S.",
+              "partner": "",
+              "operationType": "",
+              "city": "Bogotá",
+              "registeredAddress": "Cr 63 # 17 B 65, Bogotá",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "zh-CN": {
+              "company": "Teknum SHX S.A.S.",
+              "partner": "",
+              "operationType": "",
+              "city": "Bogotá",
+              "registeredAddress": "Cr 63 # 17 B 65, Bogotá",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": true,
-      "sendOnly": false
+      ]
     },
     {
       "id": "peru",
       "x": 154.93,
       "y": 284.73,
       "flag": "PE",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "Peru"
@@ -340,55 +384,65 @@
       "offices": [
         {
           "id": "peru-office",
-          "email": "peru@oboya.example",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Office",
+              "company": "Oboya Peru S.A.C.",
+              "partner": "",
+              "operationType": "",
               "city": "Lima",
-              "facility": "Office",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "pt-BR": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Escritório",
+              "company": "Oboya Peru S.A.C.",
+              "partner": "",
+              "operationType": "",
               "city": "Lima",
-              "facility": "Escritório",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "es": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Oficina",
+              "company": "Oboya Peru S.A.C.",
+              "partner": "",
+              "operationType": "",
               "city": "Lima",
-              "facility": "Oficina",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "zh-CN": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "办事处",
+              "company": "Oboya Peru S.A.C.",
+              "partner": "",
+              "operationType": "",
               "city": "Lima",
-              "facility": "办事处",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": false,
-      "sendOnly": false
+      ]
     },
     {
       "id": "chile",
       "x": 173.47,
       "y": 337.7,
       "flag": "CL",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "Chile"
@@ -406,55 +460,65 @@
       "offices": [
         {
           "id": "chile-office",
-          "email": "chile@oboya.example",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Office",
+              "company": "Oboya Chile SpA",
+              "partner": "",
+              "operationType": "",
               "city": "Santiago",
-              "facility": "Office",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "pt-BR": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Escritório",
+              "company": "Oboya Chile SpA",
+              "partner": "",
+              "operationType": "",
               "city": "Santiago",
-              "facility": "Escritório",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "es": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Oficina",
+              "company": "Oboya Chile SpA",
+              "partner": "",
+              "operationType": "",
               "city": "Santiago",
-              "facility": "Oficina",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "zh-CN": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "办事处",
+              "company": "Oboya Chile SpA",
+              "partner": "",
+              "operationType": "",
               "city": "Santiago",
-              "facility": "办事处",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": false,
-      "sendOnly": false
+      ]
     },
     {
       "id": "brazil",
       "x": 217.18,
       "y": 270.16,
       "flag": "BR",
+      "hasFactories": true,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "Brazil"
@@ -472,101 +536,117 @@
       "offices": [
         {
           "id": "brazil-office",
-          "email": "brazil@oboya.example",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
-              "company": "Oboya Ecovaso",
-              "partner": "Oboya Ecovaso",
-              "operationType": "Two Factories & Oboya Ecovaso Headquarters",
-              "city": "São Paulo",
-              "facility": "Two Factories & Oboya Ecovaso Headquarters",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+55 (00) 0000-0000",
-              "businessHours": "Mon–Fri 08:00–17:00"
+              "company": "Oboya Soluções em Reciclagem Co. LTDA",
+              "partner": "",
+              "operationType": "",
+              "city": "Fortaleza",
+              "registeredAddress": "22º andar, sala 2210, CXP 481, Aldeota, Fortaleza, 60.135-270",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "pt-BR": {
-              "company": "Oboya Ecovaso",
-              "partner": "Oboya Ecovaso",
-              "operationType": "Duas fábricas e sede Oboya Ecovaso",
-              "city": "São Paulo",
-              "facility": "Duas fábricas e sede Oboya Ecovaso",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+55 (00) 0000-0000",
-              "businessHours": "Seg–Sex 08:00–17:00"
+              "company": "Oboya Soluções em Reciclagem Co. LTDA",
+              "partner": "",
+              "operationType": "",
+              "city": "Fortaleza",
+              "registeredAddress": "22º andar, sala 2210, CXP 481, Aldeota, Fortaleza, 60.135-270",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "es": {
-              "company": "Oboya Ecovaso",
-              "partner": "Oboya Ecovaso",
-              "operationType": "Dos fábricas y sede Oboya Ecovaso",
-              "city": "São Paulo",
-              "facility": "Dos fábricas y sede Oboya Ecovaso",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+55 (00) 0000-0000",
-              "businessHours": "Lun–Vie 08:00–17:00"
+              "company": "Oboya Soluções em Reciclagem Co. LTDA",
+              "partner": "",
+              "operationType": "",
+              "city": "Fortaleza",
+              "registeredAddress": "22º andar, sala 2210, CXP 481, Aldeota, Fortaleza, 60.135-270",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "zh-CN": {
-              "company": "Oboya Ecovaso",
-              "partner": "Oboya Ecovaso",
-              "operationType": "两座工厂及 Oboya Ecovaso 总部",
-              "city": "São Paulo",
-              "facility": "两座工厂及 Oboya Ecovaso 总部",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+55 (00) 0000-0000",
-              "businessHours": "周一至周五 08:00–17:00"
+              "company": "Oboya Soluções em Reciclagem Co. LTDA",
+              "partner": "",
+              "operationType": "",
+              "city": "Fortaleza",
+              "registeredAddress": "22º andar, sala 2210, CXP 481, Aldeota, Fortaleza, 60.135-270",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             }
           }
         },
         {
           "id": "brazil-factory",
-          "email": "brazil-factory@oboya.example",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Brasil",
-              "operationType": "Production facility",
-              "city": "Campinas",
-              "facility": "Growing media production plant",
-              "segments": "Growing Media, Substrates",
-              "phone": "+00 (00) 0000-0002"
+              "company": "Oboya Qingshu Ecovaso LTDA",
+              "partner": "",
+              "operationType": "",
+              "city": "Jaguariúna",
+              "registeredAddress": "Rodovia Prefeito Aziz Lian (SP 107), km 2, Borda da Mata, Jaguariúna",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "pt-BR": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Brasil",
-              "operationType": "Unidade de produção",
-              "city": "Campinas",
-              "facility": "Fábrica de substratos",
-              "segments": "Substratos",
-              "phone": "+00 (00) 0000-0002"
+              "company": "Oboya Qingshu Ecovaso LTDA",
+              "partner": "",
+              "operationType": "",
+              "city": "Jaguariúna",
+              "registeredAddress": "Rodovia Prefeito Aziz Lian (SP 107), km 2, Borda da Mata, Jaguariúna",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "es": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Brasil",
-              "operationType": "Planta de producción",
-              "city": "Campinas",
-              "facility": "Planta de sustratos",
-              "segments": "Sustratos",
-              "phone": "+00 (00) 0000-0002"
+              "company": "Oboya Qingshu Ecovaso LTDA",
+              "partner": "",
+              "operationType": "",
+              "city": "Jaguariúna",
+              "registeredAddress": "Rodovia Prefeito Aziz Lian (SP 107), km 2, Borda da Mata, Jaguariúna",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "zh-CN": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Brasil",
-              "operationType": "生产工厂",
-              "city": "坎皮纳斯",
-              "facility": "栽培基质生产厂",
-              "segments": "基质",
-              "phone": "+00 (00) 0000-0002"
+              "company": "Oboya Qingshu Ecovaso LTDA",
+              "partner": "",
+              "operationType": "",
+              "city": "Jaguariúna",
+              "registeredAddress": "Rodovia Prefeito Aziz Lian (SP 107), km 2, Borda da Mata, Jaguariúna",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": true,
-      "sendOnly": false
+      ]
     },
     {
       "id": "argentina",
       "x": 178.77,
       "y": 365.51,
       "flag": "AR",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "Argentina"
@@ -585,54 +665,64 @@
         {
           "id": "argentina-office",
           "email": "argentina@oboya.example",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
               "company": "Oboya Horticulture",
               "partner": "Oboya Horticulture",
               "operationType": "Office",
               "city": "Buenos Aires",
+              "registeredAddress": "",
               "facility": "Office",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "phone": "+00 (00) 0000-0000",
+              "businessHours": ""
             },
             "pt-BR": {
               "company": "Oboya Horticulture",
               "partner": "Oboya Horticulture",
               "operationType": "Escritório",
               "city": "Buenos Aires",
+              "registeredAddress": "",
               "facility": "Escritório",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "phone": "+00 (00) 0000-0000",
+              "businessHours": ""
             },
             "es": {
               "company": "Oboya Horticulture",
               "partner": "Oboya Horticulture",
               "operationType": "Oficina",
               "city": "Buenos Aires",
+              "registeredAddress": "",
               "facility": "Oficina",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "phone": "+00 (00) 0000-0000",
+              "businessHours": ""
             },
             "zh-CN": {
               "company": "Oboya Horticulture",
               "partner": "Oboya Horticulture",
               "operationType": "办事处",
               "city": "Buenos Aires",
+              "registeredAddress": "",
               "facility": "办事处",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "phone": "+00 (00) 0000-0000",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": false,
-      "sendOnly": false
+      ]
     },
     {
       "id": "norway",
       "x": 394.64,
       "y": 64.89,
       "flag": "NO",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "Norway"
@@ -650,59 +740,65 @@
       "offices": [
         {
           "id": "norway-office",
-          "email": "norway@oboya.example",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Office",
-              "city": "Oslo",
-              "facility": "Office",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000",
-              "businessHours": "Mon–Fri 08:00–17:00"
+              "company": "Larsen Trading International AS",
+              "partner": "",
+              "operationType": "",
+              "city": "Tjodalyng",
+              "registeredAddress": "Tjøllingveien 665, 3280 Tjodalyng",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "pt-BR": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Escritório",
-              "city": "Oslo",
-              "facility": "Escritório",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000",
-              "businessHours": "Seg–Sex 08:00–17:00"
+              "company": "Larsen Trading International AS",
+              "partner": "",
+              "operationType": "",
+              "city": "Tjodalyng",
+              "registeredAddress": "Tjøllingveien 665, 3280 Tjodalyng",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "es": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Oficina",
-              "city": "Oslo",
-              "facility": "Oficina",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000",
-              "businessHours": "Lun–Vie 08:00–17:00"
+              "company": "Larsen Trading International AS",
+              "partner": "",
+              "operationType": "",
+              "city": "Tjodalyng",
+              "registeredAddress": "Tjøllingveien 665, 3280 Tjodalyng",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "zh-CN": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "办事处",
-              "city": "Oslo",
-              "facility": "办事处",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000",
-              "businessHours": "周一至周五 08:00–17:00"
+              "company": "Larsen Trading International AS",
+              "partner": "",
+              "operationType": "",
+              "city": "Tjodalyng",
+              "registeredAddress": "Tjøllingveien 665, 3280 Tjodalyng",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": false,
-      "sendOnly": false
+      ]
     },
     {
       "id": "sweden",
       "x": 411.85,
       "y": 43.7,
       "flag": "SE",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "Sweden"
@@ -720,55 +816,117 @@
       "offices": [
         {
           "id": "sweden-office",
-          "email": "sweden@oboya.example",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Office",
-              "city": "Malmö",
-              "facility": "Office",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Wallbo AB",
+              "partner": "",
+              "operationType": "",
+              "city": "Billdal",
+              "registeredAddress": "Box 27, 427 21 Billdal",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "pt-BR": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Escritório",
-              "city": "Malmö",
-              "facility": "Escritório",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Wallbo AB",
+              "partner": "",
+              "operationType": "",
+              "city": "Billdal",
+              "registeredAddress": "Box 27, 427 21 Billdal",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "es": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Oficina",
-              "city": "Malmö",
-              "facility": "Oficina",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Wallbo AB",
+              "partner": "",
+              "operationType": "",
+              "city": "Billdal",
+              "registeredAddress": "Box 27, 427 21 Billdal",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "zh-CN": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "办事处",
-              "city": "Malmö",
-              "facility": "办事处",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Wallbo AB",
+              "partner": "",
+              "operationType": "",
+              "city": "Billdal",
+              "registeredAddress": "Box 27, 427 21 Billdal",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            }
+          }
+        },
+        {
+          "id": "swedenshxshopquipab",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
+          "translations": {
+            "en": {
+              "company": "SHX Shopquip AB",
+              "partner": "",
+              "operationType": "",
+              "city": "Billdal",
+              "registeredAddress": "Box 27, 427 21 Billdal",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "pt-BR": {
+              "company": "SHX Shopquip AB",
+              "partner": "",
+              "operationType": "",
+              "city": "Billdal",
+              "registeredAddress": "Box 27, 427 21 Billdal",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "es": {
+              "company": "SHX Shopquip AB",
+              "partner": "",
+              "operationType": "",
+              "city": "Billdal",
+              "registeredAddress": "Box 27, 427 21 Billdal",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "zh-CN": {
+              "company": "SHX Shopquip AB",
+              "partner": "",
+              "operationType": "",
+              "city": "Billdal",
+              "registeredAddress": "Box 27, 427 21 Billdal",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": false,
-      "sendOnly": false
+      ]
     },
     {
       "id": "england",
       "x": 368.15,
       "y": 98,
       "flag": "GB",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "England"
@@ -786,59 +944,65 @@
       "offices": [
         {
           "id": "england-office",
-          "email": "england@oboya.example",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Office",
-              "city": "Main office",
-              "facility": "Office",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000",
-              "businessHours": "Mon–Fri 08:00–17:00"
+              "company": "Oboya UK Co Ltd",
+              "partner": "",
+              "operationType": "",
+              "city": "",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "pt-BR": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Escritório",
-              "city": "Main office",
-              "facility": "Escritório",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000",
-              "businessHours": "Seg–Sex 08:00–17:00"
+              "company": "Oboya UK Co Ltd",
+              "partner": "",
+              "operationType": "",
+              "city": "",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "es": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Oficina",
-              "city": "Main office",
-              "facility": "Oficina",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000",
-              "businessHours": "Lun–Vie 08:00–17:00"
+              "company": "Oboya UK Co Ltd",
+              "partner": "",
+              "operationType": "",
+              "city": "",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "zh-CN": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "办事处",
-              "city": "Main office",
-              "facility": "办事处",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000",
-              "businessHours": "周一至周五 08:00–17:00"
+              "company": "Oboya UK Co Ltd",
+              "partner": "",
+              "operationType": "",
+              "city": "",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": false,
-      "sendOnly": false
+      ]
     },
     {
       "id": "poland",
       "x": 410.53,
       "y": 84.76,
       "flag": "PL",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "Poland"
@@ -856,55 +1020,65 @@
       "offices": [
         {
           "id": "poland-office",
-          "email": "poland@oboya.example",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Office & Warehouse",
-              "city": "Warsaw",
-              "facility": "Office & Warehouse",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "PSC Poland Sp. z o.o.",
+              "partner": "",
+              "operationType": "",
+              "city": "Toszek",
+              "registeredAddress": "Strzelecka 35, 44-180 Toszek",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "pt-BR": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Escritório e armazém",
-              "city": "Warsaw",
-              "facility": "Escritório e armazém",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "PSC Poland Sp. z o.o.",
+              "partner": "",
+              "operationType": "",
+              "city": "Toszek",
+              "registeredAddress": "Strzelecka 35, 44-180 Toszek",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "es": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Oficina y almacén",
-              "city": "Warsaw",
-              "facility": "Oficina y almacén",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "PSC Poland Sp. z o.o.",
+              "partner": "",
+              "operationType": "",
+              "city": "Toszek",
+              "registeredAddress": "Strzelecka 35, 44-180 Toszek",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "zh-CN": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "办事处和仓库",
-              "city": "Warsaw",
-              "facility": "办事处和仓库",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "PSC Poland Sp. z o.o.",
+              "partner": "",
+              "operationType": "",
+              "city": "Toszek",
+              "registeredAddress": "Strzelecka 35, 44-180 Toszek",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": false,
-      "sendOnly": false
+      ]
     },
     {
       "id": "ethiopia",
       "x": 456.88,
       "y": 199.97,
       "flag": "ET",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "Ethiopia"
@@ -923,54 +1097,64 @@
         {
           "id": "ethiopia-office",
           "email": "ethiopia@oboya.example",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
               "company": "Oboya Horticulture",
               "partner": "Oboya Horticulture",
               "operationType": "Office",
               "city": "Addis Ababa",
+              "registeredAddress": "",
               "facility": "Office",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "phone": "+00 (00) 0000-0000",
+              "businessHours": ""
             },
             "pt-BR": {
               "company": "Oboya Horticulture",
               "partner": "Oboya Horticulture",
               "operationType": "Escritório",
               "city": "Addis Ababa",
+              "registeredAddress": "",
               "facility": "Escritório",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "phone": "+00 (00) 0000-0000",
+              "businessHours": ""
             },
             "es": {
               "company": "Oboya Horticulture",
               "partner": "Oboya Horticulture",
               "operationType": "Oficina",
               "city": "Addis Ababa",
+              "registeredAddress": "",
               "facility": "Oficina",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "phone": "+00 (00) 0000-0000",
+              "businessHours": ""
             },
             "zh-CN": {
               "company": "Oboya Horticulture",
               "partner": "Oboya Horticulture",
               "operationType": "办事处",
               "city": "Addis Ababa",
+              "registeredAddress": "",
               "facility": "办事处",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "phone": "+00 (00) 0000-0000",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": false,
-      "sendOnly": false
+      ]
     },
     {
       "id": "kenya",
       "x": 451.58,
       "y": 246.32,
       "flag": "KE",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "Kenya"
@@ -988,55 +1172,65 @@
       "offices": [
         {
           "id": "kenya-office",
-          "email": "kenya@oboya.example",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Office",
+              "company": "Oboya Africa Limited",
+              "partner": "",
+              "operationType": "",
               "city": "Nairobi",
-              "facility": "Office",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "Bellway Industrial Park, Go Down 1, P.O. Box 1176-00521, Nairobi",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "pt-BR": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Escritório",
+              "company": "Oboya Africa Limited",
+              "partner": "",
+              "operationType": "",
               "city": "Nairobi",
-              "facility": "Escritório",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "Bellway Industrial Park, Go Down 1, P.O. Box 1176-00521, Nairobi",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "es": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Oficina",
+              "company": "Oboya Africa Limited",
+              "partner": "",
+              "operationType": "",
               "city": "Nairobi",
-              "facility": "Oficina",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "Bellway Industrial Park, Go Down 1, P.O. Box 1176-00521, Nairobi",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "zh-CN": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "办事处",
+              "company": "Oboya Africa Limited",
+              "partner": "",
+              "operationType": "",
               "city": "Nairobi",
-              "facility": "办事处",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "Bellway Industrial Park, Go Down 1, P.O. Box 1176-00521, Nairobi",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": false,
-      "sendOnly": false
+      ]
     },
     {
       "id": "southAfrica",
       "x": 406.84,
       "y": 288.79,
       "flag": "ZA",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "South Africa"
@@ -1054,55 +1248,65 @@
       "offices": [
         {
           "id": "southAfrica-office",
-          "email": "southAfrica@oboya.example",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Office",
-              "city": "Main office",
-              "facility": "Office",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Oboya South Africa",
+              "partner": "",
+              "operationType": "",
+              "city": "De Deur",
+              "registeredAddress": "166 South Street, Walkers Fruit Farms, Ophir AH, De Deur, Gauteng 1994",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "pt-BR": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Escritório",
-              "city": "Main office",
-              "facility": "Escritório",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Oboya South Africa",
+              "partner": "",
+              "operationType": "",
+              "city": "De Deur",
+              "registeredAddress": "166 South Street, Walkers Fruit Farms, Ophir AH, De Deur, Gauteng 1994",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "es": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Oficina",
-              "city": "Main office",
-              "facility": "Oficina",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Oboya South Africa",
+              "partner": "",
+              "operationType": "",
+              "city": "De Deur",
+              "registeredAddress": "166 South Street, Walkers Fruit Farms, Ophir AH, De Deur, Gauteng 1994",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "zh-CN": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "办事处",
-              "city": "Main office",
-              "facility": "办事处",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Oboya South Africa",
+              "partner": "",
+              "operationType": "",
+              "city": "De Deur",
+              "registeredAddress": "166 South Street, Walkers Fruit Farms, Ophir AH, De Deur, Gauteng 1994",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": false,
-      "sendOnly": false
+      ]
     },
     {
       "id": "uae",
       "x": 489.99,
       "y": 177.46,
       "flag": "AE",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "United Arab Emirates"
@@ -1120,55 +1324,273 @@
       "offices": [
         {
           "id": "uae-office",
-          "email": "uae@oboya.example",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Office",
+              "company": "Oboya Horticulture Solutions Trading-FZCO",
+              "partner": "",
+              "operationType": "",
               "city": "Dubai",
-              "facility": "Office",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis, Dubai",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "pt-BR": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Escritório",
+              "company": "Oboya Horticulture Solutions Trading-FZCO",
+              "partner": "",
+              "operationType": "",
               "city": "Dubai",
-              "facility": "Escritório",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis, Dubai",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "es": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Oficina",
+              "company": "Oboya Horticulture Solutions Trading-FZCO",
+              "partner": "",
+              "operationType": "",
               "city": "Dubai",
-              "facility": "Oficina",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis, Dubai",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "zh-CN": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "办事处",
+              "company": "Oboya Horticulture Solutions Trading-FZCO",
+              "partner": "",
+              "operationType": "",
               "city": "Dubai",
-              "facility": "办事处",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "registeredAddress": "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis, Dubai",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            }
+          }
+        },
+        {
+          "id": "uaeoboyanbiofzco",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
+          "translations": {
+            "en": {
+              "company": "Oboya N Bio-FZCO",
+              "partner": "",
+              "operationType": "",
+              "city": "Dubai",
+              "registeredAddress": "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis, Dubai",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "pt-BR": {
+              "company": "Oboya N Bio-FZCO",
+              "partner": "",
+              "operationType": "",
+              "city": "Dubai",
+              "registeredAddress": "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis, Dubai",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "es": {
+              "company": "Oboya N Bio-FZCO",
+              "partner": "",
+              "operationType": "",
+              "city": "Dubai",
+              "registeredAddress": "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis, Dubai",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "zh-CN": {
+              "company": "Oboya N Bio-FZCO",
+              "partner": "",
+              "operationType": "",
+              "city": "Dubai",
+              "registeredAddress": "DSO-IFZA, IFZA Properties, Dubai Silicon Oasis, Dubai",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            }
+          }
+        },
+        {
+          "id": "uaeoboyaagritechlatamfzc",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
+          "translations": {
+            "en": {
+              "company": "Oboya Agri-Tech LATAM - F.Z.C",
+              "partner": "",
+              "operationType": "",
+              "city": "",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "pt-BR": {
+              "company": "Oboya Agri-Tech LATAM - F.Z.C",
+              "partner": "",
+              "operationType": "",
+              "city": "",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "es": {
+              "company": "Oboya Agri-Tech LATAM - F.Z.C",
+              "partner": "",
+              "operationType": "",
+              "city": "",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "zh-CN": {
+              "company": "Oboya Agri-Tech LATAM - F.Z.C",
+              "partner": "",
+              "operationType": "",
+              "city": "",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            }
+          }
+        },
+        {
+          "id": "uaeqxautomotivepartstradingfzllc",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
+          "translations": {
+            "en": {
+              "company": "QX Automotive Parts Trading FZ-LLC",
+              "partner": "",
+              "operationType": "",
+              "city": "Ras Al Khaimah",
+              "registeredAddress": "FOB50923, Compass Building, Al Shohada Road, Al Hamra Industrial Zone-FZ, Ras Al Khaimah",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "pt-BR": {
+              "company": "QX Automotive Parts Trading FZ-LLC",
+              "partner": "",
+              "operationType": "",
+              "city": "Ras Al Khaimah",
+              "registeredAddress": "FOB50923, Compass Building, Al Shohada Road, Al Hamra Industrial Zone-FZ, Ras Al Khaimah",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "es": {
+              "company": "QX Automotive Parts Trading FZ-LLC",
+              "partner": "",
+              "operationType": "",
+              "city": "Ras Al Khaimah",
+              "registeredAddress": "FOB50923, Compass Building, Al Shohada Road, Al Hamra Industrial Zone-FZ, Ras Al Khaimah",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "zh-CN": {
+              "company": "QX Automotive Parts Trading FZ-LLC",
+              "partner": "",
+              "operationType": "",
+              "city": "Ras Al Khaimah",
+              "registeredAddress": "FOB50923, Compass Building, Al Shohada Road, Al Hamra Industrial Zone-FZ, Ras Al Khaimah",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            }
+          }
+        },
+        {
+          "id": "uaeshxretailsolutionsfzllc",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
+          "translations": {
+            "en": {
+              "company": "SHX Retail Solutions FZ-LLC",
+              "partner": "",
+              "operationType": "",
+              "city": "Ras Al Khaimah",
+              "registeredAddress": "FOB50870, Compass Building, Al Shohada Road, Al Hamra Industrial Zone-FZ, Ras Al Khaimah",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "pt-BR": {
+              "company": "SHX Retail Solutions FZ-LLC",
+              "partner": "",
+              "operationType": "",
+              "city": "Ras Al Khaimah",
+              "registeredAddress": "FOB50870, Compass Building, Al Shohada Road, Al Hamra Industrial Zone-FZ, Ras Al Khaimah",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "es": {
+              "company": "SHX Retail Solutions FZ-LLC",
+              "partner": "",
+              "operationType": "",
+              "city": "Ras Al Khaimah",
+              "registeredAddress": "FOB50870, Compass Building, Al Shohada Road, Al Hamra Industrial Zone-FZ, Ras Al Khaimah",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "zh-CN": {
+              "company": "SHX Retail Solutions FZ-LLC",
+              "partner": "",
+              "operationType": "",
+              "city": "Ras Al Khaimah",
+              "registeredAddress": "FOB50870, Compass Building, Al Shohada Road, Al Hamra Industrial Zone-FZ, Ras Al Khaimah",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": false,
-      "sendOnly": false
+      ]
     },
     {
       "id": "india",
       "x": 581.37,
       "y": 178.78,
       "flag": "IN",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "India"
@@ -1186,55 +1608,65 @@
       "offices": [
         {
           "id": "india-office",
-          "email": "india@oboya.example",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Office",
-              "city": "Mumbai",
-              "facility": "Office",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Oboya SI Global Private Limited",
+              "partner": "",
+              "operationType": "",
+              "city": "Pollachi",
+              "registeredAddress": "34, Rathina Vinayagar St, Venkatesa Colony, Pollachi, Coimbatore-642001",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "pt-BR": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Escritório",
-              "city": "Mumbai",
-              "facility": "Escritório",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Oboya SI Global Private Limited",
+              "partner": "",
+              "operationType": "",
+              "city": "Pollachi",
+              "registeredAddress": "34, Rathina Vinayagar St, Venkatesa Colony, Pollachi, Coimbatore-642001",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "es": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Oficina",
-              "city": "Mumbai",
-              "facility": "Oficina",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Oboya SI Global Private Limited",
+              "partner": "",
+              "operationType": "",
+              "city": "Pollachi",
+              "registeredAddress": "34, Rathina Vinayagar St, Venkatesa Colony, Pollachi, Coimbatore-642001",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "zh-CN": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "办事处",
-              "city": "Mumbai",
-              "facility": "办事处",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Oboya SI Global Private Limited",
+              "partner": "",
+              "operationType": "",
+              "city": "Pollachi",
+              "registeredAddress": "34, Rathina Vinayagar St, Venkatesa Colony, Pollachi, Coimbatore-642001",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": false,
-      "sendOnly": false
+      ]
     },
     {
       "id": "china",
       "x": 654.2,
       "y": 157.59,
       "flag": "CN",
+      "hasFactories": true,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "China"
@@ -1253,12 +1685,15 @@
         {
           "id": "china-office",
           "email": "china@oboya.example",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
               "company": "Oboya Horticulture",
               "partner": "Oboya Horticulture",
               "operationType": "Five Factories & Five Offices",
               "city": "Shanghai",
+              "registeredAddress": "",
               "facility": "Five Factories & Five Offices",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
               "phone": "+00 (00) 0000-0000",
@@ -1269,6 +1704,7 @@
               "partner": "Oboya Horticulture",
               "operationType": "Cinco fábricas e cinco escritórios",
               "city": "Shanghai",
+              "registeredAddress": "",
               "facility": "Cinco fábricas e cinco escritórios",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
               "phone": "+00 (00) 0000-0000",
@@ -1279,6 +1715,7 @@
               "partner": "Oboya Horticulture",
               "operationType": "Cinco fábricas y cinco oficinas",
               "city": "Shanghai",
+              "registeredAddress": "",
               "facility": "Cinco fábricas y cinco oficinas",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
               "phone": "+00 (00) 0000-0000",
@@ -1289,6 +1726,7 @@
               "partner": "Oboya Horticulture",
               "operationType": "五座工厂和五个办事处",
               "city": "Shanghai",
+              "registeredAddress": "",
               "facility": "五座工厂和五个办事处",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
               "phone": "+00 (00) 0000-0000",
@@ -1296,15 +1734,15 @@
             }
           }
         }
-      ],
-      "hasFactories": true,
-      "sendOnly": false
+      ]
     },
     {
       "id": "hongKong",
       "x": 643.61,
       "y": 184.08,
       "flag": "HK",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "Hong Kong"
@@ -1322,55 +1760,117 @@
       "offices": [
         {
           "id": "hongKong-office",
-          "email": "hongKong@oboya.example",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Two Offices",
-              "city": "Main office",
-              "facility": "Two Offices",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Oboya Japan Hong Kong Limited",
+              "partner": "",
+              "operationType": "",
+              "city": "Kowloon",
+              "registeredAddress": "Room 508, David House, 8-20 Nanking Street, Jordan, Kowloon, Hong Kong",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "pt-BR": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Dois escritórios",
-              "city": "Main office",
-              "facility": "Dois escritórios",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Oboya Japan Hong Kong Limited",
+              "partner": "",
+              "operationType": "",
+              "city": "Kowloon",
+              "registeredAddress": "Room 508, David House, 8-20 Nanking Street, Jordan, Kowloon, Hong Kong",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "es": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "Dos oficinas",
-              "city": "Main office",
-              "facility": "Dos oficinas",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Oboya Japan Hong Kong Limited",
+              "partner": "",
+              "operationType": "",
+              "city": "Kowloon",
+              "registeredAddress": "Room 508, David House, 8-20 Nanking Street, Jordan, Kowloon, Hong Kong",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             },
             "zh-CN": {
-              "company": "Oboya Horticulture",
-              "partner": "Oboya Horticulture",
-              "operationType": "两个办事处",
-              "city": "Main office",
-              "facility": "两个办事处",
-              "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "company": "Oboya Japan Hong Kong Limited",
+              "partner": "",
+              "operationType": "",
+              "city": "Kowloon",
+              "registeredAddress": "Room 508, David House, 8-20 Nanking Street, Jordan, Kowloon, Hong Kong",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            }
+          }
+        },
+        {
+          "id": "hongkongoboyahorticultureindustrieslimited",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
+          "translations": {
+            "en": {
+              "company": "Oboya Horticulture Industries Limited",
+              "partner": "",
+              "operationType": "",
+              "city": "Kowloon",
+              "registeredAddress": "Room 508, David House, 8-20 Nanking Street, Jordan, Kowloon, Hong Kong",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "pt-BR": {
+              "company": "Oboya Horticulture Industries Limited",
+              "partner": "",
+              "operationType": "",
+              "city": "Kowloon",
+              "registeredAddress": "Room 508, David House, 8-20 Nanking Street, Jordan, Kowloon, Hong Kong",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "es": {
+              "company": "Oboya Horticulture Industries Limited",
+              "partner": "",
+              "operationType": "",
+              "city": "Kowloon",
+              "registeredAddress": "Room 508, David House, 8-20 Nanking Street, Jordan, Kowloon, Hong Kong",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "zh-CN": {
+              "company": "Oboya Horticulture Industries Limited",
+              "partner": "",
+              "operationType": "",
+              "city": "Kowloon",
+              "registeredAddress": "Room 508, David House, 8-20 Nanking Street, Jordan, Kowloon, Hong Kong",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
             }
           }
         }
-      ],
-      "hasFactories": false,
-      "sendOnly": false
+      ]
     },
     {
       "id": "singapore",
       "x": 652.88,
       "y": 254.27,
       "flag": "SG",
+      "hasFactories": false,
+      "sendOnly": false,
       "translations": {
         "en": {
           "country": "Singapore"
@@ -1389,48 +1889,132 @@
         {
           "id": "singapore-office",
           "email": "singapore@oboya.example",
+          "showEmail": true,
+          "showPhone": true,
           "translations": {
             "en": {
               "company": "Oboya Horticulture",
               "partner": "Oboya Horticulture",
               "operationType": "Office",
               "city": "Singapore",
+              "registeredAddress": "",
               "facility": "Office",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "phone": "+00 (00) 0000-0000",
+              "businessHours": ""
             },
             "pt-BR": {
               "company": "Oboya Horticulture",
               "partner": "Oboya Horticulture",
               "operationType": "Escritório",
               "city": "Singapore",
+              "registeredAddress": "",
               "facility": "Escritório",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "phone": "+00 (00) 0000-0000",
+              "businessHours": ""
             },
             "es": {
               "company": "Oboya Horticulture",
               "partner": "Oboya Horticulture",
               "operationType": "Oficina",
               "city": "Singapore",
+              "registeredAddress": "",
               "facility": "Oficina",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "phone": "+00 (00) 0000-0000",
+              "businessHours": ""
             },
             "zh-CN": {
               "company": "Oboya Horticulture",
               "partner": "Oboya Horticulture",
               "operationType": "办事处",
               "city": "Singapore",
+              "registeredAddress": "",
               "facility": "办事处",
               "segments": "Vegetables, Flowers, Packaging, Equipment",
-              "phone": "+00 (00) 0000-0000"
+              "phone": "+00 (00) 0000-0000",
+              "businessHours": ""
             }
           }
         }
-      ],
+      ]
+    },
+    {
+      "id": "netherlands",
+      "x": 382,
+      "y": 88,
+      "flag": "NL",
       "hasFactories": false,
-      "sendOnly": false
+      "sendOnly": false,
+      "translations": {
+        "en": {
+          "country": "Netherlands"
+        },
+        "pt-BR": {
+          "country": "Países Baixos"
+        },
+        "es": {
+          "country": "Países Bajos"
+        },
+        "zh-CN": {
+          "country": "荷兰"
+        }
+      },
+      "offices": [
+        {
+          "id": "netherlandsoboyaagritechthenetherlandsbv",
+          "email": "",
+          "showEmail": true,
+          "showPhone": true,
+          "translations": {
+            "en": {
+              "company": "Oboya Agri-Tech The Netherlands B.V.",
+              "partner": "",
+              "operationType": "",
+              "city": "Rotterdam",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "pt-BR": {
+              "company": "Oboya Agri-Tech The Netherlands B.V.",
+              "partner": "",
+              "operationType": "",
+              "city": "Rotterdam",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "es": {
+              "company": "Oboya Agri-Tech The Netherlands B.V.",
+              "partner": "",
+              "operationType": "",
+              "city": "Rotterdam",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            },
+            "zh-CN": {
+              "company": "Oboya Agri-Tech The Netherlands B.V.",
+              "partner": "",
+              "operationType": "",
+              "city": "Rotterdam",
+              "registeredAddress": "",
+              "facility": "",
+              "segments": "",
+              "phone": "",
+              "businessHours": ""
+            }
+          }
+        }
+      ]
     }
   ]
 }

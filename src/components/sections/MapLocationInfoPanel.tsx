@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Building2, Mail, Phone } from "lucide-react";
+import { Building2, Mail, MapPin, Phone } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { CountryFlag } from "@/components/ui/country-flag";
 import type {
@@ -31,15 +31,48 @@ interface MapLocationInfoPanelProps {
   className?: string;
 }
 
+function RegisteredAddress({
+  address,
+  clamp,
+}: {
+  address?: string;
+  clamp?: boolean;
+}) {
+  const t = useTranslations("globalPresence");
+  const value = address?.trim();
+  if (!value) return null;
+  return (
+    <div className="mt-1.5 flex items-start gap-1.5">
+      <MapPin
+        className="mt-0.5 size-3 shrink-0 text-muted-foreground"
+        role="img"
+        aria-label={t("registeredAddress")}
+      >
+        <title>{t("registeredAddress")}</title>
+      </MapPin>
+      <p
+        className={cn(
+          "min-w-0 break-words text-[11px] leading-snug text-oboya-blue-dark/70",
+          clamp && "line-clamp-2"
+        )}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
 function ContactLinks({
-  phone,
-  email,
+  phone: rawPhone,
+  email: rawEmail,
   compact,
 }: {
   phone?: string;
   email?: string;
   compact?: boolean;
 }) {
+  const phone = rawPhone?.trim();
+  const email = rawEmail?.trim();
   if (!phone && !email) return null;
   return (
     <div
@@ -78,7 +111,10 @@ function ContactLinks({
 
 /** Single-office layout: details + contacts side by side. */
 function OfficeSingle({ office }: { office: ResolvedMapOffice }) {
-  const { company, partner, phone, email, segments } = office;
+  const { phone, email } = office;
+  const company = office.company?.trim();
+  const partner = office.partner?.trim();
+  const segments = office.segments?.trim();
   const locationLines = officeLocationLines(office);
 
   return (
@@ -116,6 +152,7 @@ function OfficeSingle({ office }: { office: ResolvedMapOffice }) {
             {segments}
           </p>
         )}
+        <RegisteredAddress address={office.registeredAddress} />
       </div>
       <ContactLinks phone={phone} email={email} />
     </div>
@@ -127,7 +164,11 @@ function OfficeSingle({ office }: { office: ResolvedMapOffice }) {
  * Only used when a country has more than one office.
  */
 function OfficeColumn({ office }: { office: ResolvedMapOffice }) {
-  const { company, partner, phone, email, segments, city } = office;
+  const { phone, email } = office;
+  const company = office.company?.trim();
+  const partner = office.partner?.trim();
+  const segments = office.segments?.trim();
+  const city = office.city?.trim();
   const locationLines = officeLocationLines(office);
   const primaryLocation =
     city?.trim() ||
@@ -160,6 +201,7 @@ function OfficeColumn({ office }: { office: ResolvedMapOffice }) {
           {segments}
         </p>
       )}
+      <RegisteredAddress address={office.registeredAddress} clamp />
       <div className="mt-auto pt-2">
         <ContactLinks phone={phone} email={email} compact />
       </div>

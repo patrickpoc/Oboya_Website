@@ -9,5 +9,6 @@
   "panelExplore": "将鼠标悬停在地图上的位置，探索我们的全球布局。",
   "panelSegments": "服务领域",
   "panelContactOffice": "联系该办事处",
-  "panelOfficeCount": "{count, plural, other {# 个办事处}}"
+  "panelOfficeCount": "{count, plural, other {# 个办事处}}",
+  "registeredAddress": "注册地址"
 }
