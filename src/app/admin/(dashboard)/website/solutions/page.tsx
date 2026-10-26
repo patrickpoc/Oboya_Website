@@ -99,7 +99,7 @@ export default function SolutionsPageAdmin() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [t, tCommon]);
 
   const handleSave = useCallback(async () => {
     if (!settings) return;
@@ -123,7 +123,7 @@ export default function SolutionsPageAdmin() {
     } finally {
       setSaving(false);
     }
-  }, [settings, notifyPending]);
+  }, [settings, notifyPending, t, tCommon]);
 
   const updateCrop = (index: number, patch: Partial<SolutionsPageCrop>) => {
     setSettings((prev) => {

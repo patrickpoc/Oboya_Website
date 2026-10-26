@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { toast } from "sonner";
 import { useAdminDocumentTitle } from "@/lib/cms/admin-document-title";
+import { hardNavigate } from "@/lib/cms/hard-navigate";
 
 export default function ResetPasswordPage() {
   const t = useTranslations("admin.auth");
@@ -31,7 +32,7 @@ export default function ResetPasswordPage() {
 
     if (!isSupabaseConfigured()) {
       toast.success(t("passwordUpdatedMock"));
-      window.location.href = "/admin/login";
+      hardNavigate("/admin/login");
       return;
     }
 
@@ -44,7 +45,7 @@ export default function ResetPasswordPage() {
       return;
     }
     toast.success(t("passwordUpdated"));
-    window.location.href = "/admin/login";
+    hardNavigate("/admin/login");
   };
 
   return (

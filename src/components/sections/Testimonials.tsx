@@ -132,6 +132,7 @@ export function Testimonials({
     };
   }, [measure]);
 
+  const carouselGo = carousel.go;
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
@@ -141,12 +142,12 @@ export function Testimonials({
       const inView =
         rect.top < window.innerHeight * 0.7 && rect.bottom > window.innerHeight * 0.3;
       if (!inView) return;
-      if (event.key === "ArrowLeft") carousel.go(-1);
-      if (event.key === "ArrowRight") carousel.go(1);
+      if (event.key === "ArrowLeft") carouselGo(-1);
+      if (event.key === "ArrowRight") carouselGo(1);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [carousel.go]);
+  }, [carouselGo]);
 
   if (count === 0) return null;
 

@@ -324,6 +324,7 @@ function RotatingRimTimeline({
   // Fan focus: one-step path (wrap last↔first). Snap to canonical angle after each step
   // so focus never drifts and the start state stays identical after a full cycle.
   useLayoutEffect(() => {
+    const proxy = focusProxy.current;
     const step = count > 0 ? 360 / count : 0;
     const canonical = getItemAngle(active, count);
     const prev = prevActive.current;
@@ -364,7 +365,7 @@ function RotatingRimTimeline({
     );
 
     return () => {
-      gsap.killTweensOf(focusProxy.current);
+      gsap.killTweensOf(proxy);
       onAnimatingChange(false);
     };
   }, [active, count, reduceMotion, onAnimatingChange]);

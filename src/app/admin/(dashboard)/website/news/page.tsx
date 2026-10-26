@@ -37,7 +37,7 @@ export default function NewsPageAdmin() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [t, tCommon]);
 
   const handleSave = async () => {
     if (!settings) return;

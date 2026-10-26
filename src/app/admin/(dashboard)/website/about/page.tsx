@@ -39,7 +39,7 @@ export default function AboutPageAdmin() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [t, tCommon]);
 
   const handleSave = useCallback(async () => {
     if (!settings) return;
@@ -67,7 +67,7 @@ export default function AboutPageAdmin() {
     } finally {
       setSaving(false);
     }
-  }, [settings, notifyPending]);
+  }, [settings, notifyPending, t, tCommon]);
 
   if (loading || !settings) {
     return <FormSkeleton />;

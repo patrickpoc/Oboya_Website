@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { safeAdminNext } from "@/lib/security/admin-next";
 import { useAdminDocumentTitle } from "@/lib/cms/admin-document-title";
+import { hardNavigate } from "@/lib/cms/hard-navigate";
 
 export function AdminLoginForm() {
   const t = useTranslations("admin.auth");
@@ -66,7 +67,7 @@ export function AdminLoginForm() {
       user?.app_metadata?.must_change_password === true;
 
     if (mustChange) {
-      window.location.href = "/admin/change-password";
+      hardNavigate("/admin/change-password");
       return;
     }
 

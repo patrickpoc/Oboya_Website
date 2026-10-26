@@ -14,7 +14,6 @@ export function GlobalPresenceSectionEditor({
   locale,
 }: HomepageSectionEditorProps) {
   const t = useTranslations("admin.website.home");
-  const tCommon = useTranslations("admin.common");
   return (
     <Card className="max-w-4xl">
       <CardHeader>
