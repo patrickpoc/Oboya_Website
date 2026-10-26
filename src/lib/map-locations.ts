@@ -21,6 +21,12 @@ export const MAP_OFFICE_FIELDS = [
   },
   { key: "city", adminLabel: "City", input: "text", prominent: true },
   {
+    key: "registeredAddress",
+    adminLabel: "Registered Address",
+    input: "textarea",
+    prominent: false,
+  },
+  {
     key: "facility",
     adminLabel: "Facility",
     input: "textarea",
@@ -65,6 +71,9 @@ export type MapLocationTranslation = MapCountryTranslation & MapOfficeTranslatio
 export type MapOffice = {
   id: string;
   email: string;
+  /** Public visibility toggles; default true. */
+  showEmail: boolean;
+  showPhone: boolean;
   translations: Record<Locale, MapOfficeTranslation>;
 };
 
@@ -158,6 +167,8 @@ export function createEmptyOffice(
   return {
     id: slugifyId(`${locationId}-office`, existingOfficeIds),
     email: "",
+    showEmail: true,
+    showPhone: true,
     translations,
   };
 }
@@ -227,6 +238,8 @@ export function normalizeMapOffice(
   return {
     id,
     email: typeof item.email === "string" ? item.email : "",
+    showEmail: item.showEmail !== false,
+    showPhone: item.showPhone !== false,
     translations,
   };
 }
@@ -286,6 +299,8 @@ export function normalizeMapLocation(location: unknown): MapLocation | null {
           {
             id: slugifyId(`${item.id}-office`, []),
             email: legacyEmail,
+            showEmail: item.showEmail !== false,
+            showPhone: item.showPhone !== false,
             translations: Object.fromEntries(
               locales.map((locale) => {
                 const raw = item.translations as Record<string, unknown> | undefined;
@@ -440,6 +455,8 @@ export function validateMapLocations(data: unknown): string[] {
 
       if (typeof office.email !== "string") {
         errors.push(`${officePrefix}.email must be a string`);
+      } else if (office.email.length > 254) {
+        errors.push(`${officePrefix}.email must be at most 254 characters`);
       }
 
       for (const locale of locales) {
@@ -448,6 +465,13 @@ export function validateMapLocations(data: unknown): string[] {
           if (typeof translation[field.key] !== "string") {
             errors.push(
               `${officePrefix}.translations.${locale}.${field.key} must be a string`
+            );
+          } else if (
+            translation[field.key].length >
+            (field.key === "registeredAddress" ? 500 : 200)
+          ) {
+            errors.push(
+              `${officePrefix}.translations.${locale}.${field.key} is too long`
             );
           }
         }
@@ -512,12 +536,43 @@ export function resolveMapLocationsForLocale(
 
         return {
           id: office.id,
-          email: office.email,
           ...Object.fromEntries(
             MAP_OFFICE_FIELDS.map((field) => [field.key, translation[field.key]])
           ),
+          email: office.showEmail === false ? "" : office.email,
+          ...(office.showPhone === false ? { phone: "" } : {}),
         } as ResolvedMapOffice;
       }),
     };
   });
+}
+
+/** Blanks email/phone of offices with the matching toggle off. Pure; keeps flags. */
+export function stripHiddenOfficeContacts(
+  data: MapLocationsData
+): MapLocationsData {
+  return {
+    ...data,
+    locations: data.locations.map((location) => ({
+      ...location,
+      offices: location.offices.map((office) => {
+        if (office.showEmail !== false && office.showPhone !== false) {
+          return office;
+        }
+        const hidePhone = office.showPhone === false;
+        return {
+          ...office,
+          email: office.showEmail === false ? "" : office.email,
+          translations: hidePhone
+            ? (Object.fromEntries(
+                locales.map((locale) => [
+                  locale,
+                  { ...office.translations[locale], phone: "" },
+                ])
+              ) as Record<Locale, MapOfficeTranslation>)
+            : office.translations,
+        };
+      }),
+    })),
+  };
 }

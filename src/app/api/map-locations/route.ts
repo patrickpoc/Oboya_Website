@@ -1,4 +1,5 @@
 import {
+  stripHiddenOfficeContacts,
   validateMapLocations,
   type MapLocationsData,
 } from "@/lib/map-locations";
@@ -13,7 +14,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     const data = await readMapLocations();
-    return NextResponse.json(data);
+    return NextResponse.json(stripHiddenOfficeContacts(data));
   } catch (error) {
     console.error("Failed to read map locations:", error);
     return NextResponse.json(
