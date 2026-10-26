@@ -2,13 +2,17 @@ import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { fontVariables, notoSansSC } from "@/lib/fonts";
+import { fontVariables } from "@/lib/fonts";
 import { routing } from "@/i18n/routing";
 import { siteConfig } from "@/constants/site";
 import { cn } from "@/lib/utils";
 import { AppProviders } from "@/components/providers/AppProviders";
 import { ConditionalAnalytics } from "@/components/privacy/ConditionalAnalytics";
 import { CookieConsentBanner } from "@/components/privacy/CookieConsentBanner";
+import "@fontsource/noto-sans-sc/400.css";
+import "@fontsource/noto-sans-sc/500.css";
+import "@fontsource/noto-sans-sc/600.css";
+import "@fontsource/noto-sans-sc/700.css";
 import "../globals.css";
 
 /**
@@ -76,7 +80,6 @@ export default async function LocaleLayout({
       lang={locale}
       className={cn(
         fontVariables,
-        locale === "zh-CN" && notoSansSC.variable,
         "h-full scroll-smooth"
       )}
     >
