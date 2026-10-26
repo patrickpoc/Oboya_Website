@@ -143,7 +143,7 @@ export function ProductRichTextEditor({
     editorProps: {
       attributes: {
         class:
-          "product-rich-editor prose prose-sm max-w-none min-h-[220px] rounded-lg border border-input px-3 py-2 focus:outline-none",
+          "product-rich-editor max-w-none min-h-[220px] rounded-lg border border-input px-3 py-2 focus:outline-none",
         "data-placeholder": placeholder ?? "",
       },
     },

@@ -40,7 +40,7 @@ export function ProductDescriptionContent({
       <div
         ref={contentRef}
         className={cn(
-          "prose prose-neutral max-w-none overflow-x-hidden text-oboya-blue-dark/80 prose-headings:font-display prose-headings:text-oboya-blue-dark prose-a:text-oboya-green prose-img:my-6 prose-hr:my-8 [&_.product-description-image[data-align='left']]:mr-auto [&_.product-description-image[data-align='left']]:ml-0 [&_.product-description-image[data-align='center']]:mx-auto [&_.product-description-image[data-align='right']]:ml-auto [&_.product-description-image[data-align='right']]:mr-0 [&_.product-description-image]:block [&_.product-description-image]:h-auto [&_.product-description-image]:max-h-[min(65vh,560px)] [&_.product-description-image]:w-auto [&_.product-description-image]:max-w-full [&_.product-description-image]:object-contain",
+          "rich-text-content max-w-none overflow-x-hidden text-oboya-blue-dark/80 [&_a]:text-oboya-green [&_img]:my-6 [&_hr]:my-8 [&_.product-description-image[data-align='left']]:mr-auto [&_.product-description-image[data-align='left']]:ml-0 [&_.product-description-image[data-align='center']]:mx-auto [&_.product-description-image[data-align='right']]:ml-auto [&_.product-description-image[data-align='right']]:mr-0 [&_.product-description-image]:block [&_.product-description-image]:h-auto [&_.product-description-image]:max-h-[min(65vh,560px)] [&_.product-description-image]:w-auto [&_.product-description-image]:max-w-full [&_.product-description-image]:object-contain",
           title ? "mt-4" : ""
         )}
         dangerouslySetInnerHTML={{ __html: content }}
