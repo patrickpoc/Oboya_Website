@@ -157,7 +157,13 @@ export function parseImportSpreadsheetBuffer(
   buffer: ArrayBuffer,
   fileName: string
 ): { records: Array<Partial<Record<ImportSpreadsheetHeader, string>>>; errors: string[] } {
-  const workbook = XLSX.read(buffer, { type: "array" });
+  let workbook: XLSX.WorkBook;
+  if (fileName.toLowerCase().endsWith(".csv")) {
+    const text = new TextDecoder("utf-8").decode(buffer);
+    workbook = XLSX.read(text, { type: "string" });
+  } else {
+    workbook = XLSX.read(buffer, { type: "array" });
+  }
   const sheetName = workbook.SheetNames[0];
   if (!sheetName) return { records: [], errors: ["Spreadsheet has no sheets."] };
   const sheet = workbook.Sheets[sheetName];
