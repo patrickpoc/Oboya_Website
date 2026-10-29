@@ -179,6 +179,7 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
           folder: asset.folder,
           folderName: folderNameById.get(asset.folder),
         })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- libraryTick busts the module-level media cache
     [folderNameById, libraryTick]
   );
 
@@ -205,6 +206,7 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
     ],
     content: value,
     immediatelyRender: false,
+    shouldRerenderOnTransaction: true,
     onUpdate: ({ editor: ed }) => {
       const html = ed.getHTML();
       lastHtmlRef.current = html;
@@ -213,7 +215,7 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
     editorProps: {
       attributes: {
         class:
-          "rich-text-editor prose prose-sm max-w-none min-h-[220px] rounded-b-lg border border-t-0 border-input px-3 py-2 focus:outline-none",
+          "rich-text-editor max-w-none min-h-[220px] rounded-b-lg border border-t-0 border-input px-3 py-2 focus:outline-none",
       },
       handleDrop: (_view, event, _slice, moved) => {
         if (moved) return false;
@@ -239,11 +241,8 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
           html.length > 200_000 || /src\s*=\s*["']data:image\//i.test(html);
         if (tooHeavy) {
           event.preventDefault();
-          if (plain) {
-            const { state, dispatch } = view;
-            const { from, to } = state.selection;
-            dispatch(state.tr.insertText(plain, from, to));
-          }
+          // pasteText splits lines into paragraphs so lists work afterwards.
+          if (plain) view.pasteText(plain);
           return true;
         }
 
@@ -556,6 +555,7 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
             title={action.label}
             aria-label={action.label}
             aria-pressed={action.active}
+            onMouseDown={(e) => e.preventDefault()}
             onClick={action.run}
             className={cn(
               "inline-flex size-8 items-center justify-center rounded-md border text-oboya-blue-dark transition-colors",

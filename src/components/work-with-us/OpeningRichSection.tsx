@@ -7,7 +7,7 @@ export function OpeningRichSection({ id, title, html }: { id: string; title: str
         {title}
       </h2>
       <div
-        className="rich-text-content prose prose-neutral mt-3 max-w-none text-oboya-blue-dark/80 prose-headings:font-display prose-headings:text-oboya-blue-dark prose-a:text-oboya-blue-light"
+        className="rich-text-content mt-3 max-w-none text-oboya-blue-dark/80 [&_a]:text-oboya-blue-light"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </section>

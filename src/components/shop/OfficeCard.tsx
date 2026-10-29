@@ -26,6 +26,12 @@ export function OfficeCard() {
   const office = getPrimaryOfficeByCountryCode(countryCode, locale, mapData ?? undefined);
   if (!office) return null;
 
+  const operationType = office.operationType?.trim();
+  const city = office.city?.trim();
+  const phone = office.phone?.trim();
+  const email = office.email?.trim();
+  const businessHours = office.businessHours?.trim();
+
   return (
     <section className="border-b border-border/60 bg-oboya-soft-white py-6">
       <Container>
@@ -45,33 +51,33 @@ export function OfficeCard() {
                 <div className="mt-2 flex items-start gap-2 text-sm text-muted-foreground">
                   <Building2 className="mt-0.5 size-4 shrink-0" aria-hidden />
                   <div>
-                    {office.operationType && <p>{office.operationType}</p>}
-                    {office.city && <p>{office.city}</p>}
+                    {operationType && <p>{operationType}</p>}
+                    {city && <p>{city}</p>}
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                  {office.phone && (
+                  {phone && (
                     <a
-                      href={toTelHref(office.phone)}
+                      href={toTelHref(phone)}
                       className="inline-flex items-center gap-1.5 text-oboya-blue-dark hover:text-oboya-green"
                     >
                       <Phone className="size-3.5" aria-hidden />
-                      {office.phone}
+                      {phone}
                     </a>
                   )}
-                  {office.email && (
+                  {email && (
                     <a
-                      href={`mailto:${office.email}`}
+                      href={`mailto:${email}`}
                       className="inline-flex items-center gap-1.5 text-oboya-blue-dark hover:text-oboya-green"
                     >
                       <Mail className="size-3.5" aria-hidden />
-                      {office.email}
+                      {email}
                     </a>
                   )}
-                  {office.businessHours && (
+                  {businessHours && (
                     <span className="inline-flex items-center gap-1.5 text-muted-foreground">
                       <Clock className="size-3.5" aria-hidden />
-                      {office.businessHours}
+                      {businessHours}
                     </span>
                   )}
                 </div>

@@ -9,5 +9,6 @@
   "panelExplore": "Pase el cursor sobre una ubicación en el mapa para explorar nuestra presencia global.",
   "panelSegments": "Segmentos atendidos",
   "panelContactOffice": "Contactar esta oficina",
-  "panelOfficeCount": "{count, plural, one {# oficina} other {# oficinas}}"
+  "panelOfficeCount": "{count, plural, one {# oficina} other {# oficinas}}",
+  "registeredAddress": "Domicilio social"
 }

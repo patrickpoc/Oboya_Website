@@ -6,6 +6,20 @@ import { MapLocationInfoPanel } from "@/components/sections/MapLocationInfoPanel
 import { InteractiveWorldMap } from "@/components/sections/InteractiveWorldMap";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import overseasSeedJson from "@/../data/cms/overseas-companies.json";
+import {
+  mergeOverseasCompanies,
+  parseOverseasSeed,
+} from "@/lib/cms/map-overseas-import";
 import { CountryFlag } from "@/components/ui/country-flag";
 import {
   countryFlagOptions,
@@ -26,6 +40,9 @@ import {
 } from "@/lib/map-locations";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { hardNavigate } from "@/lib/cms/hard-navigate";
+
+const overseasSeed = parseOverseasSeed(overseasSeedJson);
 
 const isSupabaseConfigured =
   Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
@@ -44,13 +61,15 @@ export function MapLocationEditor() {
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importNotice, setImportNotice] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
       try {
-        const response = await fetch("/api/map-locations");
+        const response = await fetch("/api/cms/map-locations");
         if (!response.ok) {
           throw new Error(t("loadFailed"));
         }
@@ -75,7 +94,7 @@ export function MapLocationEditor() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [t, tCommon]);
 
   const selectedLocation = useMemo(
     () => data?.locations.find((location) => location.id === selectedId) ?? null,
@@ -261,18 +280,35 @@ export function MapLocationEditor() {
       }
 
       setSaveState("saved");
+      setImportNotice(null);
       setTimeout(() => setSaveState("idle"), 2000);
     } catch (saveErr) {
       setSaveState("error");
       setError(saveErr instanceof Error ? saveErr.message : tCommon("saveFailed"));
     }
-  }, [data]);
+  }, [data, tCommon]);
+
+  const handleImport = useCallback(() => {
+    if (!data) return;
+    const result = mergeOverseasCompanies(data, overseasSeed);
+    const { added, removedPlaceholders, createdLocations } = result.summary;
+    setImportOpen(false);
+    if (added === 0 && removedPlaceholders === 0 && createdLocations.length === 0) {
+      setImportNotice(t("importOverseasNothing"));
+      return;
+    }
+    setData(result.data);
+    setSaveState("idle");
+    setImportNotice(
+      t("importOverseasDone", { added, removed: removedPlaceholders })
+    );
+  }, [data, t]);
 
   const handleLogout = useCallback(async () => {
     if (!isSupabaseConfigured) return;
     const supabase = createClient();
     await supabase.auth.signOut();
-    window.location.href = "/admin/login";
+    hardNavigate("/admin/login");
   }, []);
 
   if (loadError) {
@@ -317,6 +353,13 @@ export function MapLocationEditor() {
             </Button>
             <Button
               type="button"
+              variant="outline"
+              onClick={() => setImportOpen(true)}
+            >
+              {t("importOverseas")}
+            </Button>
+            <Button
+              type="button"
               onClick={() => void handleSave()}
               disabled={saveState === "saving"}
             >
@@ -328,6 +371,35 @@ export function MapLocationEditor() {
             </Button>
           </div>
         </div>
+
+        {importNotice && (
+          <p role="status" className="mb-4 rounded-lg border border-oboya-green/30 bg-oboya-green/10 px-4 py-3 text-sm text-oboya-blue-dark">
+            {importNotice}
+          </p>
+        )}
+
+        <Dialog open={importOpen} onOpenChange={setImportOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("importOverseasConfirmTitle")}</DialogTitle>
+              <DialogDescription>
+                {t("importOverseasConfirmBody")}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setImportOpen(false)}
+              >
+                {tCommon("cancel")}
+              </Button>
+              <Button type="button" onClick={handleImport}>
+                {t("importOverseasConfirm")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {error && (
           <p className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -685,6 +757,44 @@ export function MapLocationEditor() {
                           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
                         />
                       </Field>
+
+                      <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground">
+                        <span>
+                          {t("showEmail")}
+                          <span className="mt-0.5 block text-xs text-muted-foreground">
+                            {t("showEmailHint")}
+                          </span>
+                        </span>
+                        <Switch
+                          checked={selectedOffice.showEmail}
+                          onCheckedChange={(checked) =>
+                            updateOffice(
+                              selectedLocation.id,
+                              selectedOffice.id,
+                              (office) => ({ ...office, showEmail: checked })
+                            )
+                          }
+                        />
+                      </label>
+
+                      <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground">
+                        <span>
+                          {t("showPhone")}
+                          <span className="mt-0.5 block text-xs text-muted-foreground">
+                            {t("showPhoneHint")}
+                          </span>
+                        </span>
+                        <Switch
+                          checked={selectedOffice.showPhone}
+                          onCheckedChange={(checked) =>
+                            updateOffice(
+                              selectedLocation.id,
+                              selectedOffice.id,
+                              (office) => ({ ...office, showPhone: checked })
+                            )
+                          }
+                        />
+                      </label>
 
                       {MAP_OFFICE_FIELDS.map((field) => (
                         <Field key={field.key} label={t(`fields.${field.key}`)}>

@@ -107,7 +107,7 @@ export default function CaseStudyEditPage() {
         setLoading(false);
       }
     })();
-  }, [id, isNew, router]);
+  }, [id, isNew, router, t, tCommon]);
 
   const handleSave = async () => {
     if (!study) return;

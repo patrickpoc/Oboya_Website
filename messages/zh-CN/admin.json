@@ -1692,11 +1692,22 @@
         "partner": "本地合作伙伴",
         "operationType": "运营类型",
         "city": "城市",
+        "registeredAddress": "注册地址",
         "facility": "设施",
         "segments": "服务细分",
         "phone": "电话",
         "businessHours": "营业时间"
-      }
+      },
+      "showEmail": "显示电子邮件",
+      "showEmailHint": "关闭后，电子邮件不会在网站上显示",
+      "showPhone": "显示电话",
+      "showPhoneHint": "关闭后，电话不会在网站上显示（所有语言）",
+      "importOverseas": "导入海外公司",
+      "importOverseasConfirmTitle": "导入海外公司？",
+      "importOverseasConfirmBody": "受影响国家的占位办事处（@oboya.example）将被公司列表替换，其他办事处予以保留。点击“保存”之前不会保存任何内容。",
+      "importOverseasConfirm": "导入",
+      "importOverseasDone": "{added, plural, other {已添加 # 个办事处}}，{removed, plural, other {已移除 # 个占位办事处}}。请检查并点击“保存”以发布。",
+      "importOverseasNothing": "已是最新，无需导入。"
     }
   },
   "website": {

@@ -90,7 +90,7 @@ export function BlogPostContent({
 
           {safeBody ? (
             <div
-              className="rich-text-content prose prose-neutral prose-headings:font-display prose-headings:text-oboya-blue-dark prose-a:text-oboya-blue-light mt-10 max-w-none prose-img:rounded-xl"
+              className="rich-text-content mt-10 max-w-none [&_a]:text-oboya-blue-light [&_img]:rounded-xl"
               dangerouslySetInnerHTML={{ __html: safeBody }}
             />
           ) : (

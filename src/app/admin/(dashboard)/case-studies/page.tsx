@@ -118,6 +118,7 @@ export default function CaseStudiesPage() {
         ),
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- columns memoized on translators only; handleDelete closes over stable setters/translators
     [t, tCommon]
   );
 

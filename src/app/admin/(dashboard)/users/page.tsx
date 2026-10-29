@@ -292,6 +292,7 @@ export default function UsersPage() {
         ),
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- row action handlers only close over stable loadUsers/t; adding them would rebuild columns every render
     [t, tCommon, tRoles, roleDefs, isSuperAdmin]
   );
 

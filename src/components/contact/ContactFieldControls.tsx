@@ -259,7 +259,6 @@ export function CountrySelect({
         aria-expanded={open}
         aria-labelledby={`${listId}-label`}
         aria-controls={listId}
-        aria-required={required || undefined}
         onClick={() =>
           setOpen((prev) => {
             if (prev) setQuery("");

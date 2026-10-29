@@ -6,7 +6,6 @@ import { LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import type { AboutValueItem } from "@/lib/cms/repositories/about-page-repository";
 import { pickLocalized } from "@/lib/cms/utils";
 import {
-  SQUEEZE_BANNER_S,
   SQUEEZE_CARD_SURFACE_CLASS,
   SQUEEZE_MEDIA_LAYER_CLASS,
   squeezeCardTransition,
@@ -18,7 +17,6 @@ import {
 } from "@/lib/squeeze-carousel-motion";
 import { cn } from "@/lib/utils";
 
-const BANNER_TRANSITION_S = SQUEEZE_BANNER_S;
 const COLLAPSED_BASIS = "2.75rem";
 const EXPANDED_BASIS = "18rem";
 const AUTOPLAY_MS = 4600;

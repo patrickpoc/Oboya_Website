@@ -9,5 +9,6 @@
   "panelExplore": "Hover over a location on the map to explore our global presence.",
   "panelSegments": "Segments served",
   "panelContactOffice": "Contact this Office",
-  "panelOfficeCount": "{count, plural, one {# office} other {# offices}}"
+  "panelOfficeCount": "{count, plural, one {# office} other {# offices}}",
+  "registeredAddress": "Registered address"
 }

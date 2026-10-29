@@ -95,6 +95,7 @@ export function CheckoutUpsell({ popularProductIds }: { popularProductIds: strin
       );
 
     return ranked.slice(0, UPSELL_LIMIT).map((entry) => entry.product);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- lineKey recomputes when cart contents change
   }, [
     catalogReady,
     countryCode,

@@ -114,6 +114,7 @@ export function ProductRichTextEditor({
           folder: asset.folder,
           folderName: folderNameById.get(asset.folder),
         })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- libraryTick busts the module-level media cache
     [folderNameById, libraryTick]
   );
 
@@ -142,7 +143,7 @@ export function ProductRichTextEditor({
     editorProps: {
       attributes: {
         class:
-          "product-rich-editor prose prose-sm max-w-none min-h-[220px] rounded-lg border border-input px-3 py-2 focus:outline-none",
+          "product-rich-editor max-w-none min-h-[220px] rounded-lg border border-input px-3 py-2 focus:outline-none",
         "data-placeholder": placeholder ?? "",
       },
     },
@@ -203,7 +204,7 @@ export function ProductRichTextEditor({
         toast.error(error instanceof Error ? error.message : tProducts("uploadFailed"));
       }
     },
-    [openImageDialog, refreshLibrary]
+    [openImageDialog, refreshLibrary, tProducts]
   );
 
   const setLink = useCallback(() => {
