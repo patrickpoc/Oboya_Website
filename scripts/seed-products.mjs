@@ -46,7 +46,6 @@ const rows = products.map((p) => ({
   id: p.id,
   sku: p.sku,
   moq: p.moq ?? 1,
-  brand_id: p.brandId,
   category_id: p.categoryId,
   subcategory_id: p.subcategoryId,
   images: p.images ?? [],

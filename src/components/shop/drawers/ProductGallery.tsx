@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Search, ZoomOut } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState, type SyntheticEvent } from "react";
+import { needsUnoptimized } from "@/lib/shop/image-host";
 import { cn } from "@/lib/utils";
 
 const ZOOM_SCALE = 1.8;
@@ -81,6 +82,7 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
           src={src}
           alt={alt}
           fill
+          unoptimized={needsUnoptimized(src)}
           sizes="(max-width: 640px) 100vw, 36rem"
           className="object-contain object-center will-change-transform"
           onLoad={onImageLoad}
@@ -146,7 +148,7 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
                 src={imageSrc}
                 alt=""
                 fill
-                unoptimized
+                unoptimized={needsUnoptimized(imageSrc)}
                 className="object-contain object-center"
                 sizes="56px"
               />

@@ -5,6 +5,7 @@ import type {
   ImportValidationIssue,
   ImportWorkspaceRow,
 } from "@/lib/cms/bulk-import/types";
+import { imageUrlProblem } from "@/lib/cms/bulk-import/images";
 import { IMPORT_FIELD_LABELS } from "@/lib/cms/bulk-import/types";
 
 function hasAnyName(product: CmsProduct): boolean {
@@ -147,19 +148,40 @@ function validateRow(
     }
   }
 
-  if (product.brandId) {
-    if (!catalog.brands.some((b) => b.id === product.brandId)) {
+  (product.images ?? []).forEach((url, index) => {
+    const problem = imageUrlProblem(url ?? "");
+    if (problem) {
       pushIssue(
         issues,
         row,
-        "brandId",
+        "images",
         "blocked",
-        `${IMPORT_FIELD_LABELS.brandId} is invalid.`,
-        "Select an existing brand."
+        `Image ${index + 1}: ${problem}`,
+        "Fix the link, upload a file, or pick from the media library."
       );
     }
-  } else {
-    pushIssue(issues, row, "brandId", "blocked", "Brand is required.", "Select a brand.");
+  });
+  if ((product.imageColorIds ?? []).length !== (product.images ?? []).length) {
+    pushIssue(
+      issues,
+      row,
+      "images",
+      "blocked",
+      "Image color assignments do not match the image list.",
+      "Re-select the images for this product."
+    );
+  }
+
+  const shortValues = Object.values(product.shortDescription ?? {}).map((v) => (v ?? "").trim());
+  if (shortValues.some(Boolean) && shortValues.some((v) => !v)) {
+    pushIssue(
+      issues,
+      row,
+      "shortDescription",
+      "warning",
+      "Short description is missing in some languages.",
+      "Fill all four languages, or leave them to fall back to English."
+    );
   }
 
   if (!hasAnyName(product)) {

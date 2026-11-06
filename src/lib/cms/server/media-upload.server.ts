@@ -15,7 +15,7 @@ import {
   isServiceRoleConfigured,
 } from "@/lib/supabase/admin";
 
-async function mediaSupabase() {
+export async function mediaSupabase() {
   if (isServiceRoleConfigured()) return createServiceClient();
   return createClient();
 }
@@ -101,6 +101,17 @@ export function isAllowedCompletedMediaUrl(url: string, id: string): boolean {
   }
 }
 
+/** Decoded-pixel cap: stops a small, highly compressed file from expanding into gigabytes. */
+const MAX_INPUT_PIXELS = 40_000_000;
+
+/** The file is not a decodable image, or decodes past the pixel cap. Callers answer 422. */
+export class MediaImageError extends Error {
+  constructor(message = "The image could not be processed. Use a valid, smaller JPEG, PNG or WebP.") {
+    super(message);
+    this.name = "MediaImageError";
+  }
+}
+
 async function stripImageMetadata(
   buffer: Buffer,
   mime: string
@@ -108,16 +119,14 @@ async function stripImageMetadata(
   if (!IMAGE_TYPES.has(mime) || mime === "image/gif") {
     return { buffer, mime };
   }
-  if (mime === "image/png") {
-    return { buffer: await sharp(buffer).rotate().png().toBuffer(), mime };
+  try {
+    const image = sharp(buffer, { limitInputPixels: MAX_INPUT_PIXELS }).rotate();
+    if (mime === "image/png") return { buffer: await image.png().toBuffer(), mime };
+    if (mime === "image/webp") return { buffer: await image.webp().toBuffer(), mime };
+    return { buffer: await image.jpeg({ quality: 90 }).toBuffer(), mime: "image/jpeg" };
+  } catch {
+    throw new MediaImageError();
   }
-  if (mime === "image/webp") {
-    return { buffer: await sharp(buffer).rotate().webp().toBuffer(), mime };
-  }
-  return {
-    buffer: await sharp(buffer).rotate().jpeg({ quality: 90 }).toBuffer(),
-    mime: "image/jpeg",
-  };
 }
 
 async function reencodeStoredImage(url: string, mime: string) {
@@ -204,6 +213,7 @@ export async function registerMediaAsset(input: {
   mimeType: string;
   size: number;
   folder?: string;
+  tags?: string[];
   skipReencode?: boolean;
 }) {
   if (!isAllowedCompletedMediaUrl(input.url, input.id)) {
@@ -220,7 +230,7 @@ export async function registerMediaAsset(input: {
     mimeType: input.mimeType,
     size: input.size,
     folder,
-    tags: input.type === "video" ? ["video", "upload"] : ["upload"],
+    tags: input.tags ?? (input.type === "video" ? ["video", "upload"] : ["upload"]),
     createdAt: now,
     updatedAt: now,
   };
@@ -258,6 +268,7 @@ export async function storeMediaLocally(input: {
   mime: string;
   kind: MediaAsset["type"];
   folder?: string;
+  tags?: string[];
 }) {
   assertLocalDiskWritable();
 
@@ -281,6 +292,7 @@ export async function storeMediaLocally(input: {
     mimeType: stripped.mime,
     size: stripped.buffer.byteLength,
     folder: input.folder,
+    tags: input.tags,
     skipReencode: true,
   });
 }
@@ -290,6 +302,7 @@ export async function storeMediaViaSupabaseServer(input: {
   mime: string;
   kind: MediaAsset["type"];
   folder?: string;
+  tags?: string[];
 }) {
   // Keep under platform body limits when proxying through the Next.js route.
   if (input.file.size > SERVERLESS_BODY_MAX) {
@@ -329,6 +342,7 @@ export async function storeMediaViaSupabaseServer(input: {
     mimeType: stripped.mime,
     size: stripped.buffer.byteLength,
     folder: input.folder,
+    tags: input.tags,
     skipReencode: true,
   });
 }

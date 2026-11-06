@@ -13,7 +13,6 @@ const doc = {
     { id: "c1", name: "C1", subcategories: [{ id: "s1", name: "S1" }] },
     { id: "c2", name: "C2", subcategories: [{ id: "s2", name: "S2" }] },
   ],
-  brands: [{ id: "b1", name: "B1" }],
   filterGroups: [{ id: "applications", name: "App" }],
   filterOptions: { applications: [{ id: "a1", name: "A1" }] },
 };
@@ -22,7 +21,6 @@ const prod = (id: string, over = {}) => ({
   sku: id.toUpperCase(),
   categoryId: "c1",
   subcategoryId: "s1",
-  brandId: "b1",
   application: ["a1", "keep"],
   cultures: [],
   certifications: [],
@@ -37,7 +35,8 @@ const updateProductReferences = vi.fn();
 const saveMarketplaceFilters = vi.fn(async (d: unknown) => d);
 const addAuditLogDurable = vi.fn<(entry: { details: string }) => Promise<object>>(async () => ({}));
 
-vi.mock("@/lib/cms/server/require-cms-auth", () => ({ cmsGuard: async () => guard }));
+const cmsGuard = vi.fn(async (..._args: unknown[]) => guard);
+vi.mock("@/lib/cms/server/require-cms-auth", () => ({ cmsGuard }));
 vi.mock("@/lib/cms/server/marketplace-config.server", () => ({
   readMarketplaceFiltersStrict,
   saveMarketplaceFilters,
@@ -77,8 +76,24 @@ describe("POST /api/cms/marketplace/filters/remove", () => {
 
   it("returns the guard response without permission", async () => {
     guard = { response: Response.json({ error: "no" }, { status: 403 }) };
-    expect((await post({ target: { kind: "brand", id: "b1" } })).status).toBe(403);
+    expect((await post({ target: { kind: "group", id: "applications" } })).status).toBe(403);
     expect(updateProductReferences).not.toHaveBeenCalled();
+  });
+
+  it("requires both marketplace delete and edit", async () => {
+    await post({ target: { kind: "group", id: "applications" } });
+    expect(cmsGuard).toHaveBeenCalledWith("marketplace", "delete");
+    expect(cmsGuard).toHaveBeenCalledWith("marketplace", "edit");
+  });
+
+  it("rejects a caller that can delete but not edit", async () => {
+    cmsGuard.mockImplementation(async (...args: unknown[]) =>
+      args[1] === "edit" ? { response: Response.json({ error: "no" }, { status: 403 }) } : guard
+    );
+    expect((await post({ target: { kind: "group", id: "applications" } })).status).toBe(403);
+    expect(updateProductReferences).not.toHaveBeenCalled();
+    expect(saveMarketplaceFilters).not.toHaveBeenCalled();
+    cmsGuard.mockImplementation(async () => guard);
   });
 
   it("rejects invalid target and missing replacement", async () => {
@@ -137,7 +152,7 @@ describe("POST /api/cms/marketplace/filters/remove", () => {
 
   it("aborts without writing when the document read fails", async () => {
     readMarketplaceFiltersStrict.mockRejectedValue(new Error("db down: secret"));
-    const res = await post({ target: { kind: "brand", id: "b1" }, replacementId: "b1" });
+    const res = await post({ target: { kind: "subcategory", id: "s1" }, replacementId: "s2" });
     expect(res.status).toBe(500);
     expect(JSON.stringify(await res.json())).not.toContain("secret");
     expect(updateProductReferences).not.toHaveBeenCalled();
@@ -200,15 +215,11 @@ describe("POST /api/cms/marketplace/filters/remove", () => {
     expect((saveMarketplaceFilters.mock.calls[0]![0] as typeof doc).categories.map((c) => c.id)).toEqual(["c2"]);
   });
 
-  it("moves brand products", async () => {
-    const withBrand = { ...doc, brands: [...doc.brands, { id: "b2", name: "B2" }] };
-    readMarketplaceFiltersStrict.mockResolvedValue(withBrand);
+  it("rejects the removed brand kind", async () => {
     const res = await post({ target: { kind: "brand", id: "b1" }, replacementId: "b2" });
-    expect(res.status).toBe(200);
-    expect(updateProductReferences.mock.calls[0]![0]).toEqual([
-      { id: "p1", patch: { brandId: "b2" } },
-      { id: "p2", patch: { brandId: "b2" } },
-    ]);
+    expect(res.status).toBe(400);
+    expect(updateProductReferences).not.toHaveBeenCalled();
+    expect(saveMarketplaceFilters).not.toHaveBeenCalled();
   });
 
   it("clears a group on products and drops it from the document", async () => {
@@ -218,14 +229,14 @@ describe("POST /api/cms/marketplace/filters/remove", () => {
   });
 
   it("treats an already removed, unused item as success (lost response)", async () => {
-    const res = await post({ target: { kind: "brand", id: "gone" } });
+    const res = await post({ target: { kind: "group", id: "gone" } });
     expect(res.status).toBe(200);
     expect(saveMarketplaceFilters).not.toHaveBeenCalled();
   });
 
   it("validates shapes and prototype-key groups", async () => {
-    expect((await post({ target: { kind: "brand", id: "b1" }, replacementId: 5 })).status).toBe(400);
-    expect((await post({ target: { kind: "brand", id: "x".repeat(500) } })).status).toBe(400);
+    expect((await post({ target: { kind: "subcategory", id: "s1" }, replacementId: 5 })).status).toBe(400);
+    expect((await post({ target: { kind: "group", id: "x".repeat(500) } })).status).toBe(400);
     for (const groupId of ["__proto__", "constructor"]) {
       const res = await post({ target: { kind: "option", id: "a1", groupId } });
       expect(res.status).toBe(404);
@@ -234,8 +245,8 @@ describe("POST /api/cms/marketplace/filters/remove", () => {
   });
 
   it("already removed: busts the catalog and audits the outcome", async () => {
-    readProductsStrict.mockResolvedValue([prod("p1", { brandId: "other" })]);
-    const res = await post({ target: { kind: "brand", id: "gone" }, replacementId: "b1" });
+    readProductsStrict.mockResolvedValue([prod("p1", { application: ["keep"] })]);
+    const res = await post({ target: { kind: "group", id: "gone" } });
     expect(res.status).toBe(200);
     expect(invalidateCatalog).toHaveBeenCalled();
     const entries = addAuditLogDurable.mock.calls.map((c) => JSON.parse(c[0]!.details));
@@ -243,12 +254,12 @@ describe("POST /api/cms/marketplace/filters/remove", () => {
   });
 
   it("saves against a fresh document so a concurrent unrelated edit survives", async () => {
-    const fresh = { ...doc, brands: [...doc.brands, { id: "b-new", name: "Added meanwhile" }] };
+    const fresh = { ...doc, filterGroups: [...doc.filterGroups, { id: "added", name: "Added meanwhile" }] };
     readMarketplaceFiltersStrict.mockResolvedValueOnce(doc).mockResolvedValueOnce(fresh);
     const res = await post({ target: { kind: "subcategory", id: "s1" }, replacementId: "s2" });
     expect(res.status).toBe(200);
     const saved = saveMarketplaceFilters.mock.calls[0]![0] as typeof doc;
-    expect(saved.brands.map((b) => b.id)).toContain("b-new");
+    expect(saved.filterGroups.map((g) => g.id)).toContain("added");
     expect(saved.categories[0]!.subcategories).toEqual([]);
   });
 

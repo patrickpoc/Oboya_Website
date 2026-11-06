@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { BrandLabel } from "@/components/shop/BrandLabel";
 import { useShop } from "@/contexts/ShopContext";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import { useProductName } from "@/lib/shop/use-product-name";
@@ -35,7 +34,6 @@ export function ProductDrawer() {
     isCartOpen,
     getProductById,
     ensureProductDetail,
-    brands,
     categories,
     shopConfig,
   } = useShop();
@@ -56,7 +54,6 @@ export function ProductDrawer() {
   const overlayBlocksDrawer = addDialogOpen || isCartOpen;
 
   const name = product ? getProductName(product as Parameters<typeof getProductName>[0]) : "";
-  const brand = product ? brands.find((item) => item.id === product.brandId) : null;
   const category = product ? categories.find((item) => item.id === product.categoryId) : null;
   const price =
     product && currency ? (product.prices[currency] ?? 0) : 0;
@@ -145,12 +142,6 @@ export function ProductDrawer() {
                 </h3>
                 <p className="mt-1 flex flex-wrap items-center gap-x-1 text-sm text-muted-foreground">
                   <span>{product.sku}</span>
-                  {brand ? (
-                    <>
-                      <span aria-hidden>·</span>
-                      <BrandLabel brand={brand} locale={locale} />
-                    </>
-                  ) : null}
                 </p>
                 {isQuote ? (
                   <div className="mt-3">

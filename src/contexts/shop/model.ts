@@ -45,7 +45,6 @@ export interface ShopContextValue extends ShopState {
   pricing: QuotePricing;
   countries: ReturnType<typeof getShopCatalog>["countries"];
   categories: ReturnType<typeof getShopCatalog>["categories"];
-  brands: ReturnType<typeof getShopCatalog>["brands"];
   filterGroups: ReturnType<typeof getShopCatalog>["filterGroups"];
   filterOptions: ReturnType<typeof getShopCatalog>["filterOptions"];
   getProductById: (productId: string) => ShopProduct | undefined;
@@ -92,7 +91,6 @@ export interface ShopContextValue extends ShopState {
     sku: string;
     image: string;
     categoryId: string;
-    brandId: string;
     stockStatus: string;
   }>;
 }
@@ -128,7 +126,6 @@ export function catalogTaxonomy(): ShopFilterTaxonomy {
   const catalog = getShopCatalog();
   return {
     categories: catalog.categories,
-    brands: catalog.brands,
     filterOptions: catalog.filterOptions,
   };
 }

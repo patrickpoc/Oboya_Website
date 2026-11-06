@@ -10,7 +10,6 @@ const pages = [
   ["website/footer", "Footer", "Manage footer links and content.", "website"],
   ["website/seo", "SEO", "Manage global and page-level SEO settings.", "website"],
   ["marketplace/categories", "Categories", "Manage product categories.", "marketplace"],
-  ["marketplace/brands", "Brands", "Manage product brands.", "marketplace"],
   ["marketplace/specifications", "Specifications", "Manage product specification templates.", "marketplace"],
   ["marketplace/availability", "Availability by Country", "Manage product availability per market.", "marketplace"],
   ["marketplace/currencies", "Currencies", "Manage supported currencies.", "marketplace"],

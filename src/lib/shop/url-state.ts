@@ -135,7 +135,6 @@ export function parseShopUrlState(
       ...EMPTY_SHOP_FILTERS,
       categoryId: searchParams.get("category"),
       subcategoryIds: parseList(searchParams.get("subcategory")),
-      brandIds: parseList(searchParams.get("brand")),
       applications: parseList(searchParams.get("application")),
       cultures: parseList(searchParams.get("culture")),
       certifications: parseList(searchParams.get("certification")),
@@ -173,7 +172,6 @@ export function buildShopSearchParams(state: {
   const { filters } = state;
   if (filters.categoryId) params.set("category", filters.categoryId);
   setList(params, "subcategory", filters.subcategoryIds);
-  setList(params, "brand", filters.brandIds);
   setList(params, BUILTIN_PARAM_BY_GROUP.applications, filters.applications);
   setList(params, BUILTIN_PARAM_BY_GROUP.cultures, filters.cultures);
   setList(params, BUILTIN_PARAM_BY_GROUP.certifications, filters.certifications);

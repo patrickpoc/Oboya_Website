@@ -41,6 +41,18 @@ function priceValue(
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
+type NameLocale = "en" | "pt-BR" | "es" | "zh-CN";
+
+/** Localized color name; English falls back to the legacy `name` field. */
+export function variantName(
+  variant: Pick<ProductColorVariant, "name" | "nameI18n">,
+  locale: NameLocale
+): string {
+  const value = variant.nameI18n?.[locale];
+  if (typeof value === "string" && (value || locale !== "en")) return value;
+  return locale === "en" ? variant.name || "" : "";
+}
+
 function findVariant(
   product: CmsProduct,
   variantId: string | null | undefined
@@ -69,8 +81,6 @@ export function isBulkFieldEqual(
       return original.categoryId === pending.categoryId;
     case "subcategoryId":
       return original.subcategoryId === pending.subcategoryId;
-    case "brandId":
-      return original.brandId === pending.brandId;
     case "application":
       return sameStringArray(original.application, pending.application);
     case "cultures":
@@ -105,6 +115,23 @@ export function isBulkFieldEqual(
         (original.defaultColorName?.["pt-BR"] || "") ===
         (pending.defaultColorName?.["pt-BR"] || "")
       );
+    case "defaultColorNameEs":
+      return (
+        (original.defaultColorName?.es || "") === (pending.defaultColorName?.es || "")
+      );
+    case "defaultColorNameZh":
+      return (
+        (original.defaultColorName?.["zh-CN"] || "") ===
+        (pending.defaultColorName?.["zh-CN"] || "")
+      );
+    case "variantSku":
+    case "variantColor":
+    case "variantNameEn":
+    case "variantNamePt":
+    case "variantNameEs":
+    case "variantNameZh":
+    case "variantImage":
+    case "variantSortOrder":
     case "variantMoq":
     case "variantPriceUsd":
     case "variantPriceBrl":
@@ -114,6 +141,22 @@ export function isBulkFieldEqual(
       if (!before && !after) return true;
       if (!before || !after) return false;
       switch (field) {
+        case "variantSku":
+          return (before.sku || "") === (after.sku || "");
+        case "variantColor":
+          return (before.color || "") === (after.color || "");
+        case "variantNameEn":
+          return variantName(before, "en") === variantName(after, "en");
+        case "variantNamePt":
+          return variantName(before, "pt-BR") === variantName(after, "pt-BR");
+        case "variantNameEs":
+          return variantName(before, "es") === variantName(after, "es");
+        case "variantNameZh":
+          return variantName(before, "zh-CN") === variantName(after, "zh-CN");
+        case "variantImage":
+          return (before.image || "") === (after.image || "");
+        case "variantSortOrder":
+          return Number(before.sortOrder ?? 0) === Number(after.sortOrder ?? 0);
         case "variantMoq":
           return Number(before.moq ?? 1) === Number(after.moq ?? 1);
         case "variantPriceUsd":
@@ -202,6 +245,23 @@ function applyVariantPatch(
     prices: { ...variant.prices },
   };
 
+  if (patch.variantSku !== undefined) next.sku = patch.variantSku;
+  if (patch.variantColor !== undefined) next.color = patch.variantColor;
+  if (patch.variantImage !== undefined) next.image = patch.variantImage;
+  if (patch.variantSortOrder !== undefined) next.sortOrder = patch.variantSortOrder;
+  const nameKeys = [
+    ["variantNameEn", "en"],
+    ["variantNamePt", "pt-BR"],
+    ["variantNameEs", "es"],
+    ["variantNameZh", "zh-CN"],
+  ] as const;
+  for (const [key, locale] of nameKeys) {
+    const value = patch[key];
+    if (value === undefined) continue;
+    next.nameI18n = { ...next.nameI18n, [locale]: value };
+    // `name` mirrors the English label (legacy readers).
+    if (locale === "en") next.name = value;
+  }
   if (patch.variantMoq !== undefined) {
     const moq = Number(patch.variantMoq);
     next.moq = Number.isFinite(moq) && moq >= 1 ? Math.floor(moq) : 1;
@@ -234,7 +294,6 @@ export function applyPatchToProduct(
   if (patch.moq !== undefined) next.moq = patch.moq;
   if (patch.categoryId !== undefined) next.categoryId = patch.categoryId;
   if (patch.subcategoryId !== undefined) next.subcategoryId = patch.subcategoryId;
-  if (patch.brandId !== undefined) next.brandId = patch.brandId;
   if (patch.application !== undefined) next.application = [...patch.application];
   if (patch.cultures !== undefined) next.cultures = [...patch.cultures];
   if (patch.certifications !== undefined) next.certifications = [...patch.certifications];
@@ -268,6 +327,13 @@ export function applyPatchToProduct(
     };
   }
 
+  if (patch.defaultColorNameEs !== undefined) {
+    next.defaultColorName = { ...next.defaultColorName, es: patch.defaultColorNameEs };
+  }
+  if (patch.defaultColorNameZh !== undefined) {
+    next.defaultColorName = { ...next.defaultColorName, "zh-CN": patch.defaultColorNameZh };
+  }
+
   const hasVariantPatch = BULK_VARIANT_FIELDS.some(
     (field) => patch[field] !== undefined
   );
@@ -298,9 +364,6 @@ export function buildPatchFromPending(
         break;
       case "subcategoryId":
         patch.subcategoryId = pending.subcategoryId;
-        break;
-      case "brandId":
-        patch.brandId = pending.brandId;
         break;
       case "application":
         patch.application = [...pending.application];
@@ -343,6 +406,12 @@ export function buildPatchFromPending(
       case "defaultColorNamePt":
         patch.defaultColorNamePt = pending.defaultColorName?.["pt-BR"] ?? "";
         break;
+      case "defaultColorNameEs":
+        patch.defaultColorNameEs = pending.defaultColorName?.es ?? "";
+        break;
+      case "defaultColorNameZh":
+        patch.defaultColorNameZh = pending.defaultColorName?.["zh-CN"] ?? "";
+        break;
       default:
         break;
     }
@@ -362,7 +431,6 @@ export function normalizeProductForBulk(product: CmsProduct): CmsProduct {
       : 1,
     categoryId: product.categoryId ?? "",
     subcategoryId: product.subcategoryId ?? "",
-    brandId: product.brandId ?? "",
     application: Array.isArray(product.application) ? [...product.application] : [],
     cultures: Array.isArray(product.cultures) ? [...product.cultures] : [],
     certifications: Array.isArray(product.certifications)
@@ -497,8 +565,6 @@ export function formatFieldValue(
       return product.categoryId || "";
     case "subcategoryId":
       return product.subcategoryId || "";
-    case "brandId":
-      return product.brandId || "";
     case "application":
       return (product.application ?? []).join("; ");
     case "cultures":
@@ -531,6 +597,18 @@ export function formatFieldValue(
       return product.defaultColorName?.en || "";
     case "defaultColorNamePt":
       return product.defaultColorName?.["pt-BR"] || "";
+    case "defaultColorNameEs":
+      return product.defaultColorName?.es || "";
+    case "defaultColorNameZh":
+      return product.defaultColorName?.["zh-CN"] || "";
+    case "variantSku":
+    case "variantColor":
+    case "variantNameEn":
+    case "variantNamePt":
+    case "variantNameEs":
+    case "variantNameZh":
+    case "variantImage":
+    case "variantSortOrder":
     case "variantMoq":
     case "variantPriceUsd":
     case "variantPriceBrl":
@@ -538,6 +616,22 @@ export function formatFieldValue(
       const variant = findVariant(product, variantId);
       if (!variant) return "";
       switch (field) {
+        case "variantSku":
+          return variant.sku || "";
+        case "variantColor":
+          return variant.color || "";
+        case "variantNameEn":
+          return variantName(variant, "en");
+        case "variantNamePt":
+          return variantName(variant, "pt-BR");
+        case "variantNameEs":
+          return variantName(variant, "es");
+        case "variantNameZh":
+          return variantName(variant, "zh-CN");
+        case "variantImage":
+          return variant.image || "";
+        case "variantSortOrder":
+          return String(variant.sortOrder ?? 0);
         case "variantMoq":
           return String(variant.moq ?? 1);
         case "variantPriceUsd":

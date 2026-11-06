@@ -14,7 +14,6 @@ import {
 } from "@/lib/cms/shop-config/defaults";
 import type { ShopConfig } from "@/lib/cms/shop-config/types";
 import {
-  normalizeBrands,
   normalizeCategories,
   normalizeFilterGroups,
   normalizeFilterOptions,
@@ -92,7 +91,6 @@ export function useCatalogLoader({
           products?: CmsProduct[];
           filters?: {
             categories?: ReturnType<typeof getShopCatalog>["categories"];
-            brands?: ReturnType<typeof getShopCatalog>["brands"];
             filterGroups?: ReturnType<typeof getShopCatalog>["filterGroups"];
             filterOptions?: ReturnType<typeof getShopCatalog>["filterOptions"];
           };
@@ -108,7 +106,6 @@ export function useCatalogLoader({
             categories: filters.categories
               ? normalizeCategories(filters.categories)
               : undefined,
-            brands: filters.brands ? normalizeBrands(filters.brands) : undefined,
             filterGroups: filters.filterGroups
               ? normalizeFilterGroups(
                   filters.filterGroups,

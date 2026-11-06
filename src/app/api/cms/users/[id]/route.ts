@@ -67,8 +67,15 @@ export async function PATCH(request: Request, { params }: Params) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    if (body.role !== undefined && !isValidRoleId(body.role)) {
+    if (body.role !== undefined && (typeof body.role !== "string" || !isValidRoleId(body.role))) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+    }
+
+    if (id === auth.user.id && body.role !== undefined && body.role !== target.role) {
+      return NextResponse.json(
+        { error: "You cannot change your own role" },
+        { status: 403 }
+      );
     }
 
     const forbidden = rejectSuperAdminAssignment(
@@ -178,7 +185,7 @@ export async function DELETE(_request: Request, { params }: Params) {
         {
           error:
             error.code === "revoked"
-              ? "Access was revoked, but the account could not be deleted. Try again."
+              ? "The account was deactivated and can no longer sign in, but it could not be fully deleted. No further action is needed to block access."
               : "The account could not be deleted and access could not be revoked. Deactivate it manually.",
           code: error.code,
         },

@@ -16,6 +16,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { PRODUCT_EDITOR_SELECT_CLASS } from "@/components/admin/marketplace/product-editor.constants";
 import type { CmsStatus } from "@/lib/cms/types";
+import { usePermission } from "@/contexts/AdminContext";
 import { requiresReplacement, type RemovalTarget } from "@/lib/cms/taxonomy-removal";
 
 type AffectedProduct = {
@@ -62,6 +63,9 @@ function RemovalDialogBody({ removal, replacements, onClose, onRemoved }: BodyPr
   const [loadFailed, setLoadFailed] = useState(false);
   const [replacementId, setReplacementId] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const mayDelete = usePermission("marketplace", "delete");
+  const mayEdit = usePermission("marketplace", "edit");
+  const canDelete = mayDelete && mayEdit;
 
   const target = removal.target;
   const statusLabels: Record<CmsStatus, string> = {
@@ -193,13 +197,15 @@ function RemovalDialogBody({ removal, replacements, onClose, onRemoved }: BodyPr
           </div>
         )}
 
+        {!canDelete && <p className="text-sm text-destructive">{t("noPermission")}</p>}
+
         <DialogFooter>
           <Button variant="outline" disabled={submitting} onClick={onClose}>
             {tCommon("cancel")}
           </Button>
           <Button
             variant="destructive"
-            disabled={submitting || loading || loadFailed || (needsReplacement && !replacementId)}
+            disabled={!canDelete || submitting || loading || loadFailed || (needsReplacement && !replacementId)}
             onClick={() => void confirm()}
           >
             {submitting

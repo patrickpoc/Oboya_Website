@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { getShopCatalog, updateShopCatalog } from "@/lib/shop/catalog";
 import type {
-  ShopBrand,
   ShopCatalog,
   ShopCategory,
   ShopCountry,
@@ -17,7 +16,6 @@ function snapshotCatalog(): ShopCatalog {
   return {
     countries: current.countries,
     categories: current.categories,
-    brands: current.brands,
     filterGroups: current.filterGroups,
     filterOptions: current.filterOptions,
     products: current.products,
@@ -42,14 +40,12 @@ export function useAdminMarketplaceCatalog() {
         if (filtersResponse.ok && !cancelled) {
           const data = (await filtersResponse.json()) as {
             categories: ShopCategory[];
-            brands: ShopBrand[];
             filterGroups?: ShopFilterGroup[];
             filterOptions: ShopFilterOptions;
           };
 
           updateShopCatalog({
             categories: data.categories,
-            brands: data.brands,
             filterGroups: data.filterGroups,
             filterOptions: data.filterOptions,
           });

@@ -40,16 +40,6 @@ export interface ShopCategory {
   }[];
 }
 
-export interface ShopBrand {
-  id: string;
-  name: string;
-  nameI18n?: ShopLocalizedText;
-  /** Stable public key for URLs (e.g. `oboya-qs-ecovaso`). */
-  slug?: string;
-  /** ISO country code from the Global Presence map (e.g. BR, US). */
-  flag?: string;
-}
-
 export interface FilterOption {
   id: string;
   name: string;
@@ -112,7 +102,6 @@ export interface ShopProduct {
   id: string;
   sku: string;
   moq: number;
-  brandId: string;
   categoryId: string;
   subcategoryId: string;
   images: string[];
@@ -161,7 +150,6 @@ export interface ShopProduct {
 export interface ShopCatalog {
   countries: ShopCountry[];
   categories: ShopCategory[];
-  brands: ShopBrand[];
   filterGroups: ShopFilterGroup[];
   filterOptions: ShopFilterOptions;
   products: ShopProduct[];
@@ -177,7 +165,6 @@ export interface CartItem {
 export interface ShopFilters {
   categoryId: string | null;
   subcategoryIds: string[];
-  brandIds: string[];
   applications: string[];
   cultures: string[];
   certifications: string[];
@@ -192,7 +179,6 @@ export interface ShopFilters {
 export const EMPTY_SHOP_FILTERS: ShopFilters = {
   categoryId: null,
   subcategoryIds: [],
-  brandIds: [],
   applications: [],
   cultures: [],
   certifications: [],

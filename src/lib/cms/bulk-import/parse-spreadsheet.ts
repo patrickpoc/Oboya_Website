@@ -7,6 +7,7 @@ import {
   type ImportWorkspaceRow,
   type SpreadsheetImportError,
 } from "@/lib/cms/bulk-import/types";
+import { compactImages, withAlignedImages } from "@/lib/cms/bulk-import/images";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { CmsStatus } from "@/lib/cms/types";
 import { parseSaleMode } from "@/lib/cms/bulk-update/spreadsheet";
@@ -20,7 +21,6 @@ export const IMPORT_SPREADSHEET_HEADERS = [
   "name_zhCN",
   "categoryId",
   "subcategoryId",
-  "brandId",
   "moq",
   "price_usd",
   "price_brl",
@@ -34,8 +34,12 @@ export const IMPORT_SPREADSHEET_HEADERS = [
   "image_3",
   "short_en",
   "short_ptBR",
+  "short_es",
+  "short_zhCN",
   "desc_en",
   "desc_ptBR",
+  "desc_es",
+  "desc_zhCN",
 ] as const;
 
 export type ImportSpreadsheetHeader = (typeof IMPORT_SPREADSHEET_HEADERS)[number];
@@ -56,8 +60,6 @@ const HEADER_ALIASES: Record<string, ImportSpreadsheetHeader> = {
   category: "categoryId",
   subcategoryid: "subcategoryId",
   subcategory: "subcategoryId",
-  brandid: "brandId",
-  brand: "brandId",
   moq: "moq",
   price_usd: "price_usd",
   priceusd: "price_usd",
@@ -83,8 +85,22 @@ const HEADER_ALIASES: Record<string, ImportSpreadsheetHeader> = {
   image_3: "image_3",
   short_en: "short_en",
   short_ptbr: "short_ptBR",
+  short_pt: "short_ptBR",
+  shortptbr: "short_ptBR",
+  short_es: "short_es",
+  shortes: "short_es",
+  short_zhcn: "short_zhCN",
+  short_zh: "short_zhCN",
+  shortzhcn: "short_zhCN",
   desc_en: "desc_en",
   desc_ptbr: "desc_ptBR",
+  desc_pt: "desc_ptBR",
+  descptbr: "desc_ptBR",
+  desc_es: "desc_es",
+  desces: "desc_es",
+  desc_zhcn: "desc_zhCN",
+  desc_zh: "desc_zhCN",
+  desczhcn: "desc_zhCN",
 };
 
 function normalizeHeader(raw: string): ImportSpreadsheetHeader | null {
@@ -125,15 +141,6 @@ function resolveSubcategoryId(
     if (byName) return byName.id;
   }
   return null;
-}
-
-function resolveBrandId(raw: string, catalog: ImportCatalog): string | null {
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-  const byId = catalog.brands.find((b) => b.id === trimmed);
-  if (byId) return byId.id;
-  const lower = trimmed.toLowerCase();
-  return catalog.brands.find((b) => b.name.toLowerCase() === lower)?.id ?? null;
 }
 
 function parseShopStatus(raw: string): CmsStatus | null {
@@ -223,7 +230,6 @@ function rowToProduct(
   const id = sku;
 
   const categoryRaw = cells.categoryId?.trim() ?? "";
-  const brandRaw = cells.brandId?.trim() ?? "";
   const subcategoryRaw = cells.subcategoryId?.trim() ?? "";
 
   let categoryId = categoryRaw ? resolveCategoryId(categoryRaw, catalog) : "";
@@ -235,17 +241,6 @@ function rowToProduct(
       suggestedAction: "Use a valid category id or name.",
     });
     categoryId = "";
-  }
-
-  let brandId = brandRaw ? resolveBrandId(brandRaw, catalog) : "";
-  if (brandRaw && !brandId) {
-    errors.push({
-      row: rowNumber,
-      sku,
-      message: `Unknown brand "${brandRaw}".`,
-      suggestedAction: "Use a valid brand id or name.",
-    });
-    brandId = "";
   }
 
   let subcategoryId = subcategoryRaw
@@ -263,7 +258,6 @@ function rowToProduct(
 
   const fallbackCategory = catalog.categories[0];
   const fallbackSub = fallbackCategory?.subcategories[0];
-  const fallbackBrand = catalog.brands[0];
 
   const enabledCountries = Object.fromEntries(
     catalog.countries.map((country) => [country.code, false])
@@ -302,7 +296,6 @@ function rowToProduct(
     sku,
     categoryId: categoryId || fallbackCategory?.id || "",
     subcategoryId: subcategoryId || fallbackSub?.id || "",
-    brandId: brandId || fallbackBrand?.id || "",
   });
 
   return {
@@ -321,14 +314,14 @@ function rowToProduct(
     shortDescription: {
       en: cells.short_en ?? "",
       "pt-BR": cells.short_ptBR ?? "",
-      es: "",
-      "zh-CN": "",
+      es: cells.short_es ?? "",
+      "zh-CN": cells.short_zhCN ?? "",
     },
     description: {
       en: cells.desc_en ?? "",
       "pt-BR": cells.desc_ptBR ?? "",
-      es: "",
-      "zh-CN": "",
+      es: cells.desc_es ?? "",
+      "zh-CN": cells.desc_zhCN ?? "",
     },
     prices: {
       USD: (() => {
@@ -352,8 +345,9 @@ function rowToProduct(
       cells.unlimited_stock?.toLowerCase() === "true" ||
       cells.unlimited_stock?.toLowerCase() === "yes" ||
       (!cells.stock_quantity && cells.unlimited_stock !== "0"),
-    images: [cells.main_image || "", cells.image_2 || "", cells.image_3 || ""].filter(
-      Boolean
+    ...withAlignedImages(
+      compactImages([cells.main_image || "", cells.image_2 || "", cells.image_3 || ""]),
+      []
     ),
     enabledCountries,
     availability: { ...enabledCountries },
@@ -389,33 +383,43 @@ export function buildImportWorkspaceFromRecords(params: {
   };
 }
 
-export function downloadBulkImportTemplate() {
+/** Sample values keyed by header, so adding or reordering columns can never misalign the template. */
+const TEMPLATE_SAMPLE: Record<ImportSpreadsheetHeader, string> = {
+  sku: "SKU-001",
+  name_en: "Demo Product",
+  name_ptBR: "Produto Demo",
+  name_es: "Producto Demo",
+  name_zhCN: "演示产品",
+  categoryId: "",
+  subcategoryId: "",
+  moq: "1",
+  price_usd: "100",
+  price_brl: "0",
+  price_eur: "0",
+  stock_quantity: "10",
+  unlimited_stock: "0",
+  sale_mode: "stock",
+  status: "draft",
+  main_image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800",
+  image_2: "",
+  image_3: "",
+  short_en: "Short text EN",
+  short_ptBR: "Texto curto PT",
+  short_es: "Texto corto ES",
+  short_zhCN: "简短说明",
+  desc_en: "Description EN",
+  desc_ptBR: "Descrição PT",
+  desc_es: "Descripción ES",
+  desc_zhCN: "详细说明",
+};
+
+export function buildImportTemplateRows(): { headers: string[]; sample: string[] } {
   const headers = [...IMPORT_SPREADSHEET_HEADERS];
-  const sample = [
-    "SKU-001",
-    "Demo Product",
-    "Produto Demo",
-    "Producto Demo",
-    "演示产品",
-    "",
-    "",
-    "",
-    "1",
-    "100",
-    "0",
-    "0",
-    "10",
-    "0",
-    "stock",
-    "draft",
-    "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800",
-    "",
-    "",
-    "Short text EN",
-    "Texto curto PT",
-    "Description EN",
-    "Descrição PT",
-  ];
+  return { headers, sample: headers.map((header) => TEMPLATE_SAMPLE[header]) };
+}
+
+export function downloadBulkImportTemplate() {
+  const { headers, sample } = buildImportTemplateRows();
   const sheet = XLSX.utils.aoa_to_sheet([headers, sample]);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, sheet, "Import");

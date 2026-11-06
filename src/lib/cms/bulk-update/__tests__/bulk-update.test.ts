@@ -31,7 +31,6 @@ function makeProduct(partial: Partial<CmsProduct> & { id: string; sku: string })
     id: partial.id,
     sku: partial.sku,
     moq: partial.moq ?? 1,
-    brandId: partial.brandId ?? "brand-1",
     categoryId: partial.categoryId ?? "cat-1",
     subcategoryId: partial.subcategoryId ?? "sub-1",
     images: partial.images ?? [],
@@ -82,10 +81,6 @@ const catalog: BulkUpdateCatalog = {
       name: "Containers",
       subcategories: [{ id: "sub-3", name: "Trays" }],
     },
-  ],
-  brands: [
-    { id: "brand-1", name: "Oboya" },
-    { id: "brand-2", name: "Other" },
   ],
   countries: [
     { code: "BR", name: "Brazil", currencies: ["BRL"], defaultCurrency: "BRL" },
@@ -209,8 +204,8 @@ describe("searchProductsForBulkUpdate", () => {
 describe("diff", () => {
   it("detects changed fields only", () => {
     const original = makeProduct({ id: "1", sku: "A" });
-    const pending = applyPatchToProduct(original, { moq: 200, brandId: "brand-2" });
-    expect(getChangedFields(original, pending).sort()).toEqual(["brandId", "moq"]);
+    const pending = applyPatchToProduct(original, { moq: 200, subcategoryId: "sub-2" });
+    expect(getChangedFields(original, pending).sort()).toEqual(["moq", "subcategoryId"]);
     expect(isBulkFieldEqual("categoryId", original, pending)).toBe(true);
   });
 
@@ -309,7 +304,6 @@ describe("validateBulkUpdate", () => {
       sku: "A",
       categoryId: "",
       subcategoryId: "",
-      brandId: "",
       status: "draft",
     });
     const row = createWorkspaceRow(original);
@@ -328,13 +322,12 @@ describe("spreadsheet empty cells", () => {
       id: "1",
       sku: "SKU-001",
       moq: 50,
-      brandId: "brand-1",
       categoryId: "cat-1",
     });
     const workbook = XLSX.utils.book_new();
     const sheet = XLSX.utils.aoa_to_sheet([
       ["SKU", "MOQ", "Category", "Brand"],
-      ["SKU-001", "200", "Containers", ""],
+      ["SKU-001", "200", "Containers", "Some Old Brand"],
     ]);
     XLSX.utils.book_append_sheet(workbook, sheet, "Bulk");
     const buffer = XLSX.write(workbook, { type: "array", bookType: "xlsx" }) as ArrayBuffer;
@@ -352,7 +345,6 @@ describe("spreadsheet empty cells", () => {
     const parent = result.rows.find((row) => row.kind === "parent");
     expect(parent?.pending.moq).toBe(200);
     expect(parent?.pending.categoryId).toBe("cat-2");
-    expect(parent?.pending.brandId).toBe("brand-1");
   });
 
   it("expands group when spreadsheet uses child SKU", () => {

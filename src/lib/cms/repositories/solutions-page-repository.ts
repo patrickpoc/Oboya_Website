@@ -313,9 +313,6 @@ function normalizeShop(
     subcategoryIds: Array.isArray(value.subcategoryIds)
       ? value.subcategoryIds.filter((id): id is string => typeof id === "string")
       : undefined,
-    brandIds: Array.isArray(value.brandIds)
-      ? value.brandIds.filter((id): id is string => typeof id === "string")
-      : undefined,
     applications: Array.isArray(value.applications)
       ? value.applications.filter((id): id is string => typeof id === "string")
       : undefined,

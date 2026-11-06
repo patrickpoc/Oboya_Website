@@ -12,7 +12,6 @@ export type ProductRow = {
   id: string;
   sku: string;
   moq: number;
-  brand_id: string;
   category_id: string;
   subcategory_id: string;
   images: unknown;
@@ -64,7 +63,6 @@ export function rowToProduct(row: ProductRow): CmsProduct {
       Number.isFinite(Number(row.moq)) && Number(row.moq) >= 1
         ? Math.floor(Number(row.moq))
         : 1,
-    brandId: row.brand_id,
     categoryId: row.category_id,
     subcategoryId: row.subcategory_id,
     images: (() => {
@@ -181,7 +179,6 @@ export function productToRowWithFeatured(product: CmsProduct): ProductRow {
     id: product.id,
     sku: product.sku,
     moq: product.moq ?? 1,
-    brand_id: product.brandId,
     category_id: product.categoryId,
     subcategory_id: product.subcategoryId,
     images: product.images ?? [],
@@ -228,7 +225,6 @@ export const PRODUCT_TABLE_COLUMNS = [
   "id",
   "sku",
   "moq",
-  "brand_id",
   "category_id",
   "subcategory_id",
   "images",
@@ -250,7 +246,6 @@ export const PRODUCT_LIST_COLUMNS = [
   "id",
   "sku",
   "moq",
-  "brand_id",
   "category_id",
   "subcategory_id",
   "images",

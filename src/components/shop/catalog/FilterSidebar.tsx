@@ -7,7 +7,6 @@ import { useShop } from "@/contexts/ShopContext";
 import { useOverlayA11y } from "@/hooks/use-overlay-a11y";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { BrandLabel } from "@/components/shop/BrandLabel";
 import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 
 function toggleInList(list: string[], id: string) {
@@ -64,7 +63,6 @@ export function FilterSidebar({ className }: { className?: string }) {
   const locale = useLocale();
   const {
     categories,
-    brands,
     filterGroups,
     filterOptions,
     filters,
@@ -189,22 +187,6 @@ export function FilterSidebar({ className }: { className?: string }) {
           ))}
         </FilterGroup>
       )}
-
-      <FilterGroup title={t("filterBrands")}>
-        {brands.map((brand) => (
-          <CheckboxRow
-            key={brand.id}
-            id={`brand-${brand.id}`}
-            label={<BrandLabel brand={brand} locale={locale} />}
-            checked={filters.brandIds.includes(brand.id)}
-            onChange={() =>
-              updateFilters({
-                brandIds: toggleInList(filters.brandIds, brand.id),
-              })
-            }
-          />
-        ))}
-      </FilterGroup>
 
       {filterGroups.map((group) => {
         const options = filterOptions[group.id] ?? [];

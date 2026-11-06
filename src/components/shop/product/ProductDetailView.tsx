@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { BrandLabel } from "@/components/shop/BrandLabel";
 import { ProductColorThumbnailPicker } from "@/components/shop/product/ProductColorThumbnailPicker";
 import { ProductDescriptionContent } from "@/components/shop/product/ProductDescriptionContent";
 import { ProductGallery } from "@/components/shop/drawers/ProductGallery";
@@ -42,7 +41,6 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
   const searchParams = useSearchParams();
   const {
     currency,
-    brands,
     categories,
     openAddToQuoteDialog,
     getProductById,
@@ -96,7 +94,6 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
 
   const activeVariant = getActiveVariant(product, selectedVariantId);
   const name = getProductName(product);
-  const brand = brands.find((item) => item.id === product.brandId);
   const category = categories.find((item) => item.id === product.categoryId);
   const price = currency
     ? resolveVariantPrice(product, activeVariant, currency)
@@ -137,12 +134,6 @@ export function ProductDetailView({ product: initialProduct }: ProductDetailView
           </h1>
           <p className="mt-2 flex flex-wrap items-center gap-x-1 text-sm text-muted-foreground">
             <span>{displaySku}</span>
-            {brand ? (
-              <>
-                <span aria-hidden>·</span>
-                <BrandLabel brand={brand} locale={locale} />
-              </>
-            ) : null}
           </p>
 
           {isQuote ? (

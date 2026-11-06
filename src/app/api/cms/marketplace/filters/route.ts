@@ -7,7 +7,6 @@ import {
   saveMarketplaceFilters,
 } from "@/lib/cms/server/marketplace-config.server";
 import { readProductsStrict } from "@/lib/cms/server/products.server";
-import { getCountryCode } from "@/constants/country-flags";
 import {
   countGroupUsage,
   countOptionUsage,
@@ -15,7 +14,6 @@ import {
   normalizeFilterOptions,
 } from "@/lib/shop/filter-groups";
 import type {
-  ShopBrand,
   ShopCategory,
   ShopFilterGroup,
   ShopFilterOptions,
@@ -68,31 +66,15 @@ export async function GET(request: Request) {
   }
 }
 
-function normalizeBrandFlag(flag?: string) {
-  const code = flag?.trim() ? getCountryCode(flag.trim()) : null;
-  return code ?? undefined;
-}
-
-function normalizeBrands(brands: ShopBrand[]): ShopBrand[] {
-  return brands.map((brand) => {
-    const flag = normalizeBrandFlag(brand.flag);
-    if (flag) return { ...brand, flag };
-    const { flag: _removed, ...rest } = brand;
-    return rest;
-  });
-}
-
 export async function PUT(request: Request) {
   try {
     const auth = await cmsGuard("marketplace", "edit");
     if ("response" in auth) return auth.response;
     const body = (await request.json()) as {
       categories: ShopCategory[];
-      brands: ShopBrand[];
       filterGroups?: ShopFilterGroup[];
       filterOptions: ShopFilterOptions;
     };
-    body.brands = normalizeBrands(body.brands);
     const filterOptions = normalizeFilterOptions(
       body.filterOptions,
       body.filterGroups
@@ -100,7 +82,6 @@ export async function PUT(request: Request) {
     const filterGroups = normalizeFilterGroups(body.filterGroups, filterOptions);
     const payload = {
       categories: body.categories,
-      brands: body.brands,
       filterGroups,
       filterOptions: normalizeFilterOptions(filterOptions, filterGroups),
     };
@@ -119,10 +100,6 @@ export async function PUT(request: Request) {
         `Subcategory in ${category.name || "category"}`
       );
     });
-    assertNoDuplicateNames(
-      payload.brands.map((brand) => brand.name),
-      "Brand"
-    );
     assertNoDuplicateNames(
       payload.filterGroups.map((group) => group.name),
       "Filter group"
@@ -149,16 +126,12 @@ export async function PUT(request: Request) {
         category.subcategories.map((subcategory) => subcategory.id)
       )
     );
-    const nextBrandIds = new Set(payload.brands.map((brand) => brand.id));
     const removedCategories = current.categories
       .map((category) => category.id)
       .filter((id) => !nextCategoryIds.has(id));
     const removedSubcategories = current.categories
       .flatMap((category) => category.subcategories.map((subcategory) => subcategory.id))
       .filter((id) => !nextSubcategoryIds.has(id));
-    const removedBrands = current.brands
-      .map((brand) => brand.id)
-      .filter((id) => !nextBrandIds.has(id));
 
     for (const categoryId of removedCategories) {
       const usedBy = products.filter((product) => product.categoryId === categoryId).length;
@@ -170,12 +143,6 @@ export async function PUT(request: Request) {
       const usedBy = products.filter((product) => product.subcategoryId === subcategoryId).length;
       if (usedBy > 0) {
         throw new ValidationError(`Subcategory is used by ${usedBy} product(s).`);
-      }
-    }
-    for (const brandId of removedBrands) {
-      const usedBy = products.filter((product) => product.brandId === brandId).length;
-      if (usedBy > 0) {
-        throw new ValidationError(`Brand is used by ${usedBy} product(s).`);
       }
     }
 

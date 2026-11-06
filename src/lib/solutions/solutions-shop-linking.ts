@@ -8,7 +8,6 @@ function hasTaxonomy(target: ShopFilterTarget): boolean {
   return Boolean(
     target.categoryId ||
       (target.subcategoryIds && target.subcategoryIds.length > 0) ||
-      (target.brandIds && target.brandIds.length > 0) ||
       (target.applications && target.applications.length > 0) ||
       (target.cultures && target.cultures.length > 0) ||
       (target.certifications && target.certifications.length > 0) ||
@@ -34,7 +33,6 @@ export function mergeShopFilterTargets(
       ...(result.subcategoryIds ?? []),
       ...(target.subcategoryIds ?? []),
     ]);
-    result.brandIds = uniq([...(result.brandIds ?? []), ...(target.brandIds ?? [])]);
     result.applications = uniq([
       ...(result.applications ?? []),
       ...(target.applications ?? []),
@@ -53,7 +51,6 @@ export function mergeShopFilterTargets(
 
   if (qParts.length > 0) result.q = qParts.join(" ");
   if (result.subcategoryIds?.length === 0) delete result.subcategoryIds;
-  if (result.brandIds?.length === 0) delete result.brandIds;
   if (result.applications?.length === 0) delete result.applications;
   if (result.cultures?.length === 0) delete result.cultures;
   if (result.certifications?.length === 0) delete result.certifications;
@@ -75,7 +72,6 @@ export function buildShopHrefForSolution(target?: ShopFilterTarget | null): stri
     ...EMPTY_SHOP_FILTERS,
     categoryId: target.categoryId ?? null,
     subcategoryIds: target.subcategoryIds ?? [],
-    brandIds: target.brandIds ?? [],
     applications: target.applications ?? [],
     cultures: target.cultures ?? [],
     certifications: target.certifications ?? [],
@@ -89,7 +85,6 @@ export function buildShopHrefForSolution(target?: ShopFilterTarget | null): stri
   const catalog = getShopCatalog();
   const filters = toPublicShopFilters(rawFilters, {
     categories: catalog.categories,
-    brands: catalog.brands,
     filterOptions: catalog.filterOptions,
   });
 

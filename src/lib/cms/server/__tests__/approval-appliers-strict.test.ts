@@ -5,8 +5,11 @@ vi.mock("server-only", () => ({}));
 const readProductByIdStrict = vi.fn();
 vi.mock("@/lib/cms/server/products.server", () => ({ readProductByIdStrict }));
 const writeProduct = vi.fn();
+const assertVariantChangesValid = vi.fn();
+const createProductWrite = vi.fn();
 vi.mock("@/lib/cms/server/product-writes.server", () => ({
-  createProductWrite: vi.fn(),
+  assertVariantChangesValid,
+  createProductWrite,
   deleteProductWrite: vi.fn(),
   mergeProductUpdate: (a: unknown) => a,
   invalidateCatalog: vi.fn(),
@@ -67,6 +70,29 @@ describe("appliers fail on a baseline read error instead of treating data as mis
       a.apply(req("marketplace.bulk_update", { products: [{ id: "a" }, { id: "b" }] }), { force: true })
     );
     expect(writeProduct).not.toHaveBeenCalled();
+  });
+
+  it("re-checks colors at apply time: a failing guard writes nothing (edit, create, bulk)", async () => {
+    class VariantValidationError extends Error {
+      name = "VariantValidationError";
+    }
+    assertVariantChangesValid.mockRejectedValue(new VariantValidationError("Color SKU taken"));
+    readProductByIdStrict.mockReset().mockResolvedValue({ id: "a" });
+    const edit = await applier("marketplace.product_edit");
+    await expect(
+      edit.apply(req("marketplace.product_edit", { product: { id: "a" }, preserveCurrentPrices: false }), { force: true })
+    ).rejects.toThrow(/Color SKU taken/);
+    const create = await applier("marketplace.product_create");
+    await expect(create.apply(req("marketplace.product_create", { id: "n" }), { force: true })).rejects.toThrow(
+      /Color SKU taken/
+    );
+    const bulk = await applier("marketplace.bulk_update");
+    await expect(
+      bulk.apply(req("marketplace.bulk_update", { products: [{ id: "a" }] }), { force: true })
+    ).rejects.toThrow(/Color SKU taken/);
+    expect(writeProduct).not.toHaveBeenCalled();
+    expect(createProductWrite).not.toHaveBeenCalled();
+    assertVariantChangesValid.mockReset();
   });
 
   it("marketplace.countries: throws instead of using seed countries", async () => {

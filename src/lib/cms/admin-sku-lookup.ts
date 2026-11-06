@@ -90,6 +90,26 @@ export function collectAllSkus(
   return skus;
 }
 
+/**
+ * Lowercased SKU (parent, legacy id, color child) -> id of the owning product.
+ * Trashed products are included: restoring one must not create a duplicate SKU.
+ */
+export function buildSkuOwners(products: CmsProduct[]): Map<string, string> {
+  const owners = new Map<string, string>();
+  for (const product of products) {
+    const keys = [
+      product.sku,
+      product.id,
+      ...(product.colorVariants ?? []).map((variant) => variant.sku),
+    ];
+    for (const raw of keys) {
+      const key = normalizeSku(raw ?? "");
+      if (key && !owners.has(key)) owners.set(key, product.id);
+    }
+  }
+  return owners;
+}
+
 /** Detect the same SKU claimed by more than one product document. */
 export function findSkuCollisions(products: CmsProduct[]): SkuCollision[] {
   const owners = new Map<string, Set<string>>();

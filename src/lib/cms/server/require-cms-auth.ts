@@ -6,6 +6,7 @@ import type { CmsAction, CmsModule, CmsUser } from "@/lib/cms/types";
 import { canAccessUser } from "@/lib/cms/permissions/matrix";
 import { getCmsUsers } from "@/lib/cms/repositories/users-repository";
 import { ensureAccessControlHydrated } from "@/lib/cms/server/access-control.server";
+import { rethrowNextSignals } from "@/lib/cms/server/rethrow-next-signals";
 import { profileToCmsUser } from "@/lib/cms/server/users.server";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -140,13 +141,24 @@ const resolveCmsSessionUser = cache(async (): Promise<CmsAuthResult> => {
   return ok;
 });
 
-/** Cold start with an unreadable access matrix: fail closed instead of guessing permissions. */
+/**
+ * Cold start with an unreadable access matrix: fail closed (503) instead of guessing
+ * permissions. A Super Admin has full access by code, independent of the matrix, so
+ * they are let through and can still repair the document.
+ */
 async function accessUnavailable(): Promise<CmsAuthFail | null> {
   try {
     await ensureAccessControlHydrated();
     return null;
   } catch (error) {
+    rethrowNextSignals(error);
     console.error("Access control unavailable:", error);
+    try {
+      const session = await resolveCmsSessionUser();
+      if (session.ok && session.user.role === "super_admin") return null;
+    } catch (sessionError) {
+      rethrowNextSignals(sessionError);
+    }
     return { ok: false, status: 503, error: "Service unavailable" };
   }
 }

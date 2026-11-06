@@ -23,7 +23,6 @@ import {
 import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 import type {
   FilterOption,
-  ShopBrand,
   ShopCategory,
   ShopFilterGroup,
   ShopFilterOptions,
@@ -39,7 +38,6 @@ function toggleInList(list: string[], id: string) {
 interface ProductTaxonomyCardProps {
   product: CmsProduct;
   categories: ShopCategory[];
-  brands: ShopBrand[];
   filterGroups: ShopFilterGroup[];
   filterOptions: ShopFilterOptions;
   loading?: boolean;
@@ -49,7 +47,6 @@ interface ProductTaxonomyCardProps {
 export function ProductTaxonomyCard({
   product,
   categories,
-  brands,
   filterGroups,
   filterOptions,
   loading = false,
@@ -68,10 +65,6 @@ export function ProductTaxonomyCard({
   const selectedSubcategory = useMemo(
     () => selectedCategory?.subcategories.find((sub) => sub.id === product.subcategoryId),
     [selectedCategory, product.subcategoryId]
-  );
-  const selectedBrand = useMemo(
-    () => brands.find((brand) => brand.id === product.brandId),
-    [brands, product.brandId]
   );
 
   const discoverySummary = useMemo(() => {
@@ -210,28 +203,6 @@ export function ProductTaxonomyCard({
                 {labelFor(selectedCategory)} › {labelFor(selectedSubcategory)}
               </p>
             )}
-
-            <div className="space-y-1.5 sm:max-w-md">
-              <Label htmlFor="product-brand">{t("brand")}</Label>
-              <select
-                id="product-brand"
-                value={product.brandId}
-                onChange={(e) => onUpdate({ brandId: e.target.value })}
-                className={SELECT_CLASS}
-                disabled={loading}
-              >
-                {brands.map((brand) => (
-                  <option key={brand.id} value={brand.id}>
-                    {labelFor(brand)}
-                  </option>
-                ))}
-              </select>
-              {selectedBrand && (
-                <p className="text-xs text-muted-foreground">
-                  {t("manufacturer", { name: labelFor(selectedBrand) })}
-                </p>
-              )}
-            </div>
           </div>
         </section>
 

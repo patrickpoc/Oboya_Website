@@ -48,7 +48,7 @@ type CmsMediaRow = {
   updated_at: string | null;
 };
 
-function rowToAsset(row: CmsMediaRow): MediaAsset {
+export function rowToAsset(row: CmsMediaRow): MediaAsset {
   const type =
     row.type === "video" || row.type === "document" || row.type === "image"
       ? row.type

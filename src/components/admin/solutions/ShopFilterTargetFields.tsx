@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import type { ShopFilterTarget } from "@/lib/solutions/types";
-import type { ShopBrand, ShopCategory, ShopFilterOptions } from "@/lib/shop/types";
+import type { ShopCategory, ShopFilterOptions } from "@/lib/shop/types";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -13,7 +13,6 @@ interface ShopFilterTargetFieldsProps {
   onChange: (next: ShopFilterTarget) => void;
   filterOptions: ShopFilterOptions;
   categories: ShopCategory[];
-  brands: ShopBrand[];
   className?: string;
 }
 
@@ -72,7 +71,6 @@ export function ShopFilterTargetFields({
   onChange,
   filterOptions,
   categories,
-  brands,
   className,
 }: ShopFilterTargetFieldsProps) {
   const t = useTranslations("admin.website.solutions");
@@ -167,15 +165,6 @@ export function ShopFilterTargetFields({
             ...value,
             subcategoryIds: toggleId(value.subcategoryIds, id),
           })
-        }
-      />
-
-      <OptionChecklist
-        title={t("brands")}
-        options={brands}
-        selected={value.brandIds ?? []}
-        onToggle={(id) =>
-          onChange({ ...value, brandIds: toggleId(value.brandIds, id) })
         }
       />
 

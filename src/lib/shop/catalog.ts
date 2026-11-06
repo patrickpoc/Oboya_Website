@@ -18,7 +18,6 @@ const emptyOptions = normalizeFilterOptions(emptyShopFilterOptions());
 const catalog: ShopCatalog = {
   countries: countriesData as ShopCountry[],
   categories: [],
-  brands: [],
   filterGroups: normalizeFilterGroups(DEFAULT_FILTER_GROUPS, emptyOptions),
   filterOptions: emptyOptions,
   products: [],
@@ -27,7 +26,6 @@ const catalog: ShopCatalog = {
 export function updateShopCatalog(patch: Partial<ShopCatalog>) {
   if (patch.countries) catalog.countries = patch.countries;
   if (patch.categories) catalog.categories = patch.categories;
-  if (patch.brands) catalog.brands = patch.brands;
   if (patch.filterGroups) catalog.filterGroups = patch.filterGroups;
   if (patch.filterOptions) catalog.filterOptions = patch.filterOptions;
   if (patch.products) catalog.products = patch.products;
@@ -43,10 +41,6 @@ export function getCountryByCode(code: string) {
 
 export function getProductById(id: string) {
   return catalog.products.find((product) => product.id === id);
-}
-
-export function getBrandById(id: string) {
-  return catalog.brands.find((brand) => brand.id === id);
 }
 
 export function getCategoryById(id: string) {

@@ -1,7 +1,6 @@
 import { getProductOptionIds } from "@/lib/shop/filter-groups";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type {
-  ShopBrand,
   ShopCategory,
   ShopFilterGroup,
   ShopFilterOptions,
@@ -10,13 +9,11 @@ import type {
 export type RemovalTarget =
   | { kind: "subcategory"; id: string }
   | { kind: "category"; id: string }
-  | { kind: "brand"; id: string }
   | { kind: "option"; id: string; groupId: string }
   | { kind: "group"; id: string };
 
 export type TaxonomyDoc = {
   categories: ShopCategory[];
-  brands: ShopBrand[];
   filterGroups: ShopFilterGroup[];
   filterOptions: ShopFilterOptions;
 };
@@ -27,7 +24,6 @@ export type ReferencePatch = Partial<
     CmsProduct,
     | "categoryId"
     | "subcategoryId"
-    | "brandId"
     | "application"
     | "cultures"
     | "certifications"
@@ -40,7 +36,6 @@ type ProductRefs = Pick<
   CmsProduct,
   | "categoryId"
   | "subcategoryId"
-  | "brandId"
   | "application"
   | "cultures"
   | "certifications"
@@ -49,12 +44,12 @@ type ProductRefs = Pick<
 >;
 
 export type ResolvedReplacement =
-  | { ok: true; subcategoryId?: string; categoryId?: string; brandId?: string }
+  | { ok: true; subcategoryId?: string; categoryId?: string }
   | { ok: false; error: string };
 
-/** Required references (subcategory, category, brand) need a replacement. */
+/** Required references (subcategory, category) need a replacement. */
 export function requiresReplacement(target: RemovalTarget): boolean {
-  return target.kind === "subcategory" || target.kind === "category" || target.kind === "brand";
+  return target.kind === "subcategory" || target.kind === "category";
 }
 
 export const MAX_ID_LENGTH = 200;
@@ -68,7 +63,7 @@ export function isRemovalTarget(value: unknown): value is RemovalTarget {
   if (!validId(v.id)) return false;
   if (v.kind === "option") return validId(v.groupId);
   return (
-    v.kind === "subcategory" || v.kind === "category" || v.kind === "brand" || v.kind === "group"
+    v.kind === "subcategory" || v.kind === "category" || v.kind === "group"
   );
 }
 
@@ -91,8 +86,6 @@ export function targetExists(target: RemovalTarget, doc: TaxonomyDoc): boolean {
       return doc.categories.some((c) => c.subcategories.some((s) => s.id === target.id));
     case "category":
       return doc.categories.some((c) => c.id === target.id);
-    case "brand":
-      return doc.brands.some((b) => b.id === target.id);
     case "group":
       return doc.filterGroups.some((g) => g.id === target.id);
     case "option":
@@ -116,8 +109,6 @@ export function productUsesTarget(
         product.categoryId === target.id ||
         subcategoryIdsOf(doc, target.id).has(product.subcategoryId)
       );
-    case "brand":
-      return product.brandId === target.id;
     case "option":
       return getProductOptionIds(product, target.groupId).includes(target.id);
     case "group":
@@ -142,11 +133,6 @@ export function resolveReplacement(
   if (!requiresReplacement(target)) return { ok: true };
   const id = replacementId?.trim();
   if (!id) return { ok: false, error: "A replacement is required." };
-  if (target.kind === "brand") {
-    if (id === target.id) return { ok: false, error: "Replacement must differ from the removed item." };
-    if (!doc.brands.some((b) => b.id === id)) return { ok: false, error: "Replacement brand not found." };
-    return { ok: true, brandId: id };
-  }
   const doomed =
     target.kind === "category" ? subcategoryIdsOf(doc, target.id) : new Set([target.id]);
   if (doomed.has(id)) return { ok: false, error: "Replacement must differ from the removed item." };
@@ -171,8 +157,6 @@ export function computeProductPatch(
         subcategoryId: replacement.subcategoryId ?? product.subcategoryId,
         categoryId: replacement.categoryId ?? product.categoryId,
       };
-    case "brand":
-      return { brandId: replacement.brandId ?? product.brandId };
     case "option":
       return groupPatch(
         product,
@@ -213,8 +197,6 @@ export function removeFromDocument(target: RemovalTarget, doc: TaxonomyDoc): Tax
       };
     case "category":
       return { ...doc, categories: doc.categories.filter((c) => c.id !== target.id) };
-    case "brand":
-      return { ...doc, brands: doc.brands.filter((b) => b.id !== target.id) };
     case "group": {
       const filterOptions = { ...doc.filterOptions };
       delete filterOptions[target.id];

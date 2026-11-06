@@ -25,11 +25,9 @@ export async function GET() {
     // Trashed products count too: restoring one must not leave a dangling reference.
     const active = products;
     const subcategoryUsage: Record<string, number> = {};
-    const brandUsage: Record<string, number> = {};
     for (const product of active) {
       subcategoryUsage[product.subcategoryId] =
         (subcategoryUsage[product.subcategoryId] ?? 0) + 1;
-      brandUsage[product.brandId] = (brandUsage[product.brandId] ?? 0) + 1;
     }
     // Same predicate as the removal flow: a product reached only through one
     // of the category's subcategories counts as well.
@@ -56,7 +54,7 @@ export async function GET() {
     }
 
     return NextResponse.json(
-      { categoryUsage, subcategoryUsage, brandUsage, optionUsage, groupUsage },
+      { categoryUsage, subcategoryUsage, optionUsage, groupUsage },
       { headers: noStoreHeaders }
     );
   } catch (error) {

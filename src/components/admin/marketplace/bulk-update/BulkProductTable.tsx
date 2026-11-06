@@ -6,10 +6,10 @@ import Image from "next/image";
 import { ChevronDown, ChevronRight, X } from "lucide-react";
 import { BulkPriceInput } from "@/components/admin/marketplace/bulk-update/BulkPriceInput";
 import { PRODUCT_EDITOR_SELECT_CLASS } from "@/components/admin/marketplace/product-editor.constants";
+import { BulkVariantImageInput } from "@/components/admin/marketplace/bulk-update/BulkVariantImageInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  brandOptions,
   categoryOptions,
   filterOptionLabels,
   formatFieldDisplayValue,
@@ -103,7 +103,13 @@ function CellShell({
   className?: string;
 }) {
   const changed = row.changedFields.includes(field);
-  const fieldIssues = issuesForProduct(issues, row.productId, field);
+  // Variant rows only see their own issues; the parent row never sees a sibling's.
+  const fieldIssues = issuesForProduct(
+    issues,
+    row.productId,
+    field,
+    row.kind === "variant" ? row.variantId : null
+  );
   const blocked = fieldIssues.some((issue) => issue.status === "blocked");
   const warning = fieldIssues.some((issue) => issue.status === "warning");
   const original = formatFieldDisplayValue(
@@ -290,7 +296,7 @@ export function BulkProductTable({
   return (
     <div className="rounded-xl border border-border/60 bg-white">
       <div className="overflow-x-auto">
-        <table className="min-w-[2100px] w-full border-separate border-spacing-0 text-left text-sm">
+        <table className="min-w-[3500px] w-full border-separate border-spacing-0 text-left text-sm">
           <thead className="bg-oboya-soft-white">
             <tr>
               <th className={cn(TH, STICKY_LEFT_CHECK, "border-b border-border/60")}>
@@ -312,9 +318,6 @@ export function BulkProductTable({
               </th>
               <th className={cn(TH, "min-w-[10rem] border-b border-border/60")}>
                 {BULK_FIELD_LABELS.subcategoryId}
-              </th>
-              <th className={cn(TH, "min-w-[10rem] border-b border-border/60")}>
-                {BULK_FIELD_LABELS.brandId}
               </th>
               <th className={cn(TH, "min-w-[10rem] border-b border-border/60")}>
                 {BULK_FIELD_LABELS.application}
@@ -340,6 +343,13 @@ export function BulkProductTable({
               <th className={cn(TH, "min-w-[11rem] border-b border-border/60")}>USD</th>
               <th className={cn(TH, "min-w-[11rem] border-b border-border/60")}>BRL</th>
               <th className={cn(TH, "min-w-[11rem] border-b border-border/60")}>EUR</th>
+              <th className={cn(TH, "min-w-[9rem] border-b border-border/60")}>{t("colColorHex")}</th>
+              <th className={cn(TH, "min-w-[10rem] border-b border-border/60")}>{t("colColorNameEn")}</th>
+              <th className={cn(TH, "min-w-[10rem] border-b border-border/60")}>{t("colColorNamePt")}</th>
+              <th className={cn(TH, "min-w-[10rem] border-b border-border/60")}>{t("colColorNameEs")}</th>
+              <th className={cn(TH, "min-w-[10rem] border-b border-border/60")}>{t("colColorNameZh")}</th>
+              <th className={cn(TH, "min-w-[16rem] border-b border-border/60")}>{t("colVariantImage")}</th>
+              <th className={cn(TH, "min-w-[6rem] border-b border-border/60")}>{t("colSortOrder")}</th>
               <th
                 className={cn(TH, STICKY_RIGHT_HEAD, "border-b border-border/60")}
                 aria-label={tCommon("remove")}
@@ -452,6 +462,20 @@ export function BulkProductTable({
                               : t("colorsExpanded", { count: childCount })}
                           </span>
                         ) : null}
+                        {isParent
+                          ? issuesForProduct(issues, row.productId, "colorVariants")
+                              .filter((issue) => issue.status === "blocked")
+                              .map((issue) => (
+                                <span
+                                  key={`${issue.field}-${issue.message}`}
+                                  role="alert"
+                                  className="mt-1 block rounded bg-red-50 px-1.5 py-1 text-[10px] font-normal leading-tight text-red-700 ring-1 ring-red-200"
+                                >
+                                  <span className="font-medium">{t("productIssue")}: </span>
+                                  {issue.message}
+                                </span>
+                              ))
+                          : null}
                         {!isParent && (
                           <span className="mt-0.5 inline-flex rounded bg-oboya-blue/10 px-1.5 py-0.5 text-[10px] font-medium text-oboya-blue">
                             {t("colorOfParent", { parentSku })}
@@ -461,7 +485,26 @@ export function BulkProductTable({
                     </div>
                   </td>
                   <td className={cn(TD, "font-mono text-xs font-normal text-oboya-blue-dark/80")}>
-                    {isParent ? product.sku : variant?.sku || row.matchedSku}
+                    {isParent || !variant ? (
+                      isParent ? product.sku : row.matchedSku
+                    ) : (
+                      <CellShell
+                        field="variantSku"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                        className={FIELD_CELL_SHELL}
+                      >
+                        <Input
+                          className={cn(CONTROL, "min-w-[8rem] font-mono text-xs")}
+                          value={variant.sku ?? ""}
+                          onChange={(event) =>
+                            onPatch(row.productId, { variantSku: event.target.value }, row.variantId)
+                          }
+                        />
+                      </CellShell>
+                    )}
                   </td>
                   <td className={TD}>
                     {isParent ? (
@@ -578,39 +621,6 @@ export function BulkProductTable({
                             product.subcategoryId,
                             (id) =>
                               resolveCatalogDisplayName(catalog, "subcategory", id, locale)
-                          ).map((item) => (
-                            <option key={item.id} value={item.id}>
-                              {item.name}
-                            </option>
-                          ))}
-                        </select>
-                      </CellShell>
-                    ) : (
-                      <DimmedDash />
-                    )}
-                  </td>
-                  <td className={TD}>
-                    {isParent ? (
-                      <CellShell
-                        field="brandId"
-                        row={row}
-                        catalog={catalog}
-                        locale={locale}
-                        issues={issues}
-                        className={FIELD_CELL_SHELL}
-                      >
-                        <select
-                          className={SELECT_CONTROL}
-                          value={product.brandId || ""}
-                          onChange={(event) =>
-                            onPatch(row.productId, { brandId: event.target.value })
-                          }
-                        >
-                          <option value="">—</option>
-                          {withCurrentLabeledOption(
-                            brandOptions(catalog, locale),
-                            product.brandId,
-                            (id) => resolveCatalogDisplayName(catalog, "brand", id, locale)
                           ).map((item) => (
                             <option key={item.id} value={item.id}>
                               {item.name}
@@ -974,6 +984,117 @@ export function BulkProductTable({
                           }
                         />
                       </CellShell>
+                    )}
+                  </td>
+                  {(
+                    [
+                      ["defaultColor", "variantColor", "hex"],
+                      ["defaultColorNameEn", "variantNameEn", "en"],
+                      ["defaultColorNamePt", "variantNamePt", "pt-BR"],
+                      ["defaultColorNameEs", "variantNameEs", "es"],
+                      ["defaultColorNameZh", "variantNameZh", "zh-CN"],
+                    ] as const
+                  ).map(([parentField, variantField, locale_]) => {
+                    const parentValue =
+                      locale_ === "hex"
+                        ? product.defaultColor ?? ""
+                        : product.defaultColorName?.[locale_] ?? "";
+                    const variantValue =
+                      locale_ === "hex"
+                        ? variant?.color ?? ""
+                        : locale_ === "en"
+                          ? variant?.nameI18n?.en ?? variant?.name ?? ""
+                          : variant?.nameI18n?.[locale_] ?? "";
+                    if (!isParent && !variant) {
+                      return (
+                        <td key={variantField} className={TD}>
+                          <DimmedDash />
+                        </td>
+                      );
+                    }
+                    return (
+                      <td key={variantField} className={TD}>
+                        <CellShell
+                          field={isParent ? parentField : variantField}
+                          row={row}
+                          catalog={catalog}
+                          locale={locale}
+                          issues={issues}
+                          className={FIELD_CELL_SHELL}
+                        >
+                          <div className="flex items-center gap-1.5">
+                            {locale_ === "hex" &&
+                            /^#[0-9A-Fa-f]{6}$/.test(isParent ? parentValue : variantValue) ? (
+                              <span
+                                aria-hidden
+                                className="size-5 shrink-0 rounded border border-border/60"
+                                style={{ backgroundColor: isParent ? parentValue : variantValue }}
+                              />
+                            ) : null}
+                            <Input
+                              className={cn(CONTROL, locale_ === "hex" && "font-mono text-xs")}
+                              value={isParent ? parentValue : variantValue}
+                              onChange={(event) =>
+                                onPatch(
+                                  row.productId,
+                                  { [isParent ? parentField : variantField]: event.target.value },
+                                  isParent ? undefined : row.variantId
+                                )
+                              }
+                            />
+                          </div>
+                        </CellShell>
+                      </td>
+                    );
+                  })}
+                  <td className={TD}>
+                    {!isParent && variant ? (
+                      <CellShell
+                        field="variantImage"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                        className="min-w-[15rem]"
+                      >
+                        <BulkVariantImageInput
+                          value={variant.image ?? ""}
+                          onChange={(url) =>
+                            onPatch(row.productId, { variantImage: url }, row.variantId)
+                          }
+                        />
+                      </CellShell>
+                    ) : (
+                      <DimmedDash />
+                    )}
+                  </td>
+                  <td className={TD}>
+                    {!isParent && variant ? (
+                      <CellShell
+                        field="variantSortOrder"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                        className="min-w-[5rem]"
+                      >
+                        <Input
+                          type="number"
+                          min={0}
+                          step={1}
+                          className={cn(CONTROL, "min-w-[5rem]")}
+                          value={variant.sortOrder ?? 0}
+                          onChange={(event) =>
+                            onPatch(
+                              row.productId,
+                              { variantSortOrder: Number(event.target.value) },
+                              row.variantId
+                            )
+                          }
+                        />
+                      </CellShell>
+                    ) : (
+                      <DimmedDash />
                     )}
                   </td>
                   <td className={cn(TD, STICKY_RIGHT_BODY, !isParent && STICKY_CHILD_BG)}>

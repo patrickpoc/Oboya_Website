@@ -13,6 +13,7 @@ import {
 } from "@/lib/cms/bulk-update/diff";
 import {
   BULK_SPREADSHEET_HEADERS,
+  IGNORED_LEGACY_SPREADSHEET_HEADERS,
   SPREADSHEET_HEADER_ALIASES,
   type BulkSpreadsheetHeader,
 } from "@/lib/cms/bulk-update/field-labels";
@@ -108,15 +109,6 @@ function resolveSubcategoryId(
     if (byName) return byName.id;
   }
   return null;
-}
-
-function resolveBrandId(raw: string, catalog: BulkUpdateCatalog): string | null {
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-  const byId = catalog.brands.find((b) => b.id === trimmed);
-  if (byId) return byId.id;
-  const lower = trimmed.toLowerCase();
-  return catalog.brands.find((b) => b.name.toLowerCase() === lower)?.id ?? null;
 }
 
 function parseShopStatus(raw: string): CmsStatus | null {
@@ -220,21 +212,6 @@ function parseRowToPatch(
         });
       } else {
         patch.subcategoryId = resolved;
-      }
-    }
-
-    const brandRaw = cells["Brand"]?.trim();
-    if (brandRaw) {
-      const resolved = resolveBrandId(brandRaw, catalog);
-      if (!resolved) {
-        errors.push({
-          row: rowNumber,
-          sku,
-          message: `Unknown brand "${brandRaw}".`,
-          suggestedAction: "Use an existing brand id or name.",
-        });
-      } else {
-        patch.brandId = resolved;
       }
     }
 
@@ -366,8 +343,32 @@ function parseRowToPatch(
       "EUR"
     );
     if (priceEur !== undefined) patch.priceEur = priceEur;
+
+    // Parent SKU: Color hex / Color name* target the product default color.
+    const hex = cells["Color hex"]?.trim();
+    if (hex) patch.defaultColor = hex;
+    const defaultNames = [
+      ["Color name", "defaultColorNameEn"],
+      ["Color name PT", "defaultColorNamePt"],
+      ["Color name ES", "defaultColorNameEs"],
+      ["Color name ZH", "defaultColorNameZh"],
+    ] as const;
+    for (const [header, key] of defaultNames) {
+      const value = cells[header]?.trim();
+      if (value) patch[key] = value;
+    }
+    for (const header of ["New SKU", "Sort order", "Variant image"] as const) {
+      if (cells[header]?.trim()) {
+        errors.push({
+          row: rowNumber,
+          sku,
+          message: `"${header}" applies to color (child) SKUs only; it was ignored on a parent SKU.`,
+          suggestedAction: "Put this value on the color SKU row.",
+        });
+      }
+    }
   } else {
-    // Child SKU: MOQ + prices only (for now).
+    // Child SKU: MOQ, prices and the color's own fields.
     const moqRaw = cells["MOQ"]?.trim();
     if (moqRaw) {
       const moq = Number(moqRaw);
@@ -421,6 +422,34 @@ function parseRowToPatch(
       "EUR"
     );
     if (variantPriceEur !== undefined) patch.variantPriceEur = variantPriceEur;
+
+    const variantFields = [
+      ["New SKU", "variantSku"],
+      ["Color hex", "variantColor"],
+      ["Color name", "variantNameEn"],
+      ["Color name PT", "variantNamePt"],
+      ["Color name ES", "variantNameEs"],
+      ["Color name ZH", "variantNameZh"],
+      ["Variant image", "variantImage"],
+    ] as const;
+    for (const [header, key] of variantFields) {
+      const value = cells[header]?.trim();
+      if (value) patch[key] = value;
+    }
+    const sortRaw = cells["Sort order"]?.trim();
+    if (sortRaw) {
+      const sortOrder = Number(sortRaw);
+      if (!Number.isInteger(sortOrder) || sortOrder < 0) {
+        errors.push({
+          row: rowNumber,
+          sku,
+          message: `Invalid Sort order "${sortRaw}".`,
+          suggestedAction: "Use an integer ≥ 0.",
+        });
+      } else {
+        patch.variantSortOrder = sortOrder;
+      }
+    }
   }
 
   return patch;
@@ -444,6 +473,13 @@ function recordsFromSheet(data: unknown[][]): {
     if (!raw) return;
     const normalized = normalizeHeader(raw);
     if (!normalized) {
+      const key = raw.toLowerCase().replace(/\s+/g, " ");
+      if (
+        IGNORED_LEGACY_SPREADSHEET_HEADERS.has(key) ||
+        IGNORED_LEGACY_SPREADSHEET_HEADERS.has(key.replace(/[\s_/]+/g, ""))
+      ) {
+        return;
+      }
       headerErrors.push(`Unknown column "${raw}".`);
       return;
     }
@@ -673,43 +709,38 @@ export function mergeSpreadsheetIntoWorkspace(params: {
   };
 }
 
+/** Sample values keyed by header so the sample row can never drift from the columns. */
+const TEMPLATE_SAMPLE: Partial<Record<BulkSpreadsheetHeader, string>> = {
+  SKU: "SKU-001",
+  MOQ: "100",
+  "Market availability": "BR;US",
+  "Available in Shop": "yes",
+  "Sale mode": "stock",
+  "Price USD": "10",
+};
+
+export function buildTemplateRows(): { headers: string[]; sample: string[] } {
+  const headers = [...BULK_SPREADSHEET_HEADERS];
+  return { headers, sample: headers.map((header) => TEMPLATE_SAMPLE[header] ?? "") };
+}
+
 export function buildTemplateWorkbook(): ArrayBuffer {
-  const example = [...BULK_SPREADSHEET_HEADERS];
-  const sample = [
-    "SKU-001",
-    "100",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "BR;US",
-    "yes",
-    "stock",
-    "10",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-  ];
+  const { headers, sample } = buildTemplateRows();
   const notes = [
     [
       "NOTES",
       "SKU is required (parent or color/child SKU). Matching a child SKU expands the full color group.",
       "Empty cells keep the current product value (they do NOT clear fields).",
-      "Parent SKU rows: MOQ/taxonomy/status + Price USD/BRL/EUR apply to the base product.",
-      "Child SKU rows: Color hex, Color name, Variant price USD, Variant image apply to that color only.",
+      "Parent SKU rows: MOQ/taxonomy/status + Price USD/BRL/EUR apply to the base product. Color hex and Color name (EN/PT/ES/ZH) set the product default color.",
+      "Child SKU rows: New SKU (keeps the color's id), Color hex, Color name (EN/PT/ES/ZH), Variant image (https:// or /path), Sort order (integer >= 0), MOQ and prices apply to that color only.",
       "Two rows for the same parent merge into one pending document; same-field conflicts warn.",
       "Limit: 30 products / color groups (not each color row).",
+      "The old Brand column is ignored if present.",
     ],
   ];
 
   const workbook = XLSX.utils.book_new();
-  const sheet = XLSX.utils.aoa_to_sheet([example, sample, [], ...notes]);
+  const sheet = XLSX.utils.aoa_to_sheet([headers, sample, [], ...notes]);
   XLSX.utils.book_append_sheet(workbook, sheet, "Bulk Update");
   return XLSX.write(workbook, { bookType: "xlsx", type: "array" }) as ArrayBuffer;
 }

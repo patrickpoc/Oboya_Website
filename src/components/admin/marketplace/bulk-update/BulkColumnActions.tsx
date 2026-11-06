@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAdminLocale } from "@/contexts/AdminLocaleContext";
 import {
-  brandOptions,
   categoryOptions,
   filterOptionLabels,
   marketOptions,
@@ -32,7 +31,6 @@ const COLUMN_FIELDS: BulkEditableField[] = [
   "moq",
   "categoryId",
   "subcategoryId",
-  "brandId",
   "application",
   "cultures",
   "certifications",
@@ -47,7 +45,6 @@ type ActionRowState = {
   moq: string;
   categoryId: string;
   subcategoryId: string;
-  brandId: string;
   application: string[];
   cultures: string[];
   certifications: string[];
@@ -63,7 +60,6 @@ function createRow(field: BulkEditableField = "categoryId"): ActionRowState {
     moq: "1",
     categoryId: "",
     subcategoryId: "",
-    brandId: "",
     application: [],
     cultures: [],
     certifications: [],
@@ -142,10 +138,6 @@ function buildPatchFromRow(
     case "subcategoryId":
       if (!row.subcategoryId) return null;
       patch.subcategoryId = row.subcategoryId;
-      break;
-    case "brandId":
-      if (!row.brandId) return null;
-      patch.brandId = row.brandId;
       break;
     case "application":
       patch.application = [...row.application];
@@ -382,21 +374,6 @@ function ActionRowEditor({
                   </option>
                 ));
               })}
-            </select>
-          )}
-
-          {row.field === "brandId" && (
-            <select
-              className={cn(PRODUCT_EDITOR_SELECT_CLASS, "sm:col-span-2")}
-              value={row.brandId}
-              onChange={(event) => onChange({ brandId: event.target.value })}
-            >
-              <option value="">{t("selectBrand")}</option>
-              {brandOptions(catalog, locale).map((brand) => (
-                <option key={brand.id} value={brand.id}>
-                  {brand.name}
-                </option>
-              ))}
             </select>
           )}
 

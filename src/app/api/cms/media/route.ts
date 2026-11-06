@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   createSignedMediaUpload,
+  MediaImageError,
   mediaKind,
   maxBytesForKind,
   registerMediaAsset,
@@ -332,6 +333,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, asset });
   } catch (error) {
     if (error instanceof CmsReadError) return readFailureResponse(error);
+    if (error instanceof MediaImageError) {
+      return NextResponse.json({ error: error.message }, { status: 422 });
+    }
     const message =
       error instanceof Error ? error.message : "Failed to upload media";
     console.error("Media upload failed:", message);

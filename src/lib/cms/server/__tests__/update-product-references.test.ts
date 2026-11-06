@@ -29,14 +29,13 @@ describe("updateProductReferences", () => {
     const res = await updateProductReferences([
       {
         id: "p1",
-        patch: { categoryId: "c", subcategoryId: "s", brandId: "b", countryOfOrigin: "br", application: ["a"] },
+        patch: { categoryId: "c", subcategoryId: "s", countryOfOrigin: "br", application: ["a"] },
       },
     ]);
     expect(res).toEqual({ updated: ["p1"], failed: [] });
     expect(update).toHaveBeenCalledWith({
       category_id: "c",
       subcategory_id: "s",
-      brand_id: "b",
       country_of_origin: "br",
       application: ["a"],
     });
@@ -47,8 +46,8 @@ describe("updateProductReferences", () => {
       id === "gone" ? { data: [], error: null } : id === "bad" ? { data: null, error: { message: "x" } } : { data: [{ id }], error: null };
     const { updateProductReferences } = await import("../products/writes.server");
     const res = await updateProductReferences([
-      { id: "gone", patch: { brandId: "b" } },
-      { id: "bad", patch: { brandId: "b" } },
+      { id: "gone", patch: { cultures: ["b"] } },
+      { id: "bad", patch: { cultures: ["b"] } },
       { id: "custom", patch: { customFilters: { g: [] } } },
     ]);
     expect(res.failed.map((f) => f.id).sort()).toEqual(["bad", "gone"]);
@@ -63,8 +62,8 @@ describe("updateProductReferences", () => {
     };
     const { updateProductReferences } = await import("../products/writes.server");
     const res = await updateProductReferences([
-      { id: "boom", patch: { brandId: "b" } },
-      { id: "ok", patch: { brandId: "b" } },
+      { id: "boom", patch: { cultures: ["b"] } },
+      { id: "ok", patch: { cultures: ["b"] } },
     ]);
     expect(res.updated).toEqual(["ok"]);
     expect(res.failed).toEqual([{ id: "boom", error: "network" }]);

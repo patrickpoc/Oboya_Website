@@ -34,7 +34,6 @@ export default function ProductNewPage() {
       createEmptyCmsProduct({
         categoryId: catalog.categories[0]?.id,
         subcategoryId: catalog.categories[0]?.subcategories[0]?.id,
-        brandId: catalog.brands[0]?.id,
       })
     );
   }, [catalog, loading, product]);

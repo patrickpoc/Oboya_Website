@@ -4,6 +4,7 @@ import {
   listCmsUsersDurable,
 } from "@/lib/cms/server/users.server";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
+import { isValidRoleId } from "@/lib/cms/permissions/access-types";
 import type { CmsLocale, CmsRole } from "@/lib/cms/types";
 
 export async function GET() {
@@ -41,6 +42,10 @@ export async function POST(request: Request) {
         { error: "Name, email and role are required" },
         { status: 400 }
       );
+    }
+
+    if (typeof body.role !== "string" || !isValidRoleId(body.role)) {
+      return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
 
     if (

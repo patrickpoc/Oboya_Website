@@ -13,7 +13,6 @@ import {
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 import { CmsReadError, readFailureResponse } from "@/lib/cms/server/strict-read";
-import { validateColorVariants } from "@/lib/shop/color-variants";
 import { displayProductName } from "@/lib/cms/bulk-update/search-products";
 import type { BulkApplyResult } from "@/lib/cms/bulk-update/types";
 import { BULK_UPDATE_MAX_PRODUCTS } from "@/lib/cms/bulk-update/types";
@@ -25,7 +24,11 @@ import {
   toPendingInfo,
 } from "@/lib/cms/server/approvals.server";
 import { submitBulkUpdateRequest } from "@/lib/cms/server/bulk-approval.server";
-import { mergeProductUpdate } from "@/lib/cms/server/product-writes.server";
+import {
+  assertVariantChangesValid,
+  mergeProductUpdate,
+  VariantValidationError,
+} from "@/lib/cms/server/product-writes.server";
 import {
   invalidateCatalog,
   invalidateProducts,
@@ -71,6 +74,15 @@ export async function POST(request: Request) {
           error: `At most ${BULK_CAP} products per bulk request`,
         },
         { status: 400 }
+      );
+    }
+
+    // Create rows: reject invalid or colliding colors before anything is held or written.
+    if (mode === "create") {
+      await assertVariantChangesValid(
+        products
+          .filter((p) => p?.id && p?.sku)
+          .map((p) => ({ incoming: p, previous: null }))
       );
     }
 
@@ -125,6 +137,18 @@ export async function POST(request: Request) {
       }
     }
 
+    // Reject invalid or colliding color changes before the first write (nothing is written).
+    if (mode === "update") {
+      await assertVariantChangesValid(
+        products
+          .filter((p) => p?.id && p?.sku && previousById.get(p.id))
+          .map((p) => {
+            const previous = previousById.get(p.id) ?? null;
+            return { incoming: mergeProductUpdate(p, previous), previous };
+          })
+      );
+    }
+
     // Create mode: check every row before the first write so a failed read changes nothing.
     const existingByRow = new Map<unknown, Awaited<ReturnType<typeof findExistingProduct>>>();
     if (mode === "create") {
@@ -147,23 +171,6 @@ export async function POST(request: Request) {
           status: "FAILED",
           error: "Product id and sku are required",
           suggestedAction: "Fix the product data and try again.",
-        });
-        continue;
-      }
-
-      const variantError = validateColorVariants(product.colorVariants, {
-        defaultColor: product.defaultColor,
-        defaultColorName: product.defaultColorName,
-      });
-      if (variantError && (product.colorVariants?.length ?? 0) > 0) {
-        results.push({
-          productId: product.id,
-          sku: product.sku,
-          name: displayProductName(product),
-          status: "FAILED",
-          error: variantError,
-          field: "colorVariants",
-          suggestedAction: "Fix color variant data and try again.",
         });
         continue;
       }
@@ -253,6 +260,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ results, ok, failed });
   } catch (error) {
     if (error instanceof CmsReadError) return readFailureResponse(error);
+    if (error instanceof VariantValidationError) {
+      return NextResponse.json(
+        { error: error.message, field: "colorVariants", productId: error.productId, sku: error.sku },
+        { status: 400 }
+      );
+    }
     const message =
       error instanceof Error ? error.message : "Failed to bulk persist products";
     return NextResponse.json({ error: message }, { status: 500 });

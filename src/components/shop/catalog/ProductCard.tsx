@@ -4,10 +4,10 @@ import Image from "next/image";
 import { memo, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { BrandLabel } from "@/components/shop/BrandLabel";
 import { ColorSwatchGroup } from "@/components/shop/ColorSwatchGroup";
 import { buttonVariants } from "@/components/ui/button";
-import { getBrandById, getCategoryById } from "@/lib/shop/catalog";
+import { getCategoryById } from "@/lib/shop/catalog";
+import { needsUnoptimized } from "@/lib/shop/image-host";
 import {
   DEFAULT_COLOR_VARIANT_ID,
   getActiveVariant,
@@ -49,7 +49,6 @@ function ProductCardComponent({
   const shortDescription = getShortDescription(
     (product as CmsProduct).shortDescription
   );
-  const brand = getBrandById(product.brandId);
   const category = getCategoryById(product.categoryId);
   const categoryLabel = category
     ? pickLocalizedLabel(locale, category.name, category.nameI18n)
@@ -85,7 +84,7 @@ function ProductCardComponent({
             src={imageSrc}
             alt={name}
             fill
-            unoptimized
+            unoptimized={needsUnoptimized(imageSrc)}
             className="object-cover transition-opacity duration-200"
             sizes="(max-width: 640px) 100vw, 96px"
           />
@@ -115,12 +114,6 @@ function ProductCardComponent({
           ) : null}
           <p className="mt-1 flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground">
             <span>{displaySku}</span>
-            {brand ? (
-              <>
-                <span aria-hidden>·</span>
-                <BrandLabel brand={brand} locale={locale} />
-              </>
-            ) : null}
           </p>
           {isQuote ? (
             <p className="mt-2 text-xs leading-5 font-semibold text-oboya-blue-dark">
@@ -171,6 +164,7 @@ function ProductCardComponent({
           src={imageSrc}
           alt={name}
           fill
+          unoptimized={needsUnoptimized(imageSrc)}
           className="object-cover transition-opacity duration-200 group-hover:opacity-95"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
         />
@@ -188,11 +182,6 @@ function ProductCardComponent({
         </h3>
         {displaySku ? (
           <p className="truncate text-[11px] text-muted-foreground">{displaySku}</p>
-        ) : null}
-        {brand ? (
-          <p className="truncate text-[11px] text-muted-foreground">
-            <BrandLabel brand={brand} locale={locale} />
-          </p>
         ) : null}
         {showSwatches ? (
           <ColorSwatchGroup

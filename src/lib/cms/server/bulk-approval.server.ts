@@ -7,7 +7,10 @@ import { diffJson } from "@/lib/cms/approvals/diff";
 import { displayProductName } from "@/lib/cms/bulk-update/search-products";
 import { readProductByIdStrict } from "@/lib/cms/server/products.server";
 import { submitChangeRequest } from "@/lib/cms/server/approvals.server";
-import { mergeProductUpdate } from "@/lib/cms/server/product-writes.server";
+import {
+  assertVariantChangesValid,
+  mergeProductUpdate,
+} from "@/lib/cms/server/product-writes.server";
 
 export async function submitBulkUpdateRequest(
   user: CmsUser,
@@ -17,9 +20,17 @@ export async function submitBulkUpdateRequest(
   const items: BulkItemDiff[] = [];
   const changed: CmsProduct[] = [];
 
+  const prepared: Array<{ current: CmsProduct | null; product: CmsProduct }> = [];
   for (const incoming of products) {
     const current = (await readProductByIdStrict(incoming.id)) ?? null;
-    const product = mergeProductUpdate(incoming, current);
+    prepared.push({ current, product: mergeProductUpdate(incoming, current) });
+  }
+  // Throws VariantValidationError (HTTP 400) before anything is held for approval.
+  await assertVariantChangesValid(
+    prepared.map(({ current, product }) => ({ incoming: product, previous: current }))
+  );
+
+  for (const { current, product } of prepared) {
     const changes = diffJson(current, product, "", [], 60);
     if (current && changes.length === 0) continue;
     snapshots[product.id] = current;

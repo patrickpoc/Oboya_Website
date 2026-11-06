@@ -36,6 +36,8 @@ vi.mock("@/lib/cms/server/product-writes.server", () => ({
   deleteProductWrite: vi.fn(),
   restoreProductWrite: vi.fn(),
   assertProductIsNew: vi.fn(),
+  assertVariantChangesValid: vi.fn(),
+  VariantValidationError: class extends Error {},
   createProductWrite: vi.fn(),
   ProductExistsError: class extends Error {},
 }));

@@ -233,7 +233,6 @@ export function bulkUpdateBySkus(params: {
   removeTags?: string[];
   categoryId?: string;
   subcategoryId?: string;
-  brandId?: string;
 }): CmsProduct[] {
   const products = getCmsProducts({ includeDeleted: true });
   const skuSet = new Set(params.skus.map((sku) => sku.trim().toLowerCase()));
@@ -255,7 +254,6 @@ export function bulkUpdateBySkus(params: {
       tags: Array.from(nextTags),
       categoryId: params.categoryId ?? product.categoryId,
       subcategoryId: params.subcategoryId ?? product.subcategoryId,
-      brandId: params.brandId ?? product.brandId,
     };
     updated.push(next);
   }

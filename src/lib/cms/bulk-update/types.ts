@@ -1,7 +1,6 @@
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { CmsStatus } from "@/lib/cms/types";
 import type {
-  ShopBrand,
   ShopCategory,
   ShopCountry,
   ShopFilterOptions,
@@ -15,7 +14,6 @@ export const BULK_PARENT_TAXONOMY_FIELDS = [
   "moq",
   "categoryId",
   "subcategoryId",
-  "brandId",
   "application",
   "cultures",
   "certifications",
@@ -35,9 +33,19 @@ export const BULK_PARENT_COLOR_FIELDS = [
   "defaultColor",
   "defaultColorNameEn",
   "defaultColorNamePt",
+  "defaultColorNameEs",
+  "defaultColorNameZh",
 ] as const;
 
 export const BULK_VARIANT_FIELDS = [
+  "variantSku",
+  "variantColor",
+  "variantNameEn",
+  "variantNamePt",
+  "variantNameEs",
+  "variantNameZh",
+  "variantImage",
+  "variantSortOrder",
   "variantMoq",
   "variantPriceUsd",
   "variantPriceBrl",
@@ -64,6 +72,8 @@ export type BulkValidationIssue = {
   currentValue: string;
   requestedValue: string;
   status: BulkIssueStatus;
+  /** Set for issues that belong to one color variant row; absent for parent/product issues. */
+  variantId?: string | null;
   message: string;
   suggestedAction: string;
 };
@@ -73,7 +83,6 @@ export type BulkProductPatch = Partial<{
   moq: number;
   categoryId: string;
   subcategoryId: string;
-  brandId: string;
   application: string[];
   cultures: string[];
   certifications: string[];
@@ -87,6 +96,16 @@ export type BulkProductPatch = Partial<{
   defaultColor: string;
   defaultColorNameEn: string;
   defaultColorNamePt: string;
+  defaultColorNameEs: string;
+  defaultColorNameZh: string;
+  variantSku: string;
+  variantColor: string;
+  variantNameEn: string;
+  variantNamePt: string;
+  variantNameEs: string;
+  variantNameZh: string;
+  variantImage: string;
+  variantSortOrder: number;
   variantMoq: number;
   variantPriceUsd: number | null;
   variantPriceBrl: number | null;
@@ -111,9 +130,13 @@ export type BulkWorkspaceRow = {
 
 export type BulkUpdateCatalog = {
   categories: ShopCategory[];
-  brands: ShopBrand[];
   countries: ShopCountry[];
   filterOptions: ShopFilterOptions;
+  /**
+   * Lowercased SKU -> id of the product that owns it (parent, legacy id or color SKU),
+   * trashed products included. Lets validation reject SKUs owned by another product.
+   */
+  skuOwners?: Map<string, string>;
 };
 
 export type BulkApplyResultStatus = "SUCCESS" | "FAILED" | "SKIPPED";

@@ -16,8 +16,10 @@ import {
 } from "@/lib/cms/server/strict-read";
 import {
   assertProductIsNew,
+  assertVariantChangesValid,
   createProductWrite,
   ProductExistsError,
+  VariantValidationError,
 } from "@/lib/cms/server/product-writes.server";
 import {
   pendingApprovalResponse,
@@ -146,6 +148,7 @@ export async function POST(request: Request) {
     }
     const deferRevalidate = shouldDeferRevalidate(request);
     await assertProductIsNew(body);
+    await assertVariantChangesValid([{ incoming: body, previous: null }]);
     const gate = await submitOrApply({
       user: auth.user,
       changeType: "marketplace.product_create",
@@ -163,6 +166,9 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof ProductExistsError) {
       return NextResponse.json({ error: error.message }, { status: 409 });
+    }
+    if (error instanceof VariantValidationError) {
+      return NextResponse.json({ error: error.message, field: "colorVariants" }, { status: 400 });
     }
     if (error instanceof CmsReadError) return readFailureResponse(error);
     const message = error instanceof Error ? error.message : "Failed to persist product";

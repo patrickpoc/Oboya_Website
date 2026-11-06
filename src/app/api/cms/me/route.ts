@@ -41,22 +41,20 @@ export async function GET() {
     let user = null;
 
     // Prefer service-role read so we always get THIS auth user's profile.
+    // A read error is not "no row": it goes to the outer catch (500), never to provisioning.
     if (isServiceRoleConfigured()) {
-      try {
-        const admin = createServiceClient();
-        const { data } = await admin
-          .from("cms_user_profiles")
-          .select("*")
-          .eq("id", authUser.id)
-          .maybeSingle();
-        if (data) {
-          user = profileToCmsUser(
-            data as Parameters<typeof profileToCmsUser>[0],
-            authUser.email ?? ""
-          );
-        }
-      } catch (error) {
-        console.error("/api/cms/me service read failed:", error);
+      const admin = createServiceClient();
+      const { data, error } = await admin
+        .from("cms_user_profiles")
+        .select("*")
+        .eq("id", authUser.id)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      if (data) {
+        user = profileToCmsUser(
+          data as Parameters<typeof profileToCmsUser>[0],
+          authUser.email ?? ""
+        );
       }
     }
 

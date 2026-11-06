@@ -14,7 +14,7 @@ import {
   type BulkQueueItem,
 } from "@/components/admin/marketplace/BulkExecutionQueue";
 import { Button } from "@/components/ui/button";
-import { countProductGroups } from "@/lib/cms/admin-sku-lookup";
+import { buildSkuOwners, countProductGroups } from "@/lib/cms/admin-sku-lookup";
 import {
   applyBulkUpdatesSequentially,
   toBulkWritePayload,
@@ -28,6 +28,7 @@ import {
   syncGroupPending,
 } from "@/lib/cms/bulk-update/diff";
 import {
+  mergeIssues,
   summarizeValidation,
   validateBulkUpdate,
 } from "@/lib/cms/bulk-update/validate";
@@ -65,15 +66,17 @@ export function BulkUpdateWorkspace() {
   const [progress, setProgress] = useState<SequentialApplyProgress | null>(null);
   const [results, setResults] = useState<BulkApplyResult[] | null>(null);
   const [queue, setQueue] = useState<BulkQueueItem[]>([]);
+  // Built from the full list (trashed included) so a color SKU can't collide with a trashed product.
+  const [skuOwners, setSkuOwners] = useState<Map<string, string>>(() => new Map());
 
   const catalog: BulkUpdateCatalog = useMemo(
     () => ({
       categories: liveCatalog.categories,
-      brands: liveCatalog.brands,
       countries: liveCatalog.countries,
       filterOptions: liveCatalog.filterOptions,
+      skuOwners,
     }),
-    [liveCatalog]
+    [liveCatalog, skuOwners]
   );
 
   const groupCount = useMemo(() => countProductGroups(rows), [rows]);
@@ -89,6 +92,7 @@ export function BulkUpdateWorkspace() {
         return;
       }
       const list = (await response.json()) as CmsProduct[];
+      setSkuOwners(buildSkuOwners(list));
       setProducts(list.filter((product) => !product.deletedAt));
     } finally {
       setLoadingProducts(false);
@@ -109,6 +113,7 @@ export function BulkUpdateWorkspace() {
         }
         const list = (await response.json()) as CmsProduct[];
         if (!cancelled) {
+          setSkuOwners(buildSkuOwners(list));
           setProducts(list.filter((product) => !product.deletedAt));
         }
       } finally {
@@ -288,7 +293,6 @@ export function BulkUpdateWorkspace() {
             moq: pending.moq,
             categoryId: pending.categoryId,
             subcategoryId: pending.subcategoryId,
-            brandId: pending.brandId,
             application: pending.application,
             cultures: pending.cultures,
             certifications: pending.certifications,
@@ -301,6 +305,8 @@ export function BulkUpdateWorkspace() {
             defaultColor: pending.defaultColor,
             defaultColorNameEn: pending.defaultColorName?.en,
             defaultColorNamePt: pending.defaultColorName?.["pt-BR"],
+            defaultColorNameEs: pending.defaultColorName?.es,
+            defaultColorNameZh: pending.defaultColorName?.["zh-CN"],
           } satisfies BulkProductPatch,
         };
       });
@@ -316,14 +322,7 @@ export function BulkUpdateWorkspace() {
       if (response.ok) {
         const payload = (await response.json()) as { issues: BulkValidationIssue[] };
         // Merge: keep client issues (variants) + server taxonomy issues.
-        const byKey = new Map<string, BulkValidationIssue>();
-        for (const issue of [...liveIssues, ...(payload.issues ?? [])]) {
-          byKey.set(
-            `${issue.productId}:${issue.field}:${issue.message}`,
-            issue
-          );
-        }
-        nextIssues = Array.from(byKey.values());
+        nextIssues = mergeIssues(liveIssues, payload.issues ?? []);
       }
     } catch {
       // Client validation already present; continue to review.

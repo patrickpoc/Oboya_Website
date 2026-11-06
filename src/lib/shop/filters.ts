@@ -50,12 +50,6 @@ function matchesFilters(
     return false;
   }
   if (
-    filters.brandIds.length > 0 &&
-    !filters.brandIds.includes(product.brandId)
-  ) {
-    return false;
-  }
-  if (
     filters.applications.length > 0 &&
     !filters.applications.some((id) => product.application.includes(id))
   ) {
@@ -211,7 +205,6 @@ export function countActiveFilters(filters: ShopFilters): number {
   let count = 0;
   if (filters.categoryId) count += 1;
   count += filters.subcategoryIds.length;
-  count += filters.brandIds.length;
   count += filters.applications.length;
   count += filters.cultures.length;
   count += filters.certifications.length;

@@ -6,14 +6,12 @@ export function createEmptyImportProduct(seed?: {
   sku?: string;
   categoryId?: string;
   subcategoryId?: string;
-  brandId?: string;
 }): CmsProduct {
   const sku = (seed?.sku ?? seed?.id ?? "").trim();
   return {
     id: sku,
     sku,
     moq: 1,
-    brandId: seed?.brandId ?? "",
     categoryId: seed?.categoryId ?? "",
     subcategoryId: seed?.subcategoryId ?? "",
     images: [""],

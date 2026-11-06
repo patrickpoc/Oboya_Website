@@ -5,6 +5,7 @@ vi.mock("@/lib/cms/server/require-cms-auth", () => ({
   cmsGuard: async () => ({ user: { id: "admin", role: "super_admin" } }),
 }));
 const deleteCmsUserDurable = vi.fn();
+const updateCmsUserDurable = vi.fn();
 class UserDeleteError extends Error {
   constructor(public code: string, detail: string) {
     super(detail);
@@ -13,8 +14,12 @@ class UserDeleteError extends Error {
 vi.mock("@/lib/cms/server/users.server", () => ({
   UserDeleteError,
   deleteCmsUserDurable,
-  listCmsUsersDurable: async () => [{ id: "u1", role: "editor", status: "active" }],
-  updateCmsUserDurable: vi.fn(),
+  listCmsUsersDurable: async () => [
+    { id: "u1", role: "editor", status: "active" },
+    { id: "admin", role: "super_admin", status: "active" },
+    { id: "s2", role: "super_admin", status: "active" },
+  ],
+  updateCmsUserDurable,
 }));
 
 const del = async () => {
@@ -23,6 +28,18 @@ const del = async () => {
     params: Promise.resolve({ id: "u1" }),
   });
 };
+
+describe("PATCH /api/cms/users/[id]", () => {
+  it.each([{}, [], 5, true])("rejects a non-string role %j with 400", async (role) => {
+    const { PATCH } = await import("../route");
+    const res = await PATCH(
+      new Request("http://x/api/cms/users/u1", { method: "PATCH", body: JSON.stringify({ role }) }),
+      { params: Promise.resolve({ id: "u1" }) }
+    );
+    expect(res.status).toBe(400);
+    expect(updateCmsUserDurable).not.toHaveBeenCalled();
+  });
+});
 
 describe("DELETE /api/cms/users/[id]", () => {
   beforeEach(() => {
@@ -36,7 +53,8 @@ describe("DELETE /api/cms/users/[id]", () => {
     const body = await res.json();
     expect(res.status).toBe(500);
     expect(body.code).toBe("revoked");
-    expect(body.error).toMatch(/revoked/i);
+    expect(body.error).toMatch(/deactivated/i);
+    expect(body.error).not.toMatch(/try again|retry/i);
     expect(JSON.stringify(body)).not.toContain("secret");
   });
 
@@ -59,5 +77,17 @@ describe("DELETE /api/cms/users/[id]", () => {
   it("returns the generic error for anything else", async () => {
     deleteCmsUserDurable.mockRejectedValue(new Error("boom"));
     expect((await (await del()).json()).error).toBe("Failed to delete user");
+  });
+
+  it("blocks changing your own role but allows other fields", async () => {
+    const { PATCH } = await import("../route");
+    const patch = (body: unknown) =>
+      PATCH(new Request("http://x/api/cms/users/admin", { method: "PATCH", body: JSON.stringify(body) }), {
+        params: Promise.resolve({ id: "admin" }),
+      });
+    expect((await patch({ role: "viewer" })).status).toBe(403);
+    expect(updateCmsUserDurable).not.toHaveBeenCalled();
+    updateCmsUserDurable.mockResolvedValue({ id: "admin" });
+    expect((await patch({ name: "New", role: "super_admin" })).status).toBe(200);
   });
 });

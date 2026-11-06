@@ -14,7 +14,9 @@ import type {
   BulkValidationIssue,
   BulkWorkspaceRow,
 } from "@/lib/cms/bulk-update/types";
+import { imageUrlProblem } from "@/lib/cms/bulk-import/images";
 import { validateColorVariants } from "@/lib/shop/color-variants";
+import { isAllowlistedImageSrc } from "@/lib/shop/image-host";
 
 function optionIdsForGroup(
   catalog: BulkUpdateCatalog,
@@ -68,6 +70,7 @@ function pushIssue(
         ? ""
         : formatFieldValue(field, row.pending, row.variantId),
     status,
+    ...(row.kind === "variant" ? { variantId: row.variantId } : {}),
     message,
     suggestedAction,
   });
@@ -134,20 +137,6 @@ function validateParentRow(
           "Select a compatible subcategory or change the category."
         );
       }
-    }
-  }
-
-  if (changed.has("brandId") && product.brandId) {
-    const brandExists = catalog.brands.some((brand) => brand.id === product.brandId);
-    if (!brandExists) {
-      pushIssue(
-        issues,
-        row,
-        "brandId",
-        "blocked",
-        `Brand "${product.brandId}" is not a valid brand.`,
-        "Select an existing brand."
-      );
     }
   }
 
@@ -278,14 +267,14 @@ function validateParentRow(
         "Add a product name before enabling Shop availability."
       );
     }
-    if (!product.categoryId || !product.subcategoryId || !product.brandId) {
+    if (!product.categoryId || !product.subcategoryId) {
       pushIssue(
         issues,
         row,
         "status",
         "blocked",
-        "Available in Shop requires Category, Subcategory, and Brand.",
-        "Fill Category, Subcategory, and Brand before enabling Shop."
+        "Available in Shop requires Category and Subcategory.",
+        "Fill Category and Subcategory before enabling Shop."
       );
     } else if (
       !subcategoryBelongsToCategory(catalog, product.categoryId, product.subcategoryId)
@@ -343,7 +332,13 @@ function validateParentRow(
   return issues;
 }
 
-function validateVariantRow(row: BulkWorkspaceRow): BulkValidationIssue[] {
+const HEX = /^#[0-9A-Fa-f]{6}$/;
+
+function validateVariantRow(
+  row: BulkWorkspaceRow,
+  catalog: BulkUpdateCatalog,
+  batchOwners: Map<string, Set<string>>
+): BulkValidationIssue[] {
   const issues: BulkValidationIssue[] = [];
   const changed = new Set(
     getChangedFields(row.original, row.pending, {
@@ -366,6 +361,109 @@ function validateVariantRow(row: BulkWorkspaceRow): BulkValidationIssue[] {
       "Remove this row and re-add the product group."
     );
     return issues;
+  }
+
+  if (changed.has("variantSku")) {
+    const sku = (variant.sku ?? "").trim();
+    const key = sku.toLowerCase();
+    if (!sku) {
+      pushIssue(issues, row, "variantSku", "blocked", "Color SKU is required.", "Enter a unique SKU for this color.");
+    } else {
+      const siblings = (row.pending.colorVariants ?? []).filter(
+        (item) => item.id !== variant.id && (item.sku ?? "").trim().toLowerCase() === key
+      );
+      const owner = catalog.skuOwners?.get(key);
+      if (siblings.length > 0 || (row.pending.sku ?? "").trim().toLowerCase() === key) {
+        pushIssue(
+          issues,
+          row,
+          "variantSku",
+          "blocked",
+          `SKU "${sku}" is already used in this product.`,
+          "Use a SKU that is unique within the product."
+        );
+      } else if (owner && owner !== row.productId) {
+        pushIssue(
+          issues,
+          row,
+          "variantSku",
+          "blocked",
+          `SKU "${sku}" already belongs to product "${owner}".`,
+          "Use a SKU that no other product uses."
+        );
+      } else if ((batchOwners.get(key)?.size ?? 0) > 1) {
+        pushIssue(
+          issues,
+          row,
+          "variantSku",
+          "blocked",
+          `SKU "${sku}" is used by more than one product in this batch.`,
+          "Make each SKU unique across the batch."
+        );
+      }
+    }
+  }
+
+  if (changed.has("variantColor") && !HEX.test(variant.color ?? "")) {
+    pushIssue(
+      issues,
+      row,
+      "variantColor",
+      "blocked",
+      "Color must be a hex value (e.g. #4DAF4E).",
+      "Use a 6-digit hex color."
+    );
+  }
+
+  if (changed.has("variantNameEn") && !(variant.nameI18n?.en ?? variant.name ?? "").trim()) {
+    pushIssue(
+      issues,
+      row,
+      "variantNameEn",
+      "blocked",
+      "Color name (English) is required.",
+      "Enter the English color name."
+    );
+  }
+
+  if (changed.has("variantImage")) {
+    const image = (variant.image ?? "").trim();
+    const problem = image
+      ? imageUrlProblem(image)
+      : "Color image is required.";
+    if (problem) {
+      pushIssue(
+        issues,
+        row,
+        "variantImage",
+        "blocked",
+        problem,
+        "Use an https:// link, a /path, or pick from the media library."
+      );
+    } else if (!isAllowlistedImageSrc(image)) {
+      pushIssue(
+        issues,
+        row,
+        "variantImage",
+        "warning",
+        "Image host is not in the storefront allowlist, so it will not be optimized.",
+        "Upload the image to the media library, or import it from a URL."
+      );
+    }
+  }
+
+  if (changed.has("variantSortOrder")) {
+    const order = Number(variant.sortOrder);
+    if (!Number.isInteger(order) || order < 0) {
+      pushIssue(
+        issues,
+        row,
+        "variantSortOrder",
+        "blocked",
+        "Sort order must be an integer of 0 or more.",
+        "Enter 0, 1, 2…"
+      );
+    }
   }
 
   if (changed.has("variantMoq")) {
@@ -412,10 +510,27 @@ function validateVariantRow(row: BulkWorkspaceRow): BulkValidationIssue[] {
 
 export function validateBulkUpdate(
   rows: BulkWorkspaceRow[],
-  catalog: BulkUpdateCatalog
+  catalog: BulkUpdateCatalog,
+  options: { skipColorVariantCheck?: boolean } = {}
 ): BulkValidationIssue[] {
   const issues: BulkValidationIssue[] = [];
   const seenProducts = new Set<string>();
+
+  // Every SKU claimed by the batch's pending documents (one entry per product).
+  const batchOwners = new Map<string, Set<string>>();
+  const claimed = new Set<string>();
+  for (const row of rows) {
+    if (claimed.has(row.productId)) continue;
+    claimed.add(row.productId);
+    const skus = [row.pending.sku, ...(row.pending.colorVariants ?? []).map((v) => v.sku)];
+    for (const raw of skus) {
+      const key = (raw ?? "").trim().toLowerCase();
+      if (!key) continue;
+      const set = batchOwners.get(key) ?? new Set<string>();
+      set.add(row.productId);
+      batchOwners.set(key, set);
+    }
+  }
 
   for (const row of rows) {
     if (row.kind === "parent") {
@@ -428,10 +543,13 @@ export function validateBulkUpdate(
         variantId: row.variantId,
       }).length > 0
     ) {
-      issues.push(...validateVariantRow(row));
+      issues.push(...validateVariantRow(row, catalog, batchOwners));
     }
 
-    if (!seenProducts.has(row.productId) && productHasPendingChanges(row.original, row.pending)) {
+    if (
+      !options.skipColorVariantCheck &&
+      !seenProducts.has(row.productId) &&
+      productHasPendingChanges(row.original, row.pending)) {
       seenProducts.add(row.productId);
       const variantError = validateColorVariants(row.pending.colorVariants, {
         defaultColor: row.pending.defaultColor,
@@ -455,6 +573,21 @@ export function validateBulkUpdate(
   return issues;
 }
 
+/**
+ * Union of client and server issues. The key includes `variantId`, so the same field and
+ * message on two color rows of one product stay as two issues.
+ */
+export function mergeIssues(...lists: BulkValidationIssue[][]): BulkValidationIssue[] {
+  const byKey = new Map<string, BulkValidationIssue>();
+  for (const issue of lists.flat()) {
+    byKey.set(
+      `${issue.productId}:${issue.variantId ?? ""}:${issue.field}:${issue.message}`,
+      issue
+    );
+  }
+  return Array.from(byKey.values());
+}
+
 export function summarizeValidation(issues: BulkValidationIssue[]) {
   const blockedCount = issues.filter((issue) => issue.status === "blocked").length;
   const warningCount = issues.filter((issue) => issue.status === "warning").length;
@@ -462,15 +595,21 @@ export function summarizeValidation(issues: BulkValidationIssue[]) {
   return { blockedCount, warningCount, validFieldChangeCount };
 }
 
+/**
+ * Issues for one product. Pass `variantId` to scope to one color row
+ * (`null` = parent-level only); omit it to get every issue of the product.
+ */
 export function issuesForProduct(
   issues: BulkValidationIssue[],
   productId: string,
-  field?: BulkEditableField
+  field?: BulkEditableField | "product" | "colorVariants",
+  variantId?: string | null
 ): BulkValidationIssue[] {
   return issues.filter(
     (issue) =>
       issue.productId === productId &&
-      (field === undefined || issue.field === field)
+      (field === undefined || issue.field === field) &&
+      (variantId === undefined || (issue.variantId ?? null) === variantId)
   );
 }
 

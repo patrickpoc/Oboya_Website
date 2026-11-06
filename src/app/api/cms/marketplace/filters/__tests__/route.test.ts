@@ -56,10 +56,26 @@ describe("filters route", () => {
     const res = await PUT(
       new Request("http://x/api/cms/marketplace/filters", {
         method: "PUT",
-        body: JSON.stringify({ categories: [], brands: [], filterOptions: {} }),
+        body: JSON.stringify({ categories: [], filterOptions: {} }),
       })
     );
     expect(res.status).toBe(503);
     expect(save).not.toHaveBeenCalled();
+  });
+
+  it("PUT succeeds without brands and ignores brands sent by a stale tab", async () => {
+    const current = { categories: [], filterGroups: [], filterOptions: {} };
+    readStrict.mockResolvedValue(current);
+    readProductsStrict.mockResolvedValue([]);
+    save.mockImplementation(async (payload: unknown) => payload);
+    const { PUT } = await import("../route");
+    const put = (body: unknown) =>
+      PUT(new Request("http://x/api/cms/marketplace/filters", { method: "PUT", body: JSON.stringify(body) }));
+
+    expect((await put({ categories: [], filterOptions: {} })).status).toBe(200);
+    expect((await put({ categories: [], filterOptions: {}, brands: [{ id: "b1", name: "" }, { id: "b2", name: "" }] })).status).toBe(200);
+    for (const [payload] of save.mock.calls) {
+      expect(payload).not.toHaveProperty("brands");
+    }
   });
 });

@@ -1,3 +1,9 @@
+import {
+  copyExternalImages,
+  ImageCopyError,
+  importImageViaApi,
+  type ImageImporter,
+} from "@/lib/cms/bulk-import/import-images";
 import { displayProductName } from "@/lib/cms/bulk-update/search-products";
 import type {
   ImportApplyResult,
@@ -31,9 +37,12 @@ export async function applyBulkImportsSequentially(params: {
   rows: ImportWorkspaceRow[];
   onProgress?: (progress: ImportApplyProgress) => void;
   gapMs?: number;
+  importImage?: ImageImporter;
 }): Promise<ImportApplyResult[]> {
   const { rows, onProgress } = params;
   const gapMs = params.gapMs ?? BULK_APPLY_GAP_MS;
+  const importImage = params.importImage ?? importImageViaApi;
+  const imageCache = new Map<string, Promise<string>>();
   const results: ImportApplyResult[] = [];
   let wroteAny = false;
 
@@ -45,6 +54,27 @@ export async function applyBulkImportsSequentially(params: {
       current: row,
     });
 
+    let product = row.pending;
+    try {
+      product = await copyExternalImages(row.pending, importImage, imageCache);
+    } catch (error) {
+      const result: ImportApplyResult = {
+        productId: row.productId,
+        sku: row.pending.sku,
+        name: displayProductName(row.pending),
+        status: "FAILED",
+        error: error instanceof Error ? error.message : "Could not copy the image.",
+        suggestedAction:
+          error instanceof ImageCopyError
+            ? "The product was not created. Fix this image (or upload it) and import the row again."
+            : "Retry the row.",
+      };
+      results.push(result);
+      onProgress?.({ index: index + 1, total: rows.length, current: row, lastResult: result });
+      if (index < rows.length - 1) await sleep(gapMs);
+      continue;
+    }
+
     try {
       const response = await fetch("/api/cms/products", {
         method: "POST",
@@ -53,7 +83,7 @@ export async function applyBulkImportsSequentially(params: {
           [DEFER_REVALIDATE_HEADER]: "1",
           [QUIET_HEADER]: "1",
         },
-        body: JSON.stringify(row.pending),
+        body: JSON.stringify(product),
       });
 
       if (!response.ok) {

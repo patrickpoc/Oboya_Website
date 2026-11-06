@@ -55,7 +55,6 @@ export async function POST(request: Request) {
 
     const catalogBase: BulkUpdateCatalog = {
       categories: filters.categories,
-      brands: filters.brands,
       countries: currencies.countries,
       filterOptions: filters.filterOptions,
     };
@@ -88,7 +87,9 @@ export async function POST(request: Request) {
 
     const productsById = new Map(products.map((product) => [product.id, product]));
     const rows = buildRowsFromUpdates(productsById, updateBody.updates);
-    const issues = validateBulkUpdate(rows, catalogBase);
+    // The client sends no variants, so the stored ones would be checked against new parent
+    // fields and block valid repairs/renames. The client check and the write guard cover them.
+    const issues = validateBulkUpdate(rows, catalogBase, { skipColorVariantCheck: true });
     const blockedCount = issues.filter((issue) => issue.status === "blocked").length;
     const warningCount = issues.filter((issue) => issue.status === "warning").length;
     const changedFieldCount = rows.reduce(

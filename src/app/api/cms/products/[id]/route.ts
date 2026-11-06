@@ -8,9 +8,11 @@ import { toPublicProduct } from "@/lib/cms/server/public-product";
 import { noStoreHeaders } from "@/lib/security/http-cache";
 import { shouldDeferRevalidate } from "@/lib/cms/revalidate-site";
 import {
+  assertVariantChangesValid,
   deleteProductWrite,
   mergeProductUpdate,
   restoreProductWrite,
+  VariantValidationError,
   writeProduct,
 } from "@/lib/cms/server/product-writes.server";
 import {
@@ -81,6 +83,7 @@ export async function PUT(
     const deferRevalidate = shouldDeferRevalidate(request);
     const previous = (await readProductByIdStrict(id)) ?? null;
     const body = mergeProductUpdate(incoming, previous);
+    await assertVariantChangesValid([{ incoming: body, previous }]);
     const label = productLabel(body);
     const pending: ChangeRequest[] = [];
 
@@ -139,6 +142,9 @@ export async function PUT(
     return NextResponse.json(payload, { status: saved ? 200 : 202 });
   } catch (error) {
     if (error instanceof CmsReadError) return readFailureResponse(error);
+    if (error instanceof VariantValidationError) {
+      return NextResponse.json({ error: error.message, field: "colorVariants" }, { status: 400 });
+    }
     const message = error instanceof Error ? error.message : "Failed to persist product";
     const status = /exceeds|too many images/i.test(message) ? 400 : 500;
     return NextResponse.json({ error: message }, { status });

@@ -2,6 +2,7 @@ import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 import type { BulkUpdateCatalog } from "@/lib/cms/bulk-update/types";
 import type { BulkEditableField } from "@/lib/cms/bulk-update/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
+import { formatFieldValue } from "@/lib/cms/bulk-update/diff";
 import { formatPriceInput } from "@/lib/cms/parse-price";
 
 export type LabeledOption = { id: string; name: string };
@@ -39,16 +40,6 @@ export function subcategoryOptions(
   }));
 }
 
-export function brandOptions(
-  catalog: BulkUpdateCatalog,
-  locale = "en"
-): LabeledOption[] {
-  return catalog.brands.map((brand) => ({
-    id: brand.id,
-    name: labelOf(locale, brand.name, brand.nameI18n),
-  }));
-}
-
 export function filterOptionLabels(
   catalog: BulkUpdateCatalog,
   groupId: string,
@@ -73,7 +64,6 @@ export function resolveCatalogDisplayName(
   kind:
     | "category"
     | "subcategory"
-    | "brand"
     | "application"
     | "cultures"
     | "certifications"
@@ -98,10 +88,6 @@ export function resolveCatalogDisplayName(
         if (sub) return labelOf(locale, sub.name, sub.nameI18n);
       }
       return trimmed;
-    }
-    case "brand": {
-      const brand = catalog.brands.find((item) => item.id === trimmed);
-      return brand ? labelOf(locale, brand.name, brand.nameI18n) : trimmed;
     }
     case "application":
     case "cultures":
@@ -184,13 +170,6 @@ export function formatFieldDisplayValue(
         product.subcategoryId || "",
         locale
       );
-    case "brandId":
-      return resolveCatalogDisplayName(
-        catalog,
-        "brand",
-        product.brandId || "",
-        locale
-      );
     case "application":
       return (product.application ?? [])
         .map((id) =>
@@ -240,6 +219,19 @@ export function formatFieldDisplayValue(
       return product.defaultColorName?.en || "";
     case "defaultColorNamePt":
       return product.defaultColorName?.["pt-BR"] || "";
+    case "defaultColorNameEs":
+      return product.defaultColorName?.es || "";
+    case "defaultColorNameZh":
+      return product.defaultColorName?.["zh-CN"] || "";
+    case "variantSku":
+    case "variantColor":
+    case "variantNameEn":
+    case "variantNamePt":
+    case "variantNameEs":
+    case "variantNameZh":
+    case "variantImage":
+    case "variantSortOrder":
+      return formatFieldValue(field, product, variantId);
     case "variantMoq": {
       const variant = (product.colorVariants ?? []).find(
         (item) => item.id === variantId

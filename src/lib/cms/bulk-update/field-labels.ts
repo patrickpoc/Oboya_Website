@@ -2,7 +2,6 @@ export const BULK_FIELD_LABELS: Record<string, string> = {
   moq: "MOQ",
   categoryId: "Category",
   subcategoryId: "Subcategory",
-  brandId: "Brand",
   application: "Application",
   cultures: "Crop / Culture",
   certifications: "Certifications",
@@ -16,6 +15,16 @@ export const BULK_FIELD_LABELS: Record<string, string> = {
   defaultColor: "Default color",
   defaultColorNameEn: "Default color name EN",
   defaultColorNamePt: "Default color name PT",
+  defaultColorNameEs: "Default color name ES",
+  defaultColorNameZh: "Default color name ZH",
+  variantSku: "Color SKU",
+  variantColor: "Color hex",
+  variantNameEn: "Color name EN",
+  variantNamePt: "Color name PT",
+  variantNameEs: "Color name ES",
+  variantNameZh: "Color name ZH",
+  variantImage: "Color image",
+  variantSortOrder: "Color sort order",
   variantMoq: "Color MOQ",
   variantPriceUsd: "Variant price USD",
   variantPriceBrl: "Variant price BRL",
@@ -30,7 +39,6 @@ export const BULK_SPREADSHEET_HEADERS = [
   "MOQ",
   "Category",
   "Subcategory",
-  "Brand",
   "Application",
   "Crop/Culture",
   "Certifications",
@@ -43,9 +51,20 @@ export const BULK_SPREADSHEET_HEADERS = [
   "Price EUR",
   "Color hex",
   "Color name",
+  "Color name PT",
+  "Color name ES",
+  "Color name ZH",
   "Variant price USD",
   "Variant image",
+  "New SKU",
+  "Sort order",
 ] as const;
+
+/**
+ * Columns from older templates that are accepted and ignored. Without this the
+ * sheet would be rejected with "Unknown column".
+ */
+export const IGNORED_LEGACY_SPREADSHEET_HEADERS = new Set(["brand", "brandid", "brand id"]);
 
 export type BulkSpreadsheetHeader = (typeof BULK_SPREADSHEET_HEADERS)[number];
 
@@ -57,8 +76,6 @@ export const SPREADSHEET_HEADER_ALIASES: Record<string, BulkSpreadsheetHeader> =
   categoryid: "Category",
   subcategory: "Subcategory",
   subcategoryid: "Subcategory",
-  brand: "Brand",
-  brandid: "Brand",
   application: "Application",
   applications: "Application",
   "crop/culture": "Crop/Culture",
@@ -92,9 +109,21 @@ export const SPREADSHEET_HEADER_ALIASES: Record<string, BulkSpreadsheetHeader> =
   color: "Color hex",
   "color name": "Color name",
   colorname: "Color name",
+  "color name en": "Color name",
+  colornameen: "Color name",
+  "color name pt": "Color name PT",
+  colornamept: "Color name PT",
+  "color name es": "Color name ES",
+  colornamees: "Color name ES",
+  "color name zh": "Color name ZH",
+  colornamezh: "Color name ZH",
   "variant price usd": "Variant price USD",
   variantpriceusd: "Variant price USD",
   "variant image": "Variant image",
   variantimage: "Variant image",
   image: "Variant image",
+  "new sku": "New SKU",
+  newsku: "New SKU",
+  "sort order": "Sort order",
+  sortorder: "Sort order",
 };

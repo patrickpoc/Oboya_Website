@@ -3,6 +3,7 @@ import type { AccessControlDoc } from "@/lib/cms/permissions/access-types";
 import {
   readAccessControlDurable,
   readAccessControlStrict,
+  sanitizeAccessDoc,
   saveAccessControlDurable,
 } from "@/lib/cms/server/access-control.server";
 import {
@@ -48,6 +49,17 @@ export async function PUT(request: Request) {
       typeof payload.matrix !== "object" ||
       Array.isArray(payload.matrix)
     ) {
+      return NextResponse.json(
+        { error: "Invalid access control document" },
+        { status: 400 }
+      );
+    }
+
+    // Same check as the strict read, but a bad row is rejected instead of dropped.
+    const { droppedRoles, droppedMatrixRows } = sanitizeAccessDoc(
+      payload as unknown as Parameters<typeof sanitizeAccessDoc>[0]
+    );
+    if (droppedRoles > 0 || droppedMatrixRows.length > 0) {
       return NextResponse.json(
         { error: "Invalid access control document" },
         { status: 400 }

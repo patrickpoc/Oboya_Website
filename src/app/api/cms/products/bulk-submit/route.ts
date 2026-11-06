@@ -7,6 +7,7 @@ import {
   requiresApprovalFor,
 } from "@/lib/cms/server/approvals.server";
 import { submitBulkUpdateRequest } from "@/lib/cms/server/bulk-approval.server";
+import { VariantValidationError } from "@/lib/cms/server/product-writes.server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -36,6 +37,12 @@ export async function POST(request: Request) {
     const changeRequest = await submitBulkUpdateRequest(auth.user, products);
     return pendingApprovalResponse(changeRequest, { approvalRequired: true });
   } catch (error) {
+    if (error instanceof VariantValidationError) {
+      return NextResponse.json(
+        { error: error.message, field: "colorVariants", productId: error.productId, sku: error.sku },
+        { status: 400 }
+      );
+    }
     return approvalErrorResponse(error, "Failed to submit bulk update");
   }
 }

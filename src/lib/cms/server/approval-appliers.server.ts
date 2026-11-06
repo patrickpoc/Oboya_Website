@@ -25,6 +25,7 @@ import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
 import type { CmsCaseStudy } from "@/lib/cms/repositories/case-studies-repository";
 import { readProductByIdStrict } from "@/lib/cms/server/products.server";
 import {
+  assertVariantChangesValid,
   createProductWrite,
   deleteProductWrite,
   mergeProductUpdate,
@@ -54,6 +55,16 @@ type Applier = {
 async function currentProduct(id: string) {
   // Strict: a failed read must leave the request open, not look like a missing product.
   return (await readProductByIdStrict(id)) ?? null;
+}
+
+/**
+ * Requests created before brands were removed carry `brandId` in their snapshot. The read
+ * path no longer returns it, so both sides drop it to avoid a false conflict.
+ */
+export function withoutLegacyBrand<T extends object | null | undefined>(product: T): T {
+  if (!product || !("brandId" in product)) return product;
+  const { brandId: _legacy, ...rest } = product as T & { brandId?: unknown };
+  return rest as T;
 }
 
 function withoutPrices(product: CmsProduct | null | undefined) {
@@ -114,8 +125,11 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
           if (!current) return ["product_missing"];
           const snapshot = req.snapshotBefore as CmsProduct | null;
           const same = payload.preserveCurrentPrices
-            ? deepEqual(withoutPrices(current), withoutPrices(snapshot))
-            : deepEqual(current, snapshot);
+            ? deepEqual(
+                withoutPrices(withoutLegacyBrand(current)),
+                withoutPrices(withoutLegacyBrand(snapshot))
+              )
+            : deepEqual(withoutLegacyBrand(current), withoutLegacyBrand(snapshot));
           return same ? [] : ["product"];
         },
         async apply(req) {
@@ -124,6 +138,8 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
           const next = payload.preserveCurrentPrices
             ? withPricesFrom(payload.product, current)
             : payload.product;
+          // Stored data may have changed since the request was made: re-check before writing.
+          await assertVariantChangesValid([{ incoming: next, previous: current }]);
           await writeProduct(next, current);
         },
       };
@@ -135,7 +151,9 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
           return (await currentProduct(product.id)) ? ["already_exists"] : [];
         },
         async apply(req) {
-          await createProductWrite(req.payloadProposed as CmsProduct);
+          const product = req.payloadProposed as CmsProduct;
+          await assertVariantChangesValid([{ incoming: product, previous: null }]);
+          await createProductWrite(product);
         },
       };
 
@@ -191,7 +209,12 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
           const conflicts: string[] = [];
           for (const product of payload.products) {
             const current = await currentProduct(product.id);
-            if (!deepEqual(current, snapshots[product.id] ?? null)) {
+            if (
+              !deepEqual(
+                withoutLegacyBrand(current),
+                withoutLegacyBrand(snapshots[product.id] ?? null)
+              )
+            ) {
               conflicts.push(product.sku || product.id);
             }
           }
@@ -207,6 +230,13 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
           for (const product of payload.products) {
             currents.set(product.id, await currentProduct(product.id));
           }
+          // Re-check against today's catalog; a failure applies nothing and fails the request.
+          await assertVariantChangesValid(
+            payload.products.map((product) => {
+              const previous = currents.get(product.id) ?? null;
+              return { incoming: mergeProductUpdate(product, previous), previous };
+            })
+          );
           for (const product of payload.products) {
             const item = items.find((i) => i.productId === product.id);
             try {
@@ -398,7 +428,10 @@ export async function currentVsProposed(req: ChangeRequest): Promise<ChangeDiffE
     }
     case "marketplace.product_edit": {
       const payload = req.payloadProposed as ProductEditPayload;
-      return diffJson(await currentProduct(payload.product.id), payload.product);
+      return diffJson(
+        withoutLegacyBrand(await currentProduct(payload.product.id)),
+        withoutLegacyBrand(payload.product)
+      );
     }
     case "website.homepage": {
       const { readHomepageSettingsStrict } = await import("@/lib/cms/server/homepage.server");

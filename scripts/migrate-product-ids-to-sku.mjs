@@ -262,7 +262,6 @@ if (url && serviceKey) {
         id: product.id,
         sku: product.sku,
         moq: product.moq ?? 1,
-        brand_id: product.brandId,
         category_id: product.categoryId,
         subcategory_id: product.subcategoryId,
         images: product.images ?? [],

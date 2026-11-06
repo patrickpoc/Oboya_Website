@@ -41,8 +41,11 @@ const AUDIT_ACTION = "marketplace.filter_remove";
  */
 export async function POST(request: Request) {
   try {
-    const auth = await cmsGuard("marketplace", "edit");
+    // Removing moves products (edit) and deletes the item (delete): both are required.
+    const auth = await cmsGuard("marketplace", "delete");
     if ("response" in auth) return auth.response;
+    const editAuth = await cmsGuard("marketplace", "edit");
+    if ("response" in editAuth) return editAuth.response;
 
     const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
     const rawReplacement = body?.replacementId;

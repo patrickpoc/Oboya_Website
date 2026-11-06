@@ -22,12 +22,10 @@ import type {
 } from "@/lib/cms/repositories/solutions-page-repository";
 import type { CmsLocale, LocalizedString } from "@/lib/cms/types";
 import type {
-  ShopBrand,
   ShopCategory,
   ShopFilterOptions,
 } from "@/lib/shop/types";
 import {
-  normalizeBrands,
   normalizeCategories,
   normalizeFilterOptions,
 } from "@/lib/shop/filter-groups";
@@ -59,7 +57,6 @@ export default function SolutionsPageAdmin() {
   const [saving, setSaving] = useState(false);
   const notifyPending = usePendingApprovalNotice();
   const [categories, setCategories] = useState<ShopCategory[]>([]);
-  const [brands, setBrands] = useState<ShopBrand[]>([]);
   const [filterOptions, setFilterOptions] = useState<ShopFilterOptions>({
     applications: [],
     cultures: [],
@@ -80,18 +77,14 @@ export default function SolutionsPageAdmin() {
       if (filtersRes.ok) {
         const filters = (await filtersRes.json()) as {
           categories: ShopCategory[];
-          brands: ShopBrand[];
           filterOptions: ShopFilterOptions;
         };
         const categoriesNext = normalizeCategories(filters.categories ?? []);
-        const brandsNext = normalizeBrands(filters.brands ?? []);
         const optionsNext = normalizeFilterOptions(filters.filterOptions);
         setCategories(categoriesNext);
-        setBrands(brandsNext);
         setFilterOptions(optionsNext);
         updateShopCatalog({
           categories: categoriesNext,
-          brands: brandsNext,
           filterOptions: optionsNext,
         });
       }
@@ -332,7 +325,6 @@ export default function SolutionsPageAdmin() {
                     onChange={(shop) => updateCrop(index, { shop })}
                     filterOptions={filterOptions}
                     categories={categories}
-                    brands={brands}
                   />
                 </div>
               ))}
@@ -429,7 +421,6 @@ export default function SolutionsPageAdmin() {
                       onChange={(shop) => updateBanner(index, { shop })}
                       filterOptions={filterOptions}
                       categories={categories}
-                      brands={brands}
                     />
                   </div>
                 );

@@ -58,7 +58,6 @@ export function BulkImportWorkspace() {
   const catalog: ImportCatalog = useMemo(
     () => ({
       categories: liveCatalog.categories,
-      brands: liveCatalog.brands,
       countries: liveCatalog.countries,
       filterOptions: liveCatalog.filterOptions,
       existingIds: new Set([

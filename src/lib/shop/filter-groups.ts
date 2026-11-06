@@ -1,7 +1,6 @@
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type {
   FilterOption,
-  ShopBrand,
   ShopCategory,
   ShopFilterGroup,
   ShopFilterOptions,
@@ -63,7 +62,6 @@ export type SluggableEntity = {
 
 export interface ShopFilterTaxonomy {
   categories: ShopCategory[];
-  brands: ShopBrand[];
   filterOptions: ShopFilterOptions;
 }
 
@@ -170,7 +168,7 @@ export function resolveShopFilters(
   filters: ShopFilters,
   taxonomy: ShopFilterTaxonomy
 ): ShopFilters {
-  const { filterOptions, categories, brands } = taxonomy;
+  const { filterOptions, categories } = taxonomy;
   const customFilters: Record<string, string[]> = {};
   for (const [groupId, values] of Object.entries(filters.customFilters ?? {})) {
     customFilters[groupId] = resolveEntityIds(
@@ -190,7 +188,6 @@ export function resolveShopFilters(
       filters.subcategoryIds,
       flatSubcategories(categories)
     ),
-    brandIds: resolveEntityIds(filters.brandIds, brands),
     applications: resolveEntityIds(
       filters.applications,
       filterOptions.applications ?? []
@@ -213,7 +210,7 @@ export function toPublicShopFilters(
   filters: ShopFilters,
   taxonomy: ShopFilterTaxonomy
 ): ShopFilters {
-  const { filterOptions, categories, brands } = taxonomy;
+  const { filterOptions, categories } = taxonomy;
   const customFilters: Record<string, string[]> = {};
   for (const [groupId, values] of Object.entries(filters.customFilters ?? {})) {
     customFilters[groupId] = mapPublicIds(
@@ -233,7 +230,6 @@ export function toPublicShopFilters(
       filters.subcategoryIds,
       flatSubcategories(categories)
     ),
-    brandIds: mapPublicIds(filters.brandIds, brands),
     applications: mapPublicIds(
       filters.applications,
       filterOptions.applications ?? []
@@ -280,10 +276,6 @@ export function normalizeCategories(categories: ShopCategory[]): ShopCategory[] 
       subcategories: category.subcategories.map((sub) => withEntitySlug(sub)),
     };
   });
-}
-
-export function normalizeBrands(brands: ShopBrand[]): ShopBrand[] {
-  return brands.map((brand) => withEntitySlug(brand));
 }
 
 export type BuiltinFilterGroupId = (typeof BUILTIN_FILTER_GROUP_IDS)[number];

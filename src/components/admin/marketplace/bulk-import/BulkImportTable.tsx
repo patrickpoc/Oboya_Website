@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { Trash2 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { ImageIcon, Trash2 } from "lucide-react";
+import { Fragment, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { PRODUCT_EDITOR_SELECT_CLASS } from "@/components/admin/marketplace/product-editor.constants";
 import { BulkPriceInput } from "@/components/admin/marketplace/bulk-update/BulkPriceInput";
@@ -15,8 +15,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { ImageField } from "@/components/admin/media/ImageField";
 import {
-  brandOptions,
   categoryOptions,
   subcategoryOptions,
 } from "@/lib/cms/bulk-update/display-labels";
@@ -40,6 +40,9 @@ type Props = {
   onRemove: (productId: string) => void;
 };
 
+/** Header cells in the table; keep in sync with the <thead> above. */
+const IMPORT_TABLE_COLUMNS = 16;
+
 const TH =
   "whitespace-nowrap px-3 py-2.5 text-left text-[11px] font-medium uppercase tracking-wide text-oboya-blue-dark/70";
 const TD = "border-b border-border/40 px-3 py-3 align-middle";
@@ -57,11 +60,14 @@ function CellShell({
   field,
   row,
   issues,
+  hideIssues = false,
   children,
 }: {
   field: ImportEditableField;
   row: ImportWorkspaceRow;
   issues: ImportValidationIssue[];
+  /** Highlight only; the message is shown by a sibling cell sharing the same field. */
+  hideIssues?: boolean;
   children: ReactNode;
 }) {
   const fieldIssues = issuesForImportProduct(issues, row.productId, field);
@@ -79,7 +85,7 @@ function CellShell({
       )}
     >
       {children}
-      {fieldIssues.map((issue) => (
+      {(hideIssues ? [] : fieldIssues).map((issue) => (
         <p
           key={`${issue.field}-${issue.message}`}
           className={cn(
@@ -142,14 +148,14 @@ export function BulkImportTable({
 }: Props) {
   const t = useTranslations("admin.products.bulkImport");
   const categories = categoryOptions(catalog, preferredLocale);
-  const brands = brandOptions(catalog, preferredLocale);
+  const [openImagesId, setOpenImagesId] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ src: string; title: string } | null>(
     null
   );
 
   return (
     <div className="overflow-x-auto rounded-xl border border-border/60 bg-white">
-      <table className="w-full min-w-[1200px] border-separate border-spacing-0 text-sm">
+      <table className="w-full min-w-[2400px] border-separate border-spacing-0 text-sm">
         <thead>
           <tr className="bg-oboya-soft-white">
             <th className={cn(TH, STICKY_LEFT_PRODUCT)}>{t("colProduct")}</th>
@@ -157,12 +163,16 @@ export function BulkImportTable({
             <th className={TH}>{t("colMoq")}</th>
             <th className={TH}>{t("colCategory")}</th>
             <th className={TH}>{t("colSubcategory")}</th>
-            <th className={TH}>{t("colBrand")}</th>
             <th className={TH}>{t("colUsd")}</th>
             <th className={TH}>{t("colBrl")}</th>
             <th className={TH}>{t("colEur")}</th>
             <th className={TH}>{t("colStock")}</th>
             <th className={TH}>{t("colStatus")}</th>
+            <th className={TH}>{t("colImages")}</th>
+            <th className={TH}>{t("colShortEn")}</th>
+            <th className={TH}>{t("colShortPtBr")}</th>
+            <th className={TH}>{t("colShortEs")}</th>
+            <th className={TH}>{t("colShortZhCn")}</th>
             <th className={cn(TH, STICKY_RIGHT_HEAD)} />
           </tr>
         </thead>
@@ -173,8 +183,18 @@ export function BulkImportTable({
             const subs = subcategoryOptions(catalog, product.categoryId, preferredLocale);
             const title = product.name.en || product.sku || product.id;
 
+            const filledImages = product.images.filter((url) => Boolean(url?.trim()));
+            const imagesOpen = openImagesId === row.productId;
+            const shortCells = [
+              ["shortEn", "en"],
+              ["shortPt", "pt-BR"],
+              ["shortEs", "es"],
+              ["shortZh", "zh-CN"],
+            ] as const;
+
             return (
-              <tr key={row.productId} className="align-top">
+              <Fragment key={row.productId}>
+              <tr className="align-top">
                 <td className={cn(TD, STICKY_LEFT_PRODUCT_BODY)}>
                   <div className="flex min-w-[16rem] items-start gap-3 pr-1">
                     <ImportImageThumb
@@ -264,24 +284,6 @@ export function BulkImportTable({
                     </select>
                   </CellShell>
                 </td>
-                <td className={TD}>
-                  <CellShell field="brandId" row={row} issues={issues}>
-                    <select
-                      className={cn(PRODUCT_EDITOR_SELECT_CLASS, CONTROL, "min-w-[130px]")}
-                      value={product.brandId || ""}
-                      onChange={(event) =>
-                        onPatch(row.productId, { brandId: event.target.value })
-                      }
-                    >
-                      <option value="">{t("none")}</option>
-                      {brands.map((brand) => (
-                        <option key={brand.id} value={brand.id}>
-                          {brand.name}
-                        </option>
-                      ))}
-                    </select>
-                  </CellShell>
-                </td>
                 <td className={cn(TD, "min-w-[11rem]")}>
                   <CellShell field="priceUsd" row={row} issues={issues}>
                     <BulkPriceInput
@@ -347,6 +349,41 @@ export function BulkImportTable({
                     </select>
                   </CellShell>
                 </td>
+                <td className={TD}>
+                  <CellShell field="images" row={row} issues={issues}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-9 gap-1.5"
+                      aria-expanded={imagesOpen}
+                      onClick={() => setOpenImagesId(imagesOpen ? null : row.productId)}
+                    >
+                      <ImageIcon className="size-3.5" />
+                      {imagesOpen
+                        ? t("imagesHide")
+                        : t("imagesEdit", { count: filledImages.length })}
+                    </Button>
+                  </CellShell>
+                </td>
+                {shortCells.map(([patchKey, locale]) => (
+                  <td key={patchKey} className={cn(TD, "min-w-[12rem]")}>
+                    <CellShell
+                      field="shortDescription"
+                      row={row}
+                      issues={issues}
+                      hideIssues={locale !== "en"}
+                    >
+                      <Input
+                        value={product.shortDescription?.[locale] ?? ""}
+                        onChange={(event) =>
+                          onPatch(row.productId, { [patchKey]: event.target.value })
+                        }
+                        className={cn(CONTROL, "min-w-[10rem]")}
+                      />
+                    </CellShell>
+                  </td>
+                ))}
                 <td className={cn(TD, STICKY_RIGHT_BODY)}>
                   <Button
                     type="button"
@@ -360,6 +397,29 @@ export function BulkImportTable({
                   </Button>
                 </td>
               </tr>
+              {imagesOpen && (
+                <tr>
+                  <td colSpan={IMPORT_TABLE_COLUMNS} className="border-b border-border/40 bg-oboya-soft-white/40 px-3 py-3">
+                    <p className="mb-2 text-xs text-muted-foreground">{t("imagesHint")}</p>
+                    <div className="grid gap-3 md:grid-cols-3">
+                      {[0, 1, 2].map((slot) => (
+                        <ImageField
+                          key={slot}
+                          label={t("imageSlot", { n: slot + 1 })}
+                          optional={slot > 0}
+                          value={filledImages[slot] ?? ""}
+                          onChange={(url) => {
+                            const next = [0, 1, 2].map((i) => filledImages[i] ?? "");
+                            next[slot] = url;
+                            onPatch(row.productId, { images: next });
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              )}
+              </Fragment>
             );
           })}
         </tbody>

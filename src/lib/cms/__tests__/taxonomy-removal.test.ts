@@ -14,7 +14,6 @@ const doc: TaxonomyDoc = {
     { id: "c1", name: "C1", subcategories: [{ id: "s1", name: "S1" }, { id: "s2", name: "S2" }] },
     { id: "c2", name: "C2", subcategories: [{ id: "s3", name: "S3" }] },
   ],
-  brands: [{ id: "b1", name: "B1" }, { id: "b2", name: "B2" }],
   filterGroups: [{ id: "applications", name: "App" }, { id: "countriesOfOrigin", name: "Country" }],
   filterOptions: {
     applications: [{ id: "a1", name: "A1" }, { id: "a2", name: "A2" }],
@@ -29,7 +28,6 @@ const product = (over: Partial<CmsProduct> = {}) =>
     id: "p",
     categoryId: "c1",
     subcategoryId: "s1",
-    brandId: "b1",
     application: ["a1", "a2"],
     cultures: [],
     certifications: [],
@@ -55,14 +53,21 @@ describe("findAffectedProducts", () => {
   });
 });
 
+describe("legacy brand targets", () => {
+  it("is no longer a removal target", async () => {
+    const { isRemovalTarget } = await import("@/lib/cms/taxonomy-removal");
+    expect(isRemovalTarget({ kind: "brand", id: "b1" })).toBe(false);
+    expect(isRemovalTarget({ kind: "category", id: "c1" })).toBe(true);
+  });
+});
+
 describe("resolveReplacement", () => {
   it("requires a replacement for required references", () => {
-    expect(resolveReplacement({ kind: "brand", id: "b1" }, "", doc).ok).toBe(false);
+    expect(resolveReplacement({ kind: "category", id: "c1" }, "", doc).ok).toBe(false);
     expect(resolveReplacement({ kind: "subcategory", id: "s1" }, undefined, doc).ok).toBe(false);
   });
   it("rejects same, unknown and in-category destinations", () => {
-    expect(resolveReplacement({ kind: "brand", id: "b1" }, "b1", doc).ok).toBe(false);
-    expect(resolveReplacement({ kind: "brand", id: "b1" }, "zz", doc).ok).toBe(false);
+    expect(resolveReplacement({ kind: "subcategory", id: "s1" }, "zz", doc).ok).toBe(false);
     expect(resolveReplacement({ kind: "subcategory", id: "s1" }, "s1", doc).ok).toBe(false);
     expect(resolveReplacement({ kind: "category", id: "c1" }, "s2", doc).ok).toBe(false);
   });
@@ -80,9 +85,6 @@ describe("computeProductPatch", () => {
       subcategoryId: "s3",
       categoryId: "c2",
     });
-  });
-  it("swaps brand", () => {
-    expect(computeProductPatch({ kind: "brand", id: "b1" }, product(), ok({ kind: "brand", id: "b1" }, "b2"))).toEqual({ brandId: "b2" });
   });
   it("removes an option keeping the others", () => {
     const t: RemovalTarget = { kind: "option", id: "a1", groupId: "applications" };
@@ -102,7 +104,6 @@ describe("removeFromDocument", () => {
   it("removes only the target", () => {
     expect(removeFromDocument({ kind: "subcategory", id: "s1" }, doc).categories[0]!.subcategories.map((s) => s.id)).toEqual(["s2"]);
     expect(removeFromDocument({ kind: "category", id: "c1" }, doc).categories.map((c) => c.id)).toEqual(["c2"]);
-    expect(removeFromDocument({ kind: "brand", id: "b1" }, doc).brands.map((b) => b.id)).toEqual(["b2"]);
     const g = removeFromDocument({ kind: "group", id: "applications" }, doc);
     expect(g.filterGroups.map((x) => x.id)).toEqual(["countriesOfOrigin"]);
     expect(g.filterOptions.applications).toBeUndefined();

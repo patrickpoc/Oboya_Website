@@ -35,7 +35,6 @@ const seedFiles: Record<string, unknown> = {
   "countries.json": [{ code: "US", name: "US", currencies: ["USD"], defaultCurrency: "USD" }],
   "products.json": [],
   "categories.json": [],
-  "brands.json": [],
   "filter-options.json": {},
 };
 vi.mock("node:fs/promises", () => ({
@@ -55,6 +54,8 @@ const country = (code: string, active = true) => ({
 });
 const currenciesDoc = { countries: [country("US"), country("BR", false)], currencies: ["USD", "BRL"] };
 
+const noOptions = { applications: [], cultures: [], certifications: [], countriesOfOrigin: [] };
+
 async function load() {
   return import("@/lib/cms/server/marketplace-config.server");
 }
@@ -70,6 +71,31 @@ describe("strict marketplace readers", () => {
     const { readMarketplaceFiltersStrict } = await load();
     const doc = await readMarketplaceFiltersStrict();
     expect(doc.categories).toEqual([]);
+  });
+
+  it("filters: a document with or without the legacy brands array reads without error", async () => {
+    const { readMarketplaceFiltersStrict } = await load();
+    const base = { categories: [], filterOptions: {} };
+    readCmsDocumentStrict.mockResolvedValue(base);
+    await expect(readMarketplaceFiltersStrict()).resolves.not.toHaveProperty("brands");
+    readCmsDocumentStrict.mockResolvedValue({ ...base, brands: [{ id: "b1", name: "B1" }] });
+    await expect(readMarketplaceFiltersStrict()).resolves.not.toHaveProperty("brands");
+  });
+
+  it("filters: a save keeps the stored legacy brands array untouched (rollback safety)", async () => {
+    const legacy = [{ id: "b1", name: "B1", slug: "b1" }];
+    readCmsDocumentStrict.mockResolvedValue({ categories: [], filterOptions: {}, brands: legacy });
+    const { saveMarketplaceFilters } = await load();
+    await saveMarketplaceFilters({ categories: [], filterGroups: [], filterOptions: noOptions });
+    expect(writeCmsDocumentData).toHaveBeenCalledTimes(1);
+    expect(writeCmsDocumentData.mock.calls[0]![2]).toMatchObject({ brands: legacy });
+  });
+
+  it("filters: a save never invents a brands array", async () => {
+    readCmsDocumentStrict.mockResolvedValue(null);
+    const { saveMarketplaceFilters } = await load();
+    await saveMarketplaceFilters({ categories: [], filterGroups: [], filterOptions: noOptions });
+    expect(writeCmsDocumentData.mock.calls[0]![2]).not.toHaveProperty("brands");
   });
 
   it("filters: read error and malformed data throw", async () => {

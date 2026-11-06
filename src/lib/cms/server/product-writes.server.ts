@@ -12,10 +12,12 @@ import {
   findExistingProduct,
   hardDeleteProduct,
   persistProductsToFileSafe,
+  readProductsStrict,
   restoreProduct,
   saveProduct,
   softDeleteProduct,
 } from "@/lib/cms/server/products.server";
+import { colorDataChanged, findVariantProblem, variantShapeProblem } from "@/lib/cms/bulk-update/variant-guard";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import {
   invalidateCatalog,
@@ -93,6 +95,45 @@ export function mergeProductUpdate(
         }
       : { ...incoming, deletedAt: null, purgeAt: null }
   ) as CmsProduct;
+}
+
+export class VariantValidationError extends Error {
+  constructor(
+    message: string,
+    readonly productId: string,
+    readonly sku: string
+  ) {
+    super(message);
+    this.name = "VariantValidationError";
+  }
+}
+
+/**
+ * Rejects an invalid or colliding color-variant change (bad hex/name/image/sort order,
+ * duplicate SKU, SKU owned by another product, trashed included). Items whose color data is
+ * unchanged are skipped, so a legacy invalid product still saves. Within a batch the other
+ * pending documents count as owners too. Stored products are read once, and only if needed.
+ */
+export async function assertVariantChangesValid(
+  items: Array<{ incoming: CmsProduct; previous: CmsProduct | null | undefined }>
+): Promise<void> {
+  for (const { incoming, previous } of items) {
+    const shape = variantShapeProblem(incoming, previous);
+    if (shape) throw new VariantValidationError(shape, incoming.id, incoming.sku);
+  }
+  const checked = items.filter(
+    ({ incoming, previous }) =>
+      (incoming.colorVariants?.length ?? 0) > 0 && colorDataChanged(incoming, previous)
+  );
+  if (checked.length === 0) return;
+  const stored = await readProductsStrict();
+  const batch = items.map((item) => item.incoming);
+  const batchIds = new Set(batch.map((product) => product.id));
+  const others = [...stored.filter((product) => !batchIds.has(product.id)), ...batch];
+  for (const { incoming, previous } of checked) {
+    const problem = findVariantProblem(incoming, previous, others);
+    if (problem) throw new VariantValidationError(problem, incoming.id, incoming.sku);
+  }
 }
 
 export class ProductExistsError extends Error {

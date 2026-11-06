@@ -22,7 +22,7 @@ interface ShopLocalizedNameFieldsProps {
 }
 
 /**
- * Flat multilingual name editor for shop taxonomy (categories, brands, filter options).
+ * Flat multilingual name editor for shop taxonomy (categories, filter options).
  * Shows default + all locale fields at once — no language tabs.
  */
 export function ShopLocalizedNameFields({

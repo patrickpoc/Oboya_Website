@@ -80,7 +80,8 @@ describe("access control and policies strict reads", () => {
     expect(hydrateAccessControl).not.toHaveBeenCalled();
   });
 
-  it("rejects bad elements in access-control and policy documents", async () => {
+  it("drops bad access-control rows (and logs) instead of failing the whole document", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
     const { readAccessControlStrict } = await import("@/lib/cms/server/access-control.server");
     for (const bad of [
       { roles: [null], matrix: {} },
@@ -89,8 +90,37 @@ describe("access control and policies strict reads", () => {
       { roles: [], matrix: { editor: [] } },
     ]) {
       result = published(bad);
-      await expect(readAccessControlStrict()).rejects.toThrow();
+      const doc = await readAccessControlStrict();
+      expect(doc.roles.every((r) => typeof r.id === "string")).toBe(true);
+      expect(doc.matrix.editor).not.toBe("full");
+      expect(doc.matrix.editor).not.toEqual([]);
     }
+  });
+
+  it("a dropped system-role row is deny-all, except super_admin which stays full", async () => {
+    const { readAccessControlStrict } = await import("@/lib/cms/server/access-control.server");
+    const { CMS_MODULES } = await import("@/lib/cms/permissions/access-types");
+    result = published({ roles: [], matrix: { content_manager: "full", super_admin: [] } });
+    const doc = await readAccessControlStrict();
+    expect(CMS_MODULES.every((m) => doc.matrix.content_manager?.[m] === "none")).toBe(true);
+    expect(CMS_MODULES.every((m) => doc.matrix.super_admin?.[m] === "full")).toBe(true);
+    // A system role that is simply absent still gets its default row.
+    expect(Object.keys(doc.matrix.viewer ?? {}).length).toBeGreaterThan(0);
+    expect(doc.matrix.viewer?.dashboard).not.toBe("none");
+  });
+
+  it("unreadable cells in a non-super row become none and the read still succeeds", async () => {
+    const { readAccessControlStrict } = await import("@/lib/cms/server/access-control.server");
+    result = published({
+      roles: [],
+      matrix: { editor: { blog: "viewedit", media: 5, website: ["view", "bogus"], forms: "full" } },
+    });
+    const doc = await readAccessControlStrict();
+    expect(doc.matrix.editor).toEqual({ blog: "none", media: "none", website: ["view"], forms: "full" });
+  });
+
+  it("rejects bad elements in policy documents", async () => {
+    hydrateAccessControl.mockClear();
     const { readApprovalPoliciesStrict } = await import("@/lib/cms/server/approval-policies.server");
     for (const bad of [{ policies: [null] }, { policies: [{ requiresApproval: true }] }]) {
       result = published(bad);

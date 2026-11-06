@@ -320,7 +320,9 @@ export async function reviewChangeRequest(input: {
     if (error instanceof CmsReadError) throw error;
     // Typed validation errors are written for operators; anything else stays server-side.
     const userFacing =
-      (error instanceof Error && error.name === "ProductExistsError") || error instanceof CountriesValidationError;
+      (error instanceof Error &&
+        (error.name === "ProductExistsError" || error.name === "VariantValidationError")) ||
+      error instanceof CountriesValidationError;
     if (!userFacing) console.error("Failed to apply change request:", request.id, error);
     const message =
       userFacing && error instanceof Error ? error.message : "Failed to apply change";

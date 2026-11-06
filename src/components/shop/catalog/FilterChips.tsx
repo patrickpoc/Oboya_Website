@@ -3,9 +3,8 @@
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { BrandLabel } from "@/components/shop/BrandLabel";
 import { useShop } from "@/contexts/ShopContext";
-import { getBrandById, getCategoryById } from "@/lib/shop/catalog";
+import { getCategoryById } from "@/lib/shop/catalog";
 import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 import type { ShopLocalizedText } from "@/lib/shop/types";
 
@@ -63,24 +62,6 @@ export function FilterChips() {
         updateFilters({
           subcategoryIds: filters.subcategoryIds.filter((s) => s !== id),
         }),
-    });
-  }
-
-  for (const id of filters.brandIds) {
-    const brand = getBrandById(id);
-    const brandText = brand
-      ? pickLabel(locale, brand.name, brand.nameI18n)
-      : id;
-    chips.push({
-      key: `brand-${id}`,
-      label: brand ? (
-        <BrandLabel brand={brand} locale={locale} />
-      ) : (
-        id
-      ),
-      ariaLabel: brandText,
-      onRemove: () =>
-        updateFilters({ brandIds: filters.brandIds.filter((b) => b !== id) }),
     });
   }
 

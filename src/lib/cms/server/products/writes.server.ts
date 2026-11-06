@@ -33,7 +33,6 @@ export type ProductReferencePatch = ReferencePatch;
 const REFERENCE_COLUMNS: Partial<Record<keyof ProductReferencePatch, string>> = {
   categoryId: "category_id",
   subcategoryId: "subcategory_id",
-  brandId: "brand_id",
   application: "application",
   cultures: "cultures",
   certifications: "certifications",

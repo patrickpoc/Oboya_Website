@@ -13,7 +13,8 @@ export const IMPORT_EDITABLE_FIELDS = [
   "moq",
   "categoryId",
   "subcategoryId",
-  "brandId",
+  "shortDescription",
+  "images",
   "priceUsd",
   "priceBrl",
   "priceEur",
@@ -41,10 +42,15 @@ export type ImportProductPatch = Partial<{
   sku: string;
   nameEn: string;
   namePt: string;
+  shortEn: string;
+  shortPt: string;
+  shortEs: string;
+  shortZh: string;
+  /** Replaces the whole image list; blank slots are dropped. */
+  images: string[];
   moq: number;
   categoryId: string;
   subcategoryId: string;
-  brandId: string;
   priceUsd: number | null;
   priceBrl: number | null;
   priceEur: number | null;
@@ -85,7 +91,8 @@ export const IMPORT_FIELD_LABELS: Record<ImportEditableField, string> = {
   moq: "MOQ",
   categoryId: "Category",
   subcategoryId: "Subcategory",
-  brandId: "Brand",
+  shortDescription: "Short description",
+  images: "Images",
   priceUsd: "Price USD",
   priceBrl: "Price BRL",
   priceEur: "Price EUR",

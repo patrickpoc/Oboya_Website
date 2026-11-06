@@ -20,7 +20,6 @@ import {
 } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { generateTemporaryPassword } from "@/lib/security/password";
-import { isHostedRuntime } from "@/lib/security/runtime";
 
 type ProfileRow = {
   id: string;
@@ -72,137 +71,6 @@ export function profileToCmsUser(
   };
 }
 
-export type AdminActorResult =
-  | { ok: true; user: CmsUser }
-  | { ok: false; error: string };
-
-export async function requireAdminActor(): Promise<CmsUser | null> {
-  const result = await resolveAdminActor();
-  return result.ok ? result.user : null;
-}
-
-export async function resolveAdminActor(): Promise<AdminActorResult> {
-  if (!isSupabaseConfigured()) {
-    if (isHostedRuntime()) {
-      return { ok: false, error: "Service unavailable" };
-    }
-    const fallback = getCmsUsers()[0];
-    if (!fallback) {
-      return { ok: false, error: "Unauthorized" };
-    }
-    return { ok: true, user: fallback };
-  }
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { ok: false, error: "Unauthorized" };
-  }
-
-  const serviceRole = isServiceRoleConfigured();
-  let profile: ProfileRow | null = null;
-
-  // Prefer service role so RLS cannot hide the profile.
-  if (serviceRole) {
-    try {
-      const admin = createServiceClient();
-      const { data } = await admin
-        .from("cms_user_profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
-      profile = (data as ProfileRow | null) ?? null;
-
-      if (!profile) {
-        const bootstrapEmail = process.env.CMS_BOOTSTRAP_ADMIN_EMAIL?.toLowerCase();
-        const isBootstrap =
-          Boolean(bootstrapEmail && user.email?.toLowerCase() === bootstrapEmail);
-        const now = new Date().toISOString();
-        const { data: created } = await admin
-          .from("cms_user_profiles")
-          .upsert({
-            id: user.id,
-            name:
-              (user.user_metadata?.name as string | undefined) ||
-              user.email?.split("@")[0] ||
-              "User",
-            role: isBootstrap ? "super_admin" : "viewer",
-            locale: "en",
-            status: "active",
-            must_change_password: !isBootstrap,
-            created_at: now,
-            updated_at: now,
-          })
-          .select("*")
-          .single();
-        profile = (created as ProfileRow | null) ?? null;
-      }
-
-      const bootstrapEmail = process.env.CMS_BOOTSTRAP_ADMIN_EMAIL?.toLowerCase();
-      const shouldForcePromote =
-        Boolean(process.env.CMS_AUTO_PROMOTE_ADMIN === "true") ||
-        Boolean(
-          bootstrapEmail && user.email?.toLowerCase() === bootstrapEmail
-        );
-
-      if (
-        profile &&
-        shouldForcePromote &&
-        profile.role !== "super_admin" &&
-        profile.role !== "admin"
-      ) {
-        const { data: promoted } = await admin
-          .from("cms_user_profiles")
-          .update({
-            role: "super_admin",
-            status: "active",
-            must_change_password: false,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", user.id)
-          .select("*")
-          .single();
-        if (promoted) profile = promoted as ProfileRow;
-      }
-    } catch (error) {
-      console.error("resolveAdminActor service role path failed:", error);
-    }
-  }
-
-  if (!profile) {
-    const me = await getOrCreateProfileForAuthUser(user.id, user.email ?? "");
-    if (me) {
-      profile = {
-        id: me.id,
-        name: me.name,
-        job_title: me.jobTitle ?? null,
-        role: me.role,
-        locale: me.locale,
-        status: me.status,
-        must_change_password: me.mustChangePassword ?? null,
-        created_at: me.createdAt,
-        updated_at: me.updatedAt,
-      };
-    }
-  }
-
-  if (!profile) {
-    console.error("No cms_user_profiles row", { userId: user.id, serviceRole });
-    return { ok: false, error: "Unauthorized" };
-  }
-
-  const me = profileToCmsUser(profile, user.email ?? "");
-
-  if (me.status !== "active") {
-    return { ok: false, error: "Forbidden" };
-  }
-
-  return { ok: true, user: me };
-}
-
 export async function getOrCreateProfileForAuthUser(
   userId: string,
   email: string
@@ -216,11 +84,19 @@ export async function getOrCreateProfileForAuthUser(
   }
 
   const supabase = await createClient();
-  const { data: existing } = await supabase
+  // Own-row reads by id go through the service client when available, so a recursive
+  // profile policy cannot turn first login into a 500.
+  const reader = isServiceRoleConfigured() ? createServiceClient() : supabase;
+  const { data: existing, error: readError } = await reader
     .from("cms_user_profiles")
     .select("*")
     .eq("id", userId)
     .maybeSingle();
+
+  // A failed read is not "no row": provisioning on top of it could hit a real profile.
+  if (readError) {
+    throw new Error(`Could not read the profile: ${readError.message}`);
+  }
 
   if (existing) {
     return profileToCmsUser(existing as ProfileRow, email);
@@ -250,22 +126,29 @@ export async function getOrCreateProfileForAuthUser(
     updated_at: now,
   };
 
-  const writer = isServiceRoleConfigured()
-    ? createServiceClient()
-    : supabase;
+  const writer = reader;
 
+  // Never overwrite: if a row appeared meanwhile, the insert is skipped and we re-read it.
   const { data, error } = await writer
     .from("cms_user_profiles")
-    .upsert(row)
+    .upsert(row, { onConflict: "id", ignoreDuplicates: true })
     .select("*")
     .maybeSingle();
 
-  if (error || !data) {
-    console.error("Failed to bootstrap user profile:", error?.message);
+  if (error) {
+    console.error("Failed to bootstrap user profile:", error.message);
     return null;
   }
 
-  return profileToCmsUser(data as ProfileRow, email);
+  if (data) return profileToCmsUser(data as ProfileRow, email);
+
+  const { data: raced, error: rereadError } = await reader
+    .from("cms_user_profiles")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
+  if (rereadError) throw new Error(`Could not read the profile: ${rereadError.message}`);
+  return raced ? profileToCmsUser(raced as ProfileRow, email) : null;
 }
 
 export async function listCmsUsersDurable(): Promise<CmsUser[]> {

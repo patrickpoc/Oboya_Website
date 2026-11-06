@@ -16,7 +16,6 @@ function product(overrides: Partial<ShopProduct> = {}): ShopProduct {
     id: "sku-001",
     sku: "SKU-001",
     moq: 1,
-    brandId: "oboya",
     categoryId: "pots",
     subcategoryId: "containers",
     images: [],

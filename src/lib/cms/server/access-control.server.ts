@@ -4,6 +4,7 @@ import { writeCmsDocumentData } from "@/lib/cms/server/cms-document.server";
 import { CmsReadError, readCmsDocumentChecked } from "@/lib/cms/server/strict-read";
 import type { AccessControlDoc, AccessRoleDefinition } from "@/lib/cms/permissions/access-types";
 import {
+  CMS_ACTIONS,
   CMS_MODULES,
   isSystemRoleId,
   isValidRoleId,
@@ -82,22 +83,76 @@ export function normalizeDoc(raw: unknown): AccessControlDoc {
 const isPlainObject = (v: unknown): v is Record<string, unknown> =>
   Boolean(v) && typeof v === "object" && !Array.isArray(v);
 
+type RawAccessDoc = { roles: unknown[]; matrix: Record<string, unknown> };
+
+/** Only the top-level types decide whether a document is readable at all. */
+const hasAccessDocShape = (v: unknown): v is RawAccessDoc =>
+  isPlainObject(v) && Array.isArray(v.roles) && isPlainObject(v.matrix);
+
+const DENY_ROW = () => Object.fromEntries(CMS_MODULES.map((m) => [m, "none" as const]));
+
+/** A cell is "full", "none" or a list of known actions; anything else is treated as "none". */
+function sanitizeCell(value: unknown): "full" | "none" | string[] {
+  if (value === "full" || value === "none") return value;
+  if (Array.isArray(value)) {
+    return value.filter((a): a is string => typeof a === "string" && (CMS_ACTIONS as string[]).includes(a));
+  }
+  return "none";
+}
+
+/**
+ * Drops role definitions and matrix rows that are not usable. A dropped role row
+ * (custom or system) means that role has no permissions (deny-all); only super_admin
+ * is exempt, because `normalizeDoc` always rebuilds its row as full. Unreadable cells
+ * inside a row become "none" so one bad value cannot grant or break access.
+ */
+export function sanitizeAccessDoc(raw: RawAccessDoc): {
+  doc: RawAccessDoc;
+  droppedRoles: number;
+  droppedMatrixRows: string[];
+} {
+  const roles = raw.roles.filter(
+    (r) => isPlainObject(r) && typeof r.id === "string" && isValidRoleId(r.id)
+  );
+  const matrix: Record<string, unknown> = {};
+  const droppedMatrixRows: string[] = [];
+  for (const [roleId, row] of Object.entries(raw.matrix)) {
+    if (isPlainObject(row)) {
+      matrix[roleId] = Object.fromEntries(
+        CMS_MODULES.filter((m) => m in row).map((m) => [m, sanitizeCell(row[m])])
+      );
+    } else {
+      droppedMatrixRows.push(roleId);
+      // `normalizeDoc` refills a missing system row with its default; deny instead.
+      if (isSystemRoleId(roleId) && roleId !== "super_admin") matrix[roleId] = DENY_ROW();
+    }
+  }
+  return {
+    doc: { roles, matrix },
+    droppedRoles: raw.roles.length - roles.length,
+    droppedMatrixRows,
+  };
+}
+
 /**
  * Admin baseline: throws on a failed read and never hydrates defaults from one.
- * Defaults apply only to a confirmed-absent row.
+ * Defaults apply only to a confirmed-absent row. A wrong top-level type is
+ * unreadable; bad individual rows are dropped and logged so one bad entry
+ * cannot lock everyone out.
  */
 export async function readAccessControlStrict(): Promise<AccessControlDoc> {
-  const remote = await readCmsDocumentChecked(
-    ACCESS_CONTROL_DOC_ID,
-    (v): v is { roles: unknown[]; matrix: object } => {
-      if (!isPlainObject(v) || !Array.isArray(v.roles) || !isPlainObject(v.matrix)) return false;
-      return (
-        v.roles.every((r) => isPlainObject(r) && typeof r.id === "string") &&
-        Object.values(v.matrix).every(isPlainObject)
+  const remote = await readCmsDocumentChecked(ACCESS_CONTROL_DOC_ID, hasAccessDocShape);
+  let source: unknown = buildDefaultAccessControlDoc();
+  if (remote) {
+    const { doc, droppedRoles, droppedMatrixRows } = sanitizeAccessDoc(remote);
+    if (droppedRoles > 0 || droppedMatrixRows.length > 0) {
+      console.error(
+        `${ACCESS_CONTROL_DOC_ID}: dropped ${droppedRoles} bad role(s) and matrix row(s) [${droppedMatrixRows.join(", ")}]`
       );
     }
-  );
-  const doc = normalizeDoc(remote ?? buildDefaultAccessControlDoc());
+    source = doc;
+  }
+  const doc = normalizeDoc(source);
   hydrateAccessControl(doc);
   return doc;
 }

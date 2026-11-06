@@ -34,7 +34,6 @@ export type SolutionBlockLayout = "image-right" | "image-left";
 export interface ShopFilterTarget {
   categoryId?: string | null;
   subcategoryIds?: string[];
-  brandIds?: string[];
   applications?: string[];
   cultures?: string[];
   certifications?: string[];
@@ -110,7 +109,6 @@ export type ShopHrefFilters = Pick<
   ShopFilters,
   | "categoryId"
   | "subcategoryIds"
-  | "brandIds"
   | "applications"
   | "cultures"
   | "certifications"

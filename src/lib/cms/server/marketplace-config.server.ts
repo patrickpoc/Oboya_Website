@@ -15,13 +15,11 @@ import {
 import { CmsReadError, readCmsDocumentStrict } from "@/lib/cms/server/strict-read";
 import { updateShopCatalog } from "@/lib/shop/catalog";
 import {
-  normalizeBrands,
   normalizeCategories,
   normalizeFilterGroups,
   normalizeFilterOptions,
 } from "@/lib/shop/filter-groups";
 import type {
-  ShopBrand,
   ShopCategory,
   ShopCountry,
   ShopFilterGroup,
@@ -40,7 +38,6 @@ import {
 } from "@/lib/cms/marketplace-countries";
 
 const CATEGORIES_FILE = path.join(process.cwd(), "data", "shop", "categories.json");
-const BRANDS_FILE = path.join(process.cwd(), "data", "shop", "brands.json");
 const FILTER_OPTIONS_FILE = path.join(
   process.cwd(),
   "data",
@@ -68,7 +65,6 @@ export const MARKETPLACE_SHOP_CONFIG_DOC_ID = "marketplace-shop-config";
 
 export type FiltersPayload = {
   categories: ShopCategory[];
-  brands: ShopBrand[];
   filterGroups: ShopFilterGroup[];
   filterOptions: ShopFilterOptions;
 };
@@ -93,7 +89,6 @@ async function readJsonFileOptional<T>(filePath: string): Promise<T | null> {
 
 function normalizeFiltersPayload(raw: {
   categories: ShopCategory[];
-  brands: ShopBrand[];
   filterGroups?: ShopFilterGroup[];
   filterOptions: ShopFilterOptions;
 }): FiltersPayload {
@@ -101,7 +96,6 @@ function normalizeFiltersPayload(raw: {
   const filterGroups = normalizeFilterGroups(raw.filterGroups, filterOptions);
   return {
     categories: normalizeCategories(raw.categories),
-    brands: normalizeBrands(raw.brands),
     filterGroups,
     filterOptions: normalizeFilterOptions(filterOptions, filterGroups),
   };
@@ -109,7 +103,6 @@ function normalizeFiltersPayload(raw: {
 
 function isFiltersPayload(value: unknown): value is {
   categories: ShopCategory[];
-  brands: ShopBrand[];
   filterGroups?: ShopFilterGroup[];
   filterOptions: ShopFilterOptions;
 } {
@@ -117,7 +110,6 @@ function isFiltersPayload(value: unknown): value is {
   const doc = value as FiltersPayload;
   return (
     Array.isArray(doc.categories) &&
-    Array.isArray(doc.brands) &&
     Boolean(doc.filterOptions) &&
     typeof doc.filterOptions === "object"
   );
@@ -130,15 +122,13 @@ function isCurrenciesPayload(value: unknown): value is CurrenciesPayload {
 }
 
 async function readFiltersSeed(): Promise<FiltersPayload> {
-  const [categories, brands, filterOptions, filterGroups] = await Promise.all([
+  const [categories, filterOptions, filterGroups] = await Promise.all([
     readJsonFile<ShopCategory[]>(CATEGORIES_FILE),
-    readJsonFile<ShopBrand[]>(BRANDS_FILE),
     readJsonFile<ShopFilterOptions>(FILTER_OPTIONS_FILE),
     readJsonFileOptional<ShopFilterGroup[]>(FILTER_GROUPS_FILE),
   ]);
   return normalizeFiltersPayload({
     categories,
-    brands,
     filterGroups: filterGroups ?? undefined,
     filterOptions,
   });
@@ -175,17 +165,20 @@ export async function saveMarketplaceFilters(
   updateShopCatalog(normalized);
 
   if (isSupabaseConfigured()) {
+    // Phase 1 of brand removal: keep the stored legacy `brands` array so a
+    // rollback to code that requires it still reads the document.
+    const current = await readCmsDocumentStrict(MARKETPLACE_FILTERS_DOC_ID);
+    const legacyBrands = (current as { brands?: unknown } | null)?.brands;
     await writeCmsDocumentData(
       MARKETPLACE_FILTERS_DOC_ID,
       "marketplace",
-      normalized
+      Array.isArray(legacyBrands) ? { ...normalized, brands: legacyBrands } : normalized
     );
     return normalized;
   }
 
   await Promise.all([
     writeLocalJsonFile(CATEGORIES_FILE, normalized.categories),
-    writeLocalJsonFile(BRANDS_FILE, normalized.brands),
     writeLocalJsonFile(FILTER_OPTIONS_FILE, normalized.filterOptions),
     writeLocalJsonFile(FILTER_GROUPS_FILE, normalized.filterGroups),
   ]);
@@ -376,7 +369,6 @@ export async function hydrateShopCatalogDurable() {
   ]);
   updateShopCatalog({
     categories: filters.categories,
-    brands: filters.brands,
     filterGroups: filters.filterGroups,
     filterOptions: filters.filterOptions,
     countries: currencies.countries,

@@ -1,5 +1,7 @@
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { CmsStatus } from "@/lib/cms/types";
+import { normalizeImageColorIds } from "@/lib/shop/color-variants";
+import { withAlignedImages } from "@/lib/cms/bulk-import/images";
 import { createEmptyImportProduct } from "@/lib/cms/bulk-import/empty-product";
 import type {
   ImportEditableField,
@@ -12,6 +14,16 @@ function nameFingerprint(product: CmsProduct): string {
   return ["en", "pt-BR", "es", "zh-CN"]
     .map((locale) => product.name?.[locale as keyof typeof product.name] ?? "")
     .join("|");
+}
+
+const LOCALES = ["en", "pt-BR", "es", "zh-CN"] as const;
+
+function shortFingerprint(product: CmsProduct): string {
+  return LOCALES.map((locale) => product.shortDescription?.[locale] ?? "").join("|");
+}
+
+function imagesFingerprint(product: CmsProduct): string {
+  return (product.images ?? []).map((url) => url?.trim() ?? "").filter(Boolean).join("|");
 }
 
 export function getImportChangedFields(
@@ -36,8 +48,11 @@ export function getImportChangedFields(
       case "subcategoryId":
         if ((original.subcategoryId ?? "") !== (pending.subcategoryId ?? "")) changed.push(field);
         break;
-      case "brandId":
-        if ((original.brandId ?? "") !== (pending.brandId ?? "")) changed.push(field);
+      case "shortDescription":
+        if (shortFingerprint(original) !== shortFingerprint(pending)) changed.push(field);
+        break;
+      case "images":
+        if (imagesFingerprint(original) !== imagesFingerprint(pending)) changed.push(field);
         break;
       case "priceUsd":
         if (Number(original.prices?.USD ?? 0) !== Number(pending.prices?.USD ?? 0)) {
@@ -79,7 +94,6 @@ export function createImportWorkspaceRow(product: CmsProduct): ImportWorkspaceRo
     id: product.id,
     categoryId: product.categoryId,
     subcategoryId: product.subcategoryId,
-    brandId: product.brandId,
   });
   const original: CmsProduct = {
     ...baseline,
@@ -109,6 +123,7 @@ export function applyImportPatch(
   const next: CmsProduct = {
     ...product,
     name: { ...product.name },
+    shortDescription: { ...product.shortDescription },
     prices: { ...product.prices },
   };
 
@@ -122,7 +137,32 @@ export function applyImportPatch(
   if (patch.moq !== undefined) next.moq = patch.moq;
   if (patch.categoryId !== undefined) next.categoryId = patch.categoryId;
   if (patch.subcategoryId !== undefined) next.subcategoryId = patch.subcategoryId;
-  if (patch.brandId !== undefined) next.brandId = patch.brandId;
+  const shortKeys = [
+    ["shortEn", "en"],
+    ["shortPt", "pt-BR"],
+    ["shortEs", "es"],
+    ["shortZh", "zh-CN"],
+  ] as const;
+  for (const [key, locale] of shortKeys) {
+    if (patch[key] !== undefined) {
+      next.shortDescription = { ...next.shortDescription, [locale]: patch[key] };
+    }
+  }
+  if (patch.images !== undefined) {
+    // Slot i of the patch is slot i of the current list: a color list follows its image
+    // when blanks are dropped, so assignments never slide onto another picture.
+    const colors = normalizeImageColorIds(next.imageColorIds, patch.images.length);
+    const kept = patch.images
+      .map((url, index) => ({ url: url?.trim() ?? "", ids: colors[index] ?? [] }))
+      .filter((slot) => slot.url);
+    Object.assign(
+      next,
+      withAlignedImages(
+        kept.map((slot) => slot.url),
+        kept.map((slot) => slot.ids)
+      )
+    );
+  }
   if (patch.priceUsd !== undefined) {
     next.prices = { ...next.prices, USD: patch.priceUsd ?? 0 };
   }

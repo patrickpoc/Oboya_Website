@@ -7,7 +7,6 @@ function product(overrides: Partial<ShopProduct> = {}): ShopProduct {
     id: "sku-001",
     sku: "SKU-001",
     moq: 1,
-    brandId: "oboya",
     categoryId: "pots",
     subcategoryId: "containers",
     images: [],
@@ -42,21 +41,34 @@ const base = {
 
 describe("filterProducts", () => {
   it("keeps every visible product when no filter is set", () => {
-    const products = [product(), product({ id: "sku-002", sku: "SKU-002", brandId: "other" })];
+    const products = [product(), product({ id: "sku-002", sku: "SKU-002", subcategoryId: "other" })];
     expect(filterProducts(products, base)).toHaveLength(2);
   });
 
-  it("combines category and brand", () => {
+  it("combines category and subcategory", () => {
     const products = [
       product(),
-      product({ id: "sku-002", sku: "SKU-002", brandId: "other" }),
+      product({ id: "sku-002", sku: "SKU-002", subcategoryId: "other" }),
       product({ id: "sku-003", sku: "SKU-003", categoryId: "trays" }),
     ];
     const result = filterProducts(products, {
       ...base,
-      filters: { ...EMPTY_SHOP_FILTERS, categoryId: "pots", brandIds: ["oboya"] },
+      filters: {
+        ...EMPTY_SHOP_FILTERS,
+        categoryId: "pots",
+        subcategoryIds: ["containers"],
+      },
     });
     expect(result.map((item) => item.sku)).toEqual(["SKU-001"]);
+  });
+
+  it("ignores a legacy brandIds value", () => {
+    const products = [product(), product({ id: "sku-002", sku: "SKU-002" })];
+    const result = filterProducts(products, {
+      ...base,
+      filters: { ...EMPTY_SHOP_FILTERS, brandIds: ["nope"] } as typeof EMPTY_SHOP_FILTERS,
+    });
+    expect(result).toHaveLength(2);
   });
 
   it("drops products when the category id does not exist", () => {

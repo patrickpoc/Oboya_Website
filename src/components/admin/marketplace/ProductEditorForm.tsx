@@ -27,7 +27,6 @@ interface ProductEditorFormProps {
 export function createEmptyCmsProduct(seed?: {
   categoryId?: string;
   subcategoryId?: string;
-  brandId?: string;
   sku?: string;
 }): CmsProduct {
   const sku = seed?.sku?.trim() ?? "";
@@ -35,7 +34,6 @@ export function createEmptyCmsProduct(seed?: {
     id: sku,
     sku,
     moq: 1,
-    brandId: seed?.brandId ?? "",
     categoryId: seed?.categoryId ?? "",
     subcategoryId: seed?.subcategoryId ?? "",
     images: [""],
@@ -104,7 +102,6 @@ export function ProductEditorForm({ product, onChange }: ProductEditorFormProps)
       <ProductTaxonomyCard
         product={product}
         categories={catalog.categories}
-        brands={catalog.brands}
         filterGroups={catalog.filterGroups}
         filterOptions={catalog.filterOptions}
         loading={catalogLoading}

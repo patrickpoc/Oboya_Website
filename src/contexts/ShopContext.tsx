@@ -203,7 +203,6 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
               : null
           ),
           categoryId: product.categoryId,
-          brandId: product.brandId,
           stockStatus: product.stockStatus,
         };
       })
@@ -252,7 +251,6 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       countries: catalog.countries,
       // Hide taxonomy until live CMS filters arrive — never flash seed/demo.
       categories: catalogReady ? catalog.categories : [],
-      brands: catalogReady ? catalog.brands : [],
       filterGroups: catalogReady ? catalog.filterGroups : [],
       filterOptions: catalogReady
         ? catalog.filterOptions

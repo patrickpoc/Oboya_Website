@@ -19,11 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { CmsLocale } from "@/lib/cms/types";
 import { FilterRemovalDialog, type PendingRemoval } from "@/components/admin/marketplace/FilterRemovalDialog";
 import { removeFromDocument, type RemovalTarget } from "@/lib/cms/taxonomy-removal";
-import { BrandLabel } from "@/components/shop/BrandLabel";
-import { CountryFlag } from "@/components/ui/country-flag";
 import { useAdminLocale } from "@/contexts/AdminLocaleContext";
-import { useMapLocations } from "@/lib/shop/use-map-locations";
-import { getMapFlagOptions } from "@/lib/shop/map-flag-options";
 import {
   emptyShopFilterOptions,
   initFilterGroupI18n,
@@ -33,7 +29,6 @@ import {
 } from "@/lib/shop/filter-groups";
 import type {
   FilterOption,
-  ShopBrand,
   ShopCategory,
   ShopFilterGroup,
   ShopFilterOptions,
@@ -84,12 +79,10 @@ export default function MarketplaceFiltersPage() {
   const { locale } = useAdminLocale();
   const [activeTab, setActiveTab] = useState("taxonomy");
   const [categories, setCategories] = useState<ShopCategory[]>([]);
-  const [brands, setBrands] = useState<ShopBrand[]>([]);
   const [filterGroups, setFilterGroups] = useState<ShopFilterGroup[]>([]);
   const [filterOptions, setFilterOptions] = useState<ShopFilterOptions>(emptyShopFilterOptions());
   const [categoryUsage, setCategoryUsage] = useState<Record<string, number>>({});
   const [subcategoryUsage, setSubcategoryUsage] = useState<Record<string, number>>({});
-  const [brandUsage, setBrandUsage] = useState<Record<string, number>>({});
   const [optionUsage, setOptionUsage] = useState<Record<string, Record<string, number>>>({});
   const [groupUsage, setGroupUsage] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -97,19 +90,14 @@ export default function MarketplaceFiltersPage() {
   const [saving, setSaving] = useState(false);
   const [initialSnapshot, setInitialSnapshot] = useState("");
   const [searchCategory, setSearchCategory] = useState("");
-  const [searchBrand, setSearchBrand] = useState("");
   const [searchOption, setSearchOption] = useState("");
   const [categorySort, setCategorySort] = useState<SortMode>("name-asc");
-  const [brandSort, setBrandSort] = useState<SortMode>("name-asc");
   const [optionSort, setOptionSort] = useState<SortMode>("name-asc");
   const [categoryUsageFilter, setCategoryUsageFilter] = useState<UsageMode>("all");
-  const [brandUsageFilter, setBrandUsageFilter] = useState<UsageMode>("all");
   const [optionUsageFilter, setOptionUsageFilter] = useState<UsageMode>("all");
-  const [selectedBrandId, setSelectedBrandId] = useState<string | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [brandSheetOpen, setBrandSheetOpen] = useState(false);
   const [optionSheetOpen, setOptionSheetOpen] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(null);
@@ -123,11 +111,6 @@ export default function MarketplaceFiltersPage() {
   const [confirmBlocked, setConfirmBlocked] = useState(false);
   const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
   const [pendingRemoval, setPendingRemoval] = useState<PendingRemoval | null>(null);
-  const { data: mapLocations } = useMapLocations();
-  const mapFlagOptions = useMemo(
-    () => getMapFlagOptions(mapLocations),
-    [mapLocations]
-  );
 
   const groupLabel = (groupId: string) => {
     const group = filterGroups.find((item) => item.id === groupId);
@@ -138,13 +121,11 @@ export default function MarketplaceFiltersPage() {
   const applyUsage = (usage: {
     categoryUsage?: Record<string, number>;
     subcategoryUsage?: Record<string, number>;
-    brandUsage?: Record<string, number>;
     optionUsage?: Record<string, Record<string, number>>;
     groupUsage?: Record<string, number>;
   }) => {
     setCategoryUsage(usage.categoryUsage ?? {});
     setSubcategoryUsage(usage.subcategoryUsage ?? {});
-    setBrandUsage(usage.brandUsage ?? {});
     setOptionUsage(usage.optionUsage ?? {});
     setGroupUsage(usage.groupUsage ?? {});
   };
@@ -166,7 +147,6 @@ export default function MarketplaceFiltersPage() {
       if (!filtersResponse.ok || !usageResponse.ok) throw new Error("Could not load filters");
       const payload = (await filtersResponse.json()) as {
         categories: ShopCategory[];
-        brands: ShopBrand[];
         filterGroups?: ShopFilterGroup[];
         filterOptions: ShopFilterOptions;
       };
@@ -175,17 +155,14 @@ export default function MarketplaceFiltersPage() {
       const normalizedGroups = normalizeFilterGroups(payload.filterGroups, normalizedOptions);
       const snapshot = {
         categories: payload.categories,
-        brands: payload.brands,
         filterGroups: normalizedGroups,
         filterOptions: normalizedOptions,
       };
       setCategories(payload.categories);
-      setBrands(payload.brands);
       setFilterGroups(normalizedGroups);
       setFilterOptions(normalizedOptions);
       setInitialSnapshot(JSON.stringify(snapshot));
       setSelectedCategoryId(payload.categories[0]?.id ?? null);
-      setSelectedBrandId(payload.brands[0]?.id ?? null);
       const firstGroupId = normalizedGroups[0]?.id ?? "";
       setSelectedGroup(firstGroupId);
       setSelectedOptionId(normalizedOptions[firstGroupId]?.[0]?.id ?? null);
@@ -216,16 +193,6 @@ export default function MarketplaceFiltersPage() {
     );
   }, [categories, searchCategory, categorySort, categoryUsage, categoryUsageFilter]);
 
-  const filteredBrands = useMemo(() => {
-    const q = normalize(searchBrand);
-    const matches = brands.filter((brand) => normalize(brand.name).includes(q));
-    return sortByMode(
-      matches.filter((brand) => matchesUsage(brandUsage[brand.id] ?? 0, brandUsageFilter)),
-      brandSort,
-      brandUsage
-    );
-  }, [brands, searchBrand, brandSort, brandUsage, brandUsageFilter]);
-
   const filteredOptions = useMemo(() => {
     const q = normalize(searchOption);
     const list = filterOptions[selectedGroup] ?? [];
@@ -238,10 +205,9 @@ export default function MarketplaceFiltersPage() {
   }, [filterOptions, selectedGroup, searchOption, optionSort, optionUsage, optionUsageFilter]);
 
   const selectedCategory = categories.find((category) => category.id === selectedCategoryId) ?? null;
-  const selectedBrand = brands.find((brand) => brand.id === selectedBrandId) ?? null;
   const selectedGroupEntry = filterGroups.find((group) => group.id === selectedGroup) ?? null;
 
-  const currentSnapshot = JSON.stringify({ categories, brands, filterGroups, filterOptions });
+  const currentSnapshot = JSON.stringify({ categories, filterGroups, filterOptions });
   const isDirty = initialSnapshot !== "" && currentSnapshot !== initialSnapshot;
 
   const openTextEditor = (label: string, value: string, onConfirm: (nextValue: string) => void) => {
@@ -270,8 +236,6 @@ export default function MarketplaceFiltersPage() {
         return subcategoryUsage[target.id] ?? 0;
       case "category":
         return categoryUsage[target.id] ?? 0;
-      case "brand":
-        return brandUsage[target.id] ?? 0;
       case "group":
         return groupUsage[target.id] ?? 0;
       case "option":
@@ -284,14 +248,7 @@ export default function MarketplaceFiltersPage() {
     if (!target || !initialSnapshot) return [];
     const saved = JSON.parse(initialSnapshot) as {
       categories: ShopCategory[];
-      brands: ShopBrand[];
     };
-    if (target.kind === "brand") {
-      const localIds = new Set(brands.map((brand) => brand.id));
-      return saved.brands
-        .filter((brand) => brand.id !== target.id && localIds.has(brand.id))
-        .map((brand) => ({ value: brand.id, label: pickLocalized(brand.name, brand.nameI18n, locale) }));
-    }
     const localSubIds = new Set(categories.flatMap((c) => c.subcategories.map((s) => `${c.id}/${s.id}`)));
     return saved.categories
       .filter((category) => !(target.kind === "category" && category.id === target.id))
@@ -311,9 +268,8 @@ export default function MarketplaceFiltersPage() {
 
   /** Applies the same removal to local edits and, when already persisted, to the saved snapshot. */
   const applyRemoval = (target: RemovalTarget, persisted: boolean) => {
-    const next = removeFromDocument(target, { categories, brands, filterGroups, filterOptions });
+    const next = removeFromDocument(target, { categories, filterGroups, filterOptions });
     setCategories(next.categories);
-    setBrands(next.brands);
     setFilterGroups(next.filterGroups);
     setFilterOptions(next.filterOptions);
     if (persisted && initialSnapshot) {
@@ -328,7 +284,6 @@ export default function MarketplaceFiltersPage() {
     if (target.kind === "subcategory" && selectedSubcategoryId === target.id) {
       setSelectedSubcategoryId(null);
     }
-    if (target.kind === "brand" && selectedBrandId === target.id) setSelectedBrandId(null);
     if (target.kind === "option" && selectedOptionId === target.id) setSelectedOptionId(null);
     if (target.kind === "group" && selectedGroup === target.id) {
       const nextGroupId = next.filterGroups[0]?.id ?? "";
@@ -346,7 +301,6 @@ export default function MarketplaceFiltersPage() {
     const titles = {
       subcategory: "deleteSubcategory",
       category: "deleteCategory",
-      brand: "deleteBrand",
       group: "deleteGroup",
       option: "deleteOption",
     } as const;
@@ -377,13 +331,6 @@ export default function MarketplaceFiltersPage() {
         subNames.add(subKey);
       });
     });
-    const brandNames = new Set<string>();
-    brands.forEach((brand) => {
-      const key = normalize(brand.name);
-      if (!key) issues.push("Brand name cannot be empty.");
-      if (brandNames.has(key)) issues.push(`Duplicated brand: ${brand.name}`);
-      brandNames.add(key);
-    });
     const groupNames = new Set<string>();
     filterGroups.forEach((group) => {
       const groupKey = normalize(group.name);
@@ -413,7 +360,7 @@ export default function MarketplaceFiltersPage() {
       const response = await fetch("/api/cms/marketplace/filters", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ categories, brands, filterGroups, filterOptions }),
+        body: JSON.stringify({ categories, filterGroups, filterOptions }),
       });
       const payload = (await response.json().catch(() => null)) as { error?: string } | null;
       if (!response.ok) throw new Error(payload?.error ?? t("saveFailed"));
@@ -465,23 +412,6 @@ export default function MarketplaceFiltersPage() {
             : category
         );
       });
-      setEditorOpen(false);
-    });
-  };
-
-  const addBrand = () => {
-    openTextEditor(t("addBrand"), "", (value) => {
-      const name = value.trim();
-      if (!name) return;
-      const id = uniqueOptionId(name, brands);
-      const next: ShopBrand = {
-        id,
-        name,
-        nameI18n: initI18n(name),
-        slug: id,
-      };
-      setBrands((prev) => [...prev, next]);
-      setSelectedBrandId(next.id);
       setEditorOpen(false);
     });
   };
@@ -567,7 +497,6 @@ export default function MarketplaceFiltersPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="taxonomy">{t("categories")}</TabsTrigger>
-          <TabsTrigger value="brands">{t("brands")}</TabsTrigger>
           <TabsTrigger value="options">{t("productFilters")}</TabsTrigger>
         </TabsList>
 
@@ -699,15 +628,6 @@ export default function MarketplaceFiltersPage() {
                     </p>
                   ))}
                 </div>
-                <div className="border-t border-border/60 pt-4">
-                  <p className="mb-2 text-xs font-semibold uppercase">{t("brands")}</p>
-                  {brands.slice(0, 6).map((brand) => (
-                    <label key={`preview-brand-${brand.id}`} className="mb-1 flex items-center gap-2 text-sm text-oboya-blue-dark">
-                      <input type="checkbox" disabled />
-                      <BrandLabel brand={brand} locale={locale} />
-                    </label>
-                  ))}
-                </div>
                 {filterGroups.map((group) => (
                   <div key={`preview-group-${group.id}`} className="border-t border-border/60 pt-4">
                     <p className="mb-2 text-xs font-semibold uppercase">{groupLabel(group.id)}</p>
@@ -718,89 +638,6 @@ export default function MarketplaceFiltersPage() {
                       </label>
                     ))}
                   </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="brands">
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>{t("brands")}</span>
-                  <Button variant="outline" size="sm" onClick={addBrand}>
-                    <Plus className="mr-1 size-3.5" /> {t("addBrand")}
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="relative">
-                  <Search className="absolute top-2.5 left-2.5 size-4 text-muted-foreground" />
-                  <Input className="pl-8" placeholder={t("searchBrand")} value={searchBrand} onChange={(event) => setSearchBrand(event.target.value)} />
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button size="sm" variant={brandUsageFilter === "all" ? "secondary" : "outline"} onClick={() => setBrandUsageFilter("all")}>{tCommon("all")}</Button>
-                  <Button size="sm" variant={brandUsageFilter === "used" ? "secondary" : "outline"} onClick={() => setBrandUsageFilter("used")}>{tCommon("used")}</Button>
-                  <Button size="sm" variant={brandUsageFilter === "unused" ? "secondary" : "outline"} onClick={() => setBrandUsageFilter("unused")}>{tCommon("unused")}</Button>
-                  <Button size="sm" variant="outline" onClick={() => setBrandSort("name-asc")}>{tCommon("sortAZ")}</Button>
-                  <Button size="sm" variant="outline" onClick={() => setBrandSort("name-desc")}>{tCommon("sortZA")}</Button>
-                  <Button size="sm" variant="outline" onClick={() => setBrandSort("usage-desc")}>{tCommon("mostUsed")}</Button>
-                </div>
-                <div className="max-h-[32rem] space-y-2 overflow-y-auto pr-1">
-                  {filteredBrands.map((brand) => (
-                    <div key={brand.id} className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left ${selectedBrandId === brand.id ? "border-oboya-green/60 bg-oboya-green/5" : "border-border/60"}`}>
-                      <button type="button" className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-oboya-blue-dark hover:underline" onClick={() => setSelectedBrandId(brand.id)}>
-                        <Tag className="size-3.5 shrink-0 text-muted-foreground" />
-                        <BrandLabel brand={brand} locale={locale} />
-                      </button>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          aria-label={t("editBrand", {
-                            name: pickLocalized(brand.name, brand.nameI18n, locale),
-                          })}
-                          onClick={() => {
-                            setSelectedBrandId(brand.id);
-                            setBrandSheetOpen(true);
-                          }}
-                        >
-                          <Pencil className="size-3.5" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          aria-label={t("removeBrand", {
-                            name: pickLocalized(brand.name, brand.nameI18n, locale),
-                          })}
-                          onClick={() =>
-                            requestRemoval(
-                              { kind: "brand", id: brand.id },
-                              pickLocalized(brand.name, brand.nameI18n, locale)
-                            )
-                          }
-                        >
-                          <Trash2 className="size-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("siteReflection")}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <p className="text-xs font-semibold uppercase text-oboya-blue-dark">{t("brands")}</p>
-                {brands.slice(0, 12).map((brand) => (
-                  <label key={`brands-preview-${brand.id}`} className="mb-1 flex items-center gap-2 text-sm text-oboya-blue-dark">
-                    <input type="checkbox" disabled />
-                    <BrandLabel brand={brand} locale={locale} />
-                  </label>
                 ))}
               </CardContent>
             </Card>
@@ -1038,95 +875,6 @@ export default function MarketplaceFiltersPage() {
           </div>
           <SheetFooter>
             <Button variant="outline" onClick={() => setSheetOpen(false)}>{tCommon("close")}</Button>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
-
-      <Sheet open={brandSheetOpen} onOpenChange={setBrandSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-lg">
-          <SheetHeader>
-            <SheetTitle>{t("brandDetails")}</SheetTitle>
-            <SheetDescription>{t("brandDetailsDesc")}</SheetDescription>
-          </SheetHeader>
-          <div className="space-y-4 overflow-y-auto px-4">
-            {!selectedBrand && <p className="text-sm text-muted-foreground">{t("selectBrandFirst")}</p>}
-            {selectedBrand && (
-              <div className="space-y-3 rounded-lg border border-border/60 p-3">
-                <ShopLocalizedNameFields
-                  name={selectedBrand.name}
-                  nameI18n={selectedBrand.nameI18n}
-                  onNameChange={(nextName) =>
-                    setBrands((prev) =>
-                      prev.map((brand) =>
-                        brand.id === selectedBrand.id
-                          ? { ...brand, name: nextName }
-                          : brand
-                      )
-                    )
-                  }
-                  onI18nChange={(loc, value) =>
-                    setBrands((prev) =>
-                      prev.map((brand) =>
-                        brand.id === selectedBrand.id
-                          ? {
-                              ...brand,
-                              nameI18n: {
-                                ...initI18n(brand.name, brand.nameI18n),
-                                [loc]: value,
-                              },
-                            }
-                          : brand
-                      )
-                    )
-                  }
-                />
-                <div className="space-y-1.5">
-                  <Label htmlFor="brand-flag">{t("countryFlag")}</Label>
-                  <p className="text-xs text-muted-foreground">
-                    {t("countryFlagHint")}
-                  </p>
-                  <select
-                    id="brand-flag"
-                    value={selectedBrand.flag ?? ""}
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      setBrands((prev) =>
-                        prev.map((brand) =>
-                          brand.id === selectedBrand.id
-                            ? { ...brand, flag: value || undefined }
-                            : brand
-                        )
-                      );
-                    }}
-                    className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-sm"
-                  >
-                    <option value="">{t("noFlag")}</option>
-                    {mapFlagOptions.map((option) => (
-                      <option key={option.code} value={option.code}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  {selectedBrand.flag ? (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span className="inline-flex h-3.5 w-[21px] overflow-hidden rounded-[2px] border border-border/40">
-                        <CountryFlag
-                          code={selectedBrand.flag}
-                          className="block h-full w-full"
-                        />
-                      </span>
-                      {t("shopPreview")}
-                    </div>
-                  ) : null}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {t("usedByProducts", { count: brandUsage[selectedBrand.id] ?? 0 })}
-                </p>
-              </div>
-            )}
-          </div>
-          <SheetFooter>
-            <Button variant="outline" onClick={() => setBrandSheetOpen(false)}>{tCommon("close")}</Button>
           </SheetFooter>
         </SheetContent>
       </Sheet>
