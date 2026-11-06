@@ -4,6 +4,7 @@ import {
   readCmsDocumentData,
   writeCmsDocumentData,
 } from "@/lib/cms/server/cms-document.server";
+import { readCmsDocumentChecked } from "@/lib/cms/server/strict-read";
 import {
   buildDefaultApprovalPolicies,
   normalizeApprovalPolicies,
@@ -23,6 +24,30 @@ export async function readApprovalPoliciesDurable(options?: {
     return cached.doc;
   }
   const remote = await readCmsDocumentData(APPROVAL_POLICIES_DOC_ID, { fresh: true });
+  const doc = normalizeApprovalPolicies(remote ?? buildDefaultApprovalPolicies());
+  cached = { doc, expiresAt: Date.now() + TTL_MS };
+  return doc;
+}
+
+/**
+ * Admin baseline: throws on a failed read and never memoizes defaults from one.
+ * Defaults apply only to a confirmed-absent row.
+ */
+export async function readApprovalPoliciesStrict(): Promise<ApprovalPoliciesDoc> {
+  const remote = await readCmsDocumentChecked(
+    APPROVAL_POLICIES_DOC_ID,
+    (v): v is { policies: unknown[] } =>
+      Boolean(v) &&
+      typeof v === "object" &&
+      Array.isArray((v as { policies?: unknown }).policies) &&
+      (v as { policies: unknown[] }).policies.every(
+        (p) =>
+          Boolean(p) &&
+          typeof p === "object" &&
+          !Array.isArray(p) &&
+          typeof (p as { changeType?: unknown }).changeType === "string"
+      )
+  );
   const doc = normalizeApprovalPolicies(remote ?? buildDefaultApprovalPolicies());
   cached = { doc, expiresAt: Date.now() + TTL_MS };
   return doc;

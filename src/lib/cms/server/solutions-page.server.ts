@@ -11,6 +11,7 @@ import {
   readCmsDocumentData,
   writeCmsDocumentData,
 } from "@/lib/cms/server/cms-document.server";
+import { readCmsDocumentChecked } from "@/lib/cms/server/strict-read";
 
 export const SOLUTIONS_DOC_ID = "solutions-page";
 
@@ -27,10 +28,17 @@ export async function readSolutionsPageSettingsDurable(): Promise<SolutionsPageS
   return getSolutionsPageSettings();
 }
 
+/** Save baseline: throws on a failed read; the cache changes only on success. */
+export async function readSolutionsPageSettingsStrict(): Promise<SolutionsPageSettings> {
+  const remote = await readCmsDocumentChecked(SOLUTIONS_DOC_ID, isSolutions);
+  if (remote) replaceSolutionsPageSettingsCache(remote);
+  return getSolutionsPageSettings();
+}
+
 export async function saveSolutionsPageSettingsDurable(
   settings: SolutionsPageSettings
 ): Promise<SolutionsPageSettings> {
-  await readSolutionsPageSettingsDurable();
+  await readSolutionsPageSettingsStrict();
   const saved = saveMemory(normalizeSolutionsPageSettings(settings));
   await writeCmsDocumentData(SOLUTIONS_DOC_ID, "website", saved);
   return saved;

@@ -6,19 +6,28 @@ import {
 import type { CheckoutPageSettings } from "@/lib/cms/checkout-page/types";
 import {
   readCheckoutPage,
+  readCheckoutPageStrict,
   saveCheckoutPage,
 } from "@/lib/cms/server/checkout-page.server";
+import { CmsReadError, isEditRead, readFailureResponse } from "@/lib/cms/server/strict-read";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 import { noStoreHeaders } from "@/lib/security/http-cache";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    if (isEditRead(request)) {
+      // Guard first: the strict read uses the session client.
+      const auth = await cmsGuard("marketplace", "view");
+      if ("response" in auth) return auth.response;
+      return NextResponse.json(await readCheckoutPageStrict(), { headers: noStoreHeaders });
+    }
     const data = await readCheckoutPage({ fresh: true });
     return NextResponse.json(data, { headers: noStoreHeaders });
-  } catch {
+  } catch (error) {
+    if (error instanceof CmsReadError) return readFailureResponse(error);
     return NextResponse.json(
       { error: "Failed to load checkout page" },
       { status: 500 }

@@ -7,11 +7,12 @@ import {
 import {
   findExistingProduct,
   persistProductsToFileSafe,
-  readProductById,
+  readProductByIdStrict,
   saveProduct,
 } from "@/lib/cms/server/products.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
+import { CmsReadError, readFailureResponse } from "@/lib/cms/server/strict-read";
 import { validateColorVariants } from "@/lib/shop/color-variants";
 import { displayProductName } from "@/lib/cms/bulk-update/search-products";
 import type { BulkApplyResult } from "@/lib/cms/bulk-update/types";
@@ -110,9 +111,29 @@ export async function POST(request: Request) {
       );
     }
 
-    const { persistProductWithContent } = await import(
+    const { persistProductWithContent, reconcileProductImages } = await import(
       "@/lib/cms/server/product-content.server"
     );
+
+    // Read every baseline before the first write: a read failure aborts with
+    // nothing written (the batch is capped, so this is cheap).
+    const previousById = new Map<string, CmsProduct | null>();
+    if (mode === "update") {
+      for (const product of products) {
+        if (!product?.id || !product?.sku || previousById.has(product.id)) continue;
+        previousById.set(product.id, (await readProductByIdStrict(product.id)) ?? null);
+      }
+    }
+
+    // Create mode: check every row before the first write so a failed read changes nothing.
+    const existingByRow = new Map<unknown, Awaited<ReturnType<typeof findExistingProduct>>>();
+    if (mode === "create") {
+      for (const product of products) {
+        if (!product?.id || !product?.sku) continue;
+        existingByRow.set(product, await findExistingProduct(product.id, product.sku));
+      }
+    }
+    const batchKeys = new Set<string>();
 
     const results: BulkApplyResult[] = [];
     let wroteAny = false;
@@ -148,12 +169,12 @@ export async function POST(request: Request) {
       }
 
       try {
-        const previous =
-          mode === "update"
-            ? await readProductById(product.id, { asAdmin: true })
-            : null;
+        const previous = mode === "update" ? (previousById.get(product.id) ?? null) : null;
         if (mode === "create") {
-          const existing = await findExistingProduct(product.id, product.sku);
+          // Rows earlier in this batch count as existing (id or sku).
+          const keys = [product.id.trim(), product.sku.trim()];
+          const inBatch = keys.some((k) => batchKeys.has(k));
+          const existing = existingByRow.get(product) ?? (inBatch ? product : null);
           if (existing) {
             results.push({
               productId: product.id,
@@ -179,17 +200,20 @@ export async function POST(request: Request) {
         }
 
         const saved = saveCmsProduct(
-          await persistProductWithContent(mergeProductUpdate(product, previous), previous ?? undefined)
+          await persistProductWithContent(mergeProductUpdate(product, previous))
         );
 
         if (isSupabaseConfigured()) {
           await saveProduct(saved);
         }
-
         wroteAny = true;
+        batchKeys.add(saved.id.trim());
+        batchKeys.add(saved.sku.trim());
         invalidateProducts([saved.id, saved.sku, previous?.id, previous?.sku], {
           catalog: false,
         });
+        // Only after the upsert succeeded; never fails the save.
+        await reconcileProductImages(previous, saved);
         results.push({
           productId: saved.id,
           sku: saved.sku,
@@ -197,6 +221,8 @@ export async function POST(request: Request) {
           status: "SUCCESS",
         });
       } catch (error) {
+        // A failed baseline read is not a per-item failure: stop with 503.
+        if (error instanceof CmsReadError) throw error;
         const message =
           error instanceof Error ? error.message : "Failed to persist product";
         results.push({
@@ -226,6 +252,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ results, ok, failed });
   } catch (error) {
+    if (error instanceof CmsReadError) return readFailureResponse(error);
     const message =
       error instanceof Error ? error.message : "Failed to bulk persist products";
     return NextResponse.json({ error: message }, { status: 500 });

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { EditorGuard, FormSkeleton } from "@/components/admin/common";
+import { EditorGuard, ErrorState, FormSkeleton } from "@/components/admin/common";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { ShopConfigForm } from "@/components/admin/marketplace/shop-config/ShopConfigForm";
 import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
@@ -15,50 +15,47 @@ import {
   validateShopConfigForSave,
 } from "@/lib/cms/shop-config/defaults";
 import type { ShopConfig } from "@/lib/cms/shop-config/types";
+import { filterActiveCountries } from "@/lib/cms/marketplace-countries";
 import type { ShopCountry } from "@/lib/shop/types";
 
 export default function Page() {
   const t = useTranslations("admin.shopConfig");
   const tCommon = useTranslations("admin.common");
   const [config, setConfig] = useState<ShopConfig>(DEFAULT_SHOP_CONFIG);
+  // Full list (inactive included): normalizing against it keeps a default
+  // market for an inactive country. The form only offers the active ones.
   const [countries, setCountries] = useState<ShopCountry[]>([]);
+  const activeCountries = useMemo(() => filterActiveCountries(countries), [countries]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      setLoading(true);
-      try {
-        const [configRes, currenciesRes] = await Promise.all([
-          fetch("/api/cms/marketplace/shop-config", { cache: "no-store" }),
-          fetch("/api/cms/marketplace/currencies", { cache: "no-store" }),
-        ]);
-        if (!configRes.ok) throw new Error(t("loadFailed"));
-        const configJson = (await configRes.json()) as ShopConfig;
-        const currenciesJson = currenciesRes.ok
-          ? ((await currenciesRes.json()) as { countries?: ShopCountry[] })
-          : { countries: [] };
-        if (cancelled) return;
-        setCountries(currenciesJson.countries ?? []);
-        setConfig(
-          normalizeShopConfig(configJson, {
-            countries: currenciesJson.countries,
-          })
-        );
-      } catch (error) {
-        if (!cancelled) {
-          toast.error(error instanceof Error ? error.message : t("loadFailed"));
-          setConfig(DEFAULT_SHOP_CONFIG);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadFailed(false);
+    try {
+      const [configRes, currenciesRes] = await Promise.all([
+        fetch("/api/cms/marketplace/shop-config?forEdit=1", { cache: "no-store" }),
+        fetch("/api/cms/marketplace/currencies?forEdit=1", { cache: "no-store" }),
+      ]);
+      // Both must succeed: a missing country list would clear the default market on save.
+      if (!configRes.ok || !currenciesRes.ok) throw new Error(t("loadFailed"));
+      const configJson = (await configRes.json()) as ShopConfig;
+      const currenciesJson = (await currenciesRes.json()) as { countries?: ShopCountry[] };
+      setCountries(currenciesJson.countries ?? []);
+      setConfig(normalizeShopConfig(configJson, { countries: currenciesJson.countries }));
+    } catch {
+      // Never fall back to defaults: saving them would overwrite the real config.
+      setLoadFailed(true);
+    } finally {
+      setLoading(false);
+    }
   }, [t]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount; the loader sets loading state before awaiting the API
+    void load();
+  }, [load]);
 
   const save = async () => {
     const validationError = validateShopConfigForSave(config);
@@ -102,7 +99,7 @@ export default function Page() {
           <Button
             type="button"
             onClick={() => void save()}
-            disabled={loading || saving}
+            disabled={loading || loadFailed || saving}
             className="rounded-full bg-oboya-green text-white hover:bg-oboya-green/90"
           >
             {saving ? tCommon("saving") : t("save")}
@@ -111,10 +108,12 @@ export default function Page() {
       />
       {loading ? (
         <FormSkeleton />
+      ) : loadFailed ? (
+        <ErrorState message={tCommon("editorLoadFailed")} onRetry={() => void load()} />
       ) : (
-        <ShopConfigForm value={config} onChange={setConfig} countries={countries} />
+        <ShopConfigForm value={config} onChange={setConfig} countries={activeCountries} />
       )}
-      <EditorGuard dirty={!loading} saving={saving} onSave={() => void save()} />
+      <EditorGuard dirty={!loading && !loadFailed} saving={saving} onSave={() => void save()} />
     </Can>
   );
 }

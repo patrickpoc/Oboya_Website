@@ -9,6 +9,7 @@ import {
   readCmsDocumentData,
   writeCmsDocumentData,
 } from "@/lib/cms/server/cms-document.server";
+import { readCmsDocumentChecked } from "@/lib/cms/server/strict-read";
 
 export const CHECKOUT_PAGE_DOC_ID = "checkout-page";
 
@@ -20,6 +21,15 @@ export async function readCheckoutPage(options?: {
     return normalizeCheckoutPage(remote);
   }
   return normalizeCheckoutPage(DEFAULT_CHECKOUT_PAGE);
+}
+
+/** Edit baseline: throws on a failed read; defaults only for a confirmed-absent row. */
+export async function readCheckoutPageStrict(): Promise<CheckoutPageSettings> {
+  const remote = await readCmsDocumentChecked(
+    CHECKOUT_PAGE_DOC_ID,
+    (value): value is object => Boolean(value) && typeof value === "object" && !Array.isArray(value)
+  );
+  return normalizeCheckoutPage(remote ?? DEFAULT_CHECKOUT_PAGE);
 }
 
 export async function saveCheckoutPage(

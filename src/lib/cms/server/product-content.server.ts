@@ -20,16 +20,24 @@ export function sanitizeProductContent(product: CmsProduct): CmsProduct {
   };
 }
 
-export async function persistProductWithContent(
-  product: CmsProduct,
-  previous?: CmsProduct | null
+/** Sanitizes only; removing images is `reconcileProductImages`, after the upsert. */
+export async function persistProductWithContent(product: CmsProduct) {
+  return sanitizeProductContent(product);
+}
+
+/** Best-effort cleanup of description images the saved product no longer uses. */
+export async function reconcileProductImages(
+  previous: CmsProduct | null | undefined,
+  saved: CmsProduct
 ) {
-  const sanitized = sanitizeProductContent(product);
-  if (previous) {
+  if (!previous) return;
+  try {
     await reconcileDescriptionImages({
+      productId: saved.id,
       previous: previous.description,
-      next: sanitized.description,
+      next: saved.description,
     });
+  } catch (error) {
+    console.error("Description image cleanup skipped:", error);
   }
-  return sanitized;
 }

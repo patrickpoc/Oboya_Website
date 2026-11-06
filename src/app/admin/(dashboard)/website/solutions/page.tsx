@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2 } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
-import { EditorGuard, FormSkeleton } from "@/components/admin/common";
+import { EditorGuard, ErrorState, FormSkeleton } from "@/components/admin/common";
 import { LocaleFieldTabs } from "@/components/admin/forms/LocaleFieldTabs";
 import { ShopFilterTargetFields } from "@/components/admin/solutions/ShopFilterTargetFields";
 import { Can } from "@/components/admin/permissions/Can";
@@ -55,6 +55,7 @@ export default function SolutionsPageAdmin() {
   const [settings, setSettings] = useState<SolutionsPageSettings | null>(null);
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const notifyPending = usePendingApprovalNotice();
   const [categories, setCategories] = useState<ShopCategory[]>([]);
@@ -66,40 +67,46 @@ export default function SolutionsPageAdmin() {
     countriesOfOrigin: [],
   });
 
-  useEffect(() => {
-    void (async () => {
-      try {
-        const [solutionsRes, filtersRes] = await Promise.all([
-          fetch("/api/cms/solutions", { cache: "no-store" }),
-          fetch("/api/cms/marketplace/filters", { cache: "no-store" }),
-        ]);
-        if (!solutionsRes.ok) throw new Error(tCommon("loadFailed"));
-        setSettings(await solutionsRes.json());
-        if (filtersRes.ok) {
-          const filters = (await filtersRes.json()) as {
-            categories: ShopCategory[];
-            brands: ShopBrand[];
-            filterOptions: ShopFilterOptions;
-          };
-          const categoriesNext = normalizeCategories(filters.categories ?? []);
-          const brandsNext = normalizeBrands(filters.brands ?? []);
-          const optionsNext = normalizeFilterOptions(filters.filterOptions);
-          setCategories(categoriesNext);
-          setBrands(brandsNext);
-          setFilterOptions(optionsNext);
-          updateShopCatalog({
-            categories: categoriesNext,
-            brands: brandsNext,
-            filterOptions: optionsNext,
-          });
-        }
-      } catch {
-        toast.error(t("loadFailed"));
-      } finally {
-        setLoading(false);
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadFailed(false);
+    try {
+      const [solutionsRes, filtersRes] = await Promise.all([
+        fetch("/api/cms/solutions?forEdit=1", { cache: "no-store" }),
+        fetch("/api/cms/marketplace/filters", { cache: "no-store" }),
+      ]);
+      if (!solutionsRes.ok) throw new Error(tCommon("loadFailed"));
+      setSettings(await solutionsRes.json());
+      if (filtersRes.ok) {
+        const filters = (await filtersRes.json()) as {
+          categories: ShopCategory[];
+          brands: ShopBrand[];
+          filterOptions: ShopFilterOptions;
+        };
+        const categoriesNext = normalizeCategories(filters.categories ?? []);
+        const brandsNext = normalizeBrands(filters.brands ?? []);
+        const optionsNext = normalizeFilterOptions(filters.filterOptions);
+        setCategories(categoriesNext);
+        setBrands(brandsNext);
+        setFilterOptions(optionsNext);
+        updateShopCatalog({
+          categories: categoriesNext,
+          brands: brandsNext,
+          filterOptions: optionsNext,
+        });
       }
-    })();
+    } catch {
+      setLoadFailed(true);
+      toast.error(t("loadFailed"));
+    } finally {
+      setLoading(false);
+    }
   }, [t, tCommon]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount; the loader sets loading state before awaiting the API
+    void load();
+  }, [load]);
 
   const handleSave = useCallback(async () => {
     if (!settings) return;
@@ -179,8 +186,9 @@ export default function SolutionsPageAdmin() {
     });
   };
 
-  if (loading || !settings) {
-    return <FormSkeleton />;
+  if (loading) return <FormSkeleton />;
+  if (loadFailed || !settings) {
+    return <ErrorState message={tCommon("editorLoadFailed")} onRetry={() => void load()} />;
   }
 
   return (

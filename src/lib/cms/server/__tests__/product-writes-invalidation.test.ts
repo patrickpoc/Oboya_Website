@@ -10,12 +10,13 @@ vi.mock("@/lib/cms/server/cache-invalidation.server", () => ({
 }));
 
 const findExistingProduct = vi.fn();
+const saveProduct = vi.fn();
 vi.mock("@/lib/cms/server/products.server", () => ({
   findExistingProduct,
   hardDeleteProduct: vi.fn(),
   persistProductsToFileSafe: vi.fn(),
   restoreProduct: vi.fn(),
-  saveProduct: vi.fn(),
+  saveProduct,
   softDeleteProduct: vi.fn(),
 }));
 
@@ -29,6 +30,7 @@ vi.mock("@/lib/cms/repositories/product-repository", () => ({
 
 vi.mock("@/lib/cms/server/product-content.server", () => ({
   persistProductWithContent: async (product: unknown) => product,
+  reconcileProductImages: vi.fn(),
 }));
 
 vi.mock("@/lib/supabase/env", () => ({ isSupabaseConfigured: () => true }));
@@ -94,5 +96,29 @@ describe("product write invalidation", () => {
       { id: "p5", sku: "OLD", description: { en: "keep" } } as never
     );
     expect(merged).toMatchObject({ sku: "S5", description: { en: "keep" } });
+  });
+
+  it("keeps trash fields from the stored product when the payload says deletedAt: null", async () => {
+    const { writeProduct, mergeProductUpdate } = await load();
+    const previous = { id: "p6", sku: "S6", deletedAt: "2026-01-01", purgeAt: "2026-01-02" };
+    const merged = mergeProductUpdate({ id: "p6", sku: "S6", deletedAt: null, purgeAt: null } as never, previous as never);
+    expect(merged).toMatchObject({ deletedAt: "2026-01-01", purgeAt: "2026-01-02" });
+    saveProduct.mockClear();
+    await writeProduct({ id: "p6", sku: "S6", deletedAt: null, purgeAt: null } as never, previous as never);
+    expect(saveProduct).toHaveBeenCalledWith(
+      expect.objectContaining({ deletedAt: "2026-01-01", purgeAt: "2026-01-02" })
+    );
+  });
+
+  it("forces null lifecycle fields on create", async () => {
+    const { writeProduct, mergeProductUpdate } = await load();
+    expect(
+      mergeProductUpdate({ id: "n", sku: "N", deletedAt: "x", purgeAt: "y" } as never, null)
+    ).toMatchObject({ deletedAt: null, purgeAt: null });
+    saveProduct.mockClear();
+    await writeProduct({ id: "n", sku: "N", deletedAt: "x", purgeAt: "y" } as never, null);
+    expect(saveProduct).toHaveBeenCalledWith(
+      expect.objectContaining({ deletedAt: null, purgeAt: null })
+    );
   });
 });

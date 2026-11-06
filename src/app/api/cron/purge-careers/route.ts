@@ -46,7 +46,7 @@ export async function GET(request: Request) {
       }
       return done;
     };
-    // deleteApplication removes the CV objects first, then the row.
+    // deleteApplication removes the CV objects first, then the row; a CV failure keeps the row and is retried on the next run.
     pendingRemoved = await drain(listExpiredPendingIds, deleteApplication);
     anonymized = await drain(listRetentionExpiredIds, (id) => anonymizeApplication(id, SYSTEM_ACTOR));
     console.info("[purge-careers]", { pendingRemoved, anonymized, failed });

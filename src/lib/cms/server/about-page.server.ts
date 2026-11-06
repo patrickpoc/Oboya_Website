@@ -10,6 +10,7 @@ import {
   readCmsDocumentData,
   writeCmsDocumentData,
 } from "@/lib/cms/server/cms-document.server";
+import { readCmsDocumentChecked } from "@/lib/cms/server/strict-read";
 
 export const ABOUT_DOC_ID = "about-page";
 
@@ -29,10 +30,17 @@ export async function readAboutPageSettingsDurable(): Promise<AboutPageSettings>
   return getAboutPageSettings();
 }
 
+/** Save baseline: throws on a failed read; the cache changes only on success. */
+export async function readAboutPageSettingsStrict(): Promise<AboutPageSettings> {
+  const remote = await readCmsDocumentChecked(ABOUT_DOC_ID, isAbout);
+  if (remote) replaceAboutPageSettingsCache(remote);
+  return getAboutPageSettings();
+}
+
 export async function saveAboutPageSettingsDurable(
   settings: AboutPageSettings
 ): Promise<AboutPageSettings> {
-  await readAboutPageSettingsDurable();
+  await readAboutPageSettingsStrict();
   const saved = saveMemory(settings);
   await writeCmsDocumentData(ABOUT_DOC_ID, "website", saved);
   return saved;

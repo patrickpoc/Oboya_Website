@@ -19,6 +19,7 @@ import {
 } from "@/lib/cms/server/in-use-media.server";
 import {
   readMediaFoldersDurable,
+  readMediaFoldersStrict,
   saveMediaFoldersDurable,
 } from "@/lib/cms/server/media-folders.server";
 import {
@@ -182,7 +183,8 @@ async function persistFolderIfChanged(asset: MediaAsset, folder: string) {
 export async function syncMediaLibraryFromSupabase(): Promise<MediaAsset[]> {
   ensureMediaFolders(SITE_MEDIA_FOLDERS);
   try {
-    const folders = await readMediaFoldersDurable();
+    // Strict: a failed read must not persist default folders over real ones.
+    const folders = await readMediaFoldersStrict();
     await saveMediaFoldersDurable(folders);
   } catch (error) {
     console.error("media folders sync skipped:", error);

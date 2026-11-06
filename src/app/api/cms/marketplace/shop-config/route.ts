@@ -3,19 +3,33 @@ import { validateShopConfigForSave } from "@/lib/cms/shop-config/defaults";
 import type { ShopConfig } from "@/lib/cms/shop-config/types";
 import {
   readMarketplaceShopConfig,
+  readMarketplaceShopConfigStrict,
   saveMarketplaceShopConfig,
 } from "@/lib/cms/server/marketplace-config.server";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
+import {
+  CmsReadError,
+  isEditRead,
+  readFailureResponse,
+} from "@/lib/cms/server/strict-read";
 import { noStoreHeaders } from "@/lib/security/http-cache";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    if (isEditRead(request)) {
+      const auth = await cmsGuard("marketplace", "view");
+      if ("response" in auth) return auth.response;
+      return NextResponse.json(await readMarketplaceShopConfigStrict(), {
+        headers: noStoreHeaders,
+      });
+    }
     const data = await readMarketplaceShopConfig();
     return NextResponse.json(data, { headers: noStoreHeaders });
-  } catch {
+  } catch (error) {
+    if (error instanceof CmsReadError) return readFailureResponse(error);
     return NextResponse.json(
       { error: "Failed to load shop configuration" },
       { status: 500 }
@@ -37,6 +51,7 @@ export async function PUT(request: Request) {
     const saved = await saveMarketplaceShopConfig(payload);
     return NextResponse.json(saved);
   } catch (error) {
+    if (error instanceof CmsReadError) return readFailureResponse(error);
     return NextResponse.json(
       {
         error:

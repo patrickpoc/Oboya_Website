@@ -81,7 +81,7 @@ export function BulkUpdateWorkspace() {
   const loadProducts = useCallback(async () => {
     setLoadingProducts(true);
     try {
-      const response = await fetch("/api/cms/products?includeDeleted=1&fields=list", {
+      const response = await fetch("/api/cms/products?includeDeleted=1&fields=list&forEdit=1", {
         cache: "no-store",
       });
       if (!response.ok) {
@@ -100,7 +100,7 @@ export function BulkUpdateWorkspace() {
     void (async () => {
       setLoadingProducts(true);
       try {
-        const response = await fetch("/api/cms/products?includeDeleted=1&fields=list", {
+        const response = await fetch("/api/cms/products?includeDeleted=1&fields=list&forEdit=1", {
           cache: "no-store",
         });
         if (!response.ok) {

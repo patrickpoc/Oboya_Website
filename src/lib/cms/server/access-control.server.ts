@@ -1,9 +1,7 @@
 import "server-only";
 
-import {
-  readCmsDocumentData,
-  writeCmsDocumentData,
-} from "@/lib/cms/server/cms-document.server";
+import { writeCmsDocumentData } from "@/lib/cms/server/cms-document.server";
+import { CmsReadError, readCmsDocumentChecked } from "@/lib/cms/server/strict-read";
 import type { AccessControlDoc, AccessRoleDefinition } from "@/lib/cms/permissions/access-types";
 import {
   CMS_MODULES,
@@ -81,13 +79,43 @@ export function normalizeDoc(raw: unknown): AccessControlDoc {
   return { roles, matrix };
 }
 
-export async function readAccessControlDurable(): Promise<AccessControlDoc> {
-  const remote = await readCmsDocumentData(ACCESS_CONTROL_DOC_ID, {
-    fresh: true,
-  });
+const isPlainObject = (v: unknown): v is Record<string, unknown> =>
+  Boolean(v) && typeof v === "object" && !Array.isArray(v);
+
+/**
+ * Admin baseline: throws on a failed read and never hydrates defaults from one.
+ * Defaults apply only to a confirmed-absent row.
+ */
+export async function readAccessControlStrict(): Promise<AccessControlDoc> {
+  const remote = await readCmsDocumentChecked(
+    ACCESS_CONTROL_DOC_ID,
+    (v): v is { roles: unknown[]; matrix: object } => {
+      if (!isPlainObject(v) || !Array.isArray(v.roles) || !isPlainObject(v.matrix)) return false;
+      return (
+        v.roles.every((r) => isPlainObject(r) && typeof r.id === "string") &&
+        Object.values(v.matrix).every(isPlainObject)
+      );
+    }
+  );
   const doc = normalizeDoc(remote ?? buildDefaultAccessControlDoc());
   hydrateAccessControl(doc);
   return doc;
+}
+
+/**
+ * Display read: hydrates only after a good read. On a failed read the current
+ * snapshot stays; on a cold start (nothing hydrated yet) it throws, so callers fail closed.
+ */
+export async function readAccessControlDurable(): Promise<AccessControlDoc> {
+  try {
+    return await readAccessControlStrict();
+  } catch (error) {
+    const snap = getAccessSnapshot();
+    if (error instanceof CmsReadError && snap.hydrated) {
+      return { roles: snap.roles, matrix: snap.matrix };
+    }
+    throw error;
+  }
 }
 
 export async function saveAccessControlDurable(

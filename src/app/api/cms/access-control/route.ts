@@ -2,25 +2,31 @@ import { NextResponse } from "next/server";
 import type { AccessControlDoc } from "@/lib/cms/permissions/access-types";
 import {
   readAccessControlDurable,
+  readAccessControlStrict,
   saveAccessControlDurable,
 } from "@/lib/cms/server/access-control.server";
 import {
   cmsGuardSession,
   cmsGuardSuperAdmin,
 } from "@/lib/cms/server/require-cms-auth";
+import { CmsReadError, isEditRead, readFailureResponse } from "@/lib/cms/server/strict-read";
 import { noStoreHeaders } from "@/lib/security/http-cache";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const auth = await cmsGuardSession();
     if ("response" in auth) return auth.response;
 
-    const doc = await readAccessControlDurable();
+    // forEdit: the editor saves what it loads, so no defaults on a failed read.
+    const doc = isEditRead(request)
+      ? await readAccessControlStrict()
+      : await readAccessControlDurable();
     return NextResponse.json(doc, { headers: noStoreHeaders });
   } catch (error) {
+    if (error instanceof CmsReadError) return readFailureResponse(error);
     console.error("Failed to load access control:", error);
     return NextResponse.json(
       { error: "Failed to load access control" },
@@ -35,7 +41,13 @@ export async function PUT(request: Request) {
     if ("response" in auth) return auth.response;
 
     const payload = (await request.json()) as AccessControlDoc;
-    if (!payload || !Array.isArray(payload.roles) || !payload.matrix) {
+    if (
+      !payload ||
+      !Array.isArray(payload.roles) ||
+      !payload.matrix ||
+      typeof payload.matrix !== "object" ||
+      Array.isArray(payload.matrix)
+    ) {
       return NextResponse.json(
         { error: "Invalid access control document" },
         { status: 400 }

@@ -12,6 +12,7 @@ import {
   readCmsDocumentData,
   writeCmsDocumentData,
 } from "@/lib/cms/server/cms-document.server";
+import { readCmsDocumentChecked } from "@/lib/cms/server/strict-read";
 
 export const CASE_STUDIES_DOC_ID = "case-studies";
 
@@ -27,10 +28,17 @@ export async function readCaseStudiesDurable(): Promise<CmsCaseStudy[]> {
   return getCaseStudies();
 }
 
+/** Save baseline: throws on a failed read; the cache changes only on success. */
+export async function readCaseStudiesStrict(): Promise<CmsCaseStudy[]> {
+  const remote = await readCmsDocumentChecked(CASE_STUDIES_DOC_ID, isStudies);
+  if (remote) replaceCaseStudiesCache(remote);
+  return getCaseStudies();
+}
+
 export async function saveCaseStudyDurable(
   study: CmsCaseStudy
 ): Promise<CmsCaseStudy> {
-  await readCaseStudiesDurable();
+  await readCaseStudiesStrict();
   const saved = saveMemory({
     ...study,
     excerpt: sanitizeLocalizedRichHtml(study.excerpt),
@@ -48,7 +56,7 @@ export async function saveCaseStudyDurable(
 }
 
 export async function deleteCaseStudyDurable(id: string): Promise<boolean> {
-  await readCaseStudiesDurable();
+  await readCaseStudiesStrict();
   const ok = deleteMemory(id);
   if (ok) {
     await writeCmsDocumentData(

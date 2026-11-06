@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { FolderTree, Pencil, Plus, Search, Tag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { EditorGuard, FormSkeleton } from "@/components/admin/common";
+import { EditorGuard, ErrorState, FormSkeleton } from "@/components/admin/common";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Can } from "@/components/admin/permissions/Can";
 import { ShopLocalizedNameFields } from "@/components/admin/forms/ShopLocalizedNameFields";
@@ -17,6 +17,8 @@ import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { CmsLocale } from "@/lib/cms/types";
+import { FilterRemovalDialog, type PendingRemoval } from "@/components/admin/marketplace/FilterRemovalDialog";
+import { removeFromDocument, type RemovalTarget } from "@/lib/cms/taxonomy-removal";
 import { BrandLabel } from "@/components/shop/BrandLabel";
 import { CountryFlag } from "@/components/ui/country-flag";
 import { useAdminLocale } from "@/contexts/AdminLocaleContext";
@@ -86,10 +88,12 @@ export default function MarketplaceFiltersPage() {
   const [filterGroups, setFilterGroups] = useState<ShopFilterGroup[]>([]);
   const [filterOptions, setFilterOptions] = useState<ShopFilterOptions>(emptyShopFilterOptions());
   const [categoryUsage, setCategoryUsage] = useState<Record<string, number>>({});
+  const [subcategoryUsage, setSubcategoryUsage] = useState<Record<string, number>>({});
   const [brandUsage, setBrandUsage] = useState<Record<string, number>>({});
   const [optionUsage, setOptionUsage] = useState<Record<string, Record<string, number>>>({});
   const [groupUsage, setGroupUsage] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [initialSnapshot, setInitialSnapshot] = useState("");
   const [searchCategory, setSearchCategory] = useState("");
@@ -118,6 +122,7 @@ export default function MarketplaceFiltersPage() {
   const [confirmDescription, setConfirmDescription] = useState("");
   const [confirmBlocked, setConfirmBlocked] = useState(false);
   const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
+  const [pendingRemoval, setPendingRemoval] = useState<PendingRemoval | null>(null);
   const { data: mapLocations } = useMapLocations();
   const mapFlagOptions = useMemo(
     () => getMapFlagOptions(mapLocations),
@@ -130,57 +135,73 @@ export default function MarketplaceFiltersPage() {
     return pickLocalized(group.name, group.nameI18n, locale);
   };
 
-  useEffect(() => {
-    void (async () => {
-      try {
-        const [filtersResponse, usageResponse] = await Promise.all([
-          fetch("/api/cms/marketplace/filters", { cache: "no-store" }),
-          fetch("/api/cms/marketplace/filters/usage", { cache: "no-store" }),
-        ]);
-        if (!filtersResponse.ok) throw new Error("Could not load filters");
-        const payload = (await filtersResponse.json()) as {
-          categories: ShopCategory[];
-          brands: ShopBrand[];
-          filterGroups?: ShopFilterGroup[];
-          filterOptions: ShopFilterOptions;
-        };
-        const normalizedOptions = normalizeFilterOptions(payload.filterOptions, payload.filterGroups);
-        const normalizedGroups = normalizeFilterGroups(payload.filterGroups, normalizedOptions);
-        const snapshot = {
-          categories: payload.categories,
-          brands: payload.brands,
-          filterGroups: normalizedGroups,
-          filterOptions: normalizedOptions,
-        };
-        setCategories(payload.categories);
-        setBrands(payload.brands);
-        setFilterGroups(normalizedGroups);
-        setFilterOptions(normalizedOptions);
-        setInitialSnapshot(JSON.stringify(snapshot));
-        setSelectedCategoryId(payload.categories[0]?.id ?? null);
-        setSelectedBrandId(payload.brands[0]?.id ?? null);
-        const firstGroupId = normalizedGroups[0]?.id ?? "";
-        setSelectedGroup(firstGroupId);
-        setSelectedOptionId(normalizedOptions[firstGroupId]?.[0]?.id ?? null);
-        if (usageResponse.ok) {
-          const usage = (await usageResponse.json()) as {
-            categoryUsage?: Record<string, number>;
-            brandUsage?: Record<string, number>;
-            optionUsage?: Record<string, Record<string, number>>;
-            groupUsage?: Record<string, number>;
-          };
-          setCategoryUsage(usage.categoryUsage ?? {});
-          setBrandUsage(usage.brandUsage ?? {});
-          setOptionUsage(usage.optionUsage ?? {});
-          setGroupUsage(usage.groupUsage ?? {});
-        }
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Could not load data.");
-      } finally {
-        setLoading(false);
-      }
-    })();
+  const applyUsage = (usage: {
+    categoryUsage?: Record<string, number>;
+    subcategoryUsage?: Record<string, number>;
+    brandUsage?: Record<string, number>;
+    optionUsage?: Record<string, Record<string, number>>;
+    groupUsage?: Record<string, number>;
+  }) => {
+    setCategoryUsage(usage.categoryUsage ?? {});
+    setSubcategoryUsage(usage.subcategoryUsage ?? {});
+    setBrandUsage(usage.brandUsage ?? {});
+    setOptionUsage(usage.optionUsage ?? {});
+    setGroupUsage(usage.groupUsage ?? {});
+  };
+
+  const refreshUsage = async () => {
+    const response = await fetch("/api/cms/marketplace/filters/usage", { cache: "no-store" }).catch(() => null);
+    if (response?.ok) applyUsage(await response.json());
+  };
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadFailed(false);
+    try {
+      const [filtersResponse, usageResponse] = await Promise.all([
+        fetch("/api/cms/marketplace/filters?forEdit=1", { cache: "no-store" }),
+        fetch("/api/cms/marketplace/filters/usage", { cache: "no-store" }),
+      ]);
+      // Zero usage counts would be misleading, so a failed usage fetch is a failed load.
+      if (!filtersResponse.ok || !usageResponse.ok) throw new Error("Could not load filters");
+      const payload = (await filtersResponse.json()) as {
+        categories: ShopCategory[];
+        brands: ShopBrand[];
+        filterGroups?: ShopFilterGroup[];
+        filterOptions: ShopFilterOptions;
+      };
+      const usage = await usageResponse.json();
+      const normalizedOptions = normalizeFilterOptions(payload.filterOptions, payload.filterGroups);
+      const normalizedGroups = normalizeFilterGroups(payload.filterGroups, normalizedOptions);
+      const snapshot = {
+        categories: payload.categories,
+        brands: payload.brands,
+        filterGroups: normalizedGroups,
+        filterOptions: normalizedOptions,
+      };
+      setCategories(payload.categories);
+      setBrands(payload.brands);
+      setFilterGroups(normalizedGroups);
+      setFilterOptions(normalizedOptions);
+      setInitialSnapshot(JSON.stringify(snapshot));
+      setSelectedCategoryId(payload.categories[0]?.id ?? null);
+      setSelectedBrandId(payload.brands[0]?.id ?? null);
+      const firstGroupId = normalizedGroups[0]?.id ?? "";
+      setSelectedGroup(firstGroupId);
+      setSelectedOptionId(normalizedOptions[firstGroupId]?.[0]?.id ?? null);
+      applyUsage(usage);
+    } catch {
+      // Never keep empty defaults: saving them would overwrite the real filters.
+      setLoadFailed(true);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount; the loader sets loading state before awaiting the API
+    void load();
+  }, [load]);
 
   const filteredCategories = useMemo(() => {
     const q = normalize(searchCategory);
@@ -241,6 +262,103 @@ export default function MarketplaceFiltersPage() {
     setConfirmBlocked(params.blocked);
     setConfirmAction(() => params.onConfirm);
     setConfirmOpen(true);
+  };
+
+  const usageFor = (target: RemovalTarget) => {
+    switch (target.kind) {
+      case "subcategory":
+        return subcategoryUsage[target.id] ?? 0;
+      case "category":
+        return categoryUsage[target.id] ?? 0;
+      case "brand":
+        return brandUsage[target.id] ?? 0;
+      case "group":
+        return groupUsage[target.id] ?? 0;
+      case "option":
+        return optionUsage[target.groupId]?.[target.id] ?? 0;
+    }
+  };
+
+  /** Only items present in both the saved snapshot and local state are offered; the server rejects anything else. */
+  const replacementsFor = (target: RemovalTarget | null) => {
+    if (!target || !initialSnapshot) return [];
+    const saved = JSON.parse(initialSnapshot) as {
+      categories: ShopCategory[];
+      brands: ShopBrand[];
+    };
+    if (target.kind === "brand") {
+      const localIds = new Set(brands.map((brand) => brand.id));
+      return saved.brands
+        .filter((brand) => brand.id !== target.id && localIds.has(brand.id))
+        .map((brand) => ({ value: brand.id, label: pickLocalized(brand.name, brand.nameI18n, locale) }));
+    }
+    const localSubIds = new Set(categories.flatMap((c) => c.subcategories.map((s) => `${c.id}/${s.id}`)));
+    return saved.categories
+      .filter((category) => !(target.kind === "category" && category.id === target.id))
+      .flatMap((category) =>
+        category.subcategories
+          .filter(
+            (subcategory) =>
+              !(target.kind === "subcategory" && subcategory.id === target.id) &&
+              localSubIds.has(`${category.id}/${subcategory.id}`)
+          )
+          .map((subcategory) => ({
+            value: subcategory.id,
+            label: `${pickLocalized(category.name, category.nameI18n, locale)} / ${pickLocalized(subcategory.name, subcategory.nameI18n, locale)}`,
+          }))
+      );
+  };
+
+  /** Applies the same removal to local edits and, when already persisted, to the saved snapshot. */
+  const applyRemoval = (target: RemovalTarget, persisted: boolean) => {
+    const next = removeFromDocument(target, { categories, brands, filterGroups, filterOptions });
+    setCategories(next.categories);
+    setBrands(next.brands);
+    setFilterGroups(next.filterGroups);
+    setFilterOptions(next.filterOptions);
+    if (persisted && initialSnapshot) {
+      setInitialSnapshot(
+        JSON.stringify(removeFromDocument(target, JSON.parse(initialSnapshot)))
+      );
+    }
+    if (target.kind === "category" && selectedCategoryId === target.id) {
+      setSelectedCategoryId(null);
+      setSelectedSubcategoryId(null);
+    }
+    if (target.kind === "subcategory" && selectedSubcategoryId === target.id) {
+      setSelectedSubcategoryId(null);
+    }
+    if (target.kind === "brand" && selectedBrandId === target.id) setSelectedBrandId(null);
+    if (target.kind === "option" && selectedOptionId === target.id) setSelectedOptionId(null);
+    if (target.kind === "group" && selectedGroup === target.id) {
+      const nextGroupId = next.filterGroups[0]?.id ?? "";
+      setSelectedGroup(nextGroupId);
+      setSelectedOptionId(nextGroupId ? next.filterOptions[nextGroupId]?.[0]?.id ?? null : null);
+    }
+  };
+
+  const requestRemoval = (target: RemovalTarget, label: string) => {
+    const usage = usageFor(target);
+    if (usage > 0) {
+      setPendingRemoval({ target, label, usage });
+      return;
+    }
+    const titles = {
+      subcategory: "deleteSubcategory",
+      category: "deleteCategory",
+      brand: "deleteBrand",
+      group: "deleteGroup",
+      option: "deleteOption",
+    } as const;
+    openDeleteConfirm({
+      title: t(titles[target.kind]),
+      description: target.kind === "option" ? t("deleteOptionConfirm") : t("deleteConfirm"),
+      blocked: false,
+      onConfirm: () => {
+        applyRemoval(target, false);
+        setConfirmOpen(false);
+      },
+    });
   };
 
   const validateLocal = () => {
@@ -416,6 +534,15 @@ export default function MarketplaceFiltersPage() {
     );
   }
 
+  if (loadFailed) {
+    return (
+      <Can module="marketplace" action="view" fallback={<p className="text-sm text-muted-foreground">{tCommon("accessDenied")}</p>}>
+        <AdminPageHeader title={t("title")} description={t("description")} />
+        <ErrorState message={tCommon("editorLoadFailed")} onRetry={() => void load()} />
+      </Can>
+    );
+  }
+
   return (
     <Can module="marketplace" action="view" fallback={<p className="text-sm text-muted-foreground">{tCommon("accessDenied")}</p>}>
       <AdminPageHeader
@@ -509,25 +636,12 @@ export default function MarketplaceFiltersPage() {
                             aria-label={t("removeCategory", {
                               name: pickLocalized(category.name, category.nameI18n, locale),
                             })}
-                            onClick={() => {
-                              const inUse = categoryUsage[category.id] ?? 0;
-                              openDeleteConfirm({
-                                title: t("deleteCategory"),
-                                description:
-                                  inUse > 0
-                                    ? t("deleteBlocked", { count: inUse })
-                                    : t("deleteConfirm"),
-                                blocked: inUse > 0,
-                                onConfirm: () => {
-                                  setCategories((prev) => prev.filter((item) => item.id !== category.id));
-                                  if (selectedCategoryId === category.id) {
-                                    setSelectedCategoryId(null);
-                                    setSelectedSubcategoryId(null);
-                                  }
-                                  setConfirmOpen(false);
-                                },
-                              });
-                            }}
+                            onClick={() =>
+                              requestRemoval(
+                                { kind: "category", id: category.id },
+                                pickLocalized(category.name, category.nameI18n, locale)
+                              )
+                            }
                           >
                             <Trash2 className="size-3.5" />
                           </Button>
@@ -535,7 +649,7 @@ export default function MarketplaceFiltersPage() {
                       </div>
                       <div className="mt-2 space-y-1 border-l border-border/60 pl-3">
                         {category.subcategories.map((subcategory) => (
-                          <div key={subcategory.id} className="rounded px-1 py-0.5 text-xs hover:bg-muted/50">
+                          <div key={subcategory.id} className="flex items-center justify-between gap-1 rounded px-1 py-0.5 text-xs hover:bg-muted/50">
                             <button
                               type="button"
                               className="flex items-center gap-1.5 text-left hover:underline"
@@ -547,6 +661,22 @@ export default function MarketplaceFiltersPage() {
                               <Tag className="size-3 text-muted-foreground" />
                               {pickLocalized(subcategory.name, subcategory.nameI18n, locale)}
                             </button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="size-6 p-0 text-destructive"
+                              aria-label={t("removeSubcategory", {
+                                name: pickLocalized(subcategory.name, subcategory.nameI18n, locale),
+                              })}
+                              onClick={() =>
+                                requestRemoval(
+                                  { kind: "subcategory", id: subcategory.id },
+                                  pickLocalized(subcategory.name, subcategory.nameI18n, locale)
+                                )
+                              }
+                            >
+                              <Trash2 className="size-3" />
+                            </Button>
                           </div>
                         ))}
                       </div>
@@ -645,22 +775,12 @@ export default function MarketplaceFiltersPage() {
                           aria-label={t("removeBrand", {
                             name: pickLocalized(brand.name, brand.nameI18n, locale),
                           })}
-                          onClick={() => {
-                            const used = brandUsage[brand.id] ?? 0;
-                            openDeleteConfirm({
-                              title: t("deleteBrand"),
-                              description:
-                                used > 0
-                                  ? t("deleteBlocked", { count: used })
-                                  : t("deleteConfirm"),
-                              blocked: used > 0,
-                              onConfirm: () => {
-                                setBrands((prev) => prev.filter((item) => item.id !== brand.id));
-                                if (selectedBrandId === brand.id) setSelectedBrandId(null);
-                                setConfirmOpen(false);
-                              },
-                            });
-                          }}
+                          onClick={() =>
+                            requestRemoval(
+                              { kind: "brand", id: brand.id },
+                              pickLocalized(brand.name, brand.nameI18n, locale)
+                            )
+                          }
                         >
                           <Trash2 className="size-3.5" />
                         </Button>
@@ -732,38 +852,9 @@ export default function MarketplaceFiltersPage() {
                           size="sm"
                           variant="destructive"
                           aria-label={t("removeGroup", { name: groupLabel(group.id) })}
-                          onClick={() => {
-                            const inUse = groupUsage[group.id] ?? 0;
-                            openDeleteConfirm({
-                              title: t("deleteGroup"),
-                              description:
-                                inUse > 0
-                                  ? t("deleteBlocked", { count: inUse })
-                                  : t("deleteConfirm"),
-                              blocked: inUse > 0,
-                              onConfirm: () => {
-                                setFilterGroups((prev) => {
-                                  const remaining = prev.filter((item) => item.id !== group.id);
-                                  if (selectedGroup === group.id) {
-                                    const nextGroupId = remaining[0]?.id ?? "";
-                                    setSelectedGroup(nextGroupId);
-                                    setSelectedOptionId(
-                                      nextGroupId
-                                        ? filterOptions[nextGroupId]?.[0]?.id ?? null
-                                        : null
-                                    );
-                                  }
-                                  return remaining;
-                                });
-                                setFilterOptions((prev) => {
-                                  const next = { ...prev };
-                                  delete next[group.id];
-                                  return next;
-                                });
-                                setConfirmOpen(false);
-                              },
-                            });
-                          }}
+                          onClick={() =>
+                            requestRemoval({ kind: "group", id: group.id }, groupLabel(group.id))
+                          }
                         >
                           <Trash2 className="size-3.5" />
                         </Button>
@@ -919,6 +1010,26 @@ export default function MarketplaceFiltersPage() {
                           )
                         }
                       />
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs text-muted-foreground">
+                          {t("usedByProducts", { count: subcategoryUsage[subcategory.id] ?? 0 })}
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          aria-label={t("removeSubcategory", {
+                            name: pickLocalized(subcategory.name, subcategory.nameI18n, locale),
+                          })}
+                          onClick={() =>
+                            requestRemoval(
+                              { kind: "subcategory", id: subcategory.id },
+                              pickLocalized(subcategory.name, subcategory.nameI18n, locale)
+                            )
+                          }
+                        >
+                          <Trash2 className="mr-1 size-3.5" /> {t("deleteSubcategory")}
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1095,25 +1206,12 @@ export default function MarketplaceFiltersPage() {
                       aria-label={t("removeOption", {
                         name: pickLocalized(option.name, option.nameI18n, locale),
                       })}
-                      onClick={() => {
-                        const used = optionUsage[selectedGroup]?.[option.id] ?? 0;
-                        openDeleteConfirm({
-                          title: t("deleteOption"),
-                          description:
-                            used > 0
-                              ? t("deleteOptionUsed", { count: used })
-                              : t("deleteOptionConfirm"),
-                          blocked: used > 0,
-                          onConfirm: () => {
-                            setFilterOptions((prev) => ({
-                              ...prev,
-                              [selectedGroup]: (prev[selectedGroup] ?? []).filter((item) => item.id !== option.id),
-                            }));
-                            if (selectedOptionId === option.id) setSelectedOptionId(null);
-                            setConfirmOpen(false);
-                          },
-                        });
-                      }}
+                      onClick={() =>
+                        requestRemoval(
+                          { kind: "option", id: option.id, groupId: selectedGroup },
+                          pickLocalized(option.name, option.nameI18n, locale)
+                        )
+                      }
                     >
                       <Trash2 className="size-3.5" />
                     </Button>
@@ -1194,6 +1292,20 @@ export default function MarketplaceFiltersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <FilterRemovalDialog
+        removal={pendingRemoval}
+        replacements={replacementsFor(pendingRemoval?.target ?? null)}
+        onClose={() => {
+          setPendingRemoval(null);
+          void refreshUsage();
+        }}
+        onRemoved={(target) => {
+          applyRemoval(target, true);
+          setPendingRemoval(null);
+          void refreshUsage();
+        }}
+      />
     </Can>
   );
 }

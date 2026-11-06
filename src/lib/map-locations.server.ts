@@ -8,6 +8,7 @@ import { MAP_LOCATIONS_TAG } from "@/lib/cms/cache-tags";
 import { invalidateMapLocations } from "@/lib/cms/server/cache-invalidation.server";
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { rethrowNextSignals } from "@/lib/cms/server/rethrow-next-signals";
+import { CmsReadError } from "@/lib/cms/server/strict-read";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 
@@ -73,6 +74,40 @@ export async function readMapLocations(): Promise<MapLocationsData> {
       message
     );
     return readMapLocationsFromFile();
+  }
+}
+
+/**
+ * Save baseline: authenticated client, uncached. Throws `CmsReadError` on a
+ * read error or malformed data; the file seed is used only when the row is
+ * confirmed absent.
+ */
+export async function readMapLocationsStrict(): Promise<MapLocationsData> {
+  if (!isSupabaseConfigured()) {
+    try {
+      return await readMapLocationsFromFile();
+    } catch (error) {
+      throw new CmsReadError(error);
+    }
+  }
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("map_locations_config")
+      .select("data")
+      .eq("id", MAP_CONFIG_ID)
+      .maybeSingle();
+    if (error) throw new CmsReadError(`map locations: ${error.message}`);
+    if (!data) return await readMapLocationsFromFile();
+    const raw = data.data as { locations?: unknown } | null;
+    if (!raw || typeof raw !== "object" || !Array.isArray(raw.locations)) {
+      throw new CmsReadError("map locations document is malformed");
+    }
+    return normalizeMapLocations(raw);
+  } catch (error) {
+    rethrowNextSignals(error);
+    if (error instanceof CmsReadError) throw error;
+    throw new CmsReadError(error);
   }
 }
 

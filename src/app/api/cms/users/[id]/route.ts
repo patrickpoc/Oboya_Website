@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  UserDeleteError,
   deleteCmsUserDurable,
   listCmsUsersDurable,
   updateCmsUserDurable,
@@ -62,6 +63,9 @@ export async function PATCH(request: Request, { params }: Params) {
 
     const users = await listCmsUsersDurable();
     const target = users.find((u) => u.id === id);
+    if (!target) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
 
     if (body.role !== undefined && !isValidRoleId(body.role)) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
@@ -138,8 +142,11 @@ export async function DELETE(_request: Request, { params }: Params) {
   try {
     const users = await listCmsUsersDurable();
     const target = users.find((u) => u.id === id);
+    if (!target) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
     if (
-      target?.role === "super_admin" &&
+      target.role === "super_admin" &&
       auth.user.role !== "super_admin"
     ) {
       return NextResponse.json(
@@ -166,6 +173,18 @@ export async function DELETE(_request: Request, { params }: Params) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Failed to delete user:", error);
+    if (error instanceof UserDeleteError) {
+      return NextResponse.json(
+        {
+          error:
+            error.code === "revoked"
+              ? "Access was revoked, but the account could not be deleted. Try again."
+              : "The account could not be deleted and access could not be revoked. Deactivate it manually.",
+          code: error.code,
+        },
+        { status: 500 }
+      );
+    }
     return NextResponse.json({ error: "Failed to delete user" }, { status: 500 });
   }
 }

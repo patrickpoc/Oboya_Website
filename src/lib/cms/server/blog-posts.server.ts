@@ -13,6 +13,7 @@ import {
   readCmsDocumentData,
   writeCmsDocumentData,
 } from "@/lib/cms/server/cms-document.server";
+import { readCmsDocumentChecked } from "@/lib/cms/server/strict-read";
 
 export const BLOG_POSTS_DOC_ID = "blog-posts";
 
@@ -32,10 +33,17 @@ export async function readBlogPostsDurable(options?: {
   return getBlogPosts();
 }
 
+/** Save baseline: throws on a failed read; the cache changes only on success. */
+export async function readBlogPostsStrict(): Promise<CmsBlogPost[]> {
+  const remote = await readCmsDocumentChecked(BLOG_POSTS_DOC_ID, isPosts);
+  if (remote) replaceBlogPostsCache(remote);
+  return getBlogPosts();
+}
+
 export async function saveBlogPostDurable(
   post: CmsBlogPost
 ): Promise<CmsBlogPost> {
-  await readBlogPostsDurable({ fresh: true });
+  await readBlogPostsStrict();
   const saved = savePostMemory({
     ...post,
     body: sanitizeLocalizedRichHtml(post.body),
@@ -47,14 +55,14 @@ export async function saveBlogPostDurable(
 export async function reorderBlogPostsDurable(
   orderedIds: string[]
 ): Promise<CmsBlogPost[]> {
-  await readBlogPostsDurable({ fresh: true });
+  await readBlogPostsStrict();
   const next = reorderBlogPosts(orderedIds);
   await writeCmsDocumentData(BLOG_POSTS_DOC_ID, "blog", next);
   return next;
 }
 
 export async function deleteBlogPostDurable(id: string): Promise<boolean> {
-  await readBlogPostsDurable({ fresh: true });
+  await readBlogPostsStrict();
   const ok = deletePostMemory(id);
   if (ok) {
     await writeCmsDocumentData(BLOG_POSTS_DOC_ID, "blog", getBlogPosts());

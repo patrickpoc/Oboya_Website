@@ -3,6 +3,7 @@ import {
   deleteFaqCategoryDurable,
   deleteFaqItemDurable,
   readFaqsDurable,
+  readFaqsStrict,
   saveFaqCategoryDurable,
   saveFaqItemDurable,
 } from "@/lib/cms/server/faqs.server";
@@ -16,13 +17,15 @@ import {
   pendingApprovalResponse,
   stripApprovalMeta,
   submitOrApply,
+  withApprovalErrors,
 } from "@/lib/cms/server/approvals.server";
+import { isEditRead } from "@/lib/cms/server/strict-read";
 import { diffJson, summarizeDiff } from "@/lib/cms/approvals/diff";
 
 type FaqType = "category" | "faq";
 
 async function findCurrent(type: FaqType, id: string) {
-  const doc = await readFaqsDurable();
+  const doc = await readFaqsStrict();
   const list: Array<{ id: string }> = type === "category" ? doc.categories : doc.faqs;
   return list.find((item) => item.id === id) ?? null;
 }
@@ -32,11 +35,17 @@ function faqLabel(type: FaqType, data: Partial<CmsFaqCategory & CmsFaqItem> | nu
   return `${type === "category" ? "FAQ category" : "FAQ"} · ${text || id}`;
 }
 
-export async function GET() {
+async function handleGET(request: Request) {
+  if (isEditRead(request)) {
+    // Guard first: the strict read uses the session client.
+    const auth = await cmsGuard("website", "view");
+    if ("response" in auth) return auth.response;
+    return NextResponse.json(await readFaqsStrict());
+  }
   return NextResponse.json(await readFaqsDurable());
 }
 
-export async function PUT(request: Request) {
+async function handlePUT(request: Request) {
   const auth = await cmsGuard("website", "edit");
   if ("response" in auth) return auth.response;
 
@@ -74,7 +83,7 @@ export async function PUT(request: Request) {
   return NextResponse.json(gate.result);
 }
 
-export async function DELETE(request: Request) {
+async function handleDELETE(request: Request) {
   const auth = await cmsGuard("website", "delete");
   if ("response" in auth) return auth.response;
 
@@ -109,3 +118,7 @@ export async function DELETE(request: Request) {
   if (!gate.applied) return pendingApprovalResponse(gate.request, { ok: false });
   return NextResponse.json({ ok: true });
 }
+
+export const GET = withApprovalErrors("Failed to load FAQs", handleGET);
+export const PUT = withApprovalErrors("Failed to save FAQ", handlePUT);
+export const DELETE = withApprovalErrors("Failed to delete FAQ", handleDELETE);

@@ -28,6 +28,9 @@ import {
   updateChangeRequest,
 } from "@/lib/cms/server/change-requests.server";
 import { getApplier } from "@/lib/cms/server/approval-appliers.server";
+import { CountriesValidationError } from "@/lib/cms/marketplace-countries";
+import { publicApiError } from "@/lib/security/public-error";
+import { CmsReadError, readFailureResponse } from "@/lib/cms/server/strict-read";
 
 export class ApprovalError extends Error {
   constructor(
@@ -207,11 +210,30 @@ export function approvalErrorResponse(error: unknown, fallback: string) {
   if (error instanceof ApprovalError) {
     return NextResponse.json({ error: error.message }, { status: error.status });
   }
-  console.error(fallback, error);
-  return NextResponse.json(
-    { error: error instanceof Error ? error.message : fallback },
-    { status: 500 }
-  );
+  if (error instanceof CmsReadError) return readFailureResponse(error);
+  return publicApiError(error, fallback);
+}
+
+/**
+ * Wraps a route handler that has no try/catch of its own: a failure returns
+ * JSON (503 for a failed baseline read, the approval status, else 500) instead
+ * of an HTML 500.
+ */
+export function withApprovalErrors<A extends unknown[]>(
+  fallback: string,
+  handler: (...args: A) => Promise<Response>
+) {
+  return async (...args: A): Promise<Response> => {
+    try {
+      return await handler(...args);
+    } catch (error) {
+      if (error instanceof ApprovalError) {
+        return NextResponse.json({ error: error.message }, { status: error.status });
+      }
+      if (error instanceof CmsReadError) return readFailureResponse(error);
+      return publicApiError(error, fallback);
+    }
+  };
 }
 
 export async function reviewChangeRequest(input: {
@@ -294,7 +316,14 @@ export async function reviewChangeRequest(input: {
     await audit(input.user, next, input.force ? "approved_forced" : "approved", comment ?? undefined);
     return next;
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to apply change";
+    // A failed baseline read says nothing about the change: leave it open.
+    if (error instanceof CmsReadError) throw error;
+    // Typed validation errors are written for operators; anything else stays server-side.
+    const userFacing =
+      (error instanceof Error && error.name === "ProductExistsError") || error instanceof CountriesValidationError;
+    if (!userFacing) console.error("Failed to apply change request:", request.id, error);
+    const message =
+      userFacing && error instanceof Error ? error.message : "Failed to apply change";
     const next = await updateChangeRequest(request.id, {
       status: "failed",
       reviewerId: input.user.id,

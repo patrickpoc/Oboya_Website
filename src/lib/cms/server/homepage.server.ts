@@ -12,6 +12,7 @@ import { docTag } from "@/lib/cms/cache-tags";
 import { invalidateDocument } from "@/lib/cms/server/cache-invalidation.server";
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
 import { rethrowNextSignals } from "@/lib/cms/server/rethrow-next-signals";
+import { readCmsDocumentChecked } from "@/lib/cms/server/strict-read";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 
@@ -99,10 +100,31 @@ export async function readHomepageSettingsDurable(): Promise<HomepageSettings> {
   return getHomepageSettings();
 }
 
+function isHomepage(value: unknown): value is HomepageSettings {
+  return Boolean(value && typeof value === "object" && "hero" in value);
+}
+
+/**
+ * Save baseline. Unlike the tolerant read, a failed or malformed Supabase
+ * document throws; the seed/disk copy is used only for a confirmed-absent row.
+ */
+export async function readHomepageSettingsStrict(): Promise<HomepageSettings> {
+  if (isSupabaseConfigured()) {
+    const remote = await readCmsDocumentChecked(HOMEPAGE_DOC_ID, isHomepage);
+    if (remote) {
+      replaceHomepageSettingsCache(remote);
+      hydrated = true;
+      return getHomepageSettings();
+    }
+  }
+  await hydrateFromDisk();
+  return getHomepageSettings();
+}
+
 export async function saveHomepageSettingsDurable(
   settings: HomepageSettings
 ): Promise<HomepageSettings> {
-  await hydrateFromDisk();
+  await readHomepageSettingsStrict();
   const saved = saveHomepageSettings(settings);
 
   if (isSupabaseConfigured()) {

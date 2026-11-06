@@ -538,16 +538,47 @@ export async function resetCmsUserPasswordDurable(
   return nextPassword;
 }
 
+/** `revoked`: auth delete failed but the account was banned or deactivated. `revocation_failed`: it also could not be deactivated. */
+export class UserDeleteError extends Error {
+  constructor(public code: "revoked" | "revocation_failed", detail: string) {
+    super(detail);
+    this.name = "UserDeleteError";
+  }
+}
+
+function isAuthUserNotFound(error: { message?: string; status?: number; code?: string }) {
+  return error.code === "user_not_found" || /user not found/i.test(error.message ?? "");
+}
+
 export async function deleteCmsUserDurable(id: string): Promise<void> {
-  if (!isSupabaseConfigured() || !isServiceRoleConfigured()) {
+  if (!isSupabaseConfigured()) {
     deleteCmsUser(id);
     return;
   }
+  if (!isServiceRoleConfigured()) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is missing; the user cannot be deleted.");
+  }
 
   const admin = createServiceClient();
-  await admin.from("cms_user_profiles").delete().eq("id", id);
+  // Auth first. A missing auth user counts as done so a retry can finish.
   const { error } = await admin.auth.admin.deleteUser(id);
-  if (error) throw new Error(error.message);
+  if (error && !isAuthUserNotFound(error)) {
+    // Keep the profile, but make sure the account cannot be used: ban the auth user
+    // and deactivate the profile. Revoked only if one of them actually worked.
+    const { error: banError } = await admin.auth.admin.updateUserById(id, {
+      ban_duration: "876600h",
+    });
+    const { data: rows, error: profileUpdateError } = await admin
+      .from("cms_user_profiles")
+      .update({ status: "inactive", updated_at: new Date().toISOString() })
+      .eq("id", id)
+      .select("id");
+    const banned = !banError;
+    const deactivated = !profileUpdateError && (rows?.length ?? 0) > 0;
+    throw new UserDeleteError(banned || deactivated ? "revoked" : "revocation_failed", error.message);
+  }
+  const { error: profileError } = await admin.from("cms_user_profiles").delete().eq("id", id);
+  if (profileError) throw new Error(profileError.message);
   deleteCmsUser(id);
 }
 

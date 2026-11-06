@@ -42,6 +42,7 @@
     "name": "名称",
     "password": "密码",
     "retry": "重试",
+    "editorLoadFailed": "无法加载当前数据。为保护数据,已禁用保存功能。",
     "view": "查看",
     "status": "状态",
     "role": "角色",
@@ -279,8 +280,34 @@
     "editGroupName": "编辑分组名称",
     "removeGroup": "移除分组 {name}",
     "removeOption": "移除选项 {name}",
+    "deleteSubcategory": "删除子类别",
+    "removeSubcategory": "移除子类别 {name}",
     "siteReflection": "站点预览",
-    "moreOptions": "+{count} 个更多选项"
+    "moreOptions": "+{count} 个更多选项",
+    "removal": {
+      "title": "删除“{name}”",
+      "usedBy": "被 {count, plural, other {# 个产品}} 使用。",
+      "descriptionReplace": "删除此项之前,下方所有产品必须先移至其他项。原值不会保留,因此无法自动撤销。",
+      "descriptionRemove": "此项将从下方所有产品中移除,这些产品的其他筛选值会保留。无法自动撤销。",
+      "replacementLabel": "将产品移至",
+      "replacementPlaceholder": "选择目标项",
+      "noReplacements": "没有其他已保存的项可作为目标。",
+      "productsFailed": "无法加载受影响的产品。",
+      "moreProducts": "+{count, plural, other {另外 # 个产品}}",
+      "trash": "回收站",
+      "status": {
+        "draft": "草稿",
+        "scheduled": "已排期",
+        "published": "已发布",
+        "archived": "已归档"
+      },
+      "confirmReplace": "移动产品并删除",
+      "confirmRemove": "从所有产品中移除并删除",
+      "working": "正在应用…",
+      "success": "已删除“{name}”。已更新 {count, plural, other {# 个产品}}。",
+      "partialFailure": "{updated} 个已更新,{failed} 个失败。未删除任何内容,请重试。",
+      "failed": "无法删除该项。"
+    }
   },
   "products": {
     "title": "产品",

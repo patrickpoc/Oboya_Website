@@ -12,6 +12,7 @@ import { LEGACY_WEBSITE_FOLDER_IDS } from "@/lib/cms/media-folder-ids";
 import { docTag } from "@/lib/cms/cache-tags";
 import { invalidateDocument } from "@/lib/cms/server/cache-invalidation.server";
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
+import { readCmsDocumentStrict, CmsReadError } from "@/lib/cms/server/strict-read";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 
@@ -128,6 +129,24 @@ export async function readMediaFoldersDurable(): Promise<MediaFolder[]> {
   const local = await readFoldersFromDisk();
   const merged = mergeWithDefaults(local ?? getDefaultMediaFolders());
   replaceMediaFoldersCache(merged);
+  return getMediaFolders();
+}
+
+/**
+ * Baseline before a folder read-modify-write: a failed or malformed read
+ * throws, so defaults are never persisted over real folders.
+ */
+export async function readMediaFoldersStrict(): Promise<MediaFolder[]> {
+  const raw = await readCmsDocumentStrict(MEDIA_FOLDERS_DOC_ID);
+  let stored: MediaFolder[] | null;
+  if (raw == null) {
+    stored = await readFoldersFromDisk();
+  } else {
+    const folders = (raw as { folders?: unknown }).folders;
+    if (!isFolderArray(folders)) throw new CmsReadError("media-folders: document is malformed");
+    stored = folders;
+  }
+  replaceMediaFoldersCache(mergeWithDefaults(stored ?? getDefaultMediaFolders()));
   return getMediaFolders();
 }
 

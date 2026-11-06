@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import type { NewsPageSettings } from "@/lib/cms/repositories/news-page-repository";
 import {
   readNewsPageSettingsDurable,
+  readNewsPageSettingsStrict,
   saveNewsPageSettingsDurable,
 } from "@/lib/cms/server/news-page.server";
 import { revalidateNewsPages } from "@/lib/cms/revalidate-site";
+import { CmsReadError, isEditRead, readFailureResponse } from "@/lib/cms/server/strict-read";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 import {
   approvalErrorResponse,
@@ -12,8 +14,20 @@ import {
   stripApprovalMeta,
 } from "@/lib/cms/server/approvals.server";
 
-export async function GET() {
-  return NextResponse.json(await readNewsPageSettingsDurable());
+export async function GET(request: Request) {
+  try {
+    if (isEditRead(request)) {
+      // Guard first: the strict read uses the session client.
+      const auth = await cmsGuard("website", "view");
+      if ("response" in auth) return auth.response;
+      return NextResponse.json(await readNewsPageSettingsStrict());
+    }
+    return NextResponse.json(await readNewsPageSettingsDurable());
+  } catch (error) {
+    if (error instanceof CmsReadError) return readFailureResponse(error);
+    console.error("Failed to load news page settings:", error);
+    return NextResponse.json({ error: "Failed to load news page settings" }, { status: 500 });
+  }
 }
 
 export async function PUT(request: Request) {
@@ -27,7 +41,7 @@ export async function PUT(request: Request) {
       entityId: "news-page",
       entityLabel: "News Page",
       body,
-      read: readNewsPageSettingsDurable,
+      read: readNewsPageSettingsStrict,
       save: saveNewsPageSettingsDurable,
       revalidate: revalidateNewsPages,
     });

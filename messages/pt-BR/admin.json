@@ -42,6 +42,7 @@
     "name": "Nome",
     "password": "Senha",
     "retry": "Tentar de novo",
+    "editorLoadFailed": "Não foi possível carregar os dados atuais. O salvamento está desativado para protegê-los.",
     "view": "Ver",
     "status": "Status",
     "role": "Função",
@@ -279,8 +280,34 @@
     "editGroupName": "Editar nome do grupo",
     "removeGroup": "Remover grupo {name}",
     "removeOption": "Remover opção {name}",
+    "deleteSubcategory": "Excluir subcategoria",
+    "removeSubcategory": "Remover subcategoria {name}",
     "siteReflection": "Reflexo no site",
-    "moreOptions": "+{count} opções a mais"
+    "moreOptions": "+{count} opções a mais",
+    "removal": {
+      "title": "Excluir \"{name}\"",
+      "usedBy": "Usado por {count, plural, one {# produto} other {# produtos}}.",
+      "descriptionReplace": "Todos os produtos abaixo precisam ser movidos para outro item antes que este seja excluído. O valor anterior não é mantido, portanto isso não pode ser desfeito automaticamente.",
+      "descriptionRemove": "Este item será removido de todos os produtos abaixo. Os outros valores de filtro deles são mantidos. Isso não pode ser desfeito automaticamente.",
+      "replacementLabel": "Mover produtos para",
+      "replacementPlaceholder": "Selecione um destino",
+      "noReplacements": "Nenhum outro item salvo está disponível como destino.",
+      "productsFailed": "Não foi possível carregar os produtos afetados.",
+      "moreProducts": "+{count, plural, one {# produto a mais} other {# produtos a mais}}",
+      "trash": "Lixeira",
+      "status": {
+        "draft": "Rascunho",
+        "scheduled": "Agendado",
+        "published": "Publicado",
+        "archived": "Arquivado"
+      },
+      "confirmReplace": "Mover produtos e excluir",
+      "confirmRemove": "Remover de todos os produtos e excluir",
+      "working": "Aplicando…",
+      "success": "\"{name}\" excluído. {count, plural, one {# produto atualizado} other {# produtos atualizados}}.",
+      "partialFailure": "{updated} atualizados, {failed} com falha. Nada foi excluído; tente novamente.",
+      "failed": "Não foi possível excluir o item."
+    }
   },
   "products": {
     "title": "Produtos",

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
-import { EditorGuard, FormSkeleton } from "@/components/admin/common";
+import { EditorGuard, ErrorState, FormSkeleton } from "@/components/admin/common";
 import { RoleList } from "@/components/admin/access-control/RoleList";
 import { MatrixEditor } from "@/components/admin/access-control/MatrixEditor";
 import { Button } from "@/components/ui/button";
@@ -18,16 +18,19 @@ import type { CmsModule, PermissionLevel } from "@/lib/cms/types";
 
 export default function AccessControlPage() {
   const t = useTranslations("admin.accessControl");
+  const tCommon = useTranslations("admin.common");
   const [doc, setDoc] = useState<AccessControlDoc | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadFailed(false);
     try {
-      const res = await fetch("/api/cms/access-control", { cache: "no-store" });
+      const res = await fetch("/api/cms/access-control?forEdit=1", { cache: "no-store" });
       const data = (await res.json()) as AccessControlDoc & { error?: string };
       if (!res.ok) throw new Error(data.error || t("loadFailed"));
       setDoc({ roles: data.roles, matrix: data.matrix });
@@ -35,6 +38,7 @@ export default function AccessControlPage() {
       setSelectedId((prev) => prev ?? data.roles[0]?.id ?? null);
       setDirty(false);
     } catch (error) {
+      setLoadFailed(true);
       toast.error(error instanceof Error ? error.message : t("loadFailed"));
     } finally {
       setLoading(false);
@@ -141,8 +145,9 @@ export default function AccessControlPage() {
     }
   };
 
-  if (loading || !doc) {
-    return <FormSkeleton />;
+  if (loading) return <FormSkeleton />;
+  if (loadFailed || !doc) {
+    return <ErrorState message={tCommon("editorLoadFailed")} onRetry={() => void load()} />;
   }
 
   return (

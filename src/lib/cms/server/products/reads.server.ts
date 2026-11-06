@@ -7,6 +7,7 @@ import {
   type CmsProduct,
 } from "@/lib/cms/repositories/product-repository";
 import { rethrowNextSignals } from "@/lib/cms/server/rethrow-next-signals";
+import { CmsReadError } from "@/lib/cms/server/strict-read";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 import {
@@ -180,6 +181,106 @@ export async function readProducts(options?: {
       (product) => product.status === "published" && !product.deletedAt
     );
   }
+}
+
+const STRICT_PAGE_SIZE = 1000;
+
+/**
+ * Pages through every `cms_products` row with the authenticated client.
+ * Advances by the rows actually returned (the server may cap a page below
+ * `STRICT_PAGE_SIZE`) and stops on an empty page. Any error throws.
+ */
+async function readAllRowsStrict(columns: () => string): Promise<ProductRow[]> {
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch (error) {
+    rethrowNextSignals(error);
+    throw new CmsReadError(error);
+  }
+  const all: ProductRow[] = [];
+  for (let from = 0; ; ) {
+    const runQuery = () =>
+      supabase
+        .from("cms_products")
+        .select(columns())
+        .order("id", { ascending: true })
+        .range(from, from + STRICT_PAGE_SIZE - 1);
+    let { data, error } = await runQuery();
+    for (let i = 0; i < OPTIONAL_COLUMN_RETRIES && disableMissingOptionalColumn(error); i++) {
+      ({ data, error } = await runQuery());
+    }
+    if (error) throw new CmsReadError(`Failed to read products: ${error.message}`);
+    const rows = (data ?? []) as unknown as ProductRow[];
+    if (rows.length === 0) break;
+    all.push(...rows);
+    from += rows.length;
+  }
+  return all;
+}
+
+/**
+ * Every product (drafts and trash included) for write paths. Unlike
+ * `readProducts` it never falls back to seed data: a failed read throws.
+ */
+export async function readProductsStrict(
+  fields: ProductReadFields = "list"
+): Promise<CmsProduct[]> {
+  if (!isSupabaseConfigured()) {
+    return getCmsProducts({ includeDeleted: true });
+  }
+  const rows = await readAllRowsStrict(() => selectColumns(fields));
+  return rows
+    .map((row) => rowToProduct(row))
+    .filter((product) => !isProductPurgeDue(product));
+}
+
+function plainObjectStrict<T extends object>(value: unknown, id: string, column: string): T {
+  if (value && typeof value === "object" && !Array.isArray(value)) return value as T;
+  throw new CmsReadError(`Product ${id} has a malformed ${column} value`);
+}
+
+/** Prices only (trash included), for currency saves. Throws on any failure. */
+export async function readProductPricesStrict(): Promise<
+  Array<{ id: string; sku: string; prices: CmsProduct["prices"] }>
+> {
+  if (!isSupabaseConfigured()) {
+    return getCmsProducts({ includeDeleted: true }).map((product) => ({
+      id: product.id,
+      sku: product.sku,
+      prices: product.prices ?? {},
+    }));
+  }
+  const rows = await readAllRowsStrict(() => "id,sku,prices,purge_at");
+  return rows
+    .filter((row) => !isProductPurgeDue({ purgeAt: row.purge_at }))
+    .map((row) => ({
+      id: row.id,
+      sku: row.sku,
+      prices: plainObjectStrict<CmsProduct["prices"]>(row.prices, row.id, "prices"),
+    }));
+}
+
+/** Descriptions of every product (trash included), for image reference checks. */
+export async function readProductDescriptionsStrict(): Promise<
+  Array<{ id: string; description: CmsProduct["description"] }>
+> {
+  if (!isSupabaseConfigured()) {
+    return getCmsProducts({ includeDeleted: true }).map((product) => ({
+      id: product.id,
+      description: product.description,
+    }));
+  }
+  const rows = await readAllRowsStrict(() => "id,description");
+  return rows.map((row) => ({
+    id: row.id,
+    description: plainObjectStrict<CmsProduct["description"]>(
+      row.description,
+      row.id,
+      "description"
+    ),
+  }));
+
 }
 
 /** Slim SKU index for duplicate / uniqueness checks — no images or HTML. */

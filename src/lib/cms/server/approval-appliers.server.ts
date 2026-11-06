@@ -23,7 +23,7 @@ import type { NewsPageSettings } from "@/lib/cms/repositories/news-page-reposito
 import type { CmsFaqCategory, CmsFaqItem } from "@/lib/cms/repositories/faqs-repository";
 import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
 import type { CmsCaseStudy } from "@/lib/cms/repositories/case-studies-repository";
-import { readProductById } from "@/lib/cms/server/products.server";
+import { readProductByIdStrict } from "@/lib/cms/server/products.server";
 import {
   createProductWrite,
   deleteProductWrite,
@@ -52,7 +52,8 @@ type Applier = {
 };
 
 async function currentProduct(id: string) {
-  return (await readProductById(id, { asAdmin: true })) ?? null;
+  // Strict: a failed read must leave the request open, not look like a missing product.
+  return (await readProductByIdStrict(id)) ?? null;
 }
 
 function withoutPrices(product: CmsProduct | null | undefined) {
@@ -141,28 +142,28 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
     case "marketplace.countries":
       return {
         async detectConflicts(req) {
-          const { readMarketplaceCurrencies } = await import(
+          const { readMarketplaceCurrenciesStrict } = await import(
             "@/lib/cms/server/marketplace-config.server"
           );
           const { detectCountryConflicts, parseCountryChanges } = await import(
             "@/lib/cms/marketplace-countries"
           );
           const changes = parseCountryChanges(req.payloadProposed);
-          const current = await readMarketplaceCurrencies({ includeInactive: true });
+          const current = await readMarketplaceCurrenciesStrict({ includeInactive: true });
           const snapshot = Array.isArray(req.snapshotBefore)
             ? (req.snapshotBefore as StoreCountry[])
             : [];
           return detectCountryConflicts(current.countries, snapshot, changes);
         },
         async apply(req) {
-          const { readMarketplaceCurrencies, saveMarketplaceCurrencies } = await import(
+          const { readMarketplaceCurrenciesStrict, saveMarketplaceCurrencies } = await import(
             "@/lib/cms/server/marketplace-config.server"
           );
           const { applyRestrictiveCountryChanges, parseCountryChanges } = await import(
             "@/lib/cms/marketplace-countries"
           );
           const changes = parseCountryChanges(req.payloadProposed);
-          const current = await readMarketplaceCurrencies({ includeInactive: true });
+          const current = await readMarketplaceCurrenciesStrict({ includeInactive: true });
           await saveMarketplaceCurrencies({
             countries: applyRestrictiveCountryChanges(current.countries, changes),
             currencies: current.currencies,
@@ -200,10 +201,16 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
           const payload = req.payloadProposed as BulkUpdatePayload;
           const items = [...(req.diff.items ?? [])];
           let failed = 0;
+          // Read every baseline before the first write: a read failure aborts
+          // with nothing applied and the request stays open.
+          const currents = new Map<string, CmsProduct | null>();
+          for (const product of payload.products) {
+            currents.set(product.id, await currentProduct(product.id));
+          }
           for (const product of payload.products) {
             const item = items.find((i) => i.productId === product.id);
             try {
-              const current = await currentProduct(product.id);
+              const current = currents.get(product.id) ?? null;
               await writeProduct(mergeProductUpdate(product, current), current, {
                 deferRevalidate: true,
                 skipFileSync: true,
@@ -227,47 +234,47 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
       };
 
     case "website.homepage": {
-      const { readHomepageSettingsDurable, saveHomepageSettingsDurable } = await import(
+      const { readHomepageSettingsStrict, saveHomepageSettingsDurable } = await import(
         "@/lib/cms/server/homepage.server"
       );
       const { revalidateHomePages } = await import("@/lib/cms/revalidate-site");
       return settingsDoc<HomepageSettings>(
-        readHomepageSettingsDurable,
+        readHomepageSettingsStrict,
         saveHomepageSettingsDurable,
         revalidateHomePages
       );
     }
 
     case "website.about": {
-      const { readAboutPageSettingsDurable, saveAboutPageSettingsDurable } = await import(
+      const { readAboutPageSettingsStrict, saveAboutPageSettingsDurable } = await import(
         "@/lib/cms/server/about-page.server"
       );
       const { revalidateAboutPages } = await import("@/lib/cms/revalidate-site");
       return settingsDoc<AboutPageSettings>(
-        readAboutPageSettingsDurable,
+        readAboutPageSettingsStrict,
         saveAboutPageSettingsDurable,
         revalidateAboutPages
       );
     }
 
     case "website.solutions": {
-      const { readSolutionsPageSettingsDurable, saveSolutionsPageSettingsDurable } =
+      const { readSolutionsPageSettingsStrict, saveSolutionsPageSettingsDurable } =
         await import("@/lib/cms/server/solutions-page.server");
       const { revalidateSolutionsPages } = await import("@/lib/cms/revalidate-site");
       return settingsDoc<SolutionsPageSettings>(
-        readSolutionsPageSettingsDurable,
+        readSolutionsPageSettingsStrict,
         saveSolutionsPageSettingsDurable,
         revalidateSolutionsPages
       );
     }
 
     case "website.news_page": {
-      const { readNewsPageSettingsDurable, saveNewsPageSettingsDurable } = await import(
+      const { readNewsPageSettingsStrict, saveNewsPageSettingsDurable } = await import(
         "@/lib/cms/server/news-page.server"
       );
       const { revalidateNewsPages } = await import("@/lib/cms/revalidate-site");
       return settingsDoc<NewsPageSettings>(
-        readNewsPageSettingsDurable,
+        readNewsPageSettingsStrict,
         saveNewsPageSettingsDurable,
         revalidateNewsPages
       );
@@ -277,7 +284,7 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
       const faqs = await import("@/lib/cms/server/faqs.server");
       const { revalidateFaqPages } = await import("@/lib/cms/revalidate-site");
       const findCurrent = async (type: "category" | "faq", id: string) => {
-        const doc = await faqs.readFaqsDurable();
+        const doc = await faqs.readFaqsStrict();
         const list: Array<{ id: string }> = type === "category" ? doc.categories : doc.faqs;
         return list.find((x) => x.id === id) ?? null;
       };
@@ -308,7 +315,7 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
       const blog = await import("@/lib/cms/server/blog-posts.server");
       const { revalidateBlogPages } = await import("@/lib/cms/revalidate-site");
       const find = async (id: string) =>
-        (await blog.readBlogPostsDurable({ fresh: true })).find((p) => p.id === id) ?? null;
+        (await blog.readBlogPostsStrict()).find((p) => p.id === id) ?? null;
       return {
         async detectConflicts(req) {
           return deepEqual(await find(req.entityId), req.snapshotBefore ?? null) ? [] : ["post"];
@@ -331,7 +338,7 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
       const studies = await import("@/lib/cms/server/case-studies.server");
       const { revalidateCaseStudyPages } = await import("@/lib/cms/revalidate-site");
       const find = async (id: string) =>
-        (await studies.readCaseStudiesDurable()).find((s) => s.id === id) ?? null;
+        (await studies.readCaseStudiesStrict()).find((s) => s.id === id) ?? null;
       return {
         async detectConflicts(req) {
           return deepEqual(await find(req.entityId), req.snapshotBefore ?? null)
@@ -394,34 +401,34 @@ export async function currentVsProposed(req: ChangeRequest): Promise<ChangeDiffE
       return diffJson(await currentProduct(payload.product.id), payload.product);
     }
     case "website.homepage": {
-      const { readHomepageSettingsDurable } = await import("@/lib/cms/server/homepage.server");
-      return diffJson(await readHomepageSettingsDurable(), req.payloadProposed);
+      const { readHomepageSettingsStrict } = await import("@/lib/cms/server/homepage.server");
+      return diffJson(await readHomepageSettingsStrict(), req.payloadProposed);
     }
     case "website.about": {
-      const { readAboutPageSettingsDurable } = await import("@/lib/cms/server/about-page.server");
-      return diffJson(await readAboutPageSettingsDurable(), req.payloadProposed);
+      const { readAboutPageSettingsStrict } = await import("@/lib/cms/server/about-page.server");
+      return diffJson(await readAboutPageSettingsStrict(), req.payloadProposed);
     }
     case "website.solutions": {
-      const { readSolutionsPageSettingsDurable } = await import(
+      const { readSolutionsPageSettingsStrict } = await import(
         "@/lib/cms/server/solutions-page.server"
       );
-      return diffJson(await readSolutionsPageSettingsDurable(), req.payloadProposed);
+      return diffJson(await readSolutionsPageSettingsStrict(), req.payloadProposed);
     }
     case "website.news_page": {
-      const { readNewsPageSettingsDurable } = await import("@/lib/cms/server/news-page.server");
-      return diffJson(await readNewsPageSettingsDurable(), req.payloadProposed);
+      const { readNewsPageSettingsStrict } = await import("@/lib/cms/server/news-page.server");
+      return diffJson(await readNewsPageSettingsStrict(), req.payloadProposed);
     }
     case "blog.upsert": {
       const blog = await import("@/lib/cms/server/blog-posts.server");
       const current =
-        (await blog.readBlogPostsDurable({ fresh: true })).find((p) => p.id === req.entityId) ??
+        (await blog.readBlogPostsStrict()).find((p) => p.id === req.entityId) ??
         null;
       return diffJson(current, req.payloadProposed);
     }
     case "case_studies.upsert": {
       const studies = await import("@/lib/cms/server/case-studies.server");
       const current =
-        (await studies.readCaseStudiesDurable()).find((s) => s.id === req.entityId) ?? null;
+        (await studies.readCaseStudiesStrict()).find((s) => s.id === req.entityId) ?? null;
       return diffJson(current, req.payloadProposed);
     }
     case "careers.upsert": {

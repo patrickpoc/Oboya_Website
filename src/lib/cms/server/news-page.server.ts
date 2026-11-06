@@ -10,6 +10,7 @@ import {
   readCmsDocumentData,
   writeCmsDocumentData,
 } from "@/lib/cms/server/cms-document.server";
+import { readCmsDocumentChecked } from "@/lib/cms/server/strict-read";
 
 export const NEWS_PAGE_DOC_ID = "news-page";
 
@@ -30,10 +31,17 @@ export async function readNewsPageSettingsDurable(): Promise<NewsPageSettings> {
   return getNewsPageSettings();
 }
 
+/** Save baseline: throws on a failed read; the cache changes only on success. */
+export async function readNewsPageSettingsStrict(): Promise<NewsPageSettings> {
+  const remote = await readCmsDocumentChecked(NEWS_PAGE_DOC_ID, isNews);
+  if (remote) replaceNewsPageSettingsCache(remote);
+  return getNewsPageSettings();
+}
+
 export async function saveNewsPageSettingsDurable(
   settings: NewsPageSettings
 ): Promise<NewsPageSettings> {
-  await readNewsPageSettingsDurable();
+  await readNewsPageSettingsStrict();
   const saved = saveMemory(settings);
   await writeCmsDocumentData(NEWS_PAGE_DOC_ID, "website", saved);
   return saved;

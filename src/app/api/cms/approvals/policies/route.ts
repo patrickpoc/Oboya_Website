@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { ApprovalPoliciesDoc } from "@/lib/cms/approvals/types";
 import {
-  readApprovalPoliciesDurable,
+  readApprovalPoliciesStrict,
   saveApprovalPoliciesDurable,
 } from "@/lib/cms/server/approval-policies.server";
 import {
@@ -9,6 +9,7 @@ import {
   cmsGuardSuperAdmin,
 } from "@/lib/cms/server/require-cms-auth";
 import { addAuditLogDurable } from "@/lib/cms/server/audit-logs.server";
+import { CmsReadError, readFailureResponse } from "@/lib/cms/server/strict-read";
 import { noStoreHeaders } from "@/lib/security/http-cache";
 
 export const dynamic = "force-dynamic";
@@ -18,9 +19,10 @@ export async function GET() {
   try {
     const auth = await cmsGuardSession();
     if ("response" in auth) return auth.response;
-    const doc = await readApprovalPoliciesDurable({ fresh: true });
+    const doc = await readApprovalPoliciesStrict();
     return NextResponse.json(doc, { headers: noStoreHeaders });
   } catch (error) {
+    if (error instanceof CmsReadError) return readFailureResponse(error);
     console.error("Failed to load approval policies:", error);
     return NextResponse.json({ error: "Failed to load approval policies" }, { status: 500 });
   }

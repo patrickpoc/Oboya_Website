@@ -77,7 +77,7 @@ export default function FaqsAdminPage() {
   const notifyPending = usePendingApprovalNotice();
 
   const refresh = async () => {
-    const res = await fetch("/api/cms/faqs");
+    const res = await fetch("/api/cms/faqs?forEdit=1");
     if (!res.ok) throw new Error(t("loadFailedError"));
     const data = (await res.json()) as {
       categories: CmsFaqCategory[];

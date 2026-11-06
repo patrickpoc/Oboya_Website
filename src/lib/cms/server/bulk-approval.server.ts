@@ -5,7 +5,7 @@ import type { CmsUser } from "@/lib/cms/types";
 import type { BulkItemDiff, ChangeRequest } from "@/lib/cms/approvals/types";
 import { diffJson } from "@/lib/cms/approvals/diff";
 import { displayProductName } from "@/lib/cms/bulk-update/search-products";
-import { readProductById } from "@/lib/cms/server/products.server";
+import { readProductByIdStrict } from "@/lib/cms/server/products.server";
 import { submitChangeRequest } from "@/lib/cms/server/approvals.server";
 import { mergeProductUpdate } from "@/lib/cms/server/product-writes.server";
 
@@ -18,7 +18,7 @@ export async function submitBulkUpdateRequest(
   const changed: CmsProduct[] = [];
 
   for (const incoming of products) {
-    const current = (await readProductById(incoming.id, { asAdmin: true })) ?? null;
+    const current = (await readProductByIdStrict(incoming.id)) ?? null;
     const product = mergeProductUpdate(incoming, current);
     const changes = diffJson(current, product, "", [], 60);
     if (current && changes.length === 0) continue;

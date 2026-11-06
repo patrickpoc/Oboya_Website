@@ -4,15 +4,12 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { EditorGuard } from "@/components/admin/common";
+import { EditorGuard, ErrorState, FormSkeleton } from "@/components/admin/common";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { LocaleFieldTabs } from "@/components/admin/forms/LocaleFieldTabs";
 import { Button } from "@/components/ui/button";
 import { Can } from "@/components/admin/permissions/Can";
-import {
-  getHomepageSettings,
-  type HomepageSettings,
-} from "@/lib/cms/repositories/homepage-repository";
+import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import type { HomepageSectionSlug } from "@/lib/cms/homepage-sections";
 import type { CmsLocale } from "@/lib/cms/types";
 import type { HomepageSectionEditorProps } from "./shared";
@@ -29,35 +26,37 @@ type HomepageSectionShellProps = {
 export function HomepageSectionShell({ section, children }: HomepageSectionShellProps) {
   const t = useTranslations("admin.website.home");
   const tCommon = useTranslations("admin.common");
-  const [settings, setSettings] = useState<HomepageSettings>(getHomepageSettings());
+  // No seed: until the real document loads the editor (and Save) stays unavailable.
+  const [settings, setSettings] = useState<HomepageSettings | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [baseline, setBaseline] = useState("");
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [saving, setSaving] = useState(false);
   const notifyPending = usePendingApprovalNotice();
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      try {
-        const res = await fetch("/api/cms/homepage");
-        if (!res.ok) return;
-        const data = (await res.json()) as HomepageSettings;
-        if (!cancelled && data?.hero) {
-          setSettings(data);
-          setBaseline(JSON.stringify(data));
-        }
-      } catch {
-        // Keep seed defaults.
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  const load = useCallback(async () => {
+    setLoadFailed(false);
+    try {
+      const res = await fetch("/api/cms/homepage");
+      if (!res.ok) throw new Error("load failed");
+      const data = (await res.json()) as HomepageSettings;
+      if (!data?.hero) throw new Error("malformed");
+      setSettings(data);
+      setBaseline(JSON.stringify(data));
+    } catch {
+      setLoadFailed(true);
+    }
   }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount; state updates happen after the awaited request
+    void load();
+  }, [load]);
 
   const persistSettings = useCallback(
     async (next?: HomepageSettings) => {
       const payload = next ?? settings;
+      if (!payload) return false;
       setSaving(true);
       try {
         const res = await fetch("/api/cms/homepage", {
@@ -103,7 +102,7 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
           actions={
             <Button
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || !settings}
               className="rounded-full bg-oboya-green hover:bg-oboya-green/90"
             >
               {saving ? tCommon("saving") : tCommon("save")}
@@ -113,18 +112,24 @@ export function HomepageSectionShell({ section, children }: HomepageSectionShell
 
         <PendingChangeBanner entityType="homepage" entityId="homepage" />
 
-        <LocaleFieldTabs value={locale} onChange={setLocale}>
-          {(loc) =>
-            children({
-              settings,
-              setSettings,
-              locale: loc,
-              persistSettings,
-            })
-          }
-        </LocaleFieldTabs>
+        {loadFailed ? (
+          <ErrorState message={tCommon("editorLoadFailed")} onRetry={() => void load()} />
+        ) : !settings ? (
+          <FormSkeleton />
+        ) : (
+          <LocaleFieldTabs value={locale} onChange={setLocale}>
+            {(loc) =>
+              children({
+                settings,
+                setSettings: setSettings as HomepageSectionEditorProps["setSettings"],
+                locale: loc,
+                persistSettings,
+              })
+            }
+          </LocaleFieldTabs>
+        )}
         <EditorGuard
-          dirty={Boolean(baseline) && JSON.stringify(settings) !== baseline}
+          dirty={Boolean(settings) && Boolean(baseline) && JSON.stringify(settings) !== baseline}
           saving={saving}
           onSave={handleSave}
         />

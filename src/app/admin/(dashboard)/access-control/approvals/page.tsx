@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { ErrorState } from "@/components/admin/common";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -57,29 +58,31 @@ export default function ApprovalsSettingsPage() {
   const [policies, setPolicies] = useState<ApprovalPolicy[] | null>(null);
   const [roles, setRoles] = useState<PolicyOption[]>([]);
   const [users, setUsers] = useState<PolicyOption[]>([]);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState("policies");
   const [statusFilter, setStatusFilter] = useState("open");
   const [moduleFilter, setModuleFilter] = useState("");
 
-  useEffect(() => {
-    let cancelled = false;
-    fetchApprovalSettings()
-      .then((result) => {
-        if (cancelled) return;
-        setPolicies(result.policies);
-        setRoles(result.roles);
-        setUsers(result.users);
-        setDirty(false);
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) toast.error(error instanceof Error ? error.message : t("loadFailed"));
-      });
-    return () => {
-      cancelled = true;
-    };
+  const load = useCallback(async () => {
+    setLoadFailed(false);
+    try {
+      const result = await fetchApprovalSettings();
+      setPolicies(result.policies);
+      setRoles(result.roles);
+      setUsers(result.users);
+      setDirty(false);
+    } catch (error) {
+      setLoadFailed(true);
+      toast.error(error instanceof Error ? error.message : t("loadFailed"));
+    }
   }, [t]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount
+    void load();
+  }, [load]);
 
   const handleSave = async () => {
     if (!policies) return;
@@ -138,6 +141,8 @@ export default function ApprovalsSettingsPage() {
                 setDirty(true);
               }}
             />
+          ) : loadFailed ? (
+            <ErrorState message={tCommon("editorLoadFailed")} onRetry={() => void load()} />
           ) : (
             <div className="min-h-[40vh]" aria-hidden />
           )}

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
-import { readProductById } from "@/lib/cms/server/products.server";
+import { readProductById, readProductByIdStrict } from "@/lib/cms/server/products.server";
 import { cmsGuard, requireCmsAuth } from "@/lib/cms/server/require-cms-auth";
+import { CmsReadError, readFailureResponse } from "@/lib/cms/server/strict-read";
 import { publicApiError } from "@/lib/security/public-error";
 import { toPublicProduct } from "@/lib/cms/server/public-product";
 import { noStoreHeaders } from "@/lib/security/http-cache";
@@ -45,7 +46,9 @@ export async function GET(
     const { id } = await params;
     const adminAuth = await requireCmsAuth({ module: "marketplace", action: "view" });
     const asAdmin = adminAuth.ok;
-    const product = await readProductById(id, { asAdmin });
+    const product = asAdmin
+      ? await readProductByIdStrict(id)
+      : await readProductById(id);
     if (!product) return NextResponse.json({ error: "Not found" }, { status: 404 });
     if (
       !asAdmin &&
@@ -57,6 +60,7 @@ export async function GET(
       headers: noStoreHeaders,
     });
   } catch (error) {
+    if (error instanceof CmsReadError) return readFailureResponse(error);
     return publicApiError(error, "Failed to load product");
   }
 }
@@ -75,7 +79,7 @@ export async function PUT(
       return NextResponse.json({ error: "ID mismatch" }, { status: 400 });
     }
     const deferRevalidate = shouldDeferRevalidate(request);
-    const previous = (await readProductById(id, { asAdmin: true })) ?? null;
+    const previous = (await readProductByIdStrict(id)) ?? null;
     const body = mergeProductUpdate(incoming, previous);
     const label = productLabel(body);
     const pending: ChangeRequest[] = [];
@@ -134,6 +138,7 @@ export async function PUT(
     };
     return NextResponse.json(payload, { status: saved ? 200 : 202 });
   } catch (error) {
+    if (error instanceof CmsReadError) return readFailureResponse(error);
     const message = error instanceof Error ? error.message : "Failed to persist product";
     const status = /exceeds|too many images/i.test(message) ? 400 : 500;
     return NextResponse.json({ error: message }, { status });
@@ -151,7 +156,7 @@ export async function DELETE(
     const { id } = await params;
     const deferRevalidate = shouldDeferRevalidate(request);
     const hardDelete = new URL(request.url).searchParams.get("hard") === "1";
-    const existing = (await readProductById(id, { asAdmin: true })) ?? null;
+    const existing = (await readProductByIdStrict(id)) ?? null;
 
     const gate = await submitOrApply({
       user: auth.user,
@@ -176,6 +181,7 @@ export async function DELETE(
     if (!gate.applied) return pendingApprovalResponse(gate.request, { ok: false });
     return NextResponse.json({ ok: true });
   } catch (error) {
+    if (error instanceof CmsReadError) return readFailureResponse(error);
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : "Failed to delete product",

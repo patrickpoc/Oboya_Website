@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { AdminPageFooterActions } from "@/components/admin/layout/AdminPageFooterActions";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
-import { FormSkeleton } from "@/components/admin/common";
+import { ErrorState, FormSkeleton } from "@/components/admin/common";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   saveCmsProduct,
@@ -21,35 +21,49 @@ import { PendingChangeBanner } from "@/components/admin/approvals/PendingChangeB
 
 export default function ProductDetailPage() {
   const t = useTranslations("admin.products");
+  const tCommon = useTranslations("admin.common");
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
   const [product, setProduct] = useState<CmsProduct | null>(null);
   const [baseline, setBaseline] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const notifyPending = usePendingApprovalNotice();
 
-  useEffect(() => {
-    void (async () => {
-      try {
-        const response = await fetch(`/api/cms/products/${id}`, { cache: "no-store" });
-        if (!response.ok) {
-          setProduct(null);
-          return;
-        }
-        const payload = (await response.json()) as CmsProduct;
-        setProduct(payload);
-        setBaseline(JSON.stringify(payload));
-      } catch {
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadFailed(false);
+    try {
+      const response = await fetch(`/api/cms/products/${id}`, { cache: "no-store" });
+      if (response.status === 404) {
         setProduct(null);
-      } finally {
-        setLoading(false);
+        return;
       }
-    })();
+      if (!response.ok) throw new Error("load failed");
+      const payload = (await response.json()) as CmsProduct;
+      setProduct(payload);
+      setBaseline(JSON.stringify(payload));
+    } catch {
+      // Not "not found": the product may exist and simply could not be read.
+      setProduct(null);
+      setLoadFailed(true);
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount; the loader sets loading state before awaiting the API
+    void load();
+  }, [load]);
 
   if (loading) {
     return <FormSkeleton />;
+  }
+
+  if (loadFailed) {
+    return <ErrorState message={tCommon("editorLoadFailed")} onRetry={() => void load()} />;
   }
 
   if (!product) {

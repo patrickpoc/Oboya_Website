@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
 import {
   deleteBlogPostDurable,
-  readBlogPostsDurable,
+  readBlogPostsStrict,
   reorderBlogPostsDurable,
   saveBlogPostDurable,
 } from "@/lib/cms/server/blog-posts.server";
@@ -14,6 +14,7 @@ import {
   pendingApprovalResponse,
   stripApprovalMeta,
   submitOrApply,
+  withApprovalErrors,
 } from "@/lib/cms/server/approvals.server";
 import { diffJson, summarizeDiff } from "@/lib/cms/approvals/diff";
 
@@ -32,21 +33,21 @@ function toListPost(post: CmsBlogPost): CmsBlogPost {
 }
 
 async function findPost(id: string) {
-  return (await readBlogPostsDurable({ fresh: true })).find((post) => post.id === id) ?? null;
+  return (await readBlogPostsStrict()).find((post) => post.id === id) ?? null;
 }
 
 function postLabel(post: Pick<CmsBlogPost, "title" | "slug" | "id"> | null, id: string) {
   return post?.title?.en || post?.title?.["pt-BR"] || post?.slug || id;
 }
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   const auth = await cmsGuard("blog", "view");
   if ("response" in auth) return auth.response;
 
   const url = new URL(request.url);
   const id = url.searchParams.get("id");
   const fields = url.searchParams.get("fields");
-  const posts = await readBlogPostsDurable({ fresh: true });
+  const posts = await readBlogPostsStrict();
 
   if (id) {
     const post = posts.find((item) => item.id === id);
@@ -63,7 +64,7 @@ export async function GET(request: Request) {
   return NextResponse.json(posts);
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const auth = await cmsGuard("blog", "edit");
   if ("response" in auth) return auth.response;
   const body = stripApprovalMeta(
@@ -101,7 +102,7 @@ export async function POST(request: Request) {
   return NextResponse.json(gate.result, { status: 201 });
 }
 
-export async function DELETE(request: Request) {
+async function handleDELETE(request: Request) {
   const auth = await cmsGuard("blog", "delete");
   if ("response" in auth) return auth.response;
   const { searchParams } = new URL(request.url);
@@ -128,3 +129,7 @@ export async function DELETE(request: Request) {
   if (!gate.applied) return pendingApprovalResponse(gate.request, { ok: false });
   return NextResponse.json({ ok: true });
 }
+
+export const GET = withApprovalErrors("Failed to load posts", handleGET);
+export const POST = withApprovalErrors("Failed to save post", handlePOST);
+export const DELETE = withApprovalErrors("Failed to delete post", handleDELETE);

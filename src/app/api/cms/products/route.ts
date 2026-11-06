@@ -3,10 +3,17 @@ import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import {
   readProducts,
   readProductsPage,
+  readProductsStrict,
   readProductSkuIndex,
   type ProductReadFields,
 } from "@/lib/cms/server/products.server";
+import { projectFields } from "@/lib/cms/server/products/reads.server";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
+import {
+  CmsReadError,
+  isEditRead,
+  readFailureResponse,
+} from "@/lib/cms/server/strict-read";
 import {
   assertProductIsNew,
   createProductWrite,
@@ -90,12 +97,17 @@ export async function GET(request: Request) {
         return NextResponse.json(result, { headers: noStoreHeaders });
       }
 
-      const products = await readProducts({
-        includeDeleted: true,
-        asAdmin: true,
-        fields,
-        skipPurge: true,
-      });
+      // Guarded above; save baselines must not fall back to seed data.
+      const products = isEditRead(request)
+        ? (await readProductsStrict(fields)).map((product) =>
+            projectFields(product, fields)
+          )
+        : await readProducts({
+            includeDeleted: true,
+            asAdmin: true,
+            fields,
+            skipPurge: true,
+          });
       logCmsPerf("GET /api/cms/products?includeDeleted", started, {
         count: products.length,
         fields,
@@ -118,6 +130,7 @@ export async function GET(request: Request) {
     });
     return NextResponse.json(products, { headers: noStoreHeaders });
   } catch (error) {
+    if (error instanceof CmsReadError) return readFailureResponse(error);
     return publicApiError(error, "Failed to load products");
   }
 }
@@ -151,6 +164,7 @@ export async function POST(request: Request) {
     if (error instanceof ProductExistsError) {
       return NextResponse.json({ error: error.message }, { status: 409 });
     }
+    if (error instanceof CmsReadError) return readFailureResponse(error);
     const message = error instanceof Error ? error.message : "Failed to persist product";
     const status = /exceeds|too many images/i.test(message) ? 400 : 500;
     return NextResponse.json({ error: message }, { status });

@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
-import { EditorGuard, FormSkeleton } from "@/components/admin/common";
+import { EditorGuard, ErrorState, FormSkeleton } from "@/components/admin/common";
 import { LocaleFieldTabs } from "@/components/admin/forms/LocaleFieldTabs";
 import { ImpactSectionEditor } from "@/components/admin/about/ImpactSectionEditor";
 import { ValuesSectionEditor } from "@/components/admin/about/ValuesSectionEditor";
@@ -24,22 +24,29 @@ export default function AboutPageAdmin() {
   const [settings, setSettings] = useState<AboutPageSettings | null>(null);
   const [locale, setLocale] = useState<CmsLocale>("en");
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const notifyPending = usePendingApprovalNotice();
 
-  useEffect(() => {
-    void (async () => {
-      try {
-        const res = await fetch("/api/cms/about");
-        if (!res.ok) throw new Error(tCommon("loadFailed"));
-        setSettings(await res.json());
-      } catch {
-        toast.error(t("loadFailed"));
-      } finally {
-        setLoading(false);
-      }
-    })();
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadFailed(false);
+    try {
+      const res = await fetch("/api/cms/about?forEdit=1", { cache: "no-store" });
+      if (!res.ok) throw new Error(tCommon("loadFailed"));
+      setSettings(await res.json());
+    } catch {
+      setLoadFailed(true);
+      toast.error(t("loadFailed"));
+    } finally {
+      setLoading(false);
+    }
   }, [t, tCommon]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount; the loader sets loading state before awaiting the API
+    void load();
+  }, [load]);
 
   const handleSave = useCallback(async () => {
     if (!settings) return;
@@ -69,8 +76,9 @@ export default function AboutPageAdmin() {
     }
   }, [settings, notifyPending, t, tCommon]);
 
-  if (loading || !settings) {
-    return <FormSkeleton />;
+  if (loading) return <FormSkeleton />;
+  if (loadFailed || !settings) {
+    return <ErrorState message={tCommon("editorLoadFailed")} onRetry={() => void load()} />;
   }
 
   return (

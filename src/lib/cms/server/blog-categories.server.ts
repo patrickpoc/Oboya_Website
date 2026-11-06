@@ -11,6 +11,7 @@ import {
   readCmsDocumentData,
   writeCmsDocumentData,
 } from "@/lib/cms/server/cms-document.server";
+import { readCmsDocumentChecked } from "@/lib/cms/server/strict-read";
 
 export const BLOG_CATEGORIES_DOC_ID = "blog-categories";
 
@@ -26,10 +27,17 @@ export async function readBlogCategoriesDurable(): Promise<BlogCategory[]> {
   return getBlogCategories();
 }
 
+/** Save baseline: throws on a failed read; the cache changes only on success. */
+export async function readBlogCategoriesStrict(): Promise<BlogCategory[]> {
+  const remote = await readCmsDocumentChecked(BLOG_CATEGORIES_DOC_ID, isCategories);
+  if (remote) replaceBlogCategoriesCache(remote);
+  return getBlogCategories();
+}
+
 export async function saveBlogCategoryDurable(
   category: BlogCategory
 ): Promise<BlogCategory> {
-  await readBlogCategoriesDurable();
+  await readBlogCategoriesStrict();
   const saved = saveCategoryMemory(category);
   await writeCmsDocumentData(
     BLOG_CATEGORIES_DOC_ID,
@@ -40,7 +48,7 @@ export async function saveBlogCategoryDurable(
 }
 
 export async function deleteBlogCategoryDurable(id: string): Promise<boolean> {
-  await readBlogCategoriesDurable();
+  await readBlogCategoriesStrict();
   const ok = deleteCategoryMemory(id);
   if (ok) {
     await writeCmsDocumentData(

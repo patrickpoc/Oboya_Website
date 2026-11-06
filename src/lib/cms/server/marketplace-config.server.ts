@@ -8,7 +8,11 @@ import {
 } from "@/lib/cms/server/cms-document.server";
 import { invalidateProducts } from "@/lib/cms/server/cache-invalidation.server";
 import { writeLocalJsonFile } from "@/lib/cms/server/local-fs.server";
-import { readProducts, saveProduct } from "@/lib/cms/server/products.server";
+import {
+  readProductPricesStrict,
+  updateProductPrices,
+} from "@/lib/cms/server/products.server";
+import { CmsReadError, readCmsDocumentStrict } from "@/lib/cms/server/strict-read";
 import { updateShopCatalog } from "@/lib/shop/catalog";
 import {
   normalizeBrands,
@@ -149,6 +153,21 @@ export async function readMarketplaceFilters(): Promise<FiltersPayload> {
   return payload;
 }
 
+/**
+ * Baseline for write paths: authenticated client, never cached, and a failed
+ * read throws instead of falling back to seed data. Seed is used only when
+ * the document row is confirmed absent.
+ */
+export async function readMarketplaceFiltersStrict(): Promise<FiltersPayload> {
+  const raw = await readCmsDocumentStrict(MARKETPLACE_FILTERS_DOC_ID);
+  if (raw != null && !isFiltersPayload(raw)) {
+    throw new CmsReadError("Marketplace filters document is malformed");
+  }
+  const payload = normalizeFiltersPayload(raw ?? (await readFiltersSeed()));
+  updateShopCatalog(payload);
+  return payload;
+}
+
 export async function saveMarketplaceFilters(
   payload: FiltersPayload
 ): Promise<FiltersPayload> {
@@ -227,6 +246,41 @@ export async function readMarketplaceCurrencies(
   return { countries: visible(seed.countries), currencies };
 }
 
+/** Save baseline for countries/currencies; throws instead of using seed on a failed read. */
+export async function readMarketplaceCurrenciesStrict(
+  options: { includeInactive?: boolean } = {}
+): Promise<{ countries: StoreCountry[]; currencies: string[] }> {
+  const remote = await readCmsDocumentStrict(MARKETPLACE_CURRENCIES_DOC_ID);
+  if (remote != null) {
+    if (!isCurrenciesPayload(remote)) {
+      throw new CmsReadError("Marketplace currencies document is malformed");
+    }
+    updateShopCatalog({ countries: filterActiveCountries(remote.countries) });
+    return {
+      countries: options.includeInactive
+        ? remote.countries
+        : filterActiveCountries(remote.countries),
+      currencies: remote.currencies.length
+        ? remote.currencies
+        : deriveCurrencies(remote.countries, []),
+    };
+  }
+  // Confirmed absent: first save starts from the seed, as the public read does.
+  const seed = await readCurrenciesSeed().catch((error) => {
+    throw new CmsReadError(error);
+  });
+  updateShopCatalog({
+    countries: filterActiveCountries(seed.countries),
+    products: seed.products,
+  });
+  return {
+    countries: options.includeInactive
+      ? seed.countries
+      : filterActiveCountries(seed.countries),
+    currencies: deriveCurrencies(seed.countries, seed.products),
+  };
+}
+
 export async function saveMarketplaceCurrencies(payload: {
   countries: StoreCountry[];
   currencies: string[];
@@ -238,7 +292,14 @@ export async function saveMarketplaceCurrencies(payload: {
   ): T => {
     const prices = { ...(product.prices ?? {}) } as Record<string, number>;
     Object.keys(prices).forEach((key) => {
-      if (!currencySet.has(key)) delete prices[key];
+      if (currencySet.has(key)) return;
+      // Only zero prices may go: dropping a real price would be silent data loss.
+      // The route guard rejects real removals; a stale non-zero key is kept and logged.
+      if (prices[key]) {
+        console.warn(`Keeping stale non-zero price for currency ${key}.`);
+        return;
+      }
+      delete prices[key];
     });
     payload.currencies.forEach((code) => {
       if (!(code in prices)) prices[code] = 0;
@@ -248,38 +309,46 @@ export async function saveMarketplaceCurrencies(payload: {
 
   if (isSupabaseConfigured()) {
     const started = Date.now();
-    await writeCmsDocumentData(MARKETPLACE_CURRENCIES_DOC_ID, "marketplace", {
-      countries: payload.countries,
-      currencies: payload.currencies,
-    });
+    // Read every product first: a failed read must change nothing.
+    const existing = await readProductPricesStrict();
+    const changed = existing
+      .map((product) => ({
+        id: product.id,
+        sku: product.sku,
+        before: product.prices ?? {},
+        prices: normalizePrices(product).prices ?? {},
+      }))
+      .filter((item) => JSON.stringify(item.before) !== JSON.stringify(item.prices));
 
-    const products = await readProducts({
-      includeDeleted: true,
-      fields: "list",
-      skipPurge: true,
-      asAdmin: true,
-    });
-    const changed = products.filter((product) => {
-      const next = normalizePrices(product);
-      return (
-        JSON.stringify(product.prices ?? {}) !==
-        JSON.stringify(next.prices ?? {})
-      );
-    });
-    const normalizedChanged = changed.map((product) => normalizePrices(product));
-    await Promise.all(normalizedChanged.map((product) => saveProduct(product)));
-    if (normalizedChanged.length > 0) {
-      invalidateProducts(normalizedChanged.flatMap((product) => [product.id, product.sku]));
+    // Prices first, document last: a failure here leaves the document unchanged.
+    // Prices only: other columns (description, ...) are never rewritten.
+    const { updated, failed } = await updateProductPrices(
+      changed.map(({ id, prices }) => ({ id, prices }))
+    );
+    const touched = new Set(updated);
+    invalidateProducts(
+      changed.filter((item) => touched.has(item.id)).flatMap((item) => [item.id, item.sku])
+    );
+    if (failed.length === 0) {
+      await writeCmsDocumentData(MARKETPLACE_CURRENCIES_DOC_ID, "marketplace", {
+        countries: payload.countries,
+        currencies: payload.currencies,
+      });
+      updateShopCatalog({ countries: filterActiveCountries(payload.countries) });
     }
 
-    updateShopCatalog({ countries: filterActiveCountries(payload.countries) });
-    const productsOut = products.map((product) => normalizePrices(product));
     const { logCmsPerf } = await import("@/lib/cms/server/perf-log.server");
     logCmsPerf("saveMarketplaceCurrencies", started, {
-      upserted: normalizedChanged.length,
-      scanned: products.length,
+      upserted: updated.length,
+      failed: failed.length,
+      scanned: existing.length,
     });
-    return { countries: payload.countries, products: productsOut };
+    if (failed.length > 0) {
+      throw new Error(
+        `Currencies were not saved: prices could not be updated for ${failed.length} product(s). Save again to retry.`
+      );
+    }
+    return { countries: payload.countries, productsTouched: updated.length };
   }
 
   const products = await readJsonFile<ShopProduct[]>(PRODUCTS_FILE);
@@ -296,7 +365,7 @@ export async function saveMarketplaceCurrencies(payload: {
     countries: filterActiveCountries(payload.countries),
     products: normalizedProducts,
   });
-  return { countries: payload.countries, products: normalizedProducts };
+  return { countries: payload.countries, productsTouched: normalizedProducts.length };
 }
 
 /** Hydrate in-memory shop catalog from durable marketplace docs (or seed). */
@@ -336,12 +405,36 @@ export async function readMarketplaceShopConfig(): Promise<ShopConfig> {
   });
 }
 
+/**
+ * Edit baseline for shop config: strict document, and the full country list
+ * (inactive included) so a default market for an inactive country survives.
+ * If the list is unreadable, countries are left out so nothing is cleared.
+ */
+async function strictCountriesForShopConfig(): Promise<StoreCountry[] | undefined> {
+  try {
+    return (await readMarketplaceCurrenciesStrict({ includeInactive: true })).countries;
+  } catch (error) {
+    if (error instanceof CmsReadError) return undefined;
+    throw error;
+  }
+}
+
+export async function readMarketplaceShopConfigStrict(): Promise<ShopConfig> {
+  const remote = await readCmsDocumentStrict(MARKETPLACE_SHOP_CONFIG_DOC_ID);
+  if (remote != null && (typeof remote !== "object" || Array.isArray(remote))) {
+    throw new CmsReadError("Marketplace shop config document is malformed");
+  }
+  const countries = await strictCountriesForShopConfig();
+  const source =
+    remote ?? (await readJsonFileOptional<unknown>(SHOP_CONFIG_FILE)) ?? DEFAULT_SHOP_CONFIG;
+  return normalizeShopConfig(source, { countries });
+}
+
 export async function saveMarketplaceShopConfig(
   payload: unknown
 ): Promise<ShopConfig> {
-  const currencies = await readMarketplaceCurrencies().catch(() => null);
   const normalized = normalizeShopConfig(payload, {
-    countries: currencies?.countries,
+    countries: await strictCountriesForShopConfig(),
   });
 
   if (isSupabaseConfigured()) {

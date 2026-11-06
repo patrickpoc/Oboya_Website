@@ -3,6 +3,7 @@ import { FOLDER_PRODUCT_DESCRIPTIONS } from "@/lib/cms/media-folder-ids";
 import { getMediaAssets } from "@/lib/cms/repositories/media-repository";
 import { removeMediaAsset } from "@/lib/cms/server/media-upload.server";
 import { listMediaLibrary } from "@/lib/cms/server/media-library.server";
+import { readProductDescriptionsStrict } from "@/lib/cms/server/products.server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 const IMG_SRC_RE = /<img\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi;
@@ -32,7 +33,8 @@ export function extractDescriptionImageUrls(description: LocalizedString): strin
 function normalizeUrl(url: string) {
   try {
     const parsed = new URL(url, "http://local");
-    return parsed.pathname + parsed.search;
+    // Origin and query string are ignored: the same file can be referenced both ways.
+    return parsed.pathname;
   } catch {
     return url;
   }
@@ -46,17 +48,38 @@ async function loadDescriptionAssets() {
   return getMediaAssets().filter((asset) => asset.folder === FOLDER_PRODUCT_DESCRIPTIONS);
 }
 
+/**
+ * Removes description images that `previous` used and `next` no longer does,
+ * unless another product (trash included) still references them. If that
+ * reference read fails, nothing is deleted.
+ */
 export async function reconcileDescriptionImages(params: {
+  productId: string;
   previous: LocalizedString;
   next: LocalizedString;
 }) {
   const previousUrls = new Set(extractDescriptionImageUrls(params.previous));
-  const nextUrls = new Set(extractDescriptionImageUrls(params.next));
-  const removedUrls = Array.from(previousUrls).filter((url) => !nextUrls.has(url));
+  const nextUrls = new Set(extractDescriptionImageUrls(params.next).map(normalizeUrl));
+  const removedUrls = Array.from(previousUrls).filter((url) => !nextUrls.has(normalizeUrl(url)));
   if (removedUrls.length === 0) return;
 
+  const others = await readProductDescriptionsStrict().catch((error) => {
+    console.error("Description image cleanup skipped (reference read failed):", error);
+    return null;
+  });
+  if (!others) return;
+  const stillUsed = new Set<string>();
+  for (const other of others) {
+    if (other.id === params.productId) continue;
+    for (const url of extractDescriptionImageUrls(other.description)) {
+      stillUsed.add(normalizeUrl(url));
+    }
+  }
+
   const descriptionAssets = await loadDescriptionAssets();
-  const removedNormalized = new Set(removedUrls.map(normalizeUrl));
+  const removedNormalized = new Set(
+    removedUrls.map(normalizeUrl).filter((url) => !stillUsed.has(url))
+  );
 
   for (const asset of descriptionAssets) {
     if (!removedNormalized.has(normalizeUrl(asset.url))) continue;

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { CmsCaseStudy } from "@/lib/cms/repositories/case-studies-repository";
 import {
   deleteCaseStudyDurable,
-  readCaseStudiesDurable,
+  readCaseStudiesStrict,
   saveCaseStudyDurable,
 } from "@/lib/cms/server/case-studies.server";
 import { revalidateCaseStudyPages } from "@/lib/cms/revalidate-site";
@@ -12,6 +12,7 @@ import {
   pendingApprovalResponse,
   stripApprovalMeta,
   submitOrApply,
+  withApprovalErrors,
 } from "@/lib/cms/server/approvals.server";
 import { diffJson, summarizeDiff } from "@/lib/cms/approvals/diff";
 
@@ -37,21 +38,21 @@ function toListStudy(study: CmsCaseStudy): CmsCaseStudy {
 }
 
 async function findStudy(id: string) {
-  return (await readCaseStudiesDurable()).find((study) => study.id === id) ?? null;
+  return (await readCaseStudiesStrict()).find((study) => study.id === id) ?? null;
 }
 
 function studyLabel(study: Pick<CmsCaseStudy, "title" | "slug"> | null, id: string) {
   return study?.title?.en || study?.title?.["pt-BR"] || study?.slug || id;
 }
 
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   const auth = await cmsGuard("case_studies", "view");
   if ("response" in auth) return auth.response;
 
   const url = new URL(request.url);
   const id = url.searchParams.get("id");
   const fields = url.searchParams.get("fields");
-  const studies = await readCaseStudiesDurable();
+  const studies = await readCaseStudiesStrict();
 
   if (id) {
     const study = studies.find((item) => item.id === id);
@@ -68,7 +69,7 @@ export async function GET(request: Request) {
   return NextResponse.json(studies);
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const auth = await cmsGuard("case_studies", "edit");
   if ("response" in auth) return auth.response;
   const body = stripApprovalMeta((await request.json()) as CmsCaseStudy);
@@ -92,7 +93,7 @@ export async function POST(request: Request) {
   return NextResponse.json(gate.result, { status: 201 });
 }
 
-export async function DELETE(request: Request) {
+async function handleDELETE(request: Request) {
   const auth = await cmsGuard("case_studies", "delete");
   if ("response" in auth) return auth.response;
   const { searchParams } = new URL(request.url);
@@ -119,3 +120,7 @@ export async function DELETE(request: Request) {
   if (!gate.applied) return pendingApprovalResponse(gate.request, { ok: false });
   return NextResponse.json({ ok: true });
 }
+
+export const GET = withApprovalErrors("Failed to load case studies", handleGET);
+export const POST = withApprovalErrors("Failed to save case study", handlePOST);
+export const DELETE = withApprovalErrors("Failed to delete case study", handleDELETE);

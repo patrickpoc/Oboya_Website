@@ -9,10 +9,14 @@ const raw = {
 const cmsGuard = vi.fn();
 
 vi.mock("@/lib/cms/server/require-cms-auth", () => ({ cmsGuard }));
-vi.mock("@/lib/map-locations.server", () => ({ readMapLocations: async () => raw }));
+const readStrict = vi.fn();
+vi.mock("@/lib/map-locations.server", () => ({ readMapLocationsStrict: readStrict }));
 
 describe("GET /api/cms/map-locations", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    readStrict.mockResolvedValue(raw);
+  });
 
   it.each([401, 403])("returns %i when the guard fails", async (status) => {
     cmsGuard.mockResolvedValue({ response: Response.json({ error: "no" }, { status }) });
@@ -27,5 +31,14 @@ describe("GET /api/cms/map-locations", () => {
     const res = await GET();
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual(raw);
+  });
+
+  it("returns 503 instead of seed data when the strict read fails", async () => {
+    cmsGuard.mockResolvedValue({ user: { id: "u1" } });
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { CmsReadError } = await import("@/lib/cms/server/strict-read");
+    readStrict.mockRejectedValue(new CmsReadError("db"));
+    const { GET } = await import("../route");
+    expect((await GET()).status).toBe(503);
   });
 });

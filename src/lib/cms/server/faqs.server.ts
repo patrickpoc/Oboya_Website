@@ -17,6 +17,7 @@ import {
   readCmsDocumentData,
   writeCmsDocumentData,
 } from "@/lib/cms/server/cms-document.server";
+import { readCmsDocumentChecked } from "@/lib/cms/server/strict-read";
 export const FAQS_DOC_ID = "faqs";
 
 type FaqsDoc = { categories: CmsFaqCategory[]; faqs: CmsFaqItem[] };
@@ -65,31 +66,38 @@ export async function readFaqsDurable(): Promise<FaqsDoc> {
   return { categories: getCategories(), faqs: getFaqs() };
 }
 
+/** Save baseline: throws on a failed read; the cache changes only on success. */
+export async function readFaqsStrict(): Promise<FaqsDoc> {
+  const remote = await readCmsDocumentChecked(FAQS_DOC_ID, isFaqsDoc);
+  if (remote) replaceFaqsCache(mergeMissingSeeds(remote).doc);
+  return { categories: getCategories(), faqs: getFaqs() };
+}
+
 export async function saveFaqCategoryDurable(
   category: CmsFaqCategory
 ): Promise<CmsFaqCategory> {
-  await readFaqsDurable();
+  await readFaqsStrict();
   const saved = saveCategoryMemory(category);
   await persistCurrent();
   return saved;
 }
 
 export async function saveFaqItemDurable(faq: CmsFaqItem): Promise<CmsFaqItem> {
-  await readFaqsDurable();
+  await readFaqsStrict();
   const saved = saveFaqMemory(faq);
   await persistCurrent();
   return saved;
 }
 
 export async function deleteFaqCategoryDurable(id: string): Promise<boolean> {
-  await readFaqsDurable();
+  await readFaqsStrict();
   const ok = deleteCategoryMemory(id);
   if (ok) await persistCurrent();
   return ok;
 }
 
 export async function deleteFaqItemDurable(id: string): Promise<boolean> {
-  await readFaqsDurable();
+  await readFaqsStrict();
   const ok = deleteFaqMemory(id);
   if (ok) await persistCurrent();
   return ok;

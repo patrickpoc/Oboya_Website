@@ -8,6 +8,16 @@ import { EntityAvatar, FilterBar, FilterSelect, StatusPill, useUrlFilters } from
 import type { AuditLogEntry } from "@/lib/cms/types";
 import { toast } from "sonner";
 
+/** Cell preview only: the full details stay in the database and the API. */
+const DETAILS_PREVIEW_CHARS = 200;
+
+function detailsPreview(details: string | null | undefined) {
+  if (!details) return "—";
+  return details.length > DETAILS_PREVIEW_CHARS
+    ? `${details.slice(0, DETAILS_PREVIEW_CHARS)}…`
+    : details;
+}
+
 export default function AuditLogsPage() {
   const t = useTranslations("admin.audit");
   const tCommon = useTranslations("admin.common");
@@ -77,7 +87,9 @@ export default function AuditLogsPage() {
       {
         key: "details",
         header: tCommon("details"),
-        cell: (r: AuditLogEntry) => r.details ?? "—",
+        cell: (r: AuditLogEntry) => (
+          <span title={r.details ?? undefined}>{detailsPreview(r.details)}</span>
+        ),
       },
       {
         key: "createdAt",

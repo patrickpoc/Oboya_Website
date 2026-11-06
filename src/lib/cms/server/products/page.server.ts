@@ -6,6 +6,7 @@ import {
   type CmsProduct,
 } from "@/lib/cms/repositories/product-repository";
 import { rethrowNextSignals } from "@/lib/cms/server/rethrow-next-signals";
+import { CmsReadError } from "@/lib/cms/server/strict-read";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 import { logCmsPerf } from "@/lib/cms/server/perf-log.server";
@@ -354,6 +355,41 @@ export async function readProductById(
 }
 
 /**
+ * Save baseline for one product: same id-then-SKU lookup and purge-due rule as
+ * `readProductById`, with the authenticated client, but a failed read throws
+ * `CmsReadError` instead of falling back to seed data.
+ */
+export async function readProductByIdStrict(id: string): Promise<CmsProduct | undefined> {
+  if (!id) return undefined;
+
+  if (!isSupabaseConfigured()) {
+    return getCmsProducts({ includeDeleted: true }).find(
+      (product) => product.id === id || product.sku === id
+    );
+  }
+
+  try {
+    const supabase = await createClient();
+    for (const column of ["id", "sku"] as const) {
+      const { data, error } = await supabase
+        .from("cms_products")
+        .select("*")
+        .eq(column, id)
+        .maybeSingle();
+      if (error) throw new CmsReadError(`Failed to read product: ${error.message}`);
+      if (!data) continue;
+      const product = rowToProduct(data as ProductRow);
+      return isProductPurgeDue(product) ? undefined : product;
+    }
+    return undefined;
+  } catch (error) {
+    rethrowNextSignals(error);
+    if (error instanceof CmsReadError) throw error;
+    throw new CmsReadError(error);
+  }
+}
+
+/**
  * Strict lookup (includes trash) used before creating a product: saves are upserts
  * keyed by id, so an existing row with the same id or SKU would be overwritten.
  * Throws on read errors instead of falling back to seed data.
@@ -372,16 +408,22 @@ export async function findExistingProduct(
     return match ? { id: match.id, sku: match.sku, name: match.name } : null;
   }
 
-  const supabase = await createClient();
-  for (const column of ["id", "sku"] as const) {
-    const { data, error } = await supabase
-      .from("cms_products")
-      .select("id, sku, name")
-      .in(column, keys)
-      .limit(1);
-    if (error) throw new Error(`Failed to check existing product: ${error.message}`);
-    const row = data?.[0] as { id: string; sku: string; name: CmsProduct["name"] } | undefined;
-    if (row) return { id: row.id, sku: row.sku, name: row.name };
+  try {
+    const supabase = await createClient();
+    for (const column of ["id", "sku"] as const) {
+      const { data, error } = await supabase
+        .from("cms_products")
+        .select("id, sku, name")
+        .in(column, keys)
+        .limit(1);
+      if (error) throw new CmsReadError(`Failed to check existing product: ${error.message}`);
+      const row = data?.[0] as { id: string; sku: string; name: CmsProduct["name"] } | undefined;
+      if (row) return { id: row.id, sku: row.sku, name: row.name };
+    }
+    return null;
+  } catch (error) {
+    rethrowNextSignals(error);
+    if (error instanceof CmsReadError) throw error;
+    throw new CmsReadError(error);
   }
-  return null;
 }

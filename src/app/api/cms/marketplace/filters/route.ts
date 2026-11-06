@@ -3,9 +3,10 @@ import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 import { publicApiError } from "@/lib/security/public-error";
 import {
   readMarketplaceFilters,
+  readMarketplaceFiltersStrict,
   saveMarketplaceFilters,
 } from "@/lib/cms/server/marketplace-config.server";
-import { readProducts } from "@/lib/cms/server/products.server";
+import { readProductsStrict } from "@/lib/cms/server/products.server";
 import { getCountryCode } from "@/constants/country-flags";
 import {
   countGroupUsage,
@@ -20,6 +21,11 @@ import type {
   ShopFilterOptions,
 } from "@/lib/shop/types";
 import { noStoreHeaders } from "@/lib/security/http-cache";
+import {
+  CmsReadError,
+  isEditRead,
+  readFailureResponse,
+} from "@/lib/cms/server/strict-read";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -44,11 +50,20 @@ function assertNoDuplicateNames(values: string[], entityLabel: string) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    if (isEditRead(request)) {
+      // Guard first: the strict read uses the session client.
+      const auth = await cmsGuard("marketplace", "view");
+      if ("response" in auth) return auth.response;
+      return NextResponse.json(await readMarketplaceFiltersStrict(), {
+        headers: noStoreHeaders,
+      });
+    }
     const data = await readMarketplaceFilters();
     return NextResponse.json(data, { headers: noStoreHeaders });
   } catch (error) {
+    if (error instanceof CmsReadError) return readFailureResponse(error);
     return publicApiError(error, "Failed to load filters");
   }
 }
@@ -90,10 +105,9 @@ export async function PUT(request: Request) {
       filterOptions: normalizeFilterOptions(filterOptions, filterGroups),
     };
 
-    const current = await readMarketplaceFilters();
-    const products = (await readProducts({ includeDeleted: false })).filter(
-      (product) => !product.deletedAt
-    );
+    const current = await readMarketplaceFiltersStrict();
+    // Drafts, archived and trashed products all count as usage.
+    const products = await readProductsStrict();
 
     assertNoDuplicateNames(
       payload.categories.map((category) => category.name),
@@ -198,9 +212,7 @@ export async function PUT(request: Request) {
     if (error instanceof ValidationError) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to save filters" },
-      { status: 500 }
-    );
+    if (error instanceof CmsReadError) return readFailureResponse(error);
+    return publicApiError(error, "Failed to save filters");
   }
 }

@@ -11,6 +11,7 @@ import {
 import { syncMediaLibraryFromSupabase, listMediaLibrary, persistMediaAssetRow } from "@/lib/cms/server/media-library.server";
 import {
   readMediaFoldersDurable,
+  readMediaFoldersStrict,
   saveMediaFoldersDurable,
 } from "@/lib/cms/server/media-folders.server";
 import {
@@ -21,6 +22,7 @@ import {
   renameMediaFolder,
 } from "@/lib/cms/repositories/media-repository";
 import { cmsGuard, cmsGuardAny } from "@/lib/cms/server/require-cms-auth";
+import { CmsReadError, readFailureResponse } from "@/lib/cms/server/strict-read";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 export async function GET(request: Request) {
@@ -183,7 +185,7 @@ export async function POST(request: Request) {
             { status: 400 }
           );
         }
-        await readMediaFoldersDurable();
+        await readMediaFoldersStrict();
         const folder = createMediaFolder(
           body.name.trim(),
           body.parentId ?? "folder-root"
@@ -199,7 +201,7 @@ export async function POST(request: Request) {
             { status: 400 }
           );
         }
-        await readMediaFoldersDurable();
+        await readMediaFoldersStrict();
         const folder = renameMediaFolder(body.id, body.name.trim());
         if (!folder) {
           return NextResponse.json({ error: "Folder not found" }, { status: 404 });
@@ -215,7 +217,7 @@ export async function POST(request: Request) {
             { status: 400 }
           );
         }
-        await readMediaFoldersDurable();
+        await readMediaFoldersStrict();
         const folder = moveMediaFolder(body.id, body.targetParentId);
         if (!folder) {
           return NextResponse.json(
@@ -329,6 +331,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true, asset });
   } catch (error) {
+    if (error instanceof CmsReadError) return readFailureResponse(error);
     const message =
       error instanceof Error ? error.message : "Failed to upload media";
     console.error("Media upload failed:", message);

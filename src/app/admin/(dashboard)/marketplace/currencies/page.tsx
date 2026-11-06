@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { EditorGuard } from "@/components/admin/common";
+import { EditorGuard, ErrorState, FormSkeleton } from "@/components/admin/common";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Can } from "@/components/admin/permissions/Can";
@@ -38,6 +38,8 @@ export default function Page() {
   const [productCounts, setProductCounts] = useState<Record<string, number>>({});
   const [newCurrency, setNewCurrency] = useState("");
   const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -45,26 +47,34 @@ export default function Page() {
   const [removing, setRemoving] = useState<StoreCountry | null>(null);
   const { data: mapData } = useMapLocations();
 
-  useEffect(() => {
-    void (async () => {
-      try {
-        const response = await fetch("/api/cms/marketplace/currencies?includeInactive=1", {
-          cache: "no-store",
-        });
-        if (!response.ok) throw new Error(t("loadFailed"));
-        const payload = (await response.json()) as {
-          countries: StoreCountry[];
-          currencies: string[];
-          productCounts?: Record<string, number>;
-        };
-        setCountries(payload.countries);
-        setCurrencies(payload.currencies);
-        setProductCounts(payload.productCounts ?? {});
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : t("loadFailed"));
-      }
-    })();
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadFailed(false);
+    try {
+      const response = await fetch("/api/cms/marketplace/currencies?forEdit=1", {
+        cache: "no-store",
+      });
+      if (!response.ok) throw new Error(t("loadFailed"));
+      const payload = (await response.json()) as {
+        countries: StoreCountry[];
+        currencies: string[];
+        productCounts?: Record<string, number>;
+      };
+      setCountries(payload.countries);
+      setCurrencies(payload.currencies);
+      setProductCounts(payload.productCounts ?? {});
+    } catch {
+      // Empty state would be saved over the real data: block Save until a load succeeds.
+      setLoadFailed(true);
+    } finally {
+      setLoading(false);
+    }
   }, [t]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount; the loader sets loading state before awaiting the API
+    void load();
+  }, [load]);
 
   const currencySet = useMemo(() => new Set(currencies), [currencies]);
 
@@ -156,12 +166,17 @@ export default function Page() {
           <Button
             onClick={() => void save()}
             className="rounded-full bg-oboya-green text-white hover:bg-oboya-green/90"
-            disabled={saving}
+            disabled={loading || loadFailed || saving}
           >
             {saving ? tCommon("saving") : t("saveCurrencies")}
           </Button>
         }
       />
+      {loading ? (
+        <FormSkeleton />
+      ) : loadFailed ? (
+        <ErrorState message={tCommon("editorLoadFailed")} onRetry={() => void load()} />
+      ) : (
       <Card>
         <CardContent className="space-y-6 py-6">
           <div className="rounded-lg border border-border/60 p-4">
@@ -358,6 +373,7 @@ export default function Page() {
           </div>
         </CardContent>
       </Card>
+      )}
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent>

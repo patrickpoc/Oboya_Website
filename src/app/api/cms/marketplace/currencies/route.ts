@@ -2,9 +2,18 @@ import { NextResponse } from "next/server";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 import {
   readMarketplaceCurrencies,
+  readMarketplaceCurrenciesStrict,
   saveMarketplaceCurrencies,
 } from "@/lib/cms/server/marketplace-config.server";
-import { readProducts } from "@/lib/cms/server/products.server";
+import {
+  readProductPricesStrict,
+  readProductsStrict,
+} from "@/lib/cms/server/products.server";
+import {
+  CmsReadError,
+  isEditRead,
+  readFailureResponse,
+} from "@/lib/cms/server/strict-read";
 import {
   CountriesValidationError,
   countProductsByCountry,
@@ -20,7 +29,7 @@ import {
   submitChangeRequest,
 } from "@/lib/cms/server/approvals.server";
 import { diffJson, summarizeDiff } from "@/lib/cms/approvals/diff";
-import { readMapLocations } from "@/lib/map-locations.server";
+import { readMapLocationsStrict } from "@/lib/map-locations.server";
 import { publicApiError } from "@/lib/security/public-error";
 import { noStoreHeaders } from "@/lib/security/http-cache";
 import { logCmsPerf } from "@/lib/cms/server/perf-log.server";
@@ -30,27 +39,28 @@ export const revalidate = 0;
 
 export async function GET(request: Request) {
   try {
-    // Inactive countries and product counts are admin-only.
-    if (new URL(request.url).searchParams.get("includeInactive") === "1") {
+    // Inactive countries and product counts are admin-only, and strict:
+    // the editor saves what it loads, so it must never see seed fallbacks.
+    const params = new URL(request.url).searchParams;
+    if (isEditRead(request) || params.get("includeInactive") === "1") {
       const auth = await cmsGuard("marketplace", "view");
       if ("response" in auth) return auth.response;
       const [data, products] = await Promise.all([
-        readMarketplaceCurrencies({ includeInactive: true }),
-        readProducts({
-          includeDeleted: false,
-          fields: "list",
-          skipPurge: true,
-          asAdmin: true,
-        }),
+        readMarketplaceCurrenciesStrict({ includeInactive: true }),
+        readProductsStrict(),
       ]);
       return NextResponse.json(
-        { ...data, productCounts: countProductsByCountry(products) },
+        {
+          ...data,
+          productCounts: countProductsByCountry(products.filter((product) => !product.deletedAt)),
+        },
         { headers: noStoreHeaders }
       );
     }
     const data = await readMarketplaceCurrencies();
     return NextResponse.json(data, { headers: noStoreHeaders });
   } catch (error) {
+    if (error instanceof CmsReadError) return readFailureResponse(error);
     return publicApiError(error, "Failed to load currencies");
   }
 }
@@ -67,9 +77,9 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
     }
     const started = Date.now();
-    const current = await readMarketplaceCurrencies({ includeInactive: true });
+    const current = await readMarketplaceCurrenciesStrict({ includeInactive: true });
     // If the map can't be read, keep each country's previous primary office.
-    const offices = await readMapLocations()
+    const offices = await readMapLocationsStrict()
       .then(
         (mapData) =>
           new Map(
@@ -90,14 +100,10 @@ export async function PUT(request: Request) {
 
     const removedCurrencies = current.currencies.filter((code) => !uniqueCurrencies.includes(code));
     if (removedCurrencies.length > 0) {
-      const products = await readProducts({
-        includeDeleted: false,
-        fields: "list",
-        skipPurge: true,
-        asAdmin: true,
-      });
+      // Trash counts: restoring a product must not bring back a removed currency.
+      const products = await readProductPricesStrict();
       for (const code of removedCurrencies) {
-        const activeUsage = products.filter((product) => (product.prices[code] ?? 0) > 0).length;
+        const activeUsage = products.filter((product) => (product.prices?.[code] ?? 0) > 0).length;
         if (activeUsage > 0) {
           throw new CountriesValidationError(
             `Currency ${code} has non-zero prices in ${activeUsage} product(s). Set those prices to 0 before removal.`
@@ -147,7 +153,7 @@ export async function PUT(request: Request) {
     logCmsPerf("PUT /api/cms/marketplace/currencies", started, {
       currencies: uniqueCurrencies.length,
       countries: normalizedCountries.length,
-      productsTouched: Array.isArray(saved.products) ? saved.products.length : undefined,
+      productsTouched: saved.productsTouched,
     });
     // 202 only when the whole save is held; otherwise the rest was saved directly.
     const heldOnly =

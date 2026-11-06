@@ -180,8 +180,9 @@ export function saveCmsProduct(product: CmsProduct): CmsProduct {
       (product.images?.length ? product.images : [""]).length
     ),
     colorVariants: normalizeColorVariants(product.colorVariants),
-    deletedAt: null,
-    purgeAt: null,
+    // Lifecycle fields are the caller's to pin; only restore clears them.
+    deletedAt: product.deletedAt ?? null,
+    purgeAt: product.purgeAt ?? null,
   };
   if (idx >= 0) products[idx] = normalized;
   else products.push(normalized);

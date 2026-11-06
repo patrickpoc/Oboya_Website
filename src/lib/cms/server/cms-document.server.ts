@@ -11,6 +11,20 @@ import { createClient, createPublicClient } from "@/lib/supabase/server";
 
 const DATA_DIR = path.join(process.cwd(), "data", "cms");
 
+export function cmsDocumentFilePath(docId: string) {
+  return path.join(DATA_DIR, `${docId}.json`);
+}
+
+/** Seed/local file for a document; null when missing or unreadable. */
+export async function readCmsDocumentSeedFile(docId: string): Promise<unknown | null> {
+  try {
+    const raw = await readFile(cmsDocumentFilePath(docId), "utf-8");
+    return JSON.parse(raw) as unknown;
+  } catch {
+    return null;
+  }
+}
+
 export async function readCmsDocumentData(
   docId: string,
   options?: { fresh?: boolean }
@@ -39,12 +53,7 @@ export async function readCmsDocumentData(
     }
   }
 
-  try {
-    const raw = await readFile(path.join(DATA_DIR, `${docId}.json`), "utf-8");
-    return JSON.parse(raw) as unknown;
-  } catch {
-    return null;
-  }
+  return readCmsDocumentSeedFile(docId);
 }
 
 export async function writeCmsDocumentData(

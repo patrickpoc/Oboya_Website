@@ -42,6 +42,7 @@
     "name": "Name",
     "password": "Password",
     "retry": "Retry",
+    "editorLoadFailed": "Could not load the current data. Saving is disabled to protect it.",
     "view": "View",
     "status": "Status",
     "role": "Role",
@@ -279,8 +280,34 @@
     "editGroupName": "Edit group name",
     "removeGroup": "Remove group {name}",
     "removeOption": "Remove option {name}",
+    "deleteSubcategory": "Delete subcategory",
+    "removeSubcategory": "Remove subcategory {name}",
     "siteReflection": "Site Reflection",
-    "moreOptions": "+{count} more options"
+    "moreOptions": "+{count} more options",
+    "removal": {
+      "title": "Delete \"{name}\"",
+      "usedBy": "Used by {count, plural, one {# product} other {# products}}.",
+      "descriptionReplace": "Every product below must move to another item before this one is deleted. The previous value is not kept, so this cannot be undone automatically.",
+      "descriptionRemove": "This item will be removed from every product below. Their other filter values are kept. This cannot be undone automatically.",
+      "replacementLabel": "Move products to",
+      "replacementPlaceholder": "Select a destination",
+      "noReplacements": "No other saved item is available as a destination.",
+      "productsFailed": "Could not load the affected products.",
+      "moreProducts": "+{count, plural, one {# more product} other {# more products}}",
+      "trash": "Trash",
+      "status": {
+        "draft": "Draft",
+        "scheduled": "Scheduled",
+        "published": "Published",
+        "archived": "Archived"
+      },
+      "confirmReplace": "Move products and delete",
+      "confirmRemove": "Remove from all products and delete",
+      "working": "Applying…",
+      "success": "\"{name}\" deleted. {count, plural, one {# product} other {# products}} updated.",
+      "partialFailure": "{updated} updated, {failed} failed. Nothing was deleted; try again.",
+      "failed": "Could not delete the item."
+    }
   },
   "products": {
     "title": "Products",

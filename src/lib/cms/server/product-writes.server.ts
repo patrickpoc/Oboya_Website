@@ -55,17 +55,23 @@ export async function writeProduct(
   previous: CmsProduct | null | undefined,
   options: WriteOptions = {}
 ): Promise<CmsProduct> {
-  const { persistProductWithContent } = await import(
+  const { persistProductWithContent, reconcileProductImages } = await import(
     "@/lib/cms/server/product-content.server"
   );
-  const saved = saveCmsProduct(
-    await persistProductWithContent(product, previous ?? undefined)
-  );
+  // Stale client payloads carry `deletedAt: null`: only restore may clear trash.
+  const pinned = {
+    ...product,
+    deletedAt: previous?.deletedAt ?? null,
+    purgeAt: previous?.purgeAt ?? null,
+  };
+  const saved = saveCmsProduct(await persistProductWithContent(pinned));
   if (isSupabaseConfigured()) {
     await saveProduct(saved);
   }
   if (!options.skipFileSync) await syncProductsFile();
   invalidateWritten([saved.id, saved.sku, previous?.id, previous?.sku], options);
+  // Only after the upsert succeeded; never fails the save.
+  await reconcileProductImages(previous, saved);
   return saved;
 }
 
@@ -77,7 +83,16 @@ export function mergeProductUpdate(
   incoming: Partial<CmsProduct> & Pick<CmsProduct, "id">,
   previous: CmsProduct | null | undefined
 ): CmsProduct {
-  return (previous ? { ...previous, ...incoming } : incoming) as CmsProduct;
+  return (
+    previous
+      ? {
+          ...previous,
+          ...incoming,
+          deletedAt: previous.deletedAt ?? null,
+          purgeAt: previous.purgeAt ?? null,
+        }
+      : { ...incoming, deletedAt: null, purgeAt: null }
+  ) as CmsProduct;
 }
 
 export class ProductExistsError extends Error {

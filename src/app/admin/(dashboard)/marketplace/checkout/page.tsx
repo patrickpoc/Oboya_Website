@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { EditorGuard, FormSkeleton } from "@/components/admin/common";
+import { EditorGuard, ErrorState, FormSkeleton } from "@/components/admin/common";
 import { AdminPageHeader } from "@/components/admin/layout/AdminPageHeader";
 import { CheckoutPageForm } from "@/components/admin/marketplace/checkout/CheckoutPageForm";
 import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
@@ -22,30 +22,28 @@ export default function Page() {
   const tCommon = useTranslations("admin.common");
   const [settings, setSettings] = useState<CheckoutPageSettings>(DEFAULT_CHECKOUT_PAGE);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      setLoading(true);
-      try {
-        const response = await fetch("/api/cms/marketplace/checkout", { cache: "no-store" });
-        if (!response.ok) throw new Error(t("loadFailed"));
-        const json = (await response.json()) as CheckoutPageSettings;
-        if (!cancelled) setSettings(normalizeCheckoutPage(json));
-      } catch (error) {
-        if (!cancelled) {
-          toast.error(error instanceof Error ? error.message : t("loadFailed"));
-          setSettings(DEFAULT_CHECKOUT_PAGE);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadFailed(false);
+    try {
+      const response = await fetch("/api/cms/marketplace/checkout?forEdit=1", { cache: "no-store" });
+      if (!response.ok) throw new Error(t("loadFailed"));
+      setSettings(normalizeCheckoutPage((await response.json()) as CheckoutPageSettings));
+    } catch {
+      // Never fall back to defaults: saving them would overwrite the real page.
+      setLoadFailed(true);
+    } finally {
+      setLoading(false);
+    }
   }, [t]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount; the loader sets loading state before awaiting the API
+    void load();
+  }, [load]);
 
   const save = async () => {
     const normalized = normalizeCheckoutPage(settings);
@@ -88,7 +86,7 @@ export default function Page() {
           <Button
             type="button"
             onClick={() => void save()}
-            disabled={loading || saving}
+            disabled={loading || loadFailed || saving}
             className="rounded-full bg-oboya-green text-white hover:bg-oboya-green/90"
           >
             {saving ? tCommon("saving") : t("save")}
@@ -106,8 +104,14 @@ export default function Page() {
           {t("paymentsTitle")}
         </Link>
       </p>
-      {loading ? <FormSkeleton /> : <CheckoutPageForm value={settings} onChange={setSettings} />}
-      <EditorGuard dirty={!loading} saving={saving} onSave={() => void save()} />
+      {loading ? (
+        <FormSkeleton />
+      ) : loadFailed ? (
+        <ErrorState message={tCommon("editorLoadFailed")} onRetry={() => void load()} />
+      ) : (
+        <CheckoutPageForm value={settings} onChange={setSettings} />
+      )}
+      <EditorGuard dirty={!loading && !loadFailed} saving={saving} onSave={() => void save()} />
     </Can>
   );
 }

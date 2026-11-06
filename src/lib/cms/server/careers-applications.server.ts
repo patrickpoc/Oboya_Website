@@ -354,7 +354,6 @@ export async function markApplicationRead(id: string): Promise<JobApplication> {
 export async function deleteApplication(id: string): Promise<void> {
   const current = await getApplication(id);
   if (!current) throw new CareersError(404, "not_found");
-  await removeAllCvObjects(id);
   const db = careersClient();
   if (!db) {
     const file = await readLocal();
@@ -363,6 +362,9 @@ export async function deleteApplication(id: string): Promise<void> {
     await writeLocal(file);
     return;
   }
+  // CV first, as anonymizeApplication does: if a CV cannot be removed the row
+  // stays and the purge retries, so no CV is left without a row pointing to it.
+  await removeAllCvObjects(id);
   const { error } = await db.from("cms_job_applications").delete().eq("id", id);
   throwIfDbError(error);
 }

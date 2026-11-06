@@ -42,6 +42,7 @@
     "name": "Nombre",
     "password": "Contraseña",
     "retry": "Reintentar",
+    "editorLoadFailed": "No se pudieron cargar los datos actuales. El guardado está desactivado para protegerlos.",
     "view": "Ver",
     "status": "Estado",
     "role": "Rol",
@@ -279,8 +280,34 @@
     "editGroupName": "Editar nombre del grupo",
     "removeGroup": "Quitar grupo {name}",
     "removeOption": "Quitar opción {name}",
+    "deleteSubcategory": "Eliminar subcategoría",
+    "removeSubcategory": "Quitar subcategoría {name}",
     "siteReflection": "Reflexión del sitio",
-    "moreOptions": "+{count} opciones más"
+    "moreOptions": "+{count} opciones más",
+    "removal": {
+      "title": "Eliminar \"{name}\"",
+      "usedBy": "Usado por {count, plural, one {# producto} other {# productos}}.",
+      "descriptionReplace": "Todos los productos siguientes deben moverse a otro elemento antes de eliminar este. El valor anterior no se conserva, por lo que no se puede deshacer automáticamente.",
+      "descriptionRemove": "Este elemento se quitará de todos los productos siguientes. Sus demás valores de filtro se conservan. No se puede deshacer automáticamente.",
+      "replacementLabel": "Mover productos a",
+      "replacementPlaceholder": "Seleccione un destino",
+      "noReplacements": "No hay otro elemento guardado disponible como destino.",
+      "productsFailed": "No se pudieron cargar los productos afectados.",
+      "moreProducts": "+{count, plural, one {# producto más} other {# productos más}}",
+      "trash": "Papelera",
+      "status": {
+        "draft": "Borrador",
+        "scheduled": "Programado",
+        "published": "Publicado",
+        "archived": "Archivado"
+      },
+      "confirmReplace": "Mover productos y eliminar",
+      "confirmRemove": "Quitar de todos los productos y eliminar",
+      "working": "Aplicando…",
+      "success": "\"{name}\" eliminado. {count, plural, one {# producto actualizado} other {# productos actualizados}}.",
+      "partialFailure": "{updated} actualizados, {failed} con error. No se eliminó nada; inténtelo de nuevo.",
+      "failed": "No se pudo eliminar el elemento."
+    }
   },
   "products": {
     "title": "Productos",

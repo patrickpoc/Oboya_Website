@@ -140,12 +140,25 @@ const resolveCmsSessionUser = cache(async (): Promise<CmsAuthResult> => {
   return ok;
 });
 
+/** Cold start with an unreadable access matrix: fail closed instead of guessing permissions. */
+async function accessUnavailable(): Promise<CmsAuthFail | null> {
+  try {
+    const unavailable = await accessUnavailable();
+  if (unavailable) return unavailable;
+    return null;
+  } catch (error) {
+    console.error("Access control unavailable:", error);
+    return { ok: false, status: 503, error: "Service unavailable" };
+  }
+}
+
 export async function requireCmsAuth(input: {
   module: CmsModule;
   action?: CmsAction;
 }): Promise<CmsAuthResult> {
   const action = input.action ?? "view";
-  await ensureAccessControlHydrated();
+  const unavailable = await accessUnavailable();
+  if (unavailable) return unavailable;
   const session = await resolveCmsSessionUser();
   if (!session.ok) return session;
 
@@ -158,7 +171,8 @@ export async function requireCmsAuth(input: {
 
 /** Active CMS session only (no module check) — used to hydrate access matrix. */
 export async function requireCmsSession(): Promise<CmsAuthResult> {
-  await ensureAccessControlHydrated();
+  const unavailable = await accessUnavailable();
+  if (unavailable) return unavailable;
   return resolveCmsSessionUser();
 }
 
@@ -179,7 +193,8 @@ export async function cmsGuardSession(): Promise<
 
 /** Super Admin only — Access Control APIs/UI. */
 export async function requireSuperAdmin(): Promise<CmsAuthResult> {
-  await ensureAccessControlHydrated();
+  const unavailable = await accessUnavailable();
+  if (unavailable) return unavailable;
   const session = await resolveCmsSessionUser();
   if (!session.ok) return session;
   if (session.user.role !== "super_admin") {

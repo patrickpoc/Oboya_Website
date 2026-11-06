@@ -1,20 +1,21 @@
 import { NextResponse } from "next/server";
+import { withApprovalErrors } from "@/lib/cms/server/approvals.server";
 import type { BlogAuthor } from "@/lib/cms/repositories/blog-authors-repository";
 import {
   deleteBlogAuthorDurable,
-  readBlogAuthorsDurable,
+  readBlogAuthorsStrict,
   saveBlogAuthorDurable,
 } from "@/lib/cms/server/blog-authors.server";
 import { revalidateBlogPages } from "@/lib/cms/revalidate-site";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 
-export async function GET() {
+async function handleGET() {
   const auth = await cmsGuard("blog", "view");
   if ("response" in auth) return auth.response;
-  return NextResponse.json(await readBlogAuthorsDurable());
+  return NextResponse.json(await readBlogAuthorsStrict());
 }
 
-export async function POST(request: Request) {
+async function handlePOST(request: Request) {
   const auth = await cmsGuard("blog", "edit");
   if ("response" in auth) return auth.response;
   const body = (await request.json()) as BlogAuthor;
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
   return NextResponse.json(saved, { status: 201 });
 }
 
-export async function DELETE(request: Request) {
+async function handleDELETE(request: Request) {
   const auth = await cmsGuard("blog", "delete");
   if ("response" in auth) return auth.response;
   const { searchParams } = new URL(request.url);
@@ -35,3 +36,7 @@ export async function DELETE(request: Request) {
   revalidateBlogPages();
   return NextResponse.json({ ok: true });
 }
+
+export const GET = withApprovalErrors("Failed to load authors", handleGET);
+export const POST = withApprovalErrors("Failed to save author", handlePOST);
+export const DELETE = withApprovalErrors("Failed to delete author", handleDELETE);

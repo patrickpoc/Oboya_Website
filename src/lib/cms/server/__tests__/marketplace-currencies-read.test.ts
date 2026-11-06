@@ -12,7 +12,10 @@ vi.mock("@/lib/cms/server/cms-document.server", () => ({
   writeCmsDocumentData: vi.fn(),
 }));
 vi.mock("@/lib/cms/server/cache-invalidation.server", () => ({ invalidateProducts: vi.fn() }));
-vi.mock("@/lib/cms/server/products.server", () => ({ readProducts: vi.fn(), saveProduct: vi.fn() }));
+vi.mock("@/lib/cms/server/products.server", () => ({
+  readProductPricesStrict: vi.fn(),
+  updateProductPrices: vi.fn(),
+}));
 vi.mock("@/lib/shop/catalog", () => ({ updateShopCatalog: vi.fn() }));
 
 describe("readMarketplaceCurrencies", () => {
