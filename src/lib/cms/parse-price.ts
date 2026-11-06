@@ -40,24 +40,22 @@ export function parsePriceInput(
   const hasComma = normalized.includes(",");
   const hasDot = normalized.includes(".");
 
-  if (hint === "BRL") {
-    // 1.234,56 → 1234.56 | 0,47 → 0.47 | 0.47 also accepted
-    if (hasComma && hasDot) {
-      normalized = normalized.replace(/\./g, "").replace(",", ".");
-    } else if (hasComma) {
+  if (hasComma && hasDot) {
+    // Both present: the last separator is the decimal one, the other is thousands.
+    // 1,234.56 and 1.234,56 both -> 1234.56 (independent of currency hint).
+    const decimal = normalized.lastIndexOf(",") > normalized.lastIndexOf(".") ? "," : ".";
+    const thousands = decimal === "," ? "." : ",";
+    if (normalized.split(decimal).length !== 2) return null;
+    normalized = normalized.split(thousands).join("").replace(decimal, ".");
+  } else if (hint === "BRL") {
+    // 0,47 -> 0.47 | 0.47 also accepted
+    if (hasComma) normalized = normalized.replace(",", ".");
+  } else if (hasComma) {
+    // USD / EUR: also accept European-style 0,47 as decimal when there is no period.
+    if (/,\d{1,2}$/.test(normalized)) {
       normalized = normalized.replace(",", ".");
-    }
-  } else {
-    // USD / EUR: 1,234.56 → 1234.56 | 0.47 → 0.47
-    // Also accept European-style 0,47 as decimal when there is no period.
-    if (hasComma && hasDot) {
+    } else {
       normalized = normalized.replace(/,/g, "");
-    } else if (hasComma && !hasDot) {
-      if (/,\d{1,2}$/.test(normalized)) {
-        normalized = normalized.replace(",", ".");
-      } else {
-        normalized = normalized.replace(/,/g, "");
-      }
     }
   }
 

@@ -3,6 +3,9 @@
 import { useTranslations } from "next-intl";
 import { Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SpreadsheetInstructions } from "@/components/admin/marketplace/SpreadsheetInstructions";
+import { BULK_SPREADSHEET_HEADERS } from "@/lib/cms/bulk-update/field-labels";
+import { UPDATE_COLUMN_REQUIREMENT } from "@/lib/cms/spreadsheet-instructions";
 import {
   downloadBulkUpdateTemplate,
   mergeSpreadsheetIntoWorkspace,
@@ -10,7 +13,11 @@ import {
   type SpreadsheetImportError,
 } from "@/lib/cms/bulk-update/spreadsheet";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
-import type { BulkUpdateCatalog, BulkWorkspaceRow } from "@/lib/cms/bulk-update/types";
+import {
+  BULK_UPDATE_MAX_PRODUCTS,
+  type BulkUpdateCatalog,
+  type BulkWorkspaceRow,
+} from "@/lib/cms/bulk-update/types";
 import { useRef, useState } from "react";
 
 type Props = {
@@ -118,6 +125,13 @@ export function SpreadsheetImportPanel({
           ))}
         </div>
       )}
+
+      <SpreadsheetInstructions
+        namespace="admin.products.bulk"
+        headers={BULK_SPREADSHEET_HEADERS}
+        requirements={UPDATE_COLUMN_REQUIREMENT}
+        max={BULK_UPDATE_MAX_PRODUCTS}
+      />
     </div>
   );
 }

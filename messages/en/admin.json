@@ -399,6 +399,126 @@
         "success": "Done",
         "failed": "Failed",
         "skipped": "Skipped"
+      },
+      "instructions": {
+        "title": "How to fill in the spreadsheet",
+        "intro": "Each column below is listed exactly as it appears in the template. The examples are generic placeholders: replace them with your own data.",
+        "rule1": "Row 1 must contain the column names. Delete the sample row before uploading. Columns the importer does not recognise are ignored; you can leave out optional columns.",
+        "rule2": "One product per row, up to {max} products. Completely empty rows are skipped.",
+        "rule3": "Nothing is saved when you upload. You review and fix the products in the table, then confirm the import. The sheet does not set markets, so enable them afterwards.",
+        "rule4": "Use a dot as the decimal separator (12.50). In a CSV file a comma decimal must be wrapped in quotes (\"12,50\"), otherwise use a dot. Do not use thousands separators.",
+        "exampleLabel": "Example:",
+        "requirement": {
+          "required": "Required",
+          "optional": "Optional",
+          "atLeastOne": "At least one"
+        },
+        "columns": {
+          "sku": {
+            "meaning": "Unique product code; it also becomes the product ID. It must not already exist in the catalog and must not repeat in the file.",
+            "example": "DEMO-001"
+          },
+          "name_en": {
+            "meaning": "Product name in English. Fill at least one of the four name columns; the other languages can stay blank.",
+            "example": "Demo drip irrigation tape"
+          },
+          "name_ptBR": {
+            "meaning": "Product name in Brazilian Portuguese. At least one name column must be filled.",
+            "example": "Fita de irrigação demo"
+          },
+          "name_es": {
+            "meaning": "Product name in Spanish. At least one name column must be filled.",
+            "example": "Cinta de riego demo"
+          },
+          "name_zhCN": {
+            "meaning": "Product name in Simplified Chinese. At least one name column must be filled.",
+            "example": "演示滴灌带"
+          },
+          "categoryId": {
+            "meaning": "Category, written as its id or its exact name (upper or lower case does not matter); values must match your catalog. If blank, or if the value is unknown, the product loads under the first category (an unknown value also raises an error), so correct it in the preview.",
+            "example": "Irrigation"
+          },
+          "subcategoryId": {
+            "meaning": "Subcategory, as its id or exact name; values must match your catalog. It must belong to the category in the same row. Leave it blank only if you also leave the category blank. An unknown value raises an error and the first subcategory is used.",
+            "example": "Drip tape"
+          },
+          "moq": {
+            "meaning": "Minimum order quantity: a whole number of 1 or more. Blank means 1. An invalid value also becomes 1 and raises an error.",
+            "example": "10"
+          },
+          "price_usd": {
+            "meaning": "Unit price in US dollars. Numbers only, no currency symbol and no thousands separators. Blank means 0. Text that is not a number becomes 0 and raises an error.",
+            "example": "12.50"
+          },
+          "price_brl": {
+            "meaning": "Unit price in Brazilian reais. Numbers only, no currency symbol and no thousands separators. In a CSV file a comma decimal must be quoted, or use a dot. Blank means 0. Text that is not a number becomes 0 and raises an error.",
+            "example": "12.50"
+          },
+          "price_eur": {
+            "meaning": "Unit price in euros. Numbers only, no currency symbol and no thousands separators. Blank means 0. Text that is not a number becomes 0 and raises an error.",
+            "example": "11.90"
+          },
+          "stock_quantity": {
+            "meaning": "Units in stock, as a whole number. If blank, no quantity is recorded and the product counts as unlimited unless unlimited_stock is 0. Text that is not a number becomes 0.",
+            "example": "250"
+          },
+          "unlimited_stock": {
+            "meaning": "1, true or yes means unlimited stock. 0 means limited stock, using stock_quantity. Anything else, including no, counts as blank: stock is unlimited when stock_quantity is blank, otherwise limited.",
+            "example": "0"
+          },
+          "sale_mode": {
+            "meaning": "stock sells from stock at a fixed price; quote means on request (RFQ). Also accepted: in stock, on request, request, rfq. Blank means stock. Any other value becomes stock and raises an error.",
+            "example": "stock"
+          },
+          "status": {
+            "meaning": "draft or published (yes/no, true/false, 1/0 and on/off also work). archived is accepted too. Blank means draft. An unrecognised value silently becomes draft.",
+            "example": "draft"
+          },
+          "main_image": {
+            "meaning": "Main image: a public https:// link, or a site path starting with /. http:// and other kinds of link are rejected. External https images are copied into the media library when you import; if a copy fails, that product is not imported.",
+            "example": "https://example.com/images/demo-product.jpg"
+          },
+          "image_2": {
+            "meaning": "Optional second image. Same rules as main_image. Blank cells are skipped.",
+            "example": "https://example.com/images/demo-product-2.jpg"
+          },
+          "image_3": {
+            "meaning": "Optional third image. Same rules as main_image. Blank cells are skipped.",
+            "example": "https://example.com/images/demo-product-3.jpg"
+          },
+          "short_en": {
+            "meaning": "Short summary in English, shown in product lists. If you fill some languages and not all, a warning appears and the blank ones fall back to English.",
+            "example": "Reliable tape for row crops."
+          },
+          "short_ptBR": {
+            "meaning": "Short summary in Brazilian Portuguese. See short_en.",
+            "example": "Fita confiável para lavouras."
+          },
+          "short_es": {
+            "meaning": "Short summary in Spanish. See short_en.",
+            "example": "Cinta fiable para cultivos."
+          },
+          "short_zhCN": {
+            "meaning": "Short summary in Simplified Chinese. See short_en.",
+            "example": "适用于大田作物的可靠滴灌带。"
+          },
+          "desc_en": {
+            "meaning": "Full product description in English.",
+            "example": "Demo description with features and usage notes."
+          },
+          "desc_ptBR": {
+            "meaning": "Full product description in Brazilian Portuguese.",
+            "example": "Descrição demo com características e modo de uso."
+          },
+          "desc_es": {
+            "meaning": "Full product description in Spanish.",
+            "example": "Descripción demo con características e instrucciones de uso."
+          },
+          "desc_zhCN": {
+            "meaning": "Full product description in Simplified Chinese.",
+            "example": "包含特点和使用说明的演示描述。"
+          }
+        }
       }
     },
     "bulkUpdate": {
@@ -776,7 +896,115 @@
       "imageUrlPlaceholder": "https://… or /path",
       "openMediaLibrary": "Open media library",
       "productIssue": "Product issue",
-      "emptyWorkspace": "Search and select products, or import a spreadsheet to start editing."
+      "emptyWorkspace": "Search and select products, or import a spreadsheet to start editing.",
+      "instructions": {
+        "title": "How to fill in the spreadsheet",
+        "intro": "Each column below is listed exactly as it appears in the template. The examples are generic placeholders: replace them with your own data.",
+        "rule1": "Row 1 must contain the column names and the SKU column is required. Delete the sample and NOTES rows before uploading. The old Brand column is ignored; any other unknown column rejects the file.",
+        "rule2": "Blank cells keep the current value. They never clear a field, so only fill the cells you want to change.",
+        "rule3": "Use a parent SKU row for product-level data and a color SKU row for a single color; a color SKU loads its whole color group. Up to {max} products at a time. Changes are previewed and only applied after you confirm.",
+        "rule4": "Use a dot as the decimal separator (10.50). In a CSV file a comma decimal must be wrapped in quotes (\"10,50\"), otherwise use a dot. Do not use thousands separators.",
+        "exampleLabel": "Example:",
+        "requirement": {
+          "required": "Required",
+          "optional": "Optional",
+          "atLeastOne": "At least one"
+        },
+        "columns": {
+          "sku": {
+            "meaning": "SKU of an existing parent product or of one of its colors. Required on every row, one row per SKU.",
+            "example": "DEMO-001"
+          },
+          "moq": {
+            "meaning": "Minimum order quantity: a whole number of 1 or more. On a parent row it sets the product; on a color row only that color.",
+            "example": "100"
+          },
+          "category": {
+            "meaning": "Parent rows only. Category id or exact name; values must match your catalog. Unknown values raise an error. When you change the category, also fill subcategory, unless the product's current subcategory belongs to the new category.",
+            "example": "Irrigation"
+          },
+          "subcategory": {
+            "meaning": "Parent rows only. Subcategory id or exact name; values must match your catalog. It must belong to the category (the one in this row, or the product's current one).",
+            "example": "Drip tape"
+          },
+          "application": {
+            "meaning": "Parent rows only. One or more applications from the filter list, by id or label, separated by ; or |; values must match your catalog. It replaces the current list; one unknown value rejects the cell.",
+            "example": "Drip irrigation;Greenhouse"
+          },
+          "cropCulture": {
+            "meaning": "Parent rows only. One or more crops from the filter list, by id or label, separated by ; or |; values must match your catalog. It replaces the current list.",
+            "example": "Tomato;Lettuce"
+          },
+          "certifications": {
+            "meaning": "Parent rows only. One or more certifications from the filter list, by id or label, separated by ; or |; values must match your catalog. It replaces the current list.",
+            "example": "ISO 9001"
+          },
+          "countryOfManufacture": {
+            "meaning": "Parent rows only. A single country of manufacture from the filter list, by id or label; values must match your catalog.",
+            "example": "Brazil"
+          },
+          "marketAvailability": {
+            "meaning": "Parent rows only. Country codes separated by ; or |. Listed markets are enabled and every other market is disabled.",
+            "example": "BR;US"
+          },
+          "availableInShop": {
+            "meaning": "Parent rows only. yes, true, 1, published or on publishes the product; no, false, 0, draft or off makes it a draft. Anything else raises an error.",
+            "example": "yes"
+          },
+          "saleMode": {
+            "meaning": "Parent rows only. stock (or In stock) sells at a fixed price; quote (or On request, RFQ) means price on request.",
+            "example": "stock"
+          },
+          "priceUSD": {
+            "meaning": "Price in US dollars, numbers only, no thousands separators. On a parent row it is the product price; on a color row it is that color's price (Variant price USD wins if both are filled).",
+            "example": "10.50"
+          },
+          "priceBRL": {
+            "meaning": "Price in Brazilian reais, numbers only, no thousands separators. In a CSV file a comma decimal must be quoted, or use a dot. Parent row: product price. Color row: that color's price.",
+            "example": "52.90"
+          },
+          "priceEUR": {
+            "meaning": "Price in euros, numbers only, no thousands separators. Parent row: product price. Color row: that color's price.",
+            "example": "9.80"
+          },
+          "colorHex": {
+            "meaning": "Hex code of the color: # followed by exactly 6 digits or letters A-F. On a parent row it sets the default color; on a color row it sets that color.",
+            "example": "#2E7D32"
+          },
+          "colorName": {
+            "meaning": "Color name in English. Parent row: default color. Color row: that color.",
+            "example": "Forest green"
+          },
+          "colorNamePT": {
+            "meaning": "Color name in Brazilian Portuguese. Parent row: default color. Color row: that color.",
+            "example": "Verde floresta"
+          },
+          "colorNameES": {
+            "meaning": "Color name in Spanish. Parent row: default color. Color row: that color.",
+            "example": "Verde bosque"
+          },
+          "colorNameZH": {
+            "meaning": "Color name in Simplified Chinese. Parent row: default color. Color row: that color.",
+            "example": "森林绿"
+          },
+          "variantPriceUSD": {
+            "meaning": "Color rows only: USD price of that color, numbers only, no thousands separators. It takes priority over Price USD. Not used on parent rows.",
+            "example": "10.50"
+          },
+          "variantImage": {
+            "meaning": "Color rows only: image of that color, as an https:// link or a site path starting with /. The image is not copied to the media library, and a host that is not in the storefront allowlist triggers a warning. On a parent row it is ignored and reported.",
+            "example": "https://example.com/images/demo-green.jpg"
+          },
+          "newSKU": {
+            "meaning": "Color rows only: new SKU for that color. The color keeps its id. On a parent row it is ignored and reported.",
+            "example": "DEMO-001-GRN"
+          },
+          "sortOrder": {
+            "meaning": "Color rows only: display order of the color, a whole number of 0 or more.",
+            "example": "1"
+          }
+        }
+      }
     }
   },
   "taxonomy": {

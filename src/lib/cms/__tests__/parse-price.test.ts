@@ -18,6 +18,27 @@ describe("parsePriceInput", () => {
     expect(parsePriceInput("0,47", "EUR")).toBe(0.47);
   });
 
+  it("parses mixed separators by the last separator, for any currency", () => {
+    for (const hint of ["BRL", "USD", "EUR"] as const) {
+      expect(parsePriceInput("1,234.56", hint)).toBe(1234.56);
+      expect(parsePriceInput("1.234,56", hint)).toBe(1234.56);
+      expect(parsePriceInput("1,234,567.89", hint)).toBe(1234567.89);
+      expect(parsePriceInput("1.234.567,89", hint)).toBe(1234567.89);
+    }
+    expect(parsePriceInput("1,2,3.4", "USD")).toBe(123.4);
+    expect(parsePriceInput("1,2.3,4", "USD")).toBeNull();
+  });
+
+  it("keeps single-separator forms unchanged", () => {
+    expect(parsePriceInput("12.50", "USD")).toBe(12.5);
+    expect(parsePriceInput("12,50", "BRL")).toBe(12.5);
+    expect(parsePriceInput("12.50", "BRL")).toBe(12.5);
+    expect(parsePriceInput("1,234", "USD")).toBe(1234);
+    expect(parsePriceInput("1234", "EUR")).toBe(1234);
+    expect(parsePriceInput("R$ 12,50", "BRL")).toBe(12.5);
+    expect(parsePriceInput("abc", "USD")).toBeNull();
+  });
+
   it("handles empty and incomplete drafts", () => {
     expect(parsePriceInput("", "BRL")).toBeNull();
     expect(parsePriceInput("0,", "BRL", { allowIncomplete: true })).toBe(

@@ -399,7 +399,127 @@
       "imagesEdit": "{count, plural, =0 {添加图片} one {图片 (#)} other {图片 (#)}}",
       "imagesHide": "隐藏图片",
       "imageSlot": "图片 {n}",
-      "imagesHint": "上传文件、粘贴 https 链接或从媒体库选择。导入时,其他网站的链接将被复制到媒体库。"
+      "imagesHint": "上传文件、粘贴 https 链接或从媒体库选择。导入时,其他网站的链接将被复制到媒体库。",
+      "instructions": {
+        "title": "如何填写电子表格",
+        "intro": "下列每一列均与模板中的列名完全一致。示例仅为通用占位内容,请替换为您自己的数据。",
+        "rule1": "第 1 行必须包含列名。上传前请删除示例行。导入程序无法识别的列将被忽略;可以省略可选列。",
+        "rule2": "每行一个产品,最多 {max} 个产品。完全空白的行将被跳过。",
+        "rule3": "上传时不会保存任何内容。您可在表格中检查并修改产品,然后确认导入。电子表格不会设置市场,请在导入后再启用。",
+        "exampleLabel": "示例:",
+        "requirement": {
+          "required": "必填",
+          "optional": "选填",
+          "atLeastOne": "至少一个"
+        },
+        "columns": {
+          "sku": {
+            "meaning": "唯一的产品编码,同时也将成为产品 ID。不得与目录中已有编码重复,也不得在文件中重复出现。",
+            "example": "DEMO-001"
+          },
+          "name_en": {
+            "meaning": "产品英文名称。四个名称列中至少填写一个;其他语言可留空。",
+            "example": "Demo drip irrigation tape"
+          },
+          "name_ptBR": {
+            "meaning": "产品巴西葡萄牙语名称。至少须填写一个名称列。",
+            "example": "Fita de irrigação demo"
+          },
+          "name_es": {
+            "meaning": "产品西班牙语名称。至少须填写一个名称列。",
+            "example": "Cinta de riego demo"
+          },
+          "name_zhCN": {
+            "meaning": "产品简体中文名称。至少须填写一个名称列。",
+            "example": "演示滴灌带"
+          },
+          "categoryId": {
+            "meaning": "分类,填写其 id 或确切名称(不区分大小写);值必须与您的目录一致。如果为空或值未知,产品将加载到第一个分类下(未知值还会报错),请在预览中更正。",
+            "example": "Irrigation"
+          },
+          "subcategoryId": {
+            "meaning": "子分类,填写其 id 或确切名称;值必须与您的目录一致。必须属于同一行中的分类。仅当分类也为空时才可留空。未知值会报错,并使用第一个子分类。",
+            "example": "Drip tape"
+          },
+          "moq": {
+            "meaning": "最小起订量:大于等于 1 的整数。留空表示 1。无效值也会变为 1 并报错。",
+            "example": "10"
+          },
+          "price_usd": {
+            "meaning": "以美元计的单价。仅限数字,不含货币符号和千位分隔符。留空表示 0。非数字文本会变为 0 并报错。",
+            "example": "12.50"
+          },
+          "price_brl": {
+            "meaning": "以巴西雷亚尔计的单价。仅限数字,不含货币符号和千位分隔符。在 CSV 文件中,使用逗号作为小数点的数值必须加引号,或改用点号。留空表示 0。非数字文本会变为 0 并报错。",
+            "example": "12.50"
+          },
+          "price_eur": {
+            "meaning": "以欧元计的单价。仅限数字,不含货币符号和千位分隔符。留空表示 0。非数字文本会变为 0 并报错。",
+            "example": "11.90"
+          },
+          "stock_quantity": {
+            "meaning": "库存数量,为整数。如果留空,则不记录数量,产品视为无限库存,除非 unlimited_stock 为 0。非数字文本会变为 0。",
+            "example": "250"
+          },
+          "unlimited_stock": {
+            "meaning": "1、true 或 yes 表示无限库存。0 表示有限库存,使用 stock_quantity。其他任何值(包括 no)均视为空:当 stock_quantity 为空时库存无限,否则为有限。",
+            "example": "0"
+          },
+          "sale_mode": {
+            "meaning": "stock 表示按固定价格从库存销售;quote 表示按需报价(RFQ)。也接受:in stock、on request、request、rfq。留空表示 stock。其他任何值会变为 stock 并报错。",
+            "example": "stock"
+          },
+          "status": {
+            "meaning": "draft 或 published(yes/no、true/false、1/0 以及 on/off 也可使用)。也接受 archived。留空表示 draft。无法识别的值会静默变为 draft。",
+            "example": "draft"
+          },
+          "main_image": {
+            "meaning": "主图:公开的 https:// 链接,或以 / 开头的站内路径。http:// 及其他类型的链接会被拒绝。导入时,外部 https 图片会被复制到媒体库;若复制失败,该产品将不会被导入。",
+            "example": "https://example.com/images/demo-product.jpg"
+          },
+          "image_2": {
+            "meaning": "可选的第二张图片。规则与 main_image 相同。空白单元格将被跳过。",
+            "example": "https://example.com/images/demo-product-2.jpg"
+          },
+          "image_3": {
+            "meaning": "可选的第三张图片。规则与 main_image 相同。空白单元格将被跳过。",
+            "example": "https://example.com/images/demo-product-3.jpg"
+          },
+          "short_en": {
+            "meaning": "英文简短摘要,显示在产品列表中。若只填写部分语言而非全部,将出现警告,空白的语言将回退为英文。",
+            "example": "Reliable tape for row crops."
+          },
+          "short_ptBR": {
+            "meaning": "巴西葡萄牙语简短摘要。参见 short_en。",
+            "example": "Fita confiável para lavouras."
+          },
+          "short_es": {
+            "meaning": "西班牙语简短摘要。参见 short_en。",
+            "example": "Cinta fiable para cultivos."
+          },
+          "short_zhCN": {
+            "meaning": "简体中文简短摘要。参见 short_en。",
+            "example": "适用于大田作物的可靠滴灌带。"
+          },
+          "desc_en": {
+            "meaning": "产品完整英文描述。",
+            "example": "Demo description with features and usage notes."
+          },
+          "desc_ptBR": {
+            "meaning": "产品完整巴西葡萄牙语描述。",
+            "example": "Descrição demo com características e modo de uso."
+          },
+          "desc_es": {
+            "meaning": "产品完整西班牙语描述。",
+            "example": "Descripción demo con características e instrucciones de uso."
+          },
+          "desc_zhCN": {
+            "meaning": "产品完整简体中文描述。",
+            "example": "包含特点和使用说明的演示描述。"
+          }
+        },
+        "rule4": "小数分隔符请使用点号(12.50)。在 CSV 文件中,使用逗号作为小数点的数值必须加引号(\"12,50\"),否则请使用点号。不要使用千位分隔符。"
+      }
     },
     "bulkUpdate": {
       "title": "批量更新",
@@ -776,7 +896,115 @@
       "colSortOrder": "排序",
       "imageUrlPlaceholder": "https://… 或 /路径",
       "openMediaLibrary": "打开媒体库",
-      "productIssue": "产品问题"
+      "productIssue": "产品问题",
+      "instructions": {
+        "title": "如何填写电子表格",
+        "intro": "下列每一列均与模板中的列名完全一致。示例仅为通用占位内容,请替换为您自己的数据。",
+        "rule1": "第 1 行必须包含列名,且 SKU 列为必填。上传前请删除示例行和 NOTES 行。旧的 Brand 列会被忽略;任何其他未知列都会导致文件被拒绝。",
+        "rule2": "空白单元格保留当前值,绝不会清空字段,因此只需填写要更改的单元格。",
+        "rule3": "父级 SKU 行用于产品级数据,颜色 SKU 行用于单个颜色;颜色 SKU 会加载其整个颜色组。每次最多 {max} 个产品。更改会先预览,确认后才会应用。",
+        "exampleLabel": "示例:",
+        "requirement": {
+          "required": "必填",
+          "optional": "选填",
+          "atLeastOne": "至少一个"
+        },
+        "columns": {
+          "sku": {
+            "meaning": "现有父级产品或其某个颜色的 SKU。每行必填,每个 SKU 一行。",
+            "example": "DEMO-001"
+          },
+          "moq": {
+            "meaning": "最小起订量:1 或更大的整数。在父级行中设置产品;在颜色行中仅设置该颜色。",
+            "example": "100"
+          },
+          "category": {
+            "meaning": "仅限父级行。分类 id 或确切名称;值必须与您的目录一致。未知值会报错。更改分类时,也请填写子分类,除非产品当前的子分类属于新分类。",
+            "example": "Irrigation"
+          },
+          "subcategory": {
+            "meaning": "仅限父级行。子分类 id 或确切名称;值必须与您的目录一致。必须属于该分类(本行中的分类或产品当前的分类)。",
+            "example": "Drip tape"
+          },
+          "application": {
+            "meaning": "仅限父级行。筛选列表中的一个或多个应用场景,填写 id 或标签,以 ; 或 | 分隔;值必须与您的目录一致。会替换当前列表;只要有一个未知值,该单元格就会被拒绝。",
+            "example": "Drip irrigation;Greenhouse"
+          },
+          "cropCulture": {
+            "meaning": "仅限父级行。筛选列表中的一种或多种作物,填写 id 或标签,以 ; 或 | 分隔;值必须与您的目录一致。会替换当前列表。",
+            "example": "Tomato;Lettuce"
+          },
+          "certifications": {
+            "meaning": "仅限父级行。筛选列表中的一项或多项认证,填写 id 或标签,以 ; 或 | 分隔;值必须与您的目录一致。会替换当前列表。",
+            "example": "ISO 9001"
+          },
+          "countryOfManufacture": {
+            "meaning": "仅限父级行。筛选列表中的单个制造国,填写 id 或标签;值必须与您的目录一致。",
+            "example": "Brazil"
+          },
+          "marketAvailability": {
+            "meaning": "仅限父级行。以 ; 或 | 分隔的国家代码。列出的市场将启用,其他所有市场将停用。",
+            "example": "BR;US"
+          },
+          "availableInShop": {
+            "meaning": "仅限父级行。yes、true、1、published 或 on 表示发布产品;no、false、0、draft 或 off 表示设为草稿。其他任何值都会报错。",
+            "example": "yes"
+          },
+          "saleMode": {
+            "meaning": "仅限父级行。stock(或 In stock)按固定价格销售;quote(或 On request、RFQ)表示按需询价。",
+            "example": "stock"
+          },
+          "priceUSD": {
+            "meaning": "以美元计的价格,仅限数字,不含千位分隔符。在父级行中为产品价格;在颜色行中为该颜色的价格(若两者都填写,以 Variant price USD 为准)。",
+            "example": "10.50"
+          },
+          "priceBRL": {
+            "meaning": "以巴西雷亚尔计的价格,仅限数字,不含千位分隔符。在 CSV 文件中,使用逗号作为小数点的数值必须加引号,或改用点号。父级行:产品价格。颜色行:该颜色的价格。",
+            "example": "52.90"
+          },
+          "priceEUR": {
+            "meaning": "以欧元计的价格,仅限数字,不含千位分隔符。父级行:产品价格。颜色行:该颜色的价格。",
+            "example": "9.80"
+          },
+          "colorHex": {
+            "meaning": "颜色的十六进制代码:# 后跟恰好 6 位数字或字母 A-F。在父级行中设置默认颜色;在颜色行中设置该颜色。",
+            "example": "#2E7D32"
+          },
+          "colorName": {
+            "meaning": "颜色英文名称。父级行:默认颜色。颜色行:该颜色。",
+            "example": "Forest green"
+          },
+          "colorNamePT": {
+            "meaning": "颜色巴西葡萄牙语名称。父级行:默认颜色。颜色行:该颜色。",
+            "example": "Verde floresta"
+          },
+          "colorNameES": {
+            "meaning": "颜色西班牙语名称。父级行:默认颜色。颜色行:该颜色。",
+            "example": "Verde bosque"
+          },
+          "colorNameZH": {
+            "meaning": "颜色简体中文名称。父级行:默认颜色。颜色行:该颜色。",
+            "example": "森林绿"
+          },
+          "variantPriceUSD": {
+            "meaning": "仅限颜色行:该颜色的美元价格,仅限数字,不含千位分隔符。优先于 Price USD。不用于父级行。",
+            "example": "10.50"
+          },
+          "variantImage": {
+            "meaning": "仅限颜色行:该颜色的图片,为 https:// 链接或以 / 开头的站内路径。图片不会复制到媒体库,且主机不在店面允许列表中时会发出警告。在父级行中会被忽略并提示。",
+            "example": "https://example.com/images/demo-green.jpg"
+          },
+          "newSKU": {
+            "meaning": "仅限颜色行:该颜色的新 SKU。颜色保留其 id。在父级行中会被忽略并提示。",
+            "example": "DEMO-001-GRN"
+          },
+          "sortOrder": {
+            "meaning": "仅限颜色行:颜色的显示顺序,0 或更大的整数。",
+            "example": "1"
+          }
+        },
+        "rule4": "小数分隔符请使用点号(10.50)。在 CSV 文件中,使用逗号作为小数点的数值必须加引号(\"10,50\"),否则请使用点号。不要使用千位分隔符。"
+      }
     }
   },
   "taxonomy": {

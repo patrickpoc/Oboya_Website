@@ -11,7 +11,7 @@ import { compactImages, withAlignedImages } from "@/lib/cms/bulk-import/images";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { CmsStatus } from "@/lib/cms/types";
 import { parseSaleMode } from "@/lib/cms/bulk-update/spreadsheet";
-import { parsePriceInput } from "@/lib/cms/parse-price";
+import { parsePriceInput, type PriceCurrencyHint } from "@/lib/cms/parse-price";
 
 export const IMPORT_SPREADSHEET_HEADERS = [
   "sku",
@@ -211,6 +211,27 @@ export function parseImportSpreadsheetBuffer(
   return { records, errors: [] };
 }
 
+function parseImportPrice(
+  raw: string | undefined,
+  currency: PriceCurrencyHint,
+  label: string,
+  rowNumber: number,
+  sku: string,
+  errors: SpreadsheetImportError[]
+): number {
+  const value = raw?.trim();
+  if (!value) return 0;
+  const parsed = parsePriceInput(value, currency);
+  if (typeof parsed === "number") return parsed;
+  errors.push({
+    row: rowNumber,
+    sku,
+    message: `Invalid ${label} "${value}". Price set to 0.`,
+    suggestedAction: "Use a non-negative number without thousands separators (e.g. 12.50).",
+  });
+  return 0;
+}
+
 function rowToProduct(
   cells: Partial<Record<ImportSpreadsheetHeader, string>>,
   catalog: ImportCatalog,
@@ -324,18 +345,9 @@ function rowToProduct(
       "zh-CN": cells.desc_zhCN ?? "",
     },
     prices: {
-      USD: (() => {
-        const parsed = parsePriceInput(cells.price_usd || "", "USD");
-        return typeof parsed === "number" ? parsed : 0;
-      })(),
-      BRL: (() => {
-        const parsed = parsePriceInput(cells.price_brl || "", "BRL");
-        return typeof parsed === "number" ? parsed : 0;
-      })(),
-      EUR: (() => {
-        const parsed = parsePriceInput(cells.price_eur || "", "EUR");
-        return typeof parsed === "number" ? parsed : 0;
-      })(),
+      USD: parseImportPrice(cells.price_usd, "USD", "price_usd", rowNumber, sku, errors),
+      BRL: parseImportPrice(cells.price_brl, "BRL", "price_brl", rowNumber, sku, errors),
+      EUR: parseImportPrice(cells.price_eur, "EUR", "price_eur", rowNumber, sku, errors),
     },
     stockQuantity: cells.stock_quantity
       ? Number(cells.stock_quantity) || 0

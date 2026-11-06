@@ -399,7 +399,127 @@
       "imagesEdit": "{count, plural, =0 {Adicionar imagens} one {Imagens (#)} other {Imagens (#)}}",
       "imagesHide": "Ocultar imagens",
       "imageSlot": "Imagem {n}",
-      "imagesHint": "Envie um arquivo, cole um link https ou escolha na biblioteca de mídia. Links de outros sites são copiados para a biblioteca de mídia na importação."
+      "imagesHint": "Envie um arquivo, cole um link https ou escolha na biblioteca de mídia. Links de outros sites são copiados para a biblioteca de mídia na importação.",
+      "instructions": {
+        "title": "Como preencher a planilha",
+        "intro": "Cada coluna abaixo aparece exatamente como no modelo. Os exemplos são dados genéricos: substitua pelos seus próprios dados.",
+        "rule1": "A linha 1 deve conter os nomes das colunas. Exclua a linha de exemplo antes de enviar. Colunas que o importador não reconhece são ignoradas; você pode omitir colunas opcionais.",
+        "rule2": "Um produto por linha, até {max} produtos. Linhas totalmente vazias são ignoradas.",
+        "rule3": "Nada é salvo ao enviar o arquivo. Você revisa e corrige os produtos na tabela e depois confirma a importação. A planilha não define mercados, então ative-os depois.",
+        "exampleLabel": "Exemplo:",
+        "requirement": {
+          "required": "Obrigatório",
+          "optional": "Opcional",
+          "atLeastOne": "Pelo menos um"
+        },
+        "columns": {
+          "sku": {
+            "meaning": "Código único do produto; também vira o ID do produto. Não pode já existir no catálogo nem se repetir no arquivo.",
+            "example": "DEMO-001"
+          },
+          "name_en": {
+            "meaning": "Nome do produto em inglês. Preencha pelo menos uma das quatro colunas de nome; os outros idiomas podem ficar em branco.",
+            "example": "Demo drip irrigation tape"
+          },
+          "name_ptBR": {
+            "meaning": "Nome do produto em português do Brasil. Pelo menos uma coluna de nome deve ser preenchida.",
+            "example": "Fita de irrigação demo"
+          },
+          "name_es": {
+            "meaning": "Nome do produto em espanhol. Pelo menos uma coluna de nome deve ser preenchida.",
+            "example": "Cinta de riego demo"
+          },
+          "name_zhCN": {
+            "meaning": "Nome do produto em chinês simplificado. Pelo menos uma coluna de nome deve ser preenchida.",
+            "example": "演示滴灌带"
+          },
+          "categoryId": {
+            "meaning": "Categoria, informada pelo id ou pelo nome exato (maiúsculas e minúsculas não importam); os valores devem corresponder ao seu catálogo. Se estiver em branco ou o valor for desconhecido, o produto é carregado na primeira categoria (um valor desconhecido também gera erro); corrija na pré-visualização.",
+            "example": "Irrigation"
+          },
+          "subcategoryId": {
+            "meaning": "Subcategoria, pelo id ou nome exato; os valores devem corresponder ao seu catálogo. Deve pertencer à categoria da mesma linha. Deixe em branco somente se a categoria também estiver em branco. Um valor desconhecido gera erro e a primeira subcategoria é usada.",
+            "example": "Drip tape"
+          },
+          "moq": {
+            "meaning": "Quantidade mínima de pedido: número inteiro igual ou maior que 1. Em branco equivale a 1. Um valor inválido também vira 1 e gera erro.",
+            "example": "10"
+          },
+          "price_usd": {
+            "meaning": "Preço unitário em dólares americanos. Somente números, sem símbolo de moeda e sem separadores de milhar. Em branco equivale a 0. Texto que não seja número vira 0 e gera erro.",
+            "example": "12.50"
+          },
+          "price_brl": {
+            "meaning": "Preço unitário em reais. Somente números, sem símbolo de moeda e sem separadores de milhar. Em arquivo CSV, decimal com vírgula deve estar entre aspas, ou use ponto. Em branco equivale a 0. Texto que não seja número vira 0 e gera erro.",
+            "example": "12.50"
+          },
+          "price_eur": {
+            "meaning": "Preço unitário em euros. Somente números, sem símbolo de moeda e sem separadores de milhar. Em branco equivale a 0. Texto que não seja número vira 0 e gera erro.",
+            "example": "11.90"
+          },
+          "stock_quantity": {
+            "meaning": "Unidades em estoque, como número inteiro. Se estiver em branco, nenhuma quantidade é registrada e o produto é considerado ilimitado, a menos que unlimited_stock seja 0. Texto que não seja número vira 0.",
+            "example": "250"
+          },
+          "unlimited_stock": {
+            "meaning": "1, true ou yes significa estoque ilimitado. 0 significa estoque limitado, usando stock_quantity. Qualquer outro valor, inclusive no, conta como em branco: o estoque é ilimitado quando stock_quantity está em branco; caso contrário, limitado.",
+            "example": "0"
+          },
+          "sale_mode": {
+            "meaning": "stock vende do estoque a preço fixo; quote significa sob consulta (RFQ). Também são aceitos: in stock, on request, request, rfq. Em branco equivale a stock. Qualquer outro valor vira stock e gera erro.",
+            "example": "stock"
+          },
+          "status": {
+            "meaning": "draft ou published (yes/no, true/false, 1/0 e on/off também funcionam). archived também é aceito. Em branco equivale a draft. Um valor não reconhecido vira draft silenciosamente.",
+            "example": "draft"
+          },
+          "main_image": {
+            "meaning": "Imagem principal: um link público https:// ou um caminho do site começando com /. Links http:// e outros tipos são rejeitados. Imagens https externas são copiadas para a biblioteca de mídia na importação; se uma cópia falhar, o produto não é importado.",
+            "example": "https://example.com/images/demo-product.jpg"
+          },
+          "image_2": {
+            "meaning": "Segunda imagem opcional. Mesmas regras de main_image. Células em branco são ignoradas.",
+            "example": "https://example.com/images/demo-product-2.jpg"
+          },
+          "image_3": {
+            "meaning": "Terceira imagem opcional. Mesmas regras de main_image. Células em branco são ignoradas.",
+            "example": "https://example.com/images/demo-product-3.jpg"
+          },
+          "short_en": {
+            "meaning": "Resumo curto em inglês, exibido nas listas de produtos. Se você preencher alguns idiomas e não todos, aparece um aviso e os em branco usam o inglês.",
+            "example": "Reliable tape for row crops."
+          },
+          "short_ptBR": {
+            "meaning": "Resumo curto em português do Brasil. Veja short_en.",
+            "example": "Fita confiável para lavouras."
+          },
+          "short_es": {
+            "meaning": "Resumo curto em espanhol. Veja short_en.",
+            "example": "Cinta fiable para cultivos."
+          },
+          "short_zhCN": {
+            "meaning": "Resumo curto em chinês simplificado. Veja short_en.",
+            "example": "适用于大田作物的可靠滴灌带。"
+          },
+          "desc_en": {
+            "meaning": "Descrição completa do produto em inglês.",
+            "example": "Demo description with features and usage notes."
+          },
+          "desc_ptBR": {
+            "meaning": "Descrição completa do produto em português do Brasil.",
+            "example": "Descrição demo com características e modo de uso."
+          },
+          "desc_es": {
+            "meaning": "Descrição completa do produto em espanhol.",
+            "example": "Descripción demo con características e instrucciones de uso."
+          },
+          "desc_zhCN": {
+            "meaning": "Descrição completa do produto em chinês simplificado.",
+            "example": "包含特点和使用说明的演示描述。"
+          }
+        },
+        "rule4": "Use ponto como separador decimal (12.50). Em arquivo CSV, decimal com vírgula deve estar entre aspas (\"12,50\"); caso contrário, use ponto. Não use separadores de milhar."
+      }
     },
     "bulkUpdate": {
       "title": "Atualização em massa",
@@ -776,7 +896,115 @@
       "colSortOrder": "Ordem",
       "imageUrlPlaceholder": "https://… ou /caminho",
       "openMediaLibrary": "Abrir biblioteca de mídia",
-      "productIssue": "Problema no produto"
+      "productIssue": "Problema no produto",
+      "instructions": {
+        "title": "Como preencher a planilha",
+        "intro": "Cada coluna abaixo aparece exatamente como no modelo. Os exemplos são dados genéricos: substitua pelos seus próprios dados.",
+        "rule1": "A linha 1 deve conter os nomes das colunas e a coluna SKU é obrigatória. Exclua as linhas de exemplo e de NOTES antes de enviar. A antiga coluna Brand é ignorada; qualquer outra coluna desconhecida faz o arquivo ser rejeitado.",
+        "rule2": "Células em branco mantêm o valor atual. Elas nunca limpam um campo, então preencha apenas as células que deseja alterar.",
+        "rule3": "Use uma linha de SKU pai para dados do produto e uma linha de SKU de cor para uma única cor; um SKU de cor carrega todo o seu grupo de cores. Até {max} produtos por vez. As alterações são pré-visualizadas e só aplicadas após a confirmação.",
+        "exampleLabel": "Exemplo:",
+        "requirement": {
+          "required": "Obrigatório",
+          "optional": "Opcional",
+          "atLeastOne": "Pelo menos um"
+        },
+        "columns": {
+          "sku": {
+            "meaning": "SKU de um produto pai existente ou de uma de suas cores. Obrigatório em todas as linhas, uma linha por SKU.",
+            "example": "DEMO-001"
+          },
+          "moq": {
+            "meaning": "Quantidade mínima de pedido: número inteiro igual ou maior que 1. Na linha pai define o produto; na linha de cor, somente aquela cor.",
+            "example": "100"
+          },
+          "category": {
+            "meaning": "Somente linhas-mãe. Id ou nome exato da categoria; os valores devem corresponder ao seu catálogo. Valores desconhecidos geram erro. Ao alterar a categoria, preencha também a subcategoria, a menos que a subcategoria atual do produto pertença à nova categoria.",
+            "example": "Irrigation"
+          },
+          "subcategory": {
+            "meaning": "Somente linhas-mãe. Id ou nome exato da subcategoria; os valores devem corresponder ao seu catálogo. Deve pertencer à categoria (a desta linha ou a atual do produto).",
+            "example": "Drip tape"
+          },
+          "application": {
+            "meaning": "Somente linhas-mãe. Uma ou mais aplicações da lista de filtros, por id ou rótulo, separadas por ; ou |; os valores devem corresponder ao seu catálogo. Substitui a lista atual; um valor desconhecido rejeita a célula.",
+            "example": "Drip irrigation;Greenhouse"
+          },
+          "cropCulture": {
+            "meaning": "Somente linhas-mãe. Uma ou mais culturas da lista de filtros, por id ou rótulo, separadas por ; ou |; os valores devem corresponder ao seu catálogo. Substitui a lista atual.",
+            "example": "Tomato;Lettuce"
+          },
+          "certifications": {
+            "meaning": "Somente linhas-mãe. Uma ou mais certificações da lista de filtros, por id ou rótulo, separadas por ; ou |; os valores devem corresponder ao seu catálogo. Substitui a lista atual.",
+            "example": "ISO 9001"
+          },
+          "countryOfManufacture": {
+            "meaning": "Somente linhas-mãe. Um único país de fabricação da lista de filtros, por id ou rótulo; os valores devem corresponder ao seu catálogo.",
+            "example": "Brazil"
+          },
+          "marketAvailability": {
+            "meaning": "Somente linhas pai. Códigos de país separados por ; ou |. Os mercados listados são ativados e todos os outros são desativados.",
+            "example": "BR;US"
+          },
+          "availableInShop": {
+            "meaning": "Somente linhas pai. yes, true, 1, published ou on publica o produto; no, false, 0, draft ou off o deixa como rascunho. Qualquer outro valor gera erro.",
+            "example": "yes"
+          },
+          "saleMode": {
+            "meaning": "Somente linhas pai. stock (ou In stock) vende a preço fixo; quote (ou On request, RFQ) significa preço sob consulta.",
+            "example": "stock"
+          },
+          "priceUSD": {
+            "meaning": "Preço em dólares americanos, somente números, sem separadores de milhar. Na linha-mãe é o preço do produto; na linha de cor é o preço dessa cor (Variant price USD prevalece se ambos forem preenchidos).",
+            "example": "10.50"
+          },
+          "priceBRL": {
+            "meaning": "Preço em reais, somente números, sem separadores de milhar. Em arquivo CSV, decimal com vírgula deve estar entre aspas, ou use ponto. Linha-mãe: preço do produto. Linha de cor: preço dessa cor.",
+            "example": "52.90"
+          },
+          "priceEUR": {
+            "meaning": "Preço em euros, somente números, sem separadores de milhar. Linha-mãe: preço do produto. Linha de cor: preço dessa cor.",
+            "example": "9.80"
+          },
+          "colorHex": {
+            "meaning": "Código hexadecimal da cor: # seguido de exatamente 6 dígitos ou letras A-F. Na linha-mãe define a cor padrão; na linha de cor define essa cor.",
+            "example": "#2E7D32"
+          },
+          "colorName": {
+            "meaning": "Nome da cor em inglês. Linha pai: cor padrão. Linha de cor: essa cor.",
+            "example": "Forest green"
+          },
+          "colorNamePT": {
+            "meaning": "Nome da cor em português do Brasil. Linha pai: cor padrão. Linha de cor: essa cor.",
+            "example": "Verde floresta"
+          },
+          "colorNameES": {
+            "meaning": "Nome da cor em espanhol. Linha pai: cor padrão. Linha de cor: essa cor.",
+            "example": "Verde bosque"
+          },
+          "colorNameZH": {
+            "meaning": "Nome da cor em chinês simplificado. Linha pai: cor padrão. Linha de cor: essa cor.",
+            "example": "森林绿"
+          },
+          "variantPriceUSD": {
+            "meaning": "Somente linhas de cor: preço em USD dessa cor, somente números, sem separadores de milhar. Tem prioridade sobre Price USD. Não é usado em linhas-mãe.",
+            "example": "10.50"
+          },
+          "variantImage": {
+            "meaning": "Somente linhas de cor: imagem dessa cor, como link https:// ou caminho do site começando com /. A imagem não é copiada para a biblioteca de mídia, e um host que não esteja na lista de permissões da loja gera um aviso. Na linha-mãe é ignorada e informada.",
+            "example": "https://example.com/images/demo-green.jpg"
+          },
+          "newSKU": {
+            "meaning": "Somente linhas de cor: novo SKU para essa cor. A cor mantém seu id. Na linha pai é ignorado e informado.",
+            "example": "DEMO-001-GRN"
+          },
+          "sortOrder": {
+            "meaning": "Somente linhas de cor: ordem de exibição da cor, número inteiro igual ou maior que 0.",
+            "example": "1"
+          }
+        },
+        "rule4": "Use ponto como separador decimal (10.50). Em arquivo CSV, decimal com vírgula deve estar entre aspas (\"10,50\"); caso contrário, use ponto. Não use separadores de milhar."
+      }
     }
   },
   "taxonomy": {

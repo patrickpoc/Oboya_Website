@@ -399,7 +399,127 @@
       "imagesEdit": "{count, plural, =0 {Añadir imágenes} one {Imágenes (#)} other {Imágenes (#)}}",
       "imagesHide": "Ocultar imágenes",
       "imageSlot": "Imagen {n}",
-      "imagesHint": "Suba un archivo, pegue un enlace https o elija de la biblioteca multimedia. Los enlaces de otros sitios se copian a la biblioteca multimedia al importar."
+      "imagesHint": "Suba un archivo, pegue un enlace https o elija de la biblioteca multimedia. Los enlaces de otros sitios se copian a la biblioteca multimedia al importar.",
+      "instructions": {
+        "title": "Cómo completar la hoja de cálculo",
+        "intro": "Cada columna a continuación aparece exactamente como en la plantilla. Los ejemplos son datos genéricos: reemplácelos por los suyos.",
+        "rule1": "La fila 1 debe contener los nombres de las columnas. Elimine la fila de ejemplo antes de subir el archivo. Las columnas que el importador no reconoce se ignoran; puede omitir las columnas opcionales.",
+        "rule2": "Un producto por fila, hasta {max} productos. Las filas totalmente vacías se omiten.",
+        "rule3": "No se guarda nada al subir el archivo. Usted revisa y corrige los productos en la tabla y luego confirma la importación. La hoja no define mercados, así que actívelos después.",
+        "exampleLabel": "Ejemplo:",
+        "requirement": {
+          "required": "Obligatorio",
+          "optional": "Opcional",
+          "atLeastOne": "Al menos uno"
+        },
+        "columns": {
+          "sku": {
+            "meaning": "Código único del producto; también se convierte en el ID del producto. No debe existir ya en el catálogo ni repetirse en el archivo.",
+            "example": "DEMO-001"
+          },
+          "name_en": {
+            "meaning": "Nombre del producto en inglés. Complete al menos una de las cuatro columnas de nombre; los demás idiomas pueden quedar en blanco.",
+            "example": "Demo drip irrigation tape"
+          },
+          "name_ptBR": {
+            "meaning": "Nombre del producto en portugués de Brasil. Al menos una columna de nombre debe estar completa.",
+            "example": "Fita de irrigação demo"
+          },
+          "name_es": {
+            "meaning": "Nombre del producto en español. Al menos una columna de nombre debe estar completa.",
+            "example": "Cinta de riego demo"
+          },
+          "name_zhCN": {
+            "meaning": "Nombre del producto en chino simplificado. Al menos una columna de nombre debe estar completa.",
+            "example": "演示滴灌带"
+          },
+          "categoryId": {
+            "meaning": "Categoría, indicada por su id o su nombre exacto (no distingue mayúsculas de minúsculas); los valores deben coincidir con su catálogo. Si está vacío o el valor es desconocido, el producto se carga en la primera categoría (un valor desconocido también genera un error); corríjalo en la vista previa.",
+            "example": "Irrigation"
+          },
+          "subcategoryId": {
+            "meaning": "Subcategoría, por su id o nombre exacto; los valores deben coincidir con su catálogo. Debe pertenecer a la categoría de la misma fila. Déjela vacía solo si la categoría también está vacía. Un valor desconocido genera un error y se usa la primera subcategoría.",
+            "example": "Drip tape"
+          },
+          "moq": {
+            "meaning": "Cantidad mínima de pedido: un número entero de 1 o más. Vacío equivale a 1. Un valor no válido también pasa a 1 y genera un error.",
+            "example": "10"
+          },
+          "price_usd": {
+            "meaning": "Precio unitario en dólares estadounidenses. Solo números, sin símbolo de moneda ni separadores de miles. Vacío equivale a 0. El texto que no sea un número pasa a 0 y genera un error.",
+            "example": "12.50"
+          },
+          "price_brl": {
+            "meaning": "Precio unitario en reales brasileños. Solo números, sin símbolo de moneda ni separadores de miles. En un archivo CSV, un decimal con coma debe ir entre comillas, o use punto. Vacío equivale a 0. El texto que no sea un número pasa a 0 y genera un error.",
+            "example": "12.50"
+          },
+          "price_eur": {
+            "meaning": "Precio unitario en euros. Solo números, sin símbolo de moneda ni separadores de miles. Vacío equivale a 0. El texto que no sea un número pasa a 0 y genera un error.",
+            "example": "11.90"
+          },
+          "stock_quantity": {
+            "meaning": "Unidades en existencias, como número entero. Si está vacío, no se registra ninguna cantidad y el producto se considera ilimitado, salvo que unlimited_stock sea 0. El texto que no sea un número pasa a 0.",
+            "example": "250"
+          },
+          "unlimited_stock": {
+            "meaning": "1, true o yes significa existencias ilimitadas. 0 significa existencias limitadas, según stock_quantity. Cualquier otro valor, incluido no, cuenta como vacío: las existencias son ilimitadas cuando stock_quantity está vacío; de lo contrario, limitadas.",
+            "example": "0"
+          },
+          "sale_mode": {
+            "meaning": "stock vende desde existencias a precio fijo; quote significa bajo pedido (RFQ). También se aceptan: in stock, on request, request, rfq. Vacío equivale a stock. Cualquier otro valor pasa a stock y genera un error.",
+            "example": "stock"
+          },
+          "status": {
+            "meaning": "draft o published (yes/no, true/false, 1/0 y on/off también funcionan). También se acepta archived. Vacío equivale a draft. Un valor no reconocido pasa a draft sin aviso.",
+            "example": "draft"
+          },
+          "main_image": {
+            "meaning": "Imagen principal: un enlace público https:// o una ruta del sitio que empiece con /. Los enlaces http:// y otros tipos se rechazan. Las imágenes https externas se copian a la biblioteca de medios al importar; si falla una copia, ese producto no se importa.",
+            "example": "https://example.com/images/demo-product.jpg"
+          },
+          "image_2": {
+            "meaning": "Segunda imagen opcional. Mismas reglas que main_image. Las celdas en blanco se omiten.",
+            "example": "https://example.com/images/demo-product-2.jpg"
+          },
+          "image_3": {
+            "meaning": "Tercera imagen opcional. Mismas reglas que main_image. Las celdas en blanco se omiten.",
+            "example": "https://example.com/images/demo-product-3.jpg"
+          },
+          "short_en": {
+            "meaning": "Resumen corto en inglés, que se muestra en las listas de productos. Si completa algunos idiomas y no todos, aparece una advertencia y los que estén en blanco usan el inglés.",
+            "example": "Reliable tape for row crops."
+          },
+          "short_ptBR": {
+            "meaning": "Resumen corto en portugués de Brasil. Véase short_en.",
+            "example": "Fita confiável para lavouras."
+          },
+          "short_es": {
+            "meaning": "Resumen corto en español. Véase short_en.",
+            "example": "Cinta fiable para cultivos."
+          },
+          "short_zhCN": {
+            "meaning": "Resumen corto en chino simplificado. Véase short_en.",
+            "example": "适用于大田作物的可靠滴灌带。"
+          },
+          "desc_en": {
+            "meaning": "Descripción completa del producto en inglés.",
+            "example": "Demo description with features and usage notes."
+          },
+          "desc_ptBR": {
+            "meaning": "Descripción completa del producto en portugués de Brasil.",
+            "example": "Descrição demo com características e modo de uso."
+          },
+          "desc_es": {
+            "meaning": "Descripción completa del producto en español.",
+            "example": "Descripción demo con características e instrucciones de uso."
+          },
+          "desc_zhCN": {
+            "meaning": "Descripción completa del producto en chino simplificado.",
+            "example": "包含特点和使用说明的演示描述。"
+          }
+        },
+        "rule4": "Use punto como separador decimal (12.50). En un archivo CSV, un decimal con coma debe ir entre comillas (\"12,50\"); de lo contrario, use punto. No use separadores de miles."
+      }
     },
     "bulkUpdate": {
       "title": "Actualización masiva",
@@ -776,7 +896,115 @@
       "colSortOrder": "Orden",
       "imageUrlPlaceholder": "https://… o /ruta",
       "openMediaLibrary": "Abrir biblioteca multimedia",
-      "productIssue": "Problema del producto"
+      "productIssue": "Problema del producto",
+      "instructions": {
+        "title": "Cómo completar la hoja de cálculo",
+        "intro": "Cada columna a continuación aparece exactamente como en la plantilla. Los ejemplos son datos genéricos: reemplácelos por los suyos.",
+        "rule1": "La fila 1 debe contener los nombres de las columnas y la columna SKU es obligatoria. Elimine las filas de ejemplo y de NOTES antes de subir el archivo. La antigua columna Brand se ignora; cualquier otra columna desconocida provoca el rechazo del archivo.",
+        "rule2": "Las celdas en blanco conservan el valor actual. Nunca borran un campo, así que complete solo las celdas que quiera cambiar.",
+        "rule3": "Use una fila de SKU padre para datos del producto y una fila de SKU de color para un solo color; un SKU de color carga todo su grupo de colores. Hasta {max} productos a la vez. Los cambios se previsualizan y solo se aplican tras confirmar.",
+        "exampleLabel": "Ejemplo:",
+        "requirement": {
+          "required": "Obligatorio",
+          "optional": "Opcional",
+          "atLeastOne": "Al menos uno"
+        },
+        "columns": {
+          "sku": {
+            "meaning": "SKU de un producto padre existente o de uno de sus colores. Obligatorio en cada fila, una fila por SKU.",
+            "example": "DEMO-001"
+          },
+          "moq": {
+            "meaning": "Cantidad mínima de pedido: un número entero de 1 o más. En una fila padre define el producto; en una fila de color, solo ese color.",
+            "example": "100"
+          },
+          "category": {
+            "meaning": "Solo filas principales. Id o nombre exacto de la categoría; los valores deben coincidir con su catálogo. Los valores desconocidos generan un error. Al cambiar la categoría, complete también la subcategoría, salvo que la subcategoría actual del producto pertenezca a la nueva categoría.",
+            "example": "Irrigation"
+          },
+          "subcategory": {
+            "meaning": "Solo filas principales. Id o nombre exacto de la subcategoría; los valores deben coincidir con su catálogo. Debe pertenecer a la categoría (la de esta fila o la actual del producto).",
+            "example": "Drip tape"
+          },
+          "application": {
+            "meaning": "Solo filas principales. Una o más aplicaciones de la lista de filtros, por id o etiqueta, separadas por ; o |; los valores deben coincidir con su catálogo. Reemplaza la lista actual; un valor desconocido rechaza la celda.",
+            "example": "Drip irrigation;Greenhouse"
+          },
+          "cropCulture": {
+            "meaning": "Solo filas principales. Uno o más cultivos de la lista de filtros, por id o etiqueta, separados por ; o |; los valores deben coincidir con su catálogo. Reemplaza la lista actual.",
+            "example": "Tomato;Lettuce"
+          },
+          "certifications": {
+            "meaning": "Solo filas principales. Una o más certificaciones de la lista de filtros, por id o etiqueta, separadas por ; o |; los valores deben coincidir con su catálogo. Reemplaza la lista actual.",
+            "example": "ISO 9001"
+          },
+          "countryOfManufacture": {
+            "meaning": "Solo filas principales. Un único país de fabricación de la lista de filtros, por id o etiqueta; los valores deben coincidir con su catálogo.",
+            "example": "Brazil"
+          },
+          "marketAvailability": {
+            "meaning": "Solo filas padre. Códigos de país separados por ; o |. Los mercados indicados se activan y todos los demás se desactivan.",
+            "example": "BR;US"
+          },
+          "availableInShop": {
+            "meaning": "Solo filas padre. yes, true, 1, published u on publica el producto; no, false, 0, draft u off lo deja como borrador. Cualquier otro valor genera un error.",
+            "example": "yes"
+          },
+          "saleMode": {
+            "meaning": "Solo filas padre. stock (o In stock) vende a precio fijo; quote (u On request, RFQ) significa precio bajo consulta.",
+            "example": "stock"
+          },
+          "priceUSD": {
+            "meaning": "Precio en dólares estadounidenses, solo números, sin separadores de miles. En una fila principal es el precio del producto; en una fila de color es el precio de ese color (Variant price USD prevalece si se rellenan ambos).",
+            "example": "10.50"
+          },
+          "priceBRL": {
+            "meaning": "Precio en reales brasileños, solo números, sin separadores de miles. En un archivo CSV, un decimal con coma debe ir entre comillas, o use punto. Fila principal: precio del producto. Fila de color: precio de ese color.",
+            "example": "52.90"
+          },
+          "priceEUR": {
+            "meaning": "Precio en euros, solo números, sin separadores de miles. Fila principal: precio del producto. Fila de color: precio de ese color.",
+            "example": "9.80"
+          },
+          "colorHex": {
+            "meaning": "Código hexadecimal del color: # seguido de exactamente 6 dígitos o letras A-F. En una fila principal define el color predeterminado; en una fila de color define ese color.",
+            "example": "#2E7D32"
+          },
+          "colorName": {
+            "meaning": "Nombre del color en inglés. Fila padre: color predeterminado. Fila de color: ese color.",
+            "example": "Forest green"
+          },
+          "colorNamePT": {
+            "meaning": "Nombre del color en portugués de Brasil. Fila padre: color predeterminado. Fila de color: ese color.",
+            "example": "Verde floresta"
+          },
+          "colorNameES": {
+            "meaning": "Nombre del color en español. Fila padre: color predeterminado. Fila de color: ese color.",
+            "example": "Verde bosque"
+          },
+          "colorNameZH": {
+            "meaning": "Nombre del color en chino simplificado. Fila padre: color predeterminado. Fila de color: ese color.",
+            "example": "森林绿"
+          },
+          "variantPriceUSD": {
+            "meaning": "Solo filas de color: precio en USD de ese color, solo números, sin separadores de miles. Tiene prioridad sobre Price USD. No se usa en filas principales.",
+            "example": "10.50"
+          },
+          "variantImage": {
+            "meaning": "Solo filas de color: imagen de ese color, como enlace https:// o ruta del sitio que empiece por /. La imagen no se copia a la biblioteca multimedia, y un host que no esté en la lista de permitidos de la tienda genera una advertencia. En una fila principal se ignora y se informa.",
+            "example": "https://example.com/images/demo-green.jpg"
+          },
+          "newSKU": {
+            "meaning": "Solo filas de color: nuevo SKU para ese color. El color conserva su id. En una fila padre se ignora y se informa.",
+            "example": "DEMO-001-GRN"
+          },
+          "sortOrder": {
+            "meaning": "Solo filas de color: orden de visualización del color, un número entero de 0 o más.",
+            "example": "1"
+          }
+        },
+        "rule4": "Use punto como separador decimal (10.50). En un archivo CSV, un decimal con coma debe ir entre comillas (\"10,50\"); de lo contrario, use punto. No use separadores de miles."
+      }
     }
   },
   "taxonomy": {

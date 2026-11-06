@@ -4,6 +4,8 @@ import { Download, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { SpreadsheetInstructions } from "@/components/admin/marketplace/SpreadsheetInstructions";
+import { IMPORT_COLUMN_REQUIREMENT } from "@/lib/cms/spreadsheet-instructions";
 import {
   BULK_IMPORT_MAX_PRODUCTS,
   type ImportCatalog,
@@ -12,6 +14,7 @@ import {
 import {
   buildImportWorkspaceFromRecords,
   downloadBulkImportTemplate,
+  IMPORT_SPREADSHEET_HEADERS,
   parseImportSpreadsheetFile,
 } from "@/lib/cms/bulk-import/parse-spreadsheet";
 
@@ -112,6 +115,13 @@ export function SpreadsheetImportPanel({ catalog, disabled, onLoaded }: Props) {
           ))}
         </div>
       )}
+
+      <SpreadsheetInstructions
+        namespace="admin.products.bulkImport"
+        headers={IMPORT_SPREADSHEET_HEADERS}
+        requirements={IMPORT_COLUMN_REQUIREMENT}
+        max={BULK_IMPORT_MAX_PRODUCTS}
+      />
     </div>
   );
 }
