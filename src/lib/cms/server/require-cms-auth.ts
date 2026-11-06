@@ -143,8 +143,7 @@ const resolveCmsSessionUser = cache(async (): Promise<CmsAuthResult> => {
 /** Cold start with an unreadable access matrix: fail closed instead of guessing permissions. */
 async function accessUnavailable(): Promise<CmsAuthFail | null> {
   try {
-    const unavailable = await accessUnavailable();
-  if (unavailable) return unavailable;
+    await ensureAccessControlHydrated();
     return null;
   } catch (error) {
     console.error("Access control unavailable:", error);
