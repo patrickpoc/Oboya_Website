@@ -1,3 +1,6 @@
+-- !! DO NOT RUN after migration 20261105_cms_profile_privilege_guard. !!
+-- This legacy script recreates the old permissive profile policies/trigger (and, for
+-- unlock-users-admin.sql, the ensure_cms_super_admin() function) and would undo the guard.
 -- =============================================================================
 -- FIX (idempotent): CMS user profiles for Admin Users & Permissions
 -- Safe to run many times. Never errors on "policy already exists".

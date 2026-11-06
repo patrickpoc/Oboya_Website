@@ -1,3 +1,6 @@
+-- !! DO NOT RUN after migration 20261105_cms_profile_privilege_guard. !!
+-- This legacy script recreates the old permissive profile policies/trigger (and, for
+-- unlock-users-admin.sql, the ensure_cms_super_admin() function) and would undo the guard.
 -- Extended CMS schema for Oboya Admin
 -- Run after the base schema in supabase/schema.sql
 
