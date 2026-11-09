@@ -123,6 +123,7 @@
   "items": "items",
   "emptyQuote": "Your quote list is empty. Add products to request a quotation.",
   "allCountries": "All countries",
+  "globalMarket": "Global",
   "localPriceOnly": "Local price only",
   "selectCountryForPrice": "Select a country to see the price.",
   "allCountriesPriceNote": "Prices shown in USD. Select a country for local prices and availability.",

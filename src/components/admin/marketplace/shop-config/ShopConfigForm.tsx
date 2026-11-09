@@ -346,6 +346,7 @@ export function ShopConfigForm({ value, onChange, countries }: Props) {
                 if (next === "__none__") {
                   patch({
                     market: {
+                      ...value.market,
                       defaultCountryCode: null,
                       defaultCurrencyCode: null,
                     },
@@ -355,6 +356,7 @@ export function ShopConfigForm({ value, onChange, countries }: Props) {
                 const country = countries.find((item) => item.code === next);
                 patch({
                   market: {
+                    ...value.market,
                     defaultCountryCode: next,
                     defaultCurrencyCode:
                       country?.defaultCurrency?.toUpperCase() ?? null,

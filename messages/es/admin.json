@@ -2219,7 +2219,14 @@
     "saveFailed": "No se pudieron guardar las monedas.",
     "invalidCode": "El código de moneda debe tener de 3 a 6 letras mayúsculas.",
     "alreadyExists": "Esta moneda ya existe.",
-    "toggleAria": "Alternar {code} para {country}"
+    "toggleAria": "Alternar {code} para {country}",
+    "globalTitle": "Visualización Global",
+    "globalHint": "Temporal: el país seleccionado se muestra a los visitantes de la tienda como \"Global\" con un icono de globo. Los precios, la moneda, la URL y las cotizaciones siguen usando el país real.",
+    "globalLabel": "País mostrado como Global",
+    "globalNone": "Ninguno",
+    "globalSaved": "Visualización Global guardada.",
+    "globalSaveFailed": "No se pudo guardar la visualización Global.",
+    "globalResetNotice": "El país Global fue desactivado o eliminado, por lo que la visualización Global se estableció en Ninguno."
   },
   "checkout": {
     "title": "Página de cotización",

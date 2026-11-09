@@ -2219,7 +2219,14 @@
     "saveFailed": "Could not save currencies.",
     "invalidCode": "Currency code must have 3-6 uppercase letters.",
     "alreadyExists": "This currency already exists.",
-    "toggleAria": "Toggle {code} for {country}"
+    "toggleAria": "Toggle {code} for {country}",
+    "globalTitle": "Global display",
+    "globalHint": "Temporary: the selected country is shown to shop visitors as \"Global\" with a globe icon. Prices, currency, URL and quotes still use the real country.",
+    "globalLabel": "Country shown as Global",
+    "globalNone": "None",
+    "globalSaved": "Global display saved.",
+    "globalSaveFailed": "Could not save the Global display.",
+    "globalResetNotice": "The Global country was deactivated or removed, so Global display was set to None."
   },
   "checkout": {
     "title": "Checkout page",

@@ -123,6 +123,7 @@
   "items": "artículos",
   "emptyQuote": "Su lista de cotización está vacía. Añada productos para solicitar una cotización.",
   "allCountries": "Todos los países",
+  "globalMarket": "Global",
   "localPriceOnly": "Solo precio local",
   "selectCountryForPrice": "Seleccione un país para ver el precio.",
   "allCountriesPriceNote": "Precios en USD. Seleccione un país para ver precios locales y disponibilidad.",

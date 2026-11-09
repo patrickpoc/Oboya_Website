@@ -123,6 +123,7 @@
   "items": "itens",
   "emptyQuote": "Sua lista de cotação está vazia. Adicione produtos para solicitar uma cotação.",
   "allCountries": "Todos os países",
+  "globalMarket": "Global",
   "localPriceOnly": "Somente preço local",
   "selectCountryForPrice": "Selecione um país para ver o preço.",
   "allCountriesPriceNote": "Preços exibidos em USD. Selecione um país para ver preços locais e disponibilidade.",

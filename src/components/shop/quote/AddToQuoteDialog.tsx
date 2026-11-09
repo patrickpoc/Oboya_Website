@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useShop } from "@/contexts/ShopContext";
 import { useProductName } from "@/lib/shop/use-product-name";
+import { isGlobalMarket } from "@/lib/shop/global-market";
 import { getProductMoq } from "@/lib/shop/quantity";
 import {
   getActiveVariant,
@@ -43,6 +44,7 @@ export function AddToQuoteDialog() {
     isAllCountries,
     countries,
     getProductById,
+    shopConfig,
   } = useShop();
   const getProductName = useProductName();
   const [quantity, setQuantity] = useState(1);
@@ -165,7 +167,9 @@ export function AddToQuoteDialog() {
                   </option>
                   {marketOptions.map((country) => (
                     <option key={country.code} value={country.code}>
-                      {country.name}
+                      {isGlobalMarket(country.code, shopConfig.market.globalCountryCode)
+                        ? t("globalMarket")
+                        : country.name}
                     </option>
                   ))}
                 </select>

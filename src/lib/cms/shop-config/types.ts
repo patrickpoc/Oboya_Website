@@ -46,5 +46,7 @@ export type ShopConfig = {
   market: {
     defaultCountryCode: string | null;
     defaultCurrencyCode: string | null;
+    /** Temporary: country shown to shop visitors as "Global" (display only). */
+    globalCountryCode: string | null;
   };
 };

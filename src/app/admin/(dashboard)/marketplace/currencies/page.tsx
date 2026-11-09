@@ -28,6 +28,7 @@ import type { StoreCountry } from "@/lib/cms/marketplace-countries";
 import { useMapLocations } from "@/lib/shop/use-map-locations";
 
 const NO_OFFICE = "__none__";
+const NO_GLOBAL = "__none__";
 
 export default function Page() {
   const t = useTranslations("admin.currencies");
@@ -45,16 +46,22 @@ export default function Page() {
   const [addOpen, setAddOpen] = useState(false);
   const [addQuery, setAddQuery] = useState("");
   const [removing, setRemoving] = useState<StoreCountry | null>(null);
+  const [savedGlobal, setSavedGlobal] = useState<string | null>(null);
+  const [globalCode, setGlobalCode] = useState<string | null>(null);
   const { data: mapData } = useMapLocations();
 
   const load = useCallback(async () => {
     setLoading(true);
     setLoadFailed(false);
     try {
-      const response = await fetch("/api/cms/marketplace/currencies?forEdit=1", {
-        cache: "no-store",
-      });
-      if (!response.ok) throw new Error(t("loadFailed"));
+      const [response, globalResponse] = await Promise.all([
+        fetch("/api/cms/marketplace/currencies?forEdit=1", { cache: "no-store" }),
+        fetch("/api/cms/marketplace/global-market?forEdit=1", { cache: "no-store" }),
+      ]);
+      if (!response.ok || !globalResponse.ok) throw new Error(t("loadFailed"));
+      const globalPayload = (await globalResponse.json()) as { globalCountryCode: string | null };
+      setSavedGlobal(globalPayload.globalCountryCode);
+      setGlobalCode(globalPayload.globalCountryCode);
       const payload = (await response.json()) as {
         countries: StoreCountry[];
         currencies: string[];
@@ -75,6 +82,19 @@ export default function Page() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount; the loader sets loading state before awaiting the API
     void load();
   }, [load]);
+
+  const activeCountries = useMemo(
+    () => countries.filter((country) => country.active !== false),
+    [countries]
+  );
+  // A Global country that was deactivated/removed on screen falls back to None.
+  const effectiveGlobal =
+    globalCode && activeCountries.some((country) => country.code === globalCode)
+      ? globalCode
+      : null;
+  const globalReset = globalCode !== null && effectiveGlobal === null;
+  // Only an admin change counts; a stale saved code on load must not trigger the guard.
+  const globalDirty = globalCode !== savedGlobal || (dirty && globalReset);
 
   const currencySet = useMemo(() => new Set(currencies), [currencies]);
 
@@ -128,9 +148,45 @@ export default function Page() {
     setAddQuery("");
   };
 
+  const saveGlobal = async (code: string | null) => {
+    const response = await fetch("/api/cms/marketplace/global-market", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ globalCountryCode: code }),
+    });
+    const payload = (await response.json().catch(() => null)) as {
+      error?: string;
+      globalCountryCode?: string | null;
+    } | null;
+    if (!response.ok) throw new Error(payload?.error ?? t("globalSaveFailed"));
+    const next = payload?.globalCountryCode ?? null;
+    setSavedGlobal(next);
+    setGlobalCode(next);
+    toast.success(t("globalSaved"));
+  };
+
   const save = async () => {
     setSaving(true);
     try {
+      const finalCountries = dirty ? await saveCurrencies() : countries;
+      if (globalDirty) {
+        // Recompute from what the server kept: a held (pending) deactivation must not reset Global.
+        const code =
+          globalCode &&
+          finalCountries.some((country) => country.code === globalCode && country.active !== false)
+            ? globalCode
+            : null;
+        if (code !== savedGlobal) await saveGlobal(code);
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("saveFailed"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const saveCurrencies = async (): Promise<StoreCountry[]> => {
+    {
       const response = await fetch("/api/cms/marketplace/currencies", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -142,18 +198,17 @@ export default function Page() {
         pendingApproval?: unknown;
       } | null;
       if (!response.ok) throw new Error(payload?.error ?? t("saveFailed"));
+      let kept = countries;
       if (payload?.pendingApproval) {
         // Held deactivations/removals stay as they are until approved.
         if (payload.countries) setCountries(payload.countries);
+        kept = payload.countries ?? countries;
         toast.success(tApprovals(response.status === 202 ? "toast.submitted" : "toast.partial"));
       } else {
         toast.success(t("saved"));
       }
       setDirty(false);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("saveFailed"));
-    } finally {
-      setSaving(false);
+      return kept;
     }
   };
 
@@ -179,6 +234,32 @@ export default function Page() {
       ) : (
       <Card>
         <CardContent className="space-y-6 py-6">
+          <div className="rounded-lg border border-border/60 p-4">
+            <p className="mb-1 text-sm font-semibold">{t("globalTitle")}</p>
+            <p className="mb-3 text-xs text-muted-foreground">{t("globalHint")}</p>
+            <p className="mb-1 text-xs text-muted-foreground">{t("globalLabel")}</p>
+            <Select
+              value={effectiveGlobal ?? NO_GLOBAL}
+              onValueChange={(next) => setGlobalCode(next && next !== NO_GLOBAL ? next : null)}
+            >
+              <SelectTrigger className="h-9 w-full max-w-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_GLOBAL}>{t("globalNone")}</SelectItem>
+                {activeCountries.map((country) => (
+                  <SelectItem key={country.code} value={country.code}>
+                    <CountryFlag code={country.code} className="h-4 w-6 rounded-sm" />
+                    {country.name} ({country.code})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {globalReset && (
+              <p className="mt-2 text-xs text-oboya-orange">{t("globalResetNotice")}</p>
+            )}
+          </div>
+
           <div className="rounded-lg border border-border/60 p-4">
             <p className="mb-2 text-sm font-semibold">{t("registry")}</p>
             <div className="mb-3 flex flex-wrap gap-2">
@@ -432,7 +513,7 @@ export default function Page() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <EditorGuard dirty={dirty} saving={saving} onSave={() => void save()} />
+      <EditorGuard dirty={dirty || globalDirty} saving={saving} onSave={() => void save()} />
     </Can>
   );
 }

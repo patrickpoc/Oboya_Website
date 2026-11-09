@@ -232,4 +232,39 @@ describe("shop config", () => {
     expect((await readMarketplaceShopConfigStrict()).market.defaultCountryCode).toBe("BR");
     expect((await saveMarketplaceShopConfig(shop)).market.defaultCountryCode).toBe("BR");
   });
+
+  it("shop config save keeps the stored global country", async () => {
+    const stored = { market: { ...shop.market, globalCountryCode: "BR" } };
+    readCmsDocumentStrict.mockImplementation(async (id: string) =>
+      id === "marketplace-currencies" ? currenciesDoc : stored
+    );
+    const { saveMarketplaceShopConfig } = await load();
+    const saved = await saveMarketplaceShopConfig({
+      market: { ...shop.market, globalCountryCode: "US" },
+    });
+    expect(saved.market.globalCountryCode).toBe("BR");
+    expect((await saveMarketplaceShopConfig(shop)).market.globalCountryCode).toBe("BR");
+  });
+
+  it("saveMarketplaceGlobalCountry writes only the shop config doc", async () => {
+    readCmsDocumentStrict.mockImplementation(async (id: string) =>
+      id === "marketplace-currencies" ? currenciesDoc : shop
+    );
+    const { saveMarketplaceGlobalCountry } = await load();
+    const { config: saved, previous } = await saveMarketplaceGlobalCountry("US");
+    expect(previous).toBeNull();
+    expect(saved.market.globalCountryCode).toBe("US");
+    expect(saved.market.defaultCountryCode).toBe("BR");
+    expect(writeCmsDocumentData).toHaveBeenCalledTimes(1);
+    expect(writeCmsDocumentData.mock.calls[0][0]).toBe("marketplace-shop-config");
+    expect(updateProductPrices).not.toHaveBeenCalled();
+  });
+
+  it("saveMarketplaceGlobalCountry aborts when the strict read fails", async () => {
+    const { CmsReadError } = await import("@/lib/cms/server/strict-read");
+    readCmsDocumentStrict.mockRejectedValue(new CmsReadError());
+    const { saveMarketplaceGlobalCountry } = await load();
+    await expect(saveMarketplaceGlobalCountry("US")).rejects.toThrow();
+    expect(writeCmsDocumentData).not.toHaveBeenCalled();
+  });
 });

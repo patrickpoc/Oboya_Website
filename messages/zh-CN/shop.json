@@ -123,6 +123,7 @@
   "items": "项",
   "emptyQuote": "询价清单是空的。请添加产品以申请报价。",
   "allCountries": "所有国家",
+  "globalMarket": "全球",
   "localPriceOnly": "仅限本地价格",
   "selectCountryForPrice": "请选择国家以查看价格。",
   "allCountriesPriceNote": "价格以 USD 显示。选择国家可查看本地价格和供应情况。",

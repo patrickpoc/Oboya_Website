@@ -13,6 +13,7 @@ import {
   readFailureResponse,
 } from "@/lib/cms/server/strict-read";
 import { noStoreHeaders } from "@/lib/security/http-cache";
+import { publicApiError } from "@/lib/security/public-error";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -42,7 +43,10 @@ export async function PUT(request: Request) {
     const auth = await cmsGuard("marketplace", "edit");
     if ("response" in auth) return auth.response;
 
-    const payload = (await request.json()) as ShopConfig;
+    const payload = (await request.json().catch(() => null)) as ShopConfig | null;
+    if (!payload || typeof payload !== "object") {
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    }
     const validationError = validateShopConfigForSave(payload);
     if (validationError) {
       return NextResponse.json({ error: validationError }, { status: 400 });
@@ -52,14 +56,6 @@ export async function PUT(request: Request) {
     return NextResponse.json(saved);
   } catch (error) {
     if (error instanceof CmsReadError) return readFailureResponse(error);
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to save shop configuration",
-      },
-      { status: 500 }
-    );
+    return publicApiError(error, "Failed to save shop configuration");
   }
 }

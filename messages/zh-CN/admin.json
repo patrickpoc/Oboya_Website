@@ -2219,7 +2219,14 @@
     "saveFailed": "无法保存货币。",
     "invalidCode": "货币代码必须为 3–6 个大写字母。",
     "alreadyExists": "该货币已存在。",
-    "toggleAria": "为 {country} 切换 {code}"
+    "toggleAria": "为 {country} 切换 {code}",
+    "globalTitle": "全球显示",
+    "globalHint": "临时设置:所选国家/地区将以“全球”和地球图标显示给商店访客。价格、货币、URL 和报价仍使用实际国家/地区。",
+    "globalLabel": "显示为“全球”的国家/地区",
+    "globalNone": "无",
+    "globalSaved": "全球显示已保存。",
+    "globalSaveFailed": "无法保存全球显示。",
+    "globalResetNotice": "“全球”国家/地区已被停用或删除,因此全球显示已设为“无”。"
   },
   "checkout": {
     "title": "报价页面",

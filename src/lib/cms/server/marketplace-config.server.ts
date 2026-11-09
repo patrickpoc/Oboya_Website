@@ -422,22 +422,53 @@ export async function readMarketplaceShopConfigStrict(): Promise<ShopConfig> {
   return normalizeShopConfig(source, { countries });
 }
 
+async function readShopConfigBaseStrict(): Promise<unknown> {
+  const remote = await readCmsDocumentStrict(MARKETPLACE_SHOP_CONFIG_DOC_ID);
+  if (remote != null && (typeof remote !== "object" || Array.isArray(remote))) {
+    throw new CmsReadError("Marketplace shop config document is malformed");
+  }
+  return (
+    remote ?? (await readJsonFileOptional<unknown>(SHOP_CONFIG_FILE)) ?? DEFAULT_SHOP_CONFIG
+  );
+}
+
+async function writeShopConfig(config: ShopConfig): Promise<void> {
+  if (isSupabaseConfigured()) {
+    await writeCmsDocumentData(MARKETPLACE_SHOP_CONFIG_DOC_ID, "marketplace", config);
+    return;
+  }
+  await writeLocalJsonFile(SHOP_CONFIG_FILE, config);
+}
+
 export async function saveMarketplaceShopConfig(
   payload: unknown
 ): Promise<ShopConfig> {
-  const normalized = normalizeShopConfig(payload, {
+  // The Global display alias is owned by saveMarketplaceGlobalCountry: keep the stored value.
+  const current = normalizeShopConfig(await readShopConfigBaseStrict());
+  const incoming = normalizeShopConfig(payload, {
     countries: await strictCountriesForShopConfig(),
   });
-
-  if (isSupabaseConfigured()) {
-    await writeCmsDocumentData(
-      MARKETPLACE_SHOP_CONFIG_DOC_ID,
-      "marketplace",
-      normalized
-    );
-    return normalized;
-  }
-
-  await writeLocalJsonFile(SHOP_CONFIG_FILE, normalized);
+  const normalized: ShopConfig = {
+    ...incoming,
+    market: { ...incoming.market, globalCountryCode: current.market.globalCountryCode },
+  };
+  await writeShopConfig(normalized);
   return normalized;
+}
+
+/** Sets only market.globalCountryCode; never touches products or the currencies doc. */
+export async function saveMarketplaceGlobalCountry(
+  code: string | null
+): Promise<{ config: ShopConfig; previous: string | null }> {
+  const base = normalizeShopConfig(await readShopConfigBaseStrict(), {
+    countries: await strictCountriesForShopConfig(),
+  });
+  const previous = base.market.globalCountryCode;
+  const next: ShopConfig = {
+    ...base,
+    market: { ...base.market, globalCountryCode: code },
+  };
+  const normalized = normalizeShopConfig(next);
+  await writeShopConfig(normalized);
+  return { config: normalized, previous };
 }

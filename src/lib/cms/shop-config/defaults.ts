@@ -61,6 +61,7 @@ export const DEFAULT_SHOP_CONFIG: ShopConfig = {
   market: {
     defaultCountryCode: null,
     defaultCurrencyCode: null,
+    globalCountryCode: null,
   },
 };
 
@@ -96,6 +97,12 @@ function normalizeRfqField(raw: unknown, fallback: ShopConfigRfqField): ShopConf
     return { visible: true, required: true };
   }
   return { visible, required: false };
+}
+
+function normalizeGlobalCountryCode(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const code = value.trim().toUpperCase();
+  return /^[A-Z]{2}$/.test(code) ? code : null;
 }
 
 export type NormalizeShopConfigOptions = {
@@ -192,6 +199,7 @@ export function normalizeShopConfig(
     market: {
       defaultCountryCode,
       defaultCurrencyCode,
+      globalCountryCode: normalizeGlobalCountryCode(marketRaw.globalCountryCode),
     },
   };
 }

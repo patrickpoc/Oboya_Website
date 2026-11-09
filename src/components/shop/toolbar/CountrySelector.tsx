@@ -1,10 +1,11 @@
 "use client";
 
-import { Globe } from "lucide-react";
+import { Earth, Globe } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useShop } from "@/contexts/ShopContext";
 import { CountryFlag } from "@/components/ui/country-flag";
 import { ShopToolbarSelect } from "@/components/shop/toolbar/ShopToolbarSelect";
+import { isGlobalMarket } from "@/lib/shop/global-market";
 import { ALL_COUNTRIES } from "@/lib/shop/market";
 import { cn } from "@/lib/utils";
 
@@ -29,7 +30,8 @@ function FlagMark({ code }: { code: string }) {
 
 export function CountrySelector({ className }: { className?: string }) {
   const t = useTranslations("shop");
-  const { countries, countryCode, setCountry, itemCount } = useShop();
+  const { countries, countryCode, setCountry, itemCount, shopConfig } = useShop();
+  const globalCode = shopConfig.market.globalCountryCode;
 
   const handleChange = (nextCode: string) => {
     if (
@@ -64,8 +66,16 @@ export function CountrySelector({ className }: { className?: string }) {
         },
         ...countries.map((country) => ({
           value: country.code,
-          label: country.name,
-          leading: <FlagMark code={country.code} />,
+          label: isGlobalMarket(country.code, globalCode) ? t("globalMarket") : country.name,
+          leading: isGlobalMarket(country.code, globalCode) ? (
+            <Earth
+              className="shrink-0 text-oboya-blue"
+              style={{ width: FLAG_W, height: FLAG_H }}
+              aria-hidden
+            />
+          ) : (
+            <FlagMark code={country.code} />
+          ),
         })),
       ]}
       onChange={handleChange}
