@@ -8,8 +8,9 @@ import { Punnet, TRAY, Tray } from "./packs";
 /**
  * Nursery bench (5.2 m) with five plug trays filling left → right (substrate, germinating,
  * tomato seedlings, rooted mum cuttings), a seeding gantry straddling the second tray, and substrate bags on a pallet in front.
- * Painter's order: far legs, stretcher, near legs, bench top, trays (x ascending), gantry near post,
- * head and beam (above everything), then the pallet (front-left, no screen overlap).
+ * Painter's order: far legs, H-frame cross bars, near legs, bench top, trays (x ascending), gantry
+ * near post, beam, head (carriage at its back, hopper at its front-right, 5 px apart on screen),
+ * seed stream from the head's front underside, then the pallet (front-left, no overlap).
  */
 const BENCH = { x: -150, y: -70, z: 38, w: 260, d: 40, h: 3 } satisfies Box;
 const LEG_X = [-144, -20, 104];
@@ -18,9 +19,15 @@ const TRAY_X0 = -144;
 const TRAY_PITCH = 52;
 /** Tray fill left → right: substrate, substrate, germinating, tomato seedlings, mum cuttings (flower line). */
 const GROW: (0 | 1 | 2 | 3)[] = [0, 0, 1, 2, 3];
-const GX = -70;
+/** Gantry x: the seeder head is over the second tray; the near post stands just right of the first tray on screen. */
+const GX = -64;
 const BEAM = { x: GX - 2.5, y: -84, z: 86, w: 5, d: 68, h: 6 } satisfies Box;
 const HEAD = { x: GX - 7, y: -58, z: 56, w: 14, d: 18, h: 14 } satisfies Box;
+/** Carriage hangs from the beam over the head's back; the hopper stands at its front-right (under the callout dot). */
+const CARRIAGE = { x: GX - 2.5, y: HEAD.y, z: HEAD.z + HEAD.h, w: 5, d: 5, h: BEAM.z - HEAD.z - HEAD.h } satisfies Box;
+const HOPPER = { x: -67.3, y: -45.3, r: 3, h: 6 };
+/** Seeds leave the head's front underside and land in one plug of the second tray. */
+const SEED = { x: GX + 3, y: HEAD.y + 16.5 };
 const PALLET: Box = { x: -204, y: 4, w: 48, d: 34, h: 5 };
 const BAGS: Box[] = [
   { x: -201, y: 6, z: 5, w: 42, d: 30, h: 13 },
@@ -44,12 +51,18 @@ export function Propagation({ st, active }: SceneProps) {
           ))}
         </defs>
 
-        {/* Bench: steel legs with a stretcher, white top */}
-        {LEG_X.map((x) => leg(x, BENCH.y + 5, `a${x}`, 0))}
-        <Solid box={{ x: BENCH.x + 4, y: BENCH.y + 19, z: 10, w: BENCH.w - 8, d: 2.4, h: 2.4 }} tones={steel} delay={0.1} line={false} />
-        <Solid box={{ x: GX - 2.5, y: -82, w: 5, d: 5, h: BEAM.z }} tones={steel} delay={0.3} line={false} />
-        {LEG_X.map((x) => leg(x, BENCH.y + BENCH.d - 5, `b${x}`, 0.05))}
-        <Solid box={BENCH} color={M.white} delay={0.2} shadow={0.25} />
+        {/* Bench: steel H-frame legs (cross bar between each pair), white top */}
+        {LEG_X.map((x) => leg(x, BENCH.y + 5, `far${x}`, 0))}
+        {LEG_X.map((x) => (
+          <Solid key={x} box={{ x: x - 1.2, y: BENCH.y + 5, z: 10, w: 2.4, d: BENCH.d - 10, h: 2.4 }} tones={steel} delay={0.1} line={false} />
+        ))}
+        <g>
+          <Solid box={{ x: GX - 2.5, y: -82, w: 5, d: 5, h: BEAM.z }} tones={steel} delay={0.3} line={false} />
+        </g>
+        {LEG_X.map((x) => leg(x, BENCH.y + BENCH.d - 5, `near${x}`, 0.05))}
+        <g>
+          <Solid box={BENCH} color={M.white} delay={0.2} shadow={0.25} />
+        </g>
 
         {/* Trays: substrate, germinating, grown */}
         <Part i={0} active={active}>
@@ -60,31 +73,44 @@ export function Propagation({ st, active }: SceneProps) {
           ))}
         </Part>
 
-        {/* Seeding gantry: near post, beam, carriage, seeder head with a yellow hopper, seed drops */}
+        {/* Seeding gantry: near post, beam, seeder head with a yellow hopper and its carriage, seed stream */}
         <Part i={2} active={active}>
-          <Solid box={{ x: GX - 2.5, y: -21, w: 5, d: 5, h: BEAM.z }} tones={steel} delay={0.3} line={false} />
-          <Solid box={BEAM} tones={steel} delay={0.5} />
-          <Solid box={{ x: GX - 4, y: HEAD.y + 4, z: HEAD.z + HEAD.h, w: 8, d: 10, h: BEAM.z - HEAD.z - HEAD.h }} tones={steel} delay={0.8} line={false} />
-          <Solid box={HEAD} color={M.blue} dark delay={0.9} />
-          <Cyl cx={GX + 2} cy={HEAD.y + 9} z={HEAD.z + HEAD.h} r={3.6} h={6} color={M.yellow} delay={1.1} shadow={false} />
+          <g>
+            <Solid box={{ x: GX - 2.5, y: -21, w: 5, d: 5, h: BEAM.z }} tones={steel} delay={0.3} line={false} />
+          </g>
+          <g>
+            <Solid box={BEAM} tones={steel} delay={0.5} />
+          </g>
+          <g>
+            <Solid box={HEAD} color={M.blue} dark delay={0.9} />
+          </g>
+          <g>
+            <Solid box={CARRIAGE} tones={steel} delay={0.8} line={false} />
+          </g>
+          <g>
+            <Cyl cx={HOPPER.x} cy={HOPPER.y} z={HEAD.z + HEAD.h} r={HOPPER.r} h={HOPPER.h} color={M.yellow} delay={1.1} shadow={false} />
+          </g>
           <Fade delay={1.4} dur={0.4}>
-            <Dot at={[HEAD.x + HEAD.w, HEAD.y + 5, HEAD.z + 9]} r={1.6} fill={M.leafLight} />
-            <Dot at={[HEAD.x + HEAD.w, HEAD.y + 9, HEAD.z + 9]} r={1.6} fill={M.fruit} />
-            {[0, 1, 2].map((k) => (
-              <g key={k}>
-                <Dot at={[GX - 2 + k * 2.5, HEAD.y + 6 + k * 3, HEAD.z - 3 - k * 2]} r={1.1} fill={M.card} />
-                <Dot at={[GX - 1 + k * 2.5, HEAD.y + 7 + k * 3, HEAD.z - 9 - k * 1.5]} r={1.1} fill={M.card} />
-              </g>
-            ))}
+            <g>
+              <Dot at={[HEAD.x + HEAD.w, HEAD.y + 5, HEAD.z + 9]} r={1.6} fill={M.leafLight} />
+              <Dot at={[HEAD.x + HEAD.w, HEAD.y + 9, HEAD.z + 9]} r={1.6} fill={M.fruit} />
+            </g>
+            <g>
+              {[54, 51.3, 48.8, 46.7].map((z, k) => (
+                <Dot key={k} at={[SEED.x - 0.6 + k * 0.2, SEED.y - 0.5 + k * 0.15, z]} r={1.1} fill={M.card} />
+              ))}
+            </g>
           </Fade>
         </Part>
 
         {/* Substrate bags on a wooden pallet */}
         <Part i={1} active={active}>
-          <Solid box={PALLET} color={M.card} delay={0.5} shadow={0.3} />
-          <Rise delay={0.8} dur={0.4}>
-            <path d={[0.25, 0.5, 0.75].map((f) => seg([PALLET.x, PALLET.y + PALLET.d * f, PALLET.h + 0.1], [PALLET.x + PALLET.w, PALLET.y + PALLET.d * f, PALLET.h + 0.1])).join("")} fill="none" stroke={tone(M.card).line} style={{ strokeWidth: "calc(var(--eco-ink, 1.2px) * 0.6)" }} />
-          </Rise>
+          <g>
+            <Solid box={PALLET} color={M.card} delay={0.5} shadow={0.3} />
+            <Rise delay={0.8} dur={0.4}>
+              <path d={[0.25, 0.5, 0.75].map((f) => seg([PALLET.x, PALLET.y + PALLET.d * f, PALLET.h + 0.1], [PALLET.x + PALLET.w, PALLET.y + PALLET.d * f, PALLET.h + 0.1])).join("")} fill="none" stroke={tone(M.card).line} style={{ strokeWidth: "calc(var(--eco-ink, 1.2px) * 0.6)" }} />
+            </Rise>
+          </g>
           {BAGS.map((b, k) => (
             <g key={k}>
               <Solid box={b} color={M.white} delay={0.7 + k * 0.18} />

@@ -17,6 +17,19 @@ const PARKED = { x: -140, y: -30 };
 const TOWED = { x: -12, y: -32 };
 const AGV: Box = { x: 70, y: -34, w: 56, d: 32, h: 11 };
 const SW = "var(--oboya-soft-white)";
+/**
+ * Crate layout on a CC shelf: the clear width between the uprights is 68 − 2·2.4 = 63.2, so two
+ * 30-long crates sit at x+18.5 and x+49.6 with 1.1 gaps and never touch an upright.
+ */
+const CRATE_A = 18.5;
+const CRATE_B = 31.1;
+/** Punnets in a crate: a 2×2 layer (10×8 each) inside the 27×17 interior, top layer 0.5 below the rim. */
+const PUNNETS: [number, number][] = [
+  [-5.75, -4.3],
+  [5.75, -4.3],
+  [-5.75, 4.3],
+  [5.75, 4.3],
+];
 
 function arc(cx: number, cy: number, r: number, z: number, a0: number, a1: number, n = 10) {
   const pts: string[] = [];
@@ -40,15 +53,11 @@ export function Logistics({ st, active }: SceneProps) {
           <BucketDefs id={id} />
           <g id={`${id}-crate`}>
             <Crate delay={0.9}>
-              <g transform={at(-9, -2, 0)}>
-                <Punnet delay={1.1} />
-              </g>
-              <g transform={at(0, -2, 0)}>
-                <Punnet delay={1.15} />
-              </g>
-              <g transform={at(9, -2, 0)}>
-                <Punnet delay={1.2} />
-              </g>
+              {PUNNETS.map(([px, py], k) => (
+                <g key={k} transform={at(px, py, 1.5)}>
+                  <Punnet delay={1.1 + k * 0.04} />
+                </g>
+              ))}
             </Crate>
           </g>
           <g id={`${id}-mum`}>
@@ -84,32 +93,35 @@ export function Logistics({ st, active }: SceneProps) {
             top={90}
             delay={0.4}
             content={(lvl, z) => (
-              <g transform={at(PARKED.x + 17, PARKED.y + CC.d / 2, z)}>
+              <g transform={at(PARKED.x + CRATE_A, PARKED.y + CC.d / 2, z)}>
                 <use href={`#${id}-crate`} />
-                {lvl < 2 ? <use href={`#${id}-crate`} transform={at(34, 0, 0)} /> : null}
+                {lvl < 2 ? <use href={`#${id}-crate`} transform={at(CRATE_B, 0, 0)} /> : null}
               </g>
             )}
           />
         </Part>
 
-        {/* Towed trolley: potted mums below, buckets of cut flowers above */}
+        {/* Towed trolley: potted mums below, buckets of cut flowers above. Two levels at a 44 pitch:
+            the flower heads (bucket 16 + stems 12 + head ≈ 33) would be hidden behind a shelf at
+            the 34 pitch in this 30° view, so the buckets ride the open top level. */}
         <Part i={1} active={active}>
           <CCTrolley
             x={TOWED.x}
             y={TOWED.y}
+            levels={[CC.deck, 50]}
             top={90}
             delay={0.5}
             content={(lvl, z) =>
               lvl === 0 ? (
-                <g transform={at(TOWED.x + 12, TOWED.y + CC.d / 2, z)}>
+                <g transform={at(TOWED.x + 10, TOWED.y + CC.d / 2, z)}>
                   {[0, 1, 2, 3].map((k) => (
-                    <use key={k} href={`#${id}-mum`} transform={at(k * 15, 0, 0)} />
+                    <use key={k} href={`#${id}-mum`} transform={at(k * 16, 0, 0)} />
                   ))}
                 </g>
               ) : (
                 <g transform={at(TOWED.x + 12, TOWED.y + CC.d / 2, z)}>
                   {[0, 1, 2].map((k) => (
-                    <use key={k} href={`#${id}-bucket${(k + lvl) % 3}`} transform={at(k * 22, 0, 0)} />
+                    <use key={k} href={`#${id}-bucket${(k + 1) % 3}`} transform={at(k * 22, 0, 0)} />
                   ))}
                 </g>
               )
@@ -148,7 +160,7 @@ export function Logistics({ st, active }: SceneProps) {
             delay={0}
             content={(lvl, z) =>
               lvl === 0 ? (
-                <g transform={at(-CC.w / 2 + 17, RAIL.y, z)}>
+                <g transform={at(-CC.w / 2 + CRATE_A, RAIL.y, z)}>
                   <use href={`#${id}-crate`} />
                 </g>
               ) : (

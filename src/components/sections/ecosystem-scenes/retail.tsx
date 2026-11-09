@@ -18,9 +18,23 @@ const PANEL: Box = { x: G.x, y: G.y, z: 8, w: G.w, d: 4, h: 96 };
 const SHELF1 = { x: G.x, y: G.y + 4, z: 38, w: G.w, d: 24, h: 2 } satisfies Box;
 const SHELF2 = { x: G.x, y: G.y + 4, z: 70, w: G.w, d: 22, h: 2 } satisfies Box;
 const ROW_Y = G.y + 17;
-const STAND: Box = { x: 128, y: 12, w: 48, d: 32, h: 6 };
+/** Floor display: a 2×2 grid of buckets (pitch 24 × 16 > rim Ø12.1) so no two rims touch on screen. */
+const STAND: Box = { x: 116, y: 12, w: 48, d: 32, h: 6 };
+const STAND_BUCKETS: [number, number, number][] = [
+  [128, 20, 0],
+  [128, 36, 2],
+  [152, 20, 1],
+  [152, 36, 1],
+];
 const SW = "var(--oboya-soft-white)";
 const MUM_COLORS = [M.yellow, M.pink, SW, M.fruit];
+/** Punnets in the arriving crate: a 2×2 layer inside the 27×17 interior, 0.5 below the rim. */
+const CRATE_PUNNETS: [number, number][] = [
+  [-5.75, -4.3],
+  [5.75, -4.3],
+  [-5.75, 4.3],
+  [5.75, 4.3],
+];
 
 /** Price rail along a shelf front: light strip with small white tickets. */
 function PriceRail({ z, y, delay }: { z: number; y: number; delay: number }) {
@@ -118,10 +132,9 @@ export function Retail({ st, active }: SceneProps) {
         {/* Floor display: dark stand with buckets of cut flowers */}
         <Part i={0} active={active}>
           <Solid box={STAND} tones={tone(M.black, true)} delay={0.6} shadow={0.3} />
-          <use href={`#${id}-bucket0`} transform={at(STAND.x + 12, STAND.y + 10, STAND.h)} />
-          <use href={`#${id}-bucket1`} transform={at(STAND.x + 36, STAND.y + 11, STAND.h)} />
-          <use href={`#${id}-bucket2`} transform={at(STAND.x + 14, STAND.y + 24, STAND.h)} />
-          <use href={`#${id}-bucket1`} transform={at(STAND.x + 37, STAND.y + 25, STAND.h)} />
+          {STAND_BUCKETS.map(([bx, by, k]) => (
+            <use key={`${bx}-${by}`} href={`#${id}-bucket${k}`} transform={at(bx, by, STAND.h)} />
+          ))}
         </Part>
 
         {/* Unit: a crate of punnets arrives, a shelf-ready punnet leaves. */}
@@ -129,13 +142,11 @@ export function Retail({ st, active }: SceneProps) {
           from={
             <g transform={at(0, RAIL.y, 0)}>
               <Crate delay={0}>
-                <g transform={at(-9, 0, 0)}>
-                  <Punnet delay={0} />
-                </g>
-                <Punnet delay={0} />
-                <g transform={at(9, 0, 0)}>
-                  <Punnet delay={0} />
-                </g>
+                {CRATE_PUNNETS.map(([px, py], k) => (
+                  <g key={k} transform={at(px, py, 1.5)}>
+                    <Punnet delay={0} />
+                  </g>
+                ))}
               </Crate>
             </g>
           }

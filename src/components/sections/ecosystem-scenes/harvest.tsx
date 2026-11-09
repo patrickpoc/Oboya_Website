@@ -14,7 +14,8 @@ const ROW = { x0: -180, w: 360 };
 const ROW_Y = [-88, -54, -20];
 const PLANT = { x0: -160, n: 7, pitch: 50, z: 13, h: 40, wire: 62 };
 const PIPE = { y: 14, half: 5, x0: -210, x1: 210 };
-const TROLLEY = { x: -50, y: PIPE.y - 12, z: 9, w: 56, d: 24, h: 3.5 } satisfies Box;
+/** Deck is 70 long: handle gap 6 (clears the post on screen) + two crates of 30 with a 2 gap + 2 spare; nothing overhangs. */
+const TROLLEY = { x: -50, y: PIPE.y - 12, z: 9, w: 70, d: 24, h: 3.5 } satisfies Box;
 const WHEELS: [number, number][] = [
   [TROLLEY.x + 8, PIPE.y - PIPE.half],
   [TROLLEY.x + TROLLEY.w - 8, PIPE.y - PIPE.half],
@@ -85,7 +86,7 @@ export function Harvest({ st, active }: SceneProps) {
           <Solid box={{ x: TROLLEY.x - 0.2, y: TROLLEY.y + 3, z: TROLLEY.z + TROLLEY.h + 40, w: 2.6, d: TROLLEY.d - 6, h: 2.6 }} tones={steel} delay={1.1} line={false} />
         </Part>
         <Part i={0} active={active}>
-          <g transform={at(TROLLEY.x + 4 + CRATE.w / 2, PIPE.y, TROLLEY.z + TROLLEY.h)}>
+          <g transform={at(TROLLEY.x + 6 + CRATE.w / 2, PIPE.y, TROLLEY.z + TROLLEY.h)}>
             <use href={`#${id}-full`} />
             <use href={`#${id}-full`} transform={at(0, 0, CRATE.h)} />
             <use href={`#${id}-full`} transform={at(CRATE.w + 2, 0, 0)} />
@@ -100,10 +101,11 @@ export function Harvest({ st, active }: SceneProps) {
           </g>
         </Part>
 
-        {/* Cut chrysanthemums in buckets: the flower line is harvested too */}
+        {/* Cut chrysanthemums in buckets: the flower line is harvested too. Side by side along x
+            (18 apart > rim Ø12.1, so they clear each other on screen too), far one first. */}
         <Part i={2} active={active}>
+          <FlowerBucket cx={-188} cy={60} colors={[M.pink, M.yellow, SW]} h={13} delay={1.15} />
           <FlowerBucket cx={-170} cy={60} colors={[M.yellow, SW, M.yellow, M.pink]} h={14} delay={1} />
-          <FlowerBucket cx={-184} cy={48} colors={[M.pink, M.yellow, SW]} h={13} delay={1.15} />
         </Part>
 
         {/* Unit: a young potted tomato arrives, a crate of fruit leaves. */}
