@@ -6,7 +6,11 @@ import type { EcoPhaseKind } from "@/components/sections/useEcosystemSequence";
 import { STAGE_MS } from "@/components/sections/useEcosystemSequence";
 import { cn } from "@/lib/utils";
 
-/** Step rail: stage-name buttons joined by one line, progress on the active one, Pause/Play. */
+/**
+ * Step rail: stage-name buttons joined by one line, progress on the active one, Pause/Play.
+ * Click / Enter / Space select a stage; hovering has no effect (and the rail sits outside the
+ * stage's hover-pause area).
+ */
 export function HomeEcosystemRail({
   labels,
   kind,
@@ -51,22 +55,22 @@ export function HomeEcosystemRail({
         {activeLabel}
       </p>
       <div className="flex items-end gap-4 md:gap-6">
-        <ol className="flex min-w-0 flex-1 gap-1">
+        <ol className="flex min-w-0 flex-1 items-end gap-1">
           {labels.map((label, i) => {
             const isActive = inStage && i === stageIndex;
             const done = afterStages || (inStage && i < stageIndex);
             return (
-              <li key={i} className="min-w-0 flex-1">
+              <li key={i} className="min-w-0 flex-1 sm:flex-auto">
                 <button
                   type="button"
                   onClick={() => onSelect(i)}
                   aria-current={isActive ? "step" : undefined}
                   className={cn(
-                    "group flex min-h-11 w-full flex-col justify-end gap-3 rounded-sm pt-1 text-left outline-none",
+                    "flex min-h-11 w-full cursor-pointer flex-col justify-end gap-3 rounded-sm pt-1 text-left outline-none",
                     "focus-visible:ring-2 focus-visible:ring-oboya-green-light/70 focus-visible:ring-offset-2 focus-visible:ring-offset-oboya-blue-dark",
                   )}
                 >
-                  <span className="flex items-center gap-2.5 px-1">
+                  <span className="flex h-4 items-center gap-2.5 px-1">
                     <span
                       aria-hidden
                       className={cn(
@@ -75,15 +79,15 @@ export function HomeEcosystemRail({
                           ? "bg-oboya-green-light"
                           : done
                             ? "bg-white/60"
-                            : "bg-white/25 group-hover:bg-white/50",
+                            : "bg-white/25",
                       )}
                     />
                     <span
                       className={cn(
-                        "sr-only font-body text-sm font-light leading-tight transition-colors duration-300 sm:not-sr-only sm:min-w-0",
+                        "sr-only font-body text-xs font-light leading-none whitespace-nowrap transition-colors duration-300 sm:not-sr-only lg:text-sm",
                         isActive
                           ? "text-white"
-                          : "text-white/60 group-hover:text-white/85",
+                          : "text-white/60",
                       )}
                     >
                       {label}

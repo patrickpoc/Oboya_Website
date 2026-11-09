@@ -9,12 +9,14 @@ import {
 } from "react";
 import { useInView } from "framer-motion";
 import { useHomeIntro } from "@/components/layout/HomeIntroGate";
+import { usePastTransitionMarker } from "@/components/layouts/navbar/useNavChrome";
 
-export const STAGE_MS = 4000;
+export const STAGE_MS = 5000;
 export const CLOSING_MS = 6000;
 export const HOLD_MS = 12000;
 
-// Phases: -1 idle (not started), 1..N stages, N+1 closing, N+2 hold (then back to 1). No opening: the cycle starts as soon as the section is in view.
+// Phases: -1 idle (not started), 1..N stages, N+1 closing, N+2 hold (then back to 1). No opening: the cycle
+// starts when the stage is in view and the home navbar has turned solid (the reader has left the hero).
 const IDLE = -1;
 
 const REDUCED_QUERY = "(prefers-reduced-motion: reduce)";
@@ -80,6 +82,15 @@ export function ecoReducer(s: EcoState, a: EcoAction): EcoState {
   }
 }
 
+/**
+ * Start latch: the first launch waits for the stage in view, the loading overlay gone and the home
+ * navbar past the hero marker (the same condition that turns it solid). Pages without a hero
+ * marker (`heroless`) only wait for the first two. Static mode never launches.
+ */
+export function canLaunch(c: { launched: boolean; isStatic: boolean; inView: boolean; unlocked: boolean; pastHero: boolean; heroless: boolean }) {
+  return !c.launched && !c.isStatic && c.inView && c.unlocked && (c.pastHero || c.heroless);
+}
+
 /** What the UI shows for a state: resolved phase, its kind, the stage index and the clock length. */
 export function deriveEco(s: EcoState, count: number, isStatic: boolean) {
   const CLOSING = count + 1;
@@ -123,12 +134,19 @@ export function useEcosystemSequence({
 }) {
   const inView = useInView(ref, { amount: 0.3 });
   const unlocked = useHomeIntro()?.isUnlocked ?? true;
+  const pastHero = usePastTransitionMarker("hero");
+  const [heroless, setHeroless] = useState(false);
   const [state, dispatch] = useReducer(ecoReducer, ECO_INITIAL);
   const [hidden, setHidden] = useState(false);
   const [hoverPaused, setHoverPaused] = useState(false);
 
-  // First start waits for the stage in view and the loading overlay gone; later returns just resume.
-  if (!state.launched && !isStatic && inView && unlocked)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-off DOM probe: no hero marker on this page
+    setHeroless(!document.getElementById("hero"));
+  }, []);
+
+  // First start: see canLaunch(). Later returns to the section just resume.
+  if (canLaunch({ launched: state.launched, isStatic, inView, unlocked, pastHero, heroless }))
     dispatch({ type: "launch" });
 
   useEffect(() => {

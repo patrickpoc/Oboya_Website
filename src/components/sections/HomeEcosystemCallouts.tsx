@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState, type CSSProperties, type PointerEvent } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import { motion } from "framer-motion";
 import type { Hotspot } from "@/components/sections/ecosystem-scenes/hotspots";
 import { cn } from "@/lib/utils";
@@ -22,8 +22,18 @@ const LAYER = "pointer-events-none absolute left-1/2 top-1/2 z-10 aspect-[8/5] h
  * max-width (the anchors in hotspots.ts assume these widths).
  */
 const PILL =
-  "absolute -translate-y-1/2 cursor-default rounded-sm border text-center font-body leading-snug text-balance transition-[color,border-color,background-color] duration-200 " +
-  "max-sm:max-w-[6.75rem] max-sm:px-1.5 max-sm:py-px max-sm:text-[10px] sm:max-w-[11rem] sm:px-2 sm:py-0.5 sm:text-xs";
+  "absolute -translate-y-1/2 cursor-default rounded-sm border text-center font-body leading-[1.3] tracking-[0.01em] text-balance transition-[color,border-color,background-color] duration-200 " +
+  "max-sm:max-w-[7.5rem] max-sm:px-1.5 max-sm:py-[3px] max-sm:text-[10px] sm:max-w-[13.5rem] sm:px-2.5 sm:py-1 sm:text-xs";
+/**
+ * Pill position from an anchor: the leader's horizontal run ends at `lx`; a right-hung pill starts
+ * there (`left`), a left-hung one ends there (`right`). Using the matching inset keeps the browser's
+ * shrink-to-fit width measured on the free side, so pills only wrap when they really are too long.
+ */
+const pillVars = (prefix: "d" | "m", a: { lx: number; ly: number; side: "l" | "r" }) => ({
+  [`--eco-${prefix}lx`]: a.side === "r" ? `${a.lx}%` : "auto",
+  [`--eco-${prefix}rx`]: a.side === "l" ? `${100 - a.lx}%` : "auto",
+  [`--eco-${prefix}ly`]: `${a.ly}%`,
+});
 
 /**
  * Always-visible callouts over the scene: a dot on the object, a thin elbow leader and a pill with
@@ -97,12 +107,7 @@ export function HomeEcosystemCallouts({
       {spots.map((h, k) => {
         const lit = active === k;
         const dim = active != null && !lit;
-        const vars = {
-          "--eco-dlx": `${h.d.lx}%`,
-          "--eco-dly": `${h.d.ly}%`,
-          "--eco-mlx": `${h.m.lx}%`,
-          "--eco-mly": `${h.m.ly}%`,
-        } as CSSProperties;
+        const vars = { ...pillVars("d", h.d), ...pillVars("m", h.m) } as CSSProperties;
         return (
           <Fragment key={`${id}-${k}`}>
             {/* Dot on the object */}
@@ -120,7 +125,7 @@ export function HomeEcosystemCallouts({
               <span
                 className={cn(
                   "block size-2.5 rounded-full border transition-[background-color,box-shadow,border-color] duration-200",
-                  lit ? "border-oboya-green-light bg-oboya-green-light ring-4 ring-oboya-green-light/35" : "border-oboya-blue-light bg-white ring-4 ring-white/15",
+                  lit ? "border-oboya-green-light bg-oboya-green-light ring-[3px] ring-oboya-green-light/35" : "border-oboya-blue-light bg-white ring-[3px] ring-white/12",
                 )}
               />
             </motion.span>
@@ -130,9 +135,7 @@ export function HomeEcosystemCallouts({
               data-eco-callout
               className={cn(
                 PILL,
-                "max-sm:left-(--eco-mlx) max-sm:top-(--eco-mly) sm:left-(--eco-dlx) sm:top-(--eco-dly)",
-                h.m.side === "l" && "max-sm:-translate-x-full",
-                h.d.side === "l" && "sm:-translate-x-full",
+                "max-sm:left-(--eco-mlx) max-sm:right-(--eco-mrx) max-sm:top-(--eco-mly) sm:left-(--eco-dlx) sm:right-(--eco-drx) sm:top-(--eco-dly)",
                 lit ? "border-oboya-green-light/70 bg-oboya-blue-dark text-white" : "border-white/20 bg-oboya-blue-dark/80 text-white/90",
                 dim ? "pointer-events-none" : "pointer-events-auto",
               )}
@@ -153,34 +156,91 @@ export function HomeEcosystemCallouts({
   );
 }
 
+const SIGN_START = 1.1; // label start, in ring radii from the node centre (x)
+const SIGN_LIFT = 1.05; // and above it (y)
+const COS30 = 0.8660254;
+const SIN30 = 0.5;
+
 /**
  * Closing scene: the six stage names as signage lying along the isometric y axis — each label
  * starts at the upper-right edge of its node ring and climbs at 30° (the iso angle), so the six
  * read as a diagonal ladder without leaders. Revealed as each node lights up, then kept. Text is
  * the localized stage label; the rail already lists the names, so the layer is aria-hidden.
+ *
+ * Centring: label lengths depend on locale and CMS text, so after layout the component measures
+ * each label (unrotated size + the −30° geometry), unions that with the static node `bounds`, and
+ * sets `--eco-ov-dx/dy` (viewBox units) on the panel so the composition's centre meets the centre
+ * of the *visible* panel (the 4:3 mobile crop included). The overview SVG group reads the same vars.
  */
 export function HomeEcosystemOverviewLabels({
   nodes,
+  bounds,
   labels,
   isStatic,
 }: {
   nodes: { left: number; top: number; r: number; delay: number }[];
+  bounds: { left: number; right: number; top: number; bottom: number };
   labels: string[];
   isStatic: boolean;
 }) {
+  const layerRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const layer = layerRef.current;
+    const panel = layer?.parentElement;
+    if (!layer || !panel) return;
+    const centre = () => {
+      const lr = layer.getBoundingClientRect();
+      const pr = panel.getBoundingClientRect();
+      if (!lr.height) return;
+      const upp = 500 / lr.height; // viewBox units per CSS px
+      let [l, t, r, b] = [bounds.left, bounds.top, bounds.right, bounds.bottom];
+      layer.querySelectorAll<HTMLElement>("[data-eco-sign]").forEach((el, k) => {
+        const n = nodes[k];
+        if (!n) return;
+        const ax = ((n.left + n.r * SIGN_START) / 100) * 800;
+        const ay = ((n.top - n.r * SIGN_LIFT) / 100) * 500;
+        const w = el.offsetWidth * upp;
+        const h = el.offsetHeight * upp;
+        r = Math.max(r, ax + w * COS30 + (h / 2) * SIN30);
+        t = Math.min(t, ay - w * SIN30 - (h / 2) * COS30);
+        l = Math.min(l, ax - (h / 2) * SIN30);
+        b = Math.max(b, ay + (h / 2) * COS30);
+      });
+      const visL = (pr.left - lr.left) * upp;
+      const visR = (pr.right - lr.left) * upp;
+      const dx = Math.round((visL + visR) / 2 - (l + r) / 2);
+      const dy = Math.round(250 - (t + b) / 2);
+      panel.style.setProperty("--eco-ov-dx", String(dx));
+      panel.style.setProperty("--eco-ov-dy", String(dy));
+    };
+    centre();
+    const ro = new ResizeObserver(centre);
+    ro.observe(panel);
+    return () => {
+      ro.disconnect();
+      panel.style.removeProperty("--eco-ov-dx");
+      panel.style.removeProperty("--eco-ov-dy");
+    };
+  }, [nodes, bounds, labels]);
+
   const reveal = (k: number) => (isStatic ? { duration: 0 } : { duration: 0.45, delay: nodes[k].delay + 0.15 });
   return (
-    <div className={LAYER} aria-hidden>
+    <div ref={layerRef} className={LAYER} aria-hidden>
       {nodes.map((n, k) => (
         <motion.span
           key={`ov-${k}`}
+          data-eco-sign
           className={cn(
-            "absolute origin-left -translate-y-1/2 -rotate-30 whitespace-nowrap font-body leading-none tracking-wide text-white/95",
-            "max-sm:text-[10px] sm:text-sm",
-            // A thin green tick under the text, running along the slope.
-            "after:absolute after:left-0 after:right-0 after:-bottom-1 after:h-px after:bg-oboya-green-light/55",
+            "absolute origin-left -translate-y-1/2 -rotate-30 whitespace-nowrap font-body font-light leading-none text-white max-sm:tracking-wide sm:tracking-wider",
+            // Mobile scales with the viewport so the longest label still clears the 4:3 crop at 320 px.
+            "max-sm:text-[length:clamp(8px,2.5vw,11px)] sm:text-base lg:text-[17px]",
+            // A thin green rule under the text, running along the slope.
+            "after:absolute after:left-0 after:right-0 after:-bottom-1.5 after:h-px after:bg-oboya-green-light/55",
           )}
-          style={{ left: `${n.left + n.r * 0.9}%`, top: `${n.top - n.r * 0.9}%` }}
+          style={{
+            left: `calc(${n.left + n.r * SIGN_START}% + var(--eco-ov-dx, 0) / 8 * 1%)`,
+            top: `calc(${n.top - n.r * SIGN_LIFT}% + var(--eco-ov-dy, 0) / 5 * 1%)`,
+          }}
           initial={isStatic ? false : { opacity: 0, x: -6 }}
           animate={{ opacity: 1, x: 0 }}
           transition={reveal(k)}

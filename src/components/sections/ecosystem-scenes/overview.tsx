@@ -9,8 +9,13 @@ import { BucketDefs, CC, CCTrolley, Crate, Pot, Punnet, Tray } from "./packs";
  * Closing frame: the whole chain as six nodes on one line, lighting up in order, while one
  * punnet rides the full rail. Each node is the product that leaves its stage.
  */
-const NODE_Y = -14;
-const NODE_X = [-255, -193, -131, -69, -7, 55];
+/**
+ * Six nodes at a 62-unit pitch along x. The group is placed so that, with its signage (which climbs
+ * up-right from each node), the empty margins are equal top/bottom and left/right on the 8:5 panel,
+ * and the last label still clears the 4:3 mobile crop.
+ */
+const NODE_Y = 27;
+const NODE_X = [-198, -136, -74, -12, 50, 112];
 const PAD = 38;
 const STEP = 0.4;
 const [OX, OY] = iso(0, 0, 0);
@@ -23,6 +28,19 @@ const SW = "var(--oboya-soft-white)";
 const BD = "var(--oboya-blue-dark)";
 /** Node ring centres (panel %), ring radius (panel % of width) and the moment each lights up, for the stage-name labels. */
 export const OVERVIEW_NODES = NODE_X.map((x, k) => ({ ...pct(x, NODE_Y, 0), r: 4.5, delay: 1.1 + k * STEP }));
+/**
+ * Extent of the nodes with their glyphs in viewBox units (first pad's left corner, last pad's right
+ * and front corners, tallest glyph). The labels layer unions this with the measured signage to
+ * centre the whole composition on the visible panel via `--eco-ov-dx/dy` (see HomeEcosystemOverviewLabels).
+ */
+export const OVERVIEW_BOUNDS = {
+  left: iso(NODE_X[0] - PAD / 2, NODE_Y + PAD / 2)[0],
+  right: iso(NODE_X[5] + PAD / 2, NODE_Y - PAD / 2)[0],
+  top: iso(NODE_X[0], NODE_Y, 0)[1] - 36,
+  bottom: iso(NODE_X[5] + PAD / 2, NODE_Y + PAD / 2)[1],
+};
+/** CSS translate of the node group, in viewBox units, driven by the labels layer. */
+const SHIFT = { transform: "translate(calc(var(--eco-ov-dx, 0) * 1px), calc(var(--eco-ov-dy, 0) * 1px))" } as const;
 
 function Glyph({ k, x, id }: { k: number; x: number; id: string }) {
   const y = NODE_Y;
@@ -115,6 +133,7 @@ export function Overview({ st }: { st: boolean }) {
         <defs>
           <BucketDefs id={id} delay={0.8 + 4 * STEP + 0.3} />
         </defs>
+        <g style={SHIFT}>
         <Fade delay={0.2} dur={0.6}>
           {NODE_X.map((x) => (
             <path key={x} d={plane(x - PAD / 2, NODE_Y - PAD / 2, PAD, PAD)} fill={mix(SW, 10, BD)} />
@@ -137,6 +156,7 @@ export function Overview({ st }: { st: boolean }) {
         {NODE_X.map((x, k) => (
           <Glyph key={x} k={k} x={x} id={id} />
         ))}
+        </g>
 
         <Travel span={520}>
           <g transform={at(0, RAIL.y, 0)}>

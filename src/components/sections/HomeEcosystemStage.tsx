@@ -6,6 +6,7 @@ import {
   Backdrop,
   HOTSPOTS,
   HomeEcosystemStageVisual,
+  OVERVIEW_BOUNDS,
   OVERVIEW_NODES,
   Overview,
   SceneClock,
@@ -270,7 +271,7 @@ export function HomeEcosystemStage({
                 />
               ) : null}
               {afterStages ? (
-                <HomeEcosystemOverviewLabels nodes={OVERVIEW_NODES} labels={stages.map((s) => t(s.label))} isStatic={isStatic} />
+                <HomeEcosystemOverviewLabels nodes={OVERVIEW_NODES} bounds={OVERVIEW_BOUNDS} labels={stages.map((s) => t(s.label))} isStatic={isStatic} />
               ) : null}
 
               {/* Corner ticks */}

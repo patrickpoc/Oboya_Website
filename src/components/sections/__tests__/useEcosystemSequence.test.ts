@@ -4,6 +4,7 @@ import {
   ECO_INITIAL,
   HOLD_MS,
   STAGE_MS,
+  canLaunch,
   deriveEco,
   ecoReducer,
   type EcoAction,
@@ -79,5 +80,27 @@ describe("ecosystem sequence: static path", () => {
     const s = run([{ type: "select", index: 4, isStatic: true }]);
     expect(s.userPaused).toBe(false);
     expect(deriveEco(s, COUNT, true)).toMatchObject({ kind: "static", stageIndex: 4 });
+  });
+});
+
+describe("ecosystem sequence: start latch", () => {
+  const ready = { launched: false, isStatic: false, inView: true, unlocked: true, pastHero: true, heroless: false };
+  it("launches once the stage is in view, the intro is unlocked and the navbar is past the hero", () => {
+    expect(canLaunch(ready)).toBe(true);
+  });
+  it("waits while the navbar is still over the hero, even with the stage in view", () => {
+    expect(canLaunch({ ...ready, pastHero: false })).toBe(false);
+  });
+  it("does not need the hero marker on pages without one", () => {
+    expect(canLaunch({ ...ready, pastHero: false, heroless: true })).toBe(true);
+  });
+  it("never launches when static, out of view, locked or already launched", () => {
+    expect(canLaunch({ ...ready, isStatic: true })).toBe(false);
+    expect(canLaunch({ ...ready, inView: false })).toBe(false);
+    expect(canLaunch({ ...ready, unlocked: false })).toBe(false);
+    expect(canLaunch({ ...ready, launched: true })).toBe(false);
+  });
+  it("stage clock is five seconds", () => {
+    expect(STAGE_MS).toBe(5000);
   });
 });
