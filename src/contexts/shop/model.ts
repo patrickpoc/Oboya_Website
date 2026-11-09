@@ -18,11 +18,13 @@ import type {
 } from "@/lib/shop/types";
 import { EMPTY_SHOP_FILTERS } from "@/lib/shop/types";
 import type { QuotePricing } from "@/lib/shop/quote-pricing";
+import { ALL_COUNTRIES, isExplicitAll } from "@/lib/shop/market";
 import { remapCartLine } from "@/lib/shop/product-id-remap";
 
 export const STORAGE_KEY = "oboya-shop-quote";
 
 export interface PersistedState {
+  /** A country code, "all" (explicit All countries) or null (nothing chosen). */
   countryCode: string | null;
   currency: CurrencyCode | null;
   items: CartItem[];
@@ -50,7 +52,12 @@ export interface ShopContextValue extends ShopState {
   getProductById: (productId: string) => ShopProduct | undefined;
   /** Load full product (incl. description HTML) when opening quick view / detail overlays. */
   ensureProductDetail: (productId: string) => Promise<ShopProduct | undefined>;
-  setCountry: (countryCode: string) => void;
+  /** True when no concrete country is selected (All countries). */
+  isAllCountries: boolean;
+  /** Currency prices are shown in: the market currency, or USD under All countries. */
+  displayCurrency: CurrencyCode | null;
+  /** "all" or an unknown code selects All countries. `keepListing` keeps filters and search. */
+  setCountry: (countryCode: string, options?: { keepListing?: boolean }) => void;
   setCurrency: (currency: CurrencyCode) => void;
   setSearch: (search: string) => void;
   setSort: (sort: SortOption) => void;
@@ -162,8 +169,14 @@ export function loadPersisted(): PersistedState {
     if (!raw) return { countryCode: null, currency: null, items: [] };
     const parsed = JSON.parse(raw) as PersistedState;
     return {
-      countryCode: parsed.countryCode ?? null,
-      currency: parsed.currency ?? null,
+      // "all" is kept as the marker of an explicit All countries choice.
+      countryCode:
+        typeof parsed.countryCode === "string" && parsed.countryCode.trim()
+          ? isExplicitAll(parsed.countryCode)
+            ? ALL_COUNTRIES
+            : parsed.countryCode
+          : null,
+      currency: typeof parsed.currency === "string" ? parsed.currency : null,
       items: sanitizeCartItems(parsed.items),
     };
   } catch {
@@ -174,6 +187,7 @@ export function loadPersisted(): PersistedState {
 export const defaultState: ShopState = {
   countryCode: null,
   currency: null,
+  countryExplicit: false,
   items: [],
   search: "",
   sort: "relevance",

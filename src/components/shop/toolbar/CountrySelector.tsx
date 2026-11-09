@@ -1,9 +1,11 @@
 "use client";
 
+import { Globe } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useShop } from "@/contexts/ShopContext";
 import { CountryFlag } from "@/components/ui/country-flag";
 import { ShopToolbarSelect } from "@/components/shop/toolbar/ShopToolbarSelect";
+import { ALL_COUNTRIES } from "@/lib/shop/market";
 import { cn } from "@/lib/utils";
 
 const FLAG_W = 21;
@@ -32,7 +34,7 @@ export function CountrySelector({ className }: { className?: string }) {
   const handleChange = (nextCode: string) => {
     if (
       itemCount > 0 &&
-      nextCode !== (countryCode ?? "") &&
+      nextCode !== (countryCode ?? ALL_COUNTRIES) &&
       typeof window !== "undefined" &&
       !window.confirm(t("confirmClearQuoteOnCountryChange"))
     ) {
@@ -45,14 +47,27 @@ export function CountrySelector({ className }: { className?: string }) {
     <ShopToolbarSelect
       className={cn("min-w-[11rem]", className)}
       label={t("selectCountry")}
-      value={countryCode ?? ""}
+      value={countryCode ?? ALL_COUNTRIES}
       placeholder={t("chooseCountry")}
       minMenuWidth={192}
-      options={countries.map((country) => ({
-        value: country.code,
-        label: country.name,
-        leading: <FlagMark code={country.code} />,
-      }))}
+      options={[
+        {
+          value: ALL_COUNTRIES,
+          label: t("allCountries"),
+          leading: (
+            <Globe
+              className="size-3.5 shrink-0 text-oboya-blue"
+              style={{ width: FLAG_W, height: FLAG_H }}
+              aria-hidden
+            />
+          ),
+        },
+        ...countries.map((country) => ({
+          value: country.code,
+          label: country.name,
+          leading: <FlagMark code={country.code} />,
+        })),
+      ]}
       onChange={handleChange}
     />
   );

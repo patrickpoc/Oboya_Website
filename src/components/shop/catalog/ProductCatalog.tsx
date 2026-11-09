@@ -8,15 +8,15 @@ import { FilterChips } from "@/components/shop/catalog/FilterChips";
 import {
   EmptyResults,
   LoadingSkeleton,
-  SelectCountryPrompt,
 } from "@/components/shop/states/ShopStateViews";
+import { ALL_COUNTRIES_CURRENCY } from "@/lib/shop/market";
 import { countActiveSkus } from "@/lib/shop/color-variants";
 
 export function ProductCatalog() {
   const t = useTranslations("shop");
   const {
-    countryCode,
-    currency,
+    isAllCountries,
+    displayCurrency,
     viewMode,
     displayedProducts,
     filteredProducts,
@@ -29,6 +29,7 @@ export function ProductCatalog() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const activeSkuCount = countActiveSkus(filteredProducts);
   const rfqEnabled = shopConfig.rfq.enabled;
+  const currency = displayCurrency ?? ALL_COUNTRIES_CURRENCY;
 
   useEffect(() => {
     const node = loadMoreRef.current;
@@ -47,10 +48,6 @@ export function ProductCatalog() {
     return () => observer.disconnect();
   }, [hasMoreProducts, loadMoreProducts, displayedProducts.length]);
 
-  if (!countryCode || !currency) {
-    return <SelectCountryPrompt />;
-  }
-
   if (status === "loading") {
     return <LoadingSkeleton viewMode={viewMode} />;
   }
@@ -66,6 +63,9 @@ export function ProductCatalog() {
           {t("resultsCount", { count: activeSkuCount })}
         </p>
       </div>
+      {isAllCountries ? (
+        <p className="mb-3 text-xs text-muted-foreground">{t("allCountriesPriceNote")}</p>
+      ) : null}
       <FilterChips />
 
       {viewMode === "grid" ? (
@@ -75,6 +75,7 @@ export function ProductCatalog() {
               key={product.id}
               product={product}
               currency={currency}
+              allCountries={isAllCountries}
               viewMode="grid"
               onAddToQuote={
                 rfqEnabled
@@ -91,6 +92,7 @@ export function ProductCatalog() {
               key={product.id}
               product={product}
               currency={currency}
+              allCountries={isAllCountries}
               viewMode="list"
               onAddToQuote={
                 rfqEnabled

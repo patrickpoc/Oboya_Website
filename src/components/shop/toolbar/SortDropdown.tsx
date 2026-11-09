@@ -17,7 +17,7 @@ const SORT_OPTIONS: SortOption[] = [
 
 export function SortDropdown({ className }: { className?: string }) {
   const t = useTranslations("shop");
-  const { sort, setSort, countryCode } = useShop();
+  const { sort, setSort } = useShop();
 
   return (
     <ShopToolbarSelect
@@ -25,7 +25,6 @@ export function SortDropdown({ className }: { className?: string }) {
       label={t("sortBy")}
       value={sort}
       placeholder={t("sortBy")}
-      disabled={!countryCode}
       minMenuWidth={176}
       options={SORT_OPTIONS.map((option) => ({
         value: option,

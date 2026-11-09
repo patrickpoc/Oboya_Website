@@ -80,3 +80,26 @@ describe("filterProducts", () => {
     ).toEqual([]);
   });
 });
+
+describe("filterProducts under All countries (null country and currency)", () => {
+  const options = { countryCode: null, currency: null, search: "", filters: EMPTY_SHOP_FILTERS };
+
+  it("returns every product, including ones enabled for no country and quote-only ones", () => {
+    const products = [
+      product(),
+      product({ id: "none", sku: "NONE", enabledCountries: {}, availability: {}, prices: {} }),
+      product({ id: "quote", sku: "Q", saleMode: "quote", prices: {} }),
+    ];
+    expect(filterProducts(products, options)).toHaveLength(3);
+  });
+
+  it("still filters by sale mode", () => {
+    const products = [product(), product({ id: "quote", sku: "Q", saleMode: "quote", prices: {} })];
+    const filters = (availability: "priced" | "quote") => ({
+      ...options,
+      filters: { ...EMPTY_SHOP_FILTERS, availability },
+    });
+    expect(filterProducts(products, filters("priced")).map((p) => p.id)).toEqual(["sku-001"]);
+    expect(filterProducts(products, filters("quote")).map((p) => p.id)).toEqual(["quote"]);
+  });
+});

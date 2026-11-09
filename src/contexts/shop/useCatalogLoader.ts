@@ -3,7 +3,7 @@
 /* Dependency lists match the provider before this split. Setters and refs are stable. */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { useEffect, useLayoutEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
 import {
   getShopCatalog,
   updateShopCatalog,
@@ -19,7 +19,10 @@ import {
   normalizeFilterOptions,
   resolveShopFilters,
 } from "@/lib/shop/filter-groups";
-import { getCountryByCode } from "@/lib/shop/catalog";
+import {
+  isExplicitAll,
+  resolveMarketTransition,
+} from "@/lib/shop/market";
 import {
   normalizeColorVariants,
   normalizeImageColorIds,
@@ -47,6 +50,10 @@ export function useCatalogLoader({
   const [shopProducts, setShopProducts] = useState<ShopProduct[]>([]);
   const [catalogReady, setCatalogReady] = useState(false);
   const [catalogTick, setCatalogTick] = useState(0);
+  // True once the API returned its active countries (seed countries do not count).
+  const [countriesLoaded, setCountriesLoaded] = useState(false);
+  // Market restored from storage, before any URL overrides the state.
+  const savedMarketRef = useRef<{ countryCode: string | null; currency: ShopState["currency"] } | null>(null);
   const [shopConfig, setShopConfig] = useState<ShopConfig>(DEFAULT_SHOP_CONFIG);
   const shopConfigRef = useRef(shopConfig);
   useLayoutEffect(() => {
@@ -57,11 +64,21 @@ export function useCatalogLoader({
   // Persist cart/country from localStorage once
   useEffect(() => {
     const persisted = loadPersisted();
+    savedMarketRef.current = {
+      countryCode: persisted.countryCode,
+      currency: persisted.currency,
+    };
     queueMicrotask(() => {
       setState((prev) => ({
         ...prev,
-        countryCode: persisted.countryCode ?? prev.countryCode,
-        currency: persisted.currency ?? prev.currency,
+        // "all" is an explicit All countries choice (state keeps null for it).
+        countryCode: isExplicitAll(persisted.countryCode)
+          ? null
+          : (persisted.countryCode ?? prev.countryCode),
+        currency: isExplicitAll(persisted.countryCode)
+          ? null
+          : (persisted.currency ?? prev.currency),
+        countryExplicit: Boolean(persisted.countryCode),
         items: persisted.items.length > 0 ? persisted.items : prev.items,
       }));
     });
@@ -118,18 +135,9 @@ export function useCatalogLoader({
           });
         }
         if (catalog.currencies?.countries) {
-          const activeCodes = new Set(
-            catalog.currencies.countries.map((country) => country.code)
-          );
+          // A restored country that is no longer active is handled by useMarketSelection.
           updateShopCatalog({ countries: catalog.currencies.countries });
-          // A restored country that is no longer active is cleared together with its quote list.
-          if (activeCodes.size > 0) {
-            setState((prev) =>
-              prev.countryCode && !activeCodes.has(prev.countryCode)
-                ? { ...prev, countryCode: null, currency: null, items: [] }
-                : prev
-            );
-          }
+          setCountriesLoaded(true);
         }
 
         let nextShopConfig = DEFAULT_SHOP_CONFIG;
@@ -228,6 +236,8 @@ export function useCatalogLoader({
     shopProducts,
     setShopProducts,
     catalogReady,
+    countriesLoaded,
+    savedMarketRef,
     catalogTick,
     shopConfig,
     shopConfigRef,
@@ -235,51 +245,80 @@ export function useCatalogLoader({
   };
 }
 
-export function useMarketDefaults({
+/**
+ * Keeps the market valid. Runs whenever the catalog or the config loads and whenever the
+ * country/currency changes: a missing, unknown or inactive country becomes the admin default
+ * (if valid) or All countries, and a currency that does not belong to the country becomes
+ * its default currency. A concrete country that stops being valid also clears the quote list.
+ */
+export function useMarketSelection({
+  state,
   setState,
   isReady,
   catalogReady,
+  countriesLoaded,
+  savedMarketRef,
+  catalogTick,
   shopConfig,
 }: {
+  state: ShopState;
   setState: Dispatch<SetStateAction<ShopState>>;
   isReady: boolean;
   catalogReady: boolean;
+  countriesLoaded: boolean;
+  savedMarketRef: MutableRefObject<{
+    countryCode: string | null;
+    currency: ShopState["currency"];
+  } | null>;
+  catalogTick: number;
   shopConfig: ShopConfig;
 }) {
-  const marketDefaultsApplied = useRef(false);
-
-  // Apply market defaults once when visitor has no country from storage/URL.
   useEffect(() => {
-    if (!catalogReady || !isReady || marketDefaultsApplied.current) return;
-    const defaults = shopConfig.market;
-    if (!defaults.defaultCountryCode) {
-      marketDefaultsApplied.current = true;
+    if (!catalogReady || !isReady) return;
+    // A failed or offline load leaves only seed countries: keep the market and the list.
+    if (state.status === "error" || state.status === "offline") return;
+    const next = resolveMarketTransition({
+      loaded: countriesLoaded,
+      current: {
+        countryCode: state.countryCode,
+        currency: state.currency,
+        explicit: state.countryExplicit,
+      },
+      hasItems: state.items.length > 0,
+      saved: savedMarketRef.current,
+      countries: getShopCatalog().countries,
+      marketDefaults: shopConfig.market,
+    });
+    if (!next) return;
+    if (
+      next.countryCode === state.countryCode &&
+      next.currency === state.currency &&
+      !next.clearItems
+    ) {
       return;
     }
-
-    let applied = false;
     setState((prev) => {
-      if (prev.countryCode) {
-        applied = true;
+      if (prev.countryCode !== state.countryCode || prev.currency !== state.currency) {
         return prev;
       }
-      const country = getCountryByCode(defaults.defaultCountryCode!);
-      if (!country) {
-        applied = true;
-        return prev;
-      }
-      const currency =
-        defaults.defaultCurrencyCode &&
-        country.currencies.includes(defaults.defaultCurrencyCode)
-          ? defaults.defaultCurrencyCode
-          : country.defaultCurrency;
-      applied = true;
       return {
         ...prev,
-        countryCode: country.code,
-        currency,
+        countryCode: next.countryCode,
+        currency: next.currency,
+        countryExplicit: next.explicit,
+        items: next.clearItems ? [] : prev.items,
       };
     });
-    if (applied) marketDefaultsApplied.current = true;
-  }, [catalogReady, isReady, shopConfig.market]);
+  }, [
+    catalogReady,
+    countriesLoaded,
+    isReady,
+    catalogTick,
+    state.status,
+    shopConfig.market,
+    state.countryCode,
+    state.currency,
+    state.countryExplicit,
+    state.items.length,
+  ]);
 }

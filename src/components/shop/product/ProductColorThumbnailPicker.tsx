@@ -48,7 +48,7 @@ export function ProductColorThumbnailPicker({
   className,
 }: ProductColorThumbnailPickerProps) {
   const locale = useLocale();
-  const { currency } = useShop();
+  const { displayCurrency: currency } = useShop();
   if (variants.length === 0) return null;
   const isQuote = getEffectiveSaleMode(product) === "quote";
 
@@ -67,7 +67,7 @@ export function ProductColorThumbnailPicker({
           const price = currency
             ? resolveVariantPrice(product, variant, currency)
             : 0;
-          const priceLabel = currency && !isQuote
+          const priceLabel = currency && !isQuote && price > 0
             ? formatShopPrice(price, currency)
             : null;
 

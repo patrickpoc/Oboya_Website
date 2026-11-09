@@ -1,26 +1,10 @@
 "use client";
 
-import { Globe, PackageOpen, SearchX, ShoppingBag, WifiOff } from "lucide-react";
+import { PackageOpen, SearchX, ShoppingBag, WifiOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buttonVariants } from "@/components/ui/button";
 import { useShop } from "@/contexts/ShopContext";
-
-export function SelectCountryPrompt() {
-  const t = useTranslations("shop");
-
-  return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/80 bg-oboya-soft-white px-6 py-16 text-center">
-      <Globe className="size-10 text-oboya-green" aria-hidden />
-      <h3 className="mt-4 font-display text-lg font-semibold text-oboya-blue-dark">
-        {t("selectCountryPromptTitle")}
-      </h3>
-      <p className="mt-2 max-w-md text-sm text-muted-foreground">
-        {t("selectCountryPromptDesc")}
-      </p>
-    </div>
-  );
-}
 
 export function EmptyResults() {
   const t = useTranslations("shop");

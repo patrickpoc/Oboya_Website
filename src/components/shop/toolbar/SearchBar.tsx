@@ -10,7 +10,7 @@ const DEBOUNCE_MS = 350;
 
 export function SearchBar({ className }: { className?: string }) {
   const t = useTranslations("shop");
-  const { search, setSearch, countryCode } = useShop();
+  const { search, setSearch } = useShop();
   const [value, setValue] = useState(search);
   const dirtyRef = useRef(false);
   const [, startTransition] = useTransition();
@@ -68,11 +68,10 @@ export function SearchBar({ className }: { className?: string }) {
             dirtyRef.current = true;
             setValue(event.target.value);
           }}
-          disabled={!countryCode}
           placeholder={t("searchPlaceholder")}
           autoComplete="off"
           className={cn(
-            "h-10 w-full rounded-lg border border-border bg-white pl-10 text-sm leading-normal text-oboya-blue-dark shadow-sm placeholder:text-muted-foreground disabled:opacity-50",
+            "h-10 w-full rounded-lg border border-border bg-white pl-10 text-sm leading-normal text-oboya-blue-dark shadow-sm placeholder:text-muted-foreground",
             "[&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden",
             value ? "pr-9" : "pr-3"
           )}

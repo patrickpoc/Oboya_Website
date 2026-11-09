@@ -31,6 +31,8 @@ import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 interface ProductCardProps {
   product: ShopProduct;
   currency: string;
+  /** Under All countries a product without a price in `currency` shows "Local price only". */
+  allCountries?: boolean;
   viewMode?: "grid" | "list";
   onAddToQuote?: (variantId?: string | null) => void;
 }
@@ -38,6 +40,7 @@ interface ProductCardProps {
 function ProductCardComponent({
   product,
   currency,
+  allCountries = false,
   viewMode = "grid",
   onAddToQuote,
 }: ProductCardProps) {
@@ -61,6 +64,8 @@ function ProductCardComponent({
   const activeVariant = getActiveVariant(product, selectedVariantId);
   const price = resolveVariantPrice(product, activeVariant, currency);
   const isQuote = getEffectiveSaleMode(product) === "quote";
+  // On Demand takes precedence over the local price badge.
+  const localOnly = allCountries && !isQuote && price <= 0;
   const imageSrc = resolveVariantImage(product, activeVariant);
   const displaySku = resolveVariantSku(product, activeVariant);
   const displayMoq = resolveVariantMoq(product, activeVariant);
@@ -118,6 +123,14 @@ function ProductCardComponent({
           {isQuote ? (
             <p className="mt-2 text-xs leading-5 font-semibold text-oboya-blue-dark">
               {t("rfqBadge")}
+            </p>
+          ) : localOnly ? (
+            <p
+              title={t("selectCountryForPrice")}
+              className="mt-2 text-xs leading-5 font-semibold text-oboya-blue-dark"
+            >
+              {t("localPriceOnly")}
+              <span className="sr-only"> {t("selectCountryForPrice")}</span>
             </p>
           ) : (
             <p className="mt-2 text-sm font-semibold text-oboya-blue-dark">
@@ -200,6 +213,14 @@ function ProductCardComponent({
           {isQuote ? (
             <p className="text-sm leading-6 font-semibold text-oboya-blue-dark">
               {t("rfqBadge")}
+            </p>
+          ) : localOnly ? (
+            <p
+              title={t("selectCountryForPrice")}
+              className="text-sm leading-6 font-semibold text-oboya-blue-dark"
+            >
+              {t("localPriceOnly")}
+              <span className="sr-only"> {t("selectCountryForPrice")}</span>
             </p>
           ) : (
             <p className="text-base font-semibold tabular-nums text-oboya-blue-dark">

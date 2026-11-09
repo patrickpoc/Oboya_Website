@@ -195,6 +195,8 @@ export type RfqStatus = "idle" | "submitting" | "success" | "error";
 export interface ShopState {
   countryCode: string | null;
   currency: CurrencyCode | null;
+  /** True when null countryCode (All countries) was chosen on purpose, not a fallback. */
+  countryExplicit: boolean;
   items: CartItem[];
   search: string;
   sort: SortOption;

@@ -7,18 +7,21 @@ interface RfqBadgeProps {
   className?: string;
 }
 
+/** Pill shared by the On Demand and Local price only badges. */
+export function shopBadgeClass(compact: boolean, className?: string) {
+  return cn(
+    "inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border border-oboya-blue/25 bg-oboya-blue/10 font-semibold text-oboya-blue",
+    compact ? "px-2 py-0.5 text-[11px]" : "px-3 py-1 text-sm",
+    className
+  );
+}
+
 /** Replaces the price for products sold on request (never show a price for them). */
 export function RfqBadge({ size = "regular", className }: RfqBadgeProps) {
   const t = useTranslations("shop");
   const compact = size === "compact";
   return (
-    <span
-      className={cn(
-        "inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border border-oboya-blue/25 bg-oboya-blue/10 font-semibold text-oboya-blue",
-        compact ? "px-2 py-0.5 text-[11px]" : "px-3 py-1 text-sm",
-        className
-      )}
-    >
+    <span className={shopBadgeClass(compact, className)}>
       <FileText aria-hidden className={compact ? "size-3" : "size-4"} />
       {t("rfqBadge")}
     </span>

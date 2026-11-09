@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 export function ViewSwitcher({ className }: { className?: string }) {
   const t = useTranslations("shop");
-  const { viewMode, setViewMode, countryCode } = useShop();
+  const { viewMode, setViewMode } = useShop();
 
   return (
     <div className={cn("flex flex-col", className)}>
@@ -17,14 +17,12 @@ export function ViewSwitcher({ className }: { className?: string }) {
       <div className="flex h-10 rounded-lg border border-border bg-white p-1 shadow-sm">
         <button
           type="button"
-          disabled={!countryCode}
           onClick={() => setViewMode("grid")}
           className={cn(
             "flex flex-1 items-center justify-center rounded-md transition-colors",
             viewMode === "grid"
               ? "bg-oboya-green/10 text-oboya-blue-dark"
-              : "text-muted-foreground hover:text-oboya-blue-dark",
-            !countryCode && "opacity-50"
+              : "text-muted-foreground hover:text-oboya-blue-dark"
           )}
           aria-label={t("viewGrid")}
           aria-pressed={viewMode === "grid"}
@@ -33,14 +31,12 @@ export function ViewSwitcher({ className }: { className?: string }) {
         </button>
         <button
           type="button"
-          disabled={!countryCode}
           onClick={() => setViewMode("list")}
           className={cn(
             "flex flex-1 items-center justify-center rounded-md transition-colors",
             viewMode === "list"
               ? "bg-oboya-green/10 text-oboya-blue-dark"
-              : "text-muted-foreground hover:text-oboya-blue-dark",
-            !countryCode && "opacity-50"
+              : "text-muted-foreground hover:text-oboya-blue-dark"
           )}
           aria-label={t("viewList")}
           aria-pressed={viewMode === "list"}

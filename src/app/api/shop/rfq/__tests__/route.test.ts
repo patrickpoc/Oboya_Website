@@ -132,6 +132,15 @@ describe("POST /api/shop/rfq sale modes", () => {
     expect(res.status).toBe(400);
   });
 
+  it("rejects the All countries marker as a country", async () => {
+    for (const code of ["all", "ALL"]) {
+      const res = await post([{ productId: "stock", quantity: 1 }], code);
+      expect(res.status).toBe(400);
+      expect((await res.json()).error).toBe("Invalid country");
+    }
+    expect(addQuote).not.toHaveBeenCalled();
+  });
+
   it("rejects an inactive or unknown country", async () => {
     const res = await post([{ productId: "stock", quantity: 1 }], "XX");
     expect(res.status).toBe(400);

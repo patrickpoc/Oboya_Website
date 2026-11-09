@@ -29,7 +29,7 @@ function useIsLargeScreen() {
 
 export function ShopToolbar() {
   const t = useTranslations("shop");
-  const { activeFilterCount, setFilterDrawerOpen, countryCode } = useShop();
+  const { activeFilterCount, setFilterDrawerOpen } = useShop();
   const panelId = useId();
   const isLarge = useIsLargeScreen();
   const [mobileExpanded, setMobileExpanded] = useState(false);
@@ -58,7 +58,6 @@ export function ShopToolbar() {
               <button
                 type="button"
                 onClick={() => setFilterDrawerOpen(true)}
-                disabled={!countryCode}
                 className={buttonVariants({
                   variant: "outline",
                   className:

@@ -39,6 +39,14 @@ test.describe("public smoke", () => {
     }
   }
 
+  test("shop on clean storage opens on All countries without the market prompt", async ({ page }) => {
+    await page.goto("/en/shop", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("button", { name: /All countries/ }).first()).toBeVisible();
+    await expect(page.getByText("Select your market to begin")).toHaveCount(0);
+    await expect(page.getByPlaceholder("Search products, SKU or category")).toBeEnabled();
+    expect(page.url()).not.toMatch(/[?&]country=/);
+  });
+
   test("admin login renders the form", async ({ page }) => {
     const response = await page.goto("/admin/login", { waitUntil: "domcontentloaded" });
     expect(response?.status()).toBe(200);

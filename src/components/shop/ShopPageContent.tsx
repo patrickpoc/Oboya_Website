@@ -14,7 +14,7 @@ import {
 } from "@/components/shop/states/ShopStateViews";
 
 export function ShopPageContent() {
-  const { status, countryCode, catalogReady } = useShop();
+  const { status, catalogReady } = useShop();
 
   if (!catalogReady) {
     return (
@@ -40,7 +40,7 @@ export function ShopPageContent() {
           ) : (
             <div className="flex gap-5 lg:gap-6">
               <div className="hidden w-56 shrink-0 xl:w-60 lg:block">
-                {countryCode && <FilterSidebar />}
+                <FilterSidebar />
               </div>
 
               <div className="min-w-0 flex-1">

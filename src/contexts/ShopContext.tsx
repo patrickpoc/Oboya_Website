@@ -21,6 +21,7 @@ import {
   resolveVariantSku,
 } from "@/lib/shop/color-variants";
 import { getEffectiveSaleMode, isPricedLine, isUnavailableLine } from "@/lib/shop/sale-mode";
+import { getDisplayCurrency, isAllCountries } from "@/lib/shop/market";
 import { summarizeQuoteLines } from "@/lib/shop/quote-pricing";
 import type { ShopState } from "@/lib/shop/types";
 import {
@@ -29,7 +30,7 @@ import {
 } from "@/contexts/shop/model";
 import {
   useCatalogLoader,
-  useMarketDefaults,
+  useMarketSelection,
 } from "@/contexts/shop/useCatalogLoader";
 import {
   useListingHydration,
@@ -69,6 +70,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     shopProducts,
     setShopProducts,
     catalogReady,
+    countriesLoaded,
+    savedMarketRef,
     catalogTick,
     shopConfig,
     shopConfigRef,
@@ -86,13 +89,19 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     router,
     searchParams,
     catalogReady,
+    marketReady: catalogReady && countriesLoaded,
+    savedMarketRef,
     shopConfigRef,
   });
 
-  useMarketDefaults({
+  useMarketSelection({
+    state,
     setState,
     isReady,
     catalogReady,
+    countriesLoaded,
+    savedMarketRef,
+    catalogTick,
     shopConfig,
   });
 
@@ -120,6 +129,9 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     return getShopCatalog();
   }, [catalogTick]);
 
+  const allCountries = isAllCountries(state.countryCode);
+  const displayCurrency = getDisplayCurrency(state.countryCode, state.currency);
+
   const baseProducts = useMemo(
     () => {
       if (!state.countryCode) return shopProducts;
@@ -138,8 +150,9 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       search: state.search,
       filters: state.filters,
     });
-    return sortProducts(filtered, state.sort, state.currency);
+    return sortProducts(filtered, state.sort, displayCurrency);
   }, [
+    displayCurrency,
     baseProducts,
     state.countryCode,
     state.currency,
@@ -238,6 +251,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       ...state,
       isReady,
       catalogReady,
+      isAllCountries: allCountries,
+      displayCurrency,
       shopConfig,
       pageSize,
       itemCount,
@@ -292,6 +307,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       state,
       isReady,
       catalogReady,
+      allCountries,
+      displayCurrency,
       shopConfig,
       pageSize,
       itemCount,

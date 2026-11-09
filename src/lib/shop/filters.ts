@@ -108,21 +108,21 @@ function isVisibleByBusinessRules(
   return resolveCatalogPrice(product, currency) > 0;
 }
 
-/** Priced products first (by direction); quote products always last. */
+/** Priced products first (by direction), then products without a price in the currency, quote products last. */
 function comparePrice(
   a: ShopProduct,
   b: ShopProduct,
   currency: CurrencyCode | null,
   direction: 1 | -1
 ): number {
-  const aQuote = getEffectiveSaleMode(a) === "quote";
-  const bQuote = getEffectiveSaleMode(b) === "quote";
-  if (aQuote || bQuote) return Number(aQuote) - Number(bQuote);
-  return (
-    direction *
-    (resolveCatalogPrice(a, currency ?? "USD") -
-      resolveCatalogPrice(b, currency ?? "USD"))
-  );
+  const rank = (product: ShopProduct, price: number) =>
+    getEffectiveSaleMode(product) === "quote" ? 2 : price > 0 ? 0 : 1;
+  const aPrice = resolveCatalogPrice(a, currency ?? "USD");
+  const bPrice = resolveCatalogPrice(b, currency ?? "USD");
+  const aRank = rank(a, aPrice);
+  const bRank = rank(b, bPrice);
+  if (aRank !== bRank) return aRank - bRank;
+  return aRank === 0 ? direction * (aPrice - bPrice) : 0;
 }
 
 function matchesPriceRange(

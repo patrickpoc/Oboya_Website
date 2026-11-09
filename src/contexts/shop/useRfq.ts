@@ -7,6 +7,7 @@ import { useCallback, type Dispatch, type MutableRefObject, type SetStateAction 
 import type { ShopConfig } from "@/lib/cms/shop-config/types";
 import type { RfqPayload, ShopState } from "@/lib/shop/types";
 import { collectLeadContext } from "@/lib/forms/lead-context";
+import { getRfqMarket } from "@/lib/shop/market";
 import type { ShopContextValue } from "@/contexts/shop/model";
 
 export function useRfq({
@@ -37,7 +38,9 @@ export function useRfq({
       if (!shopConfigRef.current.rfq.enabled) {
         throw new Error("Quote requests are disabled");
       }
-      if (!state.countryCode || !state.currency) {
+      // All countries is never a valid quote market.
+      const market = getRfqMarket(state.countryCode, state.currency);
+      if (!market) {
         throw new Error("Country and currency required");
       }
 
@@ -66,8 +69,8 @@ export function useRfq({
 
       const payload: RfqPayload = {
         ...form,
-        countryCode: state.countryCode,
-        currency: state.currency,
+        countryCode: market.countryCode,
+        currency: market.currency,
         officeId,
         items: lineItems.map((item) => ({
           productId: item.productId,

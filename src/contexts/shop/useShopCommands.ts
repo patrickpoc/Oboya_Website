@@ -4,7 +4,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { useCallback, useMemo, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
-import { getCountryByCode, getShopCatalog, updateShopCatalog } from "@/lib/shop/catalog";
+import { getShopCatalog, updateShopCatalog } from "@/lib/shop/catalog";
+import { selectMarket } from "@/lib/shop/market";
 import type { ShopConfig } from "@/lib/cms/shop-config/types";
 import {
   clampQuantity,
@@ -44,19 +45,24 @@ export function useShopCommands({
   setAddToQuoteProductId: Dispatch<SetStateAction<string | null>>;
   setAddToQuoteVariantId: Dispatch<SetStateAction<string | null>>;
 }) {
-  const setCountry = useCallback((countryCode: string) => {
-    const country = getCountryByCode(countryCode);
-    const chunk = shopConfigRef.current.catalog.pageSize;
-    setState((prev) => ({
-      ...prev,
-      countryCode,
-      currency: country?.defaultCurrency ?? prev.currency,
-      items: [],
-      visibleCount: chunk,
-      filters: EMPTY_SHOP_FILTERS,
-      search: "",
-    }));
-  }, []);
+  const setCountry = useCallback(
+    (countryCode: string, options?: { keepListing?: boolean }) => {
+      const market = selectMarket(countryCode, getShopCatalog().countries);
+      const chunk = shopConfigRef.current.catalog.pageSize;
+      setState((prev) => ({
+        ...prev,
+        countryCode: market.countryCode,
+        currency: market.currency,
+        countryExplicit: market.explicit,
+        items: [],
+        visibleCount: chunk,
+        ...(options?.keepListing
+          ? {}
+          : { filters: EMPTY_SHOP_FILTERS, search: "" }),
+      }));
+    },
+    []
+  );
 
   const getProductByIdFromState = useCallback(
     (productId: string) =>
@@ -178,6 +184,8 @@ export function useShopCommands({
       const normalizedQuantity = clampQuantity(quantity, moq, maxQty);
 
       setState((prev) => {
+        // A quote list needs a concrete country (the quote API rejects anything else).
+        if (!prev.countryCode) return prev;
         const existing = prev.items.find((item) =>
           sameCartLine(item, productId, normalizedVariantId)
         );
@@ -204,7 +212,9 @@ export function useShopCommands({
       });
 
       window.setTimeout(() => {
-        setState((prev) => ({ ...prev, isCartOpen: true }));
+        setState((prev) =>
+          prev.countryCode ? { ...prev, isCartOpen: true } : prev
+        );
       }, 80);
     },
     [getProductByIdFromState]

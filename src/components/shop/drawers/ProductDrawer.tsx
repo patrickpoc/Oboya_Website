@@ -17,6 +17,7 @@ import { RelatedProducts } from "@/components/shop/drawers/RelatedProducts";
 import { buttonVariants } from "@/components/ui/button";
 import { RfqBadge } from "@/components/shop/product/RfqBadge";
 import { getEffectiveSaleMode } from "@/lib/shop/sale-mode";
+import { LocalPriceBadge } from "@/components/shop/product/LocalPriceBadge";
 import { formatShopPrice } from "@/lib/shop/format-price";
 import { pickLocalizedLabel } from "@/lib/shop/localized-label";
 
@@ -28,7 +29,8 @@ export function ProductDrawer() {
   const {
     quickViewProductId,
     setQuickViewProductId,
-    currency,
+    displayCurrency: currency,
+    isAllCountries,
     openAddToQuoteDialog,
     addToQuoteProductId,
     isCartOpen,
@@ -148,6 +150,13 @@ export function ProductDrawer() {
                     <RfqBadge />
                     <p className="mt-2 text-xs text-muted-foreground">
                       {t("rfqHelper")}
+                    </p>
+                  </div>
+                ) : isAllCountries && price <= 0 ? (
+                  <div className="mt-3">
+                    <LocalPriceBadge />
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {t("selectCountryForPrice")}
                     </p>
                   </div>
                 ) : (

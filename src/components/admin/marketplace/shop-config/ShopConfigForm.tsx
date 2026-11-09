@@ -366,7 +366,7 @@ export function ShopConfigForm({ value, onChange, countries }: Props) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="__none__">{t("none")}</SelectItem>
+                <SelectItem value="__none__">{t("defaultCountryAll")}</SelectItem>
                 {countries.map((country) => (
                   <SelectItem key={country.code} value={country.code}>
                     {country.name || country.code}
@@ -406,7 +406,7 @@ export function ShopConfigForm({ value, onChange, countries }: Props) {
                     </SelectItem>
                   ))
                 ) : (
-                  <SelectItem value="__country__">{t("none")}</SelectItem>
+                  <SelectItem value="__country__">{t("useCountryDefault")}</SelectItem>
                 )}
               </SelectContent>
             </Select>

@@ -6,9 +6,19 @@
 import { useEffect, useRef, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
 import type { ShopConfig } from "@/lib/cms/shop-config/types";
 import { resolveShopFilters, toPublicShopFilters } from "@/lib/shop/filter-groups";
-import { buildShopSearchParams, parseShopUrlState } from "@/lib/shop/url-state";
+import {
+  buildShopSearchParams,
+  parseShopUrlState,
+  type ShopUrlState,
+} from "@/lib/shop/url-state";
 import type { ShopState } from "@/lib/shop/types";
-import { getCountryByCode } from "@/lib/shop/catalog";
+import { getShopCatalog } from "@/lib/shop/catalog";
+import {
+  ALL_COUNTRIES,
+  isExplicitAll,
+  resolveMarketSelection,
+  toPersistedCountryCode,
+} from "@/lib/shop/market";
 import { remapProductId } from "@/lib/shop/product-id-remap";
 import {
   catalogTaxonomy,
@@ -18,6 +28,63 @@ import {
   type PersistedState,
 } from "@/contexts/shop/model";
 
+/**
+ * Market part of a URL hydration. No `country` param keeps the current market. Once the
+ * catalog is ready an unknown country or a currency of another country is resolved here
+ * (falls back to the current market, the admin default or All countries). Before that the
+ * raw value is applied and useMarketSelection fixes it when the countries load.
+ */
+function marketIsKnown(code: string | null, countries: { code: string }[]): boolean {
+  return !code || countries.some((c) => c.code.toUpperCase() === code.toUpperCase());
+}
+
+function marketFromUrl(
+  prev: ShopState,
+  urlState: ShopUrlState,
+  marketReady: boolean,
+  shopConfig: ShopConfig,
+  saved: Pick<ShopState, "countryCode" | "currency"> | null
+): Pick<ShopState, "countryCode" | "currency" | "countryExplicit"> {
+  if (!urlState.country) {
+    return {
+      countryCode: prev.countryCode,
+      currency: prev.currency,
+      countryExplicit: prev.countryExplicit,
+    };
+  }
+  if (isExplicitAll(urlState.country)) {
+    return { countryCode: null, currency: null, countryExplicit: true };
+  }
+  const sameCountry =
+    prev.countryCode?.toUpperCase() === urlState.country.toUpperCase();
+  const countries = getShopCatalog().countries;
+  if (!marketReady || countries.length === 0) {
+    return {
+      countryCode: urlState.country,
+      currency: urlState.currency ?? (sameCountry ? prev.currency : null),
+      countryExplicit: true,
+    };
+  }
+  const market = resolveMarketSelection({
+    urlCountry: urlState.country,
+    urlCurrency: urlState.currency ?? (sameCountry ? prev.currency : null),
+    // The current market when it is a known one, else the choice restored from storage.
+    persisted: marketIsKnown(prev.countryCode, countries)
+      ? {
+          countryCode: prev.countryCode ?? (prev.countryExplicit ? ALL_COUNTRIES : null),
+          currency: prev.currency,
+        }
+      : saved,
+    countries,
+    marketDefaults: shopConfig.market,
+  });
+  return {
+    countryCode: market.countryCode,
+    currency: market.currency,
+    countryExplicit: market.explicit,
+  };
+}
+
 export function useListingHydration({
   setState,
   isReady,
@@ -25,6 +92,8 @@ export function useListingHydration({
   router,
   searchParams,
   catalogReady,
+  marketReady,
+  savedMarketRef,
   shopConfigRef,
 }: {
   setState: Dispatch<SetStateAction<ShopState>>;
@@ -33,6 +102,8 @@ export function useListingHydration({
   router: { replace: (href: string) => void };
   searchParams: { toString: () => string };
   catalogReady: boolean;
+  marketReady: boolean;
+  savedMarketRef: MutableRefObject<Pick<ShopState, "countryCode" | "currency"> | null>;
   shopConfigRef: MutableRefObject<ShopConfig>;
 }) {
   const hydratedFromUrlRef = useRef(false);
@@ -94,10 +165,6 @@ export function useListingHydration({
         softOpenTimer.current = null;
       }
 
-      // Ignore a country that is not active (stale bookmark).
-      const urlCountryValid =
-        !urlState.country || !catalogReady || Boolean(getCountryByCode(urlState.country));
-
       skipUrlWriteRef.current = true;
       setState((prev) => {
         const rawFilters = urlState.filters;
@@ -106,8 +173,7 @@ export function useListingHydration({
           : rawFilters;
         return {
           ...prev,
-          countryCode: urlCountryValid ? (urlState.country ?? prev.countryCode) : prev.countryCode,
-          currency: urlCountryValid ? (urlState.currency ?? prev.currency) : prev.currency,
+          ...marketFromUrl(prev, urlState, marketReady, shopConfigRef.current, savedMarketRef.current),
           search: urlState.q,
           sort: urlState.sort,
           viewMode: urlState.view,
@@ -154,7 +220,7 @@ export function useListingHydration({
         softOpenTimer.current = null;
       }
     };
-  }, [isReady, isShopListingRoute, router, searchParams, catalogReady]);
+  }, [isReady, isShopListingRoute, router, searchParams, catalogReady, marketReady]);
 
   return {
     hydratedFromUrlRef,
@@ -187,12 +253,12 @@ export function useListingSync({
   useEffect(() => {
     if (!isReady) return;
     const payload: PersistedState = {
-      countryCode: state.countryCode,
+      countryCode: toPersistedCountryCode(state.countryCode, state.countryExplicit),
       currency: state.currency,
       items: state.items,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  }, [state.countryCode, state.currency, state.items, isReady]);
+  }, [state.countryCode, state.currency, state.countryExplicit, state.items, isReady]);
 
   // Mirror shop listing state into the address bar on every change.
   // history.replaceState (not next-intl router.replace) so query strings

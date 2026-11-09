@@ -7,6 +7,7 @@ import type {
 } from "@/lib/shop/types";
 import { EMPTY_SHOP_FILTERS } from "@/lib/shop/types";
 import { BUILTIN_FILTER_GROUP_IDS } from "@/lib/shop/filter-groups";
+import { ALL_COUNTRIES, isAllCountries, isExplicitAll } from "@/lib/shop/market";
 
 export interface ShopUrlState {
   country: string | null;
@@ -118,8 +119,11 @@ export function parseShopUrlState(
   const fallbackSort = defaults?.sort ?? "relevance";
   const fallbackView = defaults?.view ?? "grid";
 
+  const countryParam = searchParams.get("country");
+
   return {
-    country: searchParams.get("country"),
+    // `?country=all` is an explicit All countries choice.
+    country: isExplicitAll(countryParam) ? ALL_COUNTRIES : countryParam,
     currency: searchParams.get("currency") as CurrencyCode | null,
     q: searchParams.get("q") ?? "",
     sort: SORT_VALUES.includes(sortParam as SortOption)
@@ -163,8 +167,11 @@ export function buildShopSearchParams(state: {
 }): URLSearchParams {
   const params = new URLSearchParams();
 
-  if (state.countryCode) params.set("country", state.countryCode);
-  if (state.currency) params.set("currency", state.currency);
+  // All countries keeps the address bar clean: no country/currency params.
+  if (!isAllCountries(state.countryCode)) {
+    params.set("country", state.countryCode as string);
+    if (state.currency) params.set("currency", state.currency);
+  }
   if (state.search.trim()) params.set("q", state.search.trim());
   if (state.sort !== "relevance") params.set("sort", state.sort);
   if (state.viewMode === "list") params.set("view", "list");

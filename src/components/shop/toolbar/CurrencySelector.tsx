@@ -9,8 +9,11 @@ import { cn } from "@/lib/utils";
 
 export function CurrencySelector({ className }: { className?: string }) {
   const t = useTranslations("shop");
-  const { countryCode, currency, setCurrency } = useShop();
+  const { countryCode, currency, setCurrency, isAllCountries } = useShop();
   const selectedCountry = countryCode ? getCountryByCode(countryCode) : null;
+
+  // Prices are shown in USD under All countries, so there is nothing to choose.
+  if (isAllCountries) return null;
 
   return (
     <ShopToolbarSelect
