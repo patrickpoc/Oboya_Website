@@ -4,9 +4,14 @@ import { createContext, useContext, type CSSProperties, type ReactNode } from "r
 import { motion } from "framer-motion";
 
 /**
- * Isometric (30°) projection kit on a light panel; filled objects live in flat-kit.tsx.
+ * Isometric (30°) projection kit on the dark navy panel; filled objects live in flat-kit.tsx.
  * One projection, one ground plate and one flow rail shared by every scene (see backdrop.tsx).
- * Brand tokens only (and color-mix() blends of them), no filters, no <text>, no Math.random and no infinite animations.
+ * Brand tokens only (and color-mix() blends of them), no filters, no <text>, no Math.random and no
+ * infinite animations.
+ *
+ * World axes: x runs right-down on screen, y runs left-down, z up. The camera sits at (-∞, -∞, +∞),
+ * so painter's order is by increasing `x + y` (far to near); objects stacked on one footprint are
+ * drawn bottom-up, each surface before the objects standing on it.
  */
 
 // ---- Projection -------------------------------------------------------------
@@ -14,7 +19,7 @@ export const W = 800;
 export const H = 500;
 const OX = 400;
 const OY = 300;
-/** World unit to screen pixel. The plate is scaled so a station fills ~3/4 of the panel width. */
+/** World unit to screen pixel. One world unit reads as ~2 cm (pot Ø10, crate 30×20, CC trolley 68×28×95). */
 export const S = 1.4;
 const COS = 0.8660254 * S;
 const SIN = 0.5 * S;
@@ -35,6 +40,12 @@ export const pct = (x: number, y: number, z = 0) => {
 /** Screen offset of a world shift along the x axis (used by <use> and by the travelling unit). */
 export const alongX = (dx: number): [number, number] => [r1(dx * COS), r1(dx * SIN)];
 export const alongY = (dy: number): [number, number] => [r1(-dy * COS), r1(dy * SIN)];
+const [OX0, OY0] = iso(0, 0, 0);
+/** SVG transform that moves a symbol drawn around the world origin to world (x, y, z). */
+export const at = (x: number, y: number, z = 0) => {
+  const [sx, sy] = iso(x, y, z);
+  return `translate(${r1(sx - OX0)} ${r1(sy - OY0)})`;
+};
 
 // ---- Ground plate and rail (fixed across scenes) -----------------------------
 /** The plate is longer than the frame along x: its left and right corners bleed off the panel. */
@@ -43,22 +54,9 @@ export const PLATE = { x0: -300, x1: 300, y0: -112, y1: 100, h: 6 } as const;
 export const RAIL = { y: 80, half: 6 } as const;
 
 // ---- Colour -----------------------------------------------------------------
-/** Light panel: ink is dark blue mixed toward soft white. */
-const sw = (p: number) => `color-mix(in srgb, var(--oboya-blue-dark) ${p}%, var(--oboya-soft-white))`;
-export const INK = sw(70);
-export const CONSTRUCTION = sw(34);
-export const GRID = sw(9);
-export const FACE = { top: sw(5), left: sw(13), right: sw(24), soft: "var(--oboya-soft-white)" } as const;
-export const ACCENT = {
-  green: "var(--oboya-green)",
-  greenLight: "var(--oboya-green-light)",
-  blueLight: "var(--oboya-blue-light)",
-  orange: "var(--oboya-orange)",
-  yellowLight: "var(--oboya-yellow-light)",
-} as const;
-/** Accent mixed toward soft white, for tinted faces. */
-export const accentFace = (a: keyof typeof ACCENT, p = 28) =>
-  `color-mix(in srgb, ${ACCENT[a]} ${p}%, var(--oboya-soft-white))`;
+/** Dark panel: ink is soft white mixed toward dark blue. */
+const sw = (p: number) => `color-mix(in srgb, var(--oboya-soft-white) ${p}%, var(--oboya-blue-dark))`;
+export const INK = sw(72);
 
 // ---- Stroke weights ---------------------------------------------------------
 /** Three weights from one CSS variable set on the panel (`--eco-ink`). */
@@ -112,6 +110,12 @@ export function boxRight({ x, y, z = 0, w, d, h }: Box) {
 export function plane(x: number, y: number, w: number, d: number, z = 0) {
   return `M${P(x, y, z)}L${P(x + w, y, z)}L${P(x + w, y + d, z)}L${P(x, y + d, z)}Z`;
 }
+/** Rectangle on the vertical plane y = const (faces the viewer's left-front). */
+export const faceY = (x: number, y: number, z: number, w: number, h: number) =>
+  `M${P(x, y, z)}L${P(x + w, y, z)}L${P(x + w, y, z + h)}L${P(x, y, z + h)}Z`;
+/** Rectangle on the vertical plane x = const (faces the viewer's right-front). */
+export const faceX = (x: number, y: number, z: number, d: number, h: number) =>
+  `M${P(x, y, z)}L${P(x, y + d, z)}L${P(x, y + d, z + h)}L${P(x, y, z + h)}Z`;
 /** Horizontal circle (ellipse on screen) centred at world (cx, cy, z). */
 export function disc(cx: number, cy: number, r: number, z = 0) {
   const [sx, sy] = iso(cx, cy, z);
@@ -141,6 +145,16 @@ export function cylinderBody(cx: number, cy: number, r: number, h: number, z = 0
   const bx = r1(rb * 1.2247 * S);
   const byy = r1(rb * 0.7071 * S);
   return `M${r1(sx - rx)} ${sy}A${rx} ${ry} 0 0 0 ${r1(sx + rx)} ${sy}L${r1(sx + bx)} ${by}A${bx} ${byy} 0 0 1 ${r1(sx - bx)} ${by}Z`;
+}
+/** Right half of a cylinder side (the shaded tone). */
+export function cylinderHalf(cx: number, cy: number, r: number, h: number, z = 0, rb = r) {
+  const [sx, sy] = iso(cx, cy, z + h);
+  const [, by] = iso(cx, cy, z);
+  const rx = r1(r * 1.2247 * S);
+  const ry = r1(r * 0.7071 * S);
+  const bx = r1(rb * 1.2247 * S);
+  const byy = r1(rb * 0.7071 * S);
+  return `M${sx} ${r1(sy + ry)}A${rx} ${ry} 0 0 0 ${r1(sx + rx)} ${sy}L${r1(sx + bx)} ${by}A${bx} ${byy} 0 0 1 ${sx} ${r1(by + byy)}Z`;
 }
 /** Vertical line from z0 to z1 at (x, y). */
 export const post = (x: number, y: number, z0: number, z1: number) => `M${P(x, y, z0)}L${P(x, y, z1)}`;
@@ -207,32 +221,8 @@ export function Fade({
   );
 }
 
-/** Flat faces of a box, as three fills (fade in together). */
-export function Faces({ box, top = FACE.top, left = FACE.left, right = FACE.right }: { box: Box; top?: string; left?: string; right?: string }) {
-  return (
-    <>
-      <path d={boxTop(box)} fill={top} />
-      <path d={boxLeft(box)} fill={left} />
-      <path d={boxRight(box)} fill={right} />
-    </>
-  );
-}
-
-/** A closed box: faces fade after the outline draws. */
-export function IsoBox({ box, delay = 0, dur = 1, w = "base", top, left, right, inner = true }: { box: Box; delay?: number; dur?: number; w?: Weight; top?: string; left?: string; right?: string; inner?: boolean }) {
-  return (
-    <>
-      <Fade delay={delay + dur * 0.6}>
-        <Faces box={box} top={top} left={left} right={right} />
-      </Fade>
-      <Draw d={boxOutline(box)} delay={delay} dur={dur} w={w} />
-      {inner ? <Draw d={boxInner(box)} delay={delay + dur * 0.3} dur={dur * 0.6} w="light" /> : null}
-    </>
-  );
-}
-
 /** Dashed rail segment: the dashes march once along the line, then rest. */
-export function DashMarch({ d, color = ACCENT.blueLight, delay = 0, dur = 1.4, opacity = 0.7 }: { d: string; color?: string; delay?: number; dur?: number; opacity?: number }) {
+export function DashMarch({ d, color = "var(--oboya-blue-light)", delay = 0, dur = 1.4, opacity = 0.7 }: { d: string; color?: string; delay?: number; dur?: number; opacity?: number }) {
   const st = useStatic();
   return (
     <motion.path
@@ -249,29 +239,30 @@ export function DashMarch({ d, color = ACCENT.blueLight, delay = 0, dur = 1.4, o
   );
 }
 
+const anim = (name: string, ms: number, playState: string): CSSProperties => ({
+  animationName: name,
+  animationDuration: `${ms}ms`,
+  animationTimingFunction: "linear",
+  animationFillMode: "both",
+  animationPlayState: playState as CSSProperties["animationPlayState"],
+});
+
 /**
  * A product unit rides the rail: enters from the left, rests, exits right, over the whole phase.
- * Driven by a CSS animation so it shares the clock's play state (hover pause).
- * Children are drawn around world x=0 on the rail (y = RAIL.y, z = PLATE.h).
+ * Driven by CSS animations so it shares the clock's play state (hover pause).
+ * `from` is what arrives (the previous stage's output); it swaps for `children` (this stage's
+ * output) while the unit rests. Children are drawn around world x=0 on the rail (y = RAIL.y).
  */
-export function Travel({ children, span = 420 }: { children: ReactNode; span?: number }) {
+export function Travel({ children, from, span = 420 }: { children: ReactNode; from?: ReactNode; span?: number }) {
   const st = useStatic();
   const { ms, playState, rest } = useContext(SceneClock);
   const [tx, ty] = alongX(span);
-  // Static frame or autoplay stopped by the user: the unit sits at rest.
+  // Static frame or autoplay stopped by the user: the unit sits at rest, already transformed.
   if (st || rest) return <g>{children}</g>;
   return (
-    <g
-      style={
-        {
-          "--eco-tx": `${tx}px`,
-          "--eco-ty": `${ty}px`,
-          animation: `eco-travel ${ms}ms linear both`,
-          animationPlayState: playState,
-        } as CSSProperties
-      }
-    >
-      {children}
+    <g style={{ "--eco-tx": `${tx}px`, "--eco-ty": `${ty}px`, ...anim("eco-travel", ms, playState) } as CSSProperties}>
+      {from ? <g style={anim("eco-swap-out", ms, playState)}>{from}</g> : null}
+      <g style={from ? anim("eco-swap-in", ms, playState) : undefined}>{children}</g>
     </g>
   );
 }
@@ -287,7 +278,7 @@ export function Part({ i, active, children }: { i: number; active?: number | nul
   );
 }
 
-/** Repeat a symbol along the world x (and optionally y) axis. */
+/** Repeat a symbol along the world x (and optionally y) axis, far to near. */
 export function Repeat({ href, n, dx = 0, dy = 0, start = 0, className }: { href: string; n: number; dx?: number; dy?: number; start?: number; className?: string }) {
   return (
     <>

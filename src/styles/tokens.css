@@ -88,6 +88,29 @@
   }
 }
 
+/* Ecosystem unit hand-over: the arriving product fades out and the stage's output fades in while the unit rests. */
+@keyframes eco-swap-out {
+  0%,
+  42% {
+    opacity: 1;
+  }
+  54%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes eco-swap-in {
+  0%,
+  46% {
+    opacity: 0;
+  }
+  58%,
+  100% {
+    opacity: 1;
+  }
+}
+
 @keyframes shop-catalog-fade {
   0%,
   100% {

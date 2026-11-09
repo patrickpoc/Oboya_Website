@@ -173,7 +173,7 @@ export function HomeEcosystemStage({
           >
             <div
               className={cn(
-                "relative aspect-[4/3] w-full overflow-hidden rounded-md bg-oboya-soft-white ring-1 ring-white/20 sm:aspect-[8/5]",
+                "relative aspect-[4/3] w-full overflow-hidden rounded-md bg-oboya-blue-dark ring-1 ring-white/15 sm:aspect-[8/5]",
                 "[--eco-ink:2.3px] sm:[--eco-ink:1.9px] md:[--eco-ink:1.7px] lg:[--eco-ink:1.45px] xl:[--eco-ink:1.25px]",
               )}
               aria-hidden
@@ -226,51 +226,115 @@ export function HomeEcosystemStage({
                   percentages stay true when the panel is cropped (mobile). */}
               <div className="pointer-events-none absolute left-1/2 top-1/2 aspect-[8/5] h-full -translate-x-1/2 -translate-y-1/2">
                 {current && !current.image
-                  ? HOTSPOTS[current.id]
-                      .slice(0, current.points.length)
-                      .map((h, k) => {
-                        const lit = active === k;
-                        return (
-                          <motion.span
-                            key={`${current.id}-${k}`}
-                            className="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 p-2"
-                            style={{ left: `${h.left}%`, top: `${h.top}%` }}
-                            initial={isStatic ? false : { opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.4, delay: 1.8 }}
-                            onMouseEnter={() => setActive(k)}
-                            onMouseLeave={() => setActive(null)}
+                  ? (() => {
+                      const spots = HOTSPOTS[current.id].slice(0, current.points.length);
+                      const reveal = (k: number) =>
+                        isStatic ? { duration: 0 } : { duration: 0.4, delay: 1.8 + k * 0.25 };
+                      return (
+                        <>
+                          {/* Leader lines: vertical from the dot, then horizontal to the label. */}
+                          <svg
+                            className="absolute inset-0 h-full w-full overflow-visible"
+                            viewBox="0 0 100 100"
+                            preserveAspectRatio="none"
+                            aria-hidden
                           >
-                            <span
-                              className={cn(
-                                "block size-2.5 rounded-full border transition-[background-color,box-shadow] duration-300",
-                                lit
-                                  ? "border-oboya-green-light bg-oboya-green-light ring-4 ring-oboya-green-light/25"
-                                  : "border-oboya-blue bg-white ring-4 ring-oboya-blue/15",
-                              )}
-                            />
-                          </motion.span>
-                        );
-                      })
+                            {spots.map((h, k) => {
+                              const lit = active === k;
+                              return (
+                                <motion.polyline
+                                  key={`${current.id}-l${k}`}
+                                  points={`${h.left},${h.top} ${h.left},${h.ly} ${h.lx},${h.ly}`}
+                                  fill="none"
+                                  vectorEffect="non-scaling-stroke"
+                                  strokeWidth={1}
+                                  className={cn(
+                                    "transition-[stroke] duration-300 max-sm:hidden",
+                                    lit ? "stroke-oboya-green-light max-sm:block" : "stroke-white/55",
+                                    active != null && !lit && "stroke-white/25",
+                                  )}
+                                  initial={isStatic ? false : { opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={reveal(k)}
+                                />
+                              );
+                            })}
+                          </svg>
+                          {spots.map((h, k) => {
+                            const lit = active === k;
+                            return (
+                              <motion.span
+                                key={`${current.id}-${k}`}
+                                className="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 cursor-default p-2"
+                                style={{ left: `${h.left}%`, top: `${h.top}%` }}
+                                initial={isStatic ? false : { opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={reveal(k)}
+                                onMouseEnter={() => setActive(k)}
+                                onMouseLeave={() => setActive(null)}
+                                onClick={() => setActive(lit ? null : k)}
+                              >
+                                <span
+                                  className={cn(
+                                    "block size-2.5 rounded-full border transition-[background-color,box-shadow,border-color] duration-300",
+                                    lit
+                                      ? "border-oboya-green-light bg-oboya-green-light ring-4 ring-oboya-green-light/30"
+                                      : "border-oboya-blue-light bg-white ring-4 ring-white/15",
+                                  )}
+                                />
+                              </motion.span>
+                            );
+                          })}
+                          {/* Labels: the proof point text, hung on the leader's end. Mobile shows only the active one. */}
+                          {spots.map((h, k) => {
+                            const lit = active === k;
+                            const dim = active != null && !lit;
+                            const text = t(current.points[k].text);
+                            return (
+                              <motion.span
+                                key={`${current.id}-t${k}`}
+                                aria-hidden
+                                className={cn(
+                                  "pointer-events-auto absolute -translate-y-1/2 cursor-default whitespace-nowrap rounded-sm border px-2 py-0.5 font-body text-[11px] leading-snug transition-[color,border-color,opacity] duration-300 sm:text-xs",
+                                  h.side === "l" ? "-translate-x-full" : "",
+                                  lit
+                                    ? "border-oboya-green-light/60 bg-oboya-blue-dark/90 text-white"
+                                    : "border-white/20 bg-oboya-blue-dark/80 text-white/90",
+                                  !lit && "max-sm:hidden",
+                                )}
+                                style={{ left: `${h.lx}%`, top: `${h.ly}%` }}
+                                initial={isStatic ? false : { opacity: 0 }}
+                                animate={{ opacity: dim ? 0.5 : 1 }}
+                                transition={reveal(k)}
+                                onMouseEnter={() => setActive(k)}
+                                onMouseLeave={() => setActive(null)}
+                              >
+                                {text}
+                              </motion.span>
+                            );
+                          })}
+                        </>
+                      );
+                    })()
                   : null}
               </div>
 
               {/* Corner ticks */}
               <span
                 aria-hidden
-                className="pointer-events-none absolute left-2 top-2 size-2.5 border-l border-t border-oboya-blue-dark/30"
+                className="pointer-events-none absolute left-2 top-2 size-2.5 border-l border-t border-white/35"
               />
               <span
                 aria-hidden
-                className="pointer-events-none absolute right-2 top-2 size-2.5 border-r border-t border-oboya-blue-dark/30"
+                className="pointer-events-none absolute right-2 top-2 size-2.5 border-r border-t border-white/35"
               />
               <span
                 aria-hidden
-                className="pointer-events-none absolute bottom-2 left-2 size-2.5 border-b border-l border-oboya-blue-dark/30"
+                className="pointer-events-none absolute bottom-2 left-2 size-2.5 border-b border-l border-white/35"
               />
               <span
                 aria-hidden
-                className="pointer-events-none absolute bottom-2 right-2 size-2.5 border-b border-r border-oboya-blue-dark/30"
+                className="pointer-events-none absolute bottom-2 right-2 size-2.5 border-b border-r border-white/35"
               />
             </div>
           </SceneClock.Provider>
