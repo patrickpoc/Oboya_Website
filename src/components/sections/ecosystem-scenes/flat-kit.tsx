@@ -71,6 +71,7 @@ export const tone = (c: string, dark = false): Tones => ({
 
 const useStatic = () => useContext(StaticCtx);
 const LINE = { strokeWidth: ink("light") } as const;
+const THIN = { strokeWidth: "calc(var(--eco-ink, 1.2px) * 0.5)" } as const;
 
 // ---- Motion ------------------------------------------------------------------
 /** Objects appear by fading in while settling down onto their surface. */
@@ -266,37 +267,40 @@ export function Strawberry({ x, y, z, fruit = 3 }: { x: number; y: number; z: nu
   );
 }
 
-/** Chrysanthemum head: eight petals from a centre, in screen space. */
+/** Chrysanthemum head: ten two-tone petals around a dark-ringed centre, outlined so it reads small. */
 export function Mum({ at, r, color }: { at: [number, number, number]; r: number; color: string }) {
   const [cx, cy] = iso(at[0], at[1], at[2]);
   const n = 10;
-  const petals = Array.from({ length: n }, (_, k) => {
-    const a = (k / n) * Math.PI * 2;
-    const b = a + Math.PI / n;
-    const tx = cx + Math.cos(a) * r;
-    const ty = cy + Math.sin(a) * r * 0.9;
-    const px = cx + Math.cos(a - 0.3) * r * 0.65;
-    const py = cy + Math.sin(a - 0.3) * r * 0.6;
-    const qx = cx + Math.cos(b) * r * 0.65;
-    const qy = cy + Math.sin(b) * r * 0.6;
+  const petal = (k: number, scale: number) => {
+    const a = (k / n) * Math.PI * 2 - Math.PI / 2;
+    const tx = cx + Math.cos(a) * r * scale;
+    const ty = cy + Math.sin(a) * r * 0.92 * scale;
+    const px = cx + Math.cos(a - 0.36) * r * 0.7 * scale;
+    const py = cy + Math.sin(a - 0.36) * r * 0.64 * scale;
+    const qx = cx + Math.cos(a + 0.36) * r * 0.7 * scale;
+    const qy = cy + Math.sin(a + 0.36) * r * 0.64 * scale;
     return `M${cx} ${cy}Q${px} ${py} ${tx} ${ty}Q${qx} ${qy} ${cx} ${cy}`;
-  }).join("");
+  };
+  const outer = Array.from({ length: n }, (_, k) => petal(k, 1)).join("");
+  const inner = Array.from({ length: n }, (_, k) => petal(k + 0.5, 0.62)).join("");
+  const centre = color === M.yellow ? M.fruitDark : color === M.fruit ? M.yellow : mix(M.yellow, 80, M.fruit);
   return (
     <>
-      <path d={petals} fill={color} stroke={color} strokeLinejoin="round" style={{ strokeWidth: ink("light") }} />
-      <circle cx={cx} cy={cy} r={r * 0.3} fill={color === M.yellow ? M.fruitDark : M.yellow} />
+      <path d={outer} fill={color} stroke={mix(color, 72)} strokeLinejoin="round" style={THIN} />
+      <path d={inner} fill={mix(color, 78, SW)} />
+      <circle cx={cx} cy={cy} r={r * 0.3} fill={centre} stroke={mix(centre, 65)} style={THIN} />
     </>
   );
 }
 
-/** Rose: a closed bud (ellipse) with a darker inner petal line. */
+/** Rose: a closed bud (outlined ellipse) with a darker inner petal curl and a green calyx. */
 export function Rose({ at, r, color }: { at: [number, number, number]; r: number; color: string }) {
   const [cx, cy] = iso(at[0], at[1], at[2]);
   return (
     <>
-      <ellipse cx={cx} cy={cy} rx={r * 0.78} ry={r} fill={color} />
-      <path d={`M${cx - r * 0.45} ${cy - r * 0.2}Q${cx} ${cy + r * 0.5} ${cx + r * 0.4} ${cy - r * 0.35}`} fill="none" stroke={mix(color, 70)} strokeLinecap="round" style={LINE} />
-      <path d={`M${cx - r * 0.7} ${cy + r * 0.6}L${cx} ${cy + r * 1.1}L${cx + r * 0.7} ${cy + r * 0.6}`} fill={M.leafDark} />
+      <path d={`M${cx - r * 0.7} ${cy + r * 0.5}L${cx} ${cy + r * 1.25}L${cx + r * 0.7} ${cy + r * 0.5}Z`} fill={M.leafDark} />
+      <ellipse cx={cx} cy={cy} rx={r * 0.8} ry={r} fill={color} stroke={mix(color, 72)} style={THIN} />
+      <path d={`M${cx - r * 0.45} ${cy - r * 0.15}Q${cx} ${cy + r * 0.55} ${cx + r * 0.42} ${cy - r * 0.3}M${cx - r * 0.2} ${cy - r * 0.6}Q${cx + r * 0.1} ${cy - r * 0.1} ${cx + r * 0.3} ${cy - r * 0.55}`} fill="none" stroke={mix(color, 62)} strokeLinecap="round" style={LINE} />
     </>
   );
 }
@@ -319,7 +323,7 @@ export function PottedMum({ x, y, z, color = M.yellow, h = 11, blooms = 4 }: { x
         <path key={`i${k}`} d={roundLeaf([x, y, z + 2.5], rot(d, 0.4), 5, h * 0.55)} fill={k % 2 ? M.leafLight : M.leaf} />
       ))}
       {heads.slice(0, blooms).map((b, k) => (
-        <Mum key={k} at={b} r={3.3} color={color} />
+        <Mum key={k} at={b} r={4} color={color} />
       ))}
     </>
   );
@@ -349,7 +353,7 @@ export function Stems({ x, y, z, h = 16, colors = [M.yellow, M.pink, M.fruit], k
       ))}
       <path d={leaf([x, y, z + h * 0.45], [1, 0.4], 5, 2, 1.8)} fill={M.leaf} />
       <path d={leaf([x, y, z + h * 0.6], [-0.6, 0.9], 4.5, 2, 1.6)} fill={M.leafDark} />
-      {tops.map((t, k) => (kind === "mum" ? <Mum key={k} at={t} r={3} color={colors[k]} /> : <Rose key={k} at={t} r={2.6} color={colors[k]} />))}
+      {tops.map((t, k) => (kind === "mum" ? <Mum key={k} at={t} r={3.6} color={colors[k]} /> : <Rose key={k} at={t} r={3} color={colors[k]} />))}
     </>
   );
 }

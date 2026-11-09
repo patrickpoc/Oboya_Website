@@ -58,11 +58,11 @@ export function Growing({ st, active }: SceneProps) {
               <Rise delay={1 + k * 0.12}>{k === 0 ? <Seedling x={0} y={0} z={9} s={1.6} /> : <Tomato x={0} y={0} z={9} h={k === 1 ? 20 : 34} fruit={k === 1 ? 0 : 2} />}</Rise>
             </g>
           ))}
-          {[0, 1, 2, 3].map((k) => (
+          {[0, 1, 2].map((k) => (
             <g key={k} id={`${id}-mum${k}`}>
               <Pot cx={0} cy={0} r={5} h={9} color={M.black} delay={0.7 + k * 0.1} shadow={false} />
               <Rise delay={1.1 + k * 0.12}>
-                <PottedMum x={0} y={0} z={9} color={k === 1 ? M.yellow : k === 2 ? M.pink : SW} h={k === 0 ? 6 : 10} blooms={k === 0 ? 0 : k === 1 ? 2 : 4} />
+                <PottedMum x={0} y={0} z={9} color={k === 1 ? M.yellow : M.pink} h={k === 0 ? 6 : 10} blooms={k === 0 ? 0 : k === 1 ? 2 : 4} />
               </Rise>
             </g>
           ))}
@@ -85,6 +85,10 @@ export function Growing({ st, active }: SceneProps) {
         <Draw d={bars} color={BAR} w="light" delay={0.3} dur={1} />
         <Solid box={{ x: BAY.x0, y: BAY.y0 - 1.5, z: BAY.eave - 1.5, w: BAY.x1 - BAY.x0, d: 3, h: 3 }} tones={steel} delay={0.3} line={false} />
         <Solid box={{ x: BAY.x0, y: RIDGE_Y - 1.5, z: BAY.ridge - 1.5, w: BAY.x1 - BAY.x0, d: 3, h: 3 }} tones={steel} delay={0.4} line={false} />
+        {/* Gable rafters and corner posts close the cut-away cleanly at both ends */}
+        <Draw d={seg([BAY.x0, RIDGE_Y, BAY.ridge], [BAY.x0, BAY.y1, BAY.eave]) + seg([BAY.x1, BAY.y0, BAY.eave], [BAY.x1, RIDGE_Y, BAY.ridge]) + seg([BAY.x1, RIDGE_Y, BAY.ridge], [BAY.x1, BAY.y1, BAY.eave])} color={M.steel} w="heavy" delay={0.4} dur={0.9} />
+        <Solid box={{ x: BAY.x0 - 1.2, y: BAY.y1 - 2.4, w: 2.4, d: 2.4, h: BAY.eave }} tones={steel} delay={0.4} line={false} />
+        <Solid box={{ x: BAY.x1 - 2.4, y: BAY.y0 - 1.2, w: 2.4, d: 2.4, h: BAY.eave }} tones={steel} delay={0.4} line={false} />
         <Fade delay={0.2}>
           <path d={plane(BAY.x0, BAY.y0, BAY.x1 - BAY.x0, BAY.y1 - BAY.y0)} fill={M.concrete} />
         </Fade>
@@ -116,12 +120,12 @@ export function Growing({ st, active }: SceneProps) {
           <Solid box={{ x: ROW.x0, y: MUM.y - 10, z: 16, w: ROW.w, d: 20, h: 3 }} color={M.white} delay={0.55} />
           <g transform={at(MUM.x0, MUM.y, MUM.z)}>
             {Array.from({ length: MUM.n }, (_, k) => (
-              <use key={k} href={`#${id}-mum${k < 2 ? 0 : k < 4 ? 1 : k < 6 ? 2 : 3}`} transform={at(k * MUM.pitch, 0, 0)} />
+              <use key={k} href={`#${id}-mum${k < 3 ? 0 : k < 5 ? 1 : 2}`} transform={at(k * MUM.pitch, 0, 0)} />
             ))}
           </g>
 
           {/* Row 3: strawberries on a hanging gutter */}
-          {[-165, -60, 50, 160].map((x) => (
+          {[-160, 0, 160].map((x) => (
             <Solid key={x} box={{ x: x - 1.2, y: BER.y - 1.2, w: 2.4, d: 2.4, h: 28 }} tones={steel} delay={0.6} line={false} />
           ))}
           <Solid box={{ x: ROW.x0, y: BER.y - 7, z: 28, w: ROW.w, d: 14, h: 7 }} color={M.white} delay={0.65} />
@@ -134,6 +138,8 @@ export function Growing({ st, active }: SceneProps) {
             ))}
           </g>
         </Part>
+
+        <Solid box={{ x: BAY.x1 - 2.4, y: BAY.y1 - 2.4, w: 2.4, d: 2.4, h: BAY.eave }} tones={steel} delay={0.5} line={false} />
 
         {/* Cut-away container: substrate layers and roots in section, a fruiting tomato on top */}
         <Part i={1} active={active}>

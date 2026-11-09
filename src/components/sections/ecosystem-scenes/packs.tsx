@@ -1,8 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Cyl, Dot, Lettuce, M, Rise, Seedling, Shadow, Solid, Stems, TomatoFruit, mix, tone } from "./flat-kit";
-import { P, at, boxInner, boxOutline, cylinder, cylinderBody, disc, faceY, ink, plane, post, seg, type Box } from "./iso-kit";
+import { Cyl, Dot, Lettuce, M, Rise, Seedling, Shadow, Solid, Stems, TomatoFruit, leaf, mix, tone } from "./flat-kit";
+import { P, at, boxInner, boxOutline, cylinder, cylinderBody, disc, faceY, ink, iso, plane, post, seg, type Box } from "./iso-kit";
 
 /**
  * Oboya product objects shared by several scenes, drawn around the world origin unless they take a
@@ -28,8 +28,11 @@ const TRAY_GRID = (() => {
   for (let c = 1; c < CELLS.cols; c++) parts.push(seg([(TRAY.w * c) / CELLS.cols, 0, TRAY.h], [(TRAY.w * c) / CELLS.cols, TRAY.d, TRAY.h]));
   return parts.join("");
 })();
-/** Black plug tray with substrate cells; `grow` 0 = filled cells, 1 = germinating, 2 = seedlings. */
-export function Tray({ grow, delay = 0.4 }: { grow: 0 | 1 | 2; delay?: number }) {
+/**
+ * Black plug tray with substrate cells; `grow` 0 = filled cells, 1 = germinating, 2 = seedlings,
+ * 3 = rooted chrysanthemum cuttings (the flower line starts here).
+ */
+export function Tray({ grow, delay = 0.4 }: { grow: 0 | 1 | 2 | 3; delay?: number }) {
   const t = tone(M.black, true);
   return (
     <>
@@ -40,13 +43,32 @@ export function Tray({ grow, delay = 0.4 }: { grow: 0 | 1 | 2; delay?: number })
         ))}
         <path d={TRAY_GRID} fill="none" stroke={t.line} style={THIN} />
       </Rise>
-      {grow > 0 ? (
+      {grow === 3 ? (
+        <Rise delay={delay + 0.5} lift={3}>
+          {CELL.map((c, i) => (
+            <Cutting key={i} x={c.x} y={c.y} z={TRAY.h} bud={i % 3 === 0} />
+          ))}
+        </Rise>
+      ) : grow > 0 ? (
         <Rise delay={delay + 0.5} lift={3}>
           {CELL.map((c, i) => (
             <Seedling key={i} x={c.x} y={c.y} z={TRAY.h} s={grow === 1 ? 0.7 + ((i * 7) % 3) * 0.12 : 1.25 + ((i * 5) % 3) * 0.18} />
           ))}
         </Rise>
       ) : null}
+    </>
+  );
+}
+
+/** Rooted chrysanthemum cutting: a short stem with three round leaves, some with a pink bud. */
+function Cutting({ x, y, z, bud }: { x: number; y: number; z: number; bud: boolean }) {
+  return (
+    <>
+      <path d={`M${iso(x, y, z).join(" ")}L${iso(x, y, z + 4).join(" ")}`} fill="none" stroke={M.leafDark} strokeLinecap="round" style={LINE} />
+      <path d={leaf([x, y, z + 2], [1, 0.2], 3.4, 1.2, 1.8)} fill={M.leaf} />
+      <path d={leaf([x, y, z + 2.6], [-0.8, 0.7], 3.2, 1.2, 1.7)} fill={M.leafDark} />
+      <path d={leaf([x, y, z + 3.2], [-0.3, -1], 3, 1.4, 1.6)} fill={M.leafLight} />
+      {bud ? <Dot at={[x, y, z + 5]} r={1.3} fill={M.pink} stroke={mix(M.pink, 60)} /> : null}
     </>
   );
 }
@@ -69,6 +91,25 @@ export function FlowerBucket({ cx, cy, z = 0, colors, kind = "mum", h = 12, dela
       <Rise delay={delay + 0.3} lift={4}>
         <Stems x={cx} y={cy} z={z + BUCKET.h - 3} h={h} colors={colors} kind={kind} spread={3.2} />
       </Rise>
+    </>
+  );
+}
+
+/** Three bucket-of-flowers symbols (`${id}-bucket0..2`) for <use>: mums, roses, mixed. */
+export function BucketDefs({ id, delay = 1 }: { id: string; delay?: number }) {
+  const SWC = "var(--oboya-soft-white)";
+  const sets: { colors: string[]; kind: "mum" | "rose" }[] = [
+    { colors: [M.yellow, M.pink, M.yellow, SWC], kind: "mum" },
+    { colors: [M.fruit, M.pink, M.fruit], kind: "rose" },
+    { colors: [SWC, M.yellow, M.pink], kind: "mum" },
+  ];
+  return (
+    <>
+      {sets.map((b, k) => (
+        <g key={k} id={`${id}-bucket${k}`}>
+          <FlowerBucket cx={0} cy={0} colors={b.colors} kind={b.kind} h={12} delay={delay + k * 0.08} shadow={false} />
+        </g>
+      ))}
     </>
   );
 }

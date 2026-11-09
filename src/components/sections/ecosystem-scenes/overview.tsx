@@ -1,8 +1,9 @@
 "use client";
 
+import { useId } from "react";
 import { M, PottedMum, Rise, Solid, mix, tone } from "./flat-kit";
 import { DashMarch, Fade, Plate, RAIL, Static, Travel, at, disc, faceY, iso, plane, seg, type Box } from "./iso-kit";
-import { CC, CCTrolley, Crate, FlowerBucket, Pot, Punnet, Tray } from "./packs";
+import { BucketDefs, CC, CCTrolley, Crate, Pot, Punnet, Tray } from "./packs";
 
 /**
  * Closing frame: the whole chain as six nodes on one line, lighting up in order, while one
@@ -21,7 +22,7 @@ const scaled = (x: number, y: number, k: number) => {
 const SW = "var(--oboya-soft-white)";
 const BD = "var(--oboya-blue-dark)";
 
-function Glyph({ k, x }: { k: number; x: number }) {
+function Glyph({ k, x, id }: { k: number; x: number; id: string }) {
   const y = NODE_Y;
   const d = 0.8 + k * STEP;
   switch (k) {
@@ -65,11 +66,11 @@ function Glyph({ k, x }: { k: number; x: number }) {
             top={74}
             delay={d}
             content={(lvl, z) => (
-              <>
+              <g transform={at(-CC.w / 2 + 12, 0, z)}>
                 {[0, 1, 2].map((i) => (
-                  <FlowerBucket key={i} cx={-CC.w / 2 + 12 + i * 22} cy={0} z={z} colors={lvl ? [M.pink, M.yellow, M.pink] : [M.yellow, SW, M.yellow]} h={10} delay={d + 0.3} shadow={false} />
+                  <use key={i} href={`#${id}-bucket${(i + lvl) % 3}`} transform={at(i * 22, 0, 0)} />
                 ))}
-              </>
+              </g>
             )}
           />
         </g>
@@ -105,9 +106,13 @@ function Glyph({ k, x }: { k: number; x: number }) {
 }
 
 export function Overview({ st }: { st: boolean }) {
+  const id = useId();
   return (
     <Static st={st}>
       <Plate>
+        <defs>
+          <BucketDefs id={id} delay={0.8 + 4 * STEP + 0.3} />
+        </defs>
         <Fade delay={0.2} dur={0.6}>
           {NODE_X.map((x) => (
             <path key={x} d={plane(x - PAD / 2, NODE_Y - PAD / 2, PAD, PAD)} fill={mix(SW, 10, BD)} />
@@ -128,7 +133,7 @@ export function Overview({ st }: { st: boolean }) {
           </Fade>
         ))}
         {NODE_X.map((x, k) => (
-          <Glyph key={x} k={k} x={x} />
+          <Glyph key={x} k={k} x={x} id={id} />
         ))}
 
         <Travel span={520}>

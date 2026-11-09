@@ -3,7 +3,7 @@
 import { useId } from "react";
 import { M, PottedMum, Rise, Solid, mix, tone } from "./flat-kit";
 import { Part, Plate, RAIL, Repeat, Static, Travel, at, faceY, plane, type Box, type SceneProps } from "./iso-kit";
-import { Bag, Carton, Crate, FlowerBucket, Pot, Punnet, Sleeve } from "./packs";
+import { Bag, BucketDefs, Carton, Crate, Pot, Punnet, Sleeve } from "./packs";
 
 /**
  * Supermarket gondola (5.4 m): dark plinth, opaque back panel with a green header, base deck and
@@ -58,6 +58,7 @@ export function Retail({ st, active }: SceneProps) {
           <g id={`${id}-carton`}>
             <Carton delay={1.2} />
           </g>
+          <BucketDefs id={id} delay={1.1} />
         </defs>
 
         {/* Gondola structure */}
@@ -117,10 +118,10 @@ export function Retail({ st, active }: SceneProps) {
         {/* Floor display: dark stand with buckets of cut flowers */}
         <Part i={0} active={active}>
           <Solid box={STAND} tones={tone(M.black, true)} delay={0.6} shadow={0.3} />
-          <FlowerBucket cx={STAND.x + 12} cy={STAND.y + 10} z={STAND.h} colors={[M.yellow, M.pink, M.yellow, SW]} delay={1} shadow={false} />
-          <FlowerBucket cx={STAND.x + 36} cy={STAND.y + 11} z={STAND.h} colors={[M.fruit, M.pink, M.fruit]} kind="rose" delay={1.1} shadow={false} />
-          <FlowerBucket cx={STAND.x + 14} cy={STAND.y + 24} z={STAND.h} colors={[SW, M.yellow, M.pink]} delay={1.2} shadow={false} />
-          <FlowerBucket cx={STAND.x + 37} cy={STAND.y + 25} z={STAND.h} colors={[M.pink, M.fruit, M.pink, M.yellow]} kind="rose" delay={1.3} shadow={false} />
+          <use href={`#${id}-bucket0`} transform={at(STAND.x + 12, STAND.y + 10, STAND.h)} />
+          <use href={`#${id}-bucket1`} transform={at(STAND.x + 36, STAND.y + 11, STAND.h)} />
+          <use href={`#${id}-bucket2`} transform={at(STAND.x + 14, STAND.y + 24, STAND.h)} />
+          <use href={`#${id}-bucket1`} transform={at(STAND.x + 37, STAND.y + 25, STAND.h)} />
         </Part>
 
         {/* Unit: a crate of punnets arrives, a shelf-ready punnet leaves. */}

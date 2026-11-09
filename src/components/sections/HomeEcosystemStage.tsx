@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Backdrop,
@@ -9,6 +9,7 @@ import {
   Overview,
   SceneClock,
 } from "@/components/sections/ecosystem-scenes";
+import { HomeEcosystemCallouts } from "@/components/sections/HomeEcosystemCallouts";
 import type { EcoPhaseKind } from "@/components/sections/useEcosystemSequence";
 import {
   CLOSING_MS,
@@ -53,6 +54,26 @@ export function HomeEcosystemStage({
   const afterStages = kind === "closing" || kind === "hold";
   const inStage = kind === "stage" || kind === "static";
   const current = stageIndex >= 0 ? stages[stageIndex] : null;
+
+  // Emphasis resets whenever the scene changes (autoplay or rail), so every callout is back.
+  const sceneKey = `${kind}:${stageIndex}`;
+  const [seenScene, setSeenScene] = useState(sceneKey);
+  if (seenScene !== sceneKey) {
+    setSeenScene(sceneKey);
+    setActive(null);
+  }
+  // Touch: a tap outside any callout or proof point restores all callouts.
+  useEffect(() => {
+    if (active == null) return;
+    const clear = (e: globalThis.PointerEvent) => {
+      if (e.pointerType === "mouse") return;
+      const el = e.target as Element | null;
+      if (el?.closest("[data-eco-callout],[data-eco-point]")) return;
+      setActive(null);
+    };
+    document.addEventListener("pointerdown", clear);
+    return () => document.removeEventListener("pointerdown", clear);
+  }, [active]);
 
   const show = (on: boolean) => ({ opacity: on ? 1 : 0, y: on ? 0 : 8 });
 
@@ -104,9 +125,11 @@ export function HomeEcosystemStage({
                       <li
                         key={pt.id}
                         tabIndex={0}
+                        data-eco-point
                         className="flex items-center gap-3 rounded-sm font-body text-sm font-normal leading-snug text-white/85 outline-none focus-visible:ring-2 focus-visible:ring-oboya-green-light/70"
-                        onMouseEnter={() => setActive(k)}
-                        onMouseLeave={() => setActive(null)}
+                        onPointerEnter={(e) => e.pointerType === "mouse" && setActive(k)}
+                        onPointerLeave={(e) => e.pointerType === "mouse" && setActive(null)}
+                        onPointerDown={(e) => e.pointerType !== "mouse" && setActive(lit ? null : k)}
                         onFocus={() => setActive(k)}
                         onBlur={() => setActive(null)}
                       >
@@ -224,100 +247,16 @@ export function HomeEcosystemStage({
 
               {/* Hotspots, linked to the proof points. The layer keeps the SVG viewBox aspect so
                   percentages stay true when the panel is cropped (mobile). */}
-              <div className="pointer-events-none absolute left-1/2 top-1/2 aspect-[8/5] h-full -translate-x-1/2 -translate-y-1/2">
-                {current && !current.image
-                  ? (() => {
-                      const spots = HOTSPOTS[current.id].slice(0, current.points.length);
-                      const reveal = (k: number) =>
-                        isStatic ? { duration: 0 } : { duration: 0.4, delay: 1.8 + k * 0.25 };
-                      return (
-                        <>
-                          {/* Leader lines: vertical from the dot, then horizontal to the label. */}
-                          <svg
-                            className="absolute inset-0 h-full w-full overflow-visible"
-                            viewBox="0 0 100 100"
-                            preserveAspectRatio="none"
-                            aria-hidden
-                          >
-                            {spots.map((h, k) => {
-                              const lit = active === k;
-                              return (
-                                <motion.polyline
-                                  key={`${current.id}-l${k}`}
-                                  points={`${h.left},${h.top} ${h.left},${h.ly} ${h.lx},${h.ly}`}
-                                  fill="none"
-                                  vectorEffect="non-scaling-stroke"
-                                  strokeWidth={1}
-                                  className={cn(
-                                    "transition-[stroke] duration-300 max-sm:hidden",
-                                    lit ? "stroke-oboya-green-light max-sm:block" : "stroke-white/55",
-                                    active != null && !lit && "stroke-white/25",
-                                  )}
-                                  initial={isStatic ? false : { opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  transition={reveal(k)}
-                                />
-                              );
-                            })}
-                          </svg>
-                          {spots.map((h, k) => {
-                            const lit = active === k;
-                            return (
-                              <motion.span
-                                key={`${current.id}-${k}`}
-                                className="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 cursor-default p-2"
-                                style={{ left: `${h.left}%`, top: `${h.top}%` }}
-                                initial={isStatic ? false : { opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={reveal(k)}
-                                onMouseEnter={() => setActive(k)}
-                                onMouseLeave={() => setActive(null)}
-                                onClick={() => setActive(lit ? null : k)}
-                              >
-                                <span
-                                  className={cn(
-                                    "block size-2.5 rounded-full border transition-[background-color,box-shadow,border-color] duration-300",
-                                    lit
-                                      ? "border-oboya-green-light bg-oboya-green-light ring-4 ring-oboya-green-light/30"
-                                      : "border-oboya-blue-light bg-white ring-4 ring-white/15",
-                                  )}
-                                />
-                              </motion.span>
-                            );
-                          })}
-                          {/* Labels: the proof point text, hung on the leader's end. Mobile shows only the active one. */}
-                          {spots.map((h, k) => {
-                            const lit = active === k;
-                            const dim = active != null && !lit;
-                            const text = t(current.points[k].text);
-                            return (
-                              <motion.span
-                                key={`${current.id}-t${k}`}
-                                aria-hidden
-                                className={cn(
-                                  "pointer-events-auto absolute -translate-y-1/2 cursor-default whitespace-nowrap rounded-sm border px-2 py-0.5 font-body text-[11px] leading-snug transition-[color,border-color,opacity] duration-300 sm:text-xs",
-                                  h.side === "l" ? "-translate-x-full" : "",
-                                  lit
-                                    ? "border-oboya-green-light/60 bg-oboya-blue-dark/90 text-white"
-                                    : "border-white/20 bg-oboya-blue-dark/80 text-white/90",
-                                  !lit && "max-sm:hidden",
-                                )}
-                                style={{ left: `${h.lx}%`, top: `${h.ly}%` }}
-                                initial={isStatic ? false : { opacity: 0 }}
-                                animate={{ opacity: dim ? 0.5 : 1 }}
-                                transition={reveal(k)}
-                                onMouseEnter={() => setActive(k)}
-                                onMouseLeave={() => setActive(null)}
-                              >
-                                {text}
-                              </motion.span>
-                            );
-                          })}
-                        </>
-                      );
-                    })()
-                  : null}
-              </div>
+              {current && !current.image ? (
+                <HomeEcosystemCallouts
+                  id={current.id}
+                  spots={HOTSPOTS[current.id].slice(0, current.points.length)}
+                  texts={current.points.map((pt) => t(pt.text))}
+                  active={active}
+                  isStatic={isStatic}
+                  onActive={setActive}
+                />
+              ) : null}
 
               {/* Corner ticks */}
               <span

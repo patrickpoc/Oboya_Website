@@ -7,7 +7,7 @@ import { TRAY, Tray } from "./packs";
 
 /**
  * Nursery bench (5.2 m) with five plug trays filling left → right (substrate, germinating,
- * seedlings), a seeding gantry straddling the second tray, and substrate bags on a pallet in front.
+ * tomato seedlings, rooted mum cuttings), a seeding gantry straddling the second tray, and substrate bags on a pallet in front.
  * Painter's order: far legs, stretcher, near legs, bench top, trays (x ascending), gantry near post,
  * head and beam (above everything), then the pallet (front-left, no screen overlap).
  */
@@ -16,7 +16,8 @@ const LEG_X = [-144, -20, 104];
 const TRAY_Y = -62;
 const TRAY_X0 = -144;
 const TRAY_PITCH = 52;
-const GROW: (0 | 1 | 2)[] = [0, 0, 1, 2, 2];
+/** Tray fill left → right: substrate, substrate, germinating, tomato seedlings, mum cuttings (flower line). */
+const GROW: (0 | 1 | 2 | 3)[] = [0, 0, 1, 2, 3];
 const GX = -70;
 const BEAM = { x: GX - 2.5, y: -84, z: 86, w: 5, d: 68, h: 6 } satisfies Box;
 const HEAD = { x: GX - 7, y: -58, z: 56, w: 14, d: 18, h: 14 } satisfies Box;
@@ -36,9 +37,9 @@ export function Propagation({ st, active }: SceneProps) {
     <Static st={st}>
       <Plate>
         <defs>
-          {[0, 1, 2].map((g) => (
+          {[0, 1, 2, 3].map((g) => (
             <g key={g} id={`${id}-tray${g}`}>
-              <Tray grow={g as 0 | 1 | 2} delay={0.5 + g * 0.12} />
+              <Tray grow={g as 0 | 1 | 2 | 3} delay={0.5 + g * 0.12} />
             </g>
           ))}
         </defs>

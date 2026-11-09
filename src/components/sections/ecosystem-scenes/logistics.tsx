@@ -3,7 +3,7 @@
 import { useId } from "react";
 import { Dot, M, PottedMum, Rise, Solid, mix, tone } from "./flat-kit";
 import { Draw, Part, Plate, RAIL, Static, Travel, at, faceY, iso, plane, seg, type Box, type SceneProps } from "./iso-kit";
-import { CC, CCTrolley, Crate, FlowerBucket, Pot, Punnet } from "./packs";
+import { BucketDefs, CC, CCTrolley, Crate, Pot, Punnet } from "./packs";
 
 /**
  * Loading dock: a concrete wall with a half-open roller door and a dock light at the back; an AGV
@@ -28,11 +28,6 @@ function arc(cx: number, cy: number, r: number, z: number, a0: number, a1: numbe
 }
 const FRONT = { x: AGV.x + AGV.w, y: AGV.y + AGV.d / 2 };
 const SWEEP = [14, 24, 34].map((r) => arc(FRONT.x, FRONT.y, r, 1.5, -Math.PI * 0.4, Math.PI * 0.4));
-const BUNCHES = [
-  [M.yellow, M.pink, M.yellow, SW],
-  [M.pink, SW, M.pink],
-  [M.fruit, M.yellow, M.fruit, M.pink],
-];
 
 export function Logistics({ st, active }: SceneProps) {
   const id = useId();
@@ -42,6 +37,7 @@ export function Logistics({ st, active }: SceneProps) {
     <Static st={st}>
       <Plate>
         <defs>
+          <BucketDefs id={id} />
           <g id={`${id}-crate`}>
             <Crate delay={0.9}>
               <g transform={at(-9, -2, 0)}>
@@ -111,11 +107,11 @@ export function Logistics({ st, active }: SceneProps) {
                   ))}
                 </g>
               ) : (
-                <>
+                <g transform={at(TOWED.x + 12, TOWED.y + CC.d / 2, z)}>
                   {[0, 1, 2].map((k) => (
-                    <FlowerBucket key={k} cx={TOWED.x + 12 + k * 22} cy={TOWED.y + CC.d / 2} z={z} colors={BUNCHES[(k + lvl) % 3]} kind={lvl === 2 && k === 1 ? "rose" : "mum"} h={12} delay={1 + lvl * 0.15 + k * 0.08} shadow={false} />
+                    <use key={k} href={`#${id}-bucket${(k + lvl) % 3}`} transform={at(k * 22, 0, 0)} />
                   ))}
-                </>
+                </g>
               )
             }
           />
@@ -156,11 +152,11 @@ export function Logistics({ st, active }: SceneProps) {
                   <use href={`#${id}-crate`} />
                 </g>
               ) : (
-                <>
+                <g transform={at(-CC.w / 2 + 12, RAIL.y, z)}>
                   {[0, 1, 2].map((k) => (
-                    <FlowerBucket key={k} cx={-CC.w / 2 + 12 + k * 22} cy={RAIL.y} z={z} colors={BUNCHES[k]} h={10} delay={0} shadow={false} />
+                    <use key={k} href={`#${id}-bucket${k}`} transform={at(k * 22, 0, 0)} />
                   ))}
-                </>
+                </g>
               )
             }
           />
