@@ -1,6 +1,7 @@
 # Redesign da seção Ecossistema da home — ilustração técnica premium
 
-**Status: done (2026-11-09)** — risco aberto: hotspots seguem por índice a ordem padrão dos proof points; termos zh-CN "亮点"/"即上架包装" pedem revisão nativa.
+**Status: v6 (2026-11-09)** — v1 (linha técnica) foi para staging em 19c1027. Iterações seguintes, a pedido do dono: isométrico flat realista com profundidade correta sobre painel azul-escuro; sem numeração de etapas (rail só com nomes / pontos no mobile); autoplay imediato, 4s por etapa, sem fase de abertura; storytelling com linha de tomate e linha de flores atravessando as 6 cenas; callouts sempre visíveis (bolinha + linha guia + pill com o proof point do CMS) com destaque no hover/foco/toque (os outros somem e voltam). O "02 / 06" e os 6s abaixo estão superados.
+Riscos abertos: hotspots seguem por índice a ordem padrão dos proof points; campo CMS `openingLine` editável mas não exibido; termos zh-CN "亮点"/"即上架包装" e textos curtos pt-BR/es do Retail pedem revisão.
 
 ## Contexto
 A seção conta a cadeia em 6 etapas, mas o visual atual (`ecosystem-scenes/kit.tsx`: gradientes, bokeh, blur, vasos cartunescos, card arredondado, título solto + barra segmentada) parece cartunesco e sem vida. O dono quer manter a narrativa, com visual profissional, estruturado e envolvente, em **ilustração premium (SVG, sem fotos)**.

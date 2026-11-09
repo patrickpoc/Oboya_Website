@@ -1,15 +1,22 @@
 "use client";
 
-import { Fragment, type CSSProperties, type PointerEvent } from "react";
+import { Fragment, useEffect, useState, type CSSProperties, type PointerEvent } from "react";
 import { motion } from "framer-motion";
 import type { Hotspot } from "@/components/sections/ecosystem-scenes/hotspots";
 import { cn } from "@/lib/utils";
 
+/** Entrance: after the scene has drawn its main objects, one callout every 150 ms. */
+const ENTER_DELAY = 0.6;
+const ENTER_STEP = 0.15;
+const ENTER_DUR = 0.4;
+const SWAP = { duration: 0.2 } as const;
+
 /**
  * Always-visible callouts over the scene: a dot on the object, a thin elbow leader and a pill with
  * the proof point text, in planned positions per breakpoint (`d` ≥ sm, `m` below). Hover, focus or
- * tap puts one callout in emphasis and fades the others out; leaving brings them all back.
+ * tap puts one callout in emphasis and fades the others out; leaving brings them all back (200 ms).
  * The layer keeps the SVG viewBox aspect so percentages stay true when the panel is cropped.
+ * Mount with a per-scene key so the entrance replays for each stage.
  */
 export function HomeEcosystemCallouts({
   id,
@@ -26,10 +33,21 @@ export function HomeEcosystemCallouts({
   isStatic: boolean;
   onActive: (k: number | null) => void;
 }) {
-  const reveal = (k: number) => (isStatic ? { duration: 0 } : { duration: 0.4, delay: 1.8 + k * 0.25 });
+  // The staggered entrance runs once; every later opacity change (emphasis in/out) is a quick swap.
+  const [revealed, setRevealed] = useState(isStatic);
+  useEffect(() => {
+    if (revealed) return;
+    const ms = (ENTER_DELAY + (spots.length - 1) * ENTER_STEP + ENTER_DUR) * 1000;
+    const timer = window.setTimeout(() => setRevealed(true), ms);
+    return () => window.clearTimeout(timer);
+  }, [revealed, spots.length]);
+  const fade = (k: number) => (revealed ? SWAP : { duration: ENTER_DUR, delay: ENTER_DELAY + k * ENTER_STEP });
+
   const hoverIn = (k: number) => (e: PointerEvent) => e.pointerType === "mouse" && onActive(k);
   const hoverOut = (e: PointerEvent) => e.pointerType === "mouse" && onActive(null);
-  const tap = (k: number, lit: boolean) => (e: PointerEvent) => {
+  const press = (k: number, lit: boolean) => (e: PointerEvent) => {
+    // Keep focus where it is (a focused proof point would otherwise blur and reset the emphasis).
+    e.preventDefault();
     if (e.pointerType === "mouse") return;
     onActive(lit ? null : k);
   };
@@ -56,7 +74,7 @@ export function HomeEcosystemCallouts({
                 )}
                 initial={isStatic ? false : { opacity: 0 }}
                 animate={{ opacity: dim ? 0 : 1 }}
-                transition={dim || active != null || isStatic ? { duration: 0.2 } : reveal(k)}
+                transition={fade(k)}
               />
             );
           });
@@ -72,7 +90,6 @@ export function HomeEcosystemCallouts({
           "--eco-mlx": `${h.m.lx}%`,
           "--eco-mly": `${h.m.ly}%`,
         } as CSSProperties;
-        const fadeT = dim || active != null || isStatic ? { duration: 0.2 } : reveal(k);
         return (
           <Fragment key={`${id}-${k}`}>
             {/* Dot on the object */}
@@ -81,10 +98,10 @@ export function HomeEcosystemCallouts({
               style={{ left: `${h.left}%`, top: `${h.top}%` }}
               initial={isStatic ? false : { opacity: 0 }}
               animate={{ opacity: dim ? 0 : 1 }}
-              transition={fadeT}
+              transition={fade(k)}
               onPointerEnter={hoverIn(k)}
               onPointerLeave={hoverOut}
-              onPointerDown={tap(k, lit)}
+              onPointerDown={press(k, lit)}
               data-eco-callout
             >
               <span
@@ -110,10 +127,10 @@ export function HomeEcosystemCallouts({
               style={vars}
               initial={isStatic ? false : { opacity: 0 }}
               animate={{ opacity: dim ? 0 : 1 }}
-              transition={fadeT}
+              transition={fade(k)}
               onPointerEnter={hoverIn(k)}
               onPointerLeave={hoverOut}
-              onPointerDown={tap(k, lit)}
+              onPointerDown={press(k, lit)}
             >
               {texts[k]}
             </motion.span>

@@ -78,9 +78,9 @@ function Cutting({ x, y, z, bud }: { x: number; y: number; z: number; bud: boole
 export function Pot({ cx, cy, z = 0, r = 5, h = 9, color = M.terra, delay = 0, shadow = true }: { cx: number; cy: number; z?: number; r?: number; h?: number; color?: string; delay?: number; shadow?: boolean }) {
   return <Cyl cx={cx} cy={cy} z={z} r={r} rb={r * 0.76} h={h} color={color} dark={color === M.black} inner={M.soil} rim delay={delay} shadow={shadow} />;
 }
-export const BUCKET = { r: 5.5, rb: 4.6, h: 16 };
+const BUCKET = { r: 5.5, rb: 4.6, h: 16 };
 /** Black flower bucket with water. */
-export function Bucket({ cx, cy, z = 0, delay = 0, shadow = true }: { cx: number; cy: number; z?: number; delay?: number; shadow?: boolean }) {
+function Bucket({ cx, cy, z = 0, delay = 0, shadow = true }: { cx: number; cy: number; z?: number; delay?: number; shadow?: boolean }) {
   return <Cyl cx={cx} cy={cy} z={z} r={BUCKET.r} rb={BUCKET.rb} h={BUCKET.h} color={M.black} dark inner={M.water} innerDepth={2} rim delay={delay} shadow={shadow} />;
 }
 /** Bucket with a bunch of cut flowers in it. `h` is the stem length above the rim. */
@@ -196,7 +196,7 @@ export function CCTrolley({ x, y, levels = [CC.deck, 40, 74], top = CC.top, dela
 }
 
 // ---- Punnet of cherry tomatoes -------------------------------------------------------
-export const PUNNET: Box = { x: -5, y: -4, w: 10, d: 8, h: 4.5 };
+const PUNNET: Box = { x: -5, y: -4, w: 10, d: 8, h: 4.5 };
 const FRUIT: [number, number][] = [
   [0.22, 0.3],
   [0.55, 0.26],
@@ -225,7 +225,7 @@ export function Punnet({ delay = 1, unit = false }: { delay?: number; unit?: boo
 }
 
 // ---- Bagged lettuce ------------------------------------------------------------------
-export const BAG = { r: 5, rb: 5.6, h: 14 };
+const BAG = { r: 5, rb: 5.6, h: 14 };
 export function Bag({ delay = 1 }: { delay?: number }) {
   return (
     <Rise delay={delay}>
@@ -242,7 +242,7 @@ export function Bag({ delay = 1 }: { delay?: number }) {
 }
 
 // ---- Flower sleeve bouquet -------------------------------------------------------------
-export const SLEEVE = { r: 5.6, rb: 2.2, h: 13 };
+const SLEEVE = { r: 5.6, rb: 2.2, h: 13 };
 export function Sleeve({ delay = 1, colors = [M.pink, M.yellow, M.pink], kind = "mum" }: { delay?: number; colors?: string[]; kind?: "mum" | "rose" }) {
   return (
     <Rise delay={delay}>
@@ -257,7 +257,7 @@ export function Sleeve({ delay = 1, colors = [M.pink, M.yellow, M.pink], kind = 
 }
 
 // ---- Printed carton ---------------------------------------------------------------------
-export const CARTON: Box = { x: -7, y: -5, w: 14, d: 10, h: 10 };
+const CARTON: Box = { x: -7, y: -5, w: 14, d: 10, h: 10 };
 export function Carton({ delay = 1 }: { delay?: number }) {
   const b = CARTON;
   return (

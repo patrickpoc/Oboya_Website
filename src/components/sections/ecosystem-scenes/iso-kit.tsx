@@ -38,8 +38,8 @@ export const pct = (x: number, y: number, z = 0) => {
   return { left: r1((sx / W) * 100), top: r1((sy / H) * 100) };
 };
 /** Screen offset of a world shift along the x axis (used by <use> and by the travelling unit). */
-export const alongX = (dx: number): [number, number] => [r1(dx * COS), r1(dx * SIN)];
-export const alongY = (dy: number): [number, number] => [r1(-dy * COS), r1(dy * SIN)];
+const alongX = (dx: number): [number, number] => [r1(dx * COS), r1(dx * SIN)];
+const alongY = (dy: number): [number, number] => [r1(-dy * COS), r1(dy * SIN)];
 const [OX0, OY0] = iso(0, 0, 0);
 /** SVG transform that moves a symbol drawn around the world origin to world (x, y, z). */
 export const at = (x: number, y: number, z = 0) => {
@@ -56,11 +56,11 @@ export const RAIL = { y: 80, half: 6 } as const;
 // ---- Colour -----------------------------------------------------------------
 /** Dark panel: ink is soft white mixed toward dark blue. */
 const sw = (p: number) => `color-mix(in srgb, var(--oboya-soft-white) ${p}%, var(--oboya-blue-dark))`;
-export const INK = sw(72);
+const INK = sw(72);
 
 // ---- Stroke weights ---------------------------------------------------------
 /** Three weights from one CSS variable set on the panel (`--eco-ink`). */
-export type Weight = "light" | "base" | "heavy";
+type Weight = "light" | "base" | "heavy";
 const MUL: Record<Weight, number> = { light: 0.7, base: 1, heavy: 1.6 };
 export const ink = (w: Weight = "base") => `calc(var(--eco-ink, 1.2px) * ${MUL[w]})`;
 export const EASE = [0.22, 1, 0.36, 1] as const;

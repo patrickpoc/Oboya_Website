@@ -53,6 +53,7 @@ export function HomeEcosystemStage({
   const [active, setActive] = useState<number | null>(null);
   const afterStages = kind === "closing" || kind === "hold";
   const inStage = kind === "stage" || kind === "static";
+  const idle = kind === "idle";
   const current = stageIndex >= 0 ? stages[stageIndex] : null;
 
   // Emphasis resets whenever the scene changes (autoplay or rail), so every callout is back.
@@ -62,11 +63,10 @@ export function HomeEcosystemStage({
     setSeenScene(sceneKey);
     setActive(null);
   }
-  // Touch: a tap outside any callout or proof point restores all callouts.
+  // A press outside any callout or proof point (tap or click) restores all callouts.
   useEffect(() => {
     if (active == null) return;
     const clear = (e: globalThis.PointerEvent) => {
-      if (e.pointerType === "mouse") return;
       const el = e.target as Element | null;
       if (el?.closest("[data-eco-callout],[data-eco-point]")) return;
       setActive(null);
@@ -87,6 +87,7 @@ export function HomeEcosystemStage({
         isStatic ? { duration: 0 } : on ? { ...fadeT, delay: 0.25 } : fadeT
       }
       aria-hidden={!on}
+      inert={!on}
       style={{ pointerEvents: on ? "auto" : "none" }}
     >
       {children}
@@ -104,7 +105,7 @@ export function HomeEcosystemStage({
       <div className="order-2 col-span-12 grid lg:order-1 lg:col-span-4 lg:pr-6">
         {stages.map((s, i) => {
           // Before the cycle starts (section not yet in view) the first stage's text is shown.
-          const on = (inStage && i === stageIndex) || (kind === "idle" && i === 0);
+          const on = (inStage && i === stageIndex) || (idle && i === 0);
           const points = s.points.slice(0, 3);
           const description = t(s.description);
           return textLayer(
@@ -131,7 +132,10 @@ export function HomeEcosystemStage({
                         onPointerLeave={(e) => e.pointerType === "mouse" && setActive(null)}
                         onPointerDown={(e) => e.pointerType !== "mouse" && setActive(lit ? null : k)}
                         onFocus={() => setActive(k)}
-                        onBlur={() => setActive(null)}
+                        onBlur={(e) => {
+                          const to = e.relatedTarget as Element | null;
+                          if (!to?.closest("[data-eco-callout]")) setActive(null);
+                        }}
                       >
                         <span
                           aria-hidden
@@ -201,9 +205,15 @@ export function HomeEcosystemStage({
               )}
               aria-hidden
             >
-              <Backdrop st={isStatic} />
+              <Backdrop st={isStatic || idle} />
 
               <AnimatePresence initial={false}>
+                {/* Before the cycle starts the first stage sits at rest in the panel (its text is shown too). */}
+                {idle ? (
+                  <motion.div key={`${stages[0].id}-idle`} className="absolute inset-0" initial={false} exit={{ opacity: 0 }} transition={{ duration: 0.4 }}>
+                    <HomeEcosystemStageVisual stage={stages[0]} label={t(stages[0].label)} static sizes="(max-width: 1024px) 94vw, 840px" />
+                  </motion.div>
+                ) : null}
                 {stages.map((s, i) => {
                   const isCurrent = inStage && i === stageIndex;
                   const preload = !!s.image && inStage && i === stageIndex + 1;
@@ -249,6 +259,7 @@ export function HomeEcosystemStage({
                   percentages stay true when the panel is cropped (mobile). */}
               {current && !current.image ? (
                 <HomeEcosystemCallouts
+                  key={current.id}
                   id={current.id}
                   spots={HOTSPOTS[current.id].slice(0, current.points.length)}
                   texts={current.points.map((pt) => t(pt.text))}

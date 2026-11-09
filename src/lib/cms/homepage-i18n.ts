@@ -376,8 +376,8 @@ export const HOME_I18N = {
       },
       retail: {
         displays: homeLoc("Display systems", "Sistemas de exibição", "Sistemas de exhibición", "陈列系统"),
-        shelfReady: homeLoc("Shelf-ready packaging", "Embalagem pronta para a gôndola", "Envases listos para el lineal", "即上架包装"),
-        potted: homeLoc("Potted plant displays", "Displays de plantas em vaso", "Expositores de plantas en maceta", "盆栽陈列架"),
+        shelfReady: homeLoc("Shelf-ready packaging", "Pronta para a gôndola", "Listos para el lineal", "即上架包装"),
+        potted: homeLoc("Potted plant displays", "Displays para vasos", "Expositores de macetas", "盆栽陈列架"),
       },
     },
   },

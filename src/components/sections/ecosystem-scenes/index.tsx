@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import type {
   HomeEcosystemStage,
   HomeEcosystemStageId,
@@ -33,8 +33,11 @@ const SCENES: Record<HomeEcosystemStageId, (p: SceneProps) => ReactNode> = {
   retail: Retail,
 };
 
-/** CMS image when set, otherwise the animated (or static) scene. Fills its parent. */
-export function HomeEcosystemStageVisual({
+/**
+ * CMS image when set, otherwise the animated (or static) scene. Fills its parent.
+ * Memoised: it re-renders only when `static` or `active` (hovered proof point) change.
+ */
+export const HomeEcosystemStageVisual = memo(function HomeEcosystemStageVisual({
   stage,
   label,
   static: st = false,
@@ -63,4 +66,4 @@ export function HomeEcosystemStageVisual({
   }
   const Scene = SCENES[stage.id];
   return <Scene st={st} active={active} />;
-}
+});

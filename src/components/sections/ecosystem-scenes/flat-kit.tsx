@@ -57,7 +57,7 @@ export const M = {
   shadow: BD,
 } as const;
 
-export type Tones = { top: string; left: string; right: string; line: string };
+type Tones = { top: string; left: string; right: string; line: string };
 /**
  * Three face tones and an outline from one base colour. `dark` materials (black PP, navy crates)
  * get a lighter outline so their edges still read on the navy plate.
@@ -268,7 +268,7 @@ export function Strawberry({ x, y, z, fruit = 3 }: { x: number; y: number; z: nu
 }
 
 /** Chrysanthemum head: ten two-tone petals around a dark-ringed centre, outlined so it reads small. */
-export function Mum({ at, r, color }: { at: [number, number, number]; r: number; color: string }) {
+function Mum({ at, r, color }: { at: [number, number, number]; r: number; color: string }) {
   const [cx, cy] = iso(at[0], at[1], at[2]);
   const n = 10;
   const petal = (k: number, scale: number) => {

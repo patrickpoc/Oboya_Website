@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { M, mix } from "./flat-kit";
 import { DashMarch, Draw, Fade, H, PLATE, Plate, RAIL, Static, W, boxLeft, boxOutline, boxRight, boxTop, plane, seg } from "./iso-kit";
 
@@ -37,7 +38,7 @@ const RAILS = railPaths();
  * The shared ground: dark navy panel, lighter navy plate, faint grid and the flow rail. Mounted
  * once per panel, so the rail stays at the same coordinates while scenes change above it.
  */
-export function Backdrop({ st }: { st: boolean }) {
+export const Backdrop = memo(function Backdrop({ st }: { st: boolean }) {
   return (
     <Static st={st}>
       <Plate>
@@ -61,4 +62,4 @@ export function Backdrop({ st }: { st: boolean }) {
       </Plate>
     </Static>
   );
-}
+});

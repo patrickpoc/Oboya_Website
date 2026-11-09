@@ -2,7 +2,7 @@ import type { HomeEcosystemStageId } from "@/lib/cms/repositories/homepage-repos
 import { pct } from "./iso-kit";
 
 /** Where a label hangs: the leader runs vertically from the dot to `ly`, then horizontally to `lx`. */
-export type Anchor = { lx: number; ly: number; side: "l" | "r" };
+type Anchor = { lx: number; ly: number; side: "l" | "r" };
 /**
  * A callout: the dot sits on the object (panel percentages from world coordinates); `d` is the
  * desktop/tablet label anchor, `m` the compact mobile one (the 4:3 panel crops the 8:5 layer to
@@ -35,7 +35,7 @@ export const HOTSPOTS: Record<HomeEcosystemStageId, Hotspot[]> = {
   ],
   // pots (first mum pot on the bench), substrates (cut-away container), irrigation (tank base)
   growing: [
-    callout([-154, -40, 24], [6, -12], [4, -12]),
+    callout([-154, -40, 24], [6, -12], [3, -13]),
     callout([150, 18, 12], [6, 8], [-4, 8]),
     callout([-178, 12, 6], [6, 12], [4, 14]),
   ],
@@ -43,7 +43,7 @@ export const HOTSPOTS: Record<HomeEcosystemStageId, Hotspot[]> = {
   harvest: [
     callout([-31, 14, 40], [6, 20], [12, -24]),
     callout([-4, 26, 12], [6, 14], [-4, 26]),
-    callout([-90, 24, 22], [-8, -16], [-2, -16]),
+    callout([-170, 60, 22], [4, -14], [0, -16]),
   ],
   // clamshells (punnet on the belt), bags (bag at the end of the line), labels (applicator head)
   packaging: [
@@ -55,12 +55,12 @@ export const HOTSPOTS: Record<HomeEcosystemStageId, Hotspot[]> = {
   logistics: [
     callout([-123, -16, 87], [-6, -6], [4, -10]),
     callout([22, -18, 58], [6, -14], [4, -12]),
-    callout([98, -18, 12], [6, 12], [2, 14]),
+    callout([98, -18, 12], [6, 12], [-1, 14]),
   ],
   // displays (floor stand bucket), shelf-ready (punnet on the middle shelf), potted (pot on the top shelf)
   retail: [
     callout([152, 23, 24], [8, 0], [-8, 12]),
-    callout([-66, -37, 44], [-6, 14], [-4, 12]),
-    callout([-18, -38, 84], [6, -12], [4, -12]),
+    callout([-66, -37, 44], [-6, 14], [4, -15]),
+    callout([-18, -38, 84], [6, -12], [4, -20]),
   ],
 };

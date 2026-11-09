@@ -6,7 +6,7 @@ import type { EcoPhaseKind } from "@/components/sections/useEcosystemSequence";
 import { STAGE_MS } from "@/components/sections/useEcosystemSequence";
 import { cn } from "@/lib/utils";
 
-/** Step rail: numbered stage buttons joined by one line, progress on the active one, Pause/Play. */
+/** Step rail: stage-name buttons joined by one line, progress on the active one, Pause/Play. */
 export function HomeEcosystemRail({
   labels,
   kind,

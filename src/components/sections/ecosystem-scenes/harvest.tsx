@@ -102,8 +102,8 @@ export function Harvest({ st, active }: SceneProps) {
 
         {/* Cut chrysanthemums in buckets: the flower line is harvested too */}
         <Part i={2} active={active}>
-          <FlowerBucket cx={-90} cy={24} colors={[M.yellow, SW, M.yellow, M.pink]} h={14} delay={1} />
-          <FlowerBucket cx={-74} cy={36} colors={[M.pink, M.yellow, SW]} h={13} delay={1.15} />
+          <FlowerBucket cx={-170} cy={60} colors={[M.yellow, SW, M.yellow, M.pink]} h={14} delay={1} />
+          <FlowerBucket cx={-184} cy={48} colors={[M.pink, M.yellow, SW]} h={13} delay={1.15} />
         </Part>
 
         {/* Unit: a young potted tomato arrives, a crate of fruit leaves. */}
