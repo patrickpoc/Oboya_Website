@@ -1,6 +1,5 @@
 "use client";
 
-import { useId } from "react";
 import {
   ACCENT,
   CONSTRUCTION,
@@ -18,7 +17,6 @@ import {
   boxOutline,
   boxRight,
   boxTop,
-  iso,
   plane,
   seg,
 } from "./iso-kit";
@@ -47,27 +45,17 @@ function railPaths() {
 
 const GRID_D = gridPath();
 const RAILS = railPaths();
-const [, topY] = iso(x0, y0, 0);
-const [, botY] = iso(x1, y1, 0);
 
 /**
  * The shared ground: plate, grid and flow rail. Mounted once per panel, so the rail
  * stays at the same coordinates while scenes change above it.
  */
 export function Backdrop({ st }: { st: boolean }) {
-  const id = useId().replace(/:/g, "");
   return (
     <Static st={st}>
       <Plate>
-        <defs>
-          {/* The single allowed gradient: a faint ground fade on the plate. */}
-          <linearGradient id={`${id}-g`} gradientUnits="userSpaceOnUse" x1="0" y1={topY} x2="0" y2={botY}>
-            <stop offset="0" stopColor={FACE.soft} stopOpacity="0.55" />
-            <stop offset="1" stopColor={FACE.soft} stopOpacity="0.05" />
-          </linearGradient>
-        </defs>
         <Fade delay={0.2} dur={0.9}>
-          <path d={boxTop(slab)} fill={`url(#${id}-g)`} />
+          <path d={boxTop(slab)} fill={FACE.soft} opacity={0.3} />
           <path d={boxLeft(slab)} fill={FACE.left} />
           <path d={boxRight(slab)} fill={FACE.right} />
         </Fade>

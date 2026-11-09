@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 /**
  * "Technical plate" kit: a true-isometric (30°) line drawing on dark blue.
  * One projection, one ground plate and one flow rail shared by every scene (see backdrop.tsx).
- * Brand tokens only, no gradients (the plate fade is the single exception), no filters,
+ * Brand tokens only, no gradients, no filters,
  * no <text>, no Math.random and no infinite animations.
  */
 

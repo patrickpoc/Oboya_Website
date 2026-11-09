@@ -1,3 +1,6 @@
 {
-  "ariaLabel": "Oboya 园艺生态系统"
+  "ariaLabel": "Oboya 园艺生态系统",
+  "stepOf": "第 {index} 步，共 {total} 步",
+  "pause": "暂停",
+  "play": "播放"
 }

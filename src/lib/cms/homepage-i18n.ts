@@ -9,9 +9,6 @@ export function homeLoc(
   return { en, "pt-BR": ptBR, es, "zh-CN": zhCN };
 }
 
-/** Same EN string for all four locales (pending translation). */
-const rep = (en: string): [string, string, string, string] => [en, en, en, en];
-
 export const HOME_I18N = {
   hero: {
     eyebrow: homeLoc(
@@ -343,45 +340,44 @@ export const HOME_I18N = {
       logistics: homeLoc("Logistics & Transport", "Logística e Transporte", "Logística y Transporte", "物流与运输"),
       retail: homeLoc("Retail Display", "Exposição no Varejo", "Exhibición en Retail", "零售陈列"),
     },
-    // EN placeholders in every locale; the i18n agent translates these.
     descriptions: {
-      propagation: homeLoc(...rep("From seed to young plant, with uniform starts that set up every crop.")),
-      growing: homeLoc(...rep("Containers, substrates and irrigation that keep crops healthy in the greenhouse.")),
-      harvest: homeLoc(...rep("Gentle handling that moves produce from the crop to the packhouse.")),
-      packaging: homeLoc(...rep("Packaging that protects freshness and gives each product shelf presence.")),
-      logistics: homeLoc(...rep("Trolleys, buckets and automation that keep the cold chain moving.")),
-      retail: homeLoc(...rep("Displays and shelf-ready formats that put fresh products in front of shoppers.")),
+      propagation: homeLoc("From seed to young plant, with uniform starts that set up every crop.", "Da semente à muda, com um início uniforme que prepara cada cultura.", "De la semilla a la planta joven, con arranques uniformes que sientan las bases de cada cultivo.", "从种子到幼苗，均匀一致的起步为每一茬作物打好基础。"),
+      growing: homeLoc("Containers, substrates and irrigation that keep crops healthy in the greenhouse.", "Recipientes, substratos e irrigação que mantêm as culturas saudáveis na estufa.", "Contenedores, sustratos y riego que mantienen los cultivos sanos en el invernadero.", "容器、基质与灌溉系统，让温室作物保持健康。"),
+      harvest: homeLoc("Gentle handling that moves produce from the crop to the packhouse.", "Manuseio cuidadoso que leva o produto da cultura até a casa de embalagem.", "Manipulación cuidadosa que lleva el producto del cultivo a la central de empaque.", "轻柔搬运，将农产品从田间送至包装车间。"),
+      packaging: homeLoc("Packaging that protects freshness and gives each product shelf presence.", "Embalagens que protegem a frescura e dão presença a cada produto na gôndola.", "Envases que protegen la frescura y dan presencia a cada producto en el lineal.", "守护新鲜度并让每件产品在货架上脱颖而出的包装。"),
+      logistics: homeLoc("Trolleys, buckets and automation that keep the cold chain moving.", "Carrinhos, baldes e automação que mantêm a cadeia do frio em movimento.", "Carros, cubos y automatización que mantienen en marcha la cadena de frío.", "推车、水桶与自动化设备，保障冷链顺畅运转。"),
+      retail: homeLoc("Displays and shelf-ready formats that put fresh products in front of shoppers.", "Displays e formatos prontos para a gôndola que põem os produtos frescos diante do consumidor.", "Expositores y formatos listos para el lineal que ponen los productos frescos frente al comprador.", "陈列架与即上架包装，让新鲜产品直达消费者眼前。"),
     },
     points: {
       propagation: {
-        trays: homeLoc(...rep("Propagation trays")),
-        substrates: homeLoc(...rep("Substrates & plugs")),
-        seeding: homeLoc(...rep("Seeding machines")),
+        trays: homeLoc("Propagation trays", "Bandejas de propagação", "Bandejas de propagación", "育苗托盘"),
+        substrates: homeLoc("Substrates & plugs", "Substratos e plugs", "Sustratos y plugs", "基质与穴盘苗"),
+        seeding: homeLoc("Seeding machines", "Máquinas de semeadura", "Máquinas sembradoras", "播种机"),
       },
       growing: {
-        pots: homeLoc(...rep("Pots & containers")),
-        substrates: homeLoc(...rep("Growing substrates")),
-        irrigation: homeLoc(...rep("Irrigation systems")),
+        pots: homeLoc("Pots & containers", "Vasos e recipientes", "Macetas y contenedores", "花盆与容器"),
+        substrates: homeLoc("Growing substrates", "Substratos de cultivo", "Sustratos de cultivo", "栽培基质"),
+        irrigation: homeLoc("Irrigation systems", "Sistemas de irrigação", "Sistemas de riego", "灌溉系统"),
       },
       harvest: {
-        crates: homeLoc(...rep("Harvest crates")),
-        trolleys: homeLoc(...rep("Harvest trolleys")),
-        handling: homeLoc(...rep("Crop handling")),
+        crates: homeLoc("Harvest crates", "Caixas de colheita", "Cajas de cosecha", "采收箱"),
+        trolleys: homeLoc("Harvest trolleys", "Carrinhos de colheita", "Carros de cosecha", "采收推车"),
+        handling: homeLoc("Crop handling", "Manuseio da cultura", "Manejo del cultivo", "作物搬运"),
       },
       packaging: {
-        clamshells: homeLoc(...rep("Clamshells & punnets")),
-        bags: homeLoc(...rep("Bags & sleeves")),
-        labels: homeLoc(...rep("Labels")),
+        clamshells: homeLoc("Clamshells & punnets", "Clamshells e cestas", "Clamshells y cubetas", "翻盖盒与小果盒"),
+        bags: homeLoc("Bags & sleeves", "Sacos e mangas", "Bolsas y fundas", "袋与套袋"),
+        labels: homeLoc("Labels", "Etiquetas", "Etiquetas", "标签"),
       },
       logistics: {
-        trolleys: homeLoc(...rep("Logistic trolleys")),
-        buckets: homeLoc(...rep("Flower buckets")),
-        agv: homeLoc(...rep("AGV robotics")),
+        trolleys: homeLoc("Logistic trolleys", "Carrinhos logísticos", "Carros logísticos", "物流推车"),
+        buckets: homeLoc("Flower buckets", "Baldes para flores", "Cubos para flores", "鲜花水桶"),
+        agv: homeLoc("AGV robotics", "Robótica AGV", "Robótica AGV", "AGV 机器人"),
       },
       retail: {
-        displays: homeLoc(...rep("Display systems")),
-        shelfReady: homeLoc(...rep("Shelf-ready packaging")),
-        potted: homeLoc(...rep("Potted plant displays")),
+        displays: homeLoc("Display systems", "Sistemas de exibição", "Sistemas de exhibición", "陈列系统"),
+        shelfReady: homeLoc("Shelf-ready packaging", "Embalagem pronta para a gôndola", "Envases listos para el lineal", "即上架包装"),
+        potted: homeLoc("Potted plant displays", "Displays de plantas em vaso", "Expositores de plantas en maceta", "盆栽陈列架"),
       },
     },
   },

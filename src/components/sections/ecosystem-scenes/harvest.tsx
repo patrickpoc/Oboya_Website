@@ -102,7 +102,7 @@ const WHEELS: [number, number][] = [
 ];
 
 export function Harvest({ st, active }: SceneProps) {
-  const id = useId().replace(/:/g, "");
+  const id = useId();
   const crateId = `${id}-crate`;
   const fullId = `${id}-full`;
   return (

@@ -92,7 +92,7 @@ const INFEED = [
 ].map(([dx, dy]) => disc(dx, BELT.y + dy, 3, BELT_TOP + 0.5));
 
 export function Packaging({ st, active }: SceneProps) {
-  const id = useId().replace(/:/g, "");
+  const id = useId();
   const clamId = `${id}-clam`;
   return (
     <Static st={st}>

@@ -1,5 +1,7 @@
 # Redesign da seção Ecossistema da home — ilustração técnica premium
 
+**Status: done (2026-11-09)** — risco aberto: hotspots seguem por índice a ordem padrão dos proof points; termos zh-CN "亮点"/"即上架包装" pedem revisão nativa.
+
 ## Contexto
 A seção conta a cadeia em 6 etapas, mas o visual atual (`ecosystem-scenes/kit.tsx`: gradientes, bokeh, blur, vasos cartunescos, card arredondado, título solto + barra segmentada) parece cartunesco e sem vida. O dono quer manter a narrativa, com visual profissional, estruturado e envolvente, em **ilustração premium (SVG, sem fotos)**.
 

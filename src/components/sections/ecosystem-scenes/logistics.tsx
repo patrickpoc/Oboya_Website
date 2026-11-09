@@ -108,7 +108,7 @@ const W_LIGHT = { strokeWidth: "calc(var(--eco-ink, 1.2px) * 0.7)" } as const;
 const UNIT_DECK: Box = { x: -24, y: RAIL.y - 10, z: 3, w: 48, d: 20, h: 3 };
 
 export function Logistics({ st, active }: SceneProps) {
-  const id = useId().replace(/:/g, "");
+  const id = useId();
   const bucketId = `${id}-bucket`;
   return (
     <Static st={st}>

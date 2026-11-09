@@ -51,6 +51,21 @@ test.describe("public smoke", () => {
     }
   });
 
+  test("home ecosystem rail selects a step", async ({ page }) => {
+    // Reduced motion puts the section in its static mode: no timers, deterministic rail.
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/en", { waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: "Accept" }).click({ timeout: 3000 }).catch(() => {});
+    const stage = page.locator("[data-eco-phase]");
+    await stage.scrollIntoViewIfNeeded();
+    await expect(stage).toHaveAttribute("data-eco-phase", "static");
+    const steps = page.getByRole("region", { name: /ecosystem/i }).locator("ol button");
+    await expect(steps).toHaveCount(6);
+    await steps.nth(2).click();
+    await expect(steps.nth(2)).toHaveAttribute("aria-current", "step");
+    await expect(steps.nth(0)).not.toHaveAttribute("aria-current", "step");
+  });
+
   test("/work-with-us redirects to /work", async ({ page }) => {
     await page.goto("/en/work-with-us", { waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/\/en\/work(\?.*)?$/);

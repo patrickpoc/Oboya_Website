@@ -37,10 +37,19 @@ export function HomeEcosystemRail({
 
   return (
     <div className="flex flex-col gap-3">
+      {/* Announces the active step only when the user is driving it (autoplay stays quiet). */}
+      <p
+        className="sr-only"
+        aria-live={autoplay && !isStatic ? "off" : "polite"}
+      >
+        {activeLabel
+          ? t("stepOf", { index: stageIndex + 1, total }) + " " + activeLabel
+          : ""}
+      </p>
       {/* Small screens: numbers only on the rail, the active label reads here in full. */}
       <p
         className="flex min-h-5 items-center gap-3 font-body text-sm font-light text-white sm:hidden"
-        aria-live="polite"
+        aria-hidden
       >
         {activeLabel ? (
           <>
@@ -53,7 +62,7 @@ export function HomeEcosystemRail({
         ) : null}
       </p>
       <div className="flex items-end gap-4 md:gap-6">
-        <ol className="flex min-w-0 flex-1 gap-1" aria-label={t("ariaLabel")}>
+        <ol className="flex min-w-0 flex-1 gap-1">
           {labels.map((label, i) => {
             const isActive = inStage && i === stageIndex;
             const done = afterStages || (inStage && i < stageIndex);
@@ -63,7 +72,6 @@ export function HomeEcosystemRail({
                   type="button"
                   onClick={() => onSelect(i)}
                   aria-current={isActive ? "step" : undefined}
-                  aria-label={t("goToStage", { stage: label })}
                   className={cn(
                     "group flex min-h-11 w-full flex-col justify-end gap-3 rounded-sm pt-1 text-left outline-none",
                     "focus-visible:ring-2 focus-visible:ring-oboya-green-light/70 focus-visible:ring-offset-2 focus-visible:ring-offset-oboya-blue-dark",
@@ -93,7 +101,7 @@ export function HomeEcosystemRail({
                     </span>
                     <span
                       className={cn(
-                        "hidden min-w-0 font-body text-sm font-light leading-tight transition-colors duration-300 sm:block",
+                        "sr-only font-body text-sm font-light leading-tight transition-colors duration-300 sm:not-sr-only sm:min-w-0",
                         isActive
                           ? "text-white"
                           : "text-white/60 group-hover:text-white/85",
@@ -133,7 +141,6 @@ export function HomeEcosystemRail({
             type="button"
             onClick={onToggle}
             aria-label={autoplay ? t("pause") : t("play")}
-            aria-pressed={!autoplay}
             className={cn(
               "mb-[-0.25rem] flex size-11 shrink-0 items-center justify-center rounded-full text-white/80 ring-1 ring-white/20 transition-colors duration-300 outline-none",
               "hover:text-white hover:ring-white/50 focus-visible:ring-2 focus-visible:ring-oboya-green-light/70",

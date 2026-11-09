@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore, type RefObject } from "react";
+import {
+  useEffect,
+  useReducer,
+  useState,
+  useSyncExternalStore,
+  type RefObject,
+} from "react";
 import { useInView } from "framer-motion";
 import { useHomeIntro } from "@/components/layout/HomeIntroGate";
 
@@ -34,7 +40,83 @@ export function useEcosystemStatic(animationsEnabled: boolean) {
   return animationsEnabled === false || reduce;
 }
 
-export type EcoPhaseKind = "static" | "idle" | "opening" | "stage" | "closing" | "hold";
+export type EcoPhaseKind =
+  "static" | "idle" | "opening" | "stage" | "closing" | "hold";
+
+// ---- Pure state machine (unit-tested; the hook only wires it to React) ------------------
+export type EcoState = {
+  phase: number;
+  launched: boolean;
+  userPaused: boolean;
+};
+export type EcoAction =
+  | { type: "launch" }
+  | { type: "advance"; count: number }
+  | { type: "select"; index: number; isStatic: boolean }
+  | { type: "toggle" };
+
+export const ECO_INITIAL: EcoState = {
+  phase: IDLE,
+  launched: false,
+  userPaused: false,
+};
+
+export function ecoReducer(s: EcoState, a: EcoAction): EcoState {
+  switch (a.type) {
+    case "launch":
+      return s.launched ? s : { ...s, launched: true };
+    case "advance": {
+      const hold = a.count + 2;
+      const from = s.phase === IDLE ? 0 : s.phase;
+      return { ...s, phase: from === hold ? 0 : from + 1 };
+    }
+    case "select":
+      // Picking a step is a manual mode: autoplay stops (static mode has no autoplay to stop).
+      return {
+        ...s,
+        phase: a.index + 1,
+        userPaused: a.isStatic ? s.userPaused : true,
+      };
+    case "toggle":
+      return { ...s, launched: true, userPaused: !s.userPaused };
+  }
+}
+
+/** What the UI shows for a state: resolved phase, its kind, the stage index and the clock length. */
+export function deriveEco(s: EcoState, count: number, isStatic: boolean) {
+  const CLOSING = count + 1;
+  const HOLD = count + 2;
+  // Static mode always shows a stage; idle after launch shows the opening.
+  const phase = isStatic
+    ? s.phase >= 1 && s.phase <= count
+      ? s.phase
+      : 1
+    : s.phase === IDLE && s.launched
+      ? 0
+      : s.phase;
+  const kind: EcoPhaseKind = isStatic
+    ? "static"
+    : phase < 0
+      ? "idle"
+      : phase === 0
+        ? "opening"
+        : phase <= count
+          ? "stage"
+          : phase === CLOSING
+            ? "closing"
+            : "hold";
+  const stageIndex =
+    phase >= 1 && phase <= count ? phase - 1 : isStatic ? 0 : -1;
+  const phaseMs =
+    phase === 0
+      ? OPENING_MS
+      : phase === CLOSING
+        ? CLOSING_MS
+        : phase === HOLD
+          ? HOLD_MS
+          : STAGE_MS;
+  return { phase, kind, stageIndex, phaseMs };
+}
 
 /**
  * The ecosystem sequence: one phase at a time, advanced by the CSS clock (`advance`),
@@ -52,19 +134,13 @@ export function useEcosystemSequence({
 }) {
   const inView = useInView(ref, { amount: 0.3 });
   const unlocked = useHomeIntro()?.isUnlocked ?? true;
-  const [rawPhase, setPhase] = useState(IDLE);
-  const [launched, setLaunched] = useState(false);
+  const [state, dispatch] = useReducer(ecoReducer, ECO_INITIAL);
   const [hidden, setHidden] = useState(false);
-  const [userPaused, setUserPaused] = useState(false);
   const [hoverPaused, setHoverPaused] = useState(false);
 
-  const CLOSING = count + 1;
-  const HOLD = count + 2;
-
   // First start waits for the stage in view and the loading overlay gone; later returns just resume.
-  if (!launched && !isStatic && inView && unlocked) setLaunched(true);
-  // Static mode and idle before launch both show the first stage.
-  const phase = isStatic ? (rawPhase >= 1 && rawPhase <= count ? rawPhase : 1) : rawPhase === IDLE && launched ? 0 : rawPhase;
+  if (!state.launched && !isStatic && inView && unlocked)
+    dispatch({ type: "launch" });
 
   useEffect(() => {
     const onVisibility = () => setHidden(document.hidden);
@@ -73,30 +149,18 @@ export function useEcosystemSequence({
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, []);
 
-  const kind: EcoPhaseKind = isStatic
-    ? "static"
-    : phase < 0
-      ? "idle"
-      : phase === 0
-        ? "opening"
-        : phase <= count
-          ? "stage"
-          : phase === CLOSING
-            ? "closing"
-            : "hold";
-  const stageIndex = phase >= 1 && phase <= count ? phase - 1 : isStatic ? 0 : -1;
-  const running = !isStatic && launched && !hidden && inView && !userPaused && !hoverPaused;
-  const phaseMs = phase === 0 ? OPENING_MS : phase === CLOSING ? CLOSING_MS : phase === HOLD ? HOLD_MS : STAGE_MS;
-
-  const advance = () => setPhase(phase === HOLD ? 0 : phase + 1);
-  const select = (i: number) => {
-    setPhase(i + 1);
-    if (!isStatic) setUserPaused(true);
-  };
-  const toggle = () => {
-    if (!launched) setLaunched(true);
-    setUserPaused((p) => !p);
-  };
+  const { phase, kind, stageIndex, phaseMs } = deriveEco(
+    state,
+    count,
+    isStatic,
+  );
+  const running =
+    !isStatic &&
+    state.launched &&
+    !hidden &&
+    inView &&
+    !state.userPaused &&
+    !hoverPaused;
 
   return {
     phase,
@@ -105,11 +169,11 @@ export function useEcosystemSequence({
     running,
     playState: (running ? "running" : "paused") as "running" | "paused",
     phaseMs,
-    autoplay: !isStatic && !userPaused,
-    userPaused,
-    advance,
-    select,
-    toggle,
+    autoplay: !isStatic && !state.userPaused,
+    userPaused: state.userPaused,
+    advance: () => dispatch({ type: "advance", count }),
+    select: (i: number) => dispatch({ type: "select", index: i, isStatic }),
+    toggle: () => dispatch({ type: "toggle" }),
     setHoverPaused,
   };
 }

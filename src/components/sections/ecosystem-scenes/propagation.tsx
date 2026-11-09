@@ -74,7 +74,7 @@ const [trayDx, trayDy] = iso(TRAY_AT.x, TRAY_AT.y, TRAY_AT.z);
 const [originX, originY] = iso(0, 0, 0);
 
 export function Propagation({ st, active }: SceneProps) {
-  const id = useId().replace(/:/g, "");
+  const id = useId();
   const tray = `${id}-tray`;
   return (
     <Static st={st}>

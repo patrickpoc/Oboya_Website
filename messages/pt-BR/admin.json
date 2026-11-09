@@ -1999,7 +1999,7 @@
         },
         "homeEcosystem": {
           "title": "Jornada do Ecossistema",
-          "description": "Sequência de abertura, imagens e textos das etapas, frases finais e slogan."
+          "description": "Linha de abertura, seis etapas com descrição, pontos de destaque e imagem opcional, linhas de encerramento e slogan."
         },
         "capabilities": {
           "title": "Por que Oboya Horticulture",
@@ -2065,6 +2065,9 @@
         "ecosystemClosingLine2": "Frase final 2",
         "ecosystemSlogan": "Slogan",
         "ecosystemStageLabel": "Rótulo da etapa",
+        "ecosystemStageDescription": "Descrição da etapa",
+        "ecosystemStagePoint": "Ponto de destaque",
+        "ecosystemStagePointsHint": "Até 3 pontos de destaque curtos sobre os produtos. Eles aparecem em evidência ao lado da ilustração.",
         "ecosystemStageImage": "Imagem da etapa",
         "ecosystemStageImageHint": "Deixe vazio para exibir a ilustração animada. Recomenda-se uma imagem 2:1; outras proporções são cortadas. Use uma imagem enviada ou da biblioteca (JPG, PNG, WebP, AVIF ou GIF; SVG não é suportado); links de outros sites não são aceitos.",
         "ecosystemStageImageInvalid": "Esta imagem não pode ser usada e será removida ao salvar. Escolha um JPG, PNG, WebP, AVIF ou GIF enviado ou da biblioteca, sem query string.",

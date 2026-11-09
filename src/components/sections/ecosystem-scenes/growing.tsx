@@ -128,7 +128,7 @@ const W_INK = { strokeWidth: "var(--eco-ink, 1.2px)" } as const;
 const W_LIGHT = { strokeWidth: "calc(var(--eco-ink, 1.2px) * 0.7)" } as const;
 
 export function Growing({ st, active }: SceneProps) {
-  const id = useId().replace(/:/g, "");
+  const id = useId();
   const potId = (k: number) => `${id}-pot${k}`;
   return (
     <Static st={st}>

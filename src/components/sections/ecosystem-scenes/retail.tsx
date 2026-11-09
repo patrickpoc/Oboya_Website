@@ -66,7 +66,7 @@ const at = (x: number, y: number, z: number) => {
 };
 
 export function Retail({ st, active }: SceneProps) {
-  const id = useId().replace(/:/g, "");
+  const id = useId();
   const plantId = `${id}-plant`;
   const clamId = `${id}-clam`;
   const bagId = `${id}-bag`;

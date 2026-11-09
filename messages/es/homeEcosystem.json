@@ -1,3 +1,6 @@
 {
-  "ariaLabel": "Ecosistema hortícola Oboya"
+  "ariaLabel": "Ecosistema hortícola Oboya",
+  "stepOf": "Paso {index} de {total}",
+  "pause": "Pausar",
+  "play": "Reproducir"
 }

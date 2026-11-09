@@ -139,7 +139,7 @@ describe("homeEcosystem settings", () => {
     });
     const d = stageOf(eco, "logistics").description;
     expect(d.en).toBe("Custom");
-    expect(d["pt-BR"]).toBe("Trolleys, buckets and automation that keep the cold chain moving.");
+    expect(d["pt-BR"]).toBe("Carrinhos, baldes e automação que mantêm a cadeia do frio em movimento.");
   });
 
   it("accepts only renderable images", () => {
