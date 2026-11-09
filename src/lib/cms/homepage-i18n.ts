@@ -330,11 +330,11 @@ export const HOME_I18N = {
       ),
     openingLine: homeLoc("Oboya, your one-stop partner for horticulture.", "Oboya, seu parceiro completo em horticultura.", "Oboya, su socio integral en horticultura.", "Oboya，您的园艺一站式合作伙伴。"),
     closingLine1: homeLoc("One Partner, One Ecosystem,", "Um Parceiro, Um Ecossistema,", "Un Socio, Un Ecosistema,", "一个伙伴，一个生态，"),
-    closingLine2: homeLoc("Endless Opportunities to Perform Better.", "Oportunidades Infinitas para Performar Melhor.", "Oportunidades Infinitas para Rendir Mejor.", "无限机遇，成就更佳表现。"),
+    closingLine2: homeLoc("Endless Opportunities to Perform Better.", "Oportunidades Infinitas para Render Mais.", "Oportunidades Infinitas para Rendir Mejor.", "无限机遇，成就更佳表现。"),
     slogan: homeLoc("Oboya, your one-stop partner for horticulture.", "Oboya, seu parceiro completo em horticultura.", "Oboya, su socio integral en horticultura.", "Oboya，您的园艺一站式合作伙伴。"),
     stages: {
       propagation: homeLoc("Propagation", "Propagação", "Propagación", "育苗繁殖"),
-      growing: homeLoc("Growing", "Cultivo", "Cultivo", "种植生长"),
+      growing: homeLoc("Growing", "Cultivo", "Cultivo", "种植"),
       harvest: homeLoc("Harvest", "Colheita", "Cosecha", "采收"),
       packaging: homeLoc("Packaging", "Embalagem", "Empaque", "包装"),
       logistics: homeLoc("Logistics & Transport", "Logística e Transporte", "Logística y Transporte", "物流与运输"),
@@ -346,7 +346,7 @@ export const HOME_I18N = {
       harvest: homeLoc("Gentle handling that moves produce from the crop to the packhouse.", "Manuseio cuidadoso que leva o produto da cultura até a casa de embalagem.", "Manipulación cuidadosa que lleva el producto del cultivo a la central de empaque.", "轻柔搬运，将农产品从田间送至包装车间。"),
       packaging: homeLoc("Packaging that protects freshness and gives each product shelf presence.", "Embalagens que protegem a frescura e dão presença a cada produto na gôndola.", "Envases que protegen la frescura y dan presencia a cada producto en el lineal.", "守护新鲜度并让每件产品在货架上脱颖而出的包装。"),
       logistics: homeLoc("Trolleys, buckets and automation that keep the cold chain moving.", "Carrinhos, baldes e automação que mantêm a cadeia do frio em movimento.", "Carros, cubos y automatización que mantienen en marcha la cadena de frío.", "推车、水桶与自动化设备，保障冷链顺畅运转。"),
-      retail: homeLoc("Displays and shelf-ready formats that put fresh products in front of shoppers.", "Displays e formatos prontos para a gôndola que põem os produtos frescos diante do consumidor.", "Expositores y formatos listos para el lineal que ponen los productos frescos frente al comprador.", "陈列架与即上架包装，让新鲜产品直达消费者眼前。"),
+      retail: homeLoc("Displays and shelf-ready formats that put fresh products in front of shoppers.", "Displays e formatos prontos para a gôndola que põem os produtos frescos diante do consumidor.", "Expositores y formatos listos para el lineal que ponen los productos frescos frente al comprador.", "陈列架与货架即用型包装，让新鲜产品直达消费者眼前。"),
     },
     points: {
       propagation: {
@@ -375,9 +375,9 @@ export const HOME_I18N = {
         agv: homeLoc("AGV robotics", "Robótica AGV", "Robótica AGV", "AGV 机器人"),
       },
       retail: {
-        displays: homeLoc("Display systems", "Sistemas de exibição", "Sistemas de exhibición", "陈列系统"),
-        shelfReady: homeLoc("Shelf-ready packaging", "Pronta para a gôndola", "Listos para el lineal", "即上架包装"),
-        potted: homeLoc("Potted plant displays", "Displays para vasos", "Expositores de macetas", "盆栽陈列架"),
+        displays: homeLoc("Display systems", "Sistemas de exposição", "Sistemas de exhibición", "陈列系统"),
+        shelfReady: homeLoc("Shelf-ready packaging", "Embalagens shelf-ready", "Envases listos para lineal", "货架即用型包装"),
+        potted: homeLoc("Potted plant displays", "Displays de plantas em vaso", "Expositores de plantas en maceta", "盆栽陈列架"),
       },
     },
   },

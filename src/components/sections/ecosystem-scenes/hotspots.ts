@@ -42,7 +42,7 @@ export const HOTSPOTS: Record<HomeEcosystemStageId, Hotspot[]> = {
   // crates (top crate on the trolley), trolleys (trolley deck), handling (cut flowers in buckets)
   harvest: [
     callout([-31, 14, 40], [6, 20], [12, -24]),
-    callout([-4, 26, 12], [6, 14], [-4, 26]),
+    callout([-4, 26, 12], [6, 14], [-2, 26]),
     callout([-170, 60, 22], [4, -14], [0, -16]),
   ],
   // clamshells (punnet on the belt), bags (bag at the end of the line), labels (applicator head)
@@ -60,7 +60,7 @@ export const HOTSPOTS: Record<HomeEcosystemStageId, Hotspot[]> = {
   // displays (floor stand bucket), shelf-ready (punnet on the middle shelf), potted (pot on the top shelf)
   retail: [
     callout([152, 23, 24], [8, 0], [-8, 12]),
-    callout([-66, -37, 44], [-6, 14], [4, -15]),
-    callout([-18, -38, 84], [6, -12], [4, -20]),
+    callout([-66, -37, 44], [-6, 14], [-2, 16]),
+    callout([-18, -38, 84], [6, -12], [2, -20]),
   ],
 };

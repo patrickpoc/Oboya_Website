@@ -15,7 +15,7 @@ import { Propagation } from "./propagation";
 import { Retail } from "./retail";
 
 export { Backdrop } from "./backdrop";
-export { Overview } from "./overview";
+export { OVERVIEW_NODES, Overview } from "./overview";
 export { HOTSPOTS } from "./hotspots";
 export { SceneClock } from "./iso-kit";
 

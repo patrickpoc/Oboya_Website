@@ -2,7 +2,7 @@
 
 import { useId } from "react";
 import { M, PottedMum, Rise, Solid, mix, tone } from "./flat-kit";
-import { DashMarch, Fade, Plate, RAIL, Static, Travel, at, disc, faceY, iso, plane, seg, type Box } from "./iso-kit";
+import { DashMarch, Fade, Plate, RAIL, Static, Travel, at, disc, faceY, iso, pct, plane, seg, type Box } from "./iso-kit";
 import { BucketDefs, CC, CCTrolley, Crate, Pot, Punnet, Tray } from "./packs";
 
 /**
@@ -10,8 +10,8 @@ import { BucketDefs, CC, CCTrolley, Crate, Pot, Punnet, Tray } from "./packs";
  * punnet rides the full rail. Each node is the product that leaves its stage.
  */
 const NODE_Y = -14;
-const NODE_X = [-200, -120, -40, 40, 120, 200];
-const PAD = 44;
+const NODE_X = [-255, -193, -131, -69, -7, 55];
+const PAD = 38;
 const STEP = 0.4;
 const [OX, OY] = iso(0, 0, 0);
 /** Translate a symbol to world (x, y) and scale it about that point. */
@@ -21,6 +21,8 @@ const scaled = (x: number, y: number, k: number) => {
 };
 const SW = "var(--oboya-soft-white)";
 const BD = "var(--oboya-blue-dark)";
+/** Node ring centres (panel %), ring radius (panel % of width) and the moment each lights up, for the stage-name labels. */
+export const OVERVIEW_NODES = NODE_X.map((x, k) => ({ ...pct(x, NODE_Y, 0), r: 4.5, delay: 1.1 + k * STEP }));
 
 function Glyph({ k, x, id }: { k: number; x: number; id: string }) {
   const y = NODE_Y;
@@ -58,7 +60,7 @@ function Glyph({ k, x, id }: { k: number; x: number; id: string }) {
       );
     case 4:
       return (
-        <g transform={scaled(x, y, 0.6)}>
+        <g transform={scaled(x, y, 0.5)}>
           <CCTrolley
             x={-CC.w / 2}
             y={-CC.d / 2}
@@ -129,7 +131,7 @@ export function Overview({ st }: { st: boolean }) {
         />
         {NODE_X.map((x, k) => (
           <Fade key={x} delay={1.1 + k * STEP} dur={0.5}>
-            <path d={disc(x, NODE_Y, 24)} fill="none" stroke={M.leafLight} opacity={0.7} style={{ strokeWidth: "var(--eco-ink, 1.2px)" }} />
+            <path d={disc(x, NODE_Y, 21)} fill="none" stroke={M.leafLight} opacity={0.7} style={{ strokeWidth: "var(--eco-ink, 1.2px)" }} />
           </Fade>
         ))}
         {NODE_X.map((x, k) => (

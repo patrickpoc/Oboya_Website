@@ -12,10 +12,23 @@ const ENTER_DUR = 0.4;
 const SWAP = { duration: 0.2 } as const;
 
 /**
+ * The HTML layer over the scene SVGs. It keeps the SVG viewBox aspect (8:5) so percentages stay
+ * true when the panel is cropped to 4:3 on mobile, and sits above every scene (z-10 inside the
+ * panel's isolated stacking context), including scenes fading out through AnimatePresence.
+ */
+const LAYER = "pointer-events-none absolute left-1/2 top-1/2 z-10 aspect-[8/5] h-full -translate-x-1/2 -translate-y-1/2";
+/**
+ * Pills size to their text, wrapping to at most two balanced lines inside a per-breakpoint
+ * max-width (the anchors in hotspots.ts assume these widths).
+ */
+const PILL =
+  "absolute -translate-y-1/2 cursor-default rounded-sm border text-center font-body leading-snug text-balance transition-[color,border-color,background-color] duration-200 " +
+  "max-sm:max-w-[6.75rem] max-sm:px-1.5 max-sm:py-px max-sm:text-[10px] sm:max-w-[11rem] sm:px-2 sm:py-0.5 sm:text-xs";
+
+/**
  * Always-visible callouts over the scene: a dot on the object, a thin elbow leader and a pill with
  * the proof point text, in planned positions per breakpoint (`d` ≥ sm, `m` below). Hover, focus or
  * tap puts one callout in emphasis and fades the others out; leaving brings them all back (200 ms).
- * The layer keeps the SVG viewBox aspect so percentages stay true when the panel is cropped.
  * Mount with a per-scene key so the entrance replays for each stage.
  */
 export function HomeEcosystemCallouts({
@@ -52,7 +65,7 @@ export function HomeEcosystemCallouts({
     onActive(lit ? null : k);
   };
   return (
-    <div className="pointer-events-none absolute left-1/2 top-1/2 aspect-[8/5] h-full -translate-x-1/2 -translate-y-1/2">
+    <div className={LAYER}>
       {/* Leader lines: vertical from the dot, then horizontal to the pill. One set per breakpoint. */}
       <svg className="absolute inset-0 h-full w-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
         {spots.map((h, k) => {
@@ -116,9 +129,8 @@ export function HomeEcosystemCallouts({
               aria-hidden
               data-eco-callout
               className={cn(
-                "absolute -translate-y-1/2 cursor-default whitespace-nowrap rounded-sm border font-body leading-snug transition-[color,border-color,background-color] duration-200",
-                "max-sm:left-(--eco-mlx) max-sm:top-(--eco-mly) max-sm:px-1.5 max-sm:py-px max-sm:text-[10px]",
-                "sm:left-(--eco-dlx) sm:top-(--eco-dly) sm:px-2 sm:py-0.5 sm:text-xs",
+                PILL,
+                "max-sm:left-(--eco-mlx) max-sm:top-(--eco-mly) sm:left-(--eco-dlx) sm:top-(--eco-dly)",
                 h.m.side === "l" && "max-sm:-translate-x-full",
                 h.d.side === "l" && "sm:-translate-x-full",
                 lit ? "border-oboya-green-light/70 bg-oboya-blue-dark text-white" : "border-white/20 bg-oboya-blue-dark/80 text-white/90",
@@ -137,6 +149,45 @@ export function HomeEcosystemCallouts({
           </Fragment>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * Closing scene: the six stage names as signage lying along the isometric y axis — each label
+ * starts at the upper-right edge of its node ring and climbs at 30° (the iso angle), so the six
+ * read as a diagonal ladder without leaders. Revealed as each node lights up, then kept. Text is
+ * the localized stage label; the rail already lists the names, so the layer is aria-hidden.
+ */
+export function HomeEcosystemOverviewLabels({
+  nodes,
+  labels,
+  isStatic,
+}: {
+  nodes: { left: number; top: number; r: number; delay: number }[];
+  labels: string[];
+  isStatic: boolean;
+}) {
+  const reveal = (k: number) => (isStatic ? { duration: 0 } : { duration: 0.45, delay: nodes[k].delay + 0.15 });
+  return (
+    <div className={LAYER} aria-hidden>
+      {nodes.map((n, k) => (
+        <motion.span
+          key={`ov-${k}`}
+          className={cn(
+            "absolute origin-left -translate-y-1/2 -rotate-30 whitespace-nowrap font-body leading-none tracking-wide text-white/95",
+            "max-sm:text-[10px] sm:text-sm",
+            // A thin green tick under the text, running along the slope.
+            "after:absolute after:left-0 after:right-0 after:-bottom-1 after:h-px after:bg-oboya-green-light/55",
+          )}
+          style={{ left: `${n.left + n.r * 0.9}%`, top: `${n.top - n.r * 0.9}%` }}
+          initial={isStatic ? false : { opacity: 0, x: -6 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={reveal(k)}
+        >
+          {labels[k]}
+        </motion.span>
+      ))}
     </div>
   );
 }

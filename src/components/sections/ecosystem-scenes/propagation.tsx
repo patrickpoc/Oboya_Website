@@ -3,7 +3,7 @@
 import { useId } from "react";
 import { Cyl, Dot, M, Rise, Solid, tone } from "./flat-kit";
 import { Fade, Part, Plate, RAIL, Static, Travel, at, faceY, plane, seg, type Box, type SceneProps } from "./iso-kit";
-import { TRAY, Tray } from "./packs";
+import { Punnet, TRAY, Tray } from "./packs";
 
 /**
  * Nursery bench (5.2 m) with five plug trays filling left → right (substrate, germinating,
@@ -97,8 +97,14 @@ export function Propagation({ st, active }: SceneProps) {
           ))}
         </Part>
 
-        {/* Unit: a tray of seedlings rides the rail. */}
-        <Travel>
+        {/* Unit: the retail punnet arrives (the loop wraps) and a tray of seedlings leaves. */}
+        <Travel
+          from={
+            <g transform={at(0, RAIL.y, 0)}>
+              <Punnet delay={0} />
+            </g>
+          }
+        >
           <g transform={at(-TRAY.w / 2, RAIL.y - TRAY.d / 2, 0)}>
             <use href={`#${id}-tray2`} />
           </g>

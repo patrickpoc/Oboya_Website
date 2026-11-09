@@ -6,10 +6,11 @@ import {
   Backdrop,
   HOTSPOTS,
   HomeEcosystemStageVisual,
+  OVERVIEW_NODES,
   Overview,
   SceneClock,
 } from "@/components/sections/ecosystem-scenes";
-import { HomeEcosystemCallouts } from "@/components/sections/HomeEcosystemCallouts";
+import { HomeEcosystemCallouts, HomeEcosystemOverviewLabels } from "@/components/sections/HomeEcosystemCallouts";
 import type { EcoPhaseKind } from "@/components/sections/useEcosystemSequence";
 import {
   CLOSING_MS,
@@ -200,7 +201,7 @@ export function HomeEcosystemStage({
           >
             <div
               className={cn(
-                "relative aspect-[4/3] w-full overflow-hidden rounded-md bg-oboya-blue-dark ring-1 ring-white/15 sm:aspect-[8/5]",
+                "relative isolate aspect-[4/3] w-full overflow-hidden rounded-md bg-oboya-blue-dark ring-1 ring-white/15 sm:aspect-[8/5]",
                 "[--eco-ink:2.3px] sm:[--eco-ink:1.9px] md:[--eco-ink:1.7px] lg:[--eco-ink:1.45px] xl:[--eco-ink:1.25px]",
               )}
               aria-hidden
@@ -267,6 +268,9 @@ export function HomeEcosystemStage({
                   isStatic={isStatic}
                   onActive={setActive}
                 />
+              ) : null}
+              {afterStages ? (
+                <HomeEcosystemOverviewLabels nodes={OVERVIEW_NODES} labels={stages.map((s) => t(s.label))} isStatic={isStatic} />
               ) : null}
 
               {/* Corner ticks */}
