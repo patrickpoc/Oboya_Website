@@ -10,12 +10,11 @@ import {
 import { useInView } from "framer-motion";
 import { useHomeIntro } from "@/components/layout/HomeIntroGate";
 
-export const OPENING_MS = 3000;
-export const STAGE_MS = 6000;
+export const STAGE_MS = 4000;
 export const CLOSING_MS = 6000;
 export const HOLD_MS = 12000;
 
-// Phases: -1 idle (not started), 0 opening, 1..N stages, N+1 closing, N+2 hold (then back to 0).
+// Phases: -1 idle (not started), 1..N stages, N+1 closing, N+2 hold (then back to 1). No opening: the cycle starts as soon as the section is in view.
 const IDLE = -1;
 
 const REDUCED_QUERY = "(prefers-reduced-motion: reduce)";
@@ -40,8 +39,7 @@ export function useEcosystemStatic(animationsEnabled: boolean) {
   return animationsEnabled === false || reduce;
 }
 
-export type EcoPhaseKind =
-  "static" | "idle" | "opening" | "stage" | "closing" | "hold";
+export type EcoPhaseKind = "static" | "idle" | "stage" | "closing" | "hold";
 
 // ---- Pure state machine (unit-tested; the hook only wires it to React) ------------------
 export type EcoState = {
@@ -67,8 +65,8 @@ export function ecoReducer(s: EcoState, a: EcoAction): EcoState {
       return s.launched ? s : { ...s, launched: true };
     case "advance": {
       const hold = a.count + 2;
-      const from = s.phase === IDLE ? 0 : s.phase;
-      return { ...s, phase: from === hold ? 0 : from + 1 };
+      const from = s.phase === IDLE ? 1 : s.phase;
+      return { ...s, phase: from === hold ? 1 : from + 1 };
     }
     case "select":
       // Picking a step is a manual mode: autoplay stops (static mode has no autoplay to stop).
@@ -86,35 +84,26 @@ export function ecoReducer(s: EcoState, a: EcoAction): EcoState {
 export function deriveEco(s: EcoState, count: number, isStatic: boolean) {
   const CLOSING = count + 1;
   const HOLD = count + 2;
-  // Static mode always shows a stage; idle after launch shows the opening.
+  // Static mode always shows a stage; launching goes straight to the first stage.
   const phase = isStatic
     ? s.phase >= 1 && s.phase <= count
       ? s.phase
       : 1
     : s.phase === IDLE && s.launched
-      ? 0
+      ? 1
       : s.phase;
   const kind: EcoPhaseKind = isStatic
     ? "static"
     : phase < 0
       ? "idle"
-      : phase === 0
-        ? "opening"
-        : phase <= count
-          ? "stage"
-          : phase === CLOSING
-            ? "closing"
-            : "hold";
+      : phase <= count
+        ? "stage"
+        : phase === CLOSING
+          ? "closing"
+          : "hold";
   const stageIndex =
     phase >= 1 && phase <= count ? phase - 1 : isStatic ? 0 : -1;
-  const phaseMs =
-    phase === 0
-      ? OPENING_MS
-      : phase === CLOSING
-        ? CLOSING_MS
-        : phase === HOLD
-          ? HOLD_MS
-          : STAGE_MS;
+  const phaseMs = phase === CLOSING ? CLOSING_MS : phase === HOLD ? HOLD_MS : STAGE_MS;
   return { phase, kind, stageIndex, phaseMs };
 }
 

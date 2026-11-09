@@ -1,146 +1,97 @@
 "use client";
 
-import {
-  ACCENT,
-  CONSTRUCTION,
-  Draw,
-  FACE,
-  Faces,
-  Fade,
-  accentFace,
-  boxInner,
-  boxOutline,
-  cylinder,
-  cylinderBody,
-  disc,
-  iso,
-  plane,
-  post,
-  type Box,
-} from "./iso-kit";
+import { Bloom, Dot, Lettuce, M, Rise, Shadow, Solid, Stems, mix, tone } from "./flat-kit";
+import { P, boxInner, boxOutline, cylinder, cylinderBody, disc, ink, iso, plane, type Box } from "./iso-kit";
 
 /**
- * Retail packaging, drawn around the world origin and shared by the packaging and retail scenes.
- * Packs read as clear plastic (soft translucent faces) holding produce (orange dots);
- * orange is used for the produce only, never for the pack itself.
+ * Retail packaging drawn around the world origin, shared by the packaging, retail and overview
+ * scenes: clear clamshell of berries, bagged lettuce, flower sleeve bouquet, printed carton.
  */
+const SW = "var(--oboya-soft-white)";
+const GLASS = tone(M.glass);
+const LINE = { strokeWidth: ink("light") } as const;
 
-/** Rectangle on the vertical left face (plane y = const). */
-export const faceRectY = (x: number, y: number, z: number, w: number, h: number) =>
-  `M${iso(x, y, z).join(" ")}L${iso(x + w, y, z).join(" ")}L${iso(x + w, y, z + h).join(" ")}L${iso(x, y, z + h).join(" ")}Z`;
+/** Rectangle on the vertical front face (plane y = const). */
+export const faceY = (x: number, y: number, z: number, w: number, h: number) => `M${P(x, y, z)}L${P(x + w, y, z)}L${P(x + w, y, z + h)}L${P(x, y, z + h)}Z`;
 
-// ---- Clamshell / punnet -----------------------------------------------------
+// ---- Clamshell of strawberries -------------------------------------------------
 export const CLAM: Box = { x: -8, y: -7, w: 16, d: 14, h: 8 };
-const clamLid = plane(CLAM.x + 1.6, CLAM.y + 1.6, CLAM.w - 3.2, CLAM.d - 3.2, CLAM.h);
-const clamDots = [
-  [0.3, 0.32],
-  [0.68, 0.3],
-  [0.32, 0.7],
-  [0.7, 0.68],
-].map(([fx, fy]) => disc(CLAM.x + CLAM.w * fx, CLAM.y + CLAM.d * fy, 2.3, CLAM.h - 1.5));
-const clamVents = [0.33, 0.66].map((f) => post(CLAM.x + CLAM.w * f, CLAM.y + CLAM.d, 2, CLAM.h - 2)).join("");
-
-export function Clamshell({ delay = 1.2, unit = false }: { delay?: number; unit?: boolean }) {
-  const dots = clamDots.map((d, k) => <path key={k} d={d} fill={ACCENT.orange} />);
-  if (unit) {
-    // Travelling unit: complete, rides the rail (no draw-on), outlined in the active green.
-    return (
-      <>
-        <Fade delay={0} dur={0.3}>
-          <Faces box={CLAM} top={FACE.soft} left={FACE.left} right={FACE.right} />
-          {dots}
-        </Fade>
-        <path d={boxOutline(CLAM)} fill="none" stroke={ACCENT.greenLight} strokeLinejoin="round" style={{ strokeWidth: "var(--eco-ink, 1.2px)" }} />
-        <path d={boxInner(CLAM) + clamLid + clamVents} fill="none" stroke={CONSTRUCTION} style={{ strokeWidth: "calc(var(--eco-ink, 1.2px) * 0.7)" }} />
-      </>
-    );
-  }
+const BERRIES: [number, number][] = [
+  [0.25, 0.3],
+  [0.6, 0.25],
+  [0.3, 0.68],
+  [0.7, 0.65],
+  [0.5, 0.48],
+];
+export function Clamshell({ delay = 1, unit = false }: { delay?: number; unit?: boolean }) {
+  const b = CLAM;
   return (
-    <>
-      <Fade delay={delay + 0.3} dur={0.5}>
-        <Faces box={CLAM} top={FACE.soft} left={FACE.left} right={FACE.right} />
-        {dots}
-      </Fade>
-      <Draw d={boxOutline(CLAM)} delay={delay} dur={0.7} w="light" />
-      <Draw d={boxInner(CLAM) + clamLid + clamVents} color={CONSTRUCTION} delay={delay + 0.2} dur={0.5} w="light" />
-    </>
+    <Rise delay={unit ? 0 : delay} dur={unit ? 0.3 : 0.6}>
+      <Shadow cx={b.x + b.w / 2 + 1} cy={b.y + b.d / 2 + 1} r={9} />
+      {/* base tray with berries sitting in it */}
+      <path d={plane(b.x, b.y, b.w, b.d, 0.5)} fill={mix(M.fruit, 25, SW)} />
+      {BERRIES.map(([fx, fy], k) => (
+        <Dot key={k} at={[b.x + b.w * fx, b.y + b.d * fy, 3]} r={2.6} fill={M.fruit} />
+      ))}
+      {BERRIES.map(([fx, fy], k) => (
+        <Dot key={`c${k}`} at={[b.x + b.w * fx, b.y + b.d * fy, 5.2]} r={1} fill={M.leaf} />
+      ))}
+      {/* clear lid */}
+      <path d={`M${P(b.x, b.y + b.d, 0)}L${P(b.x + b.w, b.y + b.d, 0)}L${P(b.x + b.w, b.y + b.d, b.h)}L${P(b.x, b.y + b.d, b.h)}Z`} fill={GLASS.left} opacity={0.55} />
+      <path d={`M${P(b.x + b.w, b.y, 0)}L${P(b.x + b.w, b.y + b.d, 0)}L${P(b.x + b.w, b.y + b.d, b.h)}L${P(b.x + b.w, b.y, b.h)}Z`} fill={GLASS.right} opacity={0.55} />
+      <path d={plane(b.x, b.y, b.w, b.d, b.h)} fill={GLASS.top} opacity={0.5} />
+      <path d={boxOutline(b) + boxInner(b)} fill="none" stroke={unit ? M.leafLight : GLASS.line} strokeLinejoin="round" style={LINE} />
+      <path d={plane(b.x + 1.5, b.y + 1.5, b.w - 3, b.d - 3, b.h)} fill="none" stroke={GLASS.line} style={LINE} />
+    </Rise>
   );
 }
 
-// ---- Produce bag (upright, pinched top) -------------------------------------
-export const BAG = { r: 5.5, rb: 6.5, h: 18 };
-const bag = cylinder(0, 0, BAG.r, BAG.h, 0, BAG.rb);
-const bagBody = cylinderBody(0, 0, BAG.r, BAG.h, 0, BAG.rb);
-const bagTop = disc(0, 0, BAG.r, BAG.h);
-const bagSeal = disc(0, 0, BAG.r * 0.55, BAG.h + 2.5);
-const bagLeaves = [
-  [-3, 1, 7],
-  [1.5, -2, 11],
-  [-1, 2.5, 4],
-].map(([x, y, z]) => disc(x, y, 2, z));
-
-export function Bag({ delay = 1.2 }: { delay?: number }) {
+// ---- Bagged lettuce ------------------------------------------------------------------
+export const BAG = { r: 6, rb: 7, h: 19 };
+export function Bag({ delay = 1 }: { delay?: number }) {
   return (
-    <>
-      <Fade delay={delay + 0.3} dur={0.5}>
-        <path d={bagBody} fill={FACE.soft} />
-        <path d={bagTop} fill={FACE.left} />
-        {bagLeaves.map((d, k) => (
-          <path key={k} d={d} fill={ACCENT.green} />
-        ))}
-      </Fade>
-      <Draw d={bag} delay={delay} dur={0.7} w="light" />
-      <Draw d={bagSeal} color={CONSTRUCTION} delay={delay + 0.4} dur={0.3} w="light" />
-    </>
+    <Rise delay={delay}>
+      <Shadow cx={1} cy={1} r={BAG.rb * 1.1} />
+      <path d={cylinderBody(0, 0, BAG.r, BAG.h, 0, BAG.rb)} fill={mix(M.leafLight, 40, SW)} />
+      <Lettuce x={0} y={0} z={3} r={6} />
+      <path d={cylinderBody(0, 0, BAG.r, BAG.h, 0, BAG.rb)} fill={GLASS.left} opacity={0.42} />
+      <path d={disc(0, 0, BAG.r, BAG.h)} fill={GLASS.top} opacity={0.8} />
+      <path d={disc(0, 0, BAG.r * 0.55, BAG.h + 2.5)} fill={M.leaf} />
+      <path d={cylinder(0, 0, BAG.r, BAG.h, 0, BAG.rb)} fill="none" stroke={GLASS.line} style={LINE} />
+    </Rise>
   );
 }
 
-// ---- Flower sleeve -----------------------------------------------------------
-export const SLEEVE = { r: 5, rb: 2.8, h: 20 };
-const sleeve = cylinder(0, 0, SLEEVE.r, SLEEVE.h, 0, SLEEVE.rb);
-const sleeveBody = cylinderBody(0, 0, SLEEVE.r, SLEEVE.h, 0, SLEEVE.rb);
-const heads = [
-  [0, 0, 5],
-  [-2.5, 1.5, 3],
-  [2, -2, 2.5],
-].map(([x, y, dz]) => disc(x, y, 2.6, SLEEVE.h + dz));
-const stems = [
-  [0, 0, 5],
-  [-2.5, 1.5, 3],
-  [2, -2, 2.5],
-]
-  .map(([x, y, dz]) => `M${iso(0, 0, SLEEVE.h - 2).join(" ")}L${iso(x, y, SLEEVE.h + dz).join(" ")}`)
-  .join("");
-
-export function Sleeve({ delay = 1.3 }: { delay?: number }) {
+// ---- Flower sleeve bouquet -------------------------------------------------------------
+export const SLEEVE = { r: 6, rb: 2.6, h: 20 };
+export function Sleeve({ delay = 1, colors }: { delay?: number; colors?: string[] }) {
   return (
-    <>
-      <Fade delay={delay + 0.3} dur={0.5}>
-        <path d={sleeveBody} fill={FACE.soft} />
-        {heads.map((d, k) => (
-          <path key={k} d={d} fill={ACCENT.yellowLight} />
-        ))}
-      </Fade>
-      <Draw d={sleeve} delay={delay} dur={0.7} w="light" />
-      <Draw d={stems} color={ACCENT.green} delay={delay + 0.4} dur={0.3} w="light" />
-    </>
+    <Rise delay={delay}>
+      <Shadow cx={1} cy={1} r={SLEEVE.rb * 1.6} />
+      <path d={cylinderBody(0, 0, SLEEVE.r, SLEEVE.h, 0, SLEEVE.rb)} fill={GLASS.left} opacity={0.75} />
+      <path d={`M${iso(0, 0, 0).join(" ")}L${iso(0, 0, SLEEVE.h).join(" ")}`} fill="none" stroke={M.leafDark} style={LINE} />
+      <path d={disc(0, 0, SLEEVE.r, SLEEVE.h)} fill={GLASS.top} opacity={0.7} />
+      <Stems x={0} y={0} z={SLEEVE.h - 10} h={14} colors={colors} />
+      <path d={cylinder(0, 0, SLEEVE.r, SLEEVE.h, 0, SLEEVE.rb)} fill="none" stroke={GLASS.line} style={LINE} />
+    </Rise>
   );
 }
 
-// ---- Labelled carton ---------------------------------------------------------
+// ---- Printed carton ---------------------------------------------------------------------
 export const CARTON: Box = { x: -8, y: -6, w: 16, d: 12, h: 12 };
-const label = faceRectY(CARTON.x + 3, CARTON.y + CARTON.d, 4, CARTON.w - 6, 4.5);
-const cartonLid = plane(CARTON.x, CARTON.y, CARTON.w, CARTON.d / 2, CARTON.h);
-
-export function Carton({ delay = 1.2 }: { delay?: number }) {
+export function Carton({ delay = 1 }: { delay?: number }) {
+  const b = CARTON;
   return (
     <>
-      <Fade delay={delay + 0.3} dur={0.5}>
-        <Faces box={CARTON} top={FACE.soft} left={accentFace("green", 14)} right={accentFace("green", 8)} />
-        <path d={label} fill={FACE.soft} />
-      </Fade>
-      <Draw d={boxOutline(CARTON)} delay={delay} dur={0.7} w="light" />
-      <Draw d={boxInner(CARTON) + cartonLid} color={CONSTRUCTION} delay={delay + 0.2} dur={0.5} w="light" />
+      <Solid box={b} color={M.card} delay={delay} shadow={0.12} />
+      <Rise delay={delay + 0.2}>
+        <path d={faceY(b.x + 2, b.y + b.d, 3, b.w - 4, 5)} fill={SW} />
+        <path d={faceY(b.x + 3, b.y + b.d, 4, 5, 3)} fill={M.leaf} />
+        <path d={plane(b.x, b.y, b.w, b.d / 2 - 0.3, b.h + 0.2)} fill="none" stroke={tone(M.card).line} style={LINE} />
+      </Rise>
     </>
   );
 }
+
+/** A single bloom used as a glyph. */
+export { Bloom };

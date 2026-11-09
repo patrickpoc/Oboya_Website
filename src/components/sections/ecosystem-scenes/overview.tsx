@@ -1,38 +1,19 @@
 "use client";
 
-import {
-  ACCENT,
-  CONSTRUCTION,
-  DashMarch,
-  Draw,
-  FACE,
-  Fade,
-  INK,
-  IsoBox,
-  Plate,
-  RAIL,
-  Static,
-  Travel,
-  cylinder,
-  cylinderBody,
-  disc,
-  iso,
-  plane,
-  post,
-  seg,
-  type Box,
-} from "./iso-kit";
+import { Cyl, Flowering, M, Rise, Seedling, Solid, Stems, mix } from "./flat-kit";
+import { DashMarch, Draw, Fade, Plate, RAIL, Static, Travel, disc, iso, plane, post, seg, type Box } from "./iso-kit";
 import { Clamshell } from "./packs";
 
 /**
  * Closing frame: the whole chain as six nodes on one line, lighting up in order,
- * while one unit rides the full rail. Glyphs echo the stage scenes.
+ * while one unit rides the full rail. Each node is a miniature of its stage.
  */
 const NODE_Y = -14;
 const NODE_X = [-200, -120, -40, 40, 120, 200];
 const PAD = 36;
-const STEP = 0.55;
-const W_LIGHT = { strokeWidth: "calc(var(--eco-ink, 1.2px) * 0.7)" } as const;
+const STEP = 0.5;
+const SW = "var(--oboya-soft-white)";
+
 const [ox, oy] = iso(0, 0, 0);
 const at = (x: number, y: number, z: number) => {
   const [sx, sy] = iso(x, y, z);
@@ -41,46 +22,47 @@ const at = (x: number, y: number, z: number) => {
 
 function Glyph({ k, x }: { k: number; x: number }) {
   const y = NODE_Y;
-  const d = 0.9 + k * STEP;
+  const d = 0.8 + k * STEP;
   switch (k) {
     case 0: {
       const tray: Box = { x: x - 11, y: y - 8, w: 22, d: 16, h: 4 };
       return (
         <>
-          <IsoBox box={tray} delay={d} dur={0.6} top={FACE.soft} />
-          <Fade delay={d + 0.5}>
+          <Solid box={tray} color={M.black} delay={d} />
+          <Rise delay={d + 0.3}>
             {[-6, 0, 6].map((o) => (
-              <path key={o} d={disc(x + o, y, 1.6, 4)} fill={ACCENT.green} />
+              <Seedling key={o} x={x + o} y={y} z={4} s={1.3} />
             ))}
-          </Fade>
+          </Rise>
         </>
       );
     }
     case 1:
       return (
         <>
-          <Fade delay={d + 0.4}>
-            <path d={cylinderBody(x, y, 7, 12, 0, 5)} fill={FACE.left} />
-          </Fade>
-          <Draw d={cylinder(x, y, 7, 12, 0, 5)} delay={d} dur={0.6} />
-          <Draw d={post(x, y, 12, 26) + seg([x, y, 20], [x - 6, y + 4, 27]) + seg([x, y, 17], [x + 6, y - 4, 24])} color={ACCENT.green} delay={d + 0.4} dur={0.5} />
+          <Cyl cx={x} cy={y} r={7} rb={5.4} h={11} color={M.terra} inner={M.soil} delay={d} />
+          <Rise delay={d + 0.3}>
+            <Flowering x={x} y={y} z={11} color={M.pink} h={12} />
+          </Rise>
         </>
       );
     case 2: {
       const crate: Box = { x: x - 11, y: y - 8, w: 22, d: 16, h: 13 };
       return (
         <>
-          <IsoBox box={crate} delay={d} dur={0.6} top={FACE.soft} />
-          <Fade delay={d + 0.5}>
+          <Solid box={crate} color={M.blue} delay={d} />
+          <Rise delay={d + 0.3}>
+            <path d={plane(x - 9.5, y - 6.5, 19, 13, 12.5)} fill={mix(M.fruit, 35, M.soil)} />
             {[
               [-5, -3],
               [2, -4],
               [-2, 2],
               [5, 1],
+              [0, -0.5],
             ].map(([dx, dy]) => (
-              <path key={`${dx}${dy}`} d={disc(x + dx, y + dy, 1.9, 14)} fill={ACCENT.orange} />
+              <path key={`${dx}${dy}`} d={disc(x + dx, y + dy, 2.2, 14)} fill={M.fruit} />
             ))}
-          </Fade>
+          </Rise>
         </>
       );
     }
@@ -91,16 +73,19 @@ function Glyph({ k, x }: { k: number; x: number }) {
         </g>
       );
     case 4: {
-      const deck: Box = { x: x - 12, y: y - 8, z: 6, w: 24, d: 16, h: 2 };
+      const deck: Box = { x: x - 12, y: y - 8, z: 5, w: 24, d: 16, h: 3 };
       return (
         <>
-          <IsoBox box={deck} delay={d} dur={0.6} inner={false} />
-          <Draw d={post(x - 12, y + 8, 8, 26) + post(x + 12, y + 8, 8, 26) + post(x + 12, y - 8, 8, 26) + seg([x - 12, y + 8, 26], [x + 12, y + 8, 26]) + seg([x + 12, y + 8, 26], [x + 12, y - 8, 26])} color={INK} w="light" delay={d + 0.3} dur={0.6} />
-          <Fade delay={d + 0.5}>
-            {[-8, 0, 8].map((o) => (
-              <path key={o} d={disc(x + o, y, 2, 6)} fill={ACCENT.blueLight} />
-            ))}
-          </Fade>
+          <Solid box={deck} color={M.steel} delay={d} />
+          <Draw d={post(x - 12, y + 8, 8, 28) + post(x + 12, y + 8, 8, 28) + post(x + 12, y - 8, 8, 28) + post(x - 12, y - 8, 8, 28) + seg([x - 12, y + 8, 28], [x + 12, y + 8, 28]) + seg([x + 12, y + 8, 28], [x + 12, y - 8, 28])} color={M.steelDark} w="light" delay={d + 0.2} dur={0.6} />
+          {[-7, 0, 7].map((o) => (
+            <g key={o}>
+              <Cyl cx={x + o} cy={y} z={8} r={3.2} rb={2.6} h={8} color={M.black} inner={M.water} delay={d + 0.3} shadow={false} />
+              <Rise delay={d + 0.5}>
+                <Stems x={x + o} y={y} z={15} h={8} colors={[M.pink, M.yellow]} />
+              </Rise>
+            </g>
+          ))}
         </>
       );
     }
@@ -108,16 +93,17 @@ function Glyph({ k, x }: { k: number; x: number }) {
       const base: Box = { x: x - 12, y: y - 8, w: 24, d: 16, h: 3 };
       return (
         <>
-          <IsoBox box={base} delay={d} dur={0.5} inner={false} />
-          <Draw d={post(x - 12, y - 8, 3, 28) + post(x + 12, y - 8, 3, 28) + seg([x - 12, y - 8, 15], [x + 12, y - 8, 15]) + seg([x - 12, y - 8, 28], [x + 12, y - 8, 28])} delay={d + 0.2} dur={0.6} />
-          <Fade delay={d + 0.6}>
-            {[-8, -2, 4].map((o) => (
-              <path key={o} d={plane(x + o, y - 6, 4, 10, 15)} fill={FACE.soft} />
+          <Solid box={base} color={M.steelDark} delay={d} />
+          <Solid box={{ x: x - 12, y: y - 8, z: 3, w: 24, d: 3, h: 26 }} color={mix(M.steel, 35, SW)} delay={d + 0.1} />
+          <Solid box={{ x: x - 12, y: y - 5, z: 14, w: 24, d: 13, h: 2 }} color={M.white} delay={d + 0.2} />
+          <Rise delay={d + 0.4}>
+            {[-7, 0, 7].map((o) => (
+              <path key={o} d={plane(x + o - 3, y - 3, 6, 6, 16.2)} fill={M.fruit} />
             ))}
-            {[-6, 0, 6].map((o) => (
-              <path key={o} d={disc(x + o, y - 1, 1.4, 15.5)} fill={ACCENT.orange} />
+            {[-7, 0, 7].map((o) => (
+              <path key={o} d={plane(x + o - 3, y - 3, 6, 6, 5.2)} fill={M.leafLight} />
             ))}
-          </Fade>
+          </Rise>
         </>
       );
     }
@@ -128,26 +114,23 @@ export function Overview({ st }: { st: boolean }) {
   return (
     <Static st={st}>
       <Plate>
-        {/* Node pads and the connecting line */}
         <Fade delay={0.2} dur={0.6}>
           {NODE_X.map((x) => (
-            <path key={x} d={plane(x - PAD / 2, NODE_Y - PAD / 2, PAD, PAD)} fill={FACE.right} />
+            <path key={x} d={plane(x - PAD / 2, NODE_Y - PAD / 2, PAD, PAD)} fill={mix(M.steel, 30, SW)} />
           ))}
         </Fade>
-        <Draw d={NODE_X.map((x) => plane(x - PAD / 2, NODE_Y - PAD / 2, PAD, PAD)).join("")} color={CONSTRUCTION} w="light" delay={0.1} dur={1} />
         <DashMarch
           d={NODE_X.slice(1)
             .map((x, k) => seg([NODE_X[k] + PAD / 2 + 4, NODE_Y], [x - PAD / 2 - 4, NODE_Y]))
             .join("")}
-          color={ACCENT.greenLight}
+          color={M.leaf}
           delay={0.6}
           dur={1.6}
-          opacity={0.75}
+          opacity={0.8}
         />
-        {/* Lit rings, one after another */}
         {NODE_X.map((x, k) => (
-          <Fade key={x} delay={1.2 + k * STEP} dur={0.5}>
-            <path d={disc(x, NODE_Y, 19)} fill="none" stroke={ACCENT.greenLight} style={W_LIGHT} />
+          <Fade key={x} delay={1.1 + k * STEP} dur={0.5}>
+            <path d={disc(x, NODE_Y, 19)} fill="none" stroke={M.leafLight} style={{ strokeWidth: "var(--eco-ink, 1.2px)" }} />
           </Fade>
         ))}
         {NODE_X.map((x, k) => (

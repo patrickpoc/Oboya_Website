@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Backdrop,
@@ -49,18 +48,11 @@ export function HomeEcosystemStage({
   onHoverChange: (hovering: boolean) => void;
 }) {
   const stages = data.stages as Stage[];
-  const total = stages.length;
   const t = (v: LocalizedString) => pickLocalized(v, locale);
   const [active, setActive] = useState<number | null>(null);
   const afterStages = kind === "closing" || kind === "hold";
   const inStage = kind === "stage" || kind === "static";
   const current = stageIndex >= 0 ? stages[stageIndex] : null;
-
-  // The leading "Oboya" (with optional comma, also the CJK one) is shown as the logo.
-  const openingText = t(data.openingLine);
-  const stripped = openingText.replace(/^\s*Oboya\s*[,，]?\s*/i, "");
-  const openingRest =
-    stripped.charAt(0).toLocaleUpperCase(locale) + stripped.slice(1);
 
   const show = (on: boolean) => ({ opacity: on ? 1 : 0, y: on ? 0 : 8 });
 
@@ -89,43 +81,16 @@ export function HomeEcosystemStage({
     >
       {/* Text column */}
       <div className="order-2 col-span-12 grid lg:order-1 lg:col-span-4 lg:pr-6">
-        {!isStatic
-          ? textLayer(
-              kind === "opening" || kind === "idle",
-              <p
-                className={cn(
-                  BIG,
-                  "flex flex-wrap items-center gap-x-5 gap-y-4",
-                )}
-              >
-                <Image
-                  src="/assets/logo.svg"
-                  alt=""
-                  width={160}
-                  height={39}
-                  className="h-[1.4em] w-auto brightness-0 invert"
-                />
-                <span>{openingRest}</span>
-              </p>,
-              "opening",
-            )
-          : null}
-
         {stages.map((s, i) => {
-          const on = inStage && i === stageIndex;
+          // Before the cycle starts (section not yet in view) the first stage's text is shown.
+          const on = (inStage && i === stageIndex) || (kind === "idle" && i === 0);
           const points = s.points.slice(0, 3);
           const description = t(s.description);
           return textLayer(
             on,
             <>
-              <p className="flex items-center gap-4 font-body text-[0.7rem] font-medium uppercase tracking-[0.22em] text-oboya-green-light">
-                <span className="tabular-nums">
-                  {String(i + 1).padStart(2, "0")} /{" "}
-                  {String(total).padStart(2, "0")}
-                </span>
-                <span className="h-px flex-1 bg-white/20" aria-hidden />
-              </p>
-              <h3 className={cn(BIG, "mt-4")}>{t(s.label)}</h3>
+              <span className="block h-0.5 w-10 bg-oboya-green-light" aria-hidden />
+              <h3 className={cn(BIG, "mt-5")}>{t(s.label)}</h3>
               {description ? (
                 <p className="mt-4 max-w-[34ch] font-body text-[clamp(0.95rem,1.2vw,1.05rem)] font-light leading-[1.6] text-white/75 text-pretty">
                   {description}
@@ -208,7 +173,7 @@ export function HomeEcosystemStage({
           >
             <div
               className={cn(
-                "relative aspect-[4/3] w-full overflow-hidden rounded-md bg-white/[0.025] ring-1 ring-white/15 sm:aspect-[8/5]",
+                "relative aspect-[4/3] w-full overflow-hidden rounded-md bg-oboya-soft-white ring-1 ring-white/20 sm:aspect-[8/5]",
                 "[--eco-ink:2.3px] sm:[--eco-ink:1.9px] md:[--eco-ink:1.7px] lg:[--eco-ink:1.45px] xl:[--eco-ink:1.25px]",
               )}
               aria-hidden
@@ -281,7 +246,7 @@ export function HomeEcosystemStage({
                                 "block size-2.5 rounded-full border transition-[background-color,box-shadow] duration-300",
                                 lit
                                   ? "border-oboya-green-light bg-oboya-green-light ring-4 ring-oboya-green-light/25"
-                                  : "border-oboya-blue-light bg-oboya-blue-dark ring-4 ring-oboya-blue-light/15",
+                                  : "border-oboya-blue bg-white ring-4 ring-oboya-blue/15",
                               )}
                             />
                           </motion.span>
@@ -293,19 +258,19 @@ export function HomeEcosystemStage({
               {/* Corner ticks */}
               <span
                 aria-hidden
-                className="pointer-events-none absolute left-2 top-2 size-2.5 border-l border-t border-white/40"
+                className="pointer-events-none absolute left-2 top-2 size-2.5 border-l border-t border-oboya-blue-dark/30"
               />
               <span
                 aria-hidden
-                className="pointer-events-none absolute right-2 top-2 size-2.5 border-r border-t border-white/40"
+                className="pointer-events-none absolute right-2 top-2 size-2.5 border-r border-t border-oboya-blue-dark/30"
               />
               <span
                 aria-hidden
-                className="pointer-events-none absolute bottom-2 left-2 size-2.5 border-b border-l border-white/40"
+                className="pointer-events-none absolute bottom-2 left-2 size-2.5 border-b border-l border-oboya-blue-dark/30"
               />
               <span
                 aria-hidden
-                className="pointer-events-none absolute bottom-2 right-2 size-2.5 border-b border-r border-white/40"
+                className="pointer-events-none absolute bottom-2 right-2 size-2.5 border-b border-r border-oboya-blue-dark/30"
               />
             </div>
           </SceneClock.Provider>

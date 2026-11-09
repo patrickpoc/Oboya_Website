@@ -1,18 +1,19 @@
 "use client";
 
+import { useId } from "react";
+import { M, mix } from "./flat-kit";
 import {
   ACCENT,
-  CONSTRUCTION,
   DashMarch,
   Draw,
-  FACE,
   Fade,
   GRID,
-  P,
+  H,
   PLATE,
   Plate,
   RAIL,
   Static,
+  W,
   boxLeft,
   boxOutline,
   boxRight,
@@ -23,6 +24,9 @@ import {
 
 const { x0, x1, y0, y1, h } = PLATE;
 const slab = { x: x0, y: y0, z: -h, w: x1 - x0, d: y1 - y0, h };
+const SW = "var(--oboya-soft-white)";
+const SKY_TOP = mix(M.blueLight, 22, SW);
+const GROUND = mix(M.leafLight, 9, SW);
 
 /** Ground grid, 30-unit cells inside the plate. */
 function gridPath() {
@@ -47,30 +51,38 @@ const GRID_D = gridPath();
 const RAILS = railPaths();
 
 /**
- * The shared ground: plate, grid and flow rail. Mounted once per panel, so the rail
- * stays at the same coordinates while scenes change above it.
+ * The shared ground: ambient sky, light plate, grid and flow rail. Mounted once per panel,
+ * so the rail stays at the same coordinates while scenes change above it.
  */
 export function Backdrop({ st }: { st: boolean }) {
+  const id = useId();
   return (
     <Static st={st}>
       <Plate>
-        <Fade delay={0.2} dur={0.9}>
-          <path d={boxTop(slab)} fill={FACE.soft} opacity={0.3} />
-          <path d={boxLeft(slab)} fill={FACE.left} />
-          <path d={boxRight(slab)} fill={FACE.right} />
+        <defs>
+          {/* Ambient sky: the one allowed 2-stop gradient. */}
+          <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor={SKY_TOP} />
+            <stop offset="1" stopColor={SW} />
+          </linearGradient>
+        </defs>
+        <rect width={W} height={H} fill={`url(#${id})`} />
+        <Fade delay={0.1} dur={0.8}>
+          <path d={boxTop(slab)} fill={GROUND} />
+          <path d={boxLeft(slab)} fill={mix(M.steel, 70, SW)} />
+          <path d={boxRight(slab)} fill={M.steel} />
+          <path d={boxOutline(slab)} fill="none" stroke={M.steelDark} style={{ strokeWidth: "calc(var(--eco-ink, 1.2px) * 0.7)" }} />
         </Fade>
-        <Fade delay={0.5} dur={1}>
+        <Fade delay={0.3} dur={0.9}>
           <path d={GRID_D} fill="none" stroke={GRID} style={{ strokeWidth: "var(--eco-ink, 1.2px)" }} />
         </Fade>
-        <Draw d={boxOutline(slab)} color={CONSTRUCTION} delay={0} dur={1.4} />
-        <Draw d={`M${P(x0, y1)}L${P(x0, y0)}L${P(x1, y0)}`} color={CONSTRUCTION} w="light" delay={0.6} dur={0.9} />
         {/* Rail bed, tracks and ties. */}
-        <Fade delay={0.9} dur={0.7}>
-          <path d={plane(x0, RAIL.y - RAIL.half, x1 - x0, RAIL.half * 2)} fill={FACE.right} />
+        <Fade delay={0.4} dur={0.6}>
+          <path d={plane(x0, RAIL.y - RAIL.half - 3, x1 - x0, RAIL.half * 2 + 6)} fill={mix(M.steel, 45, SW)} />
         </Fade>
-        <Draw d={RAILS.tracks} delay={0.4} dur={1.3} />
-        <Draw d={RAILS.ties} color={CONSTRUCTION} w="light" delay={1} dur={0.9} />
-        <DashMarch d={RAILS.dashes} color={ACCENT.blueLight} delay={1.2} opacity={0.45} />
+        <Draw d={RAILS.tracks} color={M.steelDark} delay={0.2} dur={1.1} />
+        <Draw d={RAILS.ties} color={M.steel} w="light" delay={0.6} dur={0.8} />
+        <DashMarch d={RAILS.dashes} color={ACCENT.blueLight} delay={0.8} opacity={0.55} />
       </Plate>
     </Static>
   );

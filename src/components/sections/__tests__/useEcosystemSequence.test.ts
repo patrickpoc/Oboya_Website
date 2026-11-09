@@ -3,7 +3,6 @@ import {
   CLOSING_MS,
   ECO_INITIAL,
   HOLD_MS,
-  OPENING_MS,
   STAGE_MS,
   deriveEco,
   ecoReducer,
@@ -16,24 +15,25 @@ const run = (actions: EcoAction[], from: EcoState = ECO_INITIAL) => actions.redu
 const advance: EcoAction = { type: "advance", count: COUNT };
 
 describe("ecosystem sequence: phase transitions", () => {
-  it("is idle before launch and opening right after", () => {
+  it("is idle before launch and on the first stage right after (no opening)", () => {
     expect(deriveEco(ECO_INITIAL, COUNT, false)).toMatchObject({ kind: "idle", stageIndex: -1 });
     const launched = run([{ type: "launch" }]);
-    expect(deriveEco(launched, COUNT, false)).toMatchObject({ kind: "opening", phase: 0, phaseMs: OPENING_MS });
+    expect(deriveEco(launched, COUNT, false)).toMatchObject({ kind: "stage", phase: 1, stageIndex: 0, phaseMs: STAGE_MS });
   });
 
-  it("walks opening → stages → closing → hold → opening", () => {
+  it("walks stages → closing → hold → first stage again", () => {
     let s = run([{ type: "launch" }]);
     const kinds: string[] = [];
-    for (let i = 0; i < COUNT + 3; i++) {
+    for (let i = 0; i < COUNT + 2; i++) {
       s = ecoReducer(s, advance);
       kinds.push(deriveEco(s, COUNT, false).kind);
     }
-    expect(kinds).toEqual([...Array(COUNT).fill("stage"), "closing", "hold", "opening"]);
+    expect(kinds).toEqual([...Array(COUNT - 1).fill("stage"), "closing", "hold", "stage"]);
+    expect(deriveEco(s, COUNT, false).stageIndex).toBe(0);
   });
 
   it("reports stage indices and clock lengths per phase", () => {
-    let s = run([{ type: "launch" }, advance]);
+    let s = run([{ type: "launch" }]);
     expect(deriveEco(s, COUNT, false)).toMatchObject({ kind: "stage", stageIndex: 0, phaseMs: STAGE_MS });
     for (let i = 1; i < COUNT; i++) s = ecoReducer(s, advance);
     expect(deriveEco(s, COUNT, false).stageIndex).toBe(COUNT - 1);

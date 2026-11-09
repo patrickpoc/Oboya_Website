@@ -29,7 +29,6 @@ export function HomeEcosystemRail({
   onToggle: () => void;
 }) {
   const t = useTranslations("homeEcosystem");
-  const total = labels.length;
   const afterStages = kind === "closing" || kind === "hold";
   const inStage = kind === "stage" || kind === "static";
 
@@ -42,24 +41,14 @@ export function HomeEcosystemRail({
         className="sr-only"
         aria-live={autoplay && !isStatic ? "off" : "polite"}
       >
-        {activeLabel
-          ? t("stepOf", { index: stageIndex + 1, total }) + " " + activeLabel
-          : ""}
+        {activeLabel ?? ""}
       </p>
-      {/* Small screens: numbers only on the rail, the active label reads here in full. */}
+      {/* Small screens: dots on the rail, the active name reads here in full. */}
       <p
-        className="flex min-h-5 items-center gap-3 font-body text-sm font-light text-white sm:hidden"
+        className="flex min-h-5 items-center font-body text-sm font-light text-white sm:hidden"
         aria-hidden
       >
-        {activeLabel ? (
-          <>
-            <span className="text-[0.68rem] font-medium tabular-nums tracking-[0.18em] text-oboya-green-light">
-              {String(stageIndex + 1).padStart(2, "0")} /{" "}
-              {String(total).padStart(2, "0")}
-            </span>
-            <span>{activeLabel}</span>
-          </>
-        ) : null}
+        {activeLabel}
       </p>
       <div className="flex items-end gap-4 md:gap-6">
         <ol className="flex min-w-0 flex-1 gap-1">
@@ -91,16 +80,6 @@ export function HomeEcosystemRail({
                     />
                     <span
                       className={cn(
-                        "font-body text-[0.68rem] font-medium tabular-nums tracking-[0.18em] transition-colors duration-300",
-                        isActive
-                          ? "text-oboya-green-light"
-                          : "text-white/45 group-hover:text-white/70",
-                      )}
-                    >
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <span
-                      className={cn(
                         "sr-only font-body text-sm font-light leading-tight transition-colors duration-300 sm:not-sr-only sm:min-w-0",
                         isActive
                           ? "text-white"
@@ -108,9 +87,6 @@ export function HomeEcosystemRail({
                       )}
                     >
                       {label}
-                    </span>
-                    <span className="sr-only">
-                      {t("stepOf", { index: i + 1, total })}
                     </span>
                   </span>
                   <span className="block h-px w-full overflow-hidden bg-white/15">

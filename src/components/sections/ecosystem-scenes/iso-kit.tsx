@@ -4,10 +4,9 @@ import { createContext, useContext, type CSSProperties, type ReactNode } from "r
 import { motion } from "framer-motion";
 
 /**
- * "Technical plate" kit: a true-isometric (30°) line drawing on dark blue.
+ * Isometric (30°) projection kit on a light panel; filled objects live in flat-kit.tsx.
  * One projection, one ground plate and one flow rail shared by every scene (see backdrop.tsx).
- * Brand tokens only, no gradients, no filters,
- * no <text>, no Math.random and no infinite animations.
+ * Brand tokens only (and color-mix() blends of them), no filters, no <text>, no Math.random and no infinite animations.
  */
 
 // ---- Projection -------------------------------------------------------------
@@ -44,11 +43,12 @@ export const PLATE = { x0: -300, x1: 300, y0: -112, y1: 100, h: 6 } as const;
 export const RAIL = { y: 80, half: 6 } as const;
 
 // ---- Colour -----------------------------------------------------------------
-const sw = (p: number) => `color-mix(in srgb, var(--oboya-soft-white) ${p}%, var(--oboya-blue-dark))`;
-export const INK = sw(72);
-export const CONSTRUCTION = sw(38);
-export const GRID = sw(14);
-export const FACE = { top: sw(16), left: sw(10), right: sw(5), soft: sw(24) } as const;
+/** Light panel: ink is dark blue mixed toward soft white. */
+const sw = (p: number) => `color-mix(in srgb, var(--oboya-blue-dark) ${p}%, var(--oboya-soft-white))`;
+export const INK = sw(70);
+export const CONSTRUCTION = sw(34);
+export const GRID = sw(9);
+export const FACE = { top: sw(5), left: sw(13), right: sw(24), soft: "var(--oboya-soft-white)" } as const;
 export const ACCENT = {
   green: "var(--oboya-green)",
   greenLight: "var(--oboya-green-light)",
@@ -56,9 +56,9 @@ export const ACCENT = {
   orange: "var(--oboya-orange)",
   yellowLight: "var(--oboya-yellow-light)",
 } as const;
-/** Accent mixed toward dark blue, for tinted faces. */
+/** Accent mixed toward soft white, for tinted faces. */
 export const accentFace = (a: keyof typeof ACCENT, p = 28) =>
-  `color-mix(in srgb, ${ACCENT[a]} ${p}%, var(--oboya-blue-dark))`;
+  `color-mix(in srgb, ${ACCENT[a]} ${p}%, var(--oboya-soft-white))`;
 
 // ---- Stroke weights ---------------------------------------------------------
 /** Three weights from one CSS variable set on the panel (`--eco-ink`). */
@@ -71,11 +71,11 @@ export const EASE = [0.22, 1, 0.36, 1] as const;
 export type SceneProps = { st: boolean; active?: number | null };
 /** Per-panel playback: the clock duration and play state of the current phase. */
 export const SceneClock = createContext<{ ms: number; playState: "running" | "paused"; rest: boolean }>({
-  ms: 6000,
+  ms: 4000,
   playState: "running",
   rest: false,
 });
-const StaticCtx = createContext(false);
+export const StaticCtx = createContext(false);
 /** Mark everything inside as static (complete frame, no draw-on). */
 export function Static({ st, children }: { st: boolean; children: ReactNode }) {
   return <StaticCtx.Provider value={st}>{children}</StaticCtx.Provider>;
