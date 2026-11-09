@@ -181,7 +181,7 @@ export function HomeEcosystemStage({
           >
             <div
               className={cn(
-                "relative aspect-[2/1] w-full overflow-hidden rounded-md bg-white/[0.025] ring-1 ring-white/15",
+                "relative aspect-[4/3] w-full overflow-hidden rounded-md bg-white/[0.025] ring-1 ring-white/15 sm:aspect-[8/5]",
                 "[--eco-ink:2.3px] sm:[--eco-ink:1.9px] md:[--eco-ink:1.7px] lg:[--eco-ink:1.45px] xl:[--eco-ink:1.25px]",
               )}
               aria-hidden
@@ -227,14 +227,16 @@ export function HomeEcosystemStage({
                 </motion.div>
               ) : null}
 
-              {/* Hotspots, linked to the proof points. */}
+              {/* Hotspots, linked to the proof points. The layer keeps the SVG viewBox aspect so
+                  percentages stay true when the panel is cropped (mobile). */}
+              <div className="pointer-events-none absolute left-1/2 top-1/2 aspect-[8/5] h-full -translate-x-1/2 -translate-y-1/2">
               {current && !current.image
                 ? HOTSPOTS[current.id].slice(0, current.points.length || 3).map((h, k) => {
                     const lit = active === k;
                     return (
                       <motion.span
                         key={`${current.id}-${k}`}
-                        className="absolute -translate-x-1/2 -translate-y-1/2 p-2"
+                        className="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 p-2"
                         style={{ left: `${h.left}%`, top: `${h.top}%` }}
                         initial={isStatic ? false : { opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -254,6 +256,7 @@ export function HomeEcosystemStage({
                     );
                   })
                 : null}
+              </div>
 
               {/* Corner ticks */}
               <span aria-hidden className="pointer-events-none absolute left-2 top-2 size-2.5 border-l border-t border-white/40" />

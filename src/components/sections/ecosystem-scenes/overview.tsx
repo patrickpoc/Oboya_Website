@@ -6,7 +6,6 @@ import {
   DashMarch,
   Draw,
   FACE,
-  Faces,
   Fade,
   INK,
   IsoBox,
@@ -14,27 +13,31 @@ import {
   RAIL,
   Static,
   Travel,
-  accentFace,
-  boxInner,
-  boxOutline,
   cylinder,
   cylinderBody,
   disc,
+  iso,
   plane,
   post,
   seg,
   type Box,
 } from "./iso-kit";
+import { Clamshell } from "./packs";
 
 /**
  * Closing frame: the whole chain as six nodes on one line, lighting up in order,
  * while one unit rides the full rail. Glyphs echo the stage scenes.
  */
-const NODE_Y = -24;
-const NODE_X = [-215, -129, -43, 43, 129, 215];
-const PAD = 38;
+const NODE_Y = -14;
+const NODE_X = [-200, -120, -40, 40, 120, 200];
+const PAD = 36;
 const STEP = 0.55;
 const W_LIGHT = { strokeWidth: "calc(var(--eco-ink, 1.2px) * 0.7)" } as const;
+const [ox, oy] = iso(0, 0, 0);
+const at = (x: number, y: number, z: number) => {
+  const [sx, sy] = iso(x, y, z);
+  return `translate(${Math.round((sx - ox) * 10) / 10} ${Math.round((sy - oy) * 10) / 10})`;
+};
 
 function Glyph({ k, x }: { k: number; x: number }) {
   const y = NODE_Y;
@@ -67,15 +70,26 @@ function Glyph({ k, x }: { k: number; x: number }) {
       const crate: Box = { x: x - 11, y: y - 8, w: 22, d: 16, h: 13 };
       return (
         <>
-          <IsoBox box={crate} delay={d} dur={0.6} />
-          <Draw d={plane(x - 7, y - 4, 14, 8, 13)} color={ACCENT.orange} w="light" delay={d + 0.5} dur={0.4} />
+          <IsoBox box={crate} delay={d} dur={0.6} top={FACE.soft} />
+          <Fade delay={d + 0.5}>
+            {[
+              [-5, -3],
+              [2, -4],
+              [-2, 2],
+              [5, 1],
+            ].map(([dx, dy]) => (
+              <path key={`${dx}${dy}`} d={disc(x + dx, y + dy, 1.9, 14)} fill={ACCENT.orange} />
+            ))}
+          </Fade>
         </>
       );
     }
-    case 3: {
-      const pack: Box = { x: x - 7, y: y - 6, w: 14, d: 12, h: 18 };
-      return <IsoBox box={pack} delay={d} dur={0.6} top={accentFace("orange", 60)} />;
-    }
+    case 3:
+      return (
+        <g transform={at(x, y, 0)}>
+          <Clamshell delay={d} />
+        </g>
+      );
     case 4: {
       const deck: Box = { x: x - 12, y: y - 8, z: 6, w: 24, d: 16, h: 2 };
       return (
@@ -98,7 +112,10 @@ function Glyph({ k, x }: { k: number; x: number }) {
           <Draw d={post(x - 12, y - 8, 3, 28) + post(x + 12, y - 8, 3, 28) + seg([x - 12, y - 8, 15], [x + 12, y - 8, 15]) + seg([x - 12, y - 8, 28], [x + 12, y - 8, 28])} delay={d + 0.2} dur={0.6} />
           <Fade delay={d + 0.6}>
             {[-8, -2, 4].map((o) => (
-              <path key={o} d={plane(x + o, y - 6, 4, 10, 15)} fill={accentFace("orange", 55)} />
+              <path key={o} d={plane(x + o, y - 6, 4, 10, 15)} fill={FACE.soft} />
+            ))}
+            {[-6, 0, 6].map((o) => (
+              <path key={o} d={disc(x + o, y - 1, 1.4, 15.5)} fill={ACCENT.orange} />
             ))}
           </Fade>
         </>
@@ -138,11 +155,9 @@ export function Overview({ st }: { st: boolean }) {
         ))}
 
         <Travel span={520}>
-          <Fade delay={0} dur={0.3}>
-            <Faces box={{ x: -14, y: RAIL.y - 10, w: 28, d: 20, h: 16 }} top={accentFace("orange", 60)} />
-          </Fade>
-          <path d={boxOutline({ x: -14, y: RAIL.y - 10, w: 28, d: 20, h: 16 })} fill="none" stroke={ACCENT.greenLight} strokeLinejoin="round" style={{ strokeWidth: "var(--eco-ink, 1.2px)" }} />
-          <path d={boxInner({ x: -14, y: RAIL.y - 10, w: 28, d: 20, h: 16 })} fill="none" stroke={INK} strokeLinejoin="round" style={W_LIGHT} />
+          <g transform={at(0, RAIL.y, 0)}>
+            <Clamshell unit />
+          </g>
         </Travel>
       </Plate>
     </Static>

@@ -12,17 +12,19 @@ import { motion } from "framer-motion";
 
 // ---- Projection -------------------------------------------------------------
 export const W = 800;
-export const H = 400;
+export const H = 500;
 const OX = 400;
-const OY = 215;
-const COS = 0.8660254;
-const SIN = 0.5;
+const OY = 300;
+/** World unit to screen pixel. The plate is scaled so a station fills ~3/4 of the panel width. */
+export const S = 1.4;
+const COS = 0.8660254 * S;
+const SIN = 0.5 * S;
 
 const r1 = (v: number) => Math.round(v * 10) / 10;
 /** World (x right-down, y left-down, z up) to screen. */
 export const iso = (x: number, y: number, z = 0): [number, number] => [
   r1(OX + (x - y) * COS),
-  r1(OY + (x + y) * SIN - z),
+  r1(OY + (x + y) * SIN - z * S),
 ];
 /** Screen point as "x y". */
 export const P = (x: number, y: number, z = 0) => iso(x, y, z).join(" ");
@@ -36,9 +38,10 @@ export const alongX = (dx: number): [number, number] => [r1(dx * COS), r1(dx * S
 export const alongY = (dy: number): [number, number] => [r1(-dy * COS), r1(dy * SIN)];
 
 // ---- Ground plate and rail (fixed across scenes) -----------------------------
-export const PLATE = { x0: -245, x1: 245, y0: -122, y1: 122, h: 6 } as const;
+/** The plate is longer than the frame along x: its left and right corners bleed off the panel. */
+export const PLATE = { x0: -300, x1: 300, y0: -112, y1: 100, h: 6 } as const;
 /** The flow rail: two tracks along x at the front of the plate. */
-export const RAIL = { y: 80, half: 6, x0: -480, x1: 480 } as const;
+export const RAIL = { y: 80, half: 6 } as const;
 
 // ---- Colour -----------------------------------------------------------------
 const sw = (p: number) => `color-mix(in srgb, var(--oboya-soft-white) ${p}%, var(--oboya-blue-dark))`;
@@ -112,18 +115,18 @@ export function plane(x: number, y: number, w: number, d: number, z = 0) {
 /** Horizontal circle (ellipse on screen) centred at world (cx, cy, z). */
 export function disc(cx: number, cy: number, r: number, z = 0) {
   const [sx, sy] = iso(cx, cy, z);
-  const rx = r1(r * 1.2247);
-  const ry = r1(r * 0.7071);
+  const rx = r1(r * 1.2247 * S);
+  const ry = r1(r * 0.7071 * S);
   return `M${r1(sx - rx)} ${sy}A${rx} ${ry} 0 1 0 ${r1(sx + rx)} ${sy}A${rx} ${ry} 0 1 0 ${r1(sx - rx)} ${sy}Z`;
 }
 /** Vertical cylinder (pot, bucket): top ellipse, two sides and the visible front arc. `rb` tapers the base. */
 export function cylinder(cx: number, cy: number, r: number, h: number, z = 0, rb = r) {
   const [sx, sy] = iso(cx, cy, z + h);
   const [, by] = iso(cx, cy, z);
-  const rx = r1(r * 1.2247);
-  const ry = r1(r * 0.7071);
-  const bx = r1(rb * 1.2247);
-  const byy = r1(rb * 0.7071);
+  const rx = r1(r * 1.2247 * S);
+  const ry = r1(r * 0.7071 * S);
+  const bx = r1(rb * 1.2247 * S);
+  const byy = r1(rb * 0.7071 * S);
   return (
     `M${r1(sx - rx)} ${sy}A${rx} ${ry} 0 1 0 ${r1(sx + rx)} ${sy}A${rx} ${ry} 0 1 0 ${r1(sx - rx)} ${sy}` +
     `M${r1(sx - rx)} ${sy}L${r1(sx - bx)} ${by}A${bx} ${byy} 0 0 0 ${r1(sx + bx)} ${by}L${r1(sx + rx)} ${sy}`
@@ -133,10 +136,10 @@ export function cylinder(cx: number, cy: number, r: number, h: number, z = 0, rb
 export function cylinderBody(cx: number, cy: number, r: number, h: number, z = 0, rb = r) {
   const [sx, sy] = iso(cx, cy, z + h);
   const [, by] = iso(cx, cy, z);
-  const rx = r1(r * 1.2247);
-  const ry = r1(r * 0.7071);
-  const bx = r1(rb * 1.2247);
-  const byy = r1(rb * 0.7071);
+  const rx = r1(r * 1.2247 * S);
+  const ry = r1(r * 0.7071 * S);
+  const bx = r1(rb * 1.2247 * S);
+  const byy = r1(rb * 0.7071 * S);
   return `M${r1(sx - rx)} ${sy}A${rx} ${ry} 0 0 0 ${r1(sx + rx)} ${sy}L${r1(sx + bx)} ${by}A${bx} ${byy} 0 0 1 ${r1(sx - bx)} ${by}Z`;
 }
 /** Vertical line from z0 to z1 at (x, y). */

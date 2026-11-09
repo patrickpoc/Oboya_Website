@@ -28,17 +28,17 @@ import {
 } from "./iso-kit";
 
 // Bench along x, three cell trays on it, a seeding gantry over the third tray, substrate bags at the front-left.
-const BENCH = { x: -170, y: -70, z: 39, w: 280, d: 48, h: 5 };
+const BENCH = { x: -130, y: -64, z: 36, w: 280, d: 48, h: 5 };
 const TRAY: Box = { x: 0, y: 0, z: 0, w: 84, d: 40, h: 7 };
-const TRAY_AT = { x: -162, y: -66, z: 44 };
+const TRAY_AT = { x: -122, y: -60, z: 41 };
 const TRAY_PITCH = 90;
-const GANTRY = { x: 40, w: 14, y0: -92, y1: -2, z: 116 };
+const GANTRY = { x: 80, w: 14, y0: -86, y1: 4, z: 102 };
 const BEAM: Box = { x: GANTRY.x, y: GANTRY.y0, z: GANTRY.z, w: GANTRY.w, d: GANTRY.y1 - GANTRY.y0, h: 6 };
-const HEAD = { x: 38, y: -62, z: 80, w: 18, d: 28, h: 24 };
+const HEAD = { x: 78, y: -56, z: 70, w: 18, d: 28, h: 22 };
 const BAGS: Box[] = [
-  { x: -212, y: 10, w: 42, d: 34, h: 22 },
-  { x: -210, y: 12, z: 22, w: 40, d: 32, h: 20 },
-  { x: -166, y: 14, w: 42, d: 34, h: 22 },
+  { x: -158, y: 6, w: 42, d: 34, h: 22 },
+  { x: -156, y: 8, z: 22, w: 40, d: 32, h: 20 },
+  { x: -112, y: 10, w: 42, d: 34, h: 22 },
 ];
 
 /** Cell grid lines on the tray top (4 along x, 9 along y). */
@@ -131,21 +131,21 @@ export function Propagation({ st, active }: SceneProps) {
             dur={1.2}
           />
           <IsoBox box={BEAM} delay={0.9} dur={0.8} inner={false} />
-          <Draw d={post(47, -48, HEAD.z + HEAD.h, GANTRY.z)} delay={1.3} dur={0.4} />
+          <Draw d={post(87, -42, HEAD.z + HEAD.h, GANTRY.z)} delay={1.3} dur={0.4} />
           <IsoBox box={HEAD} delay={1.2} dur={0.7} top={FACE.soft} />
           <Draw
-            d={[-58, -52, -46, -40].map((y) => post(47, y, 56, HEAD.z)).join("")}
+            d={[-52, -46, -40, -34].map((y) => post(87, y, 50, HEAD.z)).join("")}
             color={CONSTRUCTION}
             w="light"
             delay={1.7}
             dur={0.5}
           />
           <Fade delay={2}>
-            {[-58, -52, -46, -40].map((y) => {
-              const [cx, cy] = iso(47, y, 56);
+            {[-52, -46, -40, -34].map((y) => {
+              const [cx, cy] = iso(87, y, 50);
               return <circle key={y} cx={cx} cy={cy} r={1.8} fill={ACCENT.blueLight} />;
             })}
-            <circle cx={iso(56, -50, 96)[0]} cy={iso(56, -50, 96)[1]} r={2.6} fill={ACCENT.blueLight} />
+            <circle cx={iso(96, -44, 86)[0]} cy={iso(96, -44, 86)[1]} r={2.6} fill={ACCENT.blueLight} />
           </Fade>
         </Part>
 

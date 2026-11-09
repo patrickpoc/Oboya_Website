@@ -1,90 +1,209 @@
 "use client";
 
-import { BASELINE, CX, Contact, Gloss, Pop, Rise, SceneFrame, Shade, Strawberry, Tomato, Wheel, ruffle, tone, useMat } from "./kit";
+import { useId } from "react";
+import {
+  ACCENT,
+  CONSTRUCTION,
+  Draw,
+  FACE,
+  Faces,
+  Fade,
+  IsoBox,
+  Part,
+  Plate,
+  RAIL,
+  Repeat,
+  Static,
+  Travel,
+  accentFace,
+  boxInner,
+  boxOutline,
+  disc,
+  iso,
+  post,
+  seg,
+  type Box,
+  type SceneProps,
+} from "./iso-kit";
 
-type SceneProps = { st: boolean };
+// Three receding crop hedges along x with produce, a pipe rail in front of them carrying a
+// harvest trolley with stacked slotted crates, and a stack of empty crates at the front-right.
+const HEDGE = { x0: -190, w: 380, d: 16, h: 38 };
+const HEDGE_Y = [-100, -68, -36];
+const PIPE = { y: 2, half: 5, x0: -200, x1: 200 };
+const TROLLEY = { x: -40, w: 64, d: 28, z: 9, h: 4 };
+const CRATE: Box = { x: 0, y: 0, w: 28, d: 22, h: 13 };
+const STACK = { x: 118, y: 40 };
 
-const ROW_BACK: Array<[number, number, number]> = [[40, 70, 30], [170, 80, 34], [310, 66, 28], [470, 80, 34], [610, 70, 30], [750, 76, 32]];
-
-/** Generic crop rows receding behind the trolley (softly blurred by the frame). */
-function Crops() {
-  const m = useMat();
-  return (
-    <g>
-      {ROW_BACK.map(([x, rx, ry], i) => (
-        <path key={x} d={ruffle(x, 262, rx, ry, 9, 0.2, i)} fill={m(i % 2 ? "leaf" : "leafDeep")} />
-      ))}
-      {ROW_BACK.map(([x, rx, ry], i) => (
-        <path key={`f${x}`} d={ruffle(x + 70, 284, rx * 0.8, ry * 0.8, 8, 0.2, i + 1)} fill={m(i % 2 ? "leafLight" : "leaf")} />
-      ))}
-    </g>
-  );
+/** Hedge foliage: scalloped line along the front face at height z. */
+function hedgeTop(y: number, z = HEDGE.h) {
+  const parts: string[] = [];
+  for (let x = HEDGE.x0; x < HEDGE.x0 + HEDGE.w; x += 20) {
+    const [ax, ay] = iso(x, y, z);
+    const [bx, by] = iso(x + 20, y, z);
+    const [mx, my] = iso(x + 10, y, z + 6);
+    parts.push(`M${ax} ${ay}Q${mx} ${my} ${bx} ${by}`);
+  }
+  return parts.join("");
 }
-
-const SLOTS = "M-62 -48H-40Q-36 -48 -36 -44V-40Q-36 -36 -40 -36H-62Q-66 -36 -66 -40V-44Q-66 -48 -62 -48ZM-14 -48H14Q18 -48 18 -44V-40Q18 -36 14 -36H-14Q-18 -36 -18 -40V-44Q-18 -48 -14 -48ZM40 -48H62Q66 -48 66 -44V-40Q66 -36 62 -36H40Q36 -36 36 -40V-44Q36 -48 40 -48Z";
-
-function Crate({ x, kind }: { x: number; kind: "straw" | "tom" }) {
-  const m = useMat();
-  const rows: Array<[number, number]> = [[207, 7], [191, 6], [176, 4]]; // y, count
-  let n = 0;
-  return (
-    <g transform={`translate(${x} 0)`}>
-      {rows.map(([y, c], r) =>
-        Array.from({ length: c }, (_, i) => {
-          const k = n++;
-          const px = (i - (c - 1) / 2) * 24 + ((k * 3) % 5) - 2;
-          return (
-            <g key={`${r}-${i}`} transform={`translate(${px} ${y})`}>
-              {kind === "straw" ? <Strawberry rot={((k * 37) % 50) - 25} s={1.6} /> : <Tomato rot={(k * 29) % 40} s={1.15} k={k % 6 === 4 ? "yellow" : "red"} />}
-            </g>
-          );
-        })
-      )}
-      <g transform="translate(0 284)">
-        <path d="M-88 -74H88L82 -4Q81 0 77 0H-77Q-81 0 -82 -4Z" fill={m("plastic")} />
-        <path d="M-88 -74H88L82 -4Q81 0 77 0H-77Q-81 0 -82 -4Z" style={{ fill: tone("blue-light", 60, "soft-white") }} fillOpacity={0.5} />
-        <path d={SLOTS} style={{ fill: tone("blue-dark") }} fillOpacity={0.55} />
-        <path d="M-92 -80H92Q94 -80 94 -77V-70Q94 -67 92 -67H-92Q-94 -67 -94 -70V-77Q-94 -80 -92 -80Z" fill={m("plastic")} />
-        <Shade d="M88 -74L82 -4Q81 0 77 0H50L58 -74Z" o={0.22} />
-        <Gloss d="M-90 -78H-10M-84 -62L-80 -12" w={2} o={0.7} />
-      </g>
-    </g>
-  );
+/** Stakes along the front of the hedge and the training wire they carry. */
+function hedgeWires(y: number) {
+  const parts: string[] = [];
+  for (let x = HEDGE.x0 + 20; x < HEDGE.x0 + HEDGE.w; x += 60) parts.push(post(x, y, 0, HEDGE.h + 10));
+  parts.push(seg([HEDGE.x0, y, HEDGE.h + 10], [HEDGE.x0 + HEDGE.w, y, HEDGE.h + 10]));
+  return parts.join("");
 }
+const fruit = (y: number) => {
+  const pts: [number, number][] = [];
+  for (let k = 0; k < 14; k++) {
+    const x = HEDGE.x0 + 14 + k * 27 + ((k * 7) % 3) * 3;
+    const z = 8 + ((k * 5) % 3) * 9;
+    pts.push(iso(x, y + HEDGE.d, z));
+  }
+  return pts;
+};
 
-function Trolley({ st }: SceneProps) {
-  const m = useMat();
-  return (
-    <>
-      <Contact x={CX} y={BASELINE + 2} w={500} o={0.6} />
-      <g data-eco-subject>
-        <g transform="translate(-14 0)">
-        <Rise st={st} x={-110} y={0} dur={0.8}>
-          <Wheel cx={248} cy={316} r={24} />
-          <Wheel cx={552} cy={316} r={24} />
-          <path d="M212 284H588Q592 284 592 288V296Q592 300 588 300H212Q208 300 208 296V288Q208 284 212 284Z" fill={m("metal")} />
-          <path d="M208 296H592V300H208Z" fillOpacity={0.3} style={{ fill: tone("blue-dark") }} />
-          <path d="M592 288L636 190H664" fill="none" strokeWidth={7} strokeLinecap="round" strokeLinejoin="round" style={{ stroke: tone("soft-white", 82, "blue") }} />
-          <path d="M208 288L164 228" fill="none" strokeWidth={7} strokeLinecap="round" style={{ stroke: tone("soft-white", 82, "blue") }} />
-          <Gloss d="M598 280L638 194" w={1.6} o={0.6} />
-        </Rise>
-        <Pop st={st} d={0.7}>
-          <Crate x={310} kind="straw" />
-        </Pop>
-        <Pop st={st} d={0.9}>
-          <Crate x={490} kind="tom" />
-        </Pop>
-        </g>
-      </g>
-    </>
-  );
+/** Crate: slotted sides (short verticals on both visible faces). */
+function crateSlots({ x, y, w, d, h, z = 0 }: Box) {
+  const parts: string[] = [];
+  for (let k = 1; k < 5; k++) parts.push(post(x + (w * k) / 5, y + d, z + 3, z + h - 4));
+  for (let k = 1; k < 4; k++) parts.push(post(x + w, y + (d * k) / 4, z + 3, z + h - 4));
+  return parts.join("");
 }
+const CRATE_SLOTS = crateSlots(CRATE);
+const produceDots = (b: Box) => {
+  const z = (b.z ?? 0) + b.h + 1;
+  return [
+    [0.2, 0.28],
+    [0.46, 0.22],
+    [0.72, 0.3],
+    [0.3, 0.56],
+    [0.56, 0.5],
+    [0.8, 0.6],
+    [0.42, 0.78],
+    [0.68, 0.8],
+  ].map(([fx, fy]) => disc(b.x + b.w * fx, b.y + b.d * fy, 1.9, z));
+};
 
-/** Generic harvest trolley among crop rows. It does not depict any specific system. */
-export function Harvest({ st }: SceneProps) {
+const [ox, oy] = iso(0, 0, 0);
+const at = (x: number, y: number, z: number) => {
+  const [sx, sy] = iso(x, y, z);
+  return `translate(${Math.round((sx - ox) * 10) / 10} ${Math.round((sy - oy) * 10) / 10})`;
+};
+const W_INK = { strokeWidth: "var(--eco-ink, 1.2px)" } as const;
+const W_LIGHT = { strokeWidth: "calc(var(--eco-ink, 1.2px) * 0.7)" } as const;
+
+const TROLLEY_BOX: Box = { x: TROLLEY.x, y: PIPE.y - TROLLEY.d / 2, z: TROLLEY.z, w: TROLLEY.w, d: TROLLEY.d, h: TROLLEY.h };
+const WHEELS: [number, number][] = [
+  [TROLLEY.x + 8, PIPE.y - PIPE.half],
+  [TROLLEY.x + TROLLEY.w - 8, PIPE.y - PIPE.half],
+  [TROLLEY.x + 8, PIPE.y + PIPE.half],
+  [TROLLEY.x + TROLLEY.w - 8, PIPE.y + PIPE.half],
+];
+
+export function Harvest({ st, active }: SceneProps) {
+  const id = useId().replace(/:/g, "");
+  const crateId = `${id}-crate`;
+  const fullId = `${id}-full`;
   return (
-    <SceneFrame kind="greenhouse" back={<Crops />}>
-      <Trolley st={st} />
-    </SceneFrame>
+    <Static st={st}>
+      <Plate>
+        <defs>
+          <g id={crateId}>
+            <Fade delay={1} dur={0.5}>
+              <Faces box={CRATE} top={FACE.soft} />
+            </Fade>
+            <Draw d={boxOutline(CRATE)} delay={0.7} dur={0.7} />
+            <Draw d={boxInner(CRATE)} delay={0.9} dur={0.5} w="light" />
+            <Draw d={CRATE_SLOTS} color={CONSTRUCTION} w="light" delay={1.2} dur={0.5} />
+          </g>
+          <g id={fullId}>
+            <use href={`#${crateId}`} />
+            <Fade delay={1.6} dur={0.4}>
+              {produceDots(CRATE).map((d, k) => (
+                <path key={k} d={d} fill={ACCENT.orange} />
+              ))}
+            </Fade>
+          </g>
+        </defs>
+
+        {/* Crop hedges, back to front */}
+        <Part i={2} active={active}>
+          {HEDGE_Y.map((y, k) => {
+            const box: Box = { x: HEDGE.x0, y, w: HEDGE.w, d: HEDGE.d, h: HEDGE.h };
+            return (
+              <g key={y}>
+                <IsoBox box={box} delay={0.2 + k * 0.15} dur={1} inner={false} top={accentFace("green", 26)} left={accentFace("green", 15)} right={accentFace("green", 10)} />
+                <Draw d={hedgeWires(y + HEDGE.d + 1)} color={CONSTRUCTION} w="light" delay={0.6 + k * 0.15} dur={0.8} opacity={0.5} />
+                <Draw d={hedgeTop(y + HEDGE.d) + hedgeTop(y + HEDGE.d, HEDGE.h * 0.62) + hedgeTop(y + HEDGE.d, HEDGE.h * 0.28)} color={ACCENT.green} w="light" delay={0.9 + k * 0.15} dur={1} opacity={0.85} />
+                <Fade delay={1.5 + k * 0.15} dur={0.5}>
+                  {fruit(y).map(([cx, cy], i) => (
+                    <circle key={i} cx={cx} cy={cy} r={2.1} fill={ACCENT.orange} />
+                  ))}
+                </Fade>
+              </g>
+            );
+          })}
+        </Part>
+
+        {/* Pipe rail */}
+        <Draw d={seg([PIPE.x0, PIPE.y - PIPE.half], [PIPE.x1, PIPE.y - PIPE.half]) + seg([PIPE.x0, PIPE.y + PIPE.half], [PIPE.x1, PIPE.y + PIPE.half])} delay={0.3} dur={1.2} />
+        <Draw d={Array.from({ length: 9 }, (_, k) => seg([PIPE.x0 + 20 + k * 45, PIPE.y - PIPE.half - 3], [PIPE.x0 + 20 + k * 45, PIPE.y + PIPE.half + 3])).join("")} color={CONSTRUCTION} w="light" delay={0.9} dur={0.6} />
+
+        {/* Trolley with crates */}
+        <Part i={1} active={active}>
+          <Fade delay={0.9} dur={0.4}>
+            {WHEELS.map(([x, y], k) => (
+              <path key={k} d={disc(x, y, 3.2, 2)} fill={FACE.soft} />
+            ))}
+          </Fade>
+          <Draw d={WHEELS.map(([x, y]) => post(x, y, 2, TROLLEY.z)).join("")} w="light" delay={0.8} dur={0.4} />
+          <IsoBox box={TROLLEY_BOX} delay={0.6} dur={0.9} w="heavy" inner={false} top={FACE.soft} />
+          {/* Push handle at the back end */}
+          <Draw
+            d={
+              post(TROLLEY.x, PIPE.y - TROLLEY.d / 2 + 4, TROLLEY.z + TROLLEY.h, TROLLEY.z + 40) +
+              post(TROLLEY.x, PIPE.y + TROLLEY.d / 2 - 4, TROLLEY.z + TROLLEY.h, TROLLEY.z + 40) +
+              seg([TROLLEY.x, PIPE.y - TROLLEY.d / 2 + 4, TROLLEY.z + 40], [TROLLEY.x, PIPE.y + TROLLEY.d / 2 - 4, TROLLEY.z + 40])
+            }
+            delay={1.1}
+            dur={0.6}
+          />
+        </Part>
+        <Part i={0} active={active}>
+          {/* Two columns, two high: lower crates full, top ones being filled */}
+          <g transform={at(TROLLEY.x + 4, PIPE.y - CRATE.d / 2, TROLLEY.z + TROLLEY.h)}>
+            <Repeat href={`#${fullId}`} n={2} dx={30} />
+          </g>
+          <g transform={at(TROLLEY.x + 4, PIPE.y - CRATE.d / 2, TROLLEY.z + TROLLEY.h + CRATE.h)}>
+            <use href={`#${fullId}`} />
+            <use href={`#${crateId}`} transform={at(30, 0, 0)} />
+          </g>
+          {/* Empty crates stacked at the front-right */}
+          <g transform={at(STACK.x, STACK.y, 0)}>
+            {[0, 1, 2].map((k) => (
+              <use key={k} href={`#${crateId}`} transform={at(0, 0, CRATE.h * k)} />
+            ))}
+          </g>
+          <g transform={at(STACK.x + 34, STACK.y + 2, 0)}>
+            <use href={`#${fullId}`} />
+          </g>
+        </Part>
+
+        {/* Unit: a full crate rides the rail. */}
+        <Travel>
+          <g transform={at(-CRATE.w / 2, RAIL.y - CRATE.d / 2, 0)}>
+            <Fade delay={0} dur={0.3}>
+              <Faces box={CRATE} top={FACE.soft} />
+              {produceDots(CRATE).map((d, k) => (
+                <path key={k} d={d} fill={ACCENT.orange} />
+              ))}
+            </Fade>
+            <path d={boxOutline(CRATE)} fill="none" stroke={ACCENT.greenLight} strokeLinejoin="round" style={W_INK} />
+            <path d={boxInner(CRATE) + CRATE_SLOTS} fill="none" stroke={CONSTRUCTION} style={W_LIGHT} />
+          </g>
+        </Travel>
+      </Plate>
+    </Static>
   );
 }
