@@ -1745,6 +1745,10 @@
           "title": "Hero",
           "description": "Background image, headline, and primary / secondary CTAs."
         },
+        "homeEcosystem": {
+          "title": "Ecosystem Journey",
+          "description": "Opening sequence, stage visuals and text, closing lines, and slogan."
+        },
         "capabilities": {
           "title": "Why Oboya Horticulture",
           "description": "Image carousel slides with title and description overlays."
@@ -1802,6 +1806,16 @@
         "removePartner": "Remove partner",
         "addItem": "Add item",
         "removeItem": "Remove item",
+        "ecosystemBodyP1": "Body, first paragraph",
+        "ecosystemBodyP2": "Body, second paragraph",
+        "ecosystemOpeningLine": "Opening line",
+        "ecosystemClosingLine1": "Closing line 1",
+        "ecosystemClosingLine2": "Closing line 2",
+        "ecosystemSlogan": "Slogan",
+        "ecosystemStageLabel": "Stage label",
+        "ecosystemStageImage": "Stage image",
+        "ecosystemStageImageHint": "Leave empty to show the animated illustration. A 2:1 image is recommended; other proportions are cropped. Use an uploaded or library image (JPG, PNG, WebP, AVIF or GIF; SVG is not supported); links from other sites are not accepted.",
+        "ecosystemStageImageInvalid": "This image cannot be used and will be cleared on save. Pick an uploaded or library JPG, PNG, WebP, AVIF or GIF without a query string.",
         "articlesManagedHint": "Articles are managed under Blog → Posts.",
         "statsMissionTitle": "Statistics & Mission",
         "name": "Name",

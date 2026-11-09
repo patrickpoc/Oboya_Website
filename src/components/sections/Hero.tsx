@@ -83,7 +83,7 @@ export function Hero({
             {eyebrow ? (
               <motion.p
                 variants={fadeInUp}
-                className="mt-5 text-balance text-center text-sm font-medium tracking-[0.18em] text-oboya-yellow-light uppercase md:mt-6 md:text-[0.9375rem]"
+                className="mt-5 text-balance text-center text-sm font-medium tracking-[0.18em] text-oboya-yellow-light capitalize md:mt-6 md:text-[0.9375rem]"
               >
                 {eyebrow}
               </motion.p>

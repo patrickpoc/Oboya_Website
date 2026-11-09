@@ -1,5 +1,6 @@
 export const HOMEPAGE_SECTION_SLUGS = [
   "hero",
+  "homeEcosystem",
   "capabilities",
   "businessSolutions",
   "testimonials",
@@ -17,6 +18,10 @@ export const HOMEPAGE_SECTION_META: Record<
   hero: {
     title: "Hero",
     description: "Background image, headline, and primary / secondary CTAs.",
+  },
+  homeEcosystem: {
+    title: "Ecosystem Journey",
+    description: "Opening sequence, stage visuals and text, closing lines, and slogan.",
   },
   capabilities: {
     title: "Why Oboya Horticulture",

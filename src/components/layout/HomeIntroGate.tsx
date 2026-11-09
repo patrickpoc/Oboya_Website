@@ -72,6 +72,14 @@ export function HomeIntroGate({
     };
   }, [gone]);
 
+  // Fallback when no opacity transition runs (overlay mounted already faded)
+  // or transitionend is missed. Must stay above the 400ms fade duration.
+  useEffect(() => {
+    if (!ready) return;
+    const timeout = window.setTimeout(() => setGone(true), 500);
+    return () => window.clearTimeout(timeout);
+  }, [ready]);
+
   const onOverlayTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
     if (event.propertyName !== "opacity") return;
     if (!ready) return;

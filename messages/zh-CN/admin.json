@@ -1745,6 +1745,10 @@
           "title": "主视觉",
           "description": "背景图、标题与主/次 CTA。"
         },
+        "homeEcosystem": {
+          "title": "生态之旅",
+          "description": "开场序列、各阶段的图像与文字、结束语和口号。"
+        },
         "capabilities": {
           "title": "为何选择 Oboya Horticulture",
           "description": "带标题与描述叠加的轮播图。"
@@ -1802,6 +1806,16 @@
         "removePartner": "移除合作伙伴",
         "addItem": "添加项",
         "removeItem": "移除项",
+        "ecosystemBodyP1": "正文，第一段",
+        "ecosystemBodyP2": "正文，第二段",
+        "ecosystemOpeningLine": "开场语",
+        "ecosystemClosingLine1": "结束语 1",
+        "ecosystemClosingLine2": "结束语 2",
+        "ecosystemSlogan": "口号",
+        "ecosystemStageLabel": "阶段标签",
+        "ecosystemStageImage": "阶段图片",
+        "ecosystemStageImageHint": "留空则显示动画插图。推荐使用 2:1 比例的图片；其他比例将被裁剪。请使用已上传或素材库中的图片（JPG、PNG、WebP、AVIF 或 GIF；不支持 SVG）；不接受其他网站的链接。",
+        "ecosystemStageImageInvalid": "此图片无法使用，保存时将被清除。请选择已上传或素材库中的 JPG、PNG、WebP、AVIF 或 GIF 图片，且不带查询字符串。",
         "articlesManagedHint": "文章在 博客 → 文章 中管理。",
         "statsMissionTitle": "数据与使命",
         "name": "名称",

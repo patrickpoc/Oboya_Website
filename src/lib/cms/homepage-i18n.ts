@@ -314,4 +314,31 @@ export const HOME_I18N = {
       "我们的合作伙伴"
     ),
   },
+  homeEcosystem: {
+    title: homeLoc("From Propagation to\nRetail Display", "Da Propagação à\nExposição no Varejo", "De la Propagación a la\nExhibición en Retail", "从育苗繁殖到\n零售陈列"),
+    bodyP1: homeLoc(
+        "Success in horticulture depends on more than individual products. It depends on how growing, packaging, logistics, transport, retail presentation, and operational processes work together.",
+        "O sucesso na horticultura depende de mais do que produtos individuais. Depende de como cultivo, embalagem, logística, transporte, apresentação no varejo e processos operacionais trabalham juntos.",
+        "El éxito en la horticultura depende de más que productos individuales. Depende de cómo el cultivo, el embalaje, la logística, el transporte, la presentación en retail y los procesos operativos trabajan juntos.",
+        "园艺成功不只取决于单一产品，而取决于种植、包装、物流、运输、零售陈列与日常运营如何协同运作。"
+      ),
+    bodyP2: homeLoc(
+        "Oboya Horticulture offers solutions across multiple stages of the horticultural journey, helping customers access the products and expertise they need through a single trusted partner.",
+        "A Oboya Horticulture oferece soluções em múltiplas etapas da jornada hortícola, ajudando os clientes a acessar os produtos e a expertise de que precisam por meio de um único parceiro de confiança.",
+        "Oboya Horticulture ofrece soluciones en múltiples etapas del recorrido hortícola, ayudando a los clientes a acceder a los productos y la expertise que necesitan a través de un solo socio de confianza.",
+        "Oboya Horticulture 在园艺旅程的多个阶段提供解决方案，帮助客户通过同一可信赖的伙伴获得所需的产品与专业支持。"
+      ),
+    openingLine: homeLoc("Oboya, your one-stop partner for horticulture.", "Oboya, seu parceiro completo em horticultura.", "Oboya, su socio integral en horticultura.", "Oboya，您的园艺一站式合作伙伴。"),
+    closingLine1: homeLoc("One Partner, One Ecosystem,", "Um Parceiro, Um Ecossistema,", "Un Socio, Un Ecosistema,", "一个伙伴，一个生态，"),
+    closingLine2: homeLoc("Endless Opportunities to Perform Better.", "Oportunidades Infinitas para Performar Melhor.", "Oportunidades Infinitas para Rendir Mejor.", "无限机遇，成就更佳表现。"),
+    slogan: homeLoc("Oboya, your one-stop partner for horticulture.", "Oboya, seu parceiro completo em horticultura.", "Oboya, su socio integral en horticultura.", "Oboya，您的园艺一站式合作伙伴。"),
+    stages: {
+      propagation: homeLoc("Propagation", "Propagação", "Propagación", "育苗繁殖"),
+      growing: homeLoc("Growing", "Cultivo", "Cultivo", "种植生长"),
+      harvest: homeLoc("Harvest", "Colheita", "Cosecha", "采收"),
+      packaging: homeLoc("Packaging", "Embalagem", "Empaque", "包装"),
+      logistics: homeLoc("Logistics & Transport", "Logística e Transporte", "Logística y Transporte", "物流与运输"),
+      retail: homeLoc("Retail Display", "Exposição no Varejo", "Exhibición en Retail", "零售陈列"),
+    },
+  },
 } as const;

@@ -53,6 +53,16 @@
   --glass-blur: 16px;
 }
 
+/* Ecosystem phase clock: this animation both draws the progress lines and ends each phase; pausing is animation-play-state. */
+@keyframes eco-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 @keyframes shop-catalog-fade {
   0%,
   100% {
