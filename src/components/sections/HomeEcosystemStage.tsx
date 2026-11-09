@@ -1,0 +1,279 @@
+"use client";
+
+import { useState, type ReactNode } from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import {
+  Backdrop,
+  HOTSPOTS,
+  HomeEcosystemStageVisual,
+  Overview,
+  SceneClock,
+} from "@/components/sections/ecosystem-scenes";
+import type { EcoPhaseKind } from "@/components/sections/useEcosystemSequence";
+import { CLOSING_MS, STAGE_MS } from "@/components/sections/useEcosystemSequence";
+import { pickLocalized } from "@/lib/cms/utils";
+import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
+import type { LocalizedString } from "@/lib/cms/types";
+import { cn } from "@/lib/utils";
+
+type Eco = HomepageSettings["homeEcosystem"];
+type Stage = Eco["stages"][number];
+
+const fadeT = { duration: 0.5, ease: "easeOut" as const };
+const layer = "col-start-1 row-start-1";
+const BIG =
+  "font-display text-[clamp(1.6rem,3.2vw,2.5rem)] font-light leading-[1.15] tracking-tight text-white text-balance";
+
+/** Text column + isometric panel for the current phase. */
+export function HomeEcosystemStage({
+  data,
+  locale,
+  kind,
+  stageIndex,
+  isStatic,
+  playState,
+  autoplay,
+  onHoverChange,
+}: {
+  data: Eco;
+  locale: string;
+  kind: EcoPhaseKind;
+  stageIndex: number;
+  isStatic: boolean;
+  playState: "running" | "paused";
+  autoplay: boolean;
+  onHoverChange: (hovering: boolean) => void;
+}) {
+  const stages = data.stages as Stage[];
+  const total = stages.length;
+  const t = (v: LocalizedString) => pickLocalized(v, locale);
+  const [active, setActive] = useState<number | null>(null);
+  const afterStages = kind === "closing" || kind === "hold";
+  const inStage = kind === "stage" || kind === "static";
+  const current = stageIndex >= 0 ? stages[stageIndex] : null;
+
+  // The leading "Oboya" (with optional comma, also the CJK one) is shown as the logo.
+  const openingText = t(data.openingLine);
+  const stripped = openingText.replace(/^\s*Oboya\s*[,，]?\s*/i, "");
+  const openingRest = stripped.charAt(0).toLocaleUpperCase(locale) + stripped.slice(1);
+
+  const show = (on: boolean) => ({ opacity: on ? 1 : 0, y: on ? 0 : 8 });
+
+  const textLayer = (on: boolean, children: ReactNode, key: string) => (
+    <motion.div
+      key={key}
+      className={cn(layer, "flex flex-col justify-center")}
+      initial={false}
+      animate={show(on)}
+      transition={on ? { ...fadeT, delay: 0.25 } : fadeT}
+      aria-hidden={!on}
+      style={{ pointerEvents: on ? "auto" : "none" }}
+    >
+      {children}
+    </motion.div>
+  );
+
+  return (
+    <div
+      data-eco-phase={kind}
+      className="grid grid-cols-12 gap-x-6 gap-y-8 lg:gap-y-0"
+      onMouseEnter={() => onHoverChange(true)}
+      onMouseLeave={() => onHoverChange(false)}
+    >
+      {/* Text column */}
+      <div className="order-2 col-span-12 grid lg:order-1 lg:col-span-4 lg:pr-6">
+        {!isStatic
+          ? textLayer(
+              kind === "opening" || kind === "idle",
+              <p className={cn(BIG, "flex flex-wrap items-center gap-x-5 gap-y-4")}>
+                <Image
+                  src="/assets/logo.svg"
+                  alt=""
+                  width={160}
+                  height={39}
+                  className="h-[1.4em] w-auto brightness-0 invert"
+                />
+                <span>{openingRest}</span>
+              </p>,
+              "opening",
+            )
+          : null}
+
+        {stages.map((s, i) => {
+          const on = inStage && i === stageIndex;
+          const points = s.points.slice(0, 3);
+          return textLayer(
+            on,
+            <>
+              <p className="flex items-center gap-4 font-body text-[0.7rem] font-medium uppercase tracking-[0.22em] text-oboya-green-light">
+                <span className="tabular-nums">
+                  {String(i + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+                </span>
+                <span className="h-px flex-1 bg-white/20" aria-hidden />
+              </p>
+              <h3 className={cn(BIG, "mt-4")}>{t(s.label)}</h3>
+              {s.description ? (
+                <p className="mt-4 max-w-[34ch] font-body text-[clamp(0.95rem,1.2vw,1.05rem)] font-light leading-[1.6] text-white/75 text-pretty">
+                  {t(s.description)}
+                </p>
+              ) : null}
+              {points.length ? (
+                <ul className="mt-5 flex flex-col gap-2.5">
+                  {points.map((pt, k) => {
+                    const lit = active === k;
+                    return (
+                      <li
+                        key={pt.id}
+                        className="flex items-center gap-3 font-body text-sm font-normal leading-snug text-white/85"
+                        onMouseEnter={() => setActive(k)}
+                        onMouseLeave={() => setActive(null)}
+                        onFocus={() => setActive(k)}
+                        onBlur={() => setActive(null)}
+                      >
+                        <span
+                          aria-hidden
+                          className={cn(
+                            "h-1.5 w-2.5 shrink-0 transition-colors duration-300 [clip-path:polygon(50%_0,100%_50%,50%_100%,0_50%)]",
+                            lit ? "bg-oboya-green-light" : "bg-oboya-blue-light/80",
+                          )}
+                        />
+                        <span className={cn("transition-colors duration-300", lit && "text-white")}>{t(pt.text)}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : null}
+            </>,
+            s.id,
+          );
+        })}
+
+        {!isStatic
+          ? textLayer(
+              afterStages,
+              <>
+                <p className={BIG}>
+                  {t(data.closingLine1)}
+                  <br />
+                  {t(data.closingLine2)}
+                </p>
+                <motion.p
+                  className="mt-5 font-body text-[0.95rem] font-light text-white/70"
+                  initial={false}
+                  animate={{ opacity: kind === "hold" ? 1 : 0 }}
+                  transition={fadeT}
+                  aria-hidden={kind !== "hold"}
+                >
+                  {t(data.slogan)}
+                </motion.p>
+              </>,
+              "closing",
+            )
+          : null}
+      </div>
+
+      {/* Panel */}
+      <div className="order-1 col-span-12 lg:order-2 lg:col-span-8">
+        <div className="relative">
+          <SceneClock.Provider
+            value={{ ms: afterStages ? CLOSING_MS : STAGE_MS, playState, rest: !autoplay }}
+          >
+            <div
+              className={cn(
+                "relative aspect-[2/1] w-full overflow-hidden rounded-md bg-white/[0.025] ring-1 ring-white/15",
+                "[--eco-ink:2.3px] sm:[--eco-ink:1.9px] md:[--eco-ink:1.7px] lg:[--eco-ink:1.45px] xl:[--eco-ink:1.25px]",
+              )}
+              aria-hidden
+            >
+              <Backdrop st={isStatic} />
+
+              {stages.map((s, i) => {
+                const isCurrent = inStage && i === stageIndex;
+                const preload = !!s.image && inStage && i === stageIndex + 1;
+                const leaving = inStage && stageIndex >= 1 && i === stageIndex - 1;
+                if (!isCurrent && !preload && !leaving) return null;
+                return (
+                  <motion.div
+                    key={s.id}
+                    data-eco-scene={isCurrent ? s.id : undefined}
+                    className="absolute inset-0"
+                    initial={preload || isStatic ? false : { opacity: 0 }}
+                    animate={{ opacity: isCurrent ? 1 : 0 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    <HomeEcosystemStageVisual
+                      stage={s}
+                      label={t(s.label)}
+                      static={isStatic}
+                      active={isCurrent ? active : null}
+                      eager={preload}
+                      sizes="(max-width: 1024px) 94vw, 840px"
+                    />
+                  </motion.div>
+                );
+              })}
+
+              {afterStages ? (
+                <motion.div
+                  key="overview"
+                  data-eco-scene="overview"
+                  className="absolute inset-0"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                >
+                  <Overview st={false} />
+                </motion.div>
+              ) : null}
+
+              {/* Hotspots, linked to the proof points. */}
+              {current && !current.image
+                ? HOTSPOTS[current.id].slice(0, current.points.length || 3).map((h, k) => {
+                    const lit = active === k;
+                    return (
+                      <motion.span
+                        key={`${current.id}-${k}`}
+                        className="absolute -translate-x-1/2 -translate-y-1/2 p-2"
+                        style={{ left: `${h.left}%`, top: `${h.top}%` }}
+                        initial={isStatic ? false : { opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.4, delay: 1.8 }}
+                        onMouseEnter={() => setActive(k)}
+                        onMouseLeave={() => setActive(null)}
+                      >
+                        <span
+                          className={cn(
+                            "block size-2.5 rounded-full border transition-[background-color,box-shadow] duration-300",
+                            lit
+                              ? "border-oboya-green-light bg-oboya-green-light ring-4 ring-oboya-green-light/25"
+                              : "border-oboya-blue-light bg-oboya-blue-dark ring-4 ring-oboya-blue-light/15",
+                          )}
+                        />
+                      </motion.span>
+                    );
+                  })
+                : null}
+
+              {/* Corner ticks */}
+              <span aria-hidden className="pointer-events-none absolute left-2 top-2 size-2.5 border-l border-t border-white/40" />
+              <span aria-hidden className="pointer-events-none absolute right-2 top-2 size-2.5 border-r border-t border-white/40" />
+              <span aria-hidden className="pointer-events-none absolute bottom-2 left-2 size-2.5 border-b border-l border-white/40" />
+              <span aria-hidden className="pointer-events-none absolute bottom-2 right-2 size-2.5 border-b border-r border-white/40" />
+            </div>
+          </SceneClock.Provider>
+
+          {/* Plate strip: a ruler under the panel. */}
+          <div aria-hidden className="mt-2 flex items-end gap-0 px-1">
+            {Array.from({ length: 25 }, (_, k) => (
+              <span key={k} className="flex flex-1 flex-col items-start">
+                <span className={cn("w-px bg-white/30", k % 6 === 0 ? "h-2" : "h-1")} />
+              </span>
+            ))}
+            <span className="h-2 w-px bg-white/30" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

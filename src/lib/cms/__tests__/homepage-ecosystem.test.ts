@@ -64,7 +64,7 @@ describe("homeEcosystem settings", () => {
     expect(stageOf(eco, "harvest").label["pt-BR"]).toBe("Colheita");
   });
 
-  it("drops legacy stage items on load", () => {
+  it("drops legacy stage items on load and keeps default points", () => {
     const eco = load({
       stages: [
         { id: "propagation", label: loc("P"), items: [{ id: "trays", text: loc("Mine") }] },
@@ -74,6 +74,72 @@ describe("homeEcosystem settings", () => {
     expect(p.label.en).toBe("P");
     expect("items" in p).toBe(false);
     expect(eco.stages.every((s) => !("items" in s))).toBe(true);
+    expect(p.points.map((pt) => pt.text.en)).toEqual([
+      "Propagation trays",
+      "Substrates & plugs",
+      "Seeding machines",
+    ]);
+  });
+
+  it("provides a default description and three points per stage", () => {
+    const eco = load(undefined);
+    for (const s of eco.stages) {
+      expect(s.description.en.length).toBeGreaterThan(0);
+      expect(s.points).toHaveLength(3);
+      expect(new Set(s.points.map((p) => p.id)).size).toBe(3);
+      for (const p of s.points) expect(p.text.en.length).toBeGreaterThan(0);
+    }
+    expect(stageOf(eco, "retail").description.en).toContain("shoppers");
+  });
+
+  it("merges stored points by id and keeps the stored order", () => {
+    const eco = load({
+      stages: [
+        {
+          id: "growing",
+          points: [
+            { id: "irrigation", text: loc("Drip lines") },
+            { id: "pots", text: loc("") },
+            { id: "custom", text: loc("Mine", "Meu") },
+          ],
+        },
+      ],
+    });
+    const pts = stageOf(eco, "growing").points;
+    expect(pts.map((p) => p.id)).toEqual(["irrigation", "pots", "custom"]);
+    expect(pts[0].text.en).toBe("Drip lines");
+    expect(pts[1].text.en).toBe("Pots & containers");
+    expect(pts[2].text["pt-BR"]).toBe("Meu");
+  });
+
+  it("caps points at 3 and drops blank or malformed ones", () => {
+    const eco = load({
+      stages: [
+        {
+          id: "harvest",
+          points: [
+            { id: "blank", text: loc("", "") },
+            { id: "a", text: loc("A") },
+            { text: loc("no id") },
+            { id: "b", text: "not localized" },
+            { id: "c", text: loc("C") },
+            { id: "d", text: loc("D") },
+            { id: "e", text: loc("E") },
+          ],
+        },
+      ],
+    });
+    expect(stageOf(eco, "harvest").points.map((p) => p.id)).toEqual(["a", "c", "d"]);
+    expect(stageOf(eco, "packaging").points).toHaveLength(3);
+  });
+
+  it("falls back to the default description for an empty locale", () => {
+    const eco = load({
+      stages: [{ id: "logistics", description: loc("Custom", "") }],
+    });
+    const d = stageOf(eco, "logistics").description;
+    expect(d.en).toBe("Custom");
+    expect(d["pt-BR"]).toBe("Trolleys, buckets and automation that keep the cold chain moving.");
   });
 
   it("accepts only renderable images", () => {

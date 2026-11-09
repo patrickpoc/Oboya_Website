@@ -9,6 +9,9 @@ export function homeLoc(
   return { en, "pt-BR": ptBR, es, "zh-CN": zhCN };
 }
 
+/** Same EN string for all four locales (pending translation). */
+const rep = (en: string): [string, string, string, string] => [en, en, en, en];
+
 export const HOME_I18N = {
   hero: {
     eyebrow: homeLoc(
@@ -339,6 +342,47 @@ export const HOME_I18N = {
       packaging: homeLoc("Packaging", "Embalagem", "Empaque", "包装"),
       logistics: homeLoc("Logistics & Transport", "Logística e Transporte", "Logística y Transporte", "物流与运输"),
       retail: homeLoc("Retail Display", "Exposição no Varejo", "Exhibición en Retail", "零售陈列"),
+    },
+    // EN placeholders in every locale; the i18n agent translates these.
+    descriptions: {
+      propagation: homeLoc(...rep("From seed to young plant, with uniform starts that set up every crop.")),
+      growing: homeLoc(...rep("Containers, substrates and irrigation that keep crops healthy in the greenhouse.")),
+      harvest: homeLoc(...rep("Gentle handling that moves produce from the crop to the packhouse.")),
+      packaging: homeLoc(...rep("Packaging that protects freshness and gives each product shelf presence.")),
+      logistics: homeLoc(...rep("Trolleys, buckets and automation that keep the cold chain moving.")),
+      retail: homeLoc(...rep("Displays and shelf-ready formats that put fresh products in front of shoppers.")),
+    },
+    points: {
+      propagation: {
+        trays: homeLoc(...rep("Propagation trays")),
+        substrates: homeLoc(...rep("Substrates & plugs")),
+        seeding: homeLoc(...rep("Seeding machines")),
+      },
+      growing: {
+        pots: homeLoc(...rep("Pots & containers")),
+        substrates: homeLoc(...rep("Growing substrates")),
+        irrigation: homeLoc(...rep("Irrigation systems")),
+      },
+      harvest: {
+        crates: homeLoc(...rep("Harvest crates")),
+        trolleys: homeLoc(...rep("Harvest trolleys")),
+        handling: homeLoc(...rep("Crop handling")),
+      },
+      packaging: {
+        clamshells: homeLoc(...rep("Clamshells & punnets")),
+        bags: homeLoc(...rep("Bags & sleeves")),
+        labels: homeLoc(...rep("Labels")),
+      },
+      logistics: {
+        trolleys: homeLoc(...rep("Logistic trolleys")),
+        buckets: homeLoc(...rep("Flower buckets")),
+        agv: homeLoc(...rep("AGV robotics")),
+      },
+      retail: {
+        displays: homeLoc(...rep("Display systems")),
+        shelfReady: homeLoc(...rep("Shelf-ready packaging")),
+        potted: homeLoc(...rep("Potted plant displays")),
+      },
     },
   },
 } as const;

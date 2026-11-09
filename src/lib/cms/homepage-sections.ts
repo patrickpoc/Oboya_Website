@@ -21,7 +21,8 @@ export const HOMEPAGE_SECTION_META: Record<
   },
   homeEcosystem: {
     title: "Ecosystem Journey",
-    description: "Opening sequence, stage visuals and text, closing lines, and slogan.",
+    description:
+      "Opening line, six stages with description, proof points and optional image, closing lines and slogan.",
   },
   capabilities: {
     title: "Why Oboya Horticulture",

@@ -63,6 +63,31 @@
   }
 }
 
+/* Ecosystem product unit: rides the flow rail in from the left, rests, leaves right. Same play state as the clock. */
+@keyframes eco-travel {
+  0% {
+    transform: translate(calc(-1 * var(--eco-tx)), calc(-1 * var(--eco-ty)));
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  4% {
+    opacity: 1;
+  }
+  22%,
+  76% {
+    transform: translate(0, 0);
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.55, 0, 0.75, 0.35);
+  }
+  96% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--eco-tx), var(--eco-ty));
+    opacity: 0;
+  }
+}
+
 @keyframes shop-catalog-fade {
   0%,
   100% {

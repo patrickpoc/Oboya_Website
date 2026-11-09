@@ -86,9 +86,20 @@ export const HOME_ECOSYSTEM_STAGE_IDS = [
 
 export type HomeEcosystemStageId = (typeof HOME_ECOSYSTEM_STAGE_IDS)[number];
 
+export const HOME_ECOSYSTEM_MAX_POINTS = 3;
+
+/** Short product-line proof point shown next to the stage illustration. */
+export interface HomeEcosystemPoint {
+  id: string;
+  text: LocalizedString;
+}
+
 export interface HomeEcosystemStage {
   id: HomeEcosystemStageId;
   label: LocalizedString;
+  description: LocalizedString;
+  /** Up to HOME_ECOSYSTEM_MAX_POINTS entries. */
+  points: HomeEcosystemPoint[];
   /** "" shows the animated SVG scene. */
   image: string;
 }
@@ -242,14 +253,13 @@ const defaultSettings = (): HomepageSettings => ({
     closingLine1: E.closingLine1,
     closingLine2: E.closingLine2,
     slogan: E.slogan,
-    stages: [
-      { id: "propagation", label: E.stages.propagation, image: "" },
-      { id: "growing", label: E.stages.growing, image: "" },
-      { id: "harvest", label: E.stages.harvest, image: "" },
-      { id: "packaging", label: E.stages.packaging, image: "" },
-      { id: "logistics", label: E.stages.logistics, image: "" },
-      { id: "retail", label: E.stages.retail, image: "" },
-    ],
+    stages: HOME_ECOSYSTEM_STAGE_IDS.map((id) => ({
+      id,
+      label: E.stages[id],
+      description: E.descriptions[id],
+      points: Object.entries(E.points[id]).map(([pid, text]) => ({ id: pid, text })),
+      image: "",
+    })),
   },
   capabilities: {
     eyebrow: H.capabilities.eyebrow,
@@ -455,6 +465,30 @@ function isSafeImagePath(path: string): boolean {
   return /\.(jpe?g|png|webp|avif|gif)$/i.test(d);
 }
 
+const isBlankLoc = (v: LocalizedString) => LOCALE_KEYS.every((k) => !v[k].trim());
+
+/**
+ * Stored points keep their order and are filled from the default with the same id;
+ * entries blank in every locale are dropped; capped at HOME_ECOSYSTEM_MAX_POINTS;
+ * defaults apply when nothing is stored. Legacy `items` are never read.
+ */
+function migrateEcosystemPoints(
+  stored: unknown,
+  defaults: HomeEcosystemPoint[]
+): HomeEcosystemPoint[] {
+  if (!Array.isArray(stored)) return defaults;
+  const points: HomeEcosystemPoint[] = [];
+  for (const entry of stored) {
+    const r = asRecord(entry);
+    const text = asLoc(r?.text);
+    if (!r || typeof r.id !== "string" || !text) continue;
+    const def = defaults.find((d) => d.id === r.id);
+    const merged = def ? mergeLocalized(text, def.text) : text;
+    if (!isBlankLoc(merged)) points.push({ id: r.id, text: merged });
+  }
+  return points.slice(0, HOME_ECOSYSTEM_MAX_POINTS);
+}
+
 function migrateEcosystem(
   stored: unknown,
   defaults: HomepageSettings["homeEcosystem"]
@@ -478,6 +512,8 @@ function migrateEcosystem(
       return {
         id: def.id,
         label: asLoc(st?.label) ?? def.label,
+        description: asLoc(st?.description) ?? def.description,
+        points: migrateEcosystemPoints(st?.points, def.points),
         image: sanitizeHomeEcosystemImage(st?.image),
       };
     }),
@@ -505,6 +541,11 @@ function mergeHomepageLocales(
         return {
           ...stage,
           label: mergeLocalized(stage.label, def.label),
+          description: mergeLocalized(stage.description, def.description),
+          points: stage.points.map((pt) => {
+            const defPt = def.points.find((d) => d.id === pt.id);
+            return defPt ? { ...pt, text: mergeLocalized(pt.text, defPt.text) } : pt;
+          }),
         };
       }),
     },

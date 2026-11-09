@@ -2,14 +2,18 @@
 
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ImageField } from "@/components/admin/media/ImageField";
 import {
+  HOME_ECOSYSTEM_MAX_POINTS,
   type HomeEcosystemStage,
   type HomepageSettings,
   sanitizeHomeEcosystemImage,
 } from "@/lib/cms/repositories/homepage-repository";
 import {
   LocalizedInput,
+  emptyLocalized,
+  newId,
   updateLocalizedField,
   type HomepageSectionEditorProps,
 } from "../shared";
@@ -79,6 +83,66 @@ export function HomeEcosystemSectionEditor({
                 patchStage(stage.id, { label: updateLocalizedField(stage.label, l, v) })
               }
             />
+            <LocalizedInput
+              label={t("fields.ecosystemStageDescription")}
+              locale={locale}
+              value={stage.description[locale]}
+              onChange={(l, v) =>
+                patchStage(stage.id, {
+                  description: updateLocalizedField(stage.description, l, v),
+                })
+              }
+              multiline
+            />
+            <div className="space-y-2">
+              {stage.points.map((pt, pi) => (
+                <div key={pt.id} className="flex items-end gap-2">
+                  <div className="flex-1">
+                    <LocalizedInput
+                      label={`${t("fields.ecosystemStagePoint")} ${pi + 1}`}
+                      locale={locale}
+                      value={pt.text[locale]}
+                      onChange={(l, v) =>
+                        patchStage(stage.id, {
+                          points: stage.points.map((p) =>
+                            p.id === pt.id ? { ...p, text: updateLocalizedField(p.text, l, v) } : p
+                          ),
+                        })
+                      }
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      patchStage(stage.id, {
+                        points: stage.points.filter((p) => p.id !== pt.id),
+                      })
+                    }
+                  >
+                    {t("fields.removeItem")}
+                  </Button>
+                </div>
+              ))}
+              {stage.points.length < HOME_ECOSYSTEM_MAX_POINTS && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    patchStage(stage.id, {
+                      points: [...stage.points, { id: newId(), text: emptyLocalized() }],
+                    })
+                  }
+                >
+                  {t("fields.addItem")}
+                </Button>
+              )}
+              <p className="text-xs text-muted-foreground">
+                {t("fields.ecosystemStagePointsHint")}
+              </p>
+            </div>
             <ImageField
               label={t("fields.ecosystemStageImage")}
               value={stage.image}

@@ -1,82 +1,188 @@
 "use client";
 
-import { BASELINE, CX, Contact, Gloss, Grow, Rise, SceneFrame, Shade, Sprout, tone, useMat } from "./kit";
+import { useId } from "react";
+import {
+  ACCENT,
+  CONSTRUCTION,
+  Draw,
+  FACE,
+  Faces,
+  Fade,
+  IsoBox,
+  P,
+  Part,
+  Plate,
+  RAIL,
+  Repeat,
+  Static,
+  Travel,
+  accentFace,
+  boxInner,
+  boxOutline,
+  iso,
+  plane,
+  post,
+  seg,
+  type Box,
+  type SceneProps,
+} from "./iso-kit";
 
-type SceneProps = { st: boolean };
+// Bench along x, three cell trays on it, a seeding gantry over the third tray, substrate bags at the front-left.
+const BENCH = { x: -170, y: -70, z: 39, w: 280, d: 48, h: 5 };
+const TRAY: Box = { x: 0, y: 0, z: 0, w: 84, d: 40, h: 7 };
+const TRAY_AT = { x: -162, y: -66, z: 44 };
+const TRAY_PITCH = 90;
+const GANTRY = { x: 40, w: 14, y0: -92, y1: -2, z: 116 };
+const BEAM: Box = { x: GANTRY.x, y: GANTRY.y0, z: GANTRY.z, w: GANTRY.w, d: GANTRY.y1 - GANTRY.y0, h: 6 };
+const HEAD = { x: 38, y: -62, z: 80, w: 18, d: 28, h: 24 };
+const BAGS: Box[] = [
+  { x: -212, y: 10, w: 42, d: 34, h: 22 },
+  { x: -210, y: 12, z: 22, w: 40, d: 32, h: 20 },
+  { x: -166, y: 14, w: 42, d: 34, h: 22 },
+];
 
-const COLS = 11;
-const ROWS = [212, 236, 260, 284, 308];
-// Tray top plane: back edge y=196 (x 232..568), front edge y=322 (x 148..652).
-const widthAt = (y: number) => 336 + 1.333 * (y - 196);
-const pitchAt = (y: number) => (widthAt(y) - 30) / COLS;
-const cellX = (y: number, i: number) => CX + (i - (COLS - 1) / 2) * pitchAt(y);
-
-function cell(cx: number, cy: number, w: number, h: number) {
-  return `M${cx - w / 2} ${cy - h / 2}Q${cx} ${cy - h / 2 - 2} ${cx + w / 2} ${cy - h / 2}L${cx + w / 2 - 2} ${cy + h / 2 - 1}Q${cx} ${cy + h / 2 + 1.5} ${cx - w / 2 + 2} ${cy + h / 2 - 1}Z`;
+/** Cell grid lines on the tray top (4 along x, 9 along y). */
+function trayCells() {
+  const { w, d, h } = TRAY;
+  const parts: string[] = [];
+  for (let r = 1; r < 5; r++) parts.push(seg([0, (d * r) / 5, h], [w, (d * r) / 5, h]));
+  for (let c = 1; c < 10; c++) parts.push(seg([(w * c) / 10, 0, h], [(w * c) / 10, d, h]));
+  return parts.join("");
 }
-
-function Machine() {
-  const m = useMat();
-  return (
-    <g>
-      <path d="M118 176H682V204H118Z" fill={m("metal")} />
-      <path d="M150 60H168V204H150ZM632 60H650V204H632Z" fill={m("metal")} />
-      <path d="M150 58H650V80H150Z" fill={m("metal")} />
-      <path d="M326 80H474V128H326Z" fill={m("plastic")} />
-      <path d="M326 110H474V120H326Z" style={{ fill: tone("blue-light") }} />
-      <path d="M368 58L384 30H416L432 58Z" fill={m("metal")} />
-      <path d="M350 128V152M367 128V152M384 128V152M401 128V152M418 128V152M435 128V152M452 128V152" fill="none" strokeWidth={3.5} strokeLinecap="round" style={{ stroke: tone("soft-white", 70, "blue") }} />
-    </g>
-  );
+/** One sprout per cell: a small chevron whose height follows the cell index. */
+function traySprouts() {
+  const { w, d, h } = TRAY;
+  const parts: string[] = [];
+  for (let r = 0; r < 5; r++) {
+    for (let c = 0; c < 10; c++) {
+      const cx = (w * (c + 0.5)) / 10;
+      const cy = (d * (r + 0.5)) / 5;
+      const k = 3 + ((c * 7 + r * 5) % 4);
+      parts.push(`M${P(cx - 2.2, cy + 1.6, h)}L${P(cx, cy, h + k)}L${P(cx + 2.4, cy - 1.4, h)}`);
+    }
+  }
+  return parts.join("");
 }
+const CELLS = trayCells();
+const SPROUTS = traySprouts();
 
-function Tray({ st }: SceneProps) {
-  const m = useMat();
+/** Rectangle on the vertical left face (plane y = const). */
+const faceRectY = (x: number, y: number, z: number, w: number, h: number) =>
+  `M${P(x, y, z)}L${P(x + w, y, z)}L${P(x + w, y, z + h)}L${P(x, y, z + h)}Z`;
+
+const [trayDx, trayDy] = iso(TRAY_AT.x, TRAY_AT.y, TRAY_AT.z);
+const [originX, originY] = iso(0, 0, 0);
+
+export function Propagation({ st, active }: SceneProps) {
+  const id = useId().replace(/:/g, "");
+  const tray = `${id}-tray`;
   return (
-    <>
-      <Contact x={CX} y={BASELINE + 2} w={580} o={0.6} />
-      <g data-eco-subject>
-        <Rise st={st} y={16} dur={0.6}>
-          <path d="M244 196H556Q566 196 570 204L650 312Q656 322 646 322H154Q144 322 150 312L230 204Q234 196 244 196Z" fill={m("plastic")} />
-          <Shade d="M556 196Q566 196 570 204L650 312Q656 322 646 322H560Z" o={0.18} />
-          <Gloss d="M246 198H430" w={1.8} o={0.7} />
-          {ROWS.map((y, r) =>
-            Array.from({ length: COLS }, (_, i) => {
-              const w = pitchAt(y) * 0.76;
-              return <path key={`${r}-${i}`} d={cell(cellX(y, i), y, w, w * 0.46)} fill={m("soil")} strokeWidth={1.2} strokeOpacity={0.35} style={{ stroke: tone("blue-dark") }} />;
-            })
-          )}
-        </Rise>
-        {ROWS.map((y, r) => (
-          <Grow key={y} st={st} d={0.25 + r * 0.14} dur={0.6}>
-            {Array.from({ length: COLS }, (_, i) => {
-              // Hand-set from the indices: height, lean and whether first leaves have opened.
-              const h = 11 + ((i * 7 + r * 5) % 6) * 2.6 + r * 1.2;
-              const lean = (((i * 5 + r * 3) % 7) - 3) * 1.1;
-              const kind = (i + r * 2) % 3 === 0 ? 1 : 0;
-              return (
-                <g key={i} transform={`translate(${cellX(y, i)} ${y})`}>
-                  <Sprout h={h} lean={lean} kind={kind} />
-                </g>
-              );
+    <Static st={st}>
+      <Plate>
+        <defs>
+          <g id={tray}>
+            <Fade delay={0.7}>
+              <Faces box={TRAY} top={FACE.soft} />
+            </Fade>
+            <Draw d={boxOutline(TRAY)} delay={0.25} dur={0.9} />
+            <Draw d={boxInner(TRAY)} delay={0.5} dur={0.6} w="light" />
+            <Draw d={CELLS} color={CONSTRUCTION} w="light" delay={0.8} dur={1} />
+            <Draw d={SPROUTS} color={ACCENT.green} w="base" delay={1.3} dur={1.2} />
+          </g>
+        </defs>
+
+        {/* Bench */}
+        <Draw
+          d={
+            post(BENCH.x, BENCH.y + BENCH.d, 0, BENCH.z) +
+            post(BENCH.x + BENCH.w, BENCH.y + BENCH.d, 0, BENCH.z) +
+            post(BENCH.x + BENCH.w, BENCH.y, 0, BENCH.z) +
+            post(BENCH.x, BENCH.y, 0, BENCH.z) +
+            seg([BENCH.x, BENCH.y + BENCH.d, 12], [BENCH.x + BENCH.w, BENCH.y + BENCH.d, 12]) +
+            seg([BENCH.x + BENCH.w, BENCH.y + BENCH.d, 12], [BENCH.x + BENCH.w, BENCH.y, 12])
+          }
+          w="light"
+          delay={0.1}
+          dur={1}
+        />
+        <IsoBox box={BENCH} delay={0} dur={1.1} w="heavy" />
+
+        {/* Trays */}
+        <Part i={0} active={active}>
+          <g transform={`translate(${trayDx - originX} ${trayDy - originY})`}>
+            <Repeat href={`#${tray}`} n={3} dx={TRAY_PITCH} />
+          </g>
+        </Part>
+
+        {/* Seeding gantry */}
+        <Part i={2} active={active}>
+          <Fade delay={0.6}>
+            <path d={plane(GANTRY.x - 4, GANTRY.y0 - 4, GANTRY.w + 8, 8)} fill={FACE.left} />
+            <path d={plane(GANTRY.x - 4, GANTRY.y1 - 4, GANTRY.w + 8, 8)} fill={FACE.left} />
+          </Fade>
+          <Draw
+            d={
+              post(GANTRY.x, GANTRY.y0, 0, GANTRY.z) +
+              post(GANTRY.x + GANTRY.w, GANTRY.y0, 0, GANTRY.z) +
+              post(GANTRY.x, GANTRY.y1, 0, GANTRY.z) +
+              post(GANTRY.x + GANTRY.w, GANTRY.y1, 0, GANTRY.z)
+            }
+            delay={0.3}
+            dur={1.2}
+          />
+          <IsoBox box={BEAM} delay={0.9} dur={0.8} inner={false} />
+          <Draw d={post(47, -48, HEAD.z + HEAD.h, GANTRY.z)} delay={1.3} dur={0.4} />
+          <IsoBox box={HEAD} delay={1.2} dur={0.7} top={FACE.soft} />
+          <Draw
+            d={[-58, -52, -46, -40].map((y) => post(47, y, 56, HEAD.z)).join("")}
+            color={CONSTRUCTION}
+            w="light"
+            delay={1.7}
+            dur={0.5}
+          />
+          <Fade delay={2}>
+            {[-58, -52, -46, -40].map((y) => {
+              const [cx, cy] = iso(47, y, 56);
+              return <circle key={y} cx={cx} cy={cy} r={1.8} fill={ACCENT.blueLight} />;
             })}
-          </Grow>
-        ))}
-        <Rise st={st} y={16} dur={0.6}>
-          <path d="M150 314H650L646 332Q645 340 636 340H164Q155 340 154 332Z" fill={m("plastic")} />
-          <path d="M150 314H650L646 332Q645 340 636 340H164Q155 340 154 332Z" fill={m("shadeX")} />
-          <Gloss d="M152 316H648" w={2.2} o={0.75} />
-          <path d="M155 331H645L644 337Q643 340 636 340H164Q157 340 156 337Z" fillOpacity={0.18} style={{ fill: tone("blue-dark") }} />
-        </Rise>
-      </g>
-    </>
-  );
-}
+            <circle cx={iso(56, -50, 96)[0]} cy={iso(56, -50, 96)[1]} r={2.6} fill={ACCENT.blueLight} />
+          </Fade>
+        </Part>
 
-export function Propagation({ st }: SceneProps) {
-  return (
-    <SceneFrame kind="greenhouse" back={<Machine />}>
-      <Tray st={st} />
-    </SceneFrame>
+        {/* Substrate bags */}
+        <Part i={1} active={active}>
+          {BAGS.map((b, k) => (
+            <IsoBox key={k} box={b} delay={0.5 + k * 0.2} dur={0.8} />
+          ))}
+          <Draw
+            d={BAGS.map((b) => seg([b.x, b.y + b.d / 2, (b.z ?? 0) + b.h], [b.x + b.w, b.y + b.d / 2, (b.z ?? 0) + b.h])).join("")}
+            color={CONSTRUCTION}
+            w="light"
+            delay={1.3}
+            dur={0.6}
+          />
+          <Fade delay={1.5}>
+            {BAGS.map((b, k) => (
+              <path key={k} d={faceRectY(b.x + 7, b.y + b.d, (b.z ?? 0) + 7, b.w - 14, 6)} fill={accentFace("green", 55)} />
+            ))}
+          </Fade>
+        </Part>
+
+        {/* Unit: one cell tray rides the rail. */}
+        <Travel>
+          <Fade delay={0} dur={0.3}>
+            <Faces box={{ x: -20, y: RAIL.y - 12, w: 40, d: 24, h: 6 }} top={FACE.soft} />
+          </Fade>
+          <path d={boxOutline({ x: -20, y: RAIL.y - 12, w: 40, d: 24, h: 6 })} fill="none" stroke={ACCENT.greenLight} strokeLinejoin="round" style={{ strokeWidth: "var(--eco-ink, 1.2px)" }} />
+          <path d={boxInner({ x: -20, y: RAIL.y - 12, w: 40, d: 24, h: 6 })} fill="none" stroke={ACCENT.greenLight} strokeLinejoin="round" style={{ strokeWidth: "calc(var(--eco-ink, 1.2px) * 0.7)" }} />
+          <path
+            d={[-12, -4, 4, 12].map((x) => seg([x, RAIL.y - 12, 6], [x, RAIL.y + 12, 6])).join("") + seg([-20, RAIL.y, 6], [20, RAIL.y, 6])}
+            fill="none"
+            stroke={CONSTRUCTION}
+            style={{ strokeWidth: "calc(var(--eco-ink, 1.2px) * 0.7)" }}
+          />
+        </Travel>
+      </Plate>
+    </Static>
   );
 }

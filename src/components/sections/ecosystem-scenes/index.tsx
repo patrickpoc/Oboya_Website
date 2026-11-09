@@ -8,17 +8,23 @@ import type {
 } from "@/lib/cms/repositories/homepage-repository";
 import { Growing } from "./growing";
 import { Harvest } from "./harvest";
+import type { SceneProps } from "./iso-kit";
 import { Logistics } from "./logistics";
 import { Packaging } from "./packaging";
 import { Propagation } from "./propagation";
 import { Retail } from "./retail";
 
+export { Backdrop } from "./backdrop";
+export { Overview } from "./overview";
+export { HOTSPOTS } from "./hotspots";
+export { SceneClock } from "./iso-kit";
+
 /**
- * Code-built, label-free illustrations, one per stage. Brand tokens only.
- * Shared kit: 800x400 canvas (2:1), one baseline, one top-left light.
- * Every animation is finite and ends on the complete frame (`st` renders it directly).
+ * Code-built, label-free illustrations, one per stage, drawn on the shared isometric plate
+ * (see iso-kit.tsx and backdrop.tsx). Brand tokens only, every animation finite;
+ * `st` renders the complete frame directly. `active` is the hovered proof point.
  */
-const SCENES: Record<HomeEcosystemStageId, (p: { st: boolean }) => ReactNode> = {
+const SCENES: Record<HomeEcosystemStageId, (p: SceneProps) => ReactNode> = {
   propagation: Propagation,
   growing: Growing,
   harvest: Harvest,
@@ -32,12 +38,14 @@ export function HomeEcosystemStageVisual({
   stage,
   label,
   static: st = false,
+  active = null,
   sizes,
   eager = false,
 }: {
   stage: HomeEcosystemStage;
   label: string;
   static?: boolean;
+  active?: number | null;
   sizes?: string;
   eager?: boolean;
 }) {
@@ -54,5 +62,5 @@ export function HomeEcosystemStageVisual({
     );
   }
   const Scene = SCENES[stage.id];
-  return <Scene st={st} />;
+  return <Scene st={st} active={active} />;
 }
