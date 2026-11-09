@@ -24,7 +24,11 @@ export function HomePageContent({
       {homepage.sections.hero.enabled && (
         <Hero data={homepage.hero} locale={locale} animationsEnabled={animationsEnabled} />
       )}
-      <HomeEcosystemSection />
+      <HomeEcosystemSection
+        data={homepage.homeEcosystem}
+        locale={locale}
+        animationsEnabled={animationsEnabled}
+      />
       {homepage.sections.capabilities.enabled && (
         <Capabilities
           data={homepage.capabilities}

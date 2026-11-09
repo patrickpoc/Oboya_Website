@@ -75,6 +75,24 @@ export interface HomepagePartnerLogo {
   href?: string;
 }
 
+export const HOME_ECOSYSTEM_STAGE_IDS = [
+  "propagation",
+  "growing",
+  "harvest",
+  "packaging",
+  "logistics",
+  "retail",
+] as const;
+
+export type HomeEcosystemStageId = (typeof HOME_ECOSYSTEM_STAGE_IDS)[number];
+
+export interface HomeEcosystemStage {
+  id: HomeEcosystemStageId;
+  label: LocalizedString;
+  /** "" shows the animated SVG scene. */
+  image: string;
+}
+
 export interface HomepageSettings {
   animations: { enabled: boolean };
   sections: Record<HomepageSectionId, HomepageSectionToggle>;
@@ -97,6 +115,16 @@ export interface HomepageSettings {
     image: string;
     imageAlt: LocalizedString;
     stats: HomepageStat[];
+  };
+  homeEcosystem: {
+    title: LocalizedString;
+    bodyP1: LocalizedString;
+    bodyP2: LocalizedString;
+    openingLine: LocalizedString;
+    closingLine1: LocalizedString;
+    closingLine2: LocalizedString;
+    slogan: LocalizedString;
+    stages: HomeEcosystemStage[];
   };
   capabilities: {
     eyebrow: LocalizedString;
@@ -137,6 +165,7 @@ const emptyLoc = (): LocalizedString => ({
 });
 
 const H = HOME_I18N;
+const E = H.homeEcosystem;
 
 const defaultSettings = (): HomepageSettings => ({
   animations: { enabled: true },
@@ -203,6 +232,23 @@ const defaultSettings = (): HomepageSettings => ({
         suffix: "+",
         label: H.companyOverview.statExperience,
       },
+    ],
+  },
+  homeEcosystem: {
+    title: E.title,
+    bodyP1: E.bodyP1,
+    bodyP2: E.bodyP2,
+    openingLine: E.openingLine,
+    closingLine1: E.closingLine1,
+    closingLine2: E.closingLine2,
+    slogan: E.slogan,
+    stages: [
+      { id: "propagation", label: E.stages.propagation, image: "" },
+      { id: "growing", label: E.stages.growing, image: "" },
+      { id: "harvest", label: E.stages.harvest, image: "" },
+      { id: "packaging", label: E.stages.packaging, image: "" },
+      { id: "logistics", label: E.stages.logistics, image: "" },
+      { id: "retail", label: E.stages.retail, image: "" },
     ],
   },
   capabilities: {
@@ -348,12 +394,120 @@ let cache: HomepageSettings | null = null;
 const CONTENT_REVISION = "home-i18n-2026-09-02";
 let appliedRevision: string | null = null;
 
+const LOCALE_KEYS = ["en", "pt-BR", "es", "zh-CN"] as const;
+
+function asRecord(v: unknown): Record<string, unknown> | undefined {
+  return v && typeof v === "object" && !Array.isArray(v)
+    ? (v as Record<string, unknown>)
+    : undefined;
+}
+
+/** Keeps only string locale values; undefined when nothing usable is stored. */
+function asLoc(v: unknown): LocalizedString | undefined {
+  const r = asRecord(v);
+  if (!r) return undefined;
+  const out = emptyLoc();
+  for (const k of LOCALE_KEYS) if (typeof r[k] === "string") out[k] = r[k] as string;
+  return out;
+}
+
+
+/**
+ * Accepts only images next/image can render: local /uploads or /assets, or https
+ * on the configured Supabase host under /storage/v1/object/public/. Else "".
+ */
+export function sanitizeHomeEcosystemImage(value: unknown): string {
+  if (typeof value !== "string") return "";
+  const v = value.trim();
+  if (!v || /[\\\s]/.test(v)) return "";
+  if (v.startsWith("/")) {
+    if (/[?#]/.test(v) || !isSafeImagePath(v)) return "";
+    return v.startsWith("/uploads/") || v.startsWith("/assets/") ? v : "";
+  }
+  const raw = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!raw) return "";
+  try {
+    const url = new URL(v);
+    if (
+      url.protocol !== "https:" ||
+      url.host !== new URL(raw).host ||
+      url.username ||
+      url.password ||
+      !url.pathname.startsWith("/storage/v1/object/public/") ||
+      !isSafeImagePath(url.pathname)
+    )
+      return "";
+    return url.origin + url.pathname;
+  } catch {
+    return "";
+  }
+}
+
+/** Decodes up to 3 times, then rejects traversal, doubled slashes, backslashes, control chars and non-raster extensions. */
+function isSafeImagePath(path: string): boolean {
+  let d = path;
+  try {
+    for (let i = 0; i < 3; i++) d = decodeURIComponent(d);
+  } catch {
+    return false;
+  }
+  if (d.includes("..") || d.includes("//") || /[\\\u0000-\u001f\u007f]/.test(d)) return false;
+  return /\.(jpe?g|png|webp|avif|gif)$/i.test(d);
+}
+
+function migrateEcosystem(
+  stored: unknown,
+  defaults: HomepageSettings["homeEcosystem"]
+): HomepageSettings["homeEcosystem"] {
+  const raw = asRecord(stored) ?? {};
+  const storedStages = Array.isArray(raw.stages) ? raw.stages : [];
+  const text = (k: keyof HomepageSettings["homeEcosystem"]) =>
+    asLoc(raw[k]) ?? (defaults[k] as LocalizedString);
+  return {
+    title: text("title"),
+    bodyP1: text("bodyP1"),
+    bodyP2: text("bodyP2"),
+    openingLine: text("openingLine"),
+    closingLine1: text("closingLine1"),
+    closingLine2: text("closingLine2"),
+    slogan: text("slogan"),
+    stages: defaults.stages.map((def) => {
+      const st = storedStages
+        .map(asRecord)
+        .find((s) => s?.id === def.id);
+      return {
+        id: def.id,
+        label: asLoc(st?.label) ?? def.label,
+        image: sanitizeHomeEcosystemImage(st?.image),
+      };
+    }),
+  };
+}
+
 function mergeHomepageLocales(
   current: HomepageSettings,
   defaults: HomepageSettings
 ): HomepageSettings {
+  const eco = current.homeEcosystem;
+  const ecoDef = defaults.homeEcosystem;
   return {
     ...current,
+    homeEcosystem: {
+      title: mergeLocalized(eco.title, ecoDef.title),
+      bodyP1: mergeLocalized(eco.bodyP1, ecoDef.bodyP1),
+      bodyP2: mergeLocalized(eco.bodyP2, ecoDef.bodyP2),
+      openingLine: mergeLocalized(eco.openingLine, ecoDef.openingLine),
+      closingLine1: mergeLocalized(eco.closingLine1, ecoDef.closingLine1),
+      closingLine2: mergeLocalized(eco.closingLine2, ecoDef.closingLine2),
+      slogan: mergeLocalized(eco.slogan, ecoDef.slogan),
+      stages: eco.stages.map((stage, i) => {
+        const def = ecoDef.stages[i];
+        return {
+          ...stage,
+          label: mergeLocalized(stage.label, def.label),
+        };
+      }),
+    },
     hero: {
       ...current.hero,
       eyebrow: mergeLocalized(current.hero.eyebrow, defaults.hero.eyebrow),
@@ -573,6 +727,10 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
           : defaults.companyOverview.stats
       ).slice(0, 3),
     },
+    homeEcosystem: migrateEcosystem(
+      (withoutLegacy as { homeEcosystem?: unknown }).homeEcosystem,
+      defaults.homeEcosystem
+    ),
     capabilities: {
       ...defaults.capabilities,
       ...withoutLegacy.capabilities,

@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useCallback, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { motion, AnimatePresence, useInView, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import {
@@ -16,6 +16,14 @@ import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repositor
 import { pickLocalized } from "@/lib/cms/utils";
 
 const SWIPE_THRESHOLD = 48;
+const AUTOPLAY_INTERVAL_MS = 6000;
+
+function subscribeVisibility(callback: () => void) {
+  document.addEventListener("visibilitychange", callback);
+  return () => document.removeEventListener("visibilitychange", callback);
+}
+const getTabHidden = () => document.hidden;
+const getServerTabHidden = () => false;
 
 interface CapabilitiesProps {
   data: HomepageSettings["capabilities"];
@@ -34,6 +42,16 @@ export function Capabilities({
   const pointerStartX = useRef<number | null>(null);
   const count = items.length;
   const slide = items[index];
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
+  const inView = useInView(wrapperRef);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const tabHidden = useSyncExternalStore(
+    subscribeVisibility,
+    getTabHidden,
+    getServerTabHidden
+  );
 
   const go = useCallback(
     (dir: -1 | 1) => {
@@ -42,6 +60,15 @@ export function Capabilities({
     },
     [count]
   );
+
+  const autoplay =
+    count >= 2 && !reducedMotion && inView && !hovered && !focused && !tabHidden;
+
+  useEffect(() => {
+    if (!autoplay) return;
+    const id = setTimeout(() => go(1), AUTOPLAY_INTERVAL_MS);
+    return () => clearTimeout(id);
+  }, [autoplay, index, go]);
 
   const onPointerDown = (event: React.PointerEvent) => {
     pointerStartX.current = event.clientX;
@@ -79,7 +106,16 @@ export function Capabilities({
         </motion.div>
 
         <div
+          ref={wrapperRef}
           className="relative overflow-hidden rounded-2xl touch-pan-y"
+          onPointerEnter={(e) => e.pointerType === "mouse" && setHovered(true)}
+          onPointerLeave={(e) => e.pointerType === "mouse" && setHovered(false)}
+          onFocus={(e) => setFocused(e.target.matches(":focus-visible"))}
+          onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+              setFocused(false);
+            }
+          }}
           onPointerDown={onPointerDown}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}

@@ -1997,6 +1997,10 @@
           "title": "Hero",
           "description": "Imagem de fundo, título e CTAs primário / secundário."
         },
+        "homeEcosystem": {
+          "title": "Jornada do Ecossistema",
+          "description": "Sequência de abertura, imagens e textos das etapas, frases finais e slogan."
+        },
         "capabilities": {
           "title": "Por que Oboya Horticulture",
           "description": "Slides do carrossel com título e descrição."
@@ -2054,6 +2058,16 @@
         "removePartner": "Remover parceiro",
         "addItem": "Adicionar item",
         "removeItem": "Remover item",
+        "ecosystemBodyP1": "Corpo, primeiro parágrafo",
+        "ecosystemBodyP2": "Corpo, segundo parágrafo",
+        "ecosystemOpeningLine": "Frase de abertura",
+        "ecosystemClosingLine1": "Frase final 1",
+        "ecosystemClosingLine2": "Frase final 2",
+        "ecosystemSlogan": "Slogan",
+        "ecosystemStageLabel": "Rótulo da etapa",
+        "ecosystemStageImage": "Imagem da etapa",
+        "ecosystemStageImageHint": "Deixe vazio para exibir a ilustração animada. Recomenda-se uma imagem 2:1; outras proporções são cortadas. Use uma imagem enviada ou da biblioteca (JPG, PNG, WebP, AVIF ou GIF; SVG não é suportado); links de outros sites não são aceitos.",
+        "ecosystemStageImageInvalid": "Esta imagem não pode ser usada e será removida ao salvar. Escolha um JPG, PNG, WebP, AVIF ou GIF enviado ou da biblioteca, sem query string.",
         "articlesManagedHint": "Os artigos são gerenciados em Blog → Posts.",
         "statsMissionTitle": "Estatísticas e missão",
         "name": "Nome",
