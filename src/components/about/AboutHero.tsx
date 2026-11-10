@@ -35,7 +35,7 @@ export function AboutHero({ data, locale }: AboutHeroProps) {
           {title}
         </h1>
         {body ? (
-          <p className="mt-5 max-w-5xl font-display text-[clamp(1.35rem,3.2vw,2.35rem)] font-light leading-[1.35] tracking-[-0.02em] text-oboya-blue-dark text-balance md:mt-7">
+          <p className="mt-5 max-w-5xl font-display text-[clamp(1.35rem,2.8vw,1.875rem)] font-light leading-[1.35] tracking-[-0.02em] text-oboya-blue-dark text-balance md:mt-7">
             {body}
           </p>
         ) : null}
