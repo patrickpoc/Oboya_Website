@@ -65,6 +65,8 @@ export function HomeEcosystemStage({
     setSeenScene(sceneKey);
     setActive(null);
   }
+  // Release a hover pause when the scene changes or the stage unmounts (hovered text may go inert).
+  useEffect(() => () => onHoverChange(false), [sceneKey, onHoverChange]);
   // A press outside any callout or proof point (tap or click) restores all callouts.
   useEffect(() => {
     if (active == null) return;
@@ -100,8 +102,6 @@ export function HomeEcosystemStage({
     <div
       data-eco-phase={kind}
       className="grid grid-cols-12 gap-x-6 gap-y-8 lg:gap-y-0"
-      onPointerEnter={(e) => e.pointerType === "mouse" && onHoverChange(true)}
-      onPointerLeave={(e) => e.pointerType === "mouse" && onHoverChange(false)}
     >
       {/* Text column */}
       <div className="order-2 col-span-12 grid lg:order-1 lg:col-span-4 lg:pr-6">
@@ -130,8 +130,16 @@ export function HomeEcosystemStage({
                         tabIndex={0}
                         data-eco-point
                         className="flex items-center gap-3 rounded-sm font-body text-sm font-normal leading-snug text-white/85 outline-none focus-visible:ring-2 focus-visible:ring-oboya-green-light/70"
-                        onPointerEnter={(e) => e.pointerType === "mouse" && setActive(k)}
-                        onPointerLeave={(e) => e.pointerType === "mouse" && setActive(null)}
+                        onPointerEnter={(e) => {
+                          if (e.pointerType !== "mouse") return;
+                          setActive(k);
+                          onHoverChange(true);
+                        }}
+                        onPointerLeave={(e) => {
+                          if (e.pointerType !== "mouse") return;
+                          setActive(null);
+                          onHoverChange(false);
+                        }}
                         onPointerDown={(e) => e.pointerType !== "mouse" && setActive(lit ? null : k)}
                         onFocus={() => setActive(k)}
                         onBlur={(e) => {
@@ -268,6 +276,7 @@ export function HomeEcosystemStage({
                   active={active}
                   isStatic={isStatic}
                   onActive={setActive}
+                  onHover={onHoverChange}
                 />
               ) : null}
               {afterStages ? (

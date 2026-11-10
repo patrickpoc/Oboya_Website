@@ -48,6 +48,7 @@ export function HomeEcosystemCallouts({
   active,
   isStatic,
   onActive,
+  onHover,
 }: {
   id: string;
   spots: Hotspot[];
@@ -55,6 +56,8 @@ export function HomeEcosystemCallouts({
   active: number | null;
   isStatic: boolean;
   onActive: (k: number | null) => void;
+  /** Mouse hover over a pill or dot (touch never fires it). */
+  onHover?: (on: boolean) => void;
 }) {
   // The staggered entrance runs once; every later opacity change (emphasis in/out) is a quick swap.
   const [revealed, setRevealed] = useState(isStatic);
@@ -66,8 +69,16 @@ export function HomeEcosystemCallouts({
   }, [revealed, spots.length]);
   const fade = (k: number) => (revealed ? SWAP : { duration: ENTER_DUR, delay: ENTER_DELAY + k * ENTER_STEP });
 
-  const hoverIn = (k: number) => (e: PointerEvent) => e.pointerType === "mouse" && onActive(k);
-  const hoverOut = (e: PointerEvent) => e.pointerType === "mouse" && onActive(null);
+  const hoverIn = (k: number) => (e: PointerEvent) => {
+    if (e.pointerType !== "mouse") return;
+    onActive(k);
+    onHover?.(true);
+  };
+  const hoverOut = (e: PointerEvent) => {
+    if (e.pointerType !== "mouse") return;
+    onActive(null);
+    onHover?.(false);
+  };
   const press = (k: number, lit: boolean) => (e: PointerEvent) => {
     // Keep focus where it is (a focused proof point would otherwise blur and reset the emphasis).
     e.preventDefault();
