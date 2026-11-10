@@ -1,6 +1,7 @@
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page/types";
 import { defaultSettings } from "@/lib/cms/repositories/about-page/defaults";
 import {
+  LEGACY_INSTITUTIONAL_IMAGE_SRC,
   LEGACY_MISSION_BODY,
   LEGACY_VALUES,
   LEGACY_VISION_BODY,
@@ -78,6 +79,12 @@ export function normalizeAboutPageSettings(
         enabled: settings.sections?.impact?.enabled ?? true,
       },
     },
+    // The old default photo was replaced; keep any custom image set in the CMS.
+    institutionalImage:
+      !settings.institutionalImage?.src ||
+      settings.institutionalImage.src === LEGACY_INSTITUTIONAL_IMAGE_SRC
+        ? { ...settings.institutionalImage, ...defaults.institutionalImage }
+        : settings.institutionalImage,
     hero: isLegacyHero
       ? defaults.hero
       : {

@@ -1,6 +1,9 @@
 import type { LocalizedString } from "@/lib/cms/types";
 import { loc } from "@/lib/cms/repositories/about-page/locale";
 
+/** Previous default institutional photo; stored docs still pointing at it get the new one. */
+export const LEGACY_INSTITUTIONAL_IMAGE_SRC = "/assets/about/institutional.png";
+
 /** Previous default About copy; stored docs matching it exactly are upgraded. */
 export const LEGACY_MISSION_BODY = loc(
   "Oboya Horticulture is committed to delivering integrated one-stop solutions that help growers, packers, and wholesalers achieve quality, efficiency, and sustainable growth across the horticultural supply chain.",

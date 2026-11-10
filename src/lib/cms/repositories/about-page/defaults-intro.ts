@@ -41,7 +41,7 @@ export function defaultIntro(): Pick<AboutPageSettings, "sections" | "meta" | "h
     ),
   },
   institutionalImage: {
-    src: "/assets/about/institutional.png",
+    src: "/assets/about/institutional.jpg",
     alt: loc(
       "Oboya Horticulture production facility",
       "Instalação de produção Oboya Horticulture",
