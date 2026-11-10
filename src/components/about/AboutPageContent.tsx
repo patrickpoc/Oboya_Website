@@ -45,6 +45,10 @@ export async function AboutPageContent({
         <AboutCallout data={about.callout} locale={locale} />
       )}
 
+      {about.sections.culture.enabled && (
+        <AboutCorporateCulture data={about.culture} locale={locale} />
+      )}
+
       {about.sections.institutionalImage.enabled ? (
         <AboutInstitutionalImage
           data={about.institutionalImage}
@@ -65,9 +69,6 @@ export async function AboutPageContent({
         mapAlt={tPresence("mapAlt")}
         title={pickLocalized(homepage.globalPresence.title, locale)}
       />
-      {about.sections.culture.enabled && (
-        <AboutCorporateCulture data={about.culture} locale={locale} />
-      )}
       {about.sections.mission.enabled && (
         <AboutMission data={about.mission} locale={locale} />
       )}
