@@ -49,15 +49,15 @@ export async function AboutPageContent({
         <AboutCorporateCulture data={about.culture} locale={locale} />
       )}
 
+      {about.sections.timeline.enabled ? (
+        <AboutTimeline data={about.timeline} locale={locale} />
+      ) : null}
+
       {about.sections.institutionalImage.enabled ? (
         <AboutInstitutionalImage
           data={about.institutionalImage}
           locale={locale}
         />
-      ) : null}
-
-      {about.sections.timeline.enabled ? (
-        <AboutTimeline data={about.timeline} locale={locale} />
       ) : null}
 
       {about.sections.impact.enabled && (
