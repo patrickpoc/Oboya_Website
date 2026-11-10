@@ -41,6 +41,10 @@ export async function AboutPageContent({
         <AboutHero data={about.hero} locale={locale} />
       ) : null}
 
+      {about.sections.callout.enabled && (
+        <AboutCallout data={about.callout} locale={locale} />
+      )}
+
       {about.sections.institutionalImage.enabled ? (
         <AboutInstitutionalImage
           data={about.institutionalImage}
@@ -51,10 +55,6 @@ export async function AboutPageContent({
       {about.sections.timeline.enabled ? (
         <AboutTimeline data={about.timeline} locale={locale} />
       ) : null}
-
-      {about.sections.callout.enabled && (
-        <AboutCallout data={about.callout} locale={locale} />
-      )}
 
       {about.sections.impact.enabled && (
         <AboutImpact data={about.impact} locale={locale} />
