@@ -36,7 +36,7 @@ export function AboutImpact({ data, locale }: AboutImpactProps) {
           {...(reveal ?? {})}
           initial={reveal ? "hidden" : false}
           variants={reduceMotion ? undefined : fadeInUp}
-          className="mb-12 max-w-3xl md:mb-16"
+          className="mx-auto mb-12 max-w-3xl text-center md:mb-16"
         >
           {eyebrow ? (
             <p className="font-body text-[0.8125rem] font-medium tracking-[0.04em] text-oboya-green md:text-sm">
@@ -65,7 +65,7 @@ export function AboutImpact({ data, locale }: AboutImpactProps) {
           {...(reveal ?? {})}
           initial={reveal ? "hidden" : false}
           variants={reduceMotion ? undefined : fadeInUp}
-          className="mt-12 max-w-3xl font-body text-[0.9375rem] leading-relaxed text-oboya-blue-dark/65 md:mt-16 md:text-base"
+          className="mx-auto mt-12 max-w-3xl text-center font-body text-[0.9375rem] leading-relaxed text-oboya-blue-dark/65 md:mt-16 md:text-base"
         >
           {description}
         </motion.p>

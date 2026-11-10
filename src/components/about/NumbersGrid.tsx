@@ -26,32 +26,6 @@ const ICON_MAP: Record<AboutImpactStatIcon, LucideIcon> = {
   calendar: CalendarDays,
 };
 
-const DARK_TEXT = "#01203F";
-
-function channel(v: number) {
-  const c = v / 255;
-  return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-}
-
-function luminance(hex: string) {
-  const m = /^#?([0-9a-f]{6})$/i.exec(hex);
-  if (!m) return 0;
-  const n = parseInt(m[1], 16);
-  return (
-    0.2126 * channel((n >> 16) & 255) +
-    0.7152 * channel((n >> 8) & 255) +
-    0.0722 * channel(n & 255)
-  );
-}
-
-/** White text unless the dark brand blue contrasts better on this background. */
-function textColorOn(bg: string) {
-  const l = luminance(bg);
-  const white = 1.05 / (l + 0.05);
-  const dark = (l + 0.05) / (luminance(DARK_TEXT) + 0.05);
-  return dark > white ? DARK_TEXT : "#ffffff";
-}
-
 export function NumbersGrid({
   stats,
   locale,
@@ -67,14 +41,13 @@ export function NumbersGrid({
         const label = pickLocalized(stat.label, locale);
         const Icon = ICON_MAP[stat.icon] ?? Globe2;
         const accent = stat.accentColor || "#4DAF4E";
-        const color = textColorOn(accent);
         const value = stat.pending ? "XX" : `${stat.value}${stat.suffix}`;
 
         return (
           <li
             key={stat.id}
-            className="relative flex min-h-52 flex-col items-center rounded-2xl px-5 py-5 md:min-h-56"
-            style={{ backgroundColor: accent, color }}
+            className="relative flex min-h-52 flex-col items-center rounded-2xl px-5 pt-4 pb-5 text-white md:min-h-56"
+            style={{ backgroundColor: accent }}
           >
             <span
               aria-hidden
@@ -83,10 +56,11 @@ export function NumbersGrid({
               <Icon
                 className="size-4"
                 strokeWidth={1.6}
-                style={{ color: textColorOn(accent) === "#ffffff" ? accent : DARK_TEXT }}
+                style={{ color: accent }}
               />
             </span>
-            <p className="px-10 pt-1.5 text-center font-body text-sm font-medium leading-snug md:text-[0.9375rem]">
+            {/* Same height as the icon and aligned to its top, so their centres match. */}
+            <p className="flex min-h-9 items-center px-12 text-center font-body text-base font-medium leading-tight md:text-lg">
               {label}
             </p>
             <p
