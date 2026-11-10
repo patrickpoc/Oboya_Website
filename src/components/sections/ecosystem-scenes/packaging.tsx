@@ -21,8 +21,11 @@ const LEG_X = [-172, -62, 48, 172];
 const OUT_X = { punnets: [10, 36, 62], label: 90, bag: 122, sleeve: 148, carton: 174 };
 const MACHINE: Box = { x: -80, y: -64, w: 70, d: 54, h: 76 };
 const MACHINE_END = MACHINE.x + MACHINE.w;
-/** Tunnel mouth in the outfeed face: belt width, from the belt frame bottom to 14 above the belt surface. */
-const MOUTH = faceX(MACHINE_END, BELT.y, BELT.z, BELT.d, TOP + 14 - BELT.z);
+/** Outfeed opening in the machine face (plane x = MACHINE_END): bottom on the belt surface, full belt width, 14 above the belt. */
+const MOUTH = faceX(MACHINE_END, BELT.y, TOP, BELT.d, 14);
+/** The belt is cut at the face: the part inside the machine is drawn before it, the part outside after it, so nothing of the belt lands on the face. */
+const BELT_IN: Box = { ...BELT, w: MACHINE_END - BELT.x };
+const BELT_OUT: Box = { ...BELT, x: MACHINE_END, w: BELT.x + BELT.w - MACHINE_END };
 const REEL = { x: MACHINE.x + 20, y: MACHINE.y + 27, r: 9, h: 6, z: MACHINE.h };
 const ARM = { x: OUT_X.label, y0: -84, z: 84 };
 /** Applicator head 26 units above the belt: on screen the whole punnet beneath it stays visible with a clear gap. */
@@ -61,10 +64,10 @@ export function Packaging({ st, active }: SceneProps) {
         {LEG_X.map((x) => (
           <Solid key={`b${x}`} box={{ x: x - 1.5, y: BELT.y + BELT.d - 6, w: 3, d: 3, h: BELT.z }} tones={steel} delay={0.05} line={false} />
         ))}
-        <Solid box={BELT} tones={steel} delay={0.1} shadow={0.25} />
+        <Solid box={BELT_IN} tones={steel} delay={0.1} shadow={0.25} />
         <Rise delay={0.4} dur={0.4}>
-          <path d={plane(BELT.x, BELT.y + 3, BELT.w, BELT.d - 6, TOP + 0.2)} fill={M.steelDark} />
-          <path d={faceY(BELT.x, BELT.y + BELT.d, TOP, BELT.w, 1.6)} fill={steel.top} />
+          <path d={plane(BELT.x, BELT.y + 3, BELT_IN.w, BELT.d - 6, TOP + 0.2)} fill={M.steelDark} />
+          <path d={faceY(BELT.x, BELT.y + BELT.d, TOP, BELT_IN.w, 1.6)} fill={steel.top} />
         </Rise>
 
         {/* Infeed: a crate tipped at the start of the belt, fruit rolling toward the machine */}
@@ -80,14 +83,13 @@ export function Packaging({ st, active }: SceneProps) {
         {/* Flow-wrap machine: white housing over the belt, tunnel on the out side, blue control panel, film reel */}
         <Solid box={MACHINE} color={M.white} delay={0.5} shadow={0.25} />
         <Rise delay={0.9} dur={0.4}>
-          {/* Outfeed tunnel: an opening in the right face the full belt width, from the frame bottom up, with the belt surface receding inside */}
+          {/* Outfeed tunnel: an opening in the right face the full belt width, from the belt surface up 14, with the belt surface receding inside */}
           <clipPath id={`${id}-mouth`}>
             <path d={MOUTH} />
           </clipPath>
           <path d={MOUTH} fill={mix(M.steelDark, 70)} />
           <g clipPath={`url(#${id}-mouth)`}>
             <path d={plane(MACHINE_END - 14, BELT.y, 14, BELT.d, TOP)} fill={steel.top} />
-            <path d={faceY(MACHINE_END - 14, BELT.y + BELT.d, BELT.z, 14, BELT.h)} fill={steel.left} />
             <path d={plane(MACHINE_END - 14, BELT.y + 3, 14, BELT.d - 6, TOP + 0.2)} fill={M.steelDark} />
           </g>
           <path d={MOUTH} fill="none" stroke={tone(M.white).line} strokeLinejoin="round" style={{ strokeWidth: "calc(var(--eco-ink, 1.2px) * 0.8)" }} />
@@ -98,12 +100,11 @@ export function Packaging({ st, active }: SceneProps) {
           <path d={faceY(MACHINE.x + 6, MACHINE.y + MACHINE.d, 6, MACHINE.w - 12, 2)} fill={steel.right} />
           <path d={faceY(MACHINE.x + 6, MACHINE.y + MACHINE.d, 12, MACHINE.w - 12, 30)} fill="none" stroke={tone(M.white).line} style={{ strokeWidth: "calc(var(--eco-ink, 1.2px) * 0.6)" }} />
         </Rise>
-        {/* The belt in front of the outfeed face shares screen space with it: repaint that stretch so it leaves the tunnel over the face */}
+        {/* Belt outside the machine: starts exactly at the outfeed face and runs out of the opening */}
+        <Solid box={BELT_OUT} tones={steel} delay={0.1} shadow={0.25} />
         <Rise delay={0.4} dur={0.4}>
-          <path d={plane(MACHINE_END, BELT.y, OUT_X.punnets[0] - MACHINE_END, BELT.d, TOP)} fill={steel.top} />
-          <path d={faceY(MACHINE_END, BELT.y + BELT.d, BELT.z, OUT_X.punnets[0] - MACHINE_END, BELT.h)} fill={steel.left} />
-          <path d={plane(MACHINE_END, BELT.y + 3, OUT_X.punnets[0] - MACHINE_END, BELT.d - 6, TOP + 0.2)} fill={M.steelDark} />
-          <path d={faceY(MACHINE_END, BELT.y + BELT.d, TOP, OUT_X.punnets[0] - MACHINE_END, 1.6)} fill={steel.top} />
+          <path d={plane(MACHINE_END, BELT.y + 3, BELT_OUT.w, BELT.d - 6, TOP + 0.2)} fill={M.steelDark} />
+          <path d={faceY(MACHINE_END, BELT.y + BELT.d, TOP, BELT_OUT.w, 1.6)} fill={steel.top} />
         </Rise>
         <Cyl cx={REEL.x} cy={REEL.y} z={REEL.z} r={REEL.r} h={REEL.h} color={M.white} delay={1.1} shadow={false} />
         <Rise delay={1.2} dur={0.3}>
