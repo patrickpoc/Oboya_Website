@@ -1,13 +1,19 @@
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page/types";
 import { defaultSettings } from "@/lib/cms/repositories/about-page/defaults";
 import {
+  LEGACY_MISSION_BODY,
+  LEGACY_VALUES,
+  LEGACY_VISION_BODY,
+  sameLocalized,
+} from "@/lib/cms/repositories/about-page/legacy-defaults";
+import {
   fallbackValueImage,
   normalizeImpactStats,
   repairMissionVisionImages,
 } from "@/lib/cms/repositories/about-page/fallbacks";
 
 let cache: AboutPageSettings | null = null;
-const CONTENT_REVISION = 24;
+const CONTENT_REVISION = 25;
 let cacheRevision = 0;
 
 /** Ensure durable / legacy CMS docs have value images and Numbers stats. */
@@ -49,6 +55,19 @@ export function normalizeAboutPageSettings(
     cultureFirstTitle === "Integrated Solutions" ||
     cultureItems.some((item) => item.id === "integrated" || item.id === "performance") ||
     !settings.culture?.title?.en;
+
+  const valueItems = settings.values?.items ?? [];
+  const isLegacyValues =
+    !settings.values ||
+    (valueItems.length === LEGACY_VALUES.length &&
+      LEGACY_VALUES.every(
+        (old, i) =>
+          valueItems[i]?.id === old.id &&
+          sameLocalized(valueItems[i]?.title, old.title) &&
+          sameLocalized(valueItems[i]?.description, old.description)
+      ));
+  const isLegacyMission = sameLocalized(settings.mission?.body, LEGACY_MISSION_BODY);
+  const isLegacyVision = sameLocalized(settings.vision?.body, LEGACY_VISION_BODY);
 
   return {
     ...settings,
@@ -94,8 +113,18 @@ export function normalizeAboutPageSettings(
           eyebrow: settings.culture?.eyebrow ?? defaults.culture.eyebrow,
           items: cultureItems.length ? cultureItems : defaults.culture.items,
         },
-    mission: repairMissionVisionImages(settings.mission, defaults.mission),
-    vision: repairMissionVisionImages(settings.vision, defaults.vision),
+    mission: repairMissionVisionImages(
+      isLegacyMission
+        ? { ...settings.mission, body: defaults.mission.body }
+        : settings.mission,
+      defaults.mission
+    ),
+    vision: repairMissionVisionImages(
+      isLegacyVision
+        ? { ...settings.vision, body: defaults.vision.body }
+        : settings.vision,
+      defaults.vision
+    ),
     impact: {
       title: settings.impact?.title ?? defaults.impact.title,
       description: settings.impact?.description ?? defaults.impact.description,
@@ -104,7 +133,7 @@ export function normalizeAboutPageSettings(
     },
     values: {
       ...settings.values,
-      items: (settings.values?.items ?? []).map((item) => {
+      items: (isLegacyValues ? defaults.values.items : valueItems).map((item) => {
         const fallback = fallbackValueImage(item.id);
         const src = item.image?.src ?? "";
         const needsImage =

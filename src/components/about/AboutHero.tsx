@@ -19,23 +19,23 @@ export function AboutHero({ data, locale }: AboutHeroProps) {
 
   return (
     <section
-      className="relative w-full bg-white py-[clamp(3.5rem,8vw,6.5rem)]"
+      className="relative w-full bg-white pt-[clamp(3.5rem,8vw,6.5rem)] pb-[clamp(2rem,4vw,3rem)]"
       aria-labelledby="about-hero-heading"
     >
       <motion.div
-        className="relative z-10 mx-auto flex w-full max-w-[var(--container-max)] flex-col items-center px-[var(--container-padding)] text-center"
+        className="relative z-10 mx-auto grid w-full max-w-[var(--container-max)] gap-6 px-[var(--container-padding)] lg:grid-cols-12 lg:gap-12"
         initial={reduceMotion ? false : "hidden"}
         animate={reduceMotion ? undefined : "visible"}
         variants={reduceMotion ? undefined : fadeInUp}
       >
         <h1
           id="about-hero-heading"
-          className="max-w-3xl font-display text-[clamp(0.95rem,1.6vw,1.125rem)] font-bold leading-snug tracking-[-0.01em] text-oboya-blue-dark text-balance"
+          className="font-display text-[clamp(2.25rem,5vw,3.75rem)] font-light leading-[1.05] tracking-[-0.02em] text-oboya-blue-dark text-balance lg:col-span-5"
         >
           {title}
         </h1>
         {body ? (
-          <p className="mt-5 max-w-5xl font-display text-[clamp(1.35rem,2.8vw,1.875rem)] font-light leading-[1.35] tracking-[-0.02em] text-oboya-blue-dark text-balance md:mt-7">
+          <p className="font-display text-[clamp(1.35rem,2.8vw,1.875rem)] font-light leading-[1.35] tracking-[-0.02em] text-oboya-blue-dark text-pretty lg:col-span-7 lg:pt-2">
             {body}
           </p>
         ) : null}

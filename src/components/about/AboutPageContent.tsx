@@ -3,7 +3,6 @@ import { readAboutPageSettings, readHomepageSettings } from "@/lib/cms/readers";
 import { pickLocalized } from "@/lib/cms/utils";
 import { AboutHero } from "@/components/about/AboutHero";
 import { AboutInstitutionalImage } from "@/components/about/AboutInstitutionalImage";
-import { AboutTimeline } from "@/components/about/AboutTimeline";
 import { AboutImpact } from "@/components/about/AboutImpact";
 import { AboutCallout } from "@/components/about/AboutCallout";
 import { AboutCorporateCulture } from "@/components/about/AboutCorporateCulture";
@@ -41,6 +40,13 @@ export async function AboutPageContent({
         <AboutHero data={about.hero} locale={locale} />
       ) : null}
 
+      {about.sections.institutionalImage.enabled ? (
+        <AboutInstitutionalImage
+          data={about.institutionalImage}
+          locale={locale}
+        />
+      ) : null}
+
       {about.sections.callout.enabled && (
         <AboutCallout data={about.callout} locale={locale} />
       )}
@@ -48,17 +54,6 @@ export async function AboutPageContent({
       {about.sections.culture.enabled && (
         <AboutCorporateCulture data={about.culture} locale={locale} />
       )}
-
-      {about.sections.timeline.enabled ? (
-        <AboutTimeline data={about.timeline} locale={locale} />
-      ) : null}
-
-      {about.sections.institutionalImage.enabled ? (
-        <AboutInstitutionalImage
-          data={about.institutionalImage}
-          locale={locale}
-        />
-      ) : null}
 
       {about.sections.impact.enabled && (
         <AboutImpact data={about.impact} locale={locale} />

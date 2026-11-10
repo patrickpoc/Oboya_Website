@@ -71,6 +71,54 @@ export const VALUE_IMAGE_FALLBACKS: Record<
     },
     objectPosition: "center 40%",
   },
+  glocal: {
+    image: {
+      src: "/assets/homepage/capabilities-global-local.jpg",
+      alt: loc(
+        "Global horticulture network connecting partners across regions",
+        "Rede global de horticultura conectando parceiros entre regiões",
+        "Red hortícola global que conecta socios entre regiones",
+        "连接各地区合作伙伴的全球园艺网络"
+      ),
+    },
+    objectPosition: "center center",
+  },
+  quality: {
+    image: {
+      src: "/assets/homepage/solutions-integrated.jpg",
+      alt: loc(
+        "Integrated horticulture solutions and quality processes",
+        "Soluções integradas de horticultura e processos de qualidade",
+        "Soluciones hortícolas integradas y procesos de calidad",
+        "一体化园艺解决方案与质量流程"
+      ),
+    },
+    objectPosition: "center center",
+  },
+  sustainability: {
+    image: {
+      src: "https://images.unsplash.com/photo-1470058869958-2a77ade41c02?q=80&w=1400&auto=format&fit=crop",
+      alt: loc(
+        "Lush green plants growing in a sustainable environment",
+        "Plantas verdes exuberantes crescendo em ambiente sustentável",
+        "Plantas verdes exuberantes creciendo en un entorno sostenible",
+        "可持续环境中茂盛生长的绿色植物"
+      ),
+    },
+    objectPosition: "center 40%",
+  },
+  collaboration: {
+    image: {
+      src: "/assets/homepage/capabilities-partnerships.jpg",
+      alt: loc(
+        "Partners collaborating across the horticultural supply chain",
+        "Parceiros colaborando em toda a cadeia hortícola",
+        "Socios colaborando en toda la cadena hortícola",
+        "合作伙伴在整个园艺供应链中协作"
+      ),
+    },
+    objectPosition: "center center",
+  },
 };
 
 export function fallbackValueImage(id: string): {

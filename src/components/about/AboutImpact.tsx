@@ -30,13 +30,13 @@ export function AboutImpact({ data, locale }: AboutImpactProps) {
       } as const);
 
   return (
-    <section className="border-t border-oboya-green/35 bg-white py-[clamp(4.5rem,10vw,8rem)]">
+    <section className="border-t border-oboya-green/35 bg-white py-[clamp(5rem,11vw,9rem)]">
       <Container>
         <motion.div
           {...(reveal ?? {})}
           initial={reveal ? "hidden" : false}
           variants={reduceMotion ? undefined : fadeInUp}
-          className="mx-auto mb-10 max-w-3xl text-center md:mb-12"
+          className="mb-12 max-w-3xl md:mb-16"
         >
           {eyebrow ? (
             <p className="font-body text-[0.8125rem] font-medium tracking-[0.04em] text-oboya-green md:text-sm">
@@ -65,7 +65,7 @@ export function AboutImpact({ data, locale }: AboutImpactProps) {
           {...(reveal ?? {})}
           initial={reveal ? "hidden" : false}
           variants={reduceMotion ? undefined : fadeInUp}
-          className="mx-auto mt-10 max-w-3xl text-center font-body text-[0.9375rem] leading-relaxed text-oboya-blue-dark/65 md:mt-12 md:text-base"
+          className="mt-12 max-w-3xl font-body text-[0.9375rem] leading-relaxed text-oboya-blue-dark/65 md:mt-16 md:text-base"
         >
           {description}
         </motion.p>

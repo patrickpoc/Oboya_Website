@@ -80,27 +80,20 @@ export function AboutCorporateCulture({
 
   return (
     <section
-      className="overflow-x-clip border-t border-oboya-green/35 bg-oboya-blue-dark"
+      className="overflow-x-clip border-t border-oboya-green/35 bg-oboya-blue-dark py-[clamp(4rem,9vw,7rem)]"
       aria-labelledby={title ? "about-culture-heading" : undefined}
     >
-      <div className="grid lg:grid-cols-12 lg:items-stretch">
+      <div className="mx-auto w-full max-w-[var(--container-max)] px-[var(--container-padding)]">
         <motion.div
           {...(reveal ?? {})}
           initial={reveal ? "hidden" : false}
           variants={reduceMotion ? undefined : staggerContainer}
-          className={cn(
-            "flex flex-col justify-center",
-            "px-[var(--container-padding)] py-[clamp(3.5rem,8vw,6.5rem)]",
-            "lg:col-span-7 xl:col-span-8",
-            "lg:pl-[calc(max(0px,(100vw-var(--container-max))/2)+var(--container-padding))]",
-            "lg:pr-10 xl:pr-16"
-          )}
         >
           {title ? (
             <motion.h2
               id="about-culture-heading"
               variants={reduceMotion ? undefined : fadeInUp}
-              className="max-w-xl font-display text-[clamp(1.85rem,3.6vw,3.15rem)] font-light leading-[1.08] tracking-[-0.02em] text-balance"
+              className="max-w-2xl font-display text-[clamp(1.85rem,3.6vw,3.15rem)] font-light leading-[1.08] tracking-[-0.02em] text-balance"
             >
               {titleParts ? (
                 <>
@@ -114,65 +107,64 @@ export function AboutCorporateCulture({
             </motion.h2>
           ) : null}
 
-          {data.items.length > 0 ? (
-            <ul
-              className={cn(
-                "mt-10 grid list-none gap-x-8 gap-y-10 sm:mt-12 sm:grid-cols-2 sm:gap-x-10 sm:gap-y-12 md:mt-14 lg:gap-x-12 lg:gap-y-14",
-                !title && "mt-0"
-              )}
-            >
-              {data.items.map((item) => {
-                const itemTitle = pickLocalized(item.title, locale);
-                const description = pickLocalized(item.description, locale);
-                const ctaLabel =
-                  item.ctaLabel != null
-                    ? pickLocalized(item.ctaLabel, locale)
-                    : "Learn more";
-                const href = item.ctaHref || "/solutions";
+          <div
+            className={cn(
+              "grid gap-8 lg:grid-cols-12 lg:items-start lg:gap-10",
+              title && "mt-10 md:mt-14"
+            )}
+          >
+            {data.items.length > 0 ? (
+              <ul className="grid list-none gap-4 sm:grid-cols-2 sm:gap-5 lg:col-span-8">
+                {data.items.map((item) => {
+                  const itemTitle = pickLocalized(item.title, locale);
+                  const description = pickLocalized(item.description, locale);
+                  const ctaLabel =
+                    item.ctaLabel != null
+                      ? pickLocalized(item.ctaLabel, locale)
+                      : "Learn more";
+                  const href = item.ctaHref || "/solutions";
 
-                return (
-                  <motion.li
-                    key={item.id}
-                    variants={reduceMotion ? undefined : fadeInUp}
-                    className="flex min-w-0 flex-col"
-                  >
-                    <h3 className="font-display text-[clamp(1.05rem,1.6vw,1.25rem)] font-semibold leading-snug tracking-[-0.015em] text-white text-balance">
-                      {itemTitle}
-                    </h3>
-                    <p className="mt-3 flex-1 font-body text-[0.9375rem] leading-[1.6] text-white/88 md:text-base md:leading-[1.65]">
-                      {description}
-                    </p>
-                    <Link
-                      href={href}
-                      className="group mt-4 inline-flex w-fit items-center gap-1.5 font-body text-[0.9375rem] font-medium text-white underline decoration-1 decoration-white/70 underline-offset-[0.35em] transition-colors hover:text-oboya-green hover:decoration-oboya-green"
+                  return (
+                    <motion.li
+                      key={item.id}
+                      variants={reduceMotion ? undefined : fadeInUp}
+                      className="flex min-w-0 flex-col rounded-md border border-white/10 p-6 md:p-7"
                     >
-                      {ctaLabel}
-                      <ArrowRight
-                        className="size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5"
-                        aria-hidden
-                      />
-                    </Link>
-                  </motion.li>
-                );
-              })}
-            </ul>
-          ) : null}
-        </motion.div>
+                      <h3 className="font-display text-[clamp(1.05rem,1.6vw,1.25rem)] font-semibold leading-snug tracking-[-0.015em] text-white text-balance">
+                        {itemTitle}
+                      </h3>
+                      <p className="mt-3 flex-1 font-body text-[0.9375rem] leading-[1.6] text-white/80">
+                        {description}
+                      </p>
+                      <Link
+                        href={href}
+                        className="group mt-5 inline-flex w-fit items-center gap-1.5 font-body text-[0.9375rem] font-medium text-white underline decoration-1 decoration-white/70 underline-offset-[0.35em] transition-colors hover:text-oboya-green hover:decoration-oboya-green"
+                      >
+                        {ctaLabel}
+                        <ArrowRight
+                          className="size-3.5 shrink-0 transition-transform group-hover:translate-x-0.5"
+                          aria-hidden
+                        />
+                      </Link>
+                    </motion.li>
+                  );
+                })}
+              </ul>
+            ) : null}
 
-        <motion.div
-          {...(reveal ?? {})}
-          initial={reveal ? "hidden" : false}
-          variants={reduceMotion ? undefined : fadeInUp}
-          className="relative min-h-[16rem] sm:min-h-[20rem] lg:col-span-5 xl:col-span-4 lg:min-h-full"
-        >
-          <Image
-            src={featuredSrc}
-            alt={featuredAlt}
-            fill
-            className="object-cover object-center"
-            sizes="(max-width: 1024px) 100vw, 40vw"
-            priority={false}
-          />
+            <motion.div
+              variants={reduceMotion ? undefined : fadeInUp}
+              className="relative aspect-[4/3] overflow-hidden rounded-md lg:col-span-4 lg:aspect-auto lg:min-h-full lg:self-stretch"
+            >
+              <Image
+                src={featuredSrc}
+                alt={featuredAlt}
+                fill
+                className="object-cover object-center"
+                sizes="(max-width: 1024px) 100vw, 380px"
+              />
+            </motion.div>
+          </div>
         </motion.div>
       </div>
     </section>

@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { fadeInUp } from "@/lib/animations";
 import { pickLocalized } from "@/lib/cms/utils";
+import { cn } from "@/lib/utils";
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
 
 interface AboutCalloutProps {
@@ -10,10 +11,7 @@ interface AboutCalloutProps {
   locale: string;
 }
 
-/**
- * Solid navy statement band — green lead-in + white body in one paragraph.
- * No background image / parallax.
- */
+/** Navy statement band: green lead line highlighted beside the white body. */
 export function AboutCallout({ data, locale }: AboutCalloutProps) {
   const reduceMotion = useReducedMotion();
   const lead = data.segments
@@ -35,22 +33,30 @@ export function AboutCallout({ data, locale }: AboutCalloutProps) {
       aria-labelledby={leadWithPeriod ? "about-callout-heading" : undefined}
     >
       <motion.div
-        className="mx-auto w-full max-w-[var(--container-max)] px-[var(--container-padding)] py-[clamp(3.75rem,9vw,6.5rem)]"
+        className="mx-auto grid w-full max-w-[var(--container-max)] gap-6 px-[var(--container-padding)] py-[clamp(4rem,9vw,7rem)] lg:grid-cols-12 lg:gap-12"
         initial={reduceMotion ? false : "hidden"}
         whileInView={reduceMotion ? undefined : "visible"}
         viewport={{ once: true, margin: "-80px" }}
         variants={reduceMotion ? undefined : fadeInUp}
       >
-        <p
-          id="about-callout-heading"
-          className="max-w-[52rem] font-display text-[clamp(1.35rem,2.8vw,1.875rem)] font-light leading-[1.4] tracking-[-0.01em] text-pretty"
-        >
-          {leadWithPeriod ? (
-            <span className="text-oboya-green">{leadWithPeriod}</span>
-          ) : null}
-          {leadWithPeriod && body ? " " : null}
-          {body ? <span className="text-white">{body}</span> : null}
-        </p>
+        {leadWithPeriod ? (
+          <h2
+            id="about-callout-heading"
+            className="font-display text-[clamp(1.5rem,3vw,2.25rem)] font-light leading-[1.2] tracking-[-0.02em] text-oboya-green text-balance lg:col-span-5"
+          >
+            {leadWithPeriod}
+          </h2>
+        ) : null}
+        {body ? (
+          <p
+            className={cn(
+              "font-display text-[clamp(1.35rem,2.8vw,1.875rem)] font-light leading-[1.4] tracking-[-0.01em] text-white text-pretty lg:col-span-7",
+              leadWithPeriod && "lg:col-start-6"
+            )}
+          >
+            {body}
+          </p>
+        ) : null}
       </motion.div>
     </section>
   );
