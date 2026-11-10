@@ -5,6 +5,7 @@ import {
   LEGACY_MISSION_BODY,
   LEGACY_VALUES,
   LEGACY_VISION_BODY,
+  isLegacyClientsStat,
   sameLocalized,
 } from "@/lib/cms/repositories/about-page/legacy-defaults";
 import {
@@ -14,7 +15,7 @@ import {
 } from "@/lib/cms/repositories/about-page/fallbacks";
 
 let cache: AboutPageSettings | null = null;
-const CONTENT_REVISION = 25;
+const CONTENT_REVISION = 26;
 let cacheRevision = 0;
 
 /** Ensure durable / legacy CMS docs have value images and Numbers stats. */
@@ -136,7 +137,9 @@ export function normalizeAboutPageSettings(
       title: settings.impact?.title ?? defaults.impact.title,
       description: settings.impact?.description ?? defaults.impact.description,
       eyebrow: settings.impact?.eyebrow,
-      stats: normalizeImpactStats(settings.impact?.stats ?? []),
+      stats: normalizeImpactStats(
+        (settings.impact?.stats ?? []).filter((stat) => !isLegacyClientsStat(stat))
+      ),
     },
     values: {
       ...settings.values,

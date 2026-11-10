@@ -60,3 +60,26 @@ describe("about page values/mission/vision", () => {
     expect(normalizeAboutPageSettings(s).values.items).toEqual([]);
   });
 });
+
+describe("about page impact stats", () => {
+  const ids = (s: ReturnType<typeof defaultSettings>) => normalizeAboutPageSettings(s).impact.stats.map((i) => i.id);
+
+  it("defaults have 6 stats in order", () => {
+    expect(defaultSettings().impact.stats.map((i) => i.id)).toEqual([
+      "countries", "manufacturing", "offices", "employees", "products", "years",
+    ]);
+  });
+
+  it("drops the unchanged legacy clients stat", () => {
+    const s = defaultSettings();
+    s.impact.stats.splice(4, 0, { ...s.impact.stats[0], id: "clients", value: 1, suffix: "m+" });
+    expect(ids(s)).not.toContain("clients");
+    expect(ids(s)).toHaveLength(6);
+  });
+
+  it("keeps an edited clients stat", () => {
+    const s = defaultSettings();
+    s.impact.stats.splice(4, 0, { ...s.impact.stats[0], id: "clients", value: 2, suffix: "m+" });
+    expect(ids(s)).toContain("clients");
+  });
+});

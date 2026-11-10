@@ -205,7 +205,6 @@ export function normalizeImpactStats(stats: AboutImpactStat[]): AboutImpactStat[
     "manufacturing",
     "offices",
     "employees",
-    "clients",
     "products",
     "years",
   ];

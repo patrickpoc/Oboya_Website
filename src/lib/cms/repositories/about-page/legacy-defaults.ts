@@ -89,3 +89,8 @@ export function sameLocalized(
 ): boolean {
   return !!a && LOCALES.every((l) => a[l] === b[l]);
 }
+
+/** The removed "Clients Served" stat is dropped only while still at its old default. */
+export function isLegacyClientsStat(stat: { id?: string; value?: unknown; suffix?: string }): boolean {
+  return stat?.id === "clients" && stat.value === 1 && stat.suffix === "m+";
+}

@@ -109,29 +109,6 @@ export function defaultImpact(): AboutPageSettings["impact"] {
         ),
       },
       {
-        id: "clients",
-        value: 1,
-        suffix: "m+",
-        icon: "handshake",
-        accentColor: "#ea5744",
-        objectPosition: "center 30%",
-        image: {
-          src: "https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1400&auto=format&fit=crop",
-          alt: loc(
-            "Partners shaking hands after a successful agreement",
-            "Parceiros apertando as mãos após um acordo bem-sucedido",
-            "Socios estrechándose la mano tras un acuerdo exitoso",
-            "合作伙伴在达成协议后握手"
-          ),
-        },
-        label: loc(
-          "Clients Served",
-          "Clientes Atendidos",
-          "Clientes Atendidos",
-          "服务客户"
-        ),
-      },
-      {
         id: "products",
         value: 20,
         suffix: "+",

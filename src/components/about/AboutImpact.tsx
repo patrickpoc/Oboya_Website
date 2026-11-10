@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { Container } from "@/components/ui/container";
-import { NumbersSqueezeCarousel } from "@/components/about/NumbersSqueezeCarousel";
+import { NumbersGrid } from "@/components/about/NumbersGrid";
 import { fadeInUp } from "@/lib/animations";
 import { pickLocalized } from "@/lib/cms/utils";
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
@@ -58,7 +58,7 @@ export function AboutImpact({ data, locale }: AboutImpactProps) {
           initial={reveal ? "hidden" : false}
           variants={reduceMotion ? undefined : fadeInUp}
         >
-          <NumbersSqueezeCarousel stats={data.stats} locale={locale} />
+          <NumbersGrid stats={data.stats} locale={locale} />
         </motion.div>
 
         <motion.p
