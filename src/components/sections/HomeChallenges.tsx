@@ -11,9 +11,36 @@ import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repositor
 const ZOOM = 2.5;
 const MOVE_S = 0.8;
 const CAPTION_W = 300;
+const ROLL_S = 0.35;
+
+/** White banner that unrolls from the top, then the text fades in; reverses on exit. */
+function CaptionBox({ id, text, still, className }: { id: string; text: string; still: boolean; className: string }) {
+  const hidden = { clipPath: "inset(0 0 100% 0)" };
+  const shown = { clipPath: "inset(0 0 0% 0)" };
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={id}
+        className={`w-fit rounded-md bg-white px-4 py-2.5 shadow-md ${className}`}
+        initial={still ? false : hidden}
+        animate={shown}
+        exit={still ? shown : { ...hidden, transition: { duration: ROLL_S, delay: 0.15, ease: "easeIn" } }}
+        transition={{ duration: still ? 0 : ROLL_S, ease: "easeOut" }}
+      >
+        <motion.p
+          className="font-body text-base leading-snug text-oboya-blue-dark md:text-lg"
+          initial={still ? false : { opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0, transition: { duration: still ? 0 : 0.2, delay: still ? 0 : ROLL_S } }}
+          exit={still ? undefined : { opacity: 0, transition: { duration: 0.15 } }}
+        >
+          {text}
+        </motion.p>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), Math.max(lo, hi));
-const glow = { textShadow: "0 0 10px rgba(241,245,241,0.95), 0 0 3px rgba(241,245,241,0.9)" };
 
 /** Greenhouse photo with a magnifying lens that moves between points via prev/next buttons. */
 export function HomeChallenges({
@@ -73,8 +100,7 @@ export function HomeChallenges({
   const bgSize = `${rw * ZOOM}px ${rh * ZOOM}px`;
   const bgPos = `${R - (px - ox) * ZOOM}px ${R - (py - oy) * ZOOM}px`;
   const move = still ? { duration: 0 } : { duration: MOVE_S, ease: [0.22, 1, 0.36, 1] as const };
-  const fade = { duration: still ? 0 : 0.3 };
-
+  
   const step = (dir: 1 | -1) => setActive((a) => (a + dir + count) % count);
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowRight") step(1);
@@ -137,19 +163,7 @@ export function HomeChallenges({
                 transition={move}
                 aria-hidden
               >
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.p
-                    key={pt.id}
-                    className="text-center font-body text-base leading-snug text-oboya-blue-dark"
-                    style={glow}
-                    initial={still ? false : { opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={fade}
-                  >
-                    {caption(active)}
-                  </motion.p>
-                </AnimatePresence>
+                <CaptionBox id={pt.id} text={caption(active)} still={still} className="mx-auto text-center" />
               </motion.div>
             ) : (
               <motion.div
@@ -163,19 +177,12 @@ export function HomeChallenges({
                 <span className={`${dot} left-0 -translate-x-1/2`} />
                 <span className="absolute left-0 top-0 h-px w-full -translate-y-1/2 bg-white" />
                 <span className={`${dot} right-0 translate-x-1/2`} />
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.p
-                    key={pt.id}
-                    className={`absolute inset-x-0 top-3 font-body text-lg leading-snug text-oboya-blue-dark ${side === 1 ? "text-left" : "text-right"}`}
-                    style={glow}
-                    initial={still ? false : { opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={fade}
-                  >
-                    {caption(active)}
-                  </motion.p>
-                </AnimatePresence>
+                <CaptionBox
+                  id={pt.id}
+                  text={caption(active)}
+                  still={still}
+                  className={`max-w-full ${side === 1 ? "" : "ml-auto"}`}
+                />
               </motion.div>
             )}
           </>
