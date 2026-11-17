@@ -15,21 +15,14 @@ const FADE_S = 0.25;
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), Math.max(lo, hi));
 
-/** White caption box that cross-fades (opacity only) between steps. */
-function CaptionBox({ id, text, still, className }: { id: string; text: string; still: boolean; className: string }) {
+/** White caption box. */
+function CaptionBox({ text, className }: { text: string; className: string }) {
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.p
-        key={id}
-        className={`w-fit rounded-md bg-white px-4 py-2.5 font-body text-base leading-snug text-oboya-blue-dark shadow-md md:text-lg ${className}`}
-        initial={still ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: still ? 0 : FADE_S }}
-      >
-        {text}
-      </motion.p>
-    </AnimatePresence>
+    <p
+      className={`w-fit rounded-md bg-white px-4 py-2.5 font-body text-base leading-snug text-oboya-blue-dark shadow-md md:text-lg ${className}`}
+    >
+      {text}
+    </p>
   );
 }
 
@@ -146,35 +139,34 @@ export function HomeChallenges({
               />
             </motion.div>
 
-            {/* Caption (desktop) */}
-            {mobile ? (
+            {/* Caption: each one is pinned to its own final position. The old one fades out in
+                place, then the new one fades in (mode="wait"), so they never slide or overlap. */}
+            <AnimatePresence mode="wait" initial={false}>
               <motion.div
+                key={`${pt.id}-${mobile ? "m" : "d"}`}
                 className="pointer-events-none absolute left-0 top-0 z-[2]"
-                style={{ width: mobCapW }}
-                initial={false}
-                animate={{ x: mobCapX, y: lensY + R + 10 }}
-                transition={move}
-                aria-hidden
-              >
-                <CaptionBox id={pt.id} text={caption(active)} still={still} className="mx-auto text-center" />
-              </motion.div>
-            ) : (
-              <motion.div
-                className="pointer-events-none absolute left-0 top-0 z-[2]"
-                style={{ width: CAPTION_W, marginLeft: side === 1 ? 0 : -CAPTION_W }}
-                initial={false}
-                animate={{ x: lineX, y: lineY }}
-                transition={move}
+                style={
+                  mobile
+                    ? { width: mobCapW, x: mobCapX, y: lensY + R + 10 }
+                    : { width: CAPTION_W, marginLeft: side === 1 ? 0 : -CAPTION_W, x: lineX, y: lineY }
+                }
+                initial={still ? false : { opacity: 0 }}
+                // Enter only once the lens has (nearly) reached the new point.
+                animate={{
+                  opacity: 1,
+                  transition: { duration: still ? 0 : FADE_S, delay: still ? 0 : MOVE_S - FADE_S - 0.1 },
+                }}
+                exit={{ opacity: 0, transition: { duration: still ? 0 : FADE_S } }}
                 aria-hidden
               >
                 <CaptionBox
-                  id={pt.id}
                   text={caption(active)}
-                  still={still}
-                  className={`max-w-full ${side === 1 ? "" : "ml-auto"}`}
+                  className={
+                    mobile ? "mx-auto text-center" : `max-w-full ${side === 1 ? "" : "ml-auto"}`
+                  }
                 />
               </motion.div>
-            )}
+            </AnimatePresence>
           </>
         )}
 
