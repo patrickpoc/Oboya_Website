@@ -14,6 +14,7 @@ export function HomeCta({ title, description, buttonLabel }: HomeCtaProps) {
       title={title}
       description={description}
       buttonLabel={buttonLabel}
+      href="/contact"
       imageSrc="/assets/solutions/cta-horticulture.jpg"
       size="compact"
     />
