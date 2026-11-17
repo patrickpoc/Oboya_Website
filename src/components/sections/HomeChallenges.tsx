@@ -143,7 +143,7 @@ export function HomeChallenges({
               />
             </motion.div>
 
-            {/* Caption (+ connector line on desktop) */}
+            {/* Caption (desktop) */}
             {mobile ? (
               <motion.div
                 className="pointer-events-none absolute left-0 top-0 z-[2]"
@@ -164,7 +164,6 @@ export function HomeChallenges({
                 transition={move}
                 aria-hidden
               >
-                <span className="absolute left-0 top-0 h-px w-full -translate-y-1/2 bg-white" />
                 <CaptionBox
                   id={pt.id}
                   text={caption(active)}
