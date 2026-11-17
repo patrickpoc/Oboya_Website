@@ -60,7 +60,7 @@ export function HomeChallenges({
 
   const { w, h } = size;
   const mobile = w > 0 && w < 640;
-  const R = mobile ? 64 : w < 1024 ? 100 : 120;
+  const R = mobile ? 64 : w < 1024 ? 88 : 104;
   const pt = points[active];
   // Photo is object-cover and x/y are % of the whole image: map through the rendered image rect.
   const scale = Math.max(w / ratio, h) || 1;
@@ -100,7 +100,7 @@ export function HomeChallenges({
     <section className="relative overflow-hidden bg-oboya-soft-white">
       <div
         ref={frameRef}
-        className="relative aspect-[4/5] w-full sm:aspect-auto sm:h-[clamp(540px,52vw,760px)]"
+        className="relative aspect-[4/5] w-full sm:aspect-auto sm:h-[clamp(470px,38vw,560px)]"
       >
         <Image
           src={data.image}

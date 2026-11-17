@@ -24,7 +24,7 @@ function wrap(index: number, count: number) {
 function cardWidthFor(w: number) {
   if (w < 640) return w * 0.78;
   if (w < 1024) return w * 0.48;
-  return Math.min(w * 0.32, 480);
+  return Math.min(w * 0.24, 360);
 }
 
 /** The active card grows; neighbours shrink a little. */
@@ -112,7 +112,7 @@ export function BusinessSolutions({
     "flex size-10 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-blue-light sm:size-12";
 
   return (
-    <section className="overflow-x-clip bg-oboya-soft-white py-[var(--section-y)]">
+    <section className="overflow-x-clip bg-oboya-soft-white py-[var(--section-y-sm)]">
       <Container>
         <motion.div
           initial={animationsEnabled ? "hidden" : false}
@@ -195,7 +195,7 @@ export function BusinessSolutions({
                     alt={isActive ? title : ""}
                     fill
                     className="object-cover"
-                    sizes="(max-width: 640px) 85vw, (max-width: 1024px) 52vw, 520px"
+                    sizes="(max-width: 640px) 85vw, (max-width: 1024px) 52vw, 400px"
                   />
                 ) : (
                   <div className="absolute inset-0 bg-oboya-blue-dark" />
