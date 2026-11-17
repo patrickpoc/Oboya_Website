@@ -1999,7 +1999,7 @@
         },
         "homeEcosystem": {
           "title": "Recorrido del ecosistema",
-          "description": "Línea de apertura, seis etapas con descripción, puntos destacados e imagen opcional, líneas de cierre y eslogan."
+          "description": "Línea de apertura, siete etapas con imagen, descripción y puntos destacados, líneas de cierre y eslogan."
         },
         "capabilities": {
           "title": "Por qué Oboya Horticulture",
@@ -2067,9 +2067,9 @@
         "ecosystemStageLabel": "Etiqueta de la etapa",
         "ecosystemStageDescription": "Descripción de la etapa",
         "ecosystemStagePoint": "Punto destacado",
-        "ecosystemStagePointsHint": "Hasta 3 puntos destacados breves sobre los productos. Se resaltan junto a la ilustración.",
+        "ecosystemStagePointsHint": "Hasta 3 puntos destacados breves sobre los productos. La descripción y los puntos se conservan para uso futuro y no se muestran en el arco.",
         "ecosystemStageImage": "Imagen de la etapa",
-        "ecosystemStageImageHint": "Déjelo vacío para mostrar la ilustración animada. Se recomienda una imagen 2:1; otras proporciones se recortan. Use una imagen subida o de la biblioteca (JPG, PNG, WebP, AVIF o GIF; no se admite SVG); no se aceptan enlaces de otros sitios.",
+        "ecosystemStageImageHint": "Se muestra como foto en medio círculo sobre el arco; un recorte cuadrado funciona mejor. Si está vacío, se usa la foto predeterminada de la etapa. Use una imagen subida o de la biblioteca (JPG, PNG, WebP, AVIF o GIF).",
         "ecosystemStageImageInvalid": "Esta imagen no se puede usar y se eliminará al guardar. Elija un JPG, PNG, WebP, AVIF o GIF subido o de la biblioteca, sin query string.",
         "articlesManagedHint": "Los artículos se gestionan en Blog → Posts.",
         "statsMissionTitle": "Estadísticas y misión",

@@ -1999,7 +1999,7 @@
         },
         "homeEcosystem": {
           "title": "生态之旅",
-          "description": "开场语、六个阶段（含描述、亮点和可选图片）、结束语与标语。"
+          "description": "开场语、七个阶段（含图片、描述和亮点）、结束语与标语。"
         },
         "capabilities": {
           "title": "为何选择 Oboya Horticulture",
@@ -2067,9 +2067,9 @@
         "ecosystemStageLabel": "阶段标签",
         "ecosystemStageDescription": "阶段描述",
         "ecosystemStagePoint": "产品卖点",
-        "ecosystemStagePointsHint": "最多 3 条简短的产品卖点，将显示在插图旁边。",
+        "ecosystemStagePointsHint": "最多 3 条简短的产品卖点，描述和卖点仅保留备用，不会显示在弧形展示中。",
         "ecosystemStageImage": "阶段图片",
-        "ecosystemStageImageHint": "留空则显示动画插图。推荐使用 2:1 比例的图片；其他比例将被裁剪。请使用已上传或素材库中的图片（JPG、PNG、WebP、AVIF 或 GIF；不支持 SVG）；不接受其他网站的链接。",
+        "ecosystemStageImageHint": "以半圆形照片显示在弧形上，方形裁剪效果最佳。留空则使用默认阶段照片。请使用已上传或素材库中的图片（JPG、PNG、WebP、AVIF 或 GIF）。",
         "ecosystemStageImageInvalid": "此图片无法使用，保存时将被清除。请选择已上传或素材库中的 JPG、PNG、WebP、AVIF 或 GIF 图片，且不带查询字符串。",
         "articlesManagedHint": "文章在 博客 → 文章 中管理。",
         "statsMissionTitle": "数据与使命",

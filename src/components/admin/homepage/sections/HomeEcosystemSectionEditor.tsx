@@ -147,7 +147,6 @@ export function HomeEcosystemSectionEditor({
               label={t("fields.ecosystemStageImage")}
               value={stage.image}
               onChange={(url) => patchStage(stage.id, { image: url })}
-              optional
             />
             {stage.image.trim() && !sanitizeHomeEcosystemImage(stage.image) && (
               <p role="alert" className="text-xs text-destructive">

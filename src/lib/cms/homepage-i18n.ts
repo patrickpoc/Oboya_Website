@@ -339,6 +339,7 @@ export const HOME_I18N = {
       packaging: homeLoc("Packaging", "Embalagem", "Empaque", "包装"),
       logistics: homeLoc("Logistics & Transport", "Logística e Transporte", "Logística y Transporte", "物流与运输"),
       retail: homeLoc("Retail Display", "Exposição no Varejo", "Exhibición en Retail", "零售陈列"),
+      pos: homeLoc("Point of Sale", "Ponto de Venda", "Punto de Venta", "销售终端"),
     },
     descriptions: {
       propagation: homeLoc("From seed to young plant, with uniform starts that set up every crop.", "Da semente à muda, com um início uniforme que prepara cada cultura.", "De la semilla a la planta joven, con arranques uniformes que sientan las bases de cada cultivo.", "从种子到幼苗，均匀一致的起步为每一茬作物打好基础。"),
@@ -347,6 +348,7 @@ export const HOME_I18N = {
       packaging: homeLoc("Packaging that protects freshness and gives each product shelf presence.", "Embalagens que protegem a frescura e dão presença a cada produto na gôndola.", "Envases que protegen la frescura y dan presencia a cada producto en el lineal.", "守护新鲜度并让每件产品在货架上脱颖而出的包装。"),
       logistics: homeLoc("Trolleys, buckets and automation that keep the cold chain moving.", "Carrinhos, baldes e automação que mantêm a cadeia do frio em movimento.", "Carros, cubos y automatización que mantienen en marcha la cadena de frío.", "推车、水桶与自动化设备，保障冷链顺畅运转。"),
       retail: homeLoc("Displays and shelf-ready formats that put fresh products in front of shoppers.", "Displays e formatos prontos para a gôndola que põem os produtos frescos diante do consumidor.", "Expositores y formatos listos para el lineal que ponen los productos frescos frente al comprador.", "陈列架与货架即用型包装，让新鲜产品直达消费者眼前。"),
+      pos: homeLoc("Checkout-ready formats that turn the last step into one more sale.", "Formatos prontos para o caixa que transformam a última etapa em mais uma venda.", "Formatos listos para caja que convierten el último paso en una venta más.", "结账区即用型产品，让最后一步多成交一单。"),
     },
     points: {
       propagation: {
@@ -378,6 +380,11 @@ export const HOME_I18N = {
         displays: homeLoc("Display systems", "Sistemas de exposição", "Sistemas de exhibición", "陈列系统"),
         shelfReady: homeLoc("Shelf-ready packaging", "Embalagens shelf-ready", "Envases listos para lineal", "货架即用型包装"),
         potted: homeLoc("Potted plant displays", "Displays de plantas em vaso", "Expositores de plantas en maceta", "盆栽陈列架"),
+      },
+      pos: {
+        checkout: homeLoc("Checkout displays", "Displays de caixa", "Expositores de caja", "收银台陈列"),
+        impulse: homeLoc("Impulse-buy formats", "Formatos para compra por impulso", "Formatos para compra por impulso", "冲动消费型包装"),
+        labels: homeLoc("Price & product labels", "Etiquetas de preço e produto", "Etiquetas de precio y producto", "价格与产品标签"),
       },
     },
   },

@@ -1999,7 +1999,7 @@
         },
         "homeEcosystem": {
           "title": "Ecosystem Journey",
-          "description": "Opening line, six stages with description, proof points and optional image, closing lines and slogan."
+          "description": "Opening line, seven stages with image, description and proof points, closing lines and slogan."
         },
         "capabilities": {
           "title": "Why Oboya Horticulture",
@@ -2067,9 +2067,9 @@
         "ecosystemStageLabel": "Stage label",
         "ecosystemStageDescription": "Stage description",
         "ecosystemStagePoint": "Proof point",
-        "ecosystemStagePointsHint": "Up to 3 short product proof points. They are highlighted next to the illustration.",
+        "ecosystemStagePointsHint": "Up to 3 short product proof points. The description and points are kept for future use and are not shown on the arc.",
         "ecosystemStageImage": "Stage image",
-        "ecosystemStageImageHint": "Leave empty to show the animated illustration. A 2:1 image is recommended; other proportions are cropped. Use an uploaded or library image (JPG, PNG, WebP, AVIF or GIF; SVG is not supported); links from other sites are not accepted.",
+        "ecosystemStageImageHint": "Shown as a half-circle photo on the arc; a square crop works best. When empty, the default stage photo is used. Use an uploaded or library image (JPG, PNG, WebP, AVIF or GIF).",
         "ecosystemStageImageInvalid": "This image cannot be used and will be cleared on save. Pick an uploaded or library JPG, PNG, WebP, AVIF or GIF without a query string.",
         "articlesManagedHint": "Articles are managed under Blog → Posts.",
         "statsMissionTitle": "Statistics & Mission",

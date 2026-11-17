@@ -82,9 +82,20 @@ export const HOME_ECOSYSTEM_STAGE_IDS = [
   "packaging",
   "logistics",
   "retail",
+  "pos",
 ] as const;
 
 export type HomeEcosystemStageId = (typeof HOME_ECOSYSTEM_STAGE_IDS)[number];
+
+export const HOME_ECOSYSTEM_DEFAULT_IMAGES: Record<HomeEcosystemStageId, string> = {
+  propagation: "/assets/homepage/ecosystem-propagation.jpg",
+  growing: "/assets/homepage/ecosystem-growing.jpg",
+  harvest: "/assets/solutions/stage-harvest.jpg",
+  packaging: "/assets/homepage/ecosystem-packaging.jpg",
+  logistics: "/assets/homepage/ecosystem-logistics.jpg",
+  retail: "/assets/homepage/ecosystem-retail.jpg",
+  pos: "/assets/homepage/ecosystem-pos.jpg",
+};
 
 export const HOME_ECOSYSTEM_MAX_POINTS = 3;
 
@@ -100,7 +111,7 @@ export interface HomeEcosystemStage {
   description: LocalizedString;
   /** Up to HOME_ECOSYSTEM_MAX_POINTS entries. */
   points: HomeEcosystemPoint[];
-  /** "" shows the animated SVG scene. */
+  /** Required; falls back to HOME_ECOSYSTEM_DEFAULT_IMAGES[id] when empty or invalid. */
   image: string;
 }
 
@@ -258,7 +269,7 @@ const defaultSettings = (): HomepageSettings => ({
       label: E.stages[id],
       description: E.descriptions[id],
       points: Object.entries(E.points[id]).map(([pid, text]) => ({ id: pid, text })),
-      image: "",
+      image: HOME_ECOSYSTEM_DEFAULT_IMAGES[id],
     })),
   },
   capabilities: {
@@ -514,7 +525,7 @@ function migrateEcosystem(
         label: asLoc(st?.label) ?? def.label,
         description: asLoc(st?.description) ?? def.description,
         points: migrateEcosystemPoints(st?.points, def.points),
-        image: sanitizeHomeEcosystemImage(st?.image),
+        image: sanitizeHomeEcosystemImage(st?.image) || def.image,
       };
     }),
   };

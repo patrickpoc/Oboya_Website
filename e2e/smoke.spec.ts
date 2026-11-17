@@ -51,19 +51,19 @@ test.describe("public smoke", () => {
     }
   });
 
-  test("home ecosystem rail selects a step", async ({ page }) => {
-    // Reduced motion puts the section in its static mode: no timers, deterministic rail.
+  test("home ecosystem arc advances with next/prev", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/en", { waitUntil: "domcontentloaded" });
     await page.getByRole("button", { name: "Accept" }).click({ timeout: 3000 }).catch(() => {});
-    const stage = page.locator("[data-eco-phase]");
-    await stage.scrollIntoViewIfNeeded();
-    await expect(stage).toHaveAttribute("data-eco-phase", "static");
-    const steps = page.getByRole("region", { name: /ecosystem/i }).locator("ol button");
-    await expect(steps).toHaveCount(6);
-    await steps.nth(2).click();
-    await expect(steps.nth(2)).toHaveAttribute("aria-current", "step");
-    await expect(steps.nth(0)).not.toHaveAttribute("aria-current", "step");
+    const region = page.getByRole("region", { name: /ecosystem/i });
+    await region.scrollIntoViewIfNeeded();
+    await expect(region.locator("ol li")).toHaveCount(7);
+    await expect(region).toHaveAttribute("data-eco-active", "propagation");
+    await region.getByRole("button", { name: "Next stage" }).click();
+    await expect(region).toHaveAttribute("data-eco-active", "growing");
+    await expect(region.locator("ol li").nth(1)).toHaveAttribute("aria-current", "step");
+    await region.getByRole("button", { name: "Previous stage" }).click();
+    await expect(region).toHaveAttribute("data-eco-active", "propagation");
   });
 
   test("/work-with-us redirects to /work", async ({ page }) => {

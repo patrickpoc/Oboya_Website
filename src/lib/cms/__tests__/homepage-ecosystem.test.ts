@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  HOME_ECOSYSTEM_DEFAULT_IMAGES,
   HOME_ECOSYSTEM_STAGE_IDS,
   getHomepageSettings,
   replaceHomepageSettingsCache,
@@ -32,17 +33,18 @@ describe("homeEcosystem settings", () => {
     expect(eco.openingLine.en).toBe("Oboya, your one-stop partner for horticulture.");
     expect(eco.closingLine2.en).toBe("Endless Opportunities to Perform Better.");
     expect(stageOf(eco, "logistics").label.en).toBe("Logistics & Transport");
-    expect(eco.stages.every((s) => s.image === "")).toBe(true);
+    expect(eco.stages).toHaveLength(7);
+    for (const s of eco.stages) expect(s.image).toBe(HOME_ECOSYSTEM_DEFAULT_IMAGES[s.id]);
   });
 
   it("merges a partial document", () => {
     const eco = load({ slogan: loc("Custom", "Custom") });
     expect(eco.slogan.en).toBe("Custom");
     expect(eco.title.en).toContain("Retail Display");
-    expect(eco.stages).toHaveLength(6);
+    expect(eco.stages).toHaveLength(7);
   });
 
-  it("drops pos and unknown ids, ignores duplicates and reordering", () => {
+  it("keeps pos, drops unknown ids, ignores duplicates and reordering", () => {
     const eco = load({
       stages: [
         { id: "pos", label: loc("POS") },
@@ -55,6 +57,20 @@ describe("homeEcosystem settings", () => {
     expect(eco.stages.map((s) => s.id)).toEqual([...HOME_ECOSYSTEM_STAGE_IDS]);
     expect(stageOf(eco, "retail").label.en).toBe("R1");
     expect(stageOf(eco, "propagation").label.en).toBe("P");
+  });
+
+  it("appends pos with defaults to a stored 6-stage document", () => {
+    const six = HOME_ECOSYSTEM_STAGE_IDS.filter((id) => id !== "pos").map((id) => ({
+      id,
+      label: loc(`L-${id}`),
+      image: "/uploads/mine.jpg",
+    }));
+    const eco = load({ stages: six });
+    expect(eco.stages.map((s) => s.id)).toEqual([...HOME_ECOSYSTEM_STAGE_IDS]);
+    expect(stageOf(eco, "retail").label.en).toBe("L-retail");
+    expect(stageOf(eco, "retail").image).toBe("/uploads/mine.jpg");
+    expect(stageOf(eco, "pos").label.en).toBe("Point of Sale");
+    expect(stageOf(eco, "pos").image).toBe(HOME_ECOSYSTEM_DEFAULT_IMAGES.pos);
   });
 
   it("falls back to the default for an empty locale", () => {
@@ -175,7 +191,8 @@ describe("homeEcosystem settings", () => {
       "/uploads/",
       "/uploads/%ZZ.png",
     ];
-    for (const v of bad) expect(img(v)).toBe("");
+    for (const v of bad) expect(img(v)).toBe(HOME_ECOSYSTEM_DEFAULT_IMAGES.harvest);
+    expect(img("")).toBe(HOME_ECOSYSTEM_DEFAULT_IMAGES.harvest);
   });
 
   it("normalizes remote image URLs", () => {
@@ -197,6 +214,6 @@ describe("homeEcosystem settings", () => {
     const eco = load({
       stages: [{ id: "harvest", image: "https://proj.supabase.co/storage/v1/object/public/a.png" }],
     });
-    expect(stageOf(eco, "harvest").image).toBe("");
+    expect(stageOf(eco, "harvest").image).toBe(HOME_ECOSYSTEM_DEFAULT_IMAGES.harvest);
   });
 });

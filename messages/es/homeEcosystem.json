@@ -1,5 +1,8 @@
 {
   "ariaLabel": "Ecosistema hortícola Oboya",
-  "pause": "Pausar",
-  "play": "Reproducir"
+  "controls": "Navegación por etapas",
+  "prev": "Etapa anterior",
+  "next": "Etapa siguiente",
+  "restart": "Reiniciar desde {label}",
+  "stageStatus": "{label}, etapa {current} de {total}"
 }

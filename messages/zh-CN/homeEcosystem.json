@@ -1,5 +1,8 @@
 {
   "ariaLabel": "Oboya 园艺生态系统",
-  "pause": "暂停",
-  "play": "播放"
+  "controls": "阶段导航",
+  "prev": "上一阶段",
+  "next": "下一阶段",
+  "restart": "从{label}重新开始",
+  "stageStatus": "{label}，第 {current} 阶段，共 {total} 个"
 }

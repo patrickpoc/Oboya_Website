@@ -1,5 +1,8 @@
 {
   "ariaLabel": "Oboya horticulture ecosystem",
-  "pause": "Pause",
-  "play": "Play"
+  "controls": "Stage navigation",
+  "prev": "Previous stage",
+  "next": "Next stage",
+  "restart": "Restart from {label}",
+  "stageStatus": "{label}, stage {current} of {total}"
 }
