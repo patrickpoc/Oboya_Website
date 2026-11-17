@@ -6,7 +6,7 @@ import { HomeCta } from "@/components/sections/HomeCta";
 import { HomePageContent } from "@/components/sections/HomePageContent";
 import { Partners } from "@/components/sections/Partners";
 import { routing } from "@/i18n/routing";
-import { readBlogPosts, readHomepageSettings } from "@/lib/cms/readers";
+import { readHomepageSettings } from "@/lib/cms/readers";
 import { pickLocalized } from "@/lib/cms/utils";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -36,10 +36,9 @@ export default async function Home({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [tHomeCta, homepage, posts] = await Promise.all([
+  const [tHomeCta, homepage] = await Promise.all([
     getTranslations({ locale, namespace: "homeCta" }),
     readHomepageSettings(),
-    readBlogPosts(),
   ]);
 
   const waitForHero =
@@ -83,11 +82,7 @@ export default async function Home({ params }: Props) {
             </>
           }
         >
-          <HomePageContent
-            locale={locale}
-            homepage={homepage}
-            posts={posts}
-          />
+          <HomePageContent locale={locale} homepage={homepage} />
         </HomePageBackdrop>
       </main>
       <Footer />

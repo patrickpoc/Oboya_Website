@@ -3,21 +3,14 @@ import { Capabilities } from "@/components/sections/Capabilities";
 import { Hero } from "@/components/sections/Hero";
 import { HomeChallenges } from "@/components/sections/HomeChallenges";
 import { HomeEcosystemSection } from "@/components/sections/HomeEcosystemSection";
-import { HomeLatestNews } from "@/components/sections/HomeLatestNews";
 import { Testimonials } from "@/components/sections/Testimonials";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
-import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
 interface HomePageContentProps {
   locale: string;
   homepage: HomepageSettings;
-  posts: CmsBlogPost[];
 }
 
-export function HomePageContent({
-  locale,
-  homepage,
-  posts,
-}: HomePageContentProps) {
+export function HomePageContent({ locale, homepage }: HomePageContentProps) {
   const animationsEnabled = homepage.animations?.enabled !== false;
 
   const challenges =
@@ -57,14 +50,6 @@ export function HomePageContent({
       {homepage.sections.testimonials.enabled && (
         <Testimonials
           data={homepage.testimonials}
-          locale={locale}
-          animationsEnabled={animationsEnabled}
-        />
-      )}
-      {homepage.sections.latestNews.enabled && (
-        <HomeLatestNews
-          data={homepage.latestNews}
-          posts={posts}
           locale={locale}
           animationsEnabled={animationsEnabled}
         />
