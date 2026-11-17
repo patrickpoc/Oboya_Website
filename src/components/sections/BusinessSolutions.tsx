@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
 import { fadeInUp, revealViewport } from "@/lib/animations";
@@ -85,7 +85,7 @@ export function BusinessSolutions({
 
   const slot = (i: number, a: number) => wrap(i - a + half, count) - half;
   const cardW = cardWidthFor(width || 360);
-  const cardH = cardW * (width < 640 ? 1.25 : 4 / 3);
+  const cardH = cardW * (8 / 7);
   const step = cardW + GAP;
   const spring = still
     ? { duration: 0 }
@@ -163,7 +163,7 @@ export function BusinessSolutions({
             return (
               <motion.li
                 key={item.id}
-                className="absolute top-0 overflow-hidden rounded-2xl"
+                className="absolute top-0 overflow-hidden rounded-none shadow-[0_12px_40px_rgba(1,32,63,0.25)]"
                 style={{ width: cardW, height: cardH, left: `calc(50% - ${cardW / 2}px)` }}
                 initial={false}
                 animate={{ x: s * step, opacity: !visible ? 0 : isActive ? 1 : 0.45 }}
@@ -182,33 +182,24 @@ export function BusinessSolutions({
                 ) : (
                   <div className="absolute inset-0 bg-oboya-blue-dark" />
                 )}
-                <div
-                  className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/10"
-                  aria-hidden
-                />
-                <div className="absolute inset-0 flex flex-col items-start justify-end p-5 md:p-6">
-                  <h3
-                    className={cn(
-                      "rounded-l-full rounded-tr-full rounded-br-[4px] px-4 py-1.5 text-xs font-semibold text-white transition-colors duration-500 sm:text-sm",
-                      isActive
-                        ? "bg-oboya-blue-light shadow-[0_0_28px_color-mix(in_srgb,var(--oboya-blue-light)_55%,transparent)]"
-                        : "bg-oboya-blue",
-                    )}
-                  >
+                <div className="absolute inset-0 bg-black/50" aria-hidden />
+                <div className="absolute inset-x-0 bottom-0 top-[40%] flex sm:top-[48%] flex-col items-start px-6 text-white sm:px-10">
+                  <h3 className="font-display text-[clamp(1.5rem,2.4vw,2.25rem)] font-semibold leading-tight">
                     {title}
                   </h3>
-                  <p className="mt-3 line-clamp-3 min-h-[4.65em] text-sm leading-relaxed text-white/85 md:text-[0.9375rem]">
+                  <p className="mt-3 line-clamp-3 sm:mt-5text-[clamp(1rem,1.4vw,1.5rem)] leading-snug">
                     {description}
                   </p>
                   <Link
                     href={href}
                     tabIndex={isActive ? 0 : -1}
                     className={cn(
-                      "mt-3 inline-flex text-sm font-medium text-white transition-colors hover:text-oboya-green-light",
+                      "mt-5 inline-flex items-center sm:mt-8text-lg font-medium text-white",
                       !isActive && "pointer-events-none",
                     )}
                   >
-                    {cta} →
+                    <span className="underline decoration-2 underline-offset-4">{cta}</span>
+                    <ArrowRight className="ml-6 size-5" aria-hidden />
                   </Link>
                 </div>
               </motion.li>
