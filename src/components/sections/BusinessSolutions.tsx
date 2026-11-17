@@ -238,7 +238,7 @@ export function BusinessSolutions({
           type="button"
           onClick={() => go(-1)}
           aria-label={t("a11y.previousSolutions")}
-          className={cn(navBtn, "border-2 border-oboya-blue-dark/60 text-oboya-blue-dark hover:bg-oboya-blue-dark/10")}
+          className={cn(navBtn, "bg-oboya-blue-dark text-white hover:bg-oboya-blue-dark/85")}
         >
           <ChevronLeft className="size-6" strokeWidth={2.25} aria-hidden />
         </button>
