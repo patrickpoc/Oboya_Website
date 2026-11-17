@@ -11,36 +11,27 @@ import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repositor
 const ZOOM = 2.5;
 const MOVE_S = 0.8;
 const CAPTION_W = 300;
-const ROLL_S = 0.35;
+const FADE_S = 0.25;
 
-/** White banner that unrolls from the top, then the text fades in; reverses on exit. */
+const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), Math.max(lo, hi));
+
+/** White caption box that cross-fades (opacity only) between steps. */
 function CaptionBox({ id, text, still, className }: { id: string; text: string; still: boolean; className: string }) {
-  const hidden = { clipPath: "inset(0 0 100% 0)" };
-  const shown = { clipPath: "inset(0 0 0% 0)" };
   return (
     <AnimatePresence mode="wait" initial={false}>
-      <motion.div
+      <motion.p
         key={id}
-        className={`w-fit rounded-md bg-white px-4 py-2.5 shadow-md ${className}`}
-        initial={still ? false : hidden}
-        animate={shown}
-        exit={still ? shown : { ...hidden, transition: { duration: ROLL_S, delay: 0.15, ease: "easeIn" } }}
-        transition={{ duration: still ? 0 : ROLL_S, ease: "easeOut" }}
+        className={`w-fit rounded-md bg-white px-4 py-2.5 font-body text-base leading-snug text-oboya-blue-dark shadow-md md:text-lg ${className}`}
+        initial={still ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: still ? 0 : FADE_S }}
       >
-        <motion.p
-          className="font-body text-base leading-snug text-oboya-blue-dark md:text-lg"
-          initial={still ? false : { opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0, transition: { duration: still ? 0 : 0.2, delay: still ? 0 : ROLL_S } }}
-          exit={still ? undefined : { opacity: 0, transition: { duration: 0.15 } }}
-        >
-          {text}
-        </motion.p>
-      </motion.div>
+        {text}
+      </motion.p>
     </AnimatePresence>
   );
 }
-
-const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), Math.max(lo, hi));
 
 /** Greenhouse photo with a magnifying lens that moves between points via prev/next buttons. */
 export function HomeChallenges({
@@ -108,7 +99,6 @@ export function HomeChallenges({
     else return;
     e.preventDefault();
   };
-  const dot = "absolute top-0 size-2 -translate-y-1/2 rounded-full bg-white";
 
   return (
     <section className="relative overflow-hidden bg-oboya-soft-white">
@@ -174,9 +164,7 @@ export function HomeChallenges({
                 transition={move}
                 aria-hidden
               >
-                <span className={`${dot} left-0 -translate-x-1/2`} />
                 <span className="absolute left-0 top-0 h-px w-full -translate-y-1/2 bg-white" />
-                <span className={`${dot} right-0 translate-x-1/2`} />
                 <CaptionBox
                   id={pt.id}
                   text={caption(active)}
