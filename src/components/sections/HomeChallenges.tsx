@@ -186,7 +186,7 @@ export function HomeChallenges({
               type="button"
               onClick={() => step(-1)}
               aria-label={t("prev")}
-              className="flex size-10 items-center justify-center rounded-full border-2 border-oboya-blue-dark text-oboya-blue-dark transition-colors hover:bg-oboya-blue-dark/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-blue-dark focus-visible:ring-offset-2 md:size-12"
+              className="flex size-10 items-center justify-center rounded-full bg-white text-oboya-blue-dark shadow-md transition-colors hover:bg-oboya-soft-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-blue-dark focus-visible:ring-offset-2 md:size-12"
             >
               <ChevronLeft className="size-5" aria-hidden />
             </button>
