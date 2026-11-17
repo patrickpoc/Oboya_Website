@@ -1997,6 +1997,10 @@
           "title": "Hero",
           "description": "Imagen de fondo, titular y CTAs primario / secundario."
         },
+        "challenges": {
+          "title": "Desafíos",
+          "description": "Título de la sección, foto y leyendas ancladas en la foto."
+        },
         "homeEcosystem": {
           "title": "Recorrido del ecosistema",
           "description": "Línea de apertura, siete etapas con imagen, descripción y puntos destacados, líneas de cierre y eslogan."
@@ -2071,6 +2075,19 @@
         "ecosystemStageImage": "Imagen de la etapa",
         "ecosystemStageImageHint": "Se muestra como foto en medio círculo sobre el arco; un recorte cuadrado funciona mejor. Si está vacío, se usa la foto predeterminada de la etapa. Use una imagen subida o de la biblioteca (JPG, PNG, WebP, AVIF o GIF).",
         "ecosystemStageImageInvalid": "Esta imagen no se puede usar y se eliminará al guardar. Elija un JPG, PNG, WebP, AVIF o GIF subido o de la biblioteca, sin query string.",
+        "challengesImage": "Foto",
+        "challengesPoints": "Leyendas en la foto",
+        "challengesPointN": "Leyenda {index}",
+        "challengesCaption": "Leyenda",
+        "challengesX": "Posición horizontal (%)",
+        "challengesY": "Posición vertical (%)",
+        "challengesPositionHint": "Porcentaje de la foto, de 0 a 100 (0 = borde izquierdo / superior). Hasta 5 leyendas.",
+        "challengesAddPoint": "Añadir leyenda",
+        "challengesRemovePoint": "Quitar leyenda",
+        "challengesPickerHint": "Haga clic o arrastre sobre la foto para colocar la leyenda seleccionada. Con un punto enfocado, las flechas mueven 0,5 (Shift: 5).",
+        "challengesPointLabel": "Punto {n}",
+        "challengesPickerArea": "Selector de posición en la foto",
+        "challengesLensPreview": "Área ampliada del punto seleccionado",
         "articlesManagedHint": "Los artículos se gestionan en Blog → Posts.",
         "statsMissionTitle": "Estadísticas y misión",
         "name": "Nombre",

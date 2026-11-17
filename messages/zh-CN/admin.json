@@ -1997,6 +1997,10 @@
           "title": "主视觉",
           "description": "背景图、标题与主/次 CTA。"
         },
+        "challenges": {
+          "title": "挑战",
+          "description": "版块标题、照片以及固定在照片上的说明文字。"
+        },
         "homeEcosystem": {
           "title": "生态之旅",
           "description": "开场语、七个阶段（含图片、描述和亮点）、结束语与标语。"
@@ -2071,6 +2075,19 @@
         "ecosystemStageImage": "阶段图片",
         "ecosystemStageImageHint": "以半圆形照片显示在弧形上，方形裁剪效果最佳。留空则使用默认阶段照片。请使用已上传或素材库中的图片（JPG、PNG、WebP、AVIF 或 GIF）。",
         "ecosystemStageImageInvalid": "此图片无法使用，保存时将被清除。请选择已上传或素材库中的 JPG、PNG、WebP、AVIF 或 GIF 图片，且不带查询字符串。",
+        "challengesImage": "照片",
+        "challengesPoints": "照片上的说明文字",
+        "challengesPointN": "说明文字 {index}",
+        "challengesCaption": "说明文字",
+        "challengesX": "水平位置（%）",
+        "challengesY": "垂直位置（%）",
+        "challengesPositionHint": "占照片的百分比，0 到 100（0 = 左 / 上边缘）。最多 5 条说明文字。",
+        "challengesAddPoint": "添加说明文字",
+        "challengesRemovePoint": "删除说明文字",
+        "challengesPickerHint": "在照片上点击或拖动以放置所选说明文字。聚焦某个点后，方向键每次微调 0.5（Shift：5）。",
+        "challengesPointLabel": "点 {n}",
+        "challengesPickerArea": "照片位置选择器",
+        "challengesLensPreview": "所选点的放大区域",
         "articlesManagedHint": "文章在 博客 → 文章 中管理。",
         "statsMissionTitle": "数据与使命",
         "name": "名称",

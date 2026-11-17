@@ -1,6 +1,7 @@
 import { BusinessSolutions } from "@/components/sections/BusinessSolutions";
 import { Capabilities } from "@/components/sections/Capabilities";
 import { Hero } from "@/components/sections/Hero";
+import { HomeChallenges } from "@/components/sections/HomeChallenges";
 import { HomeEcosystemSection } from "@/components/sections/HomeEcosystemSection";
 import { HomeLatestNews } from "@/components/sections/HomeLatestNews";
 import { Testimonials } from "@/components/sections/Testimonials";
@@ -18,6 +19,9 @@ export function HomePageContent({
   posts,
 }: HomePageContentProps) {
   const animationsEnabled = homepage.animations?.enabled !== false;
+
+  const challenges =
+    homepage.sections.challenges?.enabled !== false ? homepage.challenges : undefined;
 
   return (
     <>
@@ -39,6 +43,13 @@ export function HomePageContent({
       {homepage.sections.businessSolutions.enabled && (
         <BusinessSolutions
           data={homepage.businessSolutions}
+          locale={locale}
+          animationsEnabled={animationsEnabled}
+        />
+      )}
+      {challenges && challenges.points?.length > 0 && challenges.image && (
+        <HomeChallenges
+          data={challenges}
           locale={locale}
           animationsEnabled={animationsEnabled}
         />

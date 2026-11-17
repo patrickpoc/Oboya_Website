@@ -213,6 +213,32 @@ export const HOME_I18N = {
       "随运营规模增长提升效率、一致性与可扩展性的技术。"
     ),
   },
+  challenges: {
+    title: homeLoc(
+      "Built Around the Challenges Facing Horticulture Today",
+      "Construído em torno dos desafios da horticultura hoje",
+      "Creado en torno a los desafíos de la horticultura actual",
+      "围绕当今园艺业面临的挑战而打造"
+    ),
+    p1: homeLoc(
+      "Growing quality expectations. More complex supply chains.",
+      "Expectativas de qualidade crescentes. Cadeias de suprimento mais complexas.",
+      "Expectativas de calidad crecientes. Cadenas de suministro más complejas.",
+      "质量期望不断提高，供应链日益复杂。"
+    ),
+    p2: homeLoc(
+      "Greater demands for operational efficiency.",
+      "Maior exigência de eficiência operacional.",
+      "Mayores exigencias de eficiencia operativa.",
+      "对运营效率的要求更高。"
+    ),
+    p3: homeLoc(
+      "Rising pressure on sustainability and labour.",
+      "Pressão crescente por sustentabilidade e mão de obra.",
+      "Creciente presión en sostenibilidad y mano de obra.",
+      "可持续发展与劳动力方面的压力不断上升。"
+    ),
+  },
   globalPresence: {
     title: homeLoc(
       "We operate in 25 countries, with production hubs in Asia, South America and Europe, as well as support teams worldwide.",

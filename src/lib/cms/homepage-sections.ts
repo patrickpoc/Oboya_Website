@@ -3,6 +3,7 @@ export const HOMEPAGE_SECTION_SLUGS = [
   "homeEcosystem",
   "capabilities",
   "businessSolutions",
+  "challenges",
   "testimonials",
   "latestNews",
   "partners",
@@ -18,6 +19,10 @@ export const HOMEPAGE_SECTION_META: Record<
   hero: {
     title: "Hero",
     description: "Background image, headline, and primary / secondary CTAs.",
+  },
+  challenges: {
+    title: "Challenges",
+    description: "Section title, photo, and captions pinned on the photo.",
   },
   homeEcosystem: {
     title: "Ecosystem Journey",

@@ -5,6 +5,7 @@ import type { HomepageSectionSlug } from "@/lib/cms/homepage-sections";
 import type { HomepageSectionEditorProps } from "./shared";
 import { HomepageSectionShell } from "./HomepageSectionShell";
 import { HeroSectionEditor } from "./sections/HeroSectionEditor";
+import { ChallengesSectionEditor } from "./sections/ChallengesSectionEditor";
 import { HomeEcosystemSectionEditor } from "./sections/HomeEcosystemSectionEditor";
 import { CapabilitiesSectionEditor } from "./sections/CapabilitiesSectionEditor";
 import { BusinessSolutionsSectionEditor } from "./sections/BusinessSolutionsSectionEditor";
@@ -15,6 +16,7 @@ import { HomepageSettingsEditor } from "./sections/HomepageSettingsEditor";
 
 const SECTION_EDITORS: Record<HomepageSectionSlug, ComponentType<HomepageSectionEditorProps>> = {
   hero: HeroSectionEditor,
+  challenges: ChallengesSectionEditor,
   homeEcosystem: HomeEcosystemSectionEditor,
   capabilities: CapabilitiesSectionEditor,
   businessSolutions: BusinessSolutionsSectionEditor,

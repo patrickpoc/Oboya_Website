@@ -5,6 +5,7 @@ import { mergeLocalized } from "@/lib/cms/utils";
 export type HomepageSectionId =
   | "hero"
   | "companyOverview"
+  | "challenges"
   | "capabilities"
   | "businessSolutions"
   | "globalPresence"
@@ -115,6 +116,16 @@ export interface HomeEcosystemStage {
   image: string;
 }
 
+export const HOME_CHALLENGES_MAX_POINTS = 5;
+
+/** Caption pinned on the challenges photo; x/y are percentages (0-100) of the image. */
+export interface HomepageChallengePoint {
+  id: string;
+  caption: LocalizedString;
+  x: number;
+  y: number;
+}
+
 export interface HomepageSettings {
   animations: { enabled: boolean };
   sections: Record<HomepageSectionId, HomepageSectionToggle>;
@@ -137,6 +148,11 @@ export interface HomepageSettings {
     image: string;
     imageAlt: LocalizedString;
     stats: HomepageStat[];
+  };
+  challenges: {
+    title: LocalizedString;
+    image: string;
+    points: HomepageChallengePoint[];
   };
   homeEcosystem: {
     title: LocalizedString;
@@ -188,12 +204,14 @@ const emptyLoc = (): LocalizedString => ({
 
 const H = HOME_I18N;
 const E = H.homeEcosystem;
+const C = H.challenges;
 
 const defaultSettings = (): HomepageSettings => ({
   animations: { enabled: true },
   sections: {
     hero: { enabled: true },
     companyOverview: { enabled: true },
+    challenges: { enabled: true },
     capabilities: { enabled: true },
     businessSolutions: { enabled: true },
     globalPresence: { enabled: true },
@@ -254,6 +272,15 @@ const defaultSettings = (): HomepageSettings => ({
         suffix: "+",
         label: H.companyOverview.statExperience,
       },
+    ],
+  },
+  challenges: {
+    title: C.title,
+    image: "/assets/homepage/greenhouse-technology.webp",
+    points: [
+      { id: "p1", caption: C.p1, x: 50, y: 62 },
+      { id: "p2", caption: C.p2, x: 76, y: 58 },
+      { id: "p3", caption: C.p3, x: 24, y: 52 },
     ],
   },
   homeEcosystem: {
@@ -500,6 +527,44 @@ function migrateEcosystemPoints(
   return points.slice(0, HOME_ECOSYSTEM_MAX_POINTS);
 }
 
+const clampPct = (n: number) => Math.min(100, Math.max(0, n));
+
+function migrateChallenges(
+  stored: unknown,
+  defaults: HomepageSettings["challenges"]
+): HomepageSettings["challenges"] {
+  const raw = asRecord(stored) ?? {};
+  let points = defaults.points;
+  if (Array.isArray(raw.points)) {
+    points = [];
+    for (const entry of raw.points) {
+      const r = asRecord(entry);
+      const caption = asLoc(r?.caption);
+      if (
+        !r ||
+        typeof r.id !== "string" ||
+        !r.id ||
+        !caption ||
+        typeof r.x !== "number" ||
+        typeof r.y !== "number" ||
+        !Number.isFinite(r.x) ||
+        !Number.isFinite(r.y)
+      )
+        continue;
+      const def = defaults.points.find((d) => d.id === r.id);
+      const merged = def ? mergeLocalized(caption, def.caption) : caption;
+      if (isBlankLoc(merged)) continue;
+      points.push({ id: r.id, caption: merged, x: clampPct(r.x), y: clampPct(r.y) });
+      if (points.length >= HOME_CHALLENGES_MAX_POINTS) break;
+    }
+  }
+  return {
+    title: asLoc(raw.title) ?? defaults.title,
+    image: sanitizeHomeEcosystemImage(raw.image) || defaults.image,
+    points,
+  };
+}
+
 function migrateEcosystem(
   stored: unknown,
   defaults: HomepageSettings["homeEcosystem"]
@@ -559,6 +624,10 @@ function mergeHomepageLocales(
           }),
         };
       }),
+    },
+    challenges: {
+      ...current.challenges,
+      title: mergeLocalized(current.challenges.title, defaults.challenges.title),
     },
     hero: {
       ...current.hero,
@@ -779,6 +848,10 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
           : defaults.companyOverview.stats
       ).slice(0, 3),
     },
+    challenges: migrateChallenges(
+      (withoutLegacy as { challenges?: unknown }).challenges,
+      defaults.challenges
+    ),
     homeEcosystem: migrateEcosystem(
       (withoutLegacy as { homeEcosystem?: unknown }).homeEcosystem,
       defaults.homeEcosystem
@@ -848,6 +921,11 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
         enabled:
           withoutLegacy.sections?.companyOverview?.enabled ??
           defaults.sections.companyOverview.enabled,
+      },
+      challenges: {
+        enabled:
+          withoutLegacy.sections?.challenges?.enabled ??
+          defaults.sections.challenges.enabled,
       },
       capabilities: {
         enabled:

@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
@@ -12,14 +12,19 @@ import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repositor
 import { pickLocalized } from "@/lib/cms/utils";
 import { cn } from "@/lib/utils";
 import { solutionsHrefForBusinessCard } from "@/lib/solutions/solutions-data";
-import { useHorizontalCarousel } from "@/hooks/useHorizontalCarousel";
 
 const GAP = 20;
+const SWIPE_THRESHOLD = 48;
+const SPRING_MS = 700;
 
-function cardsPerView(width: number) {
-  if (width < 640) return 1.15;
-  if (width < 1024) return 2.2;
-  return 3.15;
+function wrap(index: number, count: number) {
+  return ((index % count) + count) % count;
+}
+
+function cardWidthFor(w: number) {
+  if (w < 640) return w * 0.72;
+  if (w < 1024) return w * 0.42;
+  return Math.min(w * 0.28, 420);
 }
 
 interface BusinessSolutionsProps {
@@ -28,60 +33,80 @@ interface BusinessSolutionsProps {
   animationsEnabled?: boolean;
 }
 
+/** Card carousel: active card centred with a light-blue label, driven only by prev/next. */
 export function BusinessSolutions({
   data,
   locale,
   animationsEnabled = true,
 }: BusinessSolutionsProps) {
   const t = useTranslations("common");
+  const reduceMotion = useReducedMotion();
+  const still = Boolean(reduceMotion) || !animationsEnabled;
   const items = data.items;
-  const [perView, setPerView] = useState(3.15);
-  const [cardWidth, setCardWidth] = useState(0);
-  const viewportRef = useRef<HTMLDivElement>(null);
-
   const count = items.length;
-
-  const maxIndex = useMemo(() => {
-    if (count <= 0) return 0;
-    const fullyVisible = Math.max(1, Math.floor(perView));
-    return Math.max(0, count - fullyVisible);
-  }, [count, perView]);
-
-  const step = cardWidth + GAP;
-  const maxScroll = maxIndex * step;
-
-  const measure = useCallback(() => {
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-    const per = cardsPerView(window.innerWidth);
-    setPerView(per);
-    const w = (viewport.clientWidth - GAP * Math.floor(per)) / per;
-    setCardWidth(Math.max(240, w));
-  }, []);
+  const half = Math.floor(count / 2);
+  const frameRef = useRef<HTMLDivElement>(null);
+  const pointerStartX = useRef<number | null>(null);
+  const swiped = useRef(false);
+  const locked = useRef(false);
+  const lockTimer = useRef<number | undefined>(undefined);
+  const [width, setWidth] = useState(0);
+  const [state, setState] = useState({ active: 0, prev: 0 });
+  const { active, prev } = state;
 
   useEffect(() => {
-    measure();
-    const id = window.requestAnimationFrame(measure);
-    window.addEventListener("resize", measure);
+    const frame = frameRef.current;
+    if (!frame) return;
+    const update = () => setWidth(frame.clientWidth);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(frame);
     return () => {
-      window.cancelAnimationFrame(id);
-      window.removeEventListener("resize", measure);
+      observer.disconnect();
+      window.clearTimeout(lockTimer.current);
     };
-  }, [measure]);
+  }, []);
 
-  const carousel = useHorizontalCarousel({
-    viewportRef,
-    maxScroll,
-    step,
-    maxIndex,
-    animationsEnabled,
-    snapOnDragEnd: false,
-  });
+  const go = useCallback(
+    (dir: 1 | -1) => {
+      if (locked.current || count < 2) return;
+      if (!still) {
+        locked.current = true;
+        lockTimer.current = window.setTimeout(() => {
+          locked.current = false;
+        }, SPRING_MS);
+      }
+      setState((s) => ({ active: wrap(s.active + dir, count), prev: s.active }));
+    },
+    [count, still],
+  );
 
   if (count === 0) return null;
 
+  const slot = (i: number, a: number) => wrap(i - a + half, count) - half;
+  const cardW = cardWidthFor(width || 360);
+  const cardH = cardW * (width < 640 ? 1.25 : 4 / 3);
+  const step = cardW + GAP;
+  const spring = still
+    ? { duration: 0 }
+    : ({ type: "spring", duration: SPRING_MS / 1000, bounce: 0.1 } as const);
+
+  const onPointerUp = (e: React.PointerEvent) => {
+    const start = pointerStartX.current;
+    pointerStartX.current = null;
+    if (start == null) return;
+    const delta = e.clientX - start;
+    if (Math.abs(delta) >= SWIPE_THRESHOLD) {
+      swiped.current = true;
+      go(delta < 0 ? 1 : -1);
+    }
+  };
+
+  const navBtn =
+    "flex size-10 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oboya-blue-light sm:size-12";
+
   return (
-    <section className="overflow-x-hidden bg-oboya-soft-white py-[var(--section-y)]">
+    <section className="overflow-x-clip bg-oboya-soft-white py-[var(--section-y)]">
       <Container>
         <motion.div
           initial={animationsEnabled ? "hidden" : false}
@@ -100,103 +125,132 @@ export function BusinessSolutions({
             {pickLocalized(data.title, locale)}
           </h2>
         </motion.div>
-
-        <motion.div
-          initial={animationsEnabled ? "hidden" : false}
-          whileInView={animationsEnabled ? "visible" : undefined}
-          viewport={revealViewport}
-          variants={fadeInUp}
-        >
-          <div
-            ref={viewportRef}
-            className={cn("overflow-hidden", carousel.viewportClassName)}
-          >
-            <motion.div
-              className={cn(
-                "flex select-none",
-                carousel.trackClassName
-              )}
-              style={{ gap: GAP, width: "max-content", ...carousel.trackStyle }}
-              animate={{ x: carousel.motionX }}
-              transition={carousel.transition}
-              {...carousel.trackHandlers}
-            >
-            {items.map((item) => {
-              const title = pickLocalized(item.title, locale);
-              const description = pickLocalized(item.description, locale);
-              const cta =
-                item.ctaLabel != null
-                  ? pickLocalized(item.ctaLabel, locale)
-                  : t("a11y.exploreSolutions");
-              const href = solutionsHrefForBusinessCard({
-                id: item.id,
-                href: item.href,
-                title,
-              });
-
-              return (
-                <article
-                  key={item.id}
-                  className="relative aspect-[4/5] shrink-0 overflow-hidden rounded-2xl sm:aspect-[3/4]"
-                  style={{
-                    width: cardWidth > 0 ? cardWidth : "min(85vw, 20rem)",
-                  }}
-                >
-                  {item.image ? (
-                    <Image
-                      src={item.image}
-                      alt={title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 85vw, 33vw"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 bg-oboya-blue-dark" />
-                  )}
-                  <div
-                    className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/10"
-                    aria-hidden
-                  />
-                  <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-6">
-                    <h3 className="min-h-[2.6em] font-display text-xl font-bold leading-[1.3] text-white md:min-h-[2.6em] md:text-2xl">
-                      {title}
-                    </h3>
-                    <p className="mt-2 line-clamp-3 min-h-[4.65em] text-sm leading-relaxed text-white/85 md:text-[0.9375rem] md:leading-relaxed">
-                      {description}
-                    </p>
-                    <Link
-                      href={href}
-                      className="mt-4 inline-flex text-sm font-medium text-white transition-colors hover:text-oboya-green-light"
-                    >
-                      {cta} →
-                    </Link>
-                  </div>
-                </article>
-              );
-            })}
-            </motion.div>
-          </div>
-        </motion.div>
-
-        <div className="mt-8 flex justify-end gap-2.5 md:mt-10">
-          <button
-            type="button"
-            onClick={() => carousel.go(-1)}
-            aria-label={t("a11y.previousSolutions")}
-            className="flex size-10 items-center justify-center rounded-full border border-oboya-blue-dark/40 text-oboya-blue-dark transition-colors hover:border-oboya-blue-dark hover:bg-oboya-blue-dark/5"
-          >
-            <ChevronLeft className="size-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => carousel.go(1)}
-            aria-label={t("a11y.nextSolutions")}
-            className="flex size-10 items-center justify-center rounded-full border border-oboya-blue-dark/40 text-oboya-blue-dark transition-colors hover:border-oboya-blue-dark hover:bg-oboya-blue-dark/5"
-          >
-            <ChevronRight className="size-4" />
-          </button>
-        </div>
       </Container>
+
+      <div
+        ref={frameRef}
+        className="relative w-full touch-pan-y select-none"
+        style={{ height: cardH }}
+        onPointerDown={(e) => {
+          pointerStartX.current = e.clientX;
+          swiped.current = false;
+        }}
+        onClickCapture={(e) => {
+          if (swiped.current) {
+            e.preventDefault();
+            e.stopPropagation();
+            swiped.current = false;
+          }
+        }}
+        onPointerUp={onPointerUp}
+        onPointerCancel={() => {
+          pointerStartX.current = null;
+        }}
+      >
+        <ul className="m-0 list-none p-0">
+          {items.map((item, i) => {
+            const s = slot(i, active);
+            const wrapped = Math.abs(s - slot(i, prev)) > 1;
+            const isActive = s === 0;
+            const visible = Math.abs(s) <= 2;
+            const title = pickLocalized(item.title, locale);
+            const description = pickLocalized(item.description, locale);
+            const cta =
+              item.ctaLabel != null
+                ? pickLocalized(item.ctaLabel, locale)
+                : t("a11y.exploreSolutions");
+            const href = solutionsHrefForBusinessCard({ id: item.id, href: item.href, title });
+            return (
+              <motion.li
+                key={item.id}
+                className="absolute top-0 overflow-hidden rounded-2xl"
+                style={{ width: cardW, height: cardH, left: `calc(50% - ${cardW / 2}px)` }}
+                initial={false}
+                animate={{ x: s * step, opacity: !visible ? 0 : isActive ? 1 : 0.45 }}
+                transition={wrapped ? { x: { duration: 0 }, opacity: { duration: still ? 0 : 0.5 } } : spring}
+                aria-current={isActive ? "true" : undefined}
+                aria-hidden={!visible || undefined}
+              >
+                {item.image ? (
+                  <Image
+                    src={item.image}
+                    alt={isActive ? title : ""}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 72vw, 28vw"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-oboya-blue-dark" />
+                )}
+                <div
+                  className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/10"
+                  aria-hidden
+                />
+                <div className="absolute inset-0 flex flex-col items-start justify-end p-5 md:p-6">
+                  <h3
+                    className={cn(
+                      "rounded-l-full rounded-tr-full rounded-br-[4px] px-4 py-1.5 text-xs font-semibold text-white transition-colors duration-500 sm:text-sm",
+                      isActive
+                        ? "bg-oboya-blue-light shadow-[0_0_28px_color-mix(in_srgb,var(--oboya-blue-light)_55%,transparent)]"
+                        : "bg-oboya-blue",
+                    )}
+                  >
+                    {title}
+                  </h3>
+                  <p className="mt-3 line-clamp-3 min-h-[4.65em] text-sm leading-relaxed text-white/85 md:text-[0.9375rem]">
+                    {description}
+                  </p>
+                  <Link
+                    href={href}
+                    tabIndex={isActive ? 0 : -1}
+                    className={cn(
+                      "mt-3 inline-flex text-sm font-medium text-white transition-colors hover:text-oboya-green-light",
+                      !isActive && "pointer-events-none",
+                    )}
+                  >
+                    {cta} →
+                  </Link>
+                </div>
+              </motion.li>
+            );
+          })}
+        </ul>
+      </div>
+
+      <p className="sr-only" aria-live="polite">
+        {t("a11y.solutionsStatus", {
+          n: active + 1,
+          total: count,
+          title: pickLocalized(items[active].title, locale),
+        })}
+      </p>
+
+      <div
+        role="group"
+        aria-label={t("a11y.solutionsControls")}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowRight") go(1);
+          else if (e.key === "ArrowLeft") go(-1);
+        }}
+        className="mt-8 flex justify-center gap-2 sm:gap-3 md:mt-10"
+      >
+        <button
+          type="button"
+          onClick={() => go(-1)}
+          aria-label={t("a11y.previousSolutions")}
+          className={cn(navBtn, "border-2 border-oboya-blue-dark/60 text-oboya-blue-dark hover:bg-oboya-blue-dark/10")}
+        >
+          <ChevronLeft className="size-6" strokeWidth={2.25} aria-hidden />
+        </button>
+        <button
+          type="button"
+          onClick={() => go(1)}
+          aria-label={t("a11y.nextSolutions")}
+          className={cn(navBtn, "bg-oboya-blue-dark text-white hover:bg-oboya-blue-dark/85")}
+        >
+          <ChevronRight className="size-6" strokeWidth={2.25} aria-hidden />
+        </button>
+      </div>
     </section>
   );
 }

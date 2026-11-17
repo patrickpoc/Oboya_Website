@@ -1,0 +1,6 @@
+{
+  "group": "Navegación de desafíos",
+  "prev": "Desafío anterior",
+  "next": "Siguiente desafío",
+  "status": "Desafío {n} de {total}: {caption}"
+}

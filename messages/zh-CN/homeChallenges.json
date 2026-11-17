@@ -1,0 +1,6 @@
+{
+  "group": "挑战导航",
+  "prev": "上一项挑战",
+  "next": "下一项挑战",
+  "status": "第 {n} 项挑战（共 {total} 项）：{caption}"
+}

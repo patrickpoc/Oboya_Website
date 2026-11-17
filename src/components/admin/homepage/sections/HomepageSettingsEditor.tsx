@@ -9,6 +9,7 @@ import type { HomepageSectionEditorProps } from "../shared";
 
 const VISIBILITY_SECTION_IDS = [
   "hero",
+  "challenges",
   "capabilities",
   "businessSolutions",
   "testimonials",

@@ -1997,6 +1997,10 @@
           "title": "Hero",
           "description": "Background image, headline, and primary / secondary CTAs."
         },
+        "challenges": {
+          "title": "Challenges",
+          "description": "Section title, photo, and captions pinned on the photo."
+        },
         "homeEcosystem": {
           "title": "Ecosystem Journey",
           "description": "Opening line, seven stages with image, description and proof points, closing lines and slogan."
@@ -2071,6 +2075,19 @@
         "ecosystemStageImage": "Stage image",
         "ecosystemStageImageHint": "Shown as a half-circle photo on the arc; a square crop works best. When empty, the default stage photo is used. Use an uploaded or library image (JPG, PNG, WebP, AVIF or GIF).",
         "ecosystemStageImageInvalid": "This image cannot be used and will be cleared on save. Pick an uploaded or library JPG, PNG, WebP, AVIF or GIF without a query string.",
+        "challengesImage": "Photo",
+        "challengesPoints": "Captions on the photo",
+        "challengesPointN": "Caption {index}",
+        "challengesCaption": "Caption",
+        "challengesX": "Horizontal position (%)",
+        "challengesY": "Vertical position (%)",
+        "challengesPositionHint": "Percent of the photo, 0 to 100 (0 = left / top edge). Up to 5 captions.",
+        "challengesAddPoint": "Add caption",
+        "challengesRemovePoint": "Remove caption",
+        "challengesPickerHint": "Click or drag on the photo to place the selected caption. With a dot focused, arrow keys nudge by 0.5 (Shift: 5).",
+        "challengesPointLabel": "Point {n}",
+        "challengesPickerArea": "Photo position picker",
+        "challengesLensPreview": "Magnified area for the selected point",
         "articlesManagedHint": "Articles are managed under Blog → Posts.",
         "statsMissionTitle": "Statistics & Mission",
         "name": "Name",

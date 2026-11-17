@@ -14,6 +14,7 @@ import certifications from "./certifications.json";
 import cta from "./cta.json";
 import homeCta from "./homeCta.json";
 import homeEcosystem from "./homeEcosystem.json";
+import homeChallenges from "./homeChallenges.json";
 import footer from "./footer.json";
 import common from "./common.json";
 import contact from "./contact.json";
@@ -48,6 +49,7 @@ const messages = {
   cta,
   homeCta,
   homeEcosystem,
+  homeChallenges,
   footer,
   common,
   contact,

@@ -1997,6 +1997,10 @@
           "title": "Hero",
           "description": "Imagem de fundo, título e CTAs primário / secundário."
         },
+        "challenges": {
+          "title": "Desafios",
+          "description": "Título da seção, foto e legendas fixadas na foto."
+        },
         "homeEcosystem": {
           "title": "Jornada do Ecossistema",
           "description": "Linha de abertura, sete etapas com imagem, descrição e pontos de destaque, linhas de encerramento e slogan."
@@ -2071,6 +2075,19 @@
         "ecosystemStageImage": "Imagem da etapa",
         "ecosystemStageImageHint": "Exibida como foto em meio círculo no arco; um recorte quadrado funciona melhor. Se vazio, usa-se a foto padrão da etapa. Use uma imagem enviada ou da biblioteca (JPG, PNG, WebP, AVIF ou GIF).",
         "ecosystemStageImageInvalid": "Esta imagem não pode ser usada e será removida ao salvar. Escolha um JPG, PNG, WebP, AVIF ou GIF enviado ou da biblioteca, sem query string.",
+        "challengesImage": "Foto",
+        "challengesPoints": "Legendas na foto",
+        "challengesPointN": "Legenda {index}",
+        "challengesCaption": "Legenda",
+        "challengesX": "Posição horizontal (%)",
+        "challengesY": "Posição vertical (%)",
+        "challengesPositionHint": "Porcentagem da foto, de 0 a 100 (0 = borda esquerda / superior). Até 5 legendas.",
+        "challengesAddPoint": "Adicionar legenda",
+        "challengesRemovePoint": "Remover legenda",
+        "challengesPickerHint": "Clique ou arraste sobre a foto para posicionar a legenda selecionada. Com um ponto em foco, as setas movem 0,5 (Shift: 5).",
+        "challengesPointLabel": "Ponto {n}",
+        "challengesPickerArea": "Seletor de posição na foto",
+        "challengesLensPreview": "Área ampliada do ponto selecionado",
         "articlesManagedHint": "Os artigos são gerenciados em Blog → Posts.",
         "statsMissionTitle": "Estatísticas e missão",
         "name": "Nome",

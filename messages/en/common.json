@@ -19,6 +19,8 @@
     "previousSlide": "Previous slide",
     "nextSlide": "Next slide",
     "heroSlides": "Hero slides",
+    "solutionsControls": "Solutions navigation",
+    "solutionsStatus": "{n} of {total}: {title}",
     "previousSolutions": "Previous solutions",
     "nextSolutions": "Next solutions",
     "cropFilters": "Crop filters",
