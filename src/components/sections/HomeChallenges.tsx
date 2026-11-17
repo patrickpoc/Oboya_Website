@@ -82,7 +82,10 @@ export function HomeChallenges({
   const lensY = clamp(py, (mobile ? 124 : 180) + R, h - R - (mobile ? 80 : 72));
   // Ring's lower-right (or lower-left) anchor for the connector line.
   const d = R * 0.707;
-  const side = lensX + d + CAPTION_W + 16 <= w ? 1 : -1;
+  // Caption sits left of the lens unless the lens is near the left edge (or there's no room left).
+  const fitsLeft = lensX - d - CAPTION_W - 16 >= 0;
+  const fitsRight = lensX + d + CAPTION_W + 16 <= w;
+  const side = (lensX >= w * 0.35 && fitsLeft) || !fitsRight ? -1 : 1;
   const lineX = lensX + side * d;
   const lineY = lensY + d;
   const mobCapW = Math.min(260, w - 32);
