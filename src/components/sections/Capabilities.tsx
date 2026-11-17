@@ -145,7 +145,7 @@ export function Capabilities({
                     priority={i === 0}
                   />
                   <div
-                    className="absolute inset-0 bg-gradient-to-br from-black/55 via-black/25 to-black/45"
+                    className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/40 to-black/60"
                     aria-hidden
                   />
                 </motion.div>
