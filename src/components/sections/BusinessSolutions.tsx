@@ -22,10 +22,14 @@ function wrap(index: number, count: number) {
 }
 
 function cardWidthFor(w: number) {
-  if (w < 640) return w * 0.72;
-  if (w < 1024) return w * 0.42;
-  return Math.min(w * 0.28, 420);
+  if (w < 640) return w * 0.78;
+  if (w < 1024) return w * 0.48;
+  return Math.min(w * 0.32, 480);
 }
+
+/** The active card grows; neighbours shrink a little. */
+const ACTIVE_SCALE = 1.08;
+const SIDE_SCALE = 0.94;
 
 interface BusinessSolutionsProps {
   data: HomepageSettings["businessSolutions"];
@@ -86,7 +90,9 @@ export function BusinessSolutions({
   const slot = (i: number, a: number) => wrap(i - a + half, count) - half;
   const cardW = cardWidthFor(width || 360);
   const cardH = cardW * (8 / 7);
-  const step = cardW + GAP;
+  // Extra spacing so the enlarged active card never touches its neighbours.
+  const step = cardW * ((ACTIVE_SCALE + SIDE_SCALE) / 2) + GAP;
+  const frameH = cardH * ACTIVE_SCALE;
   const spring = still
     ? { duration: 0 }
     : ({ type: "spring", duration: SPRING_MS / 1000, bounce: 0.1 } as const);
@@ -130,7 +136,7 @@ export function BusinessSolutions({
       <div
         ref={frameRef}
         className="relative w-full touch-pan-y select-none"
-        style={{ height: cardH }}
+        style={{ height: frameH }}
         onPointerDown={(e) => {
           pointerStartX.current = e.clientX;
           swiped.current = false;
@@ -163,10 +169,22 @@ export function BusinessSolutions({
             return (
               <motion.li
                 key={item.id}
-                className="absolute top-0 overflow-hidden rounded-none shadow-[0_12px_40px_rgba(1,32,63,0.25)]"
-                style={{ width: cardW, height: cardH, left: `calc(50% - ${cardW / 2}px)` }}
+                className={cn(
+                  "absolute overflow-hidden rounded-none shadow-[0_12px_40px_rgba(1,32,63,0.25)]",
+                  isActive ? "z-10" : "z-0",
+                )}
+                style={{
+                  width: cardW,
+                  height: cardH,
+                  left: `calc(50% - ${cardW / 2}px)`,
+                  top: (frameH - cardH) / 2,
+                }}
                 initial={false}
-                animate={{ x: s * step, opacity: !visible ? 0 : isActive ? 1 : 0.45 }}
+                animate={{
+                  x: s * step,
+                  scale: isActive ? ACTIVE_SCALE : SIDE_SCALE,
+                  opacity: !visible ? 0 : isActive ? 1 : 0.45,
+                }}
                 transition={wrapped ? { x: { duration: 0 }, opacity: { duration: still ? 0 : 0.5 } } : spring}
                 aria-current={isActive ? "true" : undefined}
                 aria-hidden={!visible || undefined}
@@ -177,29 +195,30 @@ export function BusinessSolutions({
                     alt={isActive ? title : ""}
                     fill
                     className="object-cover"
-                    sizes="(max-width: 640px) 72vw, 28vw"
+                    sizes="(max-width: 640px) 85vw, (max-width: 1024px) 52vw, 520px"
                   />
                 ) : (
                   <div className="absolute inset-0 bg-oboya-blue-dark" />
                 )}
                 <div className="absolute inset-0 bg-black/50" aria-hidden />
-                <div className="absolute inset-x-0 bottom-0 top-[40%] flex sm:top-[48%] flex-col items-start px-6 text-white sm:px-10">
-                  <h3 className="font-display text-[clamp(1.5rem,2.4vw,2.25rem)] font-semibold leading-tight">
+                {/* Anchored to the bottom so long copy grows upwards instead of being cut off. */}
+                <div className="absolute inset-x-0 bottom-0 top-[30%] flex flex-col items-start justify-end px-6 pb-7 text-white sm:px-8 sm:pb-9">
+                  <h3 className="font-display text-[clamp(1.25rem,1.9vw,1.875rem)] font-semibold leading-tight">
                     {title}
                   </h3>
-                  <p className="mt-3 line-clamp-3 sm:mt-5text-[clamp(1rem,1.4vw,1.5rem)] leading-snug">
+                  <p className="mt-3 text-[clamp(0.9rem,1.05vw,1.0625rem)] leading-snug sm:mt-4">
                     {description}
                   </p>
                   <Link
                     href={href}
                     tabIndex={isActive ? 0 : -1}
                     className={cn(
-                      "mt-5 inline-flex items-center sm:mt-8text-lg font-medium text-white",
+                      "mt-5 inline-flex items-center text-base font-medium text-white sm:mt-6",
                       !isActive && "pointer-events-none",
                     )}
                   >
                     <span className="underline decoration-2 underline-offset-4">{cta}</span>
-                    <ArrowRight className="ml-6 size-5" aria-hidden />
+                    <ArrowRight className="ml-5 size-5" aria-hidden />
                   </Link>
                 </div>
               </motion.li>
