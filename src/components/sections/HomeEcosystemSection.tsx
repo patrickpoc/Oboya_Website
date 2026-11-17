@@ -262,7 +262,7 @@ export function HomeEcosystemSection({
                 type="button"
                 onClick={() => go(-1)}
                 aria-label={t("prev")}
-                className={cn(navBtn, "border-2 border-white text-white hover:bg-white/15")}
+                className={cn(navBtn, "bg-white text-oboya-blue-dark hover:bg-white/85")}
               >
                 <ChevronLeft className="size-6" strokeWidth={2.25} aria-hidden />
               </button>
