@@ -2001,6 +2001,10 @@
           "title": "挑战",
           "description": "版块标题、照片以及固定在照片上的说明文字。"
         },
+        "globalPresence": {
+          "title": "全球业务布局（地图）",
+          "description": "世界地图标题和绿色连接箭头（显示在“关于我们”页面）。"
+        },
         "homeEcosystem": {
           "title": "生态之旅",
           "description": "开场语、七个阶段（含图片、描述和亮点）、结束语与标语。"

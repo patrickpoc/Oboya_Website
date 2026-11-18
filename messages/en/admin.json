@@ -2001,6 +2001,10 @@
           "title": "Challenges",
           "description": "Section title, photo, and captions pinned on the photo."
         },
+        "globalPresence": {
+          "title": "Global Presence (map)",
+          "description": "World map title and the green connection arrows (shown on the About page)."
+        },
         "homeEcosystem": {
           "title": "Ecosystem Journey",
           "description": "Opening line, seven stages with image, description and proof points, closing lines and slogan."

@@ -12,6 +12,7 @@ import { BusinessSolutionsSectionEditor } from "./sections/BusinessSolutionsSect
 import { TestimonialsSectionEditor } from "./sections/TestimonialsSectionEditor";
 import { LatestNewsSectionEditor } from "./sections/LatestNewsSectionEditor";
 import { PartnersSectionEditor } from "./sections/PartnersSectionEditor";
+import { GlobalPresenceSectionEditor } from "./sections/GlobalPresenceSectionEditor";
 import { HomepageSettingsEditor } from "./sections/HomepageSettingsEditor";
 
 const SECTION_EDITORS: Record<HomepageSectionSlug, ComponentType<HomepageSectionEditorProps>> = {
@@ -23,6 +24,7 @@ const SECTION_EDITORS: Record<HomepageSectionSlug, ComponentType<HomepageSection
   testimonials: TestimonialsSectionEditor,
   latestNews: LatestNewsSectionEditor,
   partners: PartnersSectionEditor,
+  globalPresence: GlobalPresenceSectionEditor,
   settings: HomepageSettingsEditor,
 };
 

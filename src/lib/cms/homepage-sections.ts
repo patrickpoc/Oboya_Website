@@ -7,6 +7,7 @@ export const HOMEPAGE_SECTION_SLUGS = [
   "testimonials",
   "latestNews",
   "partners",
+  "globalPresence",
   "settings",
 ] as const;
 
@@ -19,6 +20,10 @@ export const HOMEPAGE_SECTION_META: Record<
   hero: {
     title: "Hero",
     description: "Background image, headline, and primary / secondary CTAs.",
+  },
+  globalPresence: {
+    title: "Global Presence (map)",
+    description: "World map title and the green connection arrows (shown on the About page).",
   },
   challenges: {
     title: "Challenges",

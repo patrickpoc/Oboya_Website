@@ -2001,6 +2001,10 @@
           "title": "Desafios",
           "description": "Título da seção, foto e legendas fixadas na foto."
         },
+        "globalPresence": {
+          "title": "Presença Global (mapa)",
+          "description": "Título do mapa-múndi e as setas verdes de conexão (exibidos na página Sobre)."
+        },
         "homeEcosystem": {
           "title": "Jornada do Ecossistema",
           "description": "Linha de abertura, sete etapas com imagem, descrição e pontos de destaque, linhas de encerramento e slogan."

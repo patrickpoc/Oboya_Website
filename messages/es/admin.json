@@ -2001,6 +2001,10 @@
           "title": "Desafíos",
           "description": "Título de la sección, foto y leyendas ancladas en la foto."
         },
+        "globalPresence": {
+          "title": "Presencia Global (mapa)",
+          "description": "Título del mapamundi y las flechas verdes de conexión (se muestran en la página Acerca de)."
+        },
         "homeEcosystem": {
           "title": "Recorrido del ecosistema",
           "description": "Línea de apertura, siete etapas con imagen, descripción y puntos destacados, líneas de cierre y eslogan."
