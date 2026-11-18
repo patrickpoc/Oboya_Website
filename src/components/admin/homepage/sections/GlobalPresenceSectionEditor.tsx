@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   LocalizedInput,
@@ -31,6 +33,22 @@ export function GlobalPresenceSectionEditor({
           onChange={(l, v) => updateSettingsLocalized(setSettings, "globalPresence", "title", l, v)}
           multiline
         />
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-1">
+            <Label htmlFor="gp-show-connections">{t("fields.showConnections")}</Label>
+            <p className="text-sm text-muted-foreground">{t("fields.showConnectionsHint")}</p>
+          </div>
+          <Switch
+            id="gp-show-connections"
+            checked={settings.globalPresence.showConnections !== false}
+            onCheckedChange={(checked) =>
+              setSettings((prev) => ({
+                ...prev,
+                globalPresence: { ...prev.globalPresence, showConnections: checked },
+              }))
+            }
+          />
+        </div>
       </CardContent>
     </Card>
   );

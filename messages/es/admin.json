@@ -2101,7 +2101,9 @@
         "toneGreen": "Verde",
         "toneWhite": "Blanco",
         "statN": "Estadística {index}",
-        "addStat": "Añadir estadística"
+        "addStat": "Añadir estadística",
+        "showConnections": "Mostrar flechas de conexión",
+        "showConnectionsHint": "Muestra u oculta las flechas verdes que unen las ubicaciones en el mapa."
       }
     },
     "about": {

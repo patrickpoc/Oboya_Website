@@ -2101,7 +2101,9 @@
         "toneGreen": "Verde",
         "toneWhite": "Branco",
         "statN": "Estatística {index}",
-        "addStat": "Adicionar estatística"
+        "addStat": "Adicionar estatística",
+        "showConnections": "Mostrar setas de conexão",
+        "showConnectionsHint": "Mostre ou oculte as setas verdes que ligam os locais no mapa."
       }
     },
     "about": {

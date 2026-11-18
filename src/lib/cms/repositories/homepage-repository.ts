@@ -178,6 +178,7 @@ export interface HomepageSettings {
   };
   globalPresence: {
     title: LocalizedString;
+    showConnections: boolean;
   };
   testimonials: {
     eyebrow: LocalizedString;
@@ -379,6 +380,7 @@ const defaultSettings = (): HomepageSettings => ({
   },
   globalPresence: {
     title: H.globalPresence.title,
+    showConnections: true,
   },
   testimonials: {
     eyebrow: H.testimonials.eyebrow,
@@ -744,6 +746,10 @@ function mergeHomepageLocales(
         current.globalPresence.title,
         defaults.globalPresence.title
       ),
+      showConnections:
+        typeof current.globalPresence.showConnections === "boolean"
+          ? current.globalPresence.showConnections
+          : true,
     },
     testimonials: {
       ...current.testimonials,

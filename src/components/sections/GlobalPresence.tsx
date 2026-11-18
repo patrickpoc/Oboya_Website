@@ -12,6 +12,7 @@ interface GlobalPresenceProps {
   connections?: MapConnection[];
   mapAlt: string;
   title?: string;
+  showConnections?: boolean;
 }
 
 export function GlobalPresence({
@@ -19,6 +20,7 @@ export function GlobalPresence({
   connections,
   mapAlt,
   title,
+  showConnections = true,
 }: GlobalPresenceProps) {
   const t = useTranslations("globalPresence");
   const heading = title ?? t("title");
@@ -48,6 +50,7 @@ export function GlobalPresence({
           <InteractiveWorldMap
             locations={locations}
             connections={connections}
+            showConnections={showConnections}
             mapAlt={mapAlt}
           />
         </motion.div>

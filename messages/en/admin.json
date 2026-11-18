@@ -2041,6 +2041,8 @@
         "primaryCta": "Primary CTA",
         "secondaryCta": "Secondary CTA",
         "sectionTitle": "Section title",
+        "showConnections": "Show connection arrows",
+        "showConnectionsHint": "Show or hide the green arrows linking locations on the map.",
         "ctaLabel": "CTA label",
         "exploreLabel": "Explore label",
         "quote": "Quote",

@@ -2101,7 +2101,9 @@
         "toneGreen": "绿色",
         "toneWhite": "白色",
         "statN": "数据 {index}",
-        "addStat": "添加数据"
+        "addStat": "添加数据",
+        "showConnections": "显示连接箭头",
+        "showConnectionsHint": "显示或隐藏地图上连接各地点的绿色箭头。"
       }
     },
     "about": {

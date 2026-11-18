@@ -62,6 +62,7 @@ export async function AboutPageContent({
         locations={mapLocations}
         connections={mapData.connections}
         mapAlt={tPresence("mapAlt")}
+        showConnections={homepage.globalPresence.showConnections !== false}
         title={pickLocalized(homepage.globalPresence.title, locale)}
       />
       {about.sections.mission.enabled && (

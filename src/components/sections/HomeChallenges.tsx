@@ -10,6 +10,8 @@ import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repositor
 
 const ZOOM = 2.5;
 const MOVE_S = 0.8;
+/** Last <-> first is a long hop: slow down with a symmetric ease. */
+const WRAP_MOVE_S = 1.4;
 const CAPTION_W = 300;
 const FADE_S = 0.25;
 
@@ -42,7 +44,9 @@ export function HomeChallenges({
   const frameRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [ratio, setRatio] = useState(1.5);
-  const [active, setActive] = useState(0);
+  const [nav, setNav] = useState({ active: 0, wrapped: false });
+  const { active, wrapped } = nav;
+  const moveS = wrapped ? WRAP_MOVE_S : MOVE_S;
 
   const points = data.points;
   const count = points.length;
@@ -86,9 +90,17 @@ export function HomeChallenges({
 
   const bgSize = `${rw * ZOOM}px ${rh * ZOOM}px`;
   const bgPos = `${R - (px - ox) * ZOOM}px ${R - (py - oy) * ZOOM}px`;
-  const move = still ? { duration: 0 } : { duration: MOVE_S, ease: [0.22, 1, 0.36, 1] as const };
-  
-  const step = (dir: 1 | -1) => setActive((a) => (a + dir + count) % count);
+  const move = still
+    ? { duration: 0 }
+    : wrapped
+      ? { duration: WRAP_MOVE_S, ease: [0.65, 0, 0.35, 1] as const }
+      : { duration: MOVE_S, ease: [0.22, 1, 0.36, 1] as const };
+
+  const step = (dir: 1 | -1) =>
+    setNav((n) => {
+      const next = (n.active + dir + count) % count;
+      return { active: next, wrapped: Math.abs(next - n.active) > 1 };
+    });
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowRight") step(1);
     else if (e.key === "ArrowLeft") step(-1);
@@ -154,7 +166,7 @@ export function HomeChallenges({
                 // Enter only once the lens has (nearly) reached the new point.
                 animate={{
                   opacity: 1,
-                  transition: { duration: still ? 0 : FADE_S, delay: still ? 0 : MOVE_S - FADE_S - 0.1 },
+                  transition: { duration: still ? 0 : FADE_S, delay: still ? 0 : moveS - FADE_S - 0.1 },
                 }}
                 exit={{ opacity: 0, transition: { duration: still ? 0 : FADE_S } }}
                 aria-hidden

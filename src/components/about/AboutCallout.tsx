@@ -11,7 +11,7 @@ interface AboutCalloutProps {
   locale: string;
 }
 
-/** Navy statement band: green lead line highlighted beside the white body. */
+/** White statement band: green lead line beside the dark-blue body. */
 export function AboutCallout({ data, locale }: AboutCalloutProps) {
   const reduceMotion = useReducedMotion();
   const lead = data.segments
@@ -28,8 +28,8 @@ export function AboutCallout({ data, locale }: AboutCalloutProps) {
 
   return (
     <section
-      data-about-callout="navy"
-      className="bg-oboya-blue-dark"
+      data-about-callout="white"
+      className="border-t border-oboya-green/35 bg-white"
       aria-labelledby={leadWithPeriod ? "about-callout-heading" : undefined}
     >
       <motion.div
@@ -50,7 +50,7 @@ export function AboutCallout({ data, locale }: AboutCalloutProps) {
         {body ? (
           <p
             className={cn(
-              "font-display text-[clamp(1.35rem,2.8vw,1.875rem)] font-light leading-[1.4] tracking-[-0.01em] text-white text-pretty lg:col-span-7",
+              "font-display text-[clamp(1.35rem,2.8vw,1.875rem)] font-light leading-[1.4] tracking-[-0.01em] text-oboya-blue-dark text-pretty lg:col-span-7",
               leadWithPeriod && "lg:col-start-6"
             )}
           >

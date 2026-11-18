@@ -35,6 +35,7 @@ export interface InteractiveWorldMapProps {
   locations: ResolvedMapLocation[];
   mapAlt: string;
   connections?: MapConnection[];
+  showConnections?: boolean;
   editable?: boolean;
   selectedId?: string | null;
   onSelect?: (id: string) => void;
@@ -46,6 +47,7 @@ export function InteractiveWorldMap({
   locations,
   mapAlt,
   connections,
+  showConnections = true,
   editable = false,
   selectedId = null,
   onSelect,
@@ -415,7 +417,7 @@ export function InteractiveWorldMap({
           pointerEvents="none"
         />
 
-        {renderedConnections.length > 0 && (
+        {showConnections && renderedConnections.length > 0 && (
           <g className="map-connections" pointerEvents="none" aria-hidden>
             {renderedConnections.map((connection) => (
               <AnimatedMapConnection
