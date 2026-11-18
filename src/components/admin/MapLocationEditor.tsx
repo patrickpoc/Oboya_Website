@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import { MapConnectionsToggle } from "@/components/admin/homepage/MapConnectionsToggle";
 import overseasSeedJson from "@/../data/cms/overseas-companies.json";
 import {
   mergeOverseasCompanies,
@@ -410,10 +411,11 @@ export function MapLocationEditor() {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(18rem,1fr)]">
           <div className="space-y-4">
             <div className="rounded-2xl border border-border/60 bg-white p-4 shadow-[var(--shadow-card)]">
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                <p className="text-sm font-medium text-oboya-blue-dark">
-                  {t("interactiveMap")}
-                </p>
+              <p className="mb-2 text-sm font-medium text-oboya-blue-dark">
+                {t("interactiveMap")}
+              </p>
+              <MapConnectionsToggle />
+              <div className="mb-4 flex flex-wrap items-center justify-end gap-3">
                 <label className="flex items-center gap-2 text-sm text-muted-foreground">
                   {t("previewLocale")}
                   <select
