@@ -42,7 +42,7 @@ export function AboutCallout({ data, locale }: AboutCalloutProps) {
         {leadWithPeriod ? (
           <h2
             id="about-callout-heading"
-            className="font-display text-[clamp(1.5rem,3vw,2.25rem)] font-light leading-[1.2] tracking-[-0.02em] text-oboya-green text-balance lg:col-span-5"
+            className="font-display text-[clamp(2.25rem,5vw,3.75rem)] font-light leading-[1.05] tracking-[-0.02em] text-oboya-blue-dark text-balance lg:col-span-5"
           >
             {leadWithPeriod}
           </h2>
