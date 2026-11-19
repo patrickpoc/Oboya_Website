@@ -103,12 +103,15 @@ export function HomeEcosystemSection({
 
   const m = useMemo(() => {
     const w = Math.max(width, 320);
-    const mode = w < 640 ? "mobile" : w < 1024 ? "tablet" : "desktop";
-    const R = mode === "desktop" ? Math.min(0.375 * w, 500) : mode === "tablet" ? 0.4 * w : 0.33 * w;
-    const step = mode === "desktop" ? 27 : mode === "tablet" ? 28 : 52;
-    const photoR = R - (mode === "desktop" ? 140 : mode === "tablet" ? 120 : 40);
+    const mode = w < 768 ? "mobile" : w < 1024 ? "tablet" : "desktop";
+    const R =
+      mode === "desktop" ? Math.min(0.375 * w, 500) : mode === "tablet" ? 0.42 * w : 0.48 * w;
+    // Wider step on narrow desktops (smaller R) so neighbouring pills never touch.
+    const step =
+      mode === "desktop" ? 27 + 3 * Math.min(Math.max((480 - R) / 96, 0), 1) : mode === "tablet" ? 31 : w < 380 ? 38 : 40;
+    const photoR = R - (mode === "desktop" ? 140 : mode === "tablet" ? 120 : w < 640 ? 70 : 105);
     const haloR = photoR + (mode === "desktop" ? 32 : mode === "tablet" ? 24 : 14);
-    const reach = mode === "mobile" ? 1 : half;
+    const reach = mode === "mobile" ? 1 : mode === "tablet" ? 2 : half;
     const height = R + PILL_HALF_H + 16;
     const arc = describeArc(w / 2, height, R, -(reach * step + 6), reach * step + 6);
     return { w, mode, R, step, photoR, haloR, reach, height, arc };
@@ -157,7 +160,7 @@ export function HomeEcosystemSection({
         {activeStage ? (
           <div
             className={cn(
-              "relative h-[calc(33cqw+40px)] w-full sm:h-[calc(40cqw+40px)] lg:h-[calc(min(37.5cqw,500px)+40px)]",
+              "relative h-[calc(48cqw+40px)] w-full md:h-[calc(42cqw+40px)] lg:h-[calc(min(37.5cqw,500px)+40px)]",
               !width && "invisible",
             )}
           >
@@ -230,7 +233,7 @@ export function HomeEcosystemSection({
                   >
                     <motion.div
                       className={cn(
-                        "absolute left-0 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 whitespace-nowrap rounded-l-full rounded-tr-full rounded-br-[4px] py-1 pl-1 pr-3 text-[10px] font-semibold text-white transition-colors duration-500 sm:gap-2 sm:pr-4 sm:text-sm",
+                        "absolute left-0 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 whitespace-nowrap rounded-l-full rounded-tr-full rounded-br-[4px] py-1 pl-1 pr-2.5 text-[9px] font-semibold text-white transition-colors duration-500 sm:gap-2 sm:pr-4 sm:text-xs lg:text-sm",
                         isActive
                           ? "bg-oboya-blue-light shadow-[0_0_28px_color-mix(in_srgb,var(--oboya-blue-light)_55%,transparent)]"
                           : "bg-oboya-blue",
@@ -240,8 +243,8 @@ export function HomeEcosystemSection({
                       animate={{ rotate: -angle, opacity: visible ? 1 : 0 }}
                       transition={wrapped ? { rotate: { duration: 0 }, opacity: { duration: still ? 0 : 0.5 } } : spring}
                     >
-                      <span className="flex size-7 shrink-0 sm:size-9 items-center justify-center rounded-full bg-oboya-blue-dark">
-                        <Icon className="size-3.5 text-oboya-green-light sm:size-[18px]" strokeWidth={2} aria-hidden />
+                      <span className="flex size-6 shrink-0 sm:size-9 items-center justify-center rounded-full bg-oboya-blue-dark">
+                        <Icon className="size-3 text-oboya-green-light sm:size-[18px]" strokeWidth={2} aria-hidden />
                       </span>
                       <span>
                         {label(i)}

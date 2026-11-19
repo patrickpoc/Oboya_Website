@@ -16,8 +16,11 @@ import { solutionsHrefForBusinessCard } from "@/lib/solutions/solutions-data";
 const GAP = 20;
 const SWIPE_THRESHOLD = 48;
 const SPRING_MS = 700;
-/** Clicks are ignored until the longest transition (the wrap, 0.8s) has finished. */
+/** Clicks are ignored until the transition has finished. */
 const LOCK_MS = 800;
+/** Virtual track: slots -REACH..REACH are rendered; the outermost are parked off-screen. */
+const REACH = 3;
+const VISIBLE = 2;
 
 function wrap(index: number, count: number) {
   return ((index % count) + count) % count;
@@ -50,15 +53,15 @@ export function BusinessSolutions({
   const still = Boolean(reduceMotion) || !animationsEnabled;
   const items = data.items;
   const count = items.length;
-  const half = Math.floor(count / 2);
   const frameRef = useRef<HTMLDivElement>(null);
   const pointerStartX = useRef<number | null>(null);
   const swiped = useRef(false);
   const locked = useRef(false);
   const lockTimer = useRef<number | undefined>(undefined);
   const [width, setWidth] = useState(0);
-  const [state, setState] = useState({ active: 0, prev: 0 });
-  const { active, prev } = state;
+  // Unbounded position on a virtual infinite track; the active item is wrap(pos).
+  const [pos, setPos] = useState(0);
+  const active = wrap(pos, count || 1);
 
   useEffect(() => {
     const frame = frameRef.current;
@@ -82,14 +85,14 @@ export function BusinessSolutions({
           locked.current = false;
         }, LOCK_MS);
       }
-      setState((s) => ({ active: wrap(s.active + dir, count), prev: s.active }));
+      setPos((p) => p + dir);
     },
     [count, still],
   );
 
   if (count === 0) return null;
 
-  const slot = (i: number, a: number) => wrap(i - a + half, count) - half;
+  const track = Array.from({ length: REACH * 2 + 1 }, (_, k) => pos - REACH + k);
   const cardW = cardWidthFor(width || 360);
   const cardH = cardW * (8 / 7);
   // Extra spacing so the enlarged active card never touches its neighbours.
@@ -156,16 +159,11 @@ export function BusinessSolutions({
         }}
       >
         <ul className="m-0 list-none p-0">
-          {items.map((item, i) => {
-            const s = slot(i, active);
-            const sOld = slot(i, prev);
-            const wrapped = Math.abs(s - sOld) > 1;
-            // Direction every card travels this step (-1 = leftwards); wrapper exits that way and
-            // re-enters from the opposite far side, so nothing ever sits still while others slide.
-            const g = s > sOld ? -1 : 1;
+          {track.map((n) => {
+            const item = items[wrap(n, count)];
+            const s = n - pos;
             const isActive = s === 0;
-            const visible = Math.abs(s) <= 2;
-            const targetOpacity = !visible ? 0 : isActive ? 1 : 0.45;
+            const visible = Math.abs(s) <= VISIBLE;
             const title = pickLocalized(item.title, locale);
             const description = pickLocalized(item.description, locale);
             const cta =
@@ -175,7 +173,7 @@ export function BusinessSolutions({
             const href = solutionsHrefForBusinessCard({ id: item.id, href: item.href, title });
             return (
               <motion.li
-                key={item.id}
+                key={n}
                 className={cn(
                   "absolute overflow-hidden rounded-none shadow-[0_12px_40px_rgba(1,32,63,0.25)]",
                   isActive ? "z-10" : "z-0",
@@ -188,25 +186,11 @@ export function BusinessSolutions({
                 }}
                 initial={false}
                 animate={{
-                  x:
-                    wrapped && !still
-                      ? [null, (sOld + g) * step, (s - g) * step, s * step]
-                      : s * step,
+                  x: s * step,
                   scale: isActive ? ACTIVE_SCALE : SIDE_SCALE,
-                  // Wrapping card: fade out where it is, jump while invisible, fade in at its new slot.
-                  opacity: wrapped && !still ? [null, 0, targetOpacity] : targetOpacity,
+                  opacity: isActive ? 1 : 0.45,
                 }}
-                transition={
-                  wrapped
-                    ? still
-                      ? { duration: 0 }
-                      : {
-                          x: { duration: 0.8, times: [0, 0.3, 0.3, 1], ease: "easeOut" },
-                          scale: { duration: 0 },
-                          opacity: { duration: 0.8, times: [0, 0.3, 1], ease: "easeOut" },
-                        }
-                    : spring
-                }
+                transition={spring}
                 aria-current={isActive ? "true" : undefined}
                 aria-hidden={!visible || undefined}
               >
