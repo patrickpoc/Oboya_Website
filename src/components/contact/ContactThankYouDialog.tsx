@@ -39,8 +39,7 @@ export function ContactThankYouDialog({
       href: siteConfig.social.linkedin,
       label: t("linkedin"),
       Icon: LinkedInIcon,
-      className:
-        "border border-oboya-blue-dark text-oboya-blue-dark hover:bg-oboya-blue-dark hover:text-white",
+      className: "bg-oboya-blue-dark text-white hover:bg-oboya-blue",
     },
   ];
 
