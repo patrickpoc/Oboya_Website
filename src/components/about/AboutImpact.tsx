@@ -44,7 +44,7 @@ export function AboutImpact({ data, locale }: AboutImpactProps) {
           ) : null}
           <h2
             className={cn(
-              "font-display text-[clamp(1.75rem,3.2vw,2.75rem)] font-semibold tracking-[-0.02em] text-oboya-blue-dark text-balance",
+              "whitespace-pre-line font-display text-[clamp(1.75rem,3.2vw,2.75rem)] font-semibold tracking-[-0.02em] text-oboya-blue-dark text-balance",
               eyebrow && "mt-4"
             )}
           >

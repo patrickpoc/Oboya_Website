@@ -4,10 +4,10 @@ import { loc } from "@/lib/cms/repositories/about-page/locale";
 export function defaultImpact(): AboutPageSettings["impact"] {
   return {
     title: loc(
-      "Oboya Horticulture in Numbers",
-      "Oboya Horticulture em Números",
-      "Oboya Horticulture en Números",
-      "Oboya Horticulture 数据一览"
+      "Oboya Horticulture\nin Numbers",
+      "Oboya Horticulture\nem Números",
+      "Oboya Horticulture\nen Números",
+      "Oboya Horticulture\n数据一览"
     ),
     description: loc(
       "Our combination of global manufacturing, strategic sourcing, and local support lets us respond quickly to customer needs while maintaining high-quality standards across multiple markets.",

@@ -88,21 +88,39 @@ describe("about page callout body", () => {
   const OLD_SINGLE =
     "Many suppliers focus on individual categories. Oboya Horticulture takes a wider perspective. By offering solutions across multiple stages of the horticultural journey, we help customers improve efficiency, protect quality, optimize resources, and create long-term value throughout their operations.";
 
+  const bodyEn = (s: ReturnType<typeof defaultSettings>) => s.callout.body?.en;
+  const withBody = (en: string) => {
+    const s = defaultSettings();
+    s.callout.body = { ...defaultSettings().callout.body!, en };
+    return s;
+  };
+
   it("default body has two paragraphs", () => {
-    expect(defaultSettings().callout.body.en).toContain("wider perspective.\n\nBy offering");
+    expect(bodyEn(defaultSettings())).toContain("wider perspective.\n\nBy offering");
   });
 
   it("upgrades the old single-paragraph default", () => {
-    const s = defaultSettings();
-    s.callout.body = { ...s.callout.body, en: OLD_SINGLE };
-    expect(normalizeAboutPageSettings(s).callout.body.en).toBe(defaultSettings().callout.body.en);
+    expect(bodyEn(normalizeAboutPageSettings(withBody(OLD_SINGLE)))).toBe(bodyEn(defaultSettings()));
   });
 
   it("keeps an edited body", () => {
-    const s = defaultSettings();
     const edited =
       "We create long-term value throughout their operations with a custom intro written in the admin.";
-    s.callout.body = { ...s.callout.body, en: edited };
-    expect(normalizeAboutPageSettings(s).callout.body.en).toBe(edited);
+    expect(bodyEn(normalizeAboutPageSettings(withBody(edited)))).toBe(edited);
+  });
+});
+
+describe("about page impact title", () => {
+  it("breaks the default title after 'Oboya Horticulture'", () => {
+    expect(defaultSettings().impact.title.en).toBe("Oboya Horticulture\nin Numbers");
+  });
+
+  it("upgrades the old single-line title but keeps an edited one", () => {
+    const old = defaultSettings();
+    old.impact.title = { ...old.impact.title, en: "Oboya Horticulture in Numbers" };
+    expect(normalizeAboutPageSettings(old).impact.title.en).toBe("Oboya Horticulture\nin Numbers");
+    const edited = defaultSettings();
+    edited.impact.title = { ...edited.impact.title, en: "Our impact" };
+    expect(normalizeAboutPageSettings(edited).impact.title.en).toBe("Our impact");
   });
 });

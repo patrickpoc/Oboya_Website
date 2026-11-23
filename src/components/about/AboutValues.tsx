@@ -51,7 +51,7 @@ export function AboutValues({ data, locale }: AboutValuesProps) {
                 <AccordionTrigger
                   className={cn(
                     "group/faq-trigger gap-5 rounded-none py-6 hover:no-underline sm:py-7",
-                    "font-body text-[0.9375rem] font-medium tracking-[0.05em] text-oboya-blue-dark uppercase sm:text-base md:text-[1.0625rem]",
+                    "font-body text-[0.9375rem] font-medium text-oboya-blue-dark sm:text-base md:text-[1.0625rem]",
                     "items-center [&_[data-slot=accordion-trigger-icon]]:hidden"
                   )}
                 >

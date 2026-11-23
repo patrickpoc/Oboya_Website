@@ -15,7 +15,10 @@ import {
 } from "@/lib/cms/repositories/about-page/fallbacks";
 
 let cache: AboutPageSettings | null = null;
-const CONTENT_REVISION = 27;
+const CONTENT_REVISION = 28;
+
+/** Previous single-line default of the impact title (English). */
+const LEGACY_IMPACT_TITLE = "Oboya Horticulture in Numbers";
 
 /** Previous single-paragraph default of the callout body (English). */
 const LEGACY_CALLOUT_SINGLE_PARAGRAPH =
@@ -140,7 +143,11 @@ export function normalizeAboutPageSettings(
       defaults.vision
     ),
     impact: {
-      title: settings.impact?.title ?? defaults.impact.title,
+      // The old single-line default now breaks after "Oboya Horticulture".
+      title:
+        !settings.impact?.title || settings.impact.title.en === LEGACY_IMPACT_TITLE
+          ? defaults.impact.title
+          : settings.impact.title,
       description: settings.impact?.description ?? defaults.impact.description,
       eyebrow: settings.impact?.eyebrow,
       stats: normalizeImpactStats(
