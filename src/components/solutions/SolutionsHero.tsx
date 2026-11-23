@@ -14,6 +14,9 @@ import { cn } from "@/lib/utils";
 const INNER_CLASS =
   "relative z-10 flex min-h-[inherit] w-full flex-col items-center justify-center px-[clamp(2.75rem,11vw,6.5rem)] py-[clamp(1.5rem,3.5vw,2.25rem)] pt-16 md:pt-20";
 
+/** Background of the /solutions index hero (same photo as the closing CTA). */
+const INDEX_HERO_IMAGE = "/assets/solutions/cta-horticulture.jpg";
+
 interface SolutionsHeroIndexProps {
   variant?: "index";
   headline: string;
@@ -68,6 +71,17 @@ export function SolutionsHero(props: SolutionsHeroProps) {
 
   return (
     <section className={PAGE_INTRO_HERO_SECTION_CLASS}>
+      <div className="absolute inset-0">
+        <Image
+          src={INDEX_HERO_IMAGE}
+          alt=""
+          fill
+          priority
+          className="object-cover object-center"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-black/35" aria-hidden />
+      </div>
       <motion.div
         variants={staggerContainer}
         initial={reduceMotion ? false : "hidden"}
