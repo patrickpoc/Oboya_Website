@@ -283,12 +283,12 @@ const defaultSettings = (): HomepageSettings => ({
   },
   challenges: {
     title: C.title,
-    image: "/assets/homepage/challenges-greenhouse-hq.jpg",
+    image: "/assets/homepage/challenges-greenhouse-final.jpg",
     points: [
-      { id: "p1", caption: C.p1, x: 29, y: 66 },
-      { id: "p2", caption: C.p2, x: 48, y: 83 },
-      { id: "p3", caption: C.p3, x: 59, y: 47 },
-      { id: "p4", caption: C.p4, x: 84, y: 57 },
+      { id: "p1", caption: C.p1, x: 25, y: 68 },
+      { id: "p2", caption: C.p2, x: 45, y: 75 },
+      { id: "p3", caption: C.p3, x: 60, y: 50 },
+      { id: "p4", caption: C.p4, x: 82, y: 59 },
     ],
     closingText: C.closingText,
   },
@@ -510,12 +510,16 @@ const upgradeLegacy = (v: LocalizedString | undefined, old: LocalizedString, nex
 const clampPct = (n: number) => Math.min(100, Math.max(0, n));
 
 /** Previous default photo and pin positions; stored copies of these get the new defaults. */
-const LEGACY_CHALLENGES_IMAGE = "/assets/homepage/greenhouse-technology.webp";
-const LEGACY_CHALLENGE_COORDS: Record<string, [number, number]> = {
-  p1: [22, 55],
-  p2: [45, 62],
-  p3: [62, 50],
-  p4: [78, 58],
+const LEGACY_CHALLENGES_IMAGES = new Set([
+  "/assets/homepage/greenhouse-technology.webp",
+  "/assets/homepage/challenges-greenhouse.jpg",
+  "/assets/homepage/challenges-greenhouse-hq.jpg",
+]);
+const LEGACY_CHALLENGE_COORDS: Record<string, [number, number][]> = {
+  p1: [[22, 55], [29, 66]],
+  p2: [[45, 62], [48, 83]],
+  p3: [[62, 50], [58, 48], [59, 47]],
+  p4: [[78, 58], [82, 52], [84, 57]],
 };
 
 function migrateChallenges(
@@ -551,7 +555,8 @@ function migrateChallenges(
       const merged = def ? mergeLocalized(caption, def.caption) : caption;
       if (isBlankLoc(merged)) continue;
       const legacy = LEGACY_CHALLENGE_COORDS[r.id];
-      const isLegacyCoords = !!def && !!legacy && r.x === legacy[0] && r.y === legacy[1];
+      const isLegacyCoords =
+        !!def && !!legacy && legacy.some(([lx, ly]) => r.x === lx && r.y === ly);
       points.push({
         id: r.id,
         caption: merged,
@@ -564,7 +569,7 @@ function migrateChallenges(
   return {
     title: asLoc(raw.title) ?? defaults.title,
     image:
-      raw.image === LEGACY_CHALLENGES_IMAGE
+      typeof raw.image === "string" && LEGACY_CHALLENGES_IMAGES.has(raw.image)
         ? defaults.image
         : sanitizeHomeEcosystemImage(raw.image) || defaults.image,
     points,

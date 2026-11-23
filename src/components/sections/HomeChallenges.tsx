@@ -62,7 +62,9 @@ export function HomeChallenges({
 
   const { w, h } = size;
   const mobile = w > 0 && w < 640;
-  const R = mobile ? 64 : w < 1024 ? 88 : 104;
+  // Outer radius ~9.5% of the width (mock: ~19% diameter), with a wide translucent ring.
+  const R = mobile ? 64 : Math.round(clamp(w * 0.095, 80, 150));
+  const BW = mobile ? 8 : Math.round(R * 0.18);
   const pt = points[active];
   // Photo is object-cover and x/y are % of the whole image: map through the rendered image rect.
   const scale = Math.max(w / ratio, h) || 1;
@@ -74,21 +76,25 @@ export function HomeChallenges({
   const py = oy + (pt.y / 100) * rh;
 
   const lensX = clamp(px, R + 8, w - R - 8);
-  const lensY = clamp(py, (mobile ? 124 : 180) + R, h - R - (mobile ? 80 : 72));
-  // Ring's lower-right (or lower-left) anchor for the connector line.
-  const d = R * 0.707;
-  // Caption sits left of the lens unless the lens is near the left edge (or there's no room left).
-  const fitsLeft = lensX - d - CAPTION_W - 16 >= 0;
-  const fitsRight = lensX + d + CAPTION_W + 16 <= w;
-  const side = (lensX >= w * 0.35 && fitsLeft) || !fitsRight ? -1 : 1;
-  const lineX = lensX + side * d;
-  const lineY = lensY + d;
+  const lensY = clamp(py, (mobile ? 124 : h * 0.22) + R, h - R - (mobile ? 80 : 24));
+  // Caption beside the lens, joined by a short horizontal line that starts on the ring's edge.
+  const capDy = R * 0.3;
+  const edge = Math.sqrt(R * R - capDy * capDy);
+  const lineLen = Math.round(clamp(w * 0.06, 40, 100));
+  const reach = edge + lineLen + CAPTION_W + 16;
+  const fitsLeft = lensX - reach >= 0;
+  const fitsRight = lensX + reach <= w;
+  // Right of the lens for points on the left half; left of it for points further right.
+  const side = (lensX > w * 0.55 && fitsLeft) || !fitsRight ? -1 : 1;
+  const lineX = lensX + side * (edge + lineLen);
+  const lineY = lensY + capDy;
   const mobCapW = Math.min(260, w - 32);
   const mobCapX = clamp(lensX - mobCapW / 2, 16, w - mobCapW - 16);
 
   // No zoom: the lens is a clear window onto the photo exactly beneath it.
   const bgSize = `${rw}px ${rh}px`;
-  const bgPos = `${R - (lensX - ox)}px ${R - (lensY - oy)}px`;
+  // Background is clipped to the padding box (inside the ring), so offset by the ring width.
+  const bgPos = `${R - BW - (lensX - ox)}px ${R - BW - (lensY - oy)}px`;
   const move = still
     ? { duration: 0 }
     : { duration: MOVE_S, ease: [0.65, 0, 0.35, 1] as const };
@@ -106,7 +112,7 @@ export function HomeChallenges({
     <section className="relative overflow-hidden bg-oboya-soft-white">
       <div
         ref={frameRef}
-        className="relative aspect-[4/5] w-full sm:aspect-auto sm:h-[clamp(470px,38vw,560px)]"
+        className="relative aspect-[4/5] w-full sm:aspect-[1440/819]"
       >
         <Image
           src={data.image}
@@ -121,6 +127,11 @@ export function HomeChallenges({
           }}
         />
         <div className="absolute inset-0 bg-oboya-soft-white/60" aria-hidden />
+        {/* White fade behind the title, as in the mock. */}
+        <div
+          className="absolute inset-x-0 top-0 h-[30%] bg-gradient-to-b from-white via-white/70 to-transparent"
+          aria-hidden
+        />
 
         <h2 className="pointer-events-none absolute inset-x-0 top-0 z-[1] mx-auto max-w-3xl whitespace-pre-line px-[var(--container-padding)] pt-10 text-center font-display text-[clamp(2rem,4vw,3rem)] font-light leading-[1.15] tracking-tight text-oboya-blue-dark text-balance md:pt-14">
           {pickLocalized(data.title, locale)}
@@ -138,8 +149,13 @@ export function HomeChallenges({
               aria-hidden
             >
               <motion.div
-                className="size-full rounded-full border-[12px] border-oboya-soft-white/70 bg-no-repeat shadow-[0_12px_40px_rgba(1,32,63,0.3)]"
-                style={{ backgroundImage: `url(${data.image})`, backgroundOrigin: "border-box" }}
+                className="size-full rounded-full border-solid border-[color-mix(in_oklab,var(--oboya-soft-white)_80%,var(--oboya-green-light))]/85 bg-no-repeat shadow-[0_12px_40px_rgba(1,32,63,0.18)]"
+                style={{
+                  backgroundImage: `url(${data.image})`,
+                  backgroundOrigin: "padding-box",
+                  backgroundClip: "padding-box",
+                  borderWidth: BW,
+                }}
                 initial={false}
                 animate={{ backgroundSize: bgSize, backgroundPosition: bgPos }}
                 transition={move}
@@ -166,10 +182,25 @@ export function HomeChallenges({
                 exit={{ opacity: 0, transition: { duration: still ? 0 : FADE_S } }}
                 aria-hidden
               >
+                {!mobile && (
+                  // Connector: from the ring's edge to the caption, with a dot on the ring.
+                  <span
+                    className={`absolute top-0 h-px bg-white ${side === 1 ? "right-full" : "left-full"}`}
+                    style={{ width: lineLen }}
+                  >
+                    <span
+                      className={`absolute top-1/2 size-2 -translate-y-1/2 rounded-full bg-white ${
+                        side === 1 ? "left-0 -translate-x-1/2" : "right-0 translate-x-1/2"
+                      }`}
+                    />
+                  </span>
+                )}
                 <CaptionBox
                   text={caption(active)}
                   className={
-                    mobile ? "mx-auto text-center" : `max-w-full ${side === 1 ? "" : "ml-auto"}`
+                    mobile
+                      ? "mx-auto text-center"
+                      : `max-w-full -translate-y-1/2 ${side === 1 ? "" : "ml-auto"}`
                   }
                 />
               </motion.div>
