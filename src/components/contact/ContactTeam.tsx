@@ -38,7 +38,10 @@ export function ContactTeam({ team }: { team: ContactPerson[] }) {
   return (
     <section className="pb-20 pt-14 md:pb-28" aria-labelledby="contact-team-title">
       <Container>
-        <h2 id="contact-team-title" className="sr-only">
+        <h2
+          id="contact-team-title"
+          className="mx-auto mb-10 max-w-3xl text-center font-display text-[clamp(1.75rem,3.2vw,2.75rem)] font-semibold tracking-[-0.02em] text-oboya-blue-dark text-balance md:mb-12"
+        >
           {t("title")}
         </h2>
         <div role="group" aria-label={t("title")} className="flex flex-wrap gap-2">
