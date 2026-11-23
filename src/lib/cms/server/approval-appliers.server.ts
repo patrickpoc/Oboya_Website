@@ -310,6 +310,14 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
       );
     }
 
+    case "website.contact_team": {
+      const { readContactTeamStrict, saveContactTeamDurable } = await import(
+        "@/lib/cms/server/contact-team.server"
+      );
+      const { revalidateContactPages } = await import("@/lib/cms/revalidate-site");
+      return settingsDoc(readContactTeamStrict, saveContactTeamDurable, revalidateContactPages);
+    }
+
     case "website.faqs": {
       const faqs = await import("@/lib/cms/server/faqs.server");
       const { revalidateFaqPages } = await import("@/lib/cms/revalidate-site");
@@ -450,6 +458,10 @@ export async function currentVsProposed(req: ChangeRequest): Promise<ChangeDiffE
     case "website.news_page": {
       const { readNewsPageSettingsStrict } = await import("@/lib/cms/server/news-page.server");
       return diffJson(await readNewsPageSettingsStrict(), req.payloadProposed);
+    }
+    case "website.contact_team": {
+      const { readContactTeamStrict } = await import("@/lib/cms/server/contact-team.server");
+      return diffJson(await readContactTeamStrict(), req.payloadProposed);
     }
     case "blog.upsert": {
       const blog = await import("@/lib/cms/server/blog-posts.server");

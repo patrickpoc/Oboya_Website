@@ -92,6 +92,12 @@ export function revalidateSolutionsPages() {
   });
 }
 
+export function revalidateContactPages() {
+  forEachLocale((locale) => {
+    revalidatePath(`/${locale}/contact`);
+  });
+}
+
 export function revalidateNewsPages() {
   forEachLocale((locale) => {
     revalidatePath(`/${locale}/news`);

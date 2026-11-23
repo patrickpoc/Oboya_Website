@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   CharCount,
@@ -9,6 +9,10 @@ import {
   PhoneCountrySelect,
   underlineField,
 } from "@/components/contact/ContactFieldControls";
+import { ContactIntroStep } from "@/components/contact/ContactIntroStep";
+import { ContactTeam } from "@/components/contact/ContactTeam";
+import type { ContactPerson } from "@/lib/cms/repositories/contact-team-repository";
+import { ContactThankYouDialog } from "@/components/contact/ContactThankYouDialog";
 import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/constants/site";
 import { Link } from "@/i18n/navigation";
@@ -20,10 +24,19 @@ const SUBJECT_MAX = 50;
 const MESSAGE_MAX = 500;
 const COMPANY_MAX = 120;
 
-export function ContactPageContent() {
+function isFormDeepLink() {
+  const { search, hash } = window.location;
+  return new URLSearchParams(search).get("step") === "form" || hash === "#form";
+}
+
+export function ContactPageContent({ team = [] }: { team?: ContactPerson[] }) {
   const t = useTranslations("contact");
   const tPages = useTranslations("pages.contact");
 
+  const [step, setStep] = useState<"intro" | "form">("intro");
+  const [thanksOpen, setThanksOpen] = useState(false);
+  const formHeadingRef = useRef<HTMLHeadingElement>(null);
+  const focusFormRef = useRef(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +51,27 @@ export function ContactPageContent() {
   const dialCode = useMemo(() => {
     return getWorldCountryByCode(phoneCountryCode)?.dial ?? "+1";
   }, [phoneCountryCode]);
+
+  useEffect(() => {
+    const sync = () => setStep(isFormDeepLink() ? "form" : "intro");
+    sync();
+    window.addEventListener("popstate", sync);
+    return () => window.removeEventListener("popstate", sync);
+  }, []);
+
+  useEffect(() => {
+    if (step === "form" && focusFormRef.current) {
+      focusFormRef.current = false;
+      window.scrollTo({ top: 0 });
+      formHeadingRef.current?.focus({ preventScroll: true });
+    }
+  }, [step]);
+
+  const startRequest = useCallback(() => {
+    focusFormRef.current = true;
+    window.history.pushState(null, "", "?step=form");
+    setStep("form");
+  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -95,11 +129,21 @@ export function ContactPageContent() {
       }
 
       setSubmitted(true);
+      setThanksOpen(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("error"));
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (step === "intro") {
+    return (
+      <div className="bg-white">
+        <ContactIntroStep onStart={startRequest} />
+        <ContactTeam team={team} />
+      </div>
+    );
   }
 
   return (
@@ -109,7 +153,7 @@ export function ContactPageContent() {
           <p className="text-sm font-medium tracking-wide text-white/80">
             {tPages("title")}
           </p>
-          <h1 className="mx-auto mt-6 max-w-3xl font-display text-[length:var(--text-heading)] leading-[var(--text-heading-leading)] text-white">
+          <h1 ref={formHeadingRef} tabIndex={-1} className="mx-auto mt-6 outline-none max-w-3xl font-display text-[length:var(--text-heading)] leading-[var(--text-heading-leading)] text-white">
             {tPages("description")}
           </h1>
         </Container>
@@ -370,6 +414,7 @@ export function ContactPageContent() {
           </div>
         </Container>
       </section>
+      <ContactThankYouDialog open={thanksOpen} onOpenChange={setThanksOpen} />
     </div>
   );
 }

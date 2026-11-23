@@ -12,6 +12,7 @@ import {
   getPageConfig,
   getPageSlug,
 } from "@/constants/pages";
+import { readContactTeam } from "@/lib/cms/readers";
 import { routing } from "@/i18n/routing";
 import { siteConfig } from "@/constants/site";
 
@@ -70,7 +71,7 @@ export default async function InnerPage({ params }: PageProps) {
   if (config.template === "contact") {
     return (
       <SiteLayout>
-        <ContactPageContent />
+        <ContactPageContent team={await readContactTeam()} />
       </SiteLayout>
     );
   }

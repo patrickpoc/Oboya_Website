@@ -39,5 +39,30 @@
   "privacyNotice": "We use this information to respond to your inquiry in accordance with our <link>Privacy Policy</link>.",
   "privacyLink": "Privacy Policy",
   "privacyAccept": "I have read the privacy notice and agree to the processing of my data for this inquiry.",
-  "marketingOptIn": "I would like to receive occasional product updates by email (optional)."
+  "marketingOptIn": "I would like to receive occasional product updates by email (optional).",
+  "intro": {
+    "eyebrow": "Let's Find the Right Solution",
+    "title": "Tell us about your project, operational challenge, or product requirement. Our specialists will help identify the solutions that best fit your needs.",
+    "body": "Whether you are looking for growing systems, packaging, logistics equipment, retail solutions, or technical support, our team is ready to help.",
+    "emphasis": "No two operations are the same. That is why every conversation starts with understanding your goals.",
+    "cta": "Start Your Request",
+    "imageAlt": "Two Oboya specialists shaking hands in a greenhouse"
+  },
+  "team": {
+    "title": "Contact our team by region",
+    "regions": {
+      "north-america": "North America",
+      "latin-america": "Latin America",
+      "europe": "Europe",
+      "africa": "Africa",
+      "asia": "Asia"
+    }
+  },
+  "thanks": {
+    "title": "Thank you for reaching out!",
+    "body": "Our team will get back to you shortly.",
+    "follow": "Do you already follow us?",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn"
+  }
 }

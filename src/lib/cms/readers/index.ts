@@ -13,6 +13,8 @@ import { readNewsPageSettingsDurable } from "@/lib/cms/server/news-page.server";
 import { readHomepageSettingsDurable } from "@/lib/cms/server/homepage.server";
 import { readAboutPageSettingsDurable } from "@/lib/cms/server/about-page.server";
 import { readCaseStudiesDurable } from "@/lib/cms/server/case-studies.server";
+import { readContactTeamDurable } from "@/lib/cms/server/contact-team.server";
+import type { ContactPerson } from "@/lib/cms/repositories/contact-team-repository";
 import { readFaqsDurable } from "@/lib/cms/server/faqs.server";
 import { hydrateShopCatalogDurable } from "@/lib/cms/server/marketplace-config.server";
 import { siteConfig } from "@/constants/site";
@@ -124,4 +126,9 @@ export async function readFaqCategories() {
 
 export async function readFaqs() {
   return (await readFaqsDoc()).faqs.filter((f) => f.status === "published");
+}
+
+/** Enabled contact-team people for the public Contact page (defaults when nothing stored). */
+export async function readContactTeam(): Promise<ContactPerson[]> {
+  return (await readContactTeamDurable()).filter((p) => p.enabled);
 }

@@ -39,5 +39,30 @@
   "privacyNotice": "Usamos esta información para responder a su consulta, de acuerdo con nuestra <link>Política de Privacidad</link>.",
   "privacyLink": "Política de Privacidad",
   "privacyAccept": "He leído el aviso de privacidad y acepto el tratamiento de mis datos para esta consulta.",
-  "marketingOptIn": "Deseo recibir novedades de productos por correo electrónico (opcional)."
+  "marketingOptIn": "Deseo recibir novedades de productos por correo electrónico (opcional).",
+  "intro": {
+    "eyebrow": "Encontremos la solución adecuada",
+    "title": "Cuéntenos sobre su proyecto, desafío operativo o necesidad de producto. Nuestros especialistas le ayudarán a identificar las soluciones que mejor se adapten a sus necesidades.",
+    "body": "Ya sea que busque sistemas de cultivo, empaques, equipos de logística, soluciones para retail o soporte técnico, nuestro equipo está listo para ayudarle.",
+    "emphasis": "No hay dos operaciones iguales. Por eso, cada conversación comienza entendiendo sus objetivos.",
+    "cta": "Iniciar su solicitud",
+    "imageAlt": "Dos especialistas de Oboya dándose la mano en un invernadero"
+  },
+  "team": {
+    "title": "Contacte a nuestro equipo por región",
+    "regions": {
+      "north-america": "Norteamérica",
+      "latin-america": "Latinoamérica",
+      "europe": "Europa",
+      "africa": "África",
+      "asia": "Asia"
+    }
+  },
+  "thanks": {
+    "title": "¡Gracias por contactarnos!",
+    "body": "Nuestro equipo le responderá en breve.",
+    "follow": "¿Ya nos sigue?",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn"
+  }
 }
