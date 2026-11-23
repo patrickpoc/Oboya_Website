@@ -1,0 +1,51 @@
+{
+  "metaTitle": "Innovation With Purpose",
+  "heroTitle": "Innovation With Purpose",
+  "heroBody": "Innovation should create measurable value. Progress should be supported by action.\n\nAt Oboya, we develop solutions that help customers improve operational performance, respond to evolving market expectations, and create long-term value across the horticultural value chain. Our approach combines product innovation, manufacturing expertise, automation, operational efficiency, and responsible business practices designed to strengthen the future of horticulture.",
+  "value": {
+    "title": "How We Create Value",
+    "items": [
+      {
+        "title": "Practical Innovation",
+        "body": "Solutions developed to address real-world challenges across growing, packaging, logistics, retail display and automation.",
+        "imageAlt": "Seedlings growing in trays beside greenhouse automation equipment"
+      },
+      {
+        "title": "Operational Efficiency",
+        "body": "Technologies and processes designed to help businesses improve productivity, consistency and performance.",
+        "imageAlt": "Stem processing machine handling cut roses"
+      },
+      {
+        "title": "Responsible Progress",
+        "body": "Continuous efforts focused on alternative materials, certified products, renewable energy initiatives, and ongoing improvement across our operations.",
+        "imageAlt": "Fresh lettuce in clear retail packaging"
+      }
+    ]
+  },
+  "featured": {
+    "title": "Featured Innovations",
+    "learnMore": "Learn more",
+    "items": [
+      {
+        "title": "Oboya Terra",
+        "body": "A sustainable product line developed to help growers and retailers respond to evolving market requirements through innovative materials.",
+        "imageAlt": "Young plants in black pots with soil and drip irrigation"
+      },
+      {
+        "title": "Bioglitter",
+        "body": "Biodegradable glitter solutions for horticultural and decorative applications.",
+        "imageAlt": "Colorful flower bouquets and potted plants on a retail display"
+      },
+      {
+        "title": "Automation",
+        "body": "Solutions designed to improve productivity, consistency, and operational performance across horticultural operations.",
+        "imageAlt": "Smart rail tractor carrying bagged banana bunches"
+      }
+    ]
+  },
+  "commitment": {
+    "title": "Our Commitment",
+    "body": "We firmly believe progress is achieved through continuous improvement. That means investing in innovation, exploring new materials, improving operational efficiency, and developing solutions that help horticultural businesses perform better today while preparing for the opportunities of tomorrow.",
+    "cta": "Explore innovations"
+  }
+}

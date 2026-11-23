@@ -62,6 +62,7 @@ export function MobileNavSheetContent({
     { label: t("nav.caseStudies"), href: "/case-studies", children: byHref("/case-studies")?.children },
     { label: t("nav.blog"), href: "/blog", children: byHref("/blog")?.children },
     { label: t("nav.newsroom"), href: "/news" },
+    { label: t("nav.innovationWithPurpose"), href: "/innovation-with-purpose" },
     { label: t("nav.joinUs"), href: "/work" },
     { label: t("nav.contactUs"), href: "/contact" },
   ];

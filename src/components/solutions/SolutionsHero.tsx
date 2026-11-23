@@ -21,6 +21,8 @@ interface SolutionsHeroIndexProps {
   variant?: "index";
   headline: string;
   body: string;
+  /** Overrides the default hero background photo. */
+  image?: string;
 }
 
 interface SolutionsHeroCategoryProps {
@@ -73,7 +75,7 @@ export function SolutionsHero(props: SolutionsHeroProps) {
     <section className={PAGE_INTRO_HERO_SECTION_CLASS}>
       <div className="absolute inset-0">
         <Image
-          src={INDEX_HERO_IMAGE}
+          src={props.image ?? INDEX_HERO_IMAGE}
           alt=""
           fill
           priority

@@ -1,0 +1,51 @@
+{
+  "metaTitle": "Innovación con Propósito",
+  "heroTitle": "Innovación con Propósito",
+  "heroBody": "La innovación debe generar valor medible. El progreso debe respaldarse con acciones.\n\nEn Oboya desarrollamos soluciones que ayudan a los clientes a mejorar su desempeño operativo, responder a las expectativas cambiantes del mercado y crear valor a largo plazo en toda la cadena de valor de la horticultura. Nuestro enfoque combina innovación de productos, experiencia en manufactura, automatización, eficiencia operativa y prácticas empresariales responsables, pensadas para fortalecer el futuro de la horticultura.",
+  "value": {
+    "title": "Cómo Generamos Valor",
+    "items": [
+      {
+        "title": "Innovación Práctica",
+        "body": "Soluciones desarrolladas para abordar desafíos reales en cultivo, empaque, logística, exhibición en retail y automatización.",
+        "imageAlt": "Plántulas creciendo en bandejas junto a equipos de automatización de invernadero"
+      },
+      {
+        "title": "Eficiencia Operativa",
+        "body": "Tecnologías y procesos diseñados para ayudar a las empresas a mejorar su productividad, consistencia y desempeño.",
+        "imageAlt": "Máquina de procesamiento de tallos manipulando rosas de corte"
+      },
+      {
+        "title": "Progreso Responsable",
+        "body": "Esfuerzos continuos enfocados en materiales alternativos, productos certificados, iniciativas de energía renovable y mejora constante en nuestras operaciones.",
+        "imageAlt": "Lechuga fresca en empaque transparente para retail"
+      }
+    ]
+  },
+  "featured": {
+    "title": "Innovaciones Destacadas",
+    "learnMore": "Más información",
+    "items": [
+      {
+        "title": "Oboya Terra",
+        "body": "Una línea de productos sostenibles desarrollada para ayudar a productores y minoristas a responder a los requisitos cambiantes del mercado mediante materiales innovadores.",
+        "imageAlt": "Plantas jóvenes en macetas negras con tierra y riego por goteo"
+      },
+      {
+        "title": "Bioglitter",
+        "body": "Soluciones de glitter biodegradable para aplicaciones hortícolas y decorativas.",
+        "imageAlt": "Ramos de flores de colores y plantas en maceta en una exhibición de retail"
+      },
+      {
+        "title": "Automatización",
+        "body": "Soluciones diseñadas para mejorar la productividad, la consistencia y el desempeño operativo en operaciones hortícolas.",
+        "imageAlt": "Tractor inteligente sobre riel transportando racimos de banano embolsados"
+      }
+    ]
+  },
+  "commitment": {
+    "title": "Nuestro Compromiso",
+    "body": "Creemos firmemente que el progreso se logra con mejora continua. Eso significa invertir en innovación, explorar nuevos materiales, mejorar la eficiencia operativa y desarrollar soluciones que ayuden a las empresas hortícolas a rendir mejor hoy, preparándose para las oportunidades del mañana.",
+    "cta": "Explorar innovaciones"
+  }
+}

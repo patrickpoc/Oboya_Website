@@ -29,6 +29,7 @@ import faqsPage from "./faqsPage.json";
 import workWithUsPage from "./workWithUsPage.json";
 import legalPage from "./legalPage.json";
 import solutionsPage from "./solutionsPage.json";
+import innovationPage from "./innovationPage.json";
 import admin from "./admin.json";
 import latestNews from "./latestNews.json";
 
@@ -64,6 +65,7 @@ const messages = {
   workWithUsPage,
   legalPage,
   solutionsPage,
+  innovationPage,
   admin,
   latestNews,
 };

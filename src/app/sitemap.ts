@@ -16,6 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const contentPaths = [
     "solutions",
+    "innovation-with-purpose",
     ...getAllPageSlugs().map((slug) => slug.join("/")),
   ];
   const pageEntries = routing.locales.flatMap((locale) =>
