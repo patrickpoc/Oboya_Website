@@ -23,7 +23,7 @@ export function AboutValues({ data, locale }: AboutValuesProps) {
   const title = pickLocalized(data.title, locale);
 
   return (
-    <section className="border-t border-oboya-green/35 bg-white py-[clamp(4.5rem,10vw,8rem)]">
+    <section className="border-t border-oboya-green/35 bg-oboya-soft-white py-[clamp(4.5rem,10vw,8rem)]">
       <Container>
         <motion.h2
           initial="hidden"
