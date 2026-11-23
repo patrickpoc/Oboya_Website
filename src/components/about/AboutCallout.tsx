@@ -29,7 +29,7 @@ export function AboutCallout({ data, locale }: AboutCalloutProps) {
   return (
     <section
       data-about-callout="white"
-      className="border-t border-oboya-green/35 bg-white"
+      className="border-t border-white bg-white"
       aria-labelledby={leadWithPeriod ? "about-callout-heading" : undefined}
     >
       <motion.div
@@ -42,7 +42,7 @@ export function AboutCallout({ data, locale }: AboutCalloutProps) {
         {leadWithPeriod ? (
           <h2
             id="about-callout-heading"
-            className="font-display text-[clamp(2.25rem,5vw,3.75rem)] font-light leading-[1.05] tracking-[-0.02em] text-oboya-blue-dark text-balance lg:col-span-5"
+            className="font-display text-[clamp(1.85rem,3.6vw,3.15rem)] font-light leading-[1.08] tracking-[-0.02em] text-oboya-blue-dark text-balance lg:col-span-5"
           >
             {leadWithPeriod}
           </h2>
@@ -50,7 +50,7 @@ export function AboutCallout({ data, locale }: AboutCalloutProps) {
         {body ? (
           <p
             className={cn(
-              "font-display text-[clamp(1.35rem,2.8vw,1.875rem)] font-light leading-[1.4] tracking-[-0.01em] text-oboya-blue-dark text-pretty lg:col-span-7",
+              "font-body text-[0.9375rem] leading-[1.6] text-oboya-blue-dark/80 text-pretty lg:col-span-7",
               leadWithPeriod && "lg:col-start-6"
             )}
           >

@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { readAboutPageSettings, readHomepageSettings } from "@/lib/cms/readers";
 import { pickLocalized } from "@/lib/cms/utils";
-import { AboutHero } from "@/components/about/AboutHero";
 import { AboutInstitutionalImage } from "@/components/about/AboutInstitutionalImage";
 import { AboutImpact } from "@/components/about/AboutImpact";
 import { AboutCallout } from "@/components/about/AboutCallout";
@@ -36,9 +35,8 @@ export async function AboutPageContent({
 
   return (
     <>
-      {about.sections.hero.enabled ? (
-        <AboutHero data={about.hero} locale={locale} />
-      ) : null}
+      {/* The visual hero block was removed; keep the page's h1 for screen readers and SEO. */}
+      <h1 className="sr-only">{pickLocalized(about.hero.title, locale)}</h1>
 
       {about.sections.institutionalImage.enabled ? (
         <AboutInstitutionalImage

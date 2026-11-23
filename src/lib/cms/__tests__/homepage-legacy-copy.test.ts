@@ -143,7 +143,7 @@ describe("homepage legacy copy upgrades", () => {
   });
 
   it("testimonials eyebrow: old default upgraded, edited kept", () => {
-    expect(load((doc) => { doc.testimonials.eyebrow = OLD.testimonialsEyebrow; }).testimonials.eyebrow.en).toBe("Real Results. Real Partnerships");
+    expect(load((doc) => { doc.testimonials.eyebrow = OLD.testimonialsEyebrow; }).testimonials.eyebrow.en).toBe("Real Results. Real Partnerships.");
     expect(load((doc) => { doc.testimonials.eyebrow = edited("Mine"); }).testimonials.eyebrow.en).toBe("Mine");
   });
 });

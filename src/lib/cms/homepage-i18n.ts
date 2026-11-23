@@ -256,7 +256,7 @@ export const HOME_I18N = {
   },
   testimonials: {
     eyebrow: homeLoc(
-      "Real Results. Real Partnerships",
+      "Real Results. Real Partnerships.",
       "Resultados Reais. Parcerias Reais.",
       "Resultados Reales. Alianzas Reales.",
       "真实成果，真诚合作"
