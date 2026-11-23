@@ -81,14 +81,15 @@ test.describe("public smoke", () => {
   test.describe("mobile drawer", () => {
     test.use({ viewport: { width: 390, height: 844 } });
 
-    test("lists Join Us right after Newsroom", async ({ page }) => {
+    test("lists Innovation With Purpose then Join Us after Newsroom", async ({ page }) => {
       await page.goto("/en/about", { waitUntil: "domcontentloaded" });
       await page.getByRole("button", { name: "Open menu" }).first().click();
       const links = page.getByRole("navigation", { name: /menu/i }).getByRole("link");
       const labels = (await links.allTextContents()).map((l) => l.trim());
       const shop = labels.indexOf("Newsroom");
       expect(shop, labels.join("|")).toBeGreaterThanOrEqual(0);
-      expect(labels[shop + 1]).toBe("Join Us");
+      expect(labels[shop + 1]).toBe("Innovation With Purpose");
+      expect(labels[shop + 2]).toBe("Join Us");
     });
   });
 
