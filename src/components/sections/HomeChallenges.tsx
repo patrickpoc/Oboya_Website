@@ -138,7 +138,7 @@ export function HomeChallenges({
               aria-hidden
             >
               <motion.div
-                className="size-full rounded-full border-2 border-white bg-no-repeat shadow-[0_12px_40px_rgba(1,32,63,0.3)]"
+                className="size-full rounded-full border-[12px] border-oboya-soft-white/70 bg-no-repeat shadow-[0_12px_40px_rgba(1,32,63,0.3)]"
                 style={{ backgroundImage: `url(${data.image})`, backgroundOrigin: "border-box" }}
                 initial={false}
                 animate={{ backgroundSize: bgSize, backgroundPosition: bgPos }}
