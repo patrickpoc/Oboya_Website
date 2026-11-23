@@ -25,13 +25,12 @@ export function defaultCulture(): AboutPageSettings["culture"] {
           "Desde la propagación hasta el punto de venta, los clientes acceden a soluciones para múltiples etapas de su operación a través de un solo socio de confianza.",
           "从育苗到销售终端，客户可通过单一可信伙伴获得覆盖运营多阶段的解决方案。"
         ),
-        image:
-          "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=1400&auto=format&fit=crop",
+        image: "/assets/about/culture-aerial-logistics.jpg",
         imageAlt: loc(
-          "Horticulture facility with fields and production buildings",
-          "Instalação hortícola com campos e prédios de produção",
-          "Instalación hortícola con campos y edificios de producción",
-          "带田地与生产建筑的园艺设施"
+          "Aerial view of a horticulture distribution site with trucks",
+          "Vista aérea de um centro de distribuição de horticultura com caminhões",
+          "Vista aérea de un centro de distribución hortícola con camiones",
+          "带卡车的园艺配送中心航拍图"
         ),
         imageSide: "right",
         ctaLabel: loc("Learn more", "Saiba mais", "Saber más", "了解更多"),

@@ -3,6 +3,14 @@ import { loc } from "@/lib/cms/repositories/about-page/locale";
 
 /** Previous default institutional photo; stored docs still pointing at it get the new one. */
 export const LEGACY_INSTITUTIONAL_IMAGE_SRC = "/assets/about/institutional.png";
+export const LEGACY_INSTITUTIONAL_IMAGE_SRC_JPG = "/assets/about/institutional.jpg";
+
+/** Previous default photos of Corporate Culture / Mission / Vision (stored value equal to these is upgraded). */
+export const LEGACY_CULTURE_IMAGE_SRC =
+  "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=1400&auto=format&fit=crop";
+export const LEGACY_MISSION_IMAGE_SRC =
+  "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?q=80&w=1200&auto=format&fit=crop";
+export const LEGACY_VISION_IMAGE_SRC = "/assets/homepage/capabilities-global-local.jpg";
 
 /** Previous default About copy; stored docs matching it exactly are upgraded. */
 export const LEGACY_MISSION_BODY = loc(

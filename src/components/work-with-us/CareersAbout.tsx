@@ -30,11 +30,11 @@ export function CareersAbout() {
       </section>
       <div className="relative aspect-[4/5] w-full sm:aspect-[16/9] lg:aspect-[21/9]">
         <Image
-          src="/assets/homepage/capabilities-partnerships.jpg"
+          src="/assets/work/team.jpg"
           alt={t("photoAlt")}
           fill
           sizes="100vw"
-          className="object-cover"
+          className="object-cover object-[center_35%]"
         />
       </div>
     </>

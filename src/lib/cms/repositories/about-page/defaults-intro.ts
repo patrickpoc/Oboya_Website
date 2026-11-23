@@ -41,12 +41,12 @@ export function defaultIntro(): Pick<AboutPageSettings, "sections" | "meta" | "h
     ),
   },
   institutionalImage: {
-    src: "/assets/about/institutional.jpg",
+    src: "/assets/about/oboya-facility.jpg",
     alt: loc(
-      "Oboya Horticulture production facility",
-      "Instalação de produção Oboya Horticulture",
-      "Instalación de producción Oboya Horticulture",
-      "Oboya Horticulture 生产设施"
+      "Oboya Horticulture facility",
+      "Instalação da Oboya Horticulture",
+      "Instalación de Oboya Horticulture",
+      "Oboya Horticulture 设施"
     ),
   },
   timeline: {

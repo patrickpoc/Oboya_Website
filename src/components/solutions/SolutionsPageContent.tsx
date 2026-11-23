@@ -24,6 +24,7 @@ export async function SolutionsPageContent() {
         description={pickLocalized(settings.cta.description, locale)}
         buttonLabel={pickLocalized(settings.cta.buttonLabel, locale)}
         href={settings.cta.href}
+        imageSrc="/assets/homepage/cta-flowers-field.jpg"
       />
     </>
   );

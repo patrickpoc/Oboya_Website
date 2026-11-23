@@ -13,15 +13,15 @@ const HERO_IMAGE = "/assets/homepage/greenhouse-technology.webp";
 const COMMITMENT_IMAGE = "/assets/homepage/solutions-integrated.jpg";
 
 const VALUE_IMAGES = [
-  "/assets/homepage/wheel-propagation.jpg",
-  "/assets/solutions/flowers/automation.jpg",
-  "/assets/homepage/wheel-packaging.jpg",
+  "/assets/innovation/practical-innovation.jpg",
+  "/assets/innovation/operational-efficiency.jpg",
+  "/assets/innovation/responsible-progress.jpg",
 ];
 
 /** Edit images / links here when replacing the featured cards. */
 const FEATURED = [
-  { image: "/assets/homepage/wheel-growing.jpg", href: "/shop" },
-  { image: "/assets/homepage/wheel-pos.jpg", href: "/shop" },
+  { image: "/assets/innovation/oboya-terra.jpg", href: "/shop" },
+  { image: "/assets/innovation/bioglitter.jpg", href: "/shop" },
   { image: "/assets/homepage/wheel-harvest.jpg", href: "/solutions" },
 ] as const;
 

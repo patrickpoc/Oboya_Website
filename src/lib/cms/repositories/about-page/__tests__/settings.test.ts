@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { defaultSettings } from "@/lib/cms/repositories/about-page/defaults";
 import {
+  LEGACY_CULTURE_IMAGE_SRC,
+  LEGACY_INSTITUTIONAL_IMAGE_SRC_JPG,
   LEGACY_MISSION_BODY,
+  LEGACY_MISSION_IMAGE_SRC,
+  LEGACY_VISION_IMAGE_SRC,
   LEGACY_VALUES,
   LEGACY_VISION_BODY,
 } from "@/lib/cms/repositories/about-page/legacy-defaults";
@@ -122,5 +126,25 @@ describe("about page impact title", () => {
     const edited = defaultSettings();
     edited.impact.title = { ...edited.impact.title, en: "Our impact" };
     expect(normalizeAboutPageSettings(edited).impact.title.en).toBe("Our impact");
+  });
+});
+
+describe("about page legacy image upgrade", () => {
+  it("upgrades old default images and keeps custom ones", () => {
+    const d = defaultSettings();
+    const s = defaultSettings();
+    s.institutionalImage.src = LEGACY_INSTITUTIONAL_IMAGE_SRC_JPG;
+    s.mission.images[0].src = LEGACY_MISSION_IMAGE_SRC;
+    s.vision.images[0].src = LEGACY_VISION_IMAGE_SRC;
+    s.culture.items[0].image = LEGACY_CULTURE_IMAGE_SRC;
+    const out = normalizeAboutPageSettings(s);
+    expect(out.institutionalImage.src).toBe("/assets/about/oboya-facility.jpg");
+    expect(out.mission.images[0]).toEqual(d.mission.images[0]);
+    expect(out.vision.images[0].src).toBe("/assets/about/vision-team.jpg");
+    expect(out.culture.items[0].image).toBe("/assets/about/culture-aerial-logistics.jpg");
+
+    const c = defaultSettings();
+    c.mission.images[0].src = "/uploads/custom.jpg";
+    expect(normalizeAboutPageSettings(c).mission.images[0].src).toBe("/uploads/custom.jpg");
   });
 });

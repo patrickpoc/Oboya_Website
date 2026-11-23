@@ -69,7 +69,12 @@ export function ContactTeam({ team }: { team: ContactPerson[] }) {
               key={person.id}
               className="flex flex-col items-center gap-3 rounded-lg bg-oboya-soft-white p-6 text-center shadow-[var(--shadow-card)]"
             >
-              <div className="flex size-24 items-center justify-center overflow-hidden rounded-full bg-white">
+              <div
+                className={cn(
+                  "flex items-center justify-center overflow-hidden rounded-full",
+                  person.photo ? "size-28 bg-oboya-soft-white" : "size-24 bg-white"
+                )}
+              >
                 {person.photo ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img

@@ -25,11 +25,11 @@ export interface ContactPerson {
 }
 
 export const DEFAULT_CONTACT_TEAM: ContactPerson[] = [
-  { id: "tatiana-lochowicz", name: "Tatiana Łochowicz", email: "tatiana@oboya.cc", phone: "+48 781 526 431", countryCode: "PL", region: "europe", enabled: true, sortOrder: 0 },
-  { id: "robert-wu", name: "Robert Wu", email: "robert.wu@oboya.cc", phone: "+86 186 6972 8621", countryCode: "SE", region: "europe", enabled: true, sortOrder: 1 },
-  { id: "chadi-gebrael", name: "Chadi Gebrael", email: "chadi@oboya.cc", phone: "+51 960 815 046", countryCode: "EC", region: "latin-america", enabled: true, sortOrder: 0 },
-  { id: "lorena-paulos", name: "Lorena Paulos", email: "lorena@oboya.cc", phone: "+569 9158 0496", countryCode: "CL", region: "latin-america", enabled: true, sortOrder: 1 },
-  { id: "rafael-aguilar", name: "Rafael Aguilar", email: "rafael.aguilar@oboya.cc", phone: "+52 444 142 8229", countryCode: "MX", region: "latin-america", enabled: true, sortOrder: 2 },
+  { id: "tatiana-lochowicz", name: "Tatiana Łochowicz", email: "tatiana@oboya.cc", phone: "+48 781 526 431", countryCode: "PL", region: "europe", photo: "/assets/contact-team/tatiana-lochowicz.png", enabled: true, sortOrder: 0 },
+  { id: "robert-wu", name: "Robert Wu", email: "robert.wu@oboya.cc", phone: "+86 186 6972 8621", countryCode: "SE", region: "europe", photo: "/assets/contact-team/robert-wu.png", enabled: true, sortOrder: 1 },
+  { id: "chadi-gebrael", name: "Chadi Gebrael", email: "chadi@oboya.cc", phone: "+51 960 815 046", countryCode: "EC", region: "latin-america", photo: "/assets/contact-team/chadi-gebrael.png", enabled: true, sortOrder: 0 },
+  { id: "lorena-paulos", name: "Lorena Paulos", email: "lorena@oboya.cc", phone: "+569 9158 0496", countryCode: "CL", region: "latin-america", photo: "/assets/contact-team/lorena-paulos.png", enabled: true, sortOrder: 1 },
+  { id: "rafael-aguilar", name: "Rafael Aguilar", email: "rafael.aguilar@oboya.cc", phone: "+52 444 142 8229", countryCode: "MX", region: "latin-america", photo: "/assets/contact-team/rafael-aguilar.png", enabled: true, sortOrder: 2 },
 ];
 
 const MAX_PEOPLE = 100;
@@ -57,7 +57,11 @@ export function normalizeContactTeam(raw: unknown): ContactPerson[] {
     const email = str(r.email);
     const phone = str(r.phone);
     const country = str(r.countryCode).toUpperCase();
-    const photo = sanitizeSiteImageUrl(r.photo);
+    // A stored default person without a photo gets the default photo.
+    const photo =
+      sanitizeSiteImageUrl(r.photo) ||
+      DEFAULT_CONTACT_TEAM.find((d) => d.id === id)?.photo ||
+      "";
     const order = typeof r.sortOrder === "number" && Number.isFinite(r.sortOrder) ? r.sortOrder : index;
     people.push({
       id,

@@ -12,11 +12,11 @@ export function defaultMission(): AboutPageSettings["mission"] {
     ),
     images: [
       {
-        src: "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?q=80&w=1200&auto=format&fit=crop",
+        src: "/assets/about/mission-port.jpg",
         alt: loc(
-          "Shipping port with containers at sunset",
-          "Porto com contêineres ao pôr do sol",
-          "Puerto con contenedores al atardecer",
+          "Container port at sunset",
+          "Porto de contêineres ao pôr do sol",
+          "Puerto de contenedores al atardecer",
           "日落时分的集装箱港口"
         ),
       },
@@ -44,12 +44,12 @@ export function defaultVision(): AboutPageSettings["vision"] {
     ),
     images: [
       {
-        src: "/assets/homepage/capabilities-global-local.jpg",
+        src: "/assets/about/vision-team.jpg",
         alt: loc(
-          "Global horticulture network connecting partners across regions",
-          "Rede global de horticultura conectando parceiros entre regiões",
-          "Red hortícola global que conecta socios entre regiones",
-          "连接各地区合作伙伴的全球园艺网络"
+          "Two colleagues reviewing work on a tablet",
+          "Dois colegas revisando um trabalho em um tablet",
+          "Dos compañeros revisando un trabajo en una tableta",
+          "两位同事在平板电脑上查看工作内容"
         ),
       },
       {

@@ -17,8 +17,16 @@ const base = {
 describe("contact team", () => {
   it("seeds five default people, all enabled and valid", () => {
     expect(DEFAULT_CONTACT_TEAM).toHaveLength(5);
-    expect(DEFAULT_CONTACT_TEAM.every((p) => p.enabled && !p.photo)).toBe(true);
+    expect(DEFAULT_CONTACT_TEAM.every((p) => p.enabled && p.photo?.startsWith("/assets/contact-team/"))).toBe(true);
     expect(normalizeContactTeam(DEFAULT_CONTACT_TEAM)).toHaveLength(5);
+  });
+
+  it("gives a stored default person without photo the default photo", () => {
+    const [p] = normalizeContactTeam([{ ...base, id: "robert-wu", name: "Robert Wu" }]);
+    expect(p.photo).toBe("/assets/contact-team/robert-wu.png");
+    const [custom] = normalizeContactTeam([{ ...base, id: "robert-wu", name: "R", photo: "/uploads/x.jpg" }]);
+    expect(custom.photo).toBe("/uploads/x.jpg");
+    expect(normalizeContactTeam([{ ...base, id: "other" }])[0].photo).toBeUndefined();
   });
 
   it("drops invalid entries and duplicates", () => {

@@ -1,7 +1,11 @@
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page/types";
 import { defaultSettings } from "@/lib/cms/repositories/about-page/defaults";
 import {
+  LEGACY_CULTURE_IMAGE_SRC,
   LEGACY_INSTITUTIONAL_IMAGE_SRC,
+  LEGACY_INSTITUTIONAL_IMAGE_SRC_JPG,
+  LEGACY_MISSION_IMAGE_SRC,
+  LEGACY_VISION_IMAGE_SRC,
   LEGACY_MISSION_BODY,
   LEGACY_VALUES,
   LEGACY_VISION_BODY,
@@ -15,7 +19,7 @@ import {
 } from "@/lib/cms/repositories/about-page/fallbacks";
 
 let cache: AboutPageSettings | null = null;
-const CONTENT_REVISION = 28;
+const CONTENT_REVISION = 29;
 
 /** Previous single-line default of the impact title (English). */
 const LEGACY_IMPACT_TITLE = "Oboya Horticulture in Numbers";
@@ -24,6 +28,25 @@ const LEGACY_IMPACT_TITLE = "Oboya Horticulture in Numbers";
 const LEGACY_CALLOUT_SINGLE_PARAGRAPH =
   "Many suppliers focus on individual categories. Oboya Horticulture takes a wider perspective. By offering solutions across multiple stages of the horticultural journey, we help customers improve efficiency, protect quality, optimize resources, and create long-term value throughout their operations.";
 let cacheRevision = 0;
+
+/** Replaces an image still at its old default src (src + alt) with the new default. */
+function upgradeImage<T extends { src: string }>(
+  image: T | undefined,
+  legacySrc: string,
+  next: T | undefined
+): T | undefined {
+  return image && next && image.src === legacySrc ? next : image;
+}
+
+function upgradeBlockImage(
+  block: AboutPageSettings["mission"],
+  legacySrc: string,
+  fallback: AboutPageSettings["mission"]
+): AboutPageSettings["mission"] {
+  const [first, ...rest] = block.images;
+  const next = upgradeImage(first, legacySrc, fallback.images[0]);
+  return next === first ? block : { ...block, images: [next!, ...rest] };
+}
 
 /** Ensure durable / legacy CMS docs have value images and Numbers stats. */
 export function normalizeAboutPageSettings(
@@ -92,7 +115,8 @@ export function normalizeAboutPageSettings(
     // The old default photo was replaced; keep any custom image set in the CMS.
     institutionalImage:
       !settings.institutionalImage?.src ||
-      settings.institutionalImage.src === LEGACY_INSTITUTIONAL_IMAGE_SRC
+      settings.institutionalImage.src === LEGACY_INSTITUTIONAL_IMAGE_SRC ||
+      settings.institutionalImage.src === LEGACY_INSTITUTIONAL_IMAGE_SRC_JPG
         ? { ...settings.institutionalImage, ...defaults.institutionalImage }
         : settings.institutionalImage,
     hero: isLegacyHero
@@ -128,18 +152,34 @@ export function normalizeAboutPageSettings(
           ...settings.culture,
           title: settings.culture?.title ?? defaults.culture.title,
           eyebrow: settings.culture?.eyebrow ?? defaults.culture.eyebrow,
-          items: cultureItems.length ? cultureItems : defaults.culture.items,
+          items: (cultureItems.length ? cultureItems : defaults.culture.items).map(
+            (item) => {
+              if (item.image !== LEGACY_CULTURE_IMAGE_SRC) return item;
+              const next = defaults.culture.items.find((d) => d.id === item.id);
+              return next
+                ? { ...item, image: next.image, imageAlt: next.imageAlt }
+                : { ...item, image: defaults.culture.items[0].image, imageAlt: defaults.culture.items[0].imageAlt };
+            }
+          ),
         },
-    mission: repairMissionVisionImages(
-      isLegacyMission
-        ? { ...settings.mission, body: defaults.mission.body }
-        : settings.mission,
+    mission: upgradeBlockImage(
+      repairMissionVisionImages(
+        isLegacyMission
+          ? { ...settings.mission, body: defaults.mission.body }
+          : settings.mission,
+        defaults.mission
+      ),
+      LEGACY_MISSION_IMAGE_SRC,
       defaults.mission
     ),
-    vision: repairMissionVisionImages(
-      isLegacyVision
-        ? { ...settings.vision, body: defaults.vision.body }
-        : settings.vision,
+    vision: upgradeBlockImage(
+      repairMissionVisionImages(
+        isLegacyVision
+          ? { ...settings.vision, body: defaults.vision.body }
+          : settings.vision,
+        defaults.vision
+      ),
+      LEGACY_VISION_IMAGE_SRC,
       defaults.vision
     ),
     impact: {
