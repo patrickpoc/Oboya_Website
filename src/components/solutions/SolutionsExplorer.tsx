@@ -117,9 +117,12 @@ export function SolutionsExplorer({ settings }: SolutionsExplorerProps) {
           >
             {heading}
           </h1>
-          <p className="max-w-lg font-body text-[0.9rem] leading-[1.6] text-oboya-blue-dark/65 md:justify-self-end md:text-[0.975rem] md:leading-[1.65]">
-            {description}
-          </p>
+          {/* No sector description under "All Crops". */}
+          {activeFilter !== "all" && description ? (
+            <p className="max-w-lg font-body text-[0.9rem] leading-[1.6] text-oboya-blue-dark/65 md:justify-self-end md:text-[0.975rem] md:leading-[1.65]">
+              {description}
+            </p>
+          ) : null}
         </motion.div>
 
         <motion.div
@@ -133,10 +136,6 @@ export function SolutionsExplorer({ settings }: SolutionsExplorerProps) {
             const href = buildShopHrefForSolution(
               mergeShopFilterTargets(activeCrop?.shop, card.shop)
             );
-            const tags = card.tags
-              .map((tag) => pickLocalized(tag, locale))
-              .filter(Boolean)
-              .join(", ");
 
             return (
               <motion.article key={card.id} variants={fadeInUp}>
@@ -163,11 +162,6 @@ export function SolutionsExplorer({ settings }: SolutionsExplorerProps) {
                   <h2 className="mt-2.5 font-display text-[0.975rem] font-semibold leading-snug text-oboya-blue-dark md:mt-3 md:text-[1.05rem]">
                     {pickLocalized(card.title, locale)}
                   </h2>
-                  {tags ? (
-                    <p className="mt-1 font-body text-[0.8125rem] leading-relaxed text-oboya-blue-dark/55">
-                      {tags}
-                    </p>
-                  ) : null}
                 </Link>
               </motion.article>
             );
