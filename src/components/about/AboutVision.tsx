@@ -27,7 +27,7 @@ export function AboutVision({ data, locale }: AboutVisionProps) {
         variants={reduceMotion ? undefined : fadeInUp}
         className="grid lg:grid-cols-12"
       >
-        <div className="flex items-center lg:col-span-7">
+        <div className="flex items-center bg-oboya-soft-white lg:col-span-7">
           <Container className="py-[clamp(4.5rem,10vw,8rem)] lg:max-w-none lg:pl-[max(var(--container-padding),calc((100vw-var(--container-max))/2+var(--container-padding)))] lg:pr-12">
             <h2 className="font-display text-[clamp(2.25rem,5vw,3.75rem)] font-light tracking-[-0.02em] text-oboya-blue-dark">
               {title}
