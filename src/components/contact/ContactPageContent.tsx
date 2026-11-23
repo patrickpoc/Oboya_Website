@@ -317,13 +317,16 @@ export function ContactPageContent() {
 
                   <div className="flex flex-col gap-3">
                     <p className="text-xs leading-relaxed text-oboya-blue-dark/70">
-                      {t("privacyNotice")}{" "}
-                      <Link
-                        href="/privacy"
-                        className="text-oboya-blue-light underline-offset-2 hover:underline"
-                      >
-                        {t("privacyLink")}
-                      </Link>
+                      {t.rich("privacyNotice", {
+                        link: (chunks) => (
+                          <Link
+                            href="/privacy"
+                            className="text-oboya-blue-light underline-offset-2 hover:underline"
+                          >
+                            {chunks}
+                          </Link>
+                        ),
+                      })}
                     </p>
                     <label className="flex items-start gap-2 text-xs text-oboya-blue-dark/80">
                       <input

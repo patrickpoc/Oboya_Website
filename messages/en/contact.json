@@ -36,7 +36,7 @@
   },
   "success": "Thank you. Our team will contact you shortly.",
   "error": "Unable to send your message. Please try again.",
-  "privacyNotice": "We use this information to respond to your inquiry (LGPD Art. 7 V/IX — pre-contractual steps and legitimate interest).",
+  "privacyNotice": "We use this information to respond to your inquiry in accordance with our <link>Privacy Policy</link>.",
   "privacyLink": "Privacy Policy",
   "privacyAccept": "I have read the privacy notice and agree to the processing of my data for this inquiry.",
   "marketingOptIn": "I would like to receive occasional product updates by email (optional)."

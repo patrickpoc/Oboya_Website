@@ -36,7 +36,7 @@
   },
   "success": "Obrigado. Nossa equipe entrará em contato em breve.",
   "error": "Não foi possível enviar sua mensagem. Tente novamente.",
-  "privacyNotice": "Usamos estas informações para responder à sua solicitação (LGPD art. 7º, V/IX — procedimentos preliminares e legítimo interesse).",
+  "privacyNotice": "Usamos estas informações para responder à sua solicitação, de acordo com nossa <link>Política de Privacidade</link>.",
   "privacyLink": "Política de Privacidade",
   "privacyAccept": "Li o aviso de privacidade e concordo com o tratamento dos meus dados para esta solicitação.",
   "marketingOptIn": "Quero receber novidades de produtos por e-mail (opcional)."

@@ -36,7 +36,7 @@
   },
   "success": "谢谢。我们的团队将尽快与您联系。",
   "error": "消息发送失败，请重试。",
-  "privacyNotice": "我们使用这些信息回复您的咨询（LGPD 第 7 条 V/IX — 缔约前程序与合法利益）。",
+  "privacyNotice": "我们将根据<link>隐私政策</link>使用这些信息回复您的咨询。",
   "privacyLink": "隐私政策",
   "privacyAccept": "我已阅读隐私说明，并同意为本次咨询处理我的数据。",
   "marketingOptIn": "我希望偶尔通过电子邮件接收产品更新（可选）。"

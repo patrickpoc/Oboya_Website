@@ -36,7 +36,7 @@
   },
   "success": "Gracias. Nuestro equipo se pondrá en contacto pronto.",
   "error": "No pudimos enviar su mensaje. Inténtelo de nuevo.",
-  "privacyNotice": "Usamos esta información para responder a su consulta (LGPD art. 7 V/IX — trámites precontractuales e interés legítimo).",
+  "privacyNotice": "Usamos esta información para responder a su consulta, de acuerdo con nuestra <link>Política de Privacidad</link>.",
   "privacyLink": "Política de Privacidad",
   "privacyAccept": "He leído el aviso de privacidad y acepto el tratamiento de mis datos para esta consulta.",
   "marketingOptIn": "Deseo recibir novedades de productos por correo electrónico (opcional)."
