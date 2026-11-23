@@ -16,7 +16,44 @@ export interface SolutionsPageCrop {
   description: LocalizedString;
   /** Sector title used in “Solutions for {sector}”. */
   sectorTitle: LocalizedString;
+  /** Ordered “challenges we help address” bullets (max 8). */
+  challenges: LocalizedString[];
   shop: ShopFilterTarget;
+}
+
+const MAX_CHALLENGES = 8;
+
+function challengeList(...items: [string, string, string, string][]): LocalizedString[] {
+  return items.map((item) => L(...item));
+}
+
+const DEFAULT_CHALLENGES: Record<string, LocalizedString[]> = {
+  flowers: challengeList(
+    ["Product protection", "Proteção do produto", "Protección del producto", "产品保护"],
+    ["Post-harvest handling", "Manejo pós-colheita", "Manejo poscosecha", "采后处理"],
+    ["Packaging efficiency", "Eficiência de embalagem", "Eficiencia de empaque", "包装效率"],
+    ["Logistics performance", "Desempenho logístico", "Desempeño logístico", "物流绩效"],
+    ["Labor productivity", "Produtividade da mão de obra", "Productividad de la mano de obra", "劳动生产率"],
+    ["Retail presentation", "Apresentação no varejo", "Presentación en el comercio minorista", "零售陈列"]
+  ),
+  vegetables: challengeList(
+    ["Production efficiency", "Eficiência de produção", "Eficiencia de producción", "生产效率"],
+    ["Product consistency", "Consistência do produto", "Consistencia del producto", "产品一致性"],
+    ["Packaging performance", "Desempenho da embalagem", "Desempeño del empaque", "包装性能"],
+    ["Supply chain optimization", "Otimização da cadeia de suprimentos", "Optimización de la cadena de suministro", "供应链优化"],
+    ["Sustainability objectives", "Metas de sustentabilidade", "Objetivos de sostenibilidad", "可持续发展目标"]
+  ),
+  fruits: challengeList(
+    ["Damage reduction", "Redução de danos", "Reducción de daños", "减少损耗"],
+    ["Transportation efficiency", "Eficiência no transporte", "Eficiencia en el transporte", "运输效率"],
+    ["Product presentation", "Apresentação do produto", "Presentación del producto", "产品呈现"],
+    ["Distribution performance", "Desempenho da distribuição", "Desempeño de la distribución", "配送绩效"],
+    ["Retail execution", "Execução no varejo", "Ejecución en el comercio minorista", "零售执行"]
+  ),
+};
+
+function defaultChallenges(cropId: string): LocalizedString[] {
+  return (DEFAULT_CHALLENGES[cropId] ?? []).map((item) => ({ ...item }));
 }
 
 export type SolutionsBannerCropId = Exclude<SolutionsCropFilterId, "all">;
@@ -60,6 +97,7 @@ function defaultCrops(): SolutionsPageCrop[] {
         "从育苗到零售终端，支持花卉种植者、出口商、分销商和零售商。"
       ),
       sectorTitle: L("every crop", "cada cultura", "cada cultivo", "每种作物"),
+      challenges: defaultChallenges("all"),
       shop: {},
     },
     {
@@ -72,6 +110,7 @@ function defaultCrops(): SolutionsPageCrop[] {
         "从育苗到零售终端，支持花卉种植者、出口商、分销商和零售商。"
       ),
       sectorTitle: L("Floriculture", "Floricultura", "Floricultura", "花卉种植"),
+      challenges: defaultChallenges("flowers"),
       shop: { cultures: ["flowers"] },
     },
     {
@@ -89,6 +128,7 @@ function defaultCrops(): SolutionsPageCrop[] {
         "Hortalizas y hierbas",
         "蔬菜与香草"
       ),
+      challenges: defaultChallenges("vegetables"),
       shop: { cultures: ["vegetables"] },
     },
     {
@@ -101,6 +141,7 @@ function defaultCrops(): SolutionsPageCrop[] {
         "优化水果供应链中的种植、搬运、包装与配送。"
       ),
       sectorTitle: L("Fruits", "Frutas", "Frutas", "水果"),
+      challenges: defaultChallenges("fruits"),
       shop: { cultures: ["fruits"] },
     },
   ];
@@ -238,19 +279,19 @@ export function createDefaultSolutionsPageSettings(): SolutionsPageSettings {
     banners: defaultBanners(),
     cta: {
       title: L(
-        "Ready to find the right solution?",
-        "Pronto para encontrar a solução certa?",
-        "¿Listo para encontrar la solución adecuada?",
-        "准备好找到合适的方案了吗？"
+        "Which Solution is Right for You?",
+        "Qual solução é a ideal para você?",
+        "¿Qué solución es la adecuada para usted?",
+        "哪种解决方案适合您？"
       ),
       description: L(
-        "Browse products in the Shop or contact our team for tailored recommendations.",
-        "Veja os produtos na loja ou fale com nossa equipe para recomendações sob medida.",
-        "Explore los productos en la tienda o contacte a nuestro equipo para recomendaciones a medida.",
-        "在商店浏览产品，或联系我们的团队获取针对性建议。"
+        "In our work culture, honesty is a priority. We are here to offer you the solution you really need. Find out what it is here.",
+        "Em nossa cultura de trabalho, a honestidade é prioridade. Estamos aqui para oferecer a solução de que você realmente precisa. Descubra qual é aqui.",
+        "En nuestra cultura de trabajo, la honestidad es una prioridad. Estamos aquí para ofrecerle la solución que realmente necesita. Descubra cuál es aquí.",
+        "在我们的工作文化中，诚信是首要原则。我们致力于为您提供真正需要的解决方案。点击此处了解详情。"
       ),
-      buttonLabel: L("Go to Shop", "Ir para a loja", "Ir a la tienda", "前往商店"),
-      href: "/shop",
+      buttonLabel: L("Contact Us", "Fale conosco", "Contáctenos", "联系我们"),
+      href: "/contact",
     },
     updatedAt: new Date().toISOString(),
   };
@@ -349,6 +390,37 @@ function normalizeLocalized(
   };
 }
 
+function normalizeChallenges(value: unknown, cropId: string): LocalizedString[] {
+  if (!Array.isArray(value)) return defaultChallenges(cropId);
+  return value
+    .filter(
+      (item): item is Record<string, unknown> =>
+        isObject(item) && typeof item.en === "string" && item.en.trim() !== ""
+    )
+    .slice(0, MAX_CHALLENGES)
+    .map((item) => normalizeLocalized(item, L(item.en as string)));
+}
+
+const LEGACY_CTA = {
+  title: "Ready to find the right solution?",
+  description:
+    "Browse products in the Shop or contact our team for tailored recommendations.",
+  buttonLabel: "Go to Shop",
+  href: "/shop",
+};
+
+/** Stored value that still equals the old default (EN) upgrades to the new one. */
+function ctaField(
+  value: unknown,
+  legacyEn: string,
+  fallback: LocalizedString
+): LocalizedString {
+  if ((value as { en?: unknown } | undefined)?.en === legacyEn) {
+    return { ...fallback };
+  }
+  return normalizeLocalized(value, fallback);
+}
+
 export function normalizeSolutionsPageSettings(
   value: unknown
 ): SolutionsPageSettings {
@@ -387,6 +459,7 @@ export function normalizeSolutionsPageSettings(
                   crop.sectorTitle,
                   fallback.sectorTitle
                 ),
+                challenges: normalizeChallenges(crop.challenges, "all"),
                 shop: normalizeShop(crop.shop),
               };
             }
@@ -399,6 +472,10 @@ export function normalizeSolutionsPageSettings(
               sectorTitle: normalizeLocalized(
                 crop.sectorTitle,
                 fallback.sectorTitle
+              ),
+              challenges: normalizeChallenges(
+                crop.challenges,
+                typeof crop.id === "string" ? crop.id : fallback.id
               ),
               shop: normalizeShop(crop.shop),
             };
@@ -476,11 +553,21 @@ const banners =
     crops,
     banners,
     cta: {
-      title: normalizeLocalized(cta.title, defaults.cta.title),
-      description: normalizeLocalized(cta.description, defaults.cta.description),
-      buttonLabel: normalizeLocalized(cta.buttonLabel, defaults.cta.buttonLabel),
+      title: ctaField(cta.title, LEGACY_CTA.title, defaults.cta.title),
+      description: ctaField(
+        cta.description,
+        LEGACY_CTA.description,
+        defaults.cta.description
+      ),
+      buttonLabel: ctaField(
+        cta.buttonLabel,
+        LEGACY_CTA.buttonLabel,
+        defaults.cta.buttonLabel
+      ),
       href:
-        typeof cta.href === "string" && cta.href.trim()
+        typeof cta.href === "string" &&
+        cta.href.trim() &&
+        cta.href.trim() !== LEGACY_CTA.href
           ? cta.href.trim()
           : defaults.cta.href,
     },

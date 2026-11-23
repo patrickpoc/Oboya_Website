@@ -137,6 +137,7 @@
     "description": "了解 Oboya 如何支持园艺运营的每个阶段——并在商城中直接打开相关产品。",
     "headingAll": "适用于所有作物的解决方案",
     "headingFor": "{sector}解决方案",
+    "challengesTitle": "我们帮助应对的挑战",
     "navLabel": "作物筛选",
     "filters": {
       "all": "全部作物",

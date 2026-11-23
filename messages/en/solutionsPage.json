@@ -136,7 +136,8 @@
     "title": "Solutions for every horticulture sector",
     "description": "Supporting flower growers, exporters, distributors, and retailers from propagation to point of sale.",
     "headingAll": "Solutions For Every Crop",
-    "headingFor": "Solutions for {sector}",
+    "headingFor": "Solutions For {sector}",
+    "challengesTitle": "Challenges We Help Address",
     "navLabel": "Crop filters",
     "filters": {
       "all": "All Crops",

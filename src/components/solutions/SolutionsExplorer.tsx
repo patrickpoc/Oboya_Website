@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { CircleCheck } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -67,6 +68,13 @@ export function SolutionsExplorer({ settings }: SolutionsExplorerProps) {
     locale
   );
 
+  const challenges =
+    activeFilter === "all"
+      ? []
+      : (activeCrop?.challenges ?? [])
+          .map((c) => pickLocalized(c, locale))
+          .filter(Boolean);
+
   return (
     <section
       id="solutions-explorer"
@@ -125,12 +133,42 @@ export function SolutionsExplorer({ settings }: SolutionsExplorerProps) {
           ) : null}
         </motion.div>
 
+        {challenges.length > 0 ? (
+          <motion.div
+            key={`challenges-${activeFilter}`}
+            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.3 }}
+            className="mt-10"
+          >
+            <h2 className="font-body text-sm font-semibold text-oboya-green md:text-base">
+              {t("challengesTitle")}
+            </h2>
+            <div className="mt-3 h-px w-full bg-oboya-green/50 md:mt-4" />
+            <ul className="mt-6 grid gap-x-10 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
+              {challenges.map((text) => (
+                <li key={text} className="flex items-start gap-2.5">
+                  <CircleCheck
+                    aria-hidden="true"
+                    size={20}
+                    strokeWidth={1.5}
+                    className="mt-0.5 shrink-0 text-oboya-green"
+                  />
+                  <span className="font-body text-[0.9375rem] leading-snug text-oboya-blue-dark">
+                    {text}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        ) : null}
+
         <motion.div
           key={`grid-${activeFilter}`}
           initial={reduceMotion ? false : "hidden"}
           animate={reduceMotion ? undefined : "visible"}
           variants={reduceMotion ? undefined : staggerContainer}
-          className="mt-7 grid gap-x-4 gap-y-7 sm:grid-cols-2 md:mt-8 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-5 xl:gap-y-8"
+          className="mt-10 grid gap-x-4 gap-y-7 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-5 xl:gap-y-8"
         >
           {banners.map((card: SolutionsPageBanner) => {
             const href = buildShopHrefForSolution(

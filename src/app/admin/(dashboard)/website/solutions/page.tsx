@@ -305,6 +305,57 @@ export default function SolutionsPageAdmin() {
                     </div>
                   </div>
                   <div className="space-y-1.5">
+                    <Label>{t("challenges")}</Label>
+                    <p className="text-xs text-muted-foreground">
+                      {t("challengesHint")}
+                    </p>
+                    {crop.challenges.map((item, itemIndex) => (
+                      <div key={itemIndex} className="flex gap-2">
+                        <Input
+                          value={item[locale] ?? ""}
+                          onChange={(event) =>
+                            updateCrop(index, {
+                              challenges: crop.challenges.map((c, i) =>
+                                i === itemIndex
+                                  ? setLocalized(c, locale, event.target.value)
+                                  : c
+                              ),
+                            })
+                          }
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          aria-label={t("removeChallenge")}
+                          onClick={() =>
+                            updateCrop(index, {
+                              challenges: crop.challenges.filter(
+                                (_, i) => i !== itemIndex
+                              ),
+                            })
+                          }
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    {crop.challenges.length < 8 ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          updateCrop(index, {
+                            challenges: [...crop.challenges, emptyLocalized()],
+                          })
+                        }
+                      >
+                        <Plus className="mr-1 size-3.5" /> {t("addChallenge")}
+                      </Button>
+                    ) : null}
+                  </div>
+                  <div className="space-y-1.5">
                     <Label>{tCommon("description")}</Label>
                     <Textarea
                       rows={3}

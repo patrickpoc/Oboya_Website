@@ -137,6 +137,7 @@
     "description": "Descubra como a Oboya apoia cada etapa das operações hortícolas — e abra os produtos relacionados diretamente na Shop.",
     "headingAll": "Soluções para todos os cultivos",
     "headingFor": "Soluções para {sector}",
+    "challengesTitle": "Desafios que ajudamos a resolver",
     "navLabel": "Filtros de cultivo",
     "filters": {
       "all": "Todos os cultivos",
