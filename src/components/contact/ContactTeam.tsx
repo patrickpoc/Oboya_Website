@@ -64,9 +64,9 @@ export function ContactTeam({ team }: { team: ContactPerson[] }) {
           {people.map((person) => (
             <li
               key={person.id}
-              className="flex flex-col items-center gap-3 rounded-lg bg-white p-6 text-center shadow-[var(--shadow-card)]"
+              className="flex flex-col items-center gap-3 rounded-lg bg-oboya-soft-white p-6 text-center shadow-[var(--shadow-card)]"
             >
-              <div className="flex size-24 items-center justify-center overflow-hidden rounded-full bg-oboya-soft-white">
+              <div className="flex size-24 items-center justify-center overflow-hidden rounded-full bg-white">
                 {person.photo ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
