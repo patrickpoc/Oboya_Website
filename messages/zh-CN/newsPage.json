@@ -1,9 +1,12 @@
 {
   "metaTitle": "最新资讯",
+  "title": "新闻中心",
+  "description": "Oboya Horticulture 的公司新闻、活动和公告。",
+  "emptyAll": "暂无已发布的新闻。",
   "allNews": "全部资讯",
-  "filterLabel": "按类别筛选",
-  "articleLabel": "博客文章",
-  "empty": "没有符合此类别的文章。",
+  "filterLabel": "按作物筛选",
+  "articleLabel": "新闻",
+  "empty": "没有符合此作物的新闻。",
   "prevPage": "上一页",
   "nextPage": "下一页",
   "detailPlaceholder": "在后台添加后，完整文章内容将显示在此处。"

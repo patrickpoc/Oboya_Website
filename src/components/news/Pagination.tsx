@@ -36,7 +36,7 @@ export function Pagination({
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage <= 1}
         aria-label={prevLabel}
-        className="flex size-9 items-center justify-center rounded-full border border-border/80 bg-white text-muted-foreground transition-colors hover:border-oboya-blue/40 hover:text-oboya-blue disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex size-9 items-center justify-center rounded-full border border-oboya-green bg-white text-oboya-green transition-colors hover:bg-oboya-green hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oboya-green disabled:cursor-not-allowed disabled:opacity-40"
       >
         <ChevronLeft className="size-4" />
       </button>
@@ -49,10 +49,10 @@ export function Pagination({
           aria-label={t("a11y.pageNumber", { page })}
           aria-current={page === currentPage ? "page" : undefined}
           className={cn(
-            "flex size-9 items-center justify-center rounded-full text-sm font-medium transition-colors",
+            "flex size-9 items-center justify-center rounded-full text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oboya-green",
             page === currentPage
-              ? "border border-oboya-blue bg-white text-oboya-blue-dark"
-              : "text-muted-foreground hover:text-oboya-blue-dark"
+              ? "bg-oboya-green text-white"
+              : "bg-white text-oboya-green hover:bg-oboya-green/15"
           )}
         >
           {page}
@@ -64,7 +64,7 @@ export function Pagination({
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
         aria-label={nextLabel}
-        className="flex size-9 items-center justify-center rounded-full border border-border/80 bg-white text-muted-foreground transition-colors hover:border-oboya-blue/40 hover:text-oboya-blue disabled:cursor-not-allowed disabled:opacity-40"
+        className="flex size-9 items-center justify-center rounded-full border border-oboya-green bg-white text-oboya-green transition-colors hover:bg-oboya-green hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oboya-green disabled:cursor-not-allowed disabled:opacity-40"
       >
         <ChevronRight className="size-4" />
       </button>

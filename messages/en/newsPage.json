@@ -1,9 +1,12 @@
 {
   "metaTitle": "Latest News",
+  "title": "Newsroom",
+  "description": "Company news, events and announcements from Oboya Horticulture.",
+  "emptyAll": "No news published yet.",
   "allNews": "All news",
-  "filterLabel": "Filter by category",
-  "articleLabel": "Blog article",
-  "empty": "No articles match this category.",
+  "filterLabel": "Filter by crop",
+  "articleLabel": "News",
+  "empty": "No news match this crop.",
   "prevPage": "Previous page",
   "nextPage": "Next page",
   "detailPlaceholder": "Full article content will appear here once added in the dashboard."

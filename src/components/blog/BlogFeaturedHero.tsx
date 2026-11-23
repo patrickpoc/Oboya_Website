@@ -11,6 +11,8 @@ interface BlogFeaturedHeroProps {
   featuredLabel: string;
   readMoreLabel: string;
   image?: string;
+  /** Detail route prefix; defaults to the blog. */
+  basePath?: string;
   className?: string;
 }
 
@@ -22,6 +24,7 @@ export function BlogFeaturedHero({
   featuredLabel,
   readMoreLabel,
   image,
+  basePath = "/blog",
   className,
 }: BlogFeaturedHeroProps) {
   return (
@@ -60,7 +63,7 @@ export function BlogFeaturedHero({
           </p>
         )}
         <Link
-          href={`/blog/${slug}`}
+          href={`${basePath}/${slug}`}
           className="mt-6 inline-flex w-fit items-center gap-2 text-sm font-semibold text-oboya-green hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-oboya-green"
         >
           {readMoreLabel}

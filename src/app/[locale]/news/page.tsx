@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: t("metaTitle"),
     description: pickLocalized(settings.headline, locale),
     alternates: {
-      canonical: `/${locale}/blog`,
+      canonical: `/${locale}/news`,
     },
   };
 }

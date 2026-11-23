@@ -9,10 +9,12 @@ interface BlogCardProps {
   categoryLabel: string;
   date: string;
   image?: string;
+  /** Detail route prefix; defaults to the blog. */
+  basePath?: string;
   className?: string;
 }
 
-export function BlogCard({ slug, title, categoryLabel, date, image, className }: BlogCardProps) {
+export function BlogCard({ slug, title, categoryLabel, date, image, basePath = "/blog", className }: BlogCardProps) {
   return (
     <article
       className={cn(
@@ -21,7 +23,7 @@ export function BlogCard({ slug, title, categoryLabel, date, image, className }:
       )}
     >
       <Link
-        href={`/blog/${slug}`}
+        href={`${basePath}/${slug}`}
         className="flex flex-1 flex-col focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-oboya-green"
       >
         <div className="relative aspect-[4/3] bg-oboya-blue-dark/10">
