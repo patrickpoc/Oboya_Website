@@ -2,6 +2,9 @@ import type { CmsStatus, LocalizedString, SeoFields } from "@/lib/cms/types";
 import { blogPosts } from "@/constants/content-data";
 import { BLOG_SEED_I18N } from "@/lib/cms/blog-i18n";
 
+export const BLOG_CROP_IDS = ["flowers", "vegetables", "fruits"] as const;
+export type BlogCropId = (typeof BLOG_CROP_IDS)[number];
+
 export interface CmsBlogPost {
   id: string;
   slug: string;
@@ -12,6 +15,10 @@ export interface CmsBlogPost {
   categoryId: string;
   featuredImage?: string;
   relatedPostIds: string[];
+  /** Crops this post belongs to. Empty = general post (only under "All Crops"). */
+  crops: BlogCropId[];
+  /** Post shown in the featured slot of the blog. */
+  featured: boolean;
   status: CmsStatus;
   publishedAt?: string;
   /** Manual listing order — lower appears first. Falls back to publishedAt. */
@@ -23,6 +30,34 @@ export interface CmsBlogPost {
 }
 
 const emptyLoc = (): LocalizedString => ({ en: "", "pt-BR": "", es: "", "zh-CN": "" });
+
+const SEED_CROPS: Record<string, BlogCropId[]> = {
+  "greenhouse-innovation-2026": ["vegetables"],
+  "berry-retail-growth": ["fruits"],
+  "greenhouse-technology": ["vegetables"],
+  "retail-display-innovation": ["flowers"],
+};
+const SEED_FEATURED_SLUG = "2025-exhibition-overview";
+
+/** Fills defaults / drops invalid values for posts read from storage. */
+export function normalizeBlogPost(post: CmsBlogPost): CmsBlogPost {
+  const raw: unknown = (post as { crops?: unknown }).crops;
+  const crops = Array.isArray(raw)
+    ? BLOG_CROP_IDS.filter((id) => raw.includes(id))
+    : [];
+  return {
+    ...post,
+    crops,
+    featured: (post as { featured?: unknown }).featured === true,
+  };
+}
+
+/** First published featured post, else the first post (input already sorted). */
+export function pickFeaturedPost<T extends CmsBlogPost>(posts: T[]): T | undefined {
+  return (
+    posts.find((p) => p.featured === true && p.status === "published") ?? posts[0]
+  );
+}
 
 function seed(): CmsBlogPost[] {
   return blogPosts.map((p) => {
@@ -51,6 +86,8 @@ function seed(): CmsBlogPost[] {
       categoryId: p.categoryId,
       featuredImage: p.featuredImage,
       relatedPostIds: [],
+      crops: SEED_CROPS[p.slug] ?? [],
+      featured: p.slug === SEED_FEATURED_SLUG,
       status: "published" as CmsStatus,
       publishedAt: p.date,
       seo: { title: emptyLoc(), description: emptyLoc() },
@@ -68,7 +105,7 @@ export function getBlogPosts(): CmsBlogPost[] {
 }
 
 export function replaceBlogPostsCache(posts: CmsBlogPost[]) {
-  cache = posts.map((p) => ({ ...p }));
+  cache = posts.map((p) => normalizeBlogPost(p));
 }
 
 export function getBlogPostById(id: string): CmsBlogPost | undefined {
@@ -81,7 +118,7 @@ export function getBlogPostBySlug(slug: string): CmsBlogPost | undefined {
 
 export function saveBlogPost(post: CmsBlogPost): CmsBlogPost {
   if (!cache) cache = seed();
-  const updated = { ...post, updatedAt: new Date().toISOString() };
+  const updated = { ...normalizeBlogPost(post), updatedAt: new Date().toISOString() };
   const idx = cache.findIndex((p) => p.id === post.id);
   if (idx >= 0) cache[idx] = updated;
   else cache.push(updated);

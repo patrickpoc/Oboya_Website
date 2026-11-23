@@ -1418,7 +1418,8 @@
       "reorderHint": "拖动文章以更改博客公开页上的顺序。",
       "reorderSaved": "博客顺序已保存",
       "reorderFailed": "无法保存博客顺序",
-      "dragHandle": "拖动以重新排序 {title}"
+      "dragHandle": "拖动以重新排序 {title}",
+      "featuredBadge": "精选"
     },
     "postEditor": {
       "newPost": "新建文章",
@@ -1441,7 +1442,16 @@
       "savePost": "保存文章",
       "publishedDateHint": "在该日期 00:00 发布（全天可见）。",
       "slugPlaceholder": "根据标题自动生成",
-      "slugHint": "仅小写字母、数字和连字符。"
+      "slugHint": "仅小写字母、数字和连字符。",
+      "crops": "作物",
+      "cropsHint": "留空表示通用文章,将显示在“全部作物”下",
+      "cropOptions": {
+        "flowers": "花卉",
+        "vegetables": "蔬菜与香草",
+        "fruits": "水果"
+      },
+      "featured": "精选文章",
+      "featuredHint": "显示在博客顶部的精选位置。只应设置一篇精选文章。"
     },
     "authors": {
       "title": "博客作者",

@@ -179,6 +179,9 @@ export default function BlogPostsPage() {
                     /{post.slug}
                   </p>
                 </div>
+                {post.featured ? (
+                  <StatusPill tone="info">{t("featuredBadge")}</StatusPill>
+                ) : null}
                 <StatusPill tone={statusTone(post.status)}>
                   {post.status === "draft" || post.status === "published" || post.status === "scheduled" || post.status === "archived"
                     ? tCommon(post.status)

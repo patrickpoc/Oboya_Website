@@ -1418,7 +1418,8 @@
       "reorderHint": "Arraste as publicações para mudar a ordem na página pública do blog.",
       "reorderSaved": "Ordem do blog salva",
       "reorderFailed": "Não foi possível salvar a ordem do blog",
-      "dragHandle": "Arrastar para reordenar {title}"
+      "dragHandle": "Arrastar para reordenar {title}",
+      "featuredBadge": "Destaque"
     },
     "postEditor": {
       "newPost": "Novo post",
@@ -1441,7 +1442,16 @@
       "savePost": "Salvar post",
       "publishedDateHint": "Publica às 00:00 desta data (visível o dia inteiro).",
       "slugPlaceholder": "auto-do-titulo",
-      "slugHint": "Apenas letras minúsculas, números e hífens."
+      "slugHint": "Apenas letras minúsculas, números e hífens.",
+      "crops": "Culturas",
+      "cropsHint": "Deixe vazio para posts gerais, exibidos em Todas as culturas",
+      "cropOptions": {
+        "flowers": "Flores",
+        "vegetables": "Hortaliças e ervas",
+        "fruits": "Frutas"
+      },
+      "featured": "Post em destaque",
+      "featuredHint": "Exibido no espaço de destaque no topo do blog. Apenas um post deve estar em destaque."
     },
     "authors": {
       "title": "Autores do blog",

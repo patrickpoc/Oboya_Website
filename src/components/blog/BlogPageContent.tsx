@@ -1,16 +1,22 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Container } from "@/components/ui/container";
 import { PageIntroBanner } from "@/components/ui/PageIntroBanner";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { BlogFeaturedHero } from "@/components/blog/BlogFeaturedHero";
-import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
-import { sortBlogPostsForDisplay } from "@/lib/cms/repositories/blog-repository";
+import type { BlogCropId, CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
+import {
+  BLOG_CROP_IDS,
+  pickFeaturedPost,
+  sortBlogPostsForDisplay,
+} from "@/lib/cms/repositories/blog-repository";
 import type { BlogCategory } from "@/lib/cms/repositories/blog-categories-repository";
 import { pickLocalized } from "@/lib/cms/utils";
 import { cn } from "@/lib/utils";
+
+type CropFilter = "all" | BlogCropId;
 
 interface BlogPageContentProps {
   posts: CmsBlogPost[];
@@ -20,7 +26,8 @@ interface BlogPageContentProps {
 
 function formatBlogDate(isoDate: string | undefined, locale: string): string {
   if (!isoDate) return "";
-  return new Intl.DateTimeFormat(locale, {
+  // "4 JUNE 2026" order (day month year) for English too.
+  return new Intl.DateTimeFormat(locale === "en" ? "en-GB" : locale, {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -31,7 +38,22 @@ function formatBlogDate(isoDate: string | undefined, locale: string): string {
 
 export function BlogPageContent({ posts, categories, locale }: BlogPageContentProps) {
   const t = useTranslations("blog");
-  const [categoryId, setCategoryId] = useState("all");
+  const [crop, setCrop] = useState<CropFilter>("all");
+
+  // Sync from ?crop= after mount (avoids Suspense/static-render bailout of useSearchParams).
+  useEffect(() => {
+    const param = new URLSearchParams(window.location.search).get("crop");
+    const match = BLOG_CROP_IDS.find((c) => c === param);
+    if (match) setCrop(match); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []);
+
+  const selectCrop = (next: CropFilter) => {
+    setCrop(next);
+    const url = new URL(window.location.href);
+    if (next === "all") url.searchParams.delete("crop");
+    else url.searchParams.set("crop", next);
+    window.history.replaceState(null, "", url);
+  };
 
   const categoryMap = useMemo(
     () => new Map(categories.map((c) => [c.id, pickLocalized(c.name, locale)])),
@@ -40,74 +62,59 @@ export function BlogPageContent({ posts, categories, locale }: BlogPageContentPr
 
   const filteredPosts = useMemo(() => {
     const sorted = sortBlogPostsForDisplay(posts);
-    if (categoryId === "all") return sorted;
-    return sorted.filter((post) => post.categoryId === categoryId);
-  }, [posts, categoryId]);
+    if (crop === "all") return sorted;
+    return sorted.filter((post) => post.crops.includes(crop));
+  }, [posts, crop]);
 
-  const featuredPost = filteredPosts[0];
-  const gridPosts = filteredPosts.slice(1);
-  const showCategoryFilters = categories.length > 0;
+  const featuredPost = pickFeaturedPost(filteredPosts);
+  const gridPosts = filteredPosts.filter((p) => p !== featuredPost);
+  const filters: { id: CropFilter; label: string }[] = [
+    { id: "all", label: t("cropAll") },
+    { id: "flowers", label: t("cropFlowers") },
+    { id: "vegetables", label: t("cropVegetables") },
+    { id: "fruits", label: t("cropFruits") },
+  ];
 
   return (
     <>
-      <PageIntroBanner
-        title={t("title")}
-        body={t("description")}
-      />
+      <PageIntroBanner title={t("title")} body={t("description")} />
 
-      <section className="bg-oboya-soft-white py-12 md:py-16 lg:py-20">
+      <section className="bg-oboya-soft-white py-10 md:py-14 lg:py-16">
         <Container>
-          {showCategoryFilters && (
-            <div className="mb-10 md:mb-12">
-              <p className="sr-only">{t("filterLabel")}</p>
-              <div className="flex flex-wrap gap-2">
+          <nav aria-label={t("filterLabel")} className="mb-8 flex flex-wrap gap-2 md:mb-10">
+            {filters.map((filter) => {
+              const isActive = filter.id === crop;
+              return (
                 <button
+                  key={filter.id}
                   type="button"
-                  onClick={() => setCategoryId("all")}
+                  aria-pressed={isActive}
+                  onClick={() => selectCrop(filter.id)}
                   className={cn(
-                    "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-                    categoryId === "all"
-                      ? "border-oboya-blue-dark bg-oboya-blue-dark text-white"
-                      : "border-border/80 bg-white text-oboya-blue-dark hover:border-oboya-blue/40"
+                    "rounded-full px-3.5 py-1.5 font-body text-[0.8125rem] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oboya-green md:text-sm",
+                    isActive
+                      ? "bg-oboya-green text-white"
+                      : "bg-white text-oboya-green hover:bg-oboya-green/15"
                   )}
                 >
-                  {t("allPosts")}
+                  {filter.label}
                 </button>
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    type="button"
-                    onClick={() => setCategoryId(category.id)}
-                    className={cn(
-                      "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-                      categoryId === category.id
-                        ? "border-oboya-blue-dark bg-oboya-blue-dark text-white"
-                        : "border-border/80 bg-white text-oboya-blue-dark hover:border-oboya-blue/40"
-                    )}
-                  >
-                    {pickLocalized(category.name, locale)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+              );
+            })}
+          </nav>
 
           {filteredPosts.length === 0 ? (
             <p className="py-16 text-center text-muted-foreground">
-              {categoryId === "all" ? t("emptyAll") : t("empty")}
+              {crop === "all" ? t("emptyAll") : t("empty")}
             </p>
           ) : (
-            <div className="space-y-10 md:space-y-14">
+            <div className="space-y-8 md:space-y-10">
               {featuredPost && (
                 <BlogFeaturedHero
                   slug={featuredPost.slug}
                   title={pickLocalized(featuredPost.title, locale)}
                   excerpt={pickLocalized(featuredPost.excerpt, locale)}
-                  categoryLabel={
-                    categoryMap.get(featuredPost.categoryId) ?? t("articleLabel")
-                  }
-                  date={formatBlogDate(featuredPost.publishedAt, locale)}
-                  author={featuredPost.author}
+                  categoryLabel={categoryMap.get(featuredPost.categoryId) ?? t("articleLabel")}
                   featuredLabel={t("featuredLabel")}
                   readMoreLabel={t("readMore")}
                   image={featuredPost.featuredImage}
@@ -121,10 +128,8 @@ export function BlogPageContent({ posts, categories, locale }: BlogPageContentPr
                       key={post.id}
                       slug={post.slug}
                       title={pickLocalized(post.title, locale)}
-                      excerpt={pickLocalized(post.excerpt, locale)}
                       categoryLabel={categoryMap.get(post.categoryId) ?? t("articleLabel")}
                       date={formatBlogDate(post.publishedAt, locale)}
-                      author={post.author}
                       image={post.featuredImage}
                     />
                   ))}

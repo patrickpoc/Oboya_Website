@@ -8,8 +8,6 @@ interface BlogFeaturedHeroProps {
   title: string;
   excerpt: string;
   categoryLabel: string;
-  date: string;
-  author: string;
   featuredLabel: string;
   readMoreLabel: string;
   image?: string;
@@ -21,8 +19,6 @@ export function BlogFeaturedHero({
   title,
   excerpt,
   categoryLabel,
-  date,
-  author,
   featuredLabel,
   readMoreLabel,
   image,
@@ -31,18 +27,18 @@ export function BlogFeaturedHero({
   return (
     <article
       className={cn(
-        "group grid overflow-hidden bg-white shadow-[var(--shadow-card)] md:grid-cols-2",
+        "group grid overflow-hidden bg-white shadow-[var(--shadow-subtle)] md:grid-cols-[45fr_55fr]",
         className
       )}
     >
-      <div className="relative aspect-[16/10] bg-oboya-blue-dark/10 md:aspect-auto md:min-h-[22rem]">
+      <div className="relative aspect-[16/10] bg-oboya-blue-dark/10 md:aspect-auto md:min-h-[20rem]">
         {image ? (
           <Image
             src={image}
-            alt={title}
+            alt=""
             fill
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
-            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 45vw"
             priority
           />
         ) : (
@@ -54,28 +50,22 @@ export function BlogFeaturedHero({
         <p className="text-xs font-semibold tracking-[0.14em] text-oboya-green uppercase">
           {featuredLabel}
         </p>
-        <p className="mt-3 text-xs font-semibold tracking-[0.14em] text-oboya-blue uppercase">
-          {categoryLabel}
-        </p>
-        <h2 className="mt-4 font-display text-2xl leading-tight font-black tracking-tight text-oboya-blue-dark text-balance md:text-3xl lg:text-4xl">
+        <p className="mt-3 text-sm text-oboya-blue-light">{categoryLabel}</p>
+        <h2 className="mt-2 font-display text-xl leading-snug font-semibold text-oboya-blue-dark text-balance md:text-2xl lg:text-[1.75rem]">
           {title}
         </h2>
         {excerpt && (
-          <p className="mt-4 line-clamp-4 text-sm leading-relaxed text-muted-foreground md:text-base">
+          <p className="mt-4 line-clamp-4 text-sm leading-relaxed text-oboya-blue-dark/70 md:text-base">
             {excerpt}
           </p>
         )}
-        <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-          {author && <span>{author}</span>}
-          {author && date && <span aria-hidden>·</span>}
-          {date && <time>{date}</time>}
-        </div>
         <Link
           href={`/blog/${slug}`}
-          className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-oboya-green px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-oboya-green/90"
+          className="mt-6 inline-flex w-fit items-center gap-2 text-sm font-semibold text-oboya-green hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-oboya-green"
         >
           {readMoreLabel}
-          <ArrowRight className="size-4" />
+          <span className="sr-only">: {title}</span>
+          <ArrowRight className="size-4" aria-hidden />
         </Link>
       </div>
     </article>

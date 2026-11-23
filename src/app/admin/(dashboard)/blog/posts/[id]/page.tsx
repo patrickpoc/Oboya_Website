@@ -12,9 +12,11 @@ import { LocaleFieldTabs, emptyLocalizedString } from "@/components/admin/forms/
 import { ImageField } from "@/components/admin/media/ImageField";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button, buttonVariants } from "@/components/ui/button";
-import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
+import { BLOG_CROP_IDS, type CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
 import type { BlogAuthor } from "@/lib/cms/repositories/blog-authors-repository";
 import type { BlogCategory } from "@/lib/cms/repositories/blog-categories-repository";
 import type { CmsLocale, CmsStatus } from "@/lib/cms/types";
@@ -40,6 +42,8 @@ function emptyPost(
     categoryId: categories[0]?.id ?? "general",
     featuredImage: "",
     relatedPostIds: [],
+    crops: [],
+    featured: false,
     status: "draft",
     seo: { title: emptyLocalizedString(), description: emptyLocalizedString() },
     createdAt: new Date().toISOString(),
@@ -296,6 +300,36 @@ export default function BlogPostEditPage() {
                     </option>
                   ))}
                 </select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>{t("crops")}</Label>
+                {BLOG_CROP_IDS.map((crop) => (
+                  <label key={crop} className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={post.crops.includes(crop)}
+                      onCheckedChange={(on) =>
+                        setPost({
+                          ...post,
+                          crops: on
+                            ? BLOG_CROP_IDS.filter((c) => c === crop || post.crops.includes(c))
+                            : post.crops.filter((c) => c !== crop),
+                        })
+                      }
+                    />
+                    {t(`cropOptions.${crop}`)}
+                  </label>
+                ))}
+                <p className="text-xs text-muted-foreground">{t("cropsHint")}</p>
+              </div>
+              <div className="space-y-1.5">
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <Switch
+                    checked={post.featured}
+                    onCheckedChange={(on) => setPost({ ...post, featured: on })}
+                  />
+                  {t("featured")}
+                </label>
+                <p className="text-xs text-muted-foreground">{t("featuredHint")}</p>
               </div>
             </CardContent>
           </Card>

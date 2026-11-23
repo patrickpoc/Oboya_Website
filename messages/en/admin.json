@@ -1401,6 +1401,7 @@
   },
   "blog": {
     "posts": {
+      "featuredBadge": "Featured",
       "title": "Blog Posts",
       "description": "Create and manage articles shown on /news and /blog.",
       "loadFailed": "Could not load blog posts",
@@ -1427,6 +1428,15 @@
       "saved": "Post saved",
       "savePost": "Save post",
       "featuredImage": "Featured image",
+      "crops": "Crops",
+      "cropsHint": "Leave empty for general posts — shown under All Crops",
+      "cropOptions": {
+        "flowers": "Flowers",
+        "vegetables": "Vegetables & Herbs",
+        "fruits": "Fruits"
+      },
+      "featured": "Featured post",
+      "featuredHint": "Shown in the featured slot at the top of the blog. Only one post should be featured.",
       "excerpt": "Excerpt",
       "content": "Content",
       "seoTitle": "SEO title",
