@@ -1,5 +1,6 @@
 import type { LocalizedString } from "@/lib/cms/types";
 import { HOME_I18N } from "@/lib/cms/homepage-i18n";
+import { LEGACY_HOME_COPY as LEGACY } from "@/lib/cms/homepage-legacy";
 import { mergeLocalized } from "@/lib/cms/utils";
 
 export type HomepageSectionId =
@@ -153,11 +154,13 @@ export interface HomepageSettings {
     title: LocalizedString;
     image: string;
     points: HomepageChallengePoint[];
+    closingText: LocalizedString;
   };
   homeEcosystem: {
     title: LocalizedString;
     bodyP1: LocalizedString;
     bodyP2: LocalizedString;
+    bodyP3: LocalizedString;
     openingLine: LocalizedString;
     closingLine1: LocalizedString;
     closingLine2: LocalizedString;
@@ -279,15 +282,18 @@ const defaultSettings = (): HomepageSettings => ({
     title: C.title,
     image: "/assets/homepage/greenhouse-technology.webp",
     points: [
-      { id: "p1", caption: C.p1, x: 50, y: 62 },
-      { id: "p2", caption: C.p2, x: 76, y: 58 },
-      { id: "p3", caption: C.p3, x: 24, y: 52 },
+      { id: "p1", caption: C.p1, x: 22, y: 55 },
+      { id: "p2", caption: C.p2, x: 45, y: 62 },
+      { id: "p3", caption: C.p3, x: 62, y: 50 },
+      { id: "p4", caption: C.p4, x: 78, y: 58 },
     ],
+    closingText: C.closingText,
   },
   homeEcosystem: {
     title: E.title,
     bodyP1: E.bodyP1,
     bodyP2: E.bodyP2,
+    bodyP3: E.bodyP3,
     openingLine: E.openingLine,
     closingLine1: E.closingLine1,
     closingLine2: E.closingLine2,
@@ -415,12 +421,6 @@ const defaultSettings = (): HomepageSettings => ({
         author: H.testimonials.t5Author,
         role: H.testimonials.t5Role,
       },
-      {
-        id: "t6",
-        quote: H.testimonials.t6Quote,
-        author: H.testimonials.t6Author,
-        role: H.testimonials.t6Role,
-      },
     ],
   },
   latestNews: {
@@ -441,7 +441,7 @@ const defaultSettings = (): HomepageSettings => ({
 });
 
 let cache: HomepageSettings | null = null;
-const CONTENT_REVISION = "home-i18n-2026-09-02";
+const CONTENT_REVISION = "home-i18n-2026-11-23";
 let appliedRevision: string | null = null;
 
 const LOCALE_KEYS = ["en", "pt-BR", "es", "zh-CN"] as const;
@@ -529,6 +529,12 @@ function migrateEcosystemPoints(
   return points.slice(0, HOME_ECOSYSTEM_MAX_POINTS);
 }
 
+/** True when a stored value is still the old default: English equal, other locales equal or blank. */
+const isLegacy = (v: LocalizedString | undefined, old: LocalizedString): v is LocalizedString =>
+  !!v && LOCALE_KEYS.every((k) => (k === "en" ? v.en === old.en : !v[k]?.trim() || v[k] === old[k]));
+const upgradeLegacy = (v: LocalizedString | undefined, old: LocalizedString, next: LocalizedString) =>
+  isLegacy(v, old) ? next : v;
+
 const clampPct = (n: number) => Math.min(100, Math.max(0, n));
 
 function migrateChallenges(
@@ -537,9 +543,16 @@ function migrateChallenges(
 ): HomepageSettings["challenges"] {
   const raw = asRecord(stored) ?? {};
   let points = defaults.points;
-  if (Array.isArray(raw.points)) {
+  const rawPoints = Array.isArray(raw.points) ? raw.points : undefined;
+  const isOldPoints =
+    rawPoints?.length === LEGACY.challengePoints.length &&
+    rawPoints.every((e, i) => {
+      const r = asRecord(e);
+      return r?.id === `p${i + 1}` && isLegacy(asLoc(r.caption), LEGACY.challengePoints[i]);
+    });
+  if (rawPoints && !isOldPoints) {
     points = [];
-    for (const entry of raw.points) {
+    for (const entry of rawPoints) {
       const r = asRecord(entry);
       const caption = asLoc(r?.caption);
       if (
@@ -564,6 +577,7 @@ function migrateChallenges(
     title: asLoc(raw.title) ?? defaults.title,
     image: sanitizeHomeEcosystemImage(raw.image) || defaults.image,
     points,
+    closingText: asLoc(raw.closingText) ?? defaults.closingText,
   };
 }
 
@@ -573,12 +587,25 @@ function migrateEcosystem(
 ): HomepageSettings["homeEcosystem"] {
   const raw = asRecord(stored) ?? {};
   const storedStages = Array.isArray(raw.stages) ? raw.stages : [];
-  const text = (k: keyof HomepageSettings["homeEcosystem"]) =>
-    asLoc(raw[k]) ?? (defaults[k] as LocalizedString);
+  const text = (k: keyof HomepageSettings["homeEcosystem"], old?: LocalizedString) =>
+    (old ? upgradeLegacy(asLoc(raw[k]), old, defaults[k] as LocalizedString) : asLoc(raw[k])) ??
+    (defaults[k] as LocalizedString);
   return {
     title: text("title"),
-    bodyP1: text("bodyP1"),
-    bodyP2: text("bodyP2"),
+    // Split into 3 paragraphs only when both stored paragraphs are untouched; else keep them
+    // and leave bodyP3 blank unless stored, so no sentence is duplicated or lost.
+    ...(() => {
+      const p1 = asLoc(raw.bodyP1);
+      const p2 = asLoc(raw.bodyP2);
+      const split = (!p1 || isLegacy(p1, LEGACY.ecoBodyP1)) && (!p2 || isLegacy(p2, LEGACY.ecoBodyP2));
+      return split
+        ? { bodyP1: defaults.bodyP1, bodyP2: defaults.bodyP2, bodyP3: asLoc(raw.bodyP3) ?? defaults.bodyP3 }
+        : {
+            bodyP1: p1 ?? defaults.bodyP1,
+            bodyP2: p2 ?? defaults.bodyP2,
+            bodyP3: asLoc(raw.bodyP3) ?? emptyLoc(),
+          };
+    })(),
     openingLine: text("openingLine"),
     closingLine1: text("closingLine1"),
     closingLine2: text("closingLine2"),
@@ -626,6 +653,7 @@ function mergeHomepageLocales(
       title: mergeLocalized(eco.title, ecoDef.title),
       bodyP1: mergeLocalized(eco.bodyP1, ecoDef.bodyP1),
       bodyP2: mergeLocalized(eco.bodyP2, ecoDef.bodyP2),
+      bodyP3: eco.bodyP3,
       openingLine: mergeLocalized(eco.openingLine, ecoDef.openingLine),
       closingLine1: mergeLocalized(eco.closingLine1, ecoDef.closingLine1),
       closingLine2: mergeLocalized(eco.closingLine2, ecoDef.closingLine2),
@@ -807,6 +835,56 @@ function mergeHomepageLocales(
   };
 }
 
+/** Replaces stored copy that still equals a previous default with the current default. */
+function upgradeLegacyHomeCopy(s: HomepageSettings, defaults: HomepageSettings): HomepageSettings {
+  const solutionDef = (id: string) => defaults.businessSolutions.items.find((d) => d.id === id);
+  const oldTestimonials = LEGACY.testimonials;
+  const isOldTestimonials =
+    s.testimonials.items.length === oldTestimonials.length &&
+    s.testimonials.items.every(
+      (it, i) =>
+        it.id === `t${i + 1}` &&
+        isLegacy(it.quote, oldTestimonials[i][0]) &&
+        isLegacy(it.author, oldTestimonials[i][1]) &&
+        isLegacy(it.role, oldTestimonials[i][2])
+    );
+  return {
+    ...s,
+    capabilities: {
+      ...s.capabilities,
+      items: s.capabilities.items.map((it) =>
+        it.id === "global-local"
+          ? {
+              ...it,
+              description: upgradeLegacy(
+                it.description,
+                LEGACY.capItem2Desc,
+                defaults.capabilities.items.find((d) => d.id === "global-local")!.description
+              )!,
+            }
+          : it
+      ),
+    },
+    businessSolutions: {
+      ...s.businessSolutions,
+      title: upgradeLegacy(s.businessSolutions.title, LEGACY.solutionsTitle, defaults.businessSolutions.title)!,
+      items: s.businessSolutions.items.map((it) => {
+        const old = (LEGACY.solutionDesc as Record<string, LocalizedString>)[it.id];
+        const def = solutionDef(it.id);
+        return old && def ? { ...it, description: upgradeLegacy(it.description, old, def.description)! } : it;
+      }),
+    },
+    testimonials: {
+      ...s.testimonials,
+      items: isOldTestimonials ? defaults.testimonials.items : s.testimonials.items,
+    },
+    partners: {
+      ...s.partners,
+      title: upgradeLegacy(s.partners.title, LEGACY.partnersTitle, defaults.partners.title)!,
+    },
+  };
+}
+
 function migrateSettings(settings: HomepageSettings): HomepageSettings {
   const defaults = defaultSettings();
   const { featuredProducts: _legacyFeatured, ...withoutLegacy } =
@@ -981,7 +1059,7 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
       },
     },
   };
-  return mergeHomepageLocales(migrated, defaults);
+  return mergeHomepageLocales(upgradeLegacyHomeCopy(migrated, defaults), defaults);
 }
 
 export function getHomepageSettings(): HomepageSettings {

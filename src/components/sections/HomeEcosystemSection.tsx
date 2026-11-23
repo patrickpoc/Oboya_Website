@@ -69,7 +69,10 @@ export function HomeEcosystemSection({
   const slot = useCallback((i: number, a: number) => wrap(i - a + half, count) - half, [half, count]);
   const { active, prev } = state;
   const isLast = active === count - 1;
-  const bodyParagraphs = [pick(data.bodyP1), pick(data.bodyP2)];
+  const bodyP3 = data.bodyP3;
+  const bodyParagraphs = [pick(data.bodyP1), pick(data.bodyP2), bodyP3 ? pick(bodyP3) : ""].filter(
+    (p, i) => i < 2 || p.trim(),
+  );
 
   useEffect(() => {
     const frame = frameRef.current;

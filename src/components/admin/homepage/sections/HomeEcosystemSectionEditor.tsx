@@ -23,6 +23,7 @@ type TextKey =
   | "title"
   | "bodyP1"
   | "bodyP2"
+  | "bodyP3"
   | "openingLine"
   | "closingLine1"
   | "closingLine2"
@@ -68,6 +69,7 @@ export function HomeEcosystemSectionEditor({
         {textField("title", tCommon("title"), true)}
         {textField("bodyP1", t("fields.ecosystemBodyP1"), true)}
         {textField("bodyP2", t("fields.ecosystemBodyP2"), true)}
+        {textField("bodyP3", t("fields.ecosystemBodyP3"), true)}
         {textField("openingLine", t("fields.ecosystemOpeningLine"))}
 
         {section.stages.map((stage, index) => (

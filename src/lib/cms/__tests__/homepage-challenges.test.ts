@@ -25,7 +25,7 @@ describe("challenges settings", () => {
     const c = load(undefined);
     expect(c.title.en).toBe("Built Around the Challenges Facing Horticulture Today");
     expect(c.image).toBe("/assets/homepage/greenhouse-technology.webp");
-    expect(c.points.map((p) => p.id)).toEqual(["p1", "p2", "p3"]);
+    expect(c.points.map((p) => p.id)).toEqual(["p1", "p2", "p3", "p4"]);
     expect(getHomepageSettings().sections.challenges.enabled).toBe(true);
   });
 

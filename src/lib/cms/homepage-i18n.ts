@@ -125,10 +125,10 @@ export const HOME_I18N = {
       "全球实力，本地洞察"
     ),
     item2Desc: homeLoc(
-      "A global network backed by international manufacturing, product development, and sourcing capabilities — with local responsiveness and deep horticulture expertise.",
-      "Uma rede global respaldada por manufatura internacional, desenvolvimento de produtos e capacidades de sourcing — com resposta local e profunda expertise em horticultura.",
-      "Una red global respaldada por fabricación internacional, desarrollo de productos y capacidades de abastecimiento — con respuesta local y profunda experiencia en horticultura.",
-      "依托国际制造、产品开发与采购能力的全球网络——兼具本地响应速度与深厚的园艺专业经验。"
+      "A global network backed by international manufacturing, product development, and sourcing capabilities. With local responsiveness and deep horticulture expertise.",
+      "Uma rede global sustentada por capacidades internacionais de fabricação, desenvolvimento de produtos e sourcing. Com agilidade local e profunda expertise em horticultura.",
+      "Una red global respaldada por capacidades internacionales de fabricación, desarrollo de productos y abastecimiento. Con capacidad de respuesta local y profunda experiencia en horticultura.",
+      "依托国际化制造、产品研发与采购能力的全球网络，兼具本地快速响应与深厚的园艺专业经验。"
     ),
     item3Title: homeLoc(
       "Partnerships Built for the Long Term",
@@ -150,12 +150,7 @@ export const HOME_I18N = {
       "Soluciones diseñadas para su negocio",
       "围绕您的业务打造的解决方案"
     ),
-    title: homeLoc(
-      "Every crop, operation, and supply chain has unique requirements — explore the solutions, expertise, and support designed for your sector.",
-      "Cada cultura, operação e cadeia de suprimentos tem requisitos únicos — explore as soluções, expertise e suporte pensados para o seu setor.",
-      "Cada cultivo, operación y cadena de suministro tiene requisitos únicos — explore las soluciones, la experiencia y el soporte diseñados para su sector.",
-      "每种作物、运营和供应链都有独特需求——探索为您的领域量身打造的解决方案、专业实力与支持。"
-    ),
+    title: homeLoc("", "", "", ""),
     cta: homeLoc(
       "Explore Solutions",
       "Explorar soluções",
@@ -164,10 +159,10 @@ export const HOME_I18N = {
     ),
     flowersTitle: homeLoc("Flowers", "Flores", "Flores", "花卉"),
     flowersDesc: homeLoc(
-      "End-to-end solutions for floriculture operations — from propagation and packaging through to retail.",
-      "Soluções completas para floricultura — da propagação e embalagem até o varejo.",
-      "Soluciones integrales para floricultura — desde la propagación y el empaque hasta el retail.",
-      "花卉种植端到端解决方案——从育苗、包装到零售。"
+      "Solutions for floriculture operations from propagation to retail.",
+      "Soluções para operações de floricultura, da propagação ao varejo.",
+      "Soluciones para operaciones de floricultura, desde la propagación hasta el retail.",
+      "面向花卉种植业务的解决方案，覆盖从育苗繁殖到零售的全流程。"
     ),
     vegetablesTitle: homeLoc(
       "Vegetables & Herbs",
@@ -176,17 +171,17 @@ export const HOME_I18N = {
       "蔬菜与香草"
     ),
     vegetablesDesc: homeLoc(
-      "Integrated solutions that support efficient production, handling, packaging, and commercialization.",
-      "Soluções integradas que apoiam produção, manuseio, embalagem e comercialização eficientes.",
-      "Soluciones integradas que apoyan una producción, manipulación, empaque y comercialización eficientes.",
-      "支持高效生产、搬运、包装与销售的一体化解决方案。"
+      "Solutions that support efficient production, handling, packaging, and commercialization.",
+      "Soluções que apoiam produção, manuseio, embalagem e comercialização eficientes.",
+      "Soluciones que respaldan una producción, manipulación, envasado y comercialización eficientes.",
+      "助力高效生产、搬运、包装与销售的解决方案。"
     ),
     fruitsTitle: homeLoc("Fruits", "Frutas", "Frutas", "水果"),
     fruitsDesc: homeLoc(
-      "Solutions that optimize cultivation, handling, packaging, and distribution across the fruit supply chain.",
-      "Soluções que otimizam cultivo, manuseio, embalagem e distribuição em toda a cadeia de frutas.",
-      "Soluciones que optimizan el cultivo, manipulación, empaque y distribución en toda la cadena de frutas.",
-      "优化水果供应链种植、搬运、包装与配送的解决方案。"
+      "Solutions that optimize efficient cultivation, management, packaging and distribution.",
+      "Soluções que otimizam o cultivo, a gestão, a embalagem e a distribuição.",
+      "Soluciones que optimizan el cultivo, la gestión, el envasado y la distribución.",
+      "优化种植、管理、包装与分销效率的解决方案。"
     ),
     logisticsTitle: homeLoc(
       "Logistics & Display",
@@ -195,10 +190,10 @@ export const HOME_I18N = {
       "物流与陈列"
     ),
     logisticsDesc: homeLoc(
-      "Systems that improve product movement, merchandising, and point-of-sale presentation.",
-      "Sistemas que melhoram o movimento do produto, o merchandising e a apresentação no ponto de venda.",
-      "Sistemas que mejoran el movimiento del producto, el merchandising y la presentación en el punto de venta.",
-      "改善产品流转、陈列营销与终端展示的系统。"
+      "Systems that improve movement, merchandising, and point-of-sale presentation.",
+      "Sistemas que melhoram a movimentação, o merchandising e a apresentação no ponto de venda.",
+      "Sistemas que mejoran el movimiento, el merchandising y la presentación en el punto de venta.",
+      "改善物流周转、商品陈列与销售终端展示的系统。"
     ),
     machineryTitle: homeLoc(
       "Machinery & Automation",
@@ -207,10 +202,10 @@ export const HOME_I18N = {
       "机械与自动化"
     ),
     machineryDesc: homeLoc(
-      "Technology that increases efficiency, consistency, and scalability as operations grow.",
-      "Tecnologia que aumenta eficiência, consistência e escalabilidade conforme as operações crescem.",
-      "Tecnología que aumenta la eficiencia, la consistencia y la escalabilidad a medida que crecen las operaciones.",
-      "随运营规模增长提升效率、一致性与可扩展性的技术。"
+      "Technology solutions that increase efficiency, consistency and expandability.",
+      "Soluções tecnológicas que aumentam a eficiência, a consistência e a capacidade de expansão.",
+      "Soluciones tecnológicas que aumentan la eficiencia, la consistencia y la capacidad de ampliación.",
+      "提升效率、一致性与可扩展性的技术解决方案。"
     ),
   },
   challenges: {
@@ -221,22 +216,34 @@ export const HOME_I18N = {
       "围绕当今园艺业面临的挑战而打造"
     ),
     p1: homeLoc(
-      "Growing quality expectations. More complex supply chains.",
-      "Expectativas de qualidade crescentes. Cadeias de suprimento mais complexas.",
-      "Expectativas de calidad crecientes. Cadenas de suministro más complejas.",
-      "质量期望不断提高，供应链日益复杂。"
+      "Increasing labor pressures.",
+      "Pressão crescente sobre a mão de obra.",
+      "Presión creciente sobre la mano de obra.",
+      "劳动力压力日益增大。"
     ),
     p2: homeLoc(
+      "Growing quality expectations.",
+      "Expectativas de qualidade cada vez maiores.",
+      "Expectativas de calidad cada vez mayores.",
+      "品质期望不断提高。"
+    ),
+    p3: homeLoc(
+      "More complex supply chains.",
+      "Cadeias de suprimento cada vez mais complexas.",
+      "Cadenas de suministro cada vez más complejas.",
+      "供应链日趋复杂。"
+    ),
+    p4: homeLoc(
       "Greater demands for operational efficiency.",
       "Maior exigência de eficiência operacional.",
       "Mayores exigencias de eficiencia operativa.",
       "对运营效率的要求更高。"
     ),
-    p3: homeLoc(
-      "Rising pressure on sustainability and labour.",
-      "Pressão crescente por sustentabilidade e mão de obra.",
-      "Creciente presión en sostenibilidad y mano de obra.",
-      "可持续发展与劳动力方面的压力不断上升。"
+    closingText: homeLoc(
+      "Oboya Horticulture helps horticultural businesses navigate these realities with practical solutions designed to deliver measurable results.",
+      "A Oboya Horticulture ajuda empresas hortícolas a enfrentar essas realidades com soluções práticas, pensadas para gerar resultados mensuráveis.",
+      "Oboya Horticulture ayuda a las empresas hortícolas a afrontar estas realidades con soluciones prácticas diseñadas para ofrecer resultados medibles.",
+      "Oboya Horticulture 以切实可行的解决方案，帮助园艺企业应对这些现实挑战，创造可衡量的成果。"
     ),
   },
   globalPresence: {
@@ -255,72 +262,94 @@ export const HOME_I18N = {
       "客户评价"
     ),
     t1Quote: homeLoc(
-      "Oboya helped us unify packaging and logistics across our greenhouse network. Delivery reliability improved within the first season.",
-      "A Oboya nos ajudou a unificar embalagem e logística em nossa rede de estufas. A confiabilidade das entregas melhorou já na primeira safra.",
-      "Oboya nos ayudó a unificar el empaque y la logística en nuestra red de invernaderos. La confiabilidad de las entregas mejoró en la primera temporada.",
-      "Oboya 帮助我们统一了温室网络的包装与物流，交付可靠性在首个产季就得到提升。"
+      "Thank you, Oboya Horticulture, for your hard work and your quick responses, consistent follow-up, and commitment to finding the right solution.",
+      "Obrigado, Oboya Horticulture, pelo empenho, pelas respostas rápidas, pelo acompanhamento constante e pelo compromisso em encontrar a solução certa.",
+      "Gracias, Oboya Horticulture, por su esfuerzo, sus respuestas rápidas, su seguimiento constante y su compromiso de encontrar la solución adecuada.",
+      "感谢 Oboya Horticulture 的辛勤付出、快速响应、持续跟进，以及为找到合适方案所做的努力。"
     ),
-    t1Author: homeLoc("Maria Jensen", "Maria Jensen", "Maria Jensen", "Maria Jensen"),
-    t1Role: homeLoc("Nordic Growers", "Nordic Growers", "Nordic Growers", "Nordic Growers"),
+    t1Author: homeLoc(
+      "Procurement Manager",
+      "Gerente de Compras",
+      "Gerente de Compras",
+      "采购经理"
+    ),
+    t1Role: homeLoc(
+      "LVG Plants",
+      "LVG Plants",
+      "LVG Plants",
+      "LVG Plants"
+    ),
     t2Quote: homeLoc(
-      "Their local teams understood our retail requirements and delivered display solutions that lifted shelf presence without slowing operations.",
-      "As equipes locais entenderam nossas exigências de varejo e entregaram soluções de exposição que elevaram a presença na gôndola sem desacelerar as operações.",
-      "Sus equipos locales comprendieron nuestros requisitos de retail y entregaron soluciones de exhibición que mejoraron la presencia en góndola sin frenar las operaciones.",
-      "本地团队理解我们的零售需求，提供的陈列解决方案提升了货架表现力，同时不影响运营效率。"
+      "The machine has helped me tremendously. Before, we used rubber bands and tape, which could cause discomfort and even injuries to our hands. Today, the process is faster, more comfortable, and much safer. For me, this machine is a blessing.",
+      "A máquina me ajudou enormemente. Antes, usávamos elásticos e fita, o que podia causar desconforto e até lesões nas mãos. Hoje, o processo é mais rápido, mais confortável e muito mais seguro. Para mim, essa máquina é uma bênção.",
+      "La máquina me ha ayudado enormemente. Antes usábamos gomas elásticas y cinta, lo que podía causar molestias e incluso lesiones en las manos. Hoy el proceso es más rápido, más cómodo y mucho más seguro. Para mí, esta máquina es una bendición.",
+      "这台机器给了我极大的帮助。以前我们使用橡皮筋和胶带，容易造成手部不适甚至受伤。如今流程更快、更舒适，也安全得多。对我来说，这台机器是一份恩赐。"
     ),
-    t2Author: homeLoc("Carlos Mendes", "Carlos Mendes", "Carlos Mendes", "Carlos Mendes"),
-    t2Role: homeLoc("Fresh Retail Group", "Fresh Retail Group", "Fresh Retail Group", "Fresh Retail Group"),
+    t2Author: homeLoc(
+      "Betty Mesa",
+      "Betty Mesa",
+      "Betty Mesa",
+      "Betty Mesa"
+    ),
+    t2Role: homeLoc(
+      "Flor de Azama Farm – Falcon Farms",
+      "Flor de Azama Farm – Falcon Farms",
+      "Flor de Azama Farm – Falcon Farms",
+      "Flor de Azama Farm – Falcon Farms"
+    ),
     t3Quote: homeLoc(
-      "From substrates to retail-ready packaging, Oboya has become a long-term partner for our berry programs across Asia Pacific.",
-      "De substratos a embalagens prontas para o varejo, a Oboya tornou-se parceira de longo prazo dos nossos programas de frutas vermelhas na Ásia-Pacífico.",
-      "Desde sustratos hasta empaques listos para retail, Oboya se ha convertido en un socio a largo plazo para nuestros programas de berries en Asia-Pacífico.",
-      "从基质到零售级包装，Oboya 已成为我们在亚太浆果项目的长期合作伙伴。"
+      "The Oboya Terra transparent Pot helped us create better growing conditions for our plants. The increased substrate volume, improved aeration, and enhanced drainage support healthier root development and have delivered the performance we were looking for. We are very satisfied with the results.",
+      "O vaso transparente Oboya Terra nos ajudou a criar melhores condições de cultivo para as plantas. O maior volume de substrato, a melhor aeração e a drenagem aprimorada favorecem um desenvolvimento radicular mais saudável e entregaram o desempenho que buscávamos. Estamos muito satisfeitos com os resultados.",
+      "La maceta transparente Oboya Terra nos ayudó a crear mejores condiciones de cultivo para nuestras plantas. El mayor volumen de sustrato, la mejor aireación y el drenaje optimizado favorecen un desarrollo radicular más sano y han ofrecido el rendimiento que buscábamos. Estamos muy satisfechos con los resultados.",
+      "Oboya Terra 透明花盆帮助我们为植物创造了更好的生长条件。更大的基质容量、更好的透气性和更优的排水性能，促进根系更健康地发育，达到了我们期望的效果。我们对结果非常满意。"
     ),
-    t3Author: homeLoc("Li Wei", "Li Wei", "Li Wei", "李伟"),
+    t3Author: homeLoc(
+      "Geraldo Barendse",
+      "Geraldo Barendse",
+      "Geraldo Barendse",
+      "Geraldo Barendse"
+    ),
     t3Role: homeLoc(
-      "Asia Pacific Berries",
-      "Asia Pacific Berries",
-      "Asia Pacific Berries",
-      "亚太浆果"
+      "Brazil",
+      "Brasil",
+      "Brasil",
+      "巴西"
     ),
     t4Quote: homeLoc(
-      "We needed one partner for cultivation support and outbound logistics. Oboya connected both ends of the chain with clear accountability.",
-      "Precisávamos de um parceiro para apoio ao cultivo e logística de saída. A Oboya conectou as duas pontas da cadeia com responsabilidade clara.",
-      "Necesitábamos un socio para el apoyo al cultivo y la logística de salida. Oboya conectó ambos extremos de la cadena con una responsabilidad clara.",
-      "我们需要一个合作伙伴同时支持种植与出货物流。Oboya 以清晰的责任衔接了链条两端。"
+      "The custom pot holder developed by Oboya helped improve the flow of our production process and made handling mini pots much more efficient. The solution integrated well with our conveyor system and contributed to a smoother operation.",
+      "O porta-vasos personalizado desenvolvido pela Oboya ajudou a melhorar o fluxo do nosso processo produtivo e tornou o manuseio de minivasos muito mais eficiente. A solução se integrou bem ao nosso sistema de esteiras e contribuiu para uma operação mais fluida.",
+      "El portamacetas personalizado desarrollado por Oboya ayudó a mejorar el flujo de nuestro proceso de producción y hizo mucho más eficiente la manipulación de minimacetas. La solución se integró bien con nuestro sistema de transporte y contribuyó a una operación más fluida.",
+      "Oboya 开发的定制花盆托架改善了我们的生产流程，使迷你花盆的搬运效率大幅提升。该方案与我们的输送系统衔接顺畅，让整体运作更加流畅。"
     ),
-    t4Author: homeLoc("Elena Rossi", "Elena Rossi", "Elena Rossi", "Elena Rossi"),
+    t4Author: homeLoc(
+      "Joost",
+      "Joost",
+      "Joost",
+      "Joost"
+    ),
     t4Role: homeLoc(
-      "MediFlora Cooperative",
-      "Cooperativa MediFlora",
-      "Cooperativa MediFlora",
-      "MediFlora 合作社"
+      "Kalanchoe",
+      "Kalanchoe",
+      "Kalanchoe",
+      "Kalanchoe"
     ),
     t5Quote: homeLoc(
-      "Scale and local expertise rarely come together. With Oboya, we get global manufacturing strength and on-the-ground support where we grow.",
-      "Escala e expertise local raramente se encontram. Com a Oboya, temos força de manufatura global e suporte no campo onde cultivamos.",
-      "La escala y la experiencia local rara vez se combinan. Con Oboya, obtenemos fuerza de fabricación global y soporte en el terreno donde cultivamos.",
-      "规模与本地经验难得兼备。与 Oboya 合作，我们既有全球制造实力，也有种植所在地的现场支持。"
+      "The Oboya Ecovaso Tall Pot allowed us to improve transportation efficiency while maintaining an attractive presentation for our products. Being able to transport approximately 20% more pots per trolley represents a significant logistical advantage for our operation.",
+      "O vaso alto Oboya Ecovaso nos permitiu melhorar a eficiência do transporte sem abrir mão de uma apresentação atraente dos produtos. Transportar cerca de 20% mais vasos por carrinho representa uma vantagem logística significativa para a nossa operação.",
+      "La maceta alta Oboya Ecovaso nos permitió mejorar la eficiencia del transporte manteniendo una presentación atractiva de nuestros productos. Poder transportar aproximadamente un 20% más de macetas por carro supone una ventaja logística significativa para nuestra operación.",
+      "Oboya Ecovaso 高款花盆让我们在保持产品美观陈列的同时提升了运输效率。每辆推车可多运约 20% 的花盆，对我们的运营而言是显著的物流优势。"
     ),
-    t5Author: homeLoc("James Okonkwo", "James Okonkwo", "James Okonkwo", "James Okonkwo"),
+    t5Author: homeLoc(
+      "Terra Viva",
+      "Terra Viva",
+      "Terra Viva",
+      "Terra Viva"
+    ),
     t5Role: homeLoc(
-      "GreenHorizon Farms",
-      "GreenHorizon Farms",
-      "GreenHorizon Farms",
-      "GreenHorizon Farms"
-    ),
-    t6Quote: homeLoc(
-      "Switching to Oboya's integrated solutions cut complexity for our growers and gave our buyers a more consistent product experience.",
-      "A mudança para as soluções integradas da Oboya reduziu a complexidade para nossos produtores e deu aos compradores uma experiência de produto mais consistente.",
-      "El cambio a las soluciones integradas de Oboya redujo la complejidad para nuestros productores y ofreció a los compradores una experiencia de producto más consistente.",
-      "转向 Oboya 一体化解决方案降低了种植者的复杂度，并为采购方带来更一致的产品体验。"
-    ),
-    t6Author: homeLoc("Sophie Dubois", "Sophie Dubois", "Sophie Dubois", "Sophie Dubois"),
-    t6Role: homeLoc(
-      "EuroFresh Alliance",
-      "EuroFresh Alliance",
-      "EuroFresh Alliance",
-      "EuroFresh Alliance"
+      "Brazil",
+      "Brasil",
+      "Brasil",
+      "巴西"
     ),
   },
   latestNews: {
@@ -334,21 +363,27 @@ export const HOME_I18N = {
   },
   partners: {
     title: homeLoc(
-      "Our collaborations",
-      "Nossas colaborações",
-      "Nuestras colaboraciones",
-      "我们的合作伙伴"
+      "Certifications & Standards",
+      "Certificações e Normas",
+      "Certificaciones y Normas",
+      "认证与标准"
     ),
   },
   homeEcosystem: {
     title: homeLoc("From Propagation to\nRetail Display", "Da Propagação à\nExposição no Varejo", "De la Propagación a la\nExhibición en Retail", "从育苗繁殖到\n零售陈列"),
     bodyP1: homeLoc(
-        "Success in horticulture depends on more than individual products. It depends on how growing, packaging, logistics, transport, retail presentation, and operational processes work together.",
-        "O sucesso na horticultura depende de mais do que produtos individuais. Depende de como cultivo, embalagem, logística, transporte, apresentação no varejo e processos operacionais trabalham juntos.",
-        "El éxito en la horticultura depende de más que productos individuales. Depende de cómo el cultivo, el embalaje, la logística, el transporte, la presentación en retail y los procesos operativos trabajan juntos.",
-        "园艺成功不只取决于单一产品，而取决于种植、包装、物流、运输、零售陈列与日常运营如何协同运作。"
+        "Success in horticulture depends on more than individual products.",
+        "O sucesso na horticultura depende de mais do que produtos isolados.",
+        "El éxito en la horticultura depende de algo más que productos individuales.",
+        "园艺行业的成功，不仅仅取决于单一产品。"
       ),
     bodyP2: homeLoc(
+        "It depends on how growing, packaging, logistics, transport, retail presentation, and operational processes work together.",
+        "Depende de como cultivo, embalagem, logística, transporte, apresentação no varejo e processos operacionais funcionam em conjunto.",
+        "Depende de cómo funcionan en conjunto el cultivo, el envasado, la logística, el transporte, la presentación en retail y los procesos operativos.",
+        "取决于种植、包装、物流、运输、零售陈列与运营流程如何协同运作。"
+      ),
+    bodyP3: homeLoc(
         "Oboya Horticulture offers solutions across multiple stages of the horticultural journey, helping customers access the products and expertise they need through a single trusted partner.",
         "A Oboya Horticulture oferece soluções em múltiplas etapas da jornada hortícola, ajudando os clientes a acessar os produtos e a expertise de que precisam por meio de um único parceiro de confiança.",
         "Oboya Horticulture ofrece soluciones en múltiples etapas del recorrido hortícola, ayudando a los clientes a acceder a los productos y la expertise que necesitan a través de un solo socio de confianza.",

@@ -196,7 +196,7 @@ export function Testimonials({
               data-testimonial-card
               className={cn(
                 "relative flex shrink-0 flex-col items-start bg-oboya-blue p-4 md:p-5",
-                isMobileLayout ? "min-h-[18rem] aspect-auto" : "aspect-square"
+                isMobileLayout ? "min-h-[18rem]" : "min-h-[22rem]"
               )}
               style={{
                 width: cardWidth > 0 ? cardWidth : "min(100%, 20rem)",
@@ -204,7 +204,7 @@ export function Testimonials({
             >
               <QuoteMark className="h-6 w-auto self-start text-oboya-blue-light md:h-7" />
 
-              <div className="mt-3 flex min-h-0 w-[80%] flex-1 flex-col gap-2.5">
+              <div className="mt-3 flex min-h-0 w-[90%] flex-1 flex-col gap-2.5">
                 <div className="flex min-h-0 flex-1 gap-2.5">
                   <div
                     className="mt-0.5 w-px shrink-0 self-stretch bg-white/25"
@@ -216,7 +216,7 @@ export function Testimonials({
                 </div>
               </div>
 
-              <footer className="mt-auto w-[80%] pt-3">
+              <footer className="mt-auto w-[90%] pt-4">
                 <p className="text-xs tracking-[0.08em] text-white/70 uppercase">
                   {pickLocalized(item.author, locale)}
                 </p>

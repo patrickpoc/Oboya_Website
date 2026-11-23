@@ -2070,6 +2070,8 @@
         "removeItem": "Remove item",
         "ecosystemBodyP1": "Body, first paragraph",
         "ecosystemBodyP2": "Body, second paragraph",
+        "ecosystemBodyP3": "Body, third paragraph",
+        "challengesClosingText": "Closing text",
         "ecosystemOpeningLine": "Opening line",
         "ecosystemClosingLine1": "Closing line 1",
         "ecosystemClosingLine2": "Closing line 2",

@@ -79,6 +79,15 @@ export function ChallengesSectionEditor({
           value={section.title[locale]}
           onChange={(l, v) => updateSettingsLocalized(setSettings, "challenges", "title", l, v)}
         />
+        <LocalizedInput
+          label={t("fields.challengesClosingText")}
+          locale={locale}
+          value={section.closingText[locale]}
+          multiline
+          onChange={(l, v) =>
+            updateSettingsLocalized(setSettings, "challenges", "closingText", l, v)
+          }
+        />
         <ImageField
           label={t("fields.challengesImage")}
           value={section.image}

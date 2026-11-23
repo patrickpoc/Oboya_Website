@@ -47,6 +47,8 @@ export function HomeChallenges({
 
   const points = data.points;
   const count = points.length;
+  const closingRaw = data.closingText;
+  const closingText = closingRaw ? pickLocalized(closingRaw, locale).trim() : "";
   const caption = (i: number) => pickLocalized(points[i].caption, locale);
 
   useEffect(() => {
@@ -204,6 +206,14 @@ export function HomeChallenges({
       <p className="sr-only" aria-live="polite">
         {t("status", { n: active + 1, total: count, caption: caption(active) })}
       </p>
+
+      {closingText ? (
+        <div className="relative z-20 bg-oboya-blue px-[var(--container-padding)] py-6 text-center md:py-8">
+          <p className="mx-auto max-w-4xl font-display text-[clamp(1.1rem,2.2vw,1.75rem)] font-light leading-snug text-white text-balance">
+            {closingText}
+          </p>
+        </div>
+      ) : null}
     </section>
   );
 }

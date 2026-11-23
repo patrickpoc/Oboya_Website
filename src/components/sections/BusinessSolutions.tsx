@@ -92,6 +92,8 @@ export function BusinessSolutions({
 
   if (count === 0) return null;
 
+  const title = data.title ? pickLocalized(data.title, locale).trim() : "";
+
   const track = Array.from({ length: REACH * 2 + 1 }, (_, k) => pos - REACH + k);
   const cardW = cardWidthFor(width || 360);
   const cardH = cardW * (8 / 7);
@@ -126,15 +128,17 @@ export function BusinessSolutions({
           variants={fadeInUp}
           className="mb-8 md:mb-12"
         >
-          <div className="mb-5 flex items-center gap-4">
+          <div className={cn("flex items-center gap-4", title && "mb-5")}>
             <p className="shrink-0 text-sm font-semibold tracking-wide text-oboya-blue-dark">
               {pickLocalized(data.eyebrow, locale)}
             </p>
             <div className="h-px flex-1 bg-oboya-blue-dark/25" aria-hidden />
           </div>
-          <h2 className="max-w-4xl font-display text-[clamp(1.45rem,2.8vw,2.25rem)] font-light leading-[1.3] tracking-tight text-oboya-blue-dark text-balance">
-            {pickLocalized(data.title, locale)}
-          </h2>
+          {title ? (
+            <h2 className="max-w-4xl font-display text-[clamp(1.45rem,2.8vw,2.25rem)] font-light leading-[1.3] tracking-tight text-oboya-blue-dark text-balance">
+              {title}
+            </h2>
+          ) : null}
         </motion.div>
       </Container>
 
