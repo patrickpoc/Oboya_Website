@@ -102,7 +102,7 @@ const nextConfig: NextConfig = {
     // https://vercel.com/docs/image-optimization/managing-image-optimization-costs
     minimumCacheTTL: 2678400, // 31 days — CMS / product images are relatively stable
     formats: ["image/webp"],
-    qualities: [75],
+    qualities: [75, 90],
     // Cap candidates: largest layouts need ~1920 for 2x; drop 2048/3840.
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [32, 48, 64, 96, 128, 256, 384],

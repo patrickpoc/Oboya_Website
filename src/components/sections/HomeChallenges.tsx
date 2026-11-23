@@ -8,7 +8,6 @@ import { useTranslations } from "next-intl";
 import { pickLocalized } from "@/lib/cms/utils";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 
-const ZOOM = 1.7;
 /** One duration and ease for every move (next, prev, wraps). */
 const MOVE_S = 0.95;
 const CAPTION_W = 300;
@@ -87,8 +86,9 @@ export function HomeChallenges({
   const mobCapW = Math.min(260, w - 32);
   const mobCapX = clamp(lensX - mobCapW / 2, 16, w - mobCapW - 16);
 
-  const bgSize = `${rw * ZOOM}px ${rh * ZOOM}px`;
-  const bgPos = `${R - (px - ox) * ZOOM}px ${R - (py - oy) * ZOOM}px`;
+  // No zoom: the lens is a clear window onto the photo exactly beneath it.
+  const bgSize = `${rw}px ${rh}px`;
+  const bgPos = `${R - (lensX - ox)}px ${R - (lensY - oy)}px`;
   const move = still
     ? { duration: 0 }
     : { duration: MOVE_S, ease: [0.65, 0, 0.35, 1] as const };
@@ -113,6 +113,7 @@ export function HomeChallenges({
           alt=""
           fill
           sizes="100vw"
+          quality={90}
           className="object-cover"
           onLoad={(e) => {
             const img = e.currentTarget;

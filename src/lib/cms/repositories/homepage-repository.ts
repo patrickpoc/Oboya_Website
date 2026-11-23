@@ -283,12 +283,12 @@ const defaultSettings = (): HomepageSettings => ({
   },
   challenges: {
     title: C.title,
-    image: "/assets/homepage/greenhouse-technology.webp",
+    image: "/assets/homepage/challenges-greenhouse-hq.jpg",
     points: [
-      { id: "p1", caption: C.p1, x: 22, y: 55 },
-      { id: "p2", caption: C.p2, x: 45, y: 62 },
-      { id: "p3", caption: C.p3, x: 62, y: 50 },
-      { id: "p4", caption: C.p4, x: 78, y: 58 },
+      { id: "p1", caption: C.p1, x: 29, y: 66 },
+      { id: "p2", caption: C.p2, x: 48, y: 83 },
+      { id: "p3", caption: C.p3, x: 59, y: 47 },
+      { id: "p4", caption: C.p4, x: 84, y: 57 },
     ],
     closingText: C.closingText,
   },
@@ -509,6 +509,15 @@ const upgradeLegacy = (v: LocalizedString | undefined, old: LocalizedString, nex
 
 const clampPct = (n: number) => Math.min(100, Math.max(0, n));
 
+/** Previous default photo and pin positions; stored copies of these get the new defaults. */
+const LEGACY_CHALLENGES_IMAGE = "/assets/homepage/greenhouse-technology.webp";
+const LEGACY_CHALLENGE_COORDS: Record<string, [number, number]> = {
+  p1: [22, 55],
+  p2: [45, 62],
+  p3: [62, 50],
+  p4: [78, 58],
+};
+
 function migrateChallenges(
   stored: unknown,
   defaults: HomepageSettings["challenges"]
@@ -541,13 +550,23 @@ function migrateChallenges(
       const def = defaults.points.find((d) => d.id === r.id);
       const merged = def ? mergeLocalized(caption, def.caption) : caption;
       if (isBlankLoc(merged)) continue;
-      points.push({ id: r.id, caption: merged, x: clampPct(r.x), y: clampPct(r.y) });
+      const legacy = LEGACY_CHALLENGE_COORDS[r.id];
+      const isLegacyCoords = !!def && !!legacy && r.x === legacy[0] && r.y === legacy[1];
+      points.push({
+        id: r.id,
+        caption: merged,
+        x: isLegacyCoords ? def.x : clampPct(r.x),
+        y: isLegacyCoords ? def.y : clampPct(r.y),
+      });
       if (points.length >= HOME_CHALLENGES_MAX_POINTS) break;
     }
   }
   return {
     title: asLoc(raw.title) ?? defaults.title,
-    image: sanitizeHomeEcosystemImage(raw.image) || defaults.image,
+    image:
+      raw.image === LEGACY_CHALLENGES_IMAGE
+        ? defaults.image
+        : sanitizeHomeEcosystemImage(raw.image) || defaults.image,
     points,
     closingText: asLoc(raw.closingText) ?? defaults.closingText,
   };

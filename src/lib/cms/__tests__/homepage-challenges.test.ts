@@ -24,7 +24,7 @@ describe("challenges settings", () => {
   it("has defaults and enabled toggle", () => {
     const c = load(undefined);
     expect(c.title.en).toBe("Built Around the Challenges Facing Horticulture Today");
-    expect(c.image).toBe("/assets/homepage/greenhouse-technology.webp");
+    expect(c.image).toBe("/assets/homepage/challenges-greenhouse-hq.jpg");
     expect(c.points.map((p) => p.id)).toEqual(["p1", "p2", "p3", "p4"]);
     expect(getHomepageSettings().sections.challenges.enabled).toBe(true);
   });
@@ -57,12 +57,27 @@ describe("challenges settings", () => {
     ]);
   });
 
+  it("upgrades the old default photo and pin positions, keeping edited ones", () => {
+    const c = load({
+      image: "/assets/homepage/greenhouse-technology.webp",
+      points: [pt("p1", 22, 55, "Mine"), pt("p2", 45, 62), pt("p3", 10, 10), pt("p4", 78, 58)],
+    });
+    expect(c.image).toBe("/assets/homepage/challenges-greenhouse-hq.jpg");
+    expect(c.points).toMatchObject([
+      { id: "p1", x: 29, y: 66 },
+      { id: "p2", x: 48, y: 83 },
+      { id: "p3", x: 10, y: 10 },
+      { id: "p4", x: 84, y: 57 },
+    ]);
+    expect(c.points[0].caption.en).toBe("Mine");
+  });
+
   it("caps at 5 points and falls back on a bad image", () => {
     const c = load({
       image: "https://evil.example/a.jpg",
       points: Array.from({ length: 8 }, (_, i) => pt(`p${i}`, 1, 1, `c${i}`)),
     });
     expect(c.points).toHaveLength(5);
-    expect(c.image).toBe("/assets/homepage/greenhouse-technology.webp");
+    expect(c.image).toBe("/assets/homepage/challenges-greenhouse-hq.jpg");
   });
 });
