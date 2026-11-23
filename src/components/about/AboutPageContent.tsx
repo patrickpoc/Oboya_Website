@@ -8,7 +8,6 @@ import { AboutCorporateCulture } from "@/components/about/AboutCorporateCulture"
 import { AboutMission } from "@/components/about/AboutMission";
 import { AboutVision } from "@/components/about/AboutVision";
 import { AboutValues } from "@/components/about/AboutValues";
-import { AboutHonors } from "@/components/about/AboutHonors";
 import { GlobalPresence } from "@/components/sections/GlobalPresence";
 import type { Locale } from "@/i18n/routing";
 import { resolveMapLocationsForLocale } from "@/lib/map-locations";
@@ -71,9 +70,6 @@ export async function AboutPageContent({
       )}
       {about.sections.values.enabled && (
         <AboutValues data={about.values} locale={locale} />
-      )}
-      {about.sections.honors.enabled && (
-        <AboutHonors data={about.honors} locale={locale} />
       )}
     </>
   );
