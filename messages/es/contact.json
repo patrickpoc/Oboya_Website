@@ -50,6 +50,7 @@
   },
   "team": {
     "title": "Contacte a nuestro equipo por región",
+    "all": "Todas las regiones",
     "regions": {
       "north-america": "Norteamérica",
       "latin-america": "Latinoamérica",

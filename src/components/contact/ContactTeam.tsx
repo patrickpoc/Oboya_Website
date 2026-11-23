@@ -10,6 +10,8 @@ import {
 } from "@/lib/cms/repositories/contact-team-repository";
 import { cn } from "@/lib/utils";
 
+const ALL = "all";
+
 function initials(name: string) {
   return name
     .split(/\s+/)
@@ -25,12 +27,13 @@ export function ContactTeam({ team }: { team: ContactPerson[] }) {
     () => CONTACT_REGIONS.filter((r) => team.some((p) => p.region === r)),
     [team]
   );
-  const [selected, setSelected] = useState<string>("");
-  const active = regions.find((r) => r === selected) ?? regions[0];
+  const [selected, setSelected] = useState<string>(ALL);
+  const active = selected === ALL ? ALL : regions.find((r) => r === selected) ?? ALL;
 
   if (!regions.length) return null;
 
-  const people = team.filter((p) => p.region === active);
+  const people = active === ALL ? team : team.filter((p) => p.region === active);
+  const tabs = [ALL, ...regions];
 
   return (
     <section className="pb-20 pt-14 md:pb-28" aria-labelledby="contact-team-title">
@@ -39,7 +42,7 @@ export function ContactTeam({ team }: { team: ContactPerson[] }) {
           {t("title")}
         </h2>
         <div role="group" aria-label={t("title")} className="flex flex-wrap gap-2">
-          {regions.map((region) => (
+          {tabs.map((region) => (
             <button
               key={region}
               type="button"
@@ -52,7 +55,7 @@ export function ContactTeam({ team }: { team: ContactPerson[] }) {
                   : "bg-oboya-soft-white text-oboya-blue-dark hover:bg-oboya-blue/10"
               )}
             >
-              {t(`regions.${region}`)}
+              {region === ALL ? t("all") : t(`regions.${region}`)}
             </button>
           ))}
         </div>

@@ -50,6 +50,7 @@
   },
   "team": {
     "title": "按地区联系我们的团队",
+    "all": "所有地区",
     "regions": {
       "north-america": "北美",
       "latin-america": "拉丁美洲",
