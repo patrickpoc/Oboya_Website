@@ -209,7 +209,7 @@ export function HomeChallenges({
 
       {closingText ? (
         <div className="relative z-20 bg-oboya-blue px-[var(--container-padding)] py-6 text-center md:py-8">
-          <p className="mx-auto max-w-4xl font-display text-[clamp(1.1rem,2.2vw,1.75rem)] font-light leading-snug text-white text-balance">
+          <p className="mx-auto max-w-4xl font-display text-[clamp(1.05rem,2vw,1.5rem)] font-light leading-snug text-white text-balance xl:max-w-none xl:whitespace-nowrap xl:text-[clamp(0.95rem,1.15vw,1.25rem)]">
             {closingText}
           </p>
         </div>
