@@ -210,8 +210,8 @@ export function BusinessSolutions({
                   <div className="absolute inset-0 bg-oboya-blue-dark" />
                 )}
                 <div className="absolute inset-0 bg-black/50" aria-hidden />
-                {/* Anchored to the bottom so long copy grows upwards instead of being cut off. */}
-                <div className="absolute inset-x-0 bottom-0 top-[30%] flex flex-col items-start justify-end px-6 pb-7 text-white sm:px-8 sm:pb-9">
+                {/* Title starts at the same height on every card; the CTA is pinned to the bottom. */}
+                <div className="absolute inset-x-0 bottom-0 top-[36%] flex flex-col items-start justify-start px-6 pb-7 text-white sm:px-8 sm:pb-9">
                   <h3 className="font-display text-[clamp(1.25rem,1.9vw,1.875rem)] font-semibold leading-tight">
                     {title}
                   </h3>
@@ -222,7 +222,7 @@ export function BusinessSolutions({
                     href={href}
                     tabIndex={isActive ? 0 : -1}
                     className={cn(
-                      "mt-5 inline-flex items-center text-base font-medium text-white sm:mt-6",
+                      "mt-auto inline-flex items-center pt-5 text-base font-medium text-white sm:pt-6",
                       !isActive && "pointer-events-none",
                     )}
                   >
