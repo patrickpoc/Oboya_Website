@@ -89,13 +89,13 @@ export const HOME_ECOSYSTEM_STAGE_IDS = [
 export type HomeEcosystemStageId = (typeof HOME_ECOSYSTEM_STAGE_IDS)[number];
 
 export const HOME_ECOSYSTEM_DEFAULT_IMAGES: Record<HomeEcosystemStageId, string> = {
-  propagation: "/assets/homepage/ecosystem-propagation.jpg",
-  growing: "/assets/homepage/ecosystem-growing.jpg",
-  harvest: "/assets/homepage/ecosystem-harvest.jpg",
-  packaging: "/assets/homepage/ecosystem-packaging.jpg",
-  logistics: "/assets/homepage/ecosystem-logistics.jpg",
-  retail: "/assets/homepage/ecosystem-retail.jpg",
-  pos: "/assets/homepage/ecosystem-pos.jpg",
+  propagation: "/assets/homepage/wheel-propagation.jpg",
+  growing: "/assets/homepage/wheel-growing.jpg",
+  harvest: "/assets/homepage/wheel-harvest.jpg",
+  packaging: "/assets/homepage/wheel-packaging.jpg",
+  logistics: "/assets/homepage/wheel-logistics.jpg",
+  retail: "/assets/homepage/wheel-retail.jpg",
+  pos: "/assets/homepage/wheel-pos.jpg",
 };
 
 export const HOME_ECOSYSTEM_MAX_POINTS = 3;
@@ -599,7 +599,16 @@ function migrateEcosystem(
 }
 
 /** Previous default stage photos that were replaced; stored docs still pointing at them get the new default. */
-const LEGACY_ECOSYSTEM_IMAGES = new Set(["/assets/solutions/stage-harvest.jpg"]);
+const LEGACY_ECOSYSTEM_IMAGES = new Set([
+  "/assets/solutions/stage-harvest.jpg",
+  "/assets/homepage/ecosystem-propagation.jpg",
+  "/assets/homepage/ecosystem-growing.jpg",
+  "/assets/homepage/ecosystem-harvest.jpg",
+  "/assets/homepage/ecosystem-packaging.jpg",
+  "/assets/homepage/ecosystem-logistics.jpg",
+  "/assets/homepage/ecosystem-retail.jpg",
+  "/assets/homepage/ecosystem-pos.jpg",
+]);
 
 function upgradeLegacyEcosystemImage(src: string): string {
   return LEGACY_ECOSYSTEM_IMAGES.has(src) ? "" : src;

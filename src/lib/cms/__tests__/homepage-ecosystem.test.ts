@@ -221,7 +221,11 @@ describe("homeEcosystem settings", () => {
     const legacy = load({
       stages: [{ id: "harvest", image: "/assets/solutions/stage-harvest.jpg" }],
     });
-    expect(stageOf(legacy, "harvest").image).toBe("/assets/homepage/ecosystem-harvest.jpg");
+    expect(stageOf(legacy, "harvest").image).toBe("/assets/homepage/wheel-harvest.jpg");
+    const oldName = load({
+      stages: [{ id: "growing", image: "/assets/homepage/ecosystem-growing.jpg" }],
+    });
+    expect(stageOf(oldName, "growing").image).toBe("/assets/homepage/wheel-growing.jpg");
     const custom = load({
       stages: [{ id: "harvest", image: "/assets/homepage/my-harvest.jpg" }],
     });
