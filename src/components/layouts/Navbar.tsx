@@ -17,6 +17,10 @@ import {
 import { NavDropdown } from "@/components/layouts/navbar/DesktopNav";
 import { HeroMenuButton } from "@/components/layouts/navbar/MobileNav";
 
+/** Shared bar geometry so the menu button sits identically on every variant. */
+const NAV_BAR =
+  "grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-[var(--nav-padding-x)] md:h-[4.5rem] md:px-8 lg:px-10";
+
 interface NavbarProps {
   transparent?: boolean;
   persistTransparent?: boolean;
@@ -76,7 +80,6 @@ export function Navbar({
       open={mobileOpen}
       onOpenChange={setMobileOpen}
       mainNavigation={mainNavigation}
-      contactLabel={contactLabel}
       tone={tone}
     />
   );
@@ -91,7 +94,7 @@ export function Navbar({
       className="fixed inset-x-0 top-0 z-50 border-b border-oboya-blue-dark/8 bg-oboya-soft-white shadow-[var(--shadow-nav)]"
     >
       <nav
-        className="grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-[var(--nav-padding-x)] md:h-20"
+        className={NAV_BAR}
         aria-label={t("nav.mainNav")}
       >
         <div className="flex items-center gap-5 justify-self-start xl:gap-8">
@@ -159,7 +162,7 @@ export function Navbar({
               className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-oboya-blue-dark"
             >
               <nav
-                className="grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-[var(--nav-padding-x)] md:h-20"
+                className={NAV_BAR}
                 aria-label={t("nav.mainNav")}
               >
                 <div className="flex items-center gap-5 justify-self-start xl:gap-8">
@@ -238,7 +241,7 @@ export function Navbar({
               className="pointer-events-none fixed inset-x-0 top-0 z-50 bg-transparent"
             >
               <nav
-                className="pointer-events-auto grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-[var(--nav-padding-x)] md:h-[4.5rem] md:px-8 lg:px-10"
+                className={cn("pointer-events-auto", NAV_BAR)}
                 aria-label={t("nav.mainNav")}
               >
                 <div className="min-w-0 justify-self-start">
@@ -246,7 +249,6 @@ export function Navbar({
                     open={mobileOpen}
                     onOpenChange={setMobileOpen}
                     mainNavigation={mainNavigation}
-                    contactLabel={contactLabel}
                   />
                 </div>
                 <Logo
@@ -294,7 +296,7 @@ export function Navbar({
       )}
     >
       <nav
-        className="grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-[var(--nav-padding-x)] md:h-20"
+        className={NAV_BAR}
         aria-label={t("nav.mainNav")}
       >
         <div className="flex items-center gap-5 justify-self-start xl:gap-8">

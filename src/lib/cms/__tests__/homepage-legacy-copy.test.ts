@@ -117,19 +117,22 @@ describe("homepage legacy copy upgrades", () => {
     expect(kept.points[0].caption.en).toBe("Mine");
   });
 
-  it("testimonials: old set becomes the new five, edited set kept", () => {
-    const oldItems = (first?: unknown) =>
-      OLD.testimonials.map(([quote, author, role], i) => ({
+  it("testimonials: original six and interim five become the new seven, edited set kept", () => {
+    const items = (set: unknown[][], first?: unknown) =>
+      set.map(([quote, author, role], i) => ({
         id: `t${i + 1}`,
         quote: i === 0 && first ? first : quote,
         author,
         role,
       }));
-    const up = load((doc) => { doc.testimonials.items = oldItems(); }).testimonials;
-    expect(up.items).toHaveLength(5);
-    expect(up.items[0].author.en).toBe("Procurement Manager");
-    expect(up.items[0].role.en).toBe("LVG Plants");
-    const kept = load((doc) => { doc.testimonials.items = oldItems(edited("Mine")); }).testimonials;
+    for (const set of [OLD.testimonials, OLD.testimonials5]) {
+      const up = load((doc) => { doc.testimonials.items = items(set); }).testimonials;
+      expect(up.items).toHaveLength(7);
+      expect(up.items[0].author.en).toBe("Betty Mesa");
+      expect(up.items[1].author.en).toBe("Mariette Barnard");
+      expect(up.items[6].author.en).toBe("Joost Kalanchoe");
+    }
+    const kept = load((doc) => { doc.testimonials.items = items(OLD.testimonials, edited("Mine")); }).testimonials;
     expect(kept.items).toHaveLength(6);
     expect(kept.items[0].quote.en).toBe("Mine");
   });

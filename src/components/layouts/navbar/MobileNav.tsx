@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { NavItem } from "@/types";
@@ -45,38 +44,37 @@ export function MobileNavLink({
 export function MobileNavSheetContent({
   side = "right",
   mainNavigation,
-  contactLabel,
-  contactClassName,
   onNavigate,
   menuTitle,
 }: {
   side?: "left" | "right";
   mainNavigation: NavItem[];
-  contactLabel: string;
-  contactClassName: string;
   onNavigate: () => void;
   menuTitle: string;
 }) {
   const t = useTranslations();
-  const workItem: NavItem = { label: t("nav.workWithUs"), href: "/work" };
-  const shopIndex = mainNavigation.findIndex((item) => item.href === "/shop");
-  const drawerItems =
-    shopIndex === -1
-      ? [...mainNavigation, workItem]
-      : [
-          ...mainNavigation.slice(0, shopIndex + 1),
-          workItem,
-          ...mainNavigation.slice(shopIndex + 1),
-        ];
+  const byHref = (href: string) =>
+    mainNavigation.find((item) => item.href === href);
+  const drawerItems: NavItem[] = [
+    { label: t("nav.home"), href: "/" },
+    { label: t("nav.aboutUs"), href: "/about", children: byHref("/about")?.children },
+    { label: t("nav.solutions"), href: "/solutions", children: byHref("/solutions")?.children },
+    { label: t("nav.caseStudies"), href: "/case-studies", children: byHref("/case-studies")?.children },
+    { label: t("nav.blog"), href: "/blog", children: byHref("/blog")?.children },
+    { label: t("nav.newsroom"), href: "/news" },
+    { label: t("nav.joinUs"), href: "/work" },
+    { label: t("nav.contactUs"), href: "/contact" },
+  ];
 
   return (
     <SheetContent
       side={side}
-      className="w-full max-w-sm gap-0 overflow-hidden p-0"
+      className="z-[110] w-full max-w-sm gap-0 overflow-hidden p-0"
+      overlayClassName="z-[110]"
     >
       <SheetTitle className="sr-only">{menuTitle}</SheetTitle>
       <div className="flex h-full min-h-0 flex-col bg-white">
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-20 md:pt-24 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-14 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8">
           <nav className="flex flex-col" aria-label={menuTitle}>
             {drawerItems.map((item) => (
               <MobileNavLink
@@ -86,16 +84,6 @@ export function MobileNavSheetContent({
               />
             ))}
             <LanguageSwitcherMobile onNavigate={onNavigate} />
-            <Link
-              href="/contact"
-              onClick={onNavigate}
-              className={buttonVariants({
-                size: "cta",
-                className: cn("mt-6 w-full", contactClassName),
-              })}
-            >
-              {contactLabel}
-            </Link>
           </nav>
         </div>
       </div>
@@ -107,13 +95,11 @@ export function HeroMenuButton({
   open,
   onOpenChange,
   mainNavigation,
-  contactLabel,
   tone = "light",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mainNavigation: NavItem[];
-  contactLabel: string;
   /** "light" = white outline (dark/transparent chrome); "dark" = blue-dark outline (light chrome). */
   tone?: "light" | "dark";
 }) {
@@ -140,8 +126,6 @@ export function HeroMenuButton({
       <MobileNavSheetContent
         side="left"
         mainNavigation={mainNavigation}
-        contactLabel={contactLabel}
-        contactClassName="bg-oboya-blue-dark text-white hover:bg-oboya-blue"
         onNavigate={() => onOpenChange(false)}
         menuTitle={t("nav.menuTitle")}
       />

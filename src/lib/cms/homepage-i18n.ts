@@ -261,96 +261,27 @@ export const HOME_I18N = {
       "Testimonios",
       "客户评价"
     ),
-    t1Quote: homeLoc(
-      "Thank you, Oboya Horticulture, for your hard work and your quick responses, consistent follow-up, and commitment to finding the right solution.",
-      "Obrigado, Oboya Horticulture, pelo empenho, pelas respostas rápidas, pelo acompanhamento constante e pelo compromisso em encontrar a solução certa.",
-      "Gracias, Oboya Horticulture, por su esfuerzo, sus respuestas rápidas, su seguimiento constante y su compromiso de encontrar la solución adecuada.",
-      "感谢 Oboya Horticulture 的辛勤付出、快速响应、持续跟进，以及为找到合适方案所做的努力。"
-    ),
-    t1Author: homeLoc(
-      "Procurement Manager",
-      "Gerente de Compras",
-      "Gerente de Compras",
-      "采购经理"
-    ),
-    t1Role: homeLoc(
-      "LVG Plants",
-      "LVG Plants",
-      "LVG Plants",
-      "LVG Plants"
-    ),
-    t2Quote: homeLoc(
-      "The machine has helped me tremendously. Before, we used rubber bands and tape, which could cause discomfort and even injuries to our hands. Today, the process is faster, more comfortable, and much safer. For me, this machine is a blessing.",
-      "A máquina me ajudou enormemente. Antes, usávamos elásticos e fita, o que podia causar desconforto e até lesões nas mãos. Hoje, o processo é mais rápido, mais confortável e muito mais seguro. Para mim, essa máquina é uma bênção.",
-      "La máquina me ha ayudado enormemente. Antes usábamos gomas elásticas y cinta, lo que podía causar molestias e incluso lesiones en las manos. Hoy el proceso es más rápido, más cómodo y mucho más seguro. Para mí, esta máquina es una bendición.",
-      "这台机器给了我极大的帮助。以前我们使用橡皮筋和胶带，容易造成手部不适甚至受伤。如今流程更快、更舒适，也安全得多。对我来说，这台机器是一份恩赐。"
-    ),
-    t2Author: homeLoc(
-      "Betty Mesa",
-      "Betty Mesa",
-      "Betty Mesa",
-      "Betty Mesa"
-    ),
-    t2Role: homeLoc(
-      "Flor de Azama Farm – Falcon Farms",
-      "Flor de Azama Farm – Falcon Farms",
-      "Flor de Azama Farm – Falcon Farms",
-      "Flor de Azama Farm – Falcon Farms"
-    ),
-    t3Quote: homeLoc(
-      "The Oboya Terra transparent Pot helped us create better growing conditions for our plants. The increased substrate volume, improved aeration, and enhanced drainage support healthier root development and have delivered the performance we were looking for. We are very satisfied with the results.",
-      "O vaso transparente Oboya Terra nos ajudou a criar melhores condições de cultivo para as plantas. O maior volume de substrato, a melhor aeração e a drenagem aprimorada favorecem um desenvolvimento radicular mais saudável e entregaram o desempenho que buscávamos. Estamos muito satisfeitos com os resultados.",
-      "La maceta transparente Oboya Terra nos ayudó a crear mejores condiciones de cultivo para nuestras plantas. El mayor volumen de sustrato, la mejor aireación y el drenaje optimizado favorecen un desarrollo radicular más sano y han ofrecido el rendimiento que buscábamos. Estamos muy satisfechos con los resultados.",
-      "Oboya Terra 透明花盆帮助我们为植物创造了更好的生长条件。更大的基质容量、更好的透气性和更优的排水性能，促进根系更健康地发育，达到了我们期望的效果。我们对结果非常满意。"
-    ),
-    t3Author: homeLoc(
-      "Geraldo Barendse",
-      "Geraldo Barendse",
-      "Geraldo Barendse",
-      "Geraldo Barendse"
-    ),
-    t3Role: homeLoc(
-      "Brazil",
-      "Brasil",
-      "Brasil",
-      "巴西"
-    ),
-    t4Quote: homeLoc(
-      "The custom pot holder developed by Oboya helped improve the flow of our production process and made handling mini pots much more efficient. The solution integrated well with our conveyor system and contributed to a smoother operation.",
-      "O porta-vasos personalizado desenvolvido pela Oboya ajudou a melhorar o fluxo do nosso processo produtivo e tornou o manuseio de minivasos muito mais eficiente. A solução se integrou bem ao nosso sistema de esteiras e contribuiu para uma operação mais fluida.",
-      "El portamacetas personalizado desarrollado por Oboya ayudó a mejorar el flujo de nuestro proceso de producción y hizo mucho más eficiente la manipulación de minimacetas. La solución se integró bien con nuestro sistema de transporte y contribuyó a una operación más fluida.",
-      "Oboya 开发的定制花盆托架改善了我们的生产流程，使迷你花盆的搬运效率大幅提升。该方案与我们的输送系统衔接顺畅，让整体运作更加流畅。"
-    ),
-    t4Author: homeLoc(
-      "Joost",
-      "Joost",
-      "Joost",
-      "Joost"
-    ),
-    t4Role: homeLoc(
-      "Kalanchoe",
-      "Kalanchoe",
-      "Kalanchoe",
-      "Kalanchoe"
-    ),
-    t5Quote: homeLoc(
-      "The Oboya Ecovaso Tall Pot allowed us to improve transportation efficiency while maintaining an attractive presentation for our products. Being able to transport approximately 20% more pots per trolley represents a significant logistical advantage for our operation.",
-      "O vaso alto Oboya Ecovaso nos permitiu melhorar a eficiência do transporte sem abrir mão de uma apresentação atraente dos produtos. Transportar cerca de 20% mais vasos por carrinho representa uma vantagem logística significativa para a nossa operação.",
-      "La maceta alta Oboya Ecovaso nos permitió mejorar la eficiencia del transporte manteniendo una presentación atractiva de nuestros productos. Poder transportar aproximadamente un 20% más de macetas por carro supone una ventaja logística significativa para nuestra operación.",
-      "Oboya Ecovaso 高款花盆让我们在保持产品美观陈列的同时提升了运输效率。每辆推车可多运约 20% 的花盆，对我们的运营而言是显著的物流优势。"
-    ),
-    t5Author: homeLoc(
-      "Terra Viva",
-      "Terra Viva",
-      "Terra Viva",
-      "Terra Viva"
-    ),
-    t5Role: homeLoc(
-      "Brazil",
-      "Brasil",
-      "Brasil",
-      "巴西"
-    ),
+    t1Quote: homeLoc("The machine has helped me tremendously. Before, we used rubber bands and tape, which could cause discomfort and even hand injuries. Today, the process is faster, more comfortable, and much safer. For me, this machine is a blessing.", "A máquina me ajudou imensamente. Antes, usávamos elásticos e fita, que podiam causar desconforto e até lesões nas mãos. Hoje, o processo é mais rápido, mais confortável e muito mais seguro. Para mim, essa máquina é uma bênção.", "La máquina me ha ayudado enormemente. Antes usábamos gomas elásticas y cinta, que podían causar molestias e incluso lesiones en las manos. Hoy el proceso es más rápido, más cómodo y mucho más seguro. Para mí, esta máquina es una bendición.", "这台机器给了我极大的帮助。以前我们使用橡皮筋和胶带，可能造成不适，甚至手部受伤。如今，整个流程更快、更舒适，也更安全。对我来说，这台机器是一份恩赐。"),
+    t1Author: homeLoc("Betty Mesa", "Betty Mesa", "Betty Mesa", "Betty Mesa"),
+    t1Role: homeLoc("Flor de Azama Farm – Falcon Farms", "Flor de Azama Farm – Falcon Farms", "Flor de Azama Farm – Falcon Farms", "Flor de Azama Farm – Falcon Farms"),
+    t2Quote: homeLoc("Thank you, Oboya Horticulture, for your hard work and your quick responses, consistent follow-up, and commitment to finding the right solution.", "Obrigado, Oboya Horticulture, pelo seu empenho, pelas respostas rápidas, pelo acompanhamento constante e pelo compromisso em encontrar a solução certa.", "Gracias, Oboya Horticulture, por su arduo trabajo, sus respuestas rápidas, su seguimiento constante y su compromiso para encontrar la solución adecuada.", "感谢 Oboya Horticulture 的辛勤付出、快速响应、持续跟进，以及为找到合适方案所做出的努力。"),
+    t2Author: homeLoc("Mariette Barnard", "Mariette Barnard", "Mariette Barnard", "Mariette Barnard"),
+    t2Role: homeLoc("Procurement Manager, LVG Plants", "Gerente de Compras, LVG Plants", "Gerente de Compras, LVG Plants", "采购经理，LVG Plants"),
+    t3Quote: homeLoc("The APV demonstrates how integrated logistics solutions can help flower growers improve productivity while strengthening operational performance across post-harvest activities.", "O APV demonstra como soluções logísticas integradas podem ajudar os produtores de flores a aumentar a produtividade, fortalecendo o desempenho operacional em todas as atividades de pós-colheita.", "El APV demuestra cómo las soluciones logísticas integradas pueden ayudar a los productores de flores a mejorar la productividad y, al mismo tiempo, fortalecer el desempeño operativo en las actividades de poscosecha.", "APV 展示了集成式物流解决方案如何帮助花卉种植者提高生产效率，同时增强采后各环节的运营表现。"),
+    t3Author: homeLoc("José Vicente Duque", "José Vicente Duque", "José Vicente Duque", "José Vicente Duque"),
+    t3Role: homeLoc("Elite Flowers Colombia", "Elite Flowers Colombia", "Elite Flowers Colombia", "Elite Flowers Colombia"),
+    t4Quote: homeLoc("The pilot with Oboya Horticulture RFID and AGV systems is giving us valuable insights. We can already see the potential for better traceability and more efficient pallet movement once fully implemented.", "O piloto com os sistemas RFID e AGV da Oboya Horticulture está nos trazendo insights valiosos. Já enxergamos o potencial de melhor rastreabilidade e movimentação de paletes mais eficiente quando for totalmente implementado.", "El piloto con los sistemas RFID y AGV de Oboya Horticulture nos está aportando información valiosa. Ya vemos el potencial de una mejor trazabilidad y de un movimiento de palets más eficiente una vez implementado por completo.", "与 Oboya Horticulture 的 RFID 和 AGV 系统开展的试点为我们带来了宝贵的洞察。我们已经看到，全面实施后将带来更好的可追溯性和更高效的托盘搬运。"),
+    t4Author: homeLoc("Procurement Manager", "Gerente de Compras", "Gerente de Compras", "采购经理"),
+    t4Role: homeLoc("LVG Plants", "LVG Plants", "LVG Plants", "LVG Plants"),
+    t5Quote: homeLoc("The Oboya Terra transparent Pot helped us create better growing conditions for our plants. The increased substrate volume, improved aeration, and enhanced drainage support healthier root development and have delivered the performance we were looking for. We are very satisfied with the results.", "O vaso transparente Oboya Terra nos ajudou a criar melhores condições de cultivo para nossas plantas. O maior volume de substrato, a melhor aeração e a drenagem aprimorada favorecem um desenvolvimento radicular mais saudável e entregaram o desempenho que buscávamos. Estamos muito satisfeitos com os resultados.", "La maceta transparente Oboya Terra nos ayudó a crear mejores condiciones de cultivo para nuestras plantas. El mayor volumen de sustrato, la mejor aireación y el drenaje mejorado favorecen un desarrollo radicular más sano y han ofrecido el rendimiento que buscábamos. Estamos muy satisfechos con los resultados.", "Oboya Terra 透明花盆帮助我们为植物创造了更好的生长条件。更大的基质容量、更好的透气性和更优的排水性，促进了根系更健康的发育，达到了我们期望的效果。我们对结果非常满意。"),
+    t5Author: homeLoc("Geraldo Barendse", "Geraldo Barendse", "Geraldo Barendse", "Geraldo Barendse"),
+    t5Role: homeLoc("Brazil", "Brasil", "Brasil", "巴西"),
+    t6Quote: homeLoc("The Oboya Ecovaso Tall Pot allowed us to improve transportation efficiency while maintaining an attractive presentation for our products. Being able to transport approximately 20% more pots per trolley represents a significant logistical advantage for our operation.", "O Oboya Ecovaso Tall Pot nos permitiu melhorar a eficiência do transporte mantendo uma apresentação atraente dos nossos produtos. Poder transportar cerca de 20% mais vasos por carrinho representa uma vantagem logística significativa para a nossa operação.", "El Oboya Ecovaso Tall Pot nos permitió mejorar la eficiencia del transporte sin perder una presentación atractiva de nuestros productos. Poder transportar aproximadamente un 20% más de macetas por carro representa una ventaja logística significativa para nuestra operación.", "Oboya Ecovaso Tall Pot 让我们在保持产品陈列美观的同时提高了运输效率。每辆推车可多运约 20% 的花盆，对我们的运营而言是显著的物流优势。"),
+    t6Author: homeLoc("Terra Viva", "Terra Viva", "Terra Viva", "Terra Viva"),
+    t6Role: homeLoc("Brazil", "Brasil", "Brasil", "巴西"),
+    t7Quote: homeLoc("The custom pot holder developed by Oboya helped improve the flow of our production process and made handling mini pots much more efficient. The solution integrated well with our conveyor system and contributed to a smoother operation.", "O suporte de vasos personalizado desenvolvido pela Oboya ajudou a melhorar o fluxo do nosso processo produtivo e tornou o manuseio de minivasos muito mais eficiente. A solução se integrou bem ao nosso sistema de esteiras e contribuiu para uma operação mais fluida.", "El soporte de macetas personalizado desarrollado por Oboya ayudó a mejorar el flujo de nuestro proceso de producción y hizo mucho más eficiente el manejo de minimacetas. La solución se integró bien con nuestro sistema de cintas transportadoras y contribuyó a una operación más fluida.", "Oboya 定制开发的花盆托架改善了我们的生产流程，使迷你花盆的搬运效率大幅提升。该方案与我们的输送系统衔接良好，让运营更加顺畅。"),
+    t7Author: homeLoc("Joost Kalanchoe", "Joost Kalanchoe", "Joost Kalanchoe", "Joost Kalanchoe"),
+    t7Role: homeLoc("Brazil", "Brasil", "Brasil", "巴西"),
   },
   latestNews: {
     eyebrow: homeLoc("Latest News", "Blog", "Blog", "博客"),

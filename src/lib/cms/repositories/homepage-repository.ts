@@ -421,6 +421,18 @@ const defaultSettings = (): HomepageSettings => ({
         author: H.testimonials.t5Author,
         role: H.testimonials.t5Role,
       },
+      {
+        id: "t6",
+        quote: H.testimonials.t6Quote,
+        author: H.testimonials.t6Author,
+        role: H.testimonials.t6Role,
+      },
+      {
+        id: "t7",
+        quote: H.testimonials.t7Quote,
+        author: H.testimonials.t7Author,
+        role: H.testimonials.t7Role,
+      },
     ],
   },
   latestNews: {
@@ -838,16 +850,17 @@ function mergeHomepageLocales(
 /** Replaces stored copy that still equals a previous default with the current default. */
 function upgradeLegacyHomeCopy(s: HomepageSettings, defaults: HomepageSettings): HomepageSettings {
   const solutionDef = (id: string) => defaults.businessSolutions.items.find((d) => d.id === id);
-  const oldTestimonials = LEGACY.testimonials;
-  const isOldTestimonials =
-    s.testimonials.items.length === oldTestimonials.length &&
-    s.testimonials.items.every(
-      (it, i) =>
-        it.id === `t${i + 1}` &&
-        isLegacy(it.quote, oldTestimonials[i][0]) &&
-        isLegacy(it.author, oldTestimonials[i][1]) &&
-        isLegacy(it.role, oldTestimonials[i][2])
-    );
+  const isOldTestimonials = [LEGACY.testimonials, LEGACY.testimonials5].some(
+    (old) =>
+      s.testimonials.items.length === old.length &&
+      s.testimonials.items.every(
+        (it, i) =>
+          it.id === `t${i + 1}` &&
+          isLegacy(it.quote, old[i][0]) &&
+          isLegacy(it.author, old[i][1]) &&
+          isLegacy(it.role, old[i][2])
+      )
+  );
   return {
     ...s,
     capabilities: {
