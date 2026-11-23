@@ -24,13 +24,13 @@ export function CaseStudyProjectMeta({
   if (items.length === 0) return null;
 
   return (
-    <dl className="mt-10 grid gap-8 sm:grid-cols-3 sm:gap-10 md:mt-12">
+    <dl className="mt-10 grid gap-6 sm:grid-cols-3 sm:gap-10 md:mt-12">
       {items.map((item) => (
-        <div key={item.label}>
-          <dt className="font-body text-xs font-semibold text-oboya-blue-dark">
-            {item.label}
+        <div key={item.label} className="border-l border-oboya-green/60 pl-4 md:pl-5">
+          <dt className="font-body text-[0.9375rem] font-semibold text-oboya-blue-dark">
+            {item.label}:
           </dt>
-          <dd className="mt-2 font-body text-sm font-medium text-oboya-green md:text-[0.9375rem]">
+          <dd className="mt-1 font-body text-[0.9375rem] text-oboya-green">
             {item.value}
           </dd>
         </div>
