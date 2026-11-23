@@ -141,4 +141,9 @@ describe("homepage legacy copy upgrades", () => {
     expect(load((doc) => { doc.partners.title = OLD.partnersTitle; }).partners.title.en).toBe("Certifications & Standards");
     expect(load((doc) => { doc.partners.title = edited("Mine"); }).partners.title.en).toBe("Mine");
   });
+
+  it("testimonials eyebrow: old default upgraded, edited kept", () => {
+    expect(load((doc) => { doc.testimonials.eyebrow = OLD.testimonialsEyebrow; }).testimonials.eyebrow.en).toBe("Real Results. Real Partnerships");
+    expect(load((doc) => { doc.testimonials.eyebrow = edited("Mine"); }).testimonials.eyebrow.en).toBe("Mine");
+  });
 });

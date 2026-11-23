@@ -889,6 +889,7 @@ function upgradeLegacyHomeCopy(s: HomepageSettings, defaults: HomepageSettings):
     },
     testimonials: {
       ...s.testimonials,
+      eyebrow: upgradeLegacy(s.testimonials.eyebrow, LEGACY.testimonialsEyebrow, defaults.testimonials.eyebrow)!,
       items: isOldTestimonials ? defaults.testimonials.items : s.testimonials.items,
     },
     partners: {

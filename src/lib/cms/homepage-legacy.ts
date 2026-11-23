@@ -87,6 +87,7 @@ export const LEGACY_HOME_COPY = {
     "Nuestras colaboraciones",
     "我们的合作伙伴"
   ),
+  testimonialsEyebrow: homeLoc("Testimonials", "Depoimentos", "Testimonios", "客户评价"),
   /** [quote, author, role] of the six former testimonials, in order. */
   testimonials: [
     [

@@ -256,10 +256,10 @@ export const HOME_I18N = {
   },
   testimonials: {
     eyebrow: homeLoc(
-      "Testimonials",
-      "Depoimentos",
-      "Testimonios",
-      "客户评价"
+      "Real Results. Real Partnerships",
+      "Resultados Reais. Parcerias Reais.",
+      "Resultados Reales. Alianzas Reales.",
+      "真实成果，真诚合作"
     ),
     t1Quote: homeLoc("The machine has helped me tremendously. Before, we used rubber bands and tape, which could cause discomfort and even hand injuries. Today, the process is faster, more comfortable, and much safer. For me, this machine is a blessing.", "A máquina me ajudou imensamente. Antes, usávamos elásticos e fita, que podiam causar desconforto e até lesões nas mãos. Hoje, o processo é mais rápido, mais confortável e muito mais seguro. Para mim, essa máquina é uma bênção.", "La máquina me ha ayudado enormemente. Antes usábamos gomas elásticas y cinta, que podían causar molestias e incluso lesiones en las manos. Hoy el proceso es más rápido, más cómodo y mucho más seguro. Para mí, esta máquina es una bendición.", "这台机器给了我极大的帮助。以前我们使用橡皮筋和胶带，可能造成不适，甚至手部受伤。如今，整个流程更快、更舒适，也更安全。对我来说，这台机器是一份恩赐。"),
     t1Author: homeLoc("Betty Mesa", "Betty Mesa", "Betty Mesa", "Betty Mesa"),

@@ -209,7 +209,8 @@ export function HomeChallenges({
 
       {closingText ? (
         <div className="relative z-20 bg-oboya-blue px-[var(--container-padding)] py-6 text-center md:py-8">
-          <p className="mx-auto max-w-4xl font-display text-[clamp(1.05rem,2vw,1.5rem)] font-light leading-snug text-white text-balance xl:max-w-none xl:whitespace-nowrap xl:text-[clamp(0.95rem,1.15vw,1.25rem)]">
+          {/* Same type as the lens caption; a single line on desktop. */}
+          <p className="mx-auto max-w-5xl font-body text-base leading-snug text-white max-lg:text-balance lg:max-w-none lg:whitespace-nowrap lg:text-[14px] xl:text-lg">
             {closingText}
           </p>
         </div>
