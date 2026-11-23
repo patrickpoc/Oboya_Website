@@ -216,4 +216,15 @@ describe("homeEcosystem settings", () => {
     });
     expect(stageOf(eco, "harvest").image).toBe(HOME_ECOSYSTEM_DEFAULT_IMAGES.harvest);
   });
+
+  it("upgrades the old provisional harvest photo but keeps custom images", () => {
+    const legacy = load({
+      stages: [{ id: "harvest", image: "/assets/solutions/stage-harvest.jpg" }],
+    });
+    expect(stageOf(legacy, "harvest").image).toBe("/assets/homepage/ecosystem-harvest.jpg");
+    const custom = load({
+      stages: [{ id: "harvest", image: "/assets/homepage/my-harvest.jpg" }],
+    });
+    expect(stageOf(custom, "harvest").image).toBe("/assets/homepage/my-harvest.jpg");
+  });
 });
