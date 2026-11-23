@@ -2,33 +2,28 @@ import { ArrowLeft } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Container } from "@/components/ui/container";
 import { CaseStudyProjectMeta } from "@/components/case-studies/CaseStudyProjectMeta";
-import { splitCaseStudyExcerpt } from "@/lib/case-studies/excerpt";
 
 interface CaseStudyDetailHeroProps {
   title: string;
-  intro: string;
   backLabel: string;
   clientLabel: string;
   client: string;
   industryLabel: string;
   industry: string;
-  timelineLabel: string;
-  timeline: string;
+  countryLabel: string;
+  country: string;
 }
 
 export function CaseStudyDetailHero({
   title,
-  intro,
   backLabel,
   clientLabel,
   client,
   industryLabel,
   industry,
-  timelineLabel,
-  timeline,
+  countryLabel,
+  country,
 }: CaseStudyDetailHeroProps) {
-  const introParagraphs = splitCaseStudyExcerpt(intro);
-
   return (
     <section className="bg-white pt-[clamp(3.5rem,8vw,5.5rem)] pb-[clamp(2.5rem,5vw,3.5rem)]">
       <Container>
@@ -40,28 +35,16 @@ export function CaseStudyDetailHero({
           {backLabel}
         </Link>
 
-        <div className="grid gap-8 lg:grid-cols-12 lg:items-start lg:gap-12">
-          <h1 className="font-display text-[clamp(2.5rem,6vw,4.5rem)] font-light leading-[1.05] tracking-[-0.03em] text-oboya-blue-dark text-pretty lg:col-span-6">
-            {title}
-          </h1>
-          {introParagraphs.length > 0 ? (
-            <div className="flex max-w-md flex-col gap-4 font-body text-[0.9375rem] leading-[1.75] text-oboya-blue-dark/55 md:text-base lg:col-span-5 lg:col-start-8 lg:pt-3">
-              {introParagraphs.map((paragraph, index) => (
-                <p key={index} className="line-clamp-5">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          ) : null}
-        </div>
+        {/* The visible title/intro block was removed; keep the h1 for screen readers and SEO. */}
+        <h1 className="sr-only">{title}</h1>
 
         <CaseStudyProjectMeta
           clientLabel={clientLabel}
           client={client}
           industryLabel={industryLabel}
           industry={industry}
-          timelineLabel={timelineLabel}
-          timeline={timeline}
+          countryLabel={countryLabel}
+          country={country}
         />
       </Container>
     </section>

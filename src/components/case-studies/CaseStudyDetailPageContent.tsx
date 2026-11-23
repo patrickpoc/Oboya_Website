@@ -27,8 +27,6 @@ export async function CaseStudyDetailPageContent({
 }: CaseStudyDetailPageContentProps) {
   const t = await getTranslations("caseStudies");
   const title = pickLocalized(study.title, locale);
-  const intro = pickLocalized(study.excerpt, locale);
-  const timeline = pickLocalized(study.timeline, locale);
   const challenge = pickLocalized(study.challenge, locale);
   const solution = pickLocalized(study.solution, locale);
   const implementation = pickLocalized(study.implementation, locale);
@@ -42,14 +40,13 @@ export async function CaseStudyDetailPageContent({
     <>
       <CaseStudyDetailHero
         title={title}
-        intro={intro}
         backLabel={t("backToHub")}
         clientLabel={t("factClient")}
         client={study.client}
         industryLabel={t("factIndustry")}
         industry={study.industry}
-        timelineLabel={t("factTimeline")}
-        timeline={timeline}
+        countryLabel={t("factCountry")}
+        country={study.country}
       />
 
       <CaseStudyHeroImage src={study.coverImage} alt={title} />
