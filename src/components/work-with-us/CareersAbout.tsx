@@ -1,38 +1,42 @@
+import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Globe, GraduationCap, Sprout, Users } from "lucide-react";
-import { Container } from "@/components/ui/container";
+import { CircleCheck } from "lucide-react";
 
-const BENEFITS = [
-  { key: "b1", Icon: Globe },
-  { key: "b2", Icon: GraduationCap },
-  { key: "b3", Icon: Sprout },
-  { key: "b4", Icon: Users },
-] as const;
+const BENEFITS = ["b1", "b2", "b3", "b4"] as const;
 
 export function CareersAbout() {
-  const t = useTranslations("workWithUsPage");
+  const t = useTranslations("workWithUsPage.why");
   return (
-    <section className="py-16 md:py-24" aria-labelledby="careers-about">
-      <Container>
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 id="careers-about" className="font-display text-2xl font-semibold text-oboya-blue-dark md:text-3xl">
-            {t("about.title")}
+    <>
+      <section className="grid lg:grid-cols-[45fr_55fr]" aria-labelledby="careers-why">
+        <div className="bg-oboya-blue-dark px-[var(--container-padding)] py-14 text-white lg:px-16 lg:py-20">
+          <h2 id="careers-why" className="font-display text-[clamp(1.8rem,3vw,2.4rem)] leading-tight font-light">
+            {t("title")}
           </h2>
-          <p className="mt-4 text-base text-oboya-blue-dark/75">{t("about.body")}</p>
+          <p className="mt-6 max-w-md text-sm leading-relaxed text-white/85">{t("p1")}</p>
+          <p className="mt-4 max-w-md text-sm leading-relaxed text-white/85">{t("p2")}</p>
         </div>
-        <h3 className="sr-only">{t("about.highlightsTitle")}</h3>
-        <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {BENEFITS.map(({ key, Icon }) => (
-            <li key={key} className="rounded-sm bg-white p-6 shadow-sm">
-              <Icon className="size-6 text-oboya-green" aria-hidden />
-              <p className="mt-4 font-display text-lg font-semibold text-oboya-blue-dark">
-                {t(`benefits.${key}.title`)}
-              </p>
-              <p className="mt-2 text-sm text-oboya-blue-dark/70">{t(`benefits.${key}.description`)}</p>
+        <ul className="grid content-center gap-x-10 gap-y-8 bg-oboya-soft-white px-[var(--container-padding)] py-14 sm:grid-cols-2 lg:px-16 lg:py-20">
+          {BENEFITS.map((key) => (
+            <li key={key} className="flex gap-3">
+              <CircleCheck className="mt-0.5 size-5 shrink-0 text-oboya-green" strokeWidth={1.5} aria-hidden />
+              <div>
+                <p className="text-sm font-bold text-oboya-blue-dark">{t(`${key}.title`)}</p>
+                <p className="mt-1 text-sm leading-relaxed text-oboya-blue-dark">{t(`${key}.description`)}</p>
+              </div>
             </li>
           ))}
         </ul>
-      </Container>
-    </section>
+      </section>
+      <div className="relative aspect-[4/5] w-full sm:aspect-[16/9] lg:aspect-[21/9]">
+        <Image
+          src="/assets/homepage/capabilities-partnerships.jpg"
+          alt={t("photoAlt")}
+          fill
+          sizes="100vw"
+          className="object-cover"
+        />
+      </div>
+    </>
   );
 }

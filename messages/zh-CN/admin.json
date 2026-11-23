@@ -1612,6 +1612,7 @@
           "salaryCurrency": "币种（ISO 代码）",
           "salaryPeriod": "周期",
           "showSalary": "公开显示薪资",
+          "showSalaryHint": "开启后,该职位才会出现在公开的薪资范围筛选中。",
           "status": "状态",
           "publishAt": "发布时间",
           "closeAt": "关闭时间",

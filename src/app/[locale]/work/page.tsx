@@ -3,13 +3,10 @@ import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SiteLayout } from "@/components/layouts/SiteLayout";
 import { CareersAbout } from "@/components/work-with-us/CareersAbout";
-import { CareersFaq } from "@/components/work-with-us/CareersFaq";
 import { CareersHero } from "@/components/work-with-us/CareersHero";
-import { HiringProcess } from "@/components/work-with-us/HiringProcess";
 import { OpeningsBoard, OpeningsList } from "@/components/work-with-us/OpeningsBoard";
 import { Container } from "@/components/ui/container";
 import { routing } from "@/i18n/routing";
-import { countryFacets } from "@/lib/cms/careers/public";
 import { listPublicOpenings } from "@/lib/cms/server/careers-public.server";
 
 export const revalidate = 3600;
@@ -39,22 +36,18 @@ export default async function WorkPage({ params }: Props) {
 
   return (
     <SiteLayout navbarSolidTone="dark">
-      <div className="bg-oboya-soft-white">
-        <CareersHero countriesCount={countryFacets(openings).length} />
-        <section className="relative -mt-20 pb-16 md:-mt-36 md:pb-24" aria-labelledby="openings-title">
-          <Container size="wide">
-            <div className="rounded-sm bg-white p-4 shadow-[var(--shadow-card)] sm:p-8 md:p-10">
-              <OpeningsHeading />
-              <Suspense fallback={<OpeningsList openings={openings} />}>
-                <OpeningsBoard openings={openings} />
-              </Suspense>
-            </div>
-          </Container>
-        </section>
-        <CareersAbout />
-        <HiringProcess />
-        <CareersFaq />
-      </div>
+      <CareersHero />
+      <CareersAbout />
+      <section className="relative z-10 -mt-12 pb-20 md:pb-28 lg:-mt-40" aria-labelledby="openings-title">
+        <Container size="wide">
+          <div className="bg-white p-5 shadow-[var(--shadow-card)] sm:p-8 lg:p-10">
+            <OpeningsHeading />
+            <Suspense fallback={<OpeningsList openings={openings} />}>
+              <OpeningsBoard openings={openings} />
+            </Suspense>
+          </div>
+        </Container>
+      </section>
     </SiteLayout>
   );
 }
@@ -62,7 +55,7 @@ export default async function WorkPage({ params }: Props) {
 async function OpeningsHeading() {
   const t = await getTranslations("workWithUsPage.board");
   return (
-    <h2 id="openings-title" className="mb-6 font-display text-2xl font-semibold text-oboya-blue-dark">
+    <h2 id="openings-title" className="mb-6 font-display text-2xl font-bold text-oboya-blue-dark">
       {t("title")}
     </h2>
   );

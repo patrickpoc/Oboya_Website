@@ -98,7 +98,11 @@
       "allDepartments": "Todas as áreas",
       "workModel": "Modelo de trabalho",
       "employmentType": "Tipo de contrato",
-      "any": "Qualquer"
+      "any": "Qualquer",
+      "city": "Cidade",
+      "allCities": "Todas as cidades",
+      "seniority": "Senioridade",
+      "salaryRange": "Faixa salarial"
     },
     "empty": {
       "title": "Nenhuma vaga corresponde à sua busca",
@@ -106,6 +110,12 @@
       "countryTitle": "Não há vagas abertas em {country} no momento",
       "clearFilters": "Limpar filtros",
       "talentPoolCta": "Entrar no banco de talentos"
+    },
+    "salary": {
+      "upTo30k": "Até 30k",
+      "30to60k": "30k – 60k",
+      "60to100k": "60k – 100k",
+      "100kPlus": "100k+"
     }
   },
   "card": {
@@ -327,5 +337,31 @@
     "privacyLink": "Leia o aviso de privacidade de recrutamento",
     "seeOpenings": "Ver outras vagas",
     "backHome": "Voltar para o início"
+  },
+  "intro": {
+    "eyebrow": "Cresça Conosco",
+    "title": "Por trás de cada solução, cada projeto e cada inovação há uma equipe de profissionais dedicados, comprometidos em ajudar a horticultura a ter melhor desempenho."
+  },
+  "why": {
+    "title": "Por que trabalhar na Oboya Horticulture.",
+    "p1": "A Oboya Horticulture é construída sobre colaboração, expertise e compromisso com a melhoria contínua.",
+    "p2": "Estamos sempre em busca de pessoas que compartilhem nossa paixão por resolver problemas na prática e pelo crescimento de longo prazo.",
+    "b1": {
+      "title": "Oportunidades Globais",
+      "description": "Faça parte de uma organização internacional com presença em diversas regiões."
+    },
+    "b2": {
+      "title": "Trabalho com Propósito",
+      "description": "Contribua para desenvolver e entregar soluções que apoiam produtores e empresas em todo o mundo."
+    },
+    "b3": {
+      "title": "Cultura Colaborativa",
+      "description": "Trabalhe com equipes que valorizam o compartilhamento de conhecimento e a parceria."
+    },
+    "b4": {
+      "title": "Desenvolvimento Contínuo",
+      "description": "Desenvolva suas habilidades em um setor dinâmico e em constante evolução."
+    },
+    "photoAlt": "Dois colegas apertando as mãos entre as fileiras de cultivo em um viveiro"
   }
 }

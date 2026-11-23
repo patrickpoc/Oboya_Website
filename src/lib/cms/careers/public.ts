@@ -37,6 +37,36 @@ export interface PublicOpeningFilters {
   department?: string;
   workModel?: string;
   type?: string;
+  city?: string;
+  employmentType?: string;
+  seniority?: Seniority;
+  salaryRange?: SalaryRangeId;
+}
+
+export const SALARY_RANGE_IDS = ["upTo30k", "30to60k", "60to100k", "100kPlus"] as const;
+export type SalaryRangeId = (typeof SALARY_RANGE_IDS)[number];
+
+const ANNUAL_FACTOR: Record<SalaryPeriod, number> = { hour: 2080, month: 12, year: 1 };
+
+export function annualizeSalary(salary: { amount: number; period: SalaryPeriod }): number {
+  return salary.amount * ANNUAL_FACTOR[salary.period];
+}
+
+/**
+ * Bucket by annualized max (or min when no max). Bounds: <30k, 30k-<60k, 60k-<100k, >=100k.
+ * Assumption: figures are compared in the opening's own currency (no FX conversion).
+ * Undefined when the salary is hidden.
+ */
+export function salaryRangeOf(o: Pick<PublicJobOpening, "salary">): SalaryRangeId | undefined {
+  const sal = o.salary;
+  if (!sal) return undefined;
+  const amount = sal.max ?? sal.min;
+  if (amount === undefined) return undefined;
+  const annual = annualizeSalary({ amount, period: sal.period });
+  if (annual < 30000) return "upTo30k";
+  if (annual < 60000) return "30to60k";
+  if (annual < 100000) return "60to100k";
+  return "100kPlus";
 }
 
 function time(value: string): number {
@@ -106,11 +136,16 @@ export function filterPublicOpenings(
 ): PublicJobOpening[] {
   const q = f.q ? fold(f.q) : "";
   const country = f.country?.toUpperCase();
+  const city = f.city ? fold(f.city) : "";
   return list.filter((o) => {
     if (country && o.countryCode !== country) return false;
     if (f.department && o.department !== f.department) return false;
     if (f.workModel && o.workModel !== f.workModel) return false;
     if (f.type && o.employmentType !== f.type) return false;
+    if (f.employmentType && o.employmentType !== f.employmentType) return false;
+    if (city && (!o.city || fold(o.city) !== city)) return false;
+    if (f.seniority && o.seniority !== f.seniority) return false;
+    if (f.salaryRange && salaryRangeOf(o) !== f.salaryRange) return false;
     if (q) {
       const haystack = fold([o.title, o.summary, o.department, o.city].filter(Boolean).join(" "));
       if (!haystack.includes(q)) return false;
@@ -130,6 +165,42 @@ export function departmentFacets(list: PublicJobOpening[]): { name: string; coun
   const counts = new Map<string, number>();
   for (const o of list) if (o.department) counts.set(o.department, (counts.get(o.department) ?? 0) + 1);
   return [...counts].map(([name, count]) => ({ name, count })).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** Sorted; when `countryCode` is given only cities within that country. */
+export function cityFacets(list: PublicJobOpening[], countryCode?: string): { name: string; count: number }[] {
+  const cc = countryCode?.toUpperCase();
+  const counts = new Map<string, { name: string; count: number }>();
+  for (const o of list) {
+    if (!o.city || (cc && o.countryCode !== cc)) continue;
+    const key = fold(o.city);
+    const e = counts.get(key);
+    if (e) e.count += 1;
+    else counts.set(key, { name: o.city, count: 1 });
+  }
+  return [...counts.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export function seniorityFacets(list: PublicJobOpening[]): { value: Seniority; count: number }[] {
+  const counts = new Map<Seniority, number>();
+  for (const o of list) if (o.seniority) counts.set(o.seniority, (counts.get(o.seniority) ?? 0) + 1);
+  return [...counts].map(([value, count]) => ({ value, count })).sort((a, b) => a.value.localeCompare(b.value));
+}
+
+export function employmentTypeFacets(list: PublicJobOpening[]): { value: EmploymentType; count: number }[] {
+  const counts = new Map<EmploymentType, number>();
+  for (const o of list) if (o.employmentType) counts.set(o.employmentType, (counts.get(o.employmentType) ?? 0) + 1);
+  return [...counts].map(([value, count]) => ({ value, count })).sort((a, b) => a.value.localeCompare(b.value));
+}
+
+/** Only ranges present, in ascending order. */
+export function salaryRangeFacets(list: PublicJobOpening[]): { id: SalaryRangeId; count: number }[] {
+  const counts = new Map<SalaryRangeId, number>();
+  for (const o of list) {
+    const id = salaryRangeOf(o);
+    if (id) counts.set(id, (counts.get(id) ?? 0) + 1);
+  }
+  return SALARY_RANGE_IDS.filter((id) => counts.has(id)).map((id) => ({ id, count: counts.get(id) as number }));
 }
 
 const JSON_LD_EMPLOYMENT: Record<EmploymentType, string> = {

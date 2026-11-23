@@ -1612,6 +1612,7 @@
           "salaryCurrency": "Currency (ISO code)",
           "salaryPeriod": "Period",
           "showSalary": "Show salary publicly",
+          "showSalaryHint": "Required for the opening to appear in the public Salary Range filter.",
           "status": "Status",
           "publishAt": "Publish at",
           "closeAt": "Close at",

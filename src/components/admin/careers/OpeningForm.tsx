@@ -350,6 +350,7 @@ export function OpeningForm({
             <Switch checked={opening.showSalary} onCheckedChange={(checked) => set({ showSalary: checked })} />
             {f("showSalary")}
           </label>
+          <p className="text-xs text-muted-foreground sm:col-span-2 xl:col-span-1">{f("showSalaryHint")}</p>
         </CardContent>
       </Card>
 

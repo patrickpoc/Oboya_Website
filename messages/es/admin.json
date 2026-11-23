@@ -1612,6 +1612,7 @@
           "salaryCurrency": "Moneda (código ISO)",
           "salaryPeriod": "Período",
           "showSalary": "Mostrar salario públicamente",
+          "showSalaryHint": "Obligatorio para que la vacante aparezca en el filtro público de rango salarial.",
           "status": "Estado",
           "publishAt": "Publicar el",
           "closeAt": "Cerrar el",

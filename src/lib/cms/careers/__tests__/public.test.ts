@@ -1,10 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
   buildJobPostingJsonLd,
+  annualizeSalary,
+  cityFacets,
   countryFacets,
   departmentFacets,
+  employmentTypeFacets,
   filterPublicOpenings,
   isOpeningPublic,
+  salaryRangeFacets,
+  salaryRangeOf,
+  seniorityFacets,
   toPublicOpening,
 } from "@/lib/cms/careers/public";
 import { normalizeOpening } from "@/lib/cms/careers/validation";
@@ -98,6 +104,42 @@ describe("filters and facets", () => {
   it("builds facets", () => {
     expect(countryFacets([a, a, b])).toEqual([{ code: "BR", count: 2 }, { code: "SE", count: 1 }]);
     expect(departmentFacets(list)).toEqual([{ name: "Eng", count: 1 }, { name: "Ops", count: 1 }]);
+  });
+});
+
+describe("city, seniority, employment type and salary range", () => {
+  const mk = (over: Record<string, unknown>) => toPublicOpening(opening({ showSalary: true, ...over }), "en", (h) => h);
+  const a = mk({ slug: "a", city: "São Paulo", seniority: "senior", salaryMin: 5000, salaryMax: 8000, salaryPeriod: "month" });
+  const b = mk({ slug: "b", city: "Malmö", countryCode: "SE", seniority: "junior", employmentType: "contract", salaryMin: 20, salaryMax: undefined, salaryPeriod: "hour", salaryCurrency: "SEK" });
+  const c = mk({ slug: "c", city: "Rio", seniority: "senior", salaryMin: 120000, salaryMax: 150000, salaryPeriod: "year" });
+  const hidden = toPublicOpening(opening({ slug: "h", showSalary: false }), "en", (h) => h);
+  const list = [a, b, c, hidden];
+
+  it("annualizes and buckets", () => {
+    expect(annualizeSalary({ amount: 10, period: "hour" })).toBe(20800);
+    expect(annualizeSalary({ amount: 10, period: "month" })).toBe(120);
+    expect(salaryRangeOf(a)).toBe("60to100k"); // 8000 * 12 = 96000
+    expect(salaryRangeOf(b)).toBe("30to60k"); // 20 * 2080 = 41600
+    expect(salaryRangeOf(hidden)).toBeUndefined();
+  });
+
+  it("filters", () => {
+    expect(filterPublicOpenings(list, { city: "sao paulo" }).map((o) => o.slug)).toEqual(["a", "h"]);
+    expect(filterPublicOpenings(list, { seniority: "senior" }).map((o) => o.slug)).toEqual(["a", "c"]);
+    expect(filterPublicOpenings(list, { employmentType: "contract" }).map((o) => o.slug)).toEqual(["b"]);
+    expect(filterPublicOpenings(list, { salaryRange: "100kPlus" }).map((o) => o.slug)).toEqual(["c"]);
+  });
+
+  it("builds facets", () => {
+    expect(cityFacets(list).map((x) => x.name)).toEqual(["Malmö", "Rio", "São Paulo"]);
+    expect(cityFacets(list, "se")).toEqual([{ name: "Malmö", count: 1 }]);
+    expect(seniorityFacets(list)).toEqual([{ value: "junior", count: 1 }, { value: "senior", count: 2 }]);
+    expect(employmentTypeFacets(list)).toEqual([{ value: "contract", count: 1 }, { value: "full_time", count: 3 }]);
+    expect(salaryRangeFacets(list)).toEqual([
+      { id: "30to60k", count: 1 },
+      { id: "60to100k", count: 1 },
+      { id: "100kPlus", count: 1 },
+    ]);
   });
 });
 

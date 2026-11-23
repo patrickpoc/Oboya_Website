@@ -6,18 +6,24 @@ import { useSearchParams } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import {
+  cityFacets,
   countryFacets,
   departmentFacets,
+  employmentTypeFacets,
   filterPublicOpenings,
+  salaryRangeFacets,
+  seniorityFacets,
+  SALARY_RANGE_IDS,
   type PublicJobOpening,
+  type SalaryRangeId,
 } from "@/lib/cms/careers/public";
-import { EMPLOYMENT_TYPES, WORK_MODELS } from "@/lib/cms/careers/types";
+import { EMPLOYMENT_TYPES, SENIORITIES, type Seniority } from "@/lib/cms/careers/types";
 import { getWorldCountryByCode } from "@/lib/contact/world-countries";
 import { cn } from "@/lib/utils";
 import { OpeningCard } from "./OpeningCard";
 import { countryName } from "./opening-format";
 
-type Key = "country" | "q" | "department" | "workModel" | "type";
+type Key = "country" | "q" | "city" | "department" | "employmentType" | "seniority" | "salary";
 
 const selectClass =
   "h-11 w-full rounded-sm border border-border/70 bg-white px-3 text-sm text-oboya-blue-dark outline-none focus-visible:border-oboya-blue focus-visible:ring-2 focus-visible:ring-oboya-blue/30";
@@ -40,15 +46,18 @@ export function OpeningsBoard({ openings }: { openings: PublicJobOpening[] }) {
   const pathname = usePathname();
   const params = useSearchParams();
 
-  const rawWorkModel = params.get("workModel") ?? "";
-  const rawType = params.get("type") ?? "";
+  const rawType = params.get("employmentType") ?? params.get("type") ?? "";
   const rawCountry = (params.get("country") ?? "").toUpperCase();
+  const rawSeniority = params.get("seniority") ?? "";
+  const rawSalary = params.get("salary") ?? "";
   const current: Record<Key, string> = {
     country: getWorldCountryByCode(rawCountry) ? rawCountry : "",
     q: params.get("q") ?? "",
+    city: params.get("city") ?? "",
     department: params.get("department") ?? "",
-    workModel: (WORK_MODELS as readonly string[]).includes(rawWorkModel) ? rawWorkModel : "",
-    type: (EMPLOYMENT_TYPES as readonly string[]).includes(rawType) ? rawType : "",
+    employmentType: (EMPLOYMENT_TYPES as readonly string[]).includes(rawType) ? rawType : "",
+    seniority: (SENIORITIES as readonly string[]).includes(rawSeniority) ? rawSeniority : "",
+    salary: (SALARY_RANGE_IDS as readonly string[]).includes(rawSalary) ? rawSalary : "",
   };
 
   const countries = useMemo(
@@ -59,10 +68,21 @@ export function OpeningsBoard({ openings }: { openings: PublicJobOpening[] }) {
     [openings, locale]
   );
   const departments = useMemo(() => departmentFacets(openings), [openings]);
-  const results = filterPublicOpenings(openings, current);
+  const cities = useMemo(() => cityFacets(openings, current.country || undefined), [openings, current.country]);
+  const types = useMemo(() => employmentTypeFacets(openings), [openings]);
+  const seniorities = useMemo(() => seniorityFacets(openings), [openings]);
+  const salaries = useMemo(() => salaryRangeFacets(openings), [openings]);
+  const results = filterPublicOpenings(openings, {
+    ...current,
+    seniority: (current.seniority || undefined) as Seniority | undefined,
+    salaryRange: (current.salary || undefined) as SalaryRangeId | undefined,
+  });
 
   function update(patch: Partial<Record<Key, string>>) {
     const next = new URLSearchParams(params.toString());
+    next.delete("type");
+    next.delete("workModel");
+    if (patch.country !== undefined) next.delete("city");
     for (const [k, v] of Object.entries(patch)) {
       if (v) next.set(k, v);
       else next.delete(k);
@@ -74,9 +94,11 @@ export function OpeningsBoard({ openings }: { openings: PublicJobOpening[] }) {
   const chips: { key: Key; label: string }[] = [];
   if (current.q) chips.push({ key: "q", label: `"${current.q}"` });
   if (current.country) chips.push({ key: "country", label: countryName(current.country, locale) });
+  if (current.city) chips.push({ key: "city", label: current.city });
   if (current.department) chips.push({ key: "department", label: current.department });
-  if (current.workModel) chips.push({ key: "workModel", label: tl(`workModel.${current.workModel}` as never) });
-  if (current.type) chips.push({ key: "type", label: tl(`employmentType.${current.type}` as never) });
+  if (current.employmentType) chips.push({ key: "employmentType", label: tl(`employmentType.${current.employmentType}` as never) });
+  if (current.seniority) chips.push({ key: "seniority", label: tl(`seniority.${current.seniority}` as never) });
+  if (current.salary) chips.push({ key: "salary", label: t(`salary.${current.salary}` as never) });
 
   const countryLabel = current.country ? countryName(current.country, locale) : "";
 
@@ -114,31 +136,7 @@ export function OpeningsBoard({ openings }: { openings: PublicJobOpening[] }) {
         </button>
       </form>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <FilterSelect
-          id="openings-department"
-          label={t("filters.department")}
-          value={current.department}
-          anyLabel={t("filters.allDepartments")}
-          options={departments.map((d) => ({ value: d.name, label: d.name }))}
-          onChange={(v) => update({ department: v })}
-        />
-        <FilterSelect
-          id="openings-workModel"
-          label={t("filters.workModel")}
-          value={current.workModel}
-          anyLabel={t("filters.any")}
-          options={WORK_MODELS.map((v) => ({ value: v, label: tl(`workModel.${v}`) }))}
-          onChange={(v) => update({ workModel: v })}
-        />
-        <FilterSelect
-          id="openings-type"
-          label={t("filters.employmentType")}
-          value={current.type}
-          anyLabel={t("filters.any")}
-          options={EMPLOYMENT_TYPES.map((v) => ({ value: v, label: tl(`employmentType.${v}`) }))}
-          onChange={(v) => update({ type: v })}
-        />
+      <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-6">
         <FilterSelect
           id="openings-country"
           label={t("filters.country")}
@@ -151,6 +149,51 @@ export function OpeningsBoard({ openings }: { openings: PublicJobOpening[] }) {
               : []),
           ]}
           onChange={(v) => update({ country: v })}
+        />
+        <FilterSelect
+          id="openings-city"
+          label={t("filters.city")}
+          value={current.city}
+          anyLabel={t("filters.allCities")}
+          options={[
+            ...cities.map((c) => ({ value: c.name, label: c.name })),
+            ...(current.city && !cities.some((c) => c.name === current.city)
+              ? [{ value: current.city, label: current.city }]
+              : []),
+          ]}
+          onChange={(v) => update({ city: v })}
+        />
+        <FilterSelect
+          id="openings-department"
+          label={t("filters.department")}
+          value={current.department}
+          anyLabel={t("filters.allDepartments")}
+          options={departments.map((d) => ({ value: d.name, label: d.name }))}
+          onChange={(v) => update({ department: v })}
+        />
+        <FilterSelect
+          id="openings-type"
+          label={t("filters.employmentType")}
+          value={current.employmentType}
+          anyLabel={t("filters.any")}
+          options={types.map((f) => ({ value: f.value, label: tl(`employmentType.${f.value}`) }))}
+          onChange={(v) => update({ employmentType: v })}
+        />
+        <FilterSelect
+          id="openings-seniority"
+          label={t("filters.seniority")}
+          value={current.seniority}
+          anyLabel={t("filters.any")}
+          options={seniorities.map((f) => ({ value: f.value, label: tl(`seniority.${f.value}`) }))}
+          onChange={(v) => update({ seniority: v })}
+        />
+        <FilterSelect
+          id="openings-salary"
+          label={t("filters.salaryRange")}
+          value={current.salary}
+          anyLabel={t("filters.any")}
+          options={salaries.map((f) => ({ value: f.id, label: t(`salary.${f.id}`) }))}
+          onChange={(v) => update({ salary: v })}
         />
       </div>
 

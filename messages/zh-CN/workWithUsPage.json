@@ -98,7 +98,11 @@
       "allDepartments": "所有部门",
       "workModel": "工作方式",
       "employmentType": "雇佣类型",
-      "any": "不限"
+      "any": "不限",
+      "city": "城市",
+      "allCities": "所有城市",
+      "seniority": "资历级别",
+      "salaryRange": "薪资范围"
     },
     "empty": {
       "title": "没有符合搜索条件的职位",
@@ -106,6 +110,12 @@
       "countryTitle": "{country} 目前暂无在招职位",
       "clearFilters": "清除筛选",
       "talentPoolCta": "加入人才库"
+    },
+    "salary": {
+      "upTo30k": "30k 以下",
+      "30to60k": "30k – 60k",
+      "60to100k": "60k – 100k",
+      "100kPlus": "100k+"
     }
   },
   "card": {
@@ -327,5 +337,31 @@
     "privacyLink": "阅读招聘隐私声明",
     "seeOpenings": "查看其他职位",
     "backHome": "返回首页"
+  },
+  "intro": {
+    "eyebrow": "与我们一同成长",
+    "title": "每一项解决方案、每一个项目、每一次创新的背后,都有一支敬业的专业团队,致力于帮助园艺行业取得更好的成效。"
+  },
+  "why": {
+    "title": "为什么选择 Oboya Horticulture。",
+    "p1": "Oboya Horticulture 以协作、专业能力和持续改进的承诺为基石。",
+    "p2": "我们一直在寻找与我们一样热衷于务实解决问题、追求长期成长的人才。",
+    "b1": {
+      "title": "全球机遇",
+      "description": "加入一家业务遍及多个地区的国际化企业。"
+    },
+    "b2": {
+      "title": "有意义的工作",
+      "description": "参与开发并交付支持全球种植者和企业的解决方案。"
+    },
+    "b3": {
+      "title": "协作文化",
+      "description": "与重视知识分享与合作的团队共事。"
+    },
+    "b4": {
+      "title": "持续发展",
+      "description": "在充满活力、不断发展的行业中提升你的技能。"
+    },
+    "photoAlt": "两位同事在苗圃的作物行间握手"
   }
 }

@@ -11,7 +11,7 @@ export function OpeningCard({ opening }: { opening: PublicJobOpening }) {
     <li>
       <Link
         href={`/work/${opening.slug}`}
-        className="group flex flex-col gap-4 rounded-sm border border-border/60 bg-white p-5 shadow-sm transition-shadow hover:shadow-[var(--shadow-card)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oboya-blue md:p-6"
+        className="group flex flex-col gap-4 border border-border bg-white p-5 transition-shadow hover:shadow-[var(--shadow-card)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oboya-blue md:p-6"
       >
         <div className="flex items-start justify-between gap-4">
           <h3 className="font-display text-lg font-semibold text-oboya-blue-dark group-hover:text-oboya-blue md:text-xl">

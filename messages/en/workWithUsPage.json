@@ -98,7 +98,11 @@
       "allDepartments": "All departments",
       "workModel": "Work model",
       "employmentType": "Employment type",
-      "any": "Any"
+      "any": "Any",
+      "city": "City",
+      "allCities": "All cities",
+      "seniority": "Seniority",
+      "salaryRange": "Salary range"
     },
     "empty": {
       "title": "No roles match your search",
@@ -106,6 +110,12 @@
       "countryTitle": "No open roles in {country} right now",
       "clearFilters": "Clear filters",
       "talentPoolCta": "Join the talent pool"
+    },
+    "salary": {
+      "upTo30k": "Up to 30k",
+      "30to60k": "30k – 60k",
+      "60to100k": "60k – 100k",
+      "100kPlus": "100k+"
     }
   },
   "card": {
@@ -327,5 +337,31 @@
     "privacyLink": "Read the recruitment privacy notice",
     "seeOpenings": "See other openings",
     "backHome": "Back to home"
+  },
+  "intro": {
+    "eyebrow": "Grow With Us",
+    "title": "Behind every solution, every project, and every innovation is a team of dedicated professionals committed to helping horticulture perform better."
+  },
+  "why": {
+    "title": "Why work with Oboya Horticulture.",
+    "p1": "Oboya Horticulture is built on collaboration, expertise and a commitment to continuous improvement.",
+    "p2": "We are always looking for people who share our passion for practical problem-solving and long-term growth.",
+    "b1": {
+      "title": "Global Opportunities",
+      "description": "Join an international organization with a presence across multiple regions."
+    },
+    "b2": {
+      "title": "Meaningful Work",
+      "description": "Contribute to develop and deliver solutions that support growers and businesses worldwide."
+    },
+    "b3": {
+      "title": "Collaborative Culture",
+      "description": "Work with teams that value knowledge-sharing and partnership."
+    },
+    "b4": {
+      "title": "Continuous Development",
+      "description": "Grow your skills in a dynamic and evolving industry."
+    },
+    "photoAlt": "Two colleagues shaking hands between crop rows in a nursery"
   }
 }
