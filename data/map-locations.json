@@ -28,7 +28,7 @@
       "offices": [
         {
           "id": "usa-office",
-          "email": "",
+          "email": "usa@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -104,7 +104,7 @@
       "offices": [
         {
           "id": "mexico-office",
-          "email": "mexico@oboya.example",
+          "email": "mexico@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -180,7 +180,7 @@
       "offices": [
         {
           "id": "ecuador-office",
-          "email": "",
+          "email": "eduador@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -256,7 +256,7 @@
       "offices": [
         {
           "id": "colombia-office",
-          "email": "",
+          "email": "colombia@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -384,7 +384,7 @@
       "offices": [
         {
           "id": "peru-office",
-          "email": "",
+          "email": "peru@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -460,7 +460,7 @@
       "offices": [
         {
           "id": "chile-office",
-          "email": "",
+          "email": "chile@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -536,7 +536,7 @@
       "offices": [
         {
           "id": "brazil-office",
-          "email": "",
+          "email": "brazil@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -664,7 +664,7 @@
       "offices": [
         {
           "id": "argentina-office",
-          "email": "argentina@oboya.example",
+          "email": "argentina@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -740,7 +740,7 @@
       "offices": [
         {
           "id": "norway-office",
-          "email": "",
+          "email": "scandinavia@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -816,7 +816,7 @@
       "offices": [
         {
           "id": "sweden-office",
-          "email": "",
+          "email": "scandinavia@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -944,7 +944,7 @@
       "offices": [
         {
           "id": "england-office",
-          "email": "",
+          "email": "uk@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -1096,7 +1096,7 @@
       "offices": [
         {
           "id": "ethiopia-office",
-          "email": "ethiopia@oboya.example",
+          "email": "ethiopia@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -1172,7 +1172,7 @@
       "offices": [
         {
           "id": "kenya-office",
-          "email": "",
+          "email": "kenya@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -1248,7 +1248,7 @@
       "offices": [
         {
           "id": "southAfrica-office",
-          "email": "",
+          "email": "oboya.sa@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -1608,7 +1608,7 @@
       "offices": [
         {
           "id": "india-office",
-          "email": "",
+          "email": "asia@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -1684,7 +1684,7 @@
       "offices": [
         {
           "id": "china-office",
-          "email": "china@oboya.example",
+          "email": "china@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -1760,7 +1760,7 @@
       "offices": [
         {
           "id": "hongKong-office",
-          "email": "",
+          "email": "asia@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -1888,7 +1888,7 @@
       "offices": [
         {
           "id": "singapore-office",
-          "email": "singapore@oboya.example",
+          "email": "asia@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
@@ -1964,7 +1964,7 @@
       "offices": [
         {
           "id": "netherlandsoboyaagritechthenetherlandsbv",
-          "email": "",
+          "email": "netherlands@oboya-horticulture.com",
           "showEmail": true,
           "showPhone": true,
           "translations": {
