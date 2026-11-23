@@ -46,7 +46,8 @@ export function AboutCallout({ data, locale }: AboutCalloutProps) {
         {leadWithPeriod ? (
           <h2
             id="about-callout-heading"
-            className="font-display text-[clamp(1.85rem,3.6vw,3.15rem)] font-light leading-[1.08] tracking-[-0.02em] text-oboya-blue-dark text-balance lg:col-span-5"
+            // Narrow enough to break as "More Than a / Supplier." (no balancing, which would split after "Than").
+            className="max-w-[7em] font-display text-[clamp(1.85rem,3.6vw,3.15rem)] font-light leading-[1.08] tracking-[-0.02em] text-oboya-blue-dark lg:col-span-5"
           >
             {leadWithPeriod}
           </h2>
