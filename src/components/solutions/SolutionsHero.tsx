@@ -114,7 +114,7 @@ export function SolutionsHero(props: SolutionsHeroProps) {
             className={cn(
               PAGE_INTRO_OFFSET_X,
               PAGE_INTRO_STRETCH_W,
-              "mt-5 font-body text-[clamp(0.875rem,1.15vw,1rem)] font-normal leading-[1.55] text-white md:mt-6 md:leading-[1.6]"
+              "mt-5 whitespace-pre-line font-body text-[clamp(0.875rem,1.15vw,1rem)] font-normal leading-[1.55] text-white md:mt-6 md:leading-[1.6]"
             )}
           >
             {props.body}
