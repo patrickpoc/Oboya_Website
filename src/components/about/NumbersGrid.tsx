@@ -60,7 +60,7 @@ export function NumbersGrid({
             >
               {value}
             </p>
-            <p className="px-6 text-center font-body text-base font-medium leading-tight md:text-lg">
+            <p className="px-6 text-center font-body text-base font-medium leading-tight text-oboya-blue-dark md:text-lg">
               {label}
             </p>
           </li>
