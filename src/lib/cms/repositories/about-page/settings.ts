@@ -15,7 +15,11 @@ import {
 } from "@/lib/cms/repositories/about-page/fallbacks";
 
 let cache: AboutPageSettings | null = null;
-const CONTENT_REVISION = 26;
+const CONTENT_REVISION = 27;
+
+/** Previous single-paragraph default of the callout body (English). */
+const LEGACY_CALLOUT_SINGLE_PARAGRAPH =
+  "Many suppliers focus on individual categories. Oboya Horticulture takes a wider perspective. By offering solutions across multiple stages of the horticultural journey, we help customers improve efficiency, protect quality, optimize resources, and create long-term value throughout their operations.";
 let cacheRevision = 0;
 
 /** Ensure durable / legacy CMS docs have value images and Numbers stats. */
@@ -40,6 +44,8 @@ export function normalizeAboutPageSettings(
   const currentCalloutBody = settings.callout?.body?.en ?? "";
   const isLegacyCallout =
     !currentCalloutBody ||
+    // Previous default was a single paragraph; it is now split in two.
+    currentCalloutBody === LEGACY_CALLOUT_SINGLE_PARAGRAPH ||
     currentCalloutBody.includes("Most suppliers specialize") ||
     currentCalloutBody.includes("protect\nquality") ||
     !currentCalloutBody.includes("create long-term value throughout their operations");

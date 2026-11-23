@@ -83,3 +83,26 @@ describe("about page impact stats", () => {
     expect(ids(s)).toContain("clients");
   });
 });
+
+describe("about page callout body", () => {
+  const OLD_SINGLE =
+    "Many suppliers focus on individual categories. Oboya Horticulture takes a wider perspective. By offering solutions across multiple stages of the horticultural journey, we help customers improve efficiency, protect quality, optimize resources, and create long-term value throughout their operations.";
+
+  it("default body has two paragraphs", () => {
+    expect(defaultSettings().callout.body.en).toContain("wider perspective.\n\nBy offering");
+  });
+
+  it("upgrades the old single-paragraph default", () => {
+    const s = defaultSettings();
+    s.callout.body = { ...s.callout.body, en: OLD_SINGLE };
+    expect(normalizeAboutPageSettings(s).callout.body.en).toBe(defaultSettings().callout.body.en);
+  });
+
+  it("keeps an edited body", () => {
+    const s = defaultSettings();
+    const edited =
+      "We create long-term value throughout their operations with a custom intro written in the admin.";
+    s.callout.body = { ...s.callout.body, en: edited };
+    expect(normalizeAboutPageSettings(s).callout.body.en).toBe(edited);
+  });
+});

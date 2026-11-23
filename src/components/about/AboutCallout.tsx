@@ -20,11 +20,15 @@ export function AboutCallout({ data, locale }: AboutCalloutProps) {
     .trim();
   const leadWithPeriod =
     lead && !/[.!?…]$/.test(lead) ? `${lead}.` : lead;
-  const body = data.body
-    ? pickLocalized(data.body, locale).replace(/\s*\n\s*/g, " ").trim()
-    : "";
+  // A blank line in the CMS text starts a new paragraph; single line breaks are joined.
+  const paragraphs = data.body
+    ? pickLocalized(data.body, locale)
+        .split(/\n\s*\n/)
+        .map((part) => part.replace(/\s*\n\s*/g, " ").trim())
+        .filter(Boolean)
+    : [];
 
-  if (!leadWithPeriod && !body) return null;
+  if (!leadWithPeriod && paragraphs.length === 0) return null;
 
   return (
     <section
@@ -47,15 +51,17 @@ export function AboutCallout({ data, locale }: AboutCalloutProps) {
             {leadWithPeriod}
           </h2>
         ) : null}
-        {body ? (
-          <p
+        {paragraphs.length ? (
+          <div
             className={cn(
-              "font-body text-[0.9375rem] leading-[1.6] text-oboya-blue-dark/80 text-pretty lg:col-span-7",
+              "space-y-4 font-body text-[0.9375rem] leading-[1.6] text-oboya-blue-dark/80 text-pretty lg:col-span-7",
               leadWithPeriod && "lg:col-start-6"
             )}
           >
-            {body}
-          </p>
+            {paragraphs.map((paragraph, i) => (
+              <p key={i}>{paragraph}</p>
+            ))}
+          </div>
         ) : null}
       </motion.div>
     </section>

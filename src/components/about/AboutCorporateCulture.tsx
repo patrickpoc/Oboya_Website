@@ -138,7 +138,7 @@ export function AboutCorporateCulture({
                       </p>
                       <Link
                         href={href}
-                        className="group mt-5 inline-flex w-fit items-center gap-1.5 font-body text-[0.9375rem] font-medium text-white underline decoration-1 decoration-white/70 underline-offset-[0.35em] transition-colors hover:text-oboya-green hover:decoration-oboya-green"
+                        className="group mt-5 inline-flex w-fit items-center gap-1.5 font-body text-[0.9375rem] font-medium text-oboya-green underline decoration-1 decoration-oboya-green/70 underline-offset-[0.35em] transition-colors hover:text-oboya-green-light hover:decoration-oboya-green-light"
                       >
                         {ctaLabel}
                         <ArrowRight
