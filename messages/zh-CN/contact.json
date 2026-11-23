@@ -59,11 +59,19 @@
       "asia": "亚洲"
     }
   },
+  "sent": {
+    "eyebrow": "消息已发送",
+    "title": "您的消息已在途中。",
+    "again": "再发送一条消息",
+    "home": "返回首页"
+  },
   "thanks": {
+    "eyebrow": "消息已发送",
     "title": "感谢您的联系！",
     "body": "我们的团队将很快与您联系。",
     "follow": "您已经关注我们了吗？",
     "instagram": "Instagram",
-    "linkedin": "LinkedIn"
+    "linkedin": "LinkedIn",
+    "close": "关闭"
   }
 }

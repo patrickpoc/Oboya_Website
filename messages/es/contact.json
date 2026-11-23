@@ -59,11 +59,19 @@
       "asia": "Asia"
     }
   },
+  "sent": {
+    "eyebrow": "Mensaje enviado",
+    "title": "Su mensaje está en camino.",
+    "again": "Enviar otro mensaje",
+    "home": "Volver al inicio"
+  },
   "thanks": {
+    "eyebrow": "Mensaje enviado",
     "title": "¡Gracias por contactarnos!",
     "body": "Nuestro equipo le responderá en breve.",
     "follow": "¿Ya nos sigue?",
     "instagram": "Instagram",
-    "linkedin": "LinkedIn"
+    "linkedin": "LinkedIn",
+    "close": "Cerrar"
   }
 }

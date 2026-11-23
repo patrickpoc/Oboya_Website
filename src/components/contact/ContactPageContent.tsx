@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
+import { Check, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   CharCount,
@@ -38,6 +40,13 @@ export function ContactPageContent({ team = [] }: { team?: ContactPerson[] }) {
   const formHeadingRef = useRef<HTMLHeadingElement>(null);
   const focusFormRef = useRef(false);
   const [submitted, setSubmitted] = useState(false);
+  const sentRef = useRef<HTMLDivElement>(null);
+  // The sent state is much shorter than the form: bring it into view after a successful submit.
+  useEffect(() => {
+    if (!submitted) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    sentRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  }, [submitted]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [countryCode, setCountryCode] = useState("");
@@ -66,6 +75,16 @@ export function ContactPageContent({ team = [] }: { team?: ContactPerson[] }) {
       formHeadingRef.current?.focus({ preventScroll: true });
     }
   }, [step]);
+
+  const resetForm = useCallback(() => {
+    setSubmitted(false);
+    setError(null);
+    setSubject("");
+    setMessage("");
+    setPhoneLocal("");
+    setPrivacyAccepted(false);
+    setMarketingOptIn(false);
+  }, []);
 
   const startRequest = useCallback(() => {
     focusFormRef.current = true;
@@ -191,9 +210,61 @@ export function ContactPageContent({ team = [] }: { team?: ContactPerson[] }) {
 
             <div className="px-8 py-10 md:px-12 md:py-12">
               {submitted ? (
-                <p className="rounded-xl border border-oboya-green/30 bg-oboya-green/5 px-5 py-4 text-sm text-oboya-blue-dark">
-                  {t("success")}
-                </p>
+                <div
+                  ref={sentRef}
+                  role="status"
+                  className="flex scroll-mt-28 flex-col overflow-hidden rounded-sm border border-oboya-blue-dark/10 bg-white"
+                >
+                  <div className="relative h-36 sm:h-44">
+                    <Image
+                      src="/assets/homepage/wheel-growing.jpg"
+                      alt=""
+                      fill
+                      sizes="(min-width: 768px) 60vw, 100vw"
+                      className="object-cover object-[50%_35%]"
+                    />
+                    <div
+                      aria-hidden
+                      className="absolute inset-0 bg-gradient-to-t from-oboya-blue-dark/70 to-oboya-blue-dark/10"
+                    />
+                    <span
+                      aria-hidden
+                      className="absolute bottom-5 left-6 flex size-10 items-center justify-center rounded-full bg-oboya-green text-white sm:left-10"
+                    >
+                      <Check className="size-5" strokeWidth={2.5} />
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-5 px-6 py-8 text-oboya-blue-dark sm:px-10 sm:py-10">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-oboya-green">
+                      {t("sent.eyebrow")}
+                    </p>
+                    <h3 className="font-display text-[length:clamp(1.5rem,2.4vw,1.875rem)] font-light leading-[1.2]">
+                      {t("sent.title")}
+                    </h3>
+                    <span aria-hidden className="h-0.5 w-12 bg-oboya-orange" />
+                    <p className="max-w-prose text-base leading-relaxed text-oboya-blue-dark/80">
+                      {t("success")}
+                    </p>
+                    <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center">
+                      <button
+                        type="button"
+                        onClick={resetForm}
+                        className="inline-flex min-h-11 items-center justify-center rounded-full border border-oboya-blue-dark px-6 text-sm font-semibold text-oboya-blue-dark transition-colors hover:bg-oboya-blue-dark hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oboya-blue-light"
+                      >
+                        {t("sent.again")}
+                      </button>
+                      <Link
+                        href="/"
+                        className="group inline-flex min-h-11 items-center gap-3 text-sm font-semibold text-oboya-blue-dark focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-oboya-blue-light"
+                      >
+                        <span className="flex size-8 items-center justify-center rounded-full border border-oboya-orange transition-colors group-hover:bg-oboya-orange group-hover:text-white">
+                          <ChevronRight className="size-4" aria-hidden />
+                        </span>
+                        {t("sent.home")}
+                      </Link>
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
                   <div className="grid gap-8 sm:grid-cols-2">
@@ -419,7 +490,7 @@ export function ContactPageContent({ team = [] }: { team?: ContactPerson[] }) {
   );
 }
 
-function LinkedInIcon({ className }: { className?: string }) {
+export function LinkedInIcon({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -432,7 +503,7 @@ function LinkedInIcon({ className }: { className?: string }) {
   );
 }
 
-function InstagramIcon({ className }: { className?: string }) {
+export function InstagramIcon({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
