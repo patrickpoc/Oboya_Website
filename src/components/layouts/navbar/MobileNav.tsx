@@ -76,7 +76,7 @@ export function MobileNavSheetContent({
     >
       <SheetTitle className="sr-only">{menuTitle}</SheetTitle>
       <div className="flex h-full min-h-0 flex-col bg-white">
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-14 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pt-20 md:pt-24 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8">
           <nav className="flex flex-col" aria-label={menuTitle}>
             {drawerItems.map((item) => (
               <MobileNavLink
@@ -108,23 +108,33 @@ export function HeroMenuButton({
   onOpenChange,
   mainNavigation,
   contactLabel,
+  tone = "light",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mainNavigation: NavItem[];
   contactLabel: string;
+  /** "light" = white outline (dark/transparent chrome); "dark" = blue-dark outline (light chrome). */
+  tone?: "light" | "dark";
 }) {
   const t = useTranslations();
+  const onLight = tone === "dark";
+  const bar = onLight ? "bg-oboya-blue-dark" : "bg-white";
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger
-        className="inline-flex size-10 items-center justify-center rounded-md border border-white/80 text-white transition-colors hover:bg-white/10"
+        className={cn(
+          "inline-flex size-10 shrink-0 items-center justify-center rounded-md border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2",
+          onLight
+            ? "border-oboya-blue-dark/70 text-oboya-blue-dark hover:bg-oboya-blue-dark/5 focus-visible:outline-oboya-blue-dark"
+            : "border-white/80 text-white hover:bg-white/10 focus-visible:outline-white"
+        )}
         aria-label={t("nav.openMenu")}
       >
         <span className="flex w-4 flex-col gap-1.5" aria-hidden>
-          <span className="h-px w-full bg-white" />
-          <span className="h-px w-full bg-white" />
+          <span className={cn("h-px w-full", bar)} />
+          <span className={cn("h-px w-full", bar)} />
         </span>
       </SheetTrigger>
       <MobileNavSheetContent

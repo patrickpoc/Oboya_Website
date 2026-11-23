@@ -2,27 +2,20 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Logo } from "@/components/brand/Logo";
 import { buttonVariants } from "@/components/ui/button";
-import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { getMainNavigation } from "@/constants/navigation";
 import { Link } from "@/i18n/navigation";
 import { useScrollPosition } from "@/hooks/use-scroll-position";
 import { cn } from "@/lib/utils";
-import {
-  LanguageSwitcher,
-} from "@/components/layouts/navbar/NavLanguage";
+import { LanguageSwitcher } from "@/components/layouts/navbar/NavLanguage";
 import {
   usePastTransitionMarker,
   useStoryExitHandoff,
 } from "@/components/layouts/navbar/useNavChrome";
 import { NavDropdown } from "@/components/layouts/navbar/DesktopNav";
-import {
-  HeroMenuButton,
-  MobileNavSheetContent,
-} from "@/components/layouts/navbar/MobileNav";
+import { HeroMenuButton } from "@/components/layouts/navbar/MobileNav";
 
 interface NavbarProps {
   transparent?: boolean;
@@ -71,9 +64,22 @@ export function Navbar({
   const useLightChrome = isOverlay || isDarkSolid;
 
   const mainNavigation = getMainNavigation((key) => t(key));
-  const leftNav = mainNavigation.slice(0, 3);
-  const rightNav = mainNavigation.slice(3);
+  // Visible text links: Solutions · About | logo | FAQ · Shop. Everything else lives in the menu sheet.
+  const pick = (hrefs: string[]) =>
+    hrefs.flatMap((h) => mainNavigation.filter((item) => item.href === h));
+  const leftNav = pick(["/solutions", "/about"]);
+  const rightNav = pick(["/faqs", "/shop"]);
   const contactLabel = t("nav.contact");
+
+  const menuButton = (tone: "light" | "dark") => (
+    <HeroMenuButton
+      open={mobileOpen}
+      onOpenChange={setMobileOpen}
+      mainNavigation={mainNavigation}
+      contactLabel={contactLabel}
+      tone={tone}
+    />
+  );
 
   const lightSolidNav = (
     <motion.header
@@ -88,15 +94,18 @@ export function Navbar({
         className="grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-[var(--nav-padding-x)] md:h-20"
         aria-label={t("nav.mainNav")}
       >
-        <div className="hidden items-center gap-5 justify-self-start lg:flex xl:gap-8">
-          {leftNav.map((item) => (
-            <NavDropdown
-              key={item.href}
-              item={item}
-              light={false}
-              align="start"
-            />
-          ))}
+        <div className="flex items-center gap-5 justify-self-start xl:gap-8">
+          {menuButton("dark")}
+          <div className="hidden items-center gap-5 lg:flex xl:gap-8">
+            {leftNav.map((item) => (
+              <NavDropdown
+                key={item.href}
+                item={item}
+                light={false}
+                align="start"
+              />
+            ))}
+          </div>
         </div>
 
         <Logo
@@ -119,8 +128,7 @@ export function Navbar({
               href="/contact"
               className={buttonVariants({
                 size: "cta",
-                className:
-                  "bg-oboya-blue-dark text-white hover:bg-oboya-blue",
+                className: "bg-oboya-blue-dark text-white hover:bg-oboya-blue",
               })}
             >
               {contactLabel}
@@ -130,26 +138,6 @@ export function Navbar({
 
           <div className="flex items-center gap-1 sm:gap-2 lg:hidden">
             <LanguageSwitcher light={false} />
-            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-              <SheetTrigger
-                className={buttonVariants({
-                  variant: "ghost",
-                  size: "icon",
-                  className: "text-oboya-blue-dark",
-                })}
-                aria-label={t("nav.openMenu")}
-              >
-                <Menu className="size-5" />
-              </SheetTrigger>
-              <MobileNavSheetContent
-                side="right"
-                mainNavigation={mainNavigation}
-                contactLabel={contactLabel}
-                contactClassName="bg-oboya-blue-dark text-white hover:bg-oboya-blue"
-                onNavigate={() => setMobileOpen(false)}
-                menuTitle={t("nav.menuTitle")}
-              />
-            </Sheet>
           </div>
         </div>
       </nav>
@@ -174,15 +162,18 @@ export function Navbar({
                 className="grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-[var(--nav-padding-x)] md:h-20"
                 aria-label={t("nav.mainNav")}
               >
-                <div className="hidden items-center gap-5 justify-self-start lg:flex xl:gap-8">
-                  {leftNav.map((item) => (
-                    <NavDropdown
-                      key={item.href}
-                      item={item}
-                      light
-                      align="start"
-                    />
-                  ))}
+                <div className="flex items-center gap-5 justify-self-start xl:gap-8">
+                  {menuButton("light")}
+                  <div className="hidden items-center gap-5 lg:flex xl:gap-8">
+                    {leftNav.map((item) => (
+                      <NavDropdown
+                        key={item.href}
+                        item={item}
+                        light
+                        align="start"
+                      />
+                    ))}
+                  </div>
                 </div>
 
                 <Logo
@@ -217,26 +208,6 @@ export function Navbar({
 
                   <div className="flex items-center gap-1 sm:gap-2 lg:hidden">
                     <LanguageSwitcher light />
-                    <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-                      <SheetTrigger
-                        className={buttonVariants({
-                          variant: "ghost",
-                          size: "icon",
-                          className: "text-white hover:bg-white/10",
-                        })}
-                        aria-label={t("nav.openMenu")}
-                      >
-                        <Menu className="size-5" />
-                      </SheetTrigger>
-                      <MobileNavSheetContent
-                        side="right"
-                        mainNavigation={mainNavigation}
-                        contactLabel={contactLabel}
-                        contactClassName="bg-oboya-blue-dark text-white hover:bg-oboya-blue"
-                        onNavigate={() => setMobileOpen(false)}
-                        menuTitle={t("nav.menuTitle")}
-                      />
-                    </Sheet>
                   </div>
                 </div>
               </nav>
@@ -303,9 +274,7 @@ export function Navbar({
         </AnimatePresence>
 
         {/* Image 2 — light bar; exits upward when returning to hero */}
-        <AnimatePresence>
-          {showSolidHome && lightSolidNav}
-        </AnimatePresence>
+        <AnimatePresence>{showSolidHome && lightSolidNav}</AnimatePresence>
       </>
     );
   }
@@ -321,22 +290,25 @@ export function Navbar({
             : "border-b border-border/60 bg-white/95 shadow-[var(--shadow-nav)] backdrop-blur-md"
           : persistTransparent
             ? "border-b border-transparent bg-transparent"
-            : "border-b border-white/12 bg-oboya-blue-dark/40 shadow-[0_4px_30px_rgb(1_32_63/20%)] backdrop-blur-2xl backdrop-saturate-150"
+            : "border-b border-white/12 bg-oboya-blue-dark/40 shadow-[0_4px_30px_rgb(1_32_63/20%)] backdrop-blur-2xl backdrop-saturate-150",
       )}
     >
       <nav
         className="grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-[var(--nav-padding-x)] md:h-20"
         aria-label={t("nav.mainNav")}
       >
-        <div className="hidden items-center gap-5 justify-self-start lg:flex xl:gap-8">
-          {leftNav.map((item) => (
-            <NavDropdown
-              key={item.href}
-              item={item}
-              light={useLightChrome}
-              align="start"
-            />
-          ))}
+        <div className="flex items-center gap-5 justify-self-start xl:gap-8">
+          {menuButton(useLightChrome ? "light" : "dark")}
+          <div className="hidden items-center gap-5 lg:flex xl:gap-8">
+            {leftNav.map((item) => (
+              <NavDropdown
+                key={item.href}
+                item={item}
+                light={useLightChrome}
+                align="start"
+              />
+            ))}
+          </div>
         </div>
 
         <Logo
@@ -368,31 +340,8 @@ export function Navbar({
 
         <div className="col-start-3 flex items-center justify-end gap-1 sm:gap-2 lg:hidden">
           <LanguageSwitcher light={useLightChrome} />
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger
-              className={buttonVariants({
-                variant: "ghost",
-                size: "icon",
-                className: cn(
-                  useLightChrome && "text-white hover:bg-white/10 hover:text-white"
-                ),
-              })}
-              aria-label={t("nav.openMenu")}
-            >
-              <Menu className="size-5" />
-            </SheetTrigger>
-            <MobileNavSheetContent
-              side="right"
-              mainNavigation={mainNavigation}
-              contactLabel={contactLabel}
-              contactClassName="bg-oboya-green text-white hover:bg-oboya-green/90"
-              onNavigate={() => setMobileOpen(false)}
-              menuTitle={t("nav.menuTitle")}
-            />
-          </Sheet>
         </div>
       </nav>
     </header>
   );
 }
-
