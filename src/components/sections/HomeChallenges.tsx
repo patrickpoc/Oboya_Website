@@ -112,7 +112,7 @@ export function HomeChallenges({
     <section className="relative overflow-hidden bg-oboya-soft-white">
       <div
         ref={frameRef}
-        className="relative aspect-[4/5] w-full sm:aspect-[1440/819]"
+        className="relative aspect-[4/5] w-full sm:aspect-auto sm:h-[clamp(520px,46vw,680px)]"
       >
         <Image
           src={data.image}
