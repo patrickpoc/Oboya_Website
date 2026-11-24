@@ -5,6 +5,7 @@ import type {
   ImportValidationIssue,
   ImportWorkspaceRow,
 } from "@/lib/cms/bulk-import/types";
+import { PRODUCT_BOOST_MAX, PRODUCT_BOOST_MIN } from "@/lib/shop/boost";
 import { imageUrlProblem } from "@/lib/cms/bulk-import/images";
 import { IMPORT_FIELD_LABELS } from "@/lib/cms/bulk-import/types";
 
@@ -108,6 +109,18 @@ function validateRow(
       "blocked",
       "MOQ must be an integer ≥ 1.",
       "Enter a valid MOQ."
+    );
+  }
+
+  const boost = Number(product.boost ?? 0);
+  if (!Number.isInteger(boost) || boost < PRODUCT_BOOST_MIN || boost > PRODUCT_BOOST_MAX) {
+    pushIssue(
+      issues,
+      row,
+      "boost",
+      "blocked",
+      `Boost must be a whole number from ${PRODUCT_BOOST_MIN} to ${PRODUCT_BOOST_MAX}.`,
+      "Enter a valid boost (0 keeps the normal order)."
     );
   }
 

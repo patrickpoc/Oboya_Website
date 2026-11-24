@@ -2,6 +2,7 @@ import "server-only";
 
 import path from "node:path";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
+import { normalizeBoost } from "@/lib/shop/boost";
 import { normalizeColorVariants, normalizeImageColorIds, normalizeLocalizedColorName } from "@/lib/shop/color-variants";
 import { ALL_PRODUCTS_TAG, CATALOG_TAG } from "@/lib/cms/cache-tags";
 export const PRODUCTS_FILE = path.join(process.cwd(), "data", "shop", "products.json");
@@ -26,6 +27,7 @@ export type ProductRow = {
   country_of_origin: string;
   stock_status: CmsProduct["stockStatus"];
   sale_mode?: unknown;
+  boost?: unknown;
   stock_quantity: number | null;
   unlimited_stock: boolean;
   specs: unknown;
@@ -83,6 +85,7 @@ export function rowToProduct(row: ProductRow): CmsProduct {
     countryOfOrigin: row.country_of_origin ?? "",
     stockStatus: row.stock_status ?? "in_stock",
     saleMode: row.sale_mode === "quote" ? "quote" : "stock",
+    boost: normalizeBoost(row.boost),
     stockQuantity: row.stock_quantity,
     unlimitedStock: row.unlimited_stock ?? true,
     specs: parseArray<CmsProduct["specs"][number]>(row.specs),
@@ -122,7 +125,8 @@ export function rowToProduct(row: ProductRow): CmsProduct {
  */
 export const FEATURED_COLOR_COLUMN = "featured_color_id";
 export const SALE_MODE_COLUMN = "sale_mode";
-const OPTIONAL_COLUMNS = [FEATURED_COLOR_COLUMN, SALE_MODE_COLUMN];
+export const BOOST_COLUMN = "boost";
+const OPTIONAL_COLUMNS = [FEATURED_COLOR_COLUMN, SALE_MODE_COLUMN, BOOST_COLUMN];
 export const OPTIONAL_COLUMN_RETRIES = OPTIONAL_COLUMNS.length;
 const disabledOptionalColumns = new Set<string>();
 
@@ -134,7 +138,8 @@ function missingOptionalColumn(
   if (!missingColumn) return undefined;
   return OPTIONAL_COLUMNS.find(
     (column) =>
-      !disabledOptionalColumns.has(column) && String(error.message ?? "").includes(column)
+      !disabledOptionalColumns.has(column) &&
+      new RegExp(`(?<![A-Za-z0-9_])${column}(?![A-Za-z0-9_])`).test(String(error.message ?? ""))
   );
 }
 
@@ -167,6 +172,13 @@ export function productToRow(product: CmsProduct): ProductRow {
       { status: 503 }
     );
   }
+  if (normalizeBoost(product.boost) > 0 && disabledOptionalColumns.has(BOOST_COLUMN)) {
+    // Fail closed: dropping boost would silently lose the merchandising setting.
+    throw Object.assign(
+      new Error("Apply migration 20261124_cms_products_boost first"),
+      { status: 503 }
+    );
+  }
   const row = productToRowWithFeatured(product);
   for (const column of disabledOptionalColumns) {
     delete (row as Record<string, unknown>)[column];
@@ -196,6 +208,7 @@ export function productToRowWithFeatured(product: CmsProduct): ProductRow {
     country_of_origin: product.countryOfOrigin ?? "",
     stock_status: product.stockStatus,
     sale_mode: product.saleMode === "quote" ? "quote" : "stock",
+    boost: normalizeBoost(product.boost),
     stock_quantity: product.stockQuantity,
     unlimited_stock: product.unlimitedStock,
     specs: product.specs ?? [],
@@ -233,6 +246,7 @@ export const PRODUCT_TABLE_COLUMNS = [
   "status",
   "stock_status",
   "sale_mode",
+  BOOST_COLUMN,
   "stock_quantity",
   "unlimited_stock",
   "deleted_at",
@@ -260,6 +274,7 @@ export const PRODUCT_LIST_COLUMNS = [
   "country_of_origin",
   "stock_status",
   "sale_mode",
+  BOOST_COLUMN,
   "stock_quantity",
   "unlimited_stock",
   "specs",

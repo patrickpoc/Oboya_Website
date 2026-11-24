@@ -470,6 +470,10 @@
             "meaning": "stock sells from stock at a fixed price; quote means on request (RFQ). Also accepted: in stock, on request, request, rfq. Blank means stock. Any other value becomes stock and raises an error.",
             "example": "stock"
           },
+          "boost": {
+            "meaning": "Listing boost: a whole number from 0 to 100. Higher values show the product earlier in the shop's default order. Blank means 0. An invalid value becomes 0 and raises an error.",
+            "example": "0"
+          },
           "status": {
             "meaning": "draft or published (yes/no, true/false, 1/0 and on/off also work). archived is accepted too. Blank means draft. An unrecognised value silently becomes draft.",
             "example": "draft"
@@ -602,6 +606,9 @@
       "priceHint": "Currencies configured in Marketplace → Currencies. Empty or 0 hides the product in that currency.",
       "loadingCurrencies": "Loading currencies…",
       "saleMode": "Sale mode",
+      "boost": "Listing boost",
+      "boostHint": "0 to 100. Higher values show the product earlier in the shop's default order. 0 keeps the normal order.",
+      "boostInvalid": "Use a whole number from 0 to 100.",
       "saleModeHint": "In stock products show a price. On request products never show a price.",
       "saleModeStock": "In stock",
       "saleModeQuote": "On request (RFQ)",
@@ -851,6 +858,7 @@
       "removeProduct": "Remove {sku}",
       "saleModeStock": "In stock",
       "saleModeQuote": "On request (RFQ)",
+      "boostHint": "Listing boost, 0 to 100. Higher values show the product earlier in the shop. 0 keeps the normal order.",
       "priceDisabledOnRequest": "Products on request never show a price.",
       "noOptions": "No options",
       "updating": "Updating products…",
@@ -954,6 +962,10 @@
           "saleMode": {
             "meaning": "Parent rows only. stock (or In stock) sells at a fixed price; quote (or On request, RFQ) means price on request.",
             "example": "stock"
+          },
+          "boost": {
+            "meaning": "Parent rows only. Listing boost: a whole number from 0 to 100. Higher values show the product earlier in the shop's default order. Blank keeps the current value; an invalid value raises an error.",
+            "example": "50"
           },
           "priceUSD": {
             "meaning": "Price in US dollars, numbers only, no thousands separators. On a parent row it is the product price; on a color row it is that color's price (Variant price USD wins if both are filled).",

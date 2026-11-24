@@ -2,6 +2,7 @@ import * as XLSX from "xlsx";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { CmsStatus } from "@/lib/cms/types";
 import type { SaleMode } from "@/lib/shop/types";
+import { PRODUCT_BOOST_MAX, PRODUCT_BOOST_MIN, parseBoostInput } from "@/lib/shop/boost";
 import { buildSkuIndex, resolveSku } from "@/lib/cms/admin-sku-lookup";
 import {
   applyPatchToProduct,
@@ -313,6 +314,21 @@ function parseRowToPatch(
         });
       } else {
         patch.saleMode = saleMode;
+      }
+    }
+
+    const boostRaw = cells["Boost"]?.trim();
+    if (boostRaw) {
+      const boost = parseBoostInput(boostRaw);
+      if (boost === null || Number.isNaN(boost)) {
+        errors.push({
+          row: rowNumber,
+          sku,
+          message: `Invalid Boost value "${boostRaw}".`,
+          suggestedAction: `Use a whole number from ${PRODUCT_BOOST_MIN} to ${PRODUCT_BOOST_MAX}.`,
+        });
+      } else {
+        patch.boost = boost;
       }
     }
 
@@ -716,6 +732,7 @@ const TEMPLATE_SAMPLE: Partial<Record<BulkSpreadsheetHeader, string>> = {
   "Market availability": "BR;US",
   "Available in Shop": "yes",
   "Sale mode": "stock",
+  Boost: "0",
   "Price USD": "10",
 };
 

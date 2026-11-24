@@ -146,3 +146,20 @@ describe("legacy sheets", () => {
     expect(rows).toHaveLength(1);
   });
 });
+
+describe("boost column", () => {
+  const base = { sku: "A", name_en: "N", categoryId: "cat-1" };
+  it("defaults to 0, parses valid values and flags invalid ones", () => {
+    expect(build([base]).rows[0]!.pending.boost).toBe(0);
+    expect(build([{ ...base, boost: "20" }]).rows[0]!.pending.boost).toBe(20);
+    const bad = build([{ ...base, boost: "abc" }]);
+    expect(bad.rows[0]!.pending.boost).toBe(0);
+    expect(bad.errors[0]?.message).toMatch(/Invalid boost/);
+    expect(build([{ ...base, boost: "101" }]).errors).toHaveLength(1);
+  });
+  it("accepts the alias and appears in the template", () => {
+    const parsed = sheet([["sku", "name_en", "Listing boost"], ["A", "N", "7"]]);
+    expect(parsed.records[0]!.boost).toBe("7");
+    expect(buildImportTemplateRows().headers).toContain("boost");
+  });
+});

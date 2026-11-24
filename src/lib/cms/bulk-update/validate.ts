@@ -15,6 +15,7 @@ import type {
   BulkWorkspaceRow,
 } from "@/lib/cms/bulk-update/types";
 import { imageUrlProblem } from "@/lib/cms/bulk-import/images";
+import { PRODUCT_BOOST_MAX, PRODUCT_BOOST_MIN } from "@/lib/shop/boost";
 import { validateColorVariants } from "@/lib/shop/color-variants";
 import { isAllowlistedImageSrc } from "@/lib/shop/image-host";
 
@@ -96,6 +97,20 @@ function validateParentRow(
         "blocked",
         "MOQ must be an integer greater than or equal to 1.",
         "Enter a valid MOQ (e.g. 1, 10, 100)."
+      );
+    }
+  }
+
+  if (changed.has("boost")) {
+    const boost = Number(product.boost);
+    if (!Number.isInteger(boost) || boost < PRODUCT_BOOST_MIN || boost > PRODUCT_BOOST_MAX) {
+      pushIssue(
+        issues,
+        row,
+        "boost",
+        "blocked",
+        `Boost must be a whole number from ${PRODUCT_BOOST_MIN} to ${PRODUCT_BOOST_MAX}.`,
+        "Enter a valid boost (0 keeps the normal order)."
       );
     }
   }

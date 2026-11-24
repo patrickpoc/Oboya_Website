@@ -3,6 +3,7 @@ import type { BulkUpdateCatalog } from "@/lib/cms/bulk-update/types";
 import type { BulkEditableField } from "@/lib/cms/bulk-update/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import { formatFieldValue } from "@/lib/cms/bulk-update/diff";
+import { normalizeBoost } from "@/lib/shop/boost";
 import { formatPriceInput } from "@/lib/cms/parse-price";
 
 export type LabeledOption = { id: string; name: string };
@@ -207,6 +208,8 @@ export function formatFieldDisplayValue(
       return product.status === "published" ? "Yes" : "No";
     case "saleMode":
       return product.saleMode === "quote" ? "On request (RFQ)" : "In stock";
+    case "boost":
+      return String(normalizeBoost(product.boost));
     case "priceUsd":
       return formatPriceInput(product.prices?.USD, "USD");
     case "priceBrl":

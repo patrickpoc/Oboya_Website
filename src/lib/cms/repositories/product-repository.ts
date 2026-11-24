@@ -1,3 +1,4 @@
+import { normalizeBoost } from "@/lib/shop/boost";
 import { normalizeProductTag } from "@/lib/shop/product-tags";
 import {
   normalizeColorVariants,
@@ -45,6 +46,7 @@ function withDefaults(p: ShopProduct): CmsProduct {
     moq,
     enabledCountries: p.enabledCountries ?? { ...p.availability },
     saleMode: p.saleMode === "quote" ? "quote" : "stock",
+    boost: normalizeBoost(p.boost),
     stockQuantity: p.stockQuantity ?? null,
     unlimitedStock: p.unlimitedStock ?? true,
     images: Array.isArray(p.images) && p.images.length > 0 ? p.images : [""],

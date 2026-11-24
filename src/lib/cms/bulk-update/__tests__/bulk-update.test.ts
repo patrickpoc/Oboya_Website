@@ -433,3 +433,50 @@ describe("sale mode", () => {
     expect(stockIssues.some((i) => /positive price/.test(i.message))).toBe(true);
   });
 });
+
+describe("boost", () => {
+  const product = makeProduct({ id: "1", sku: "SKU-001", status: "published" });
+  const merge = (value: string | undefined) =>
+    mergeSpreadsheetIntoWorkspace({
+      records: [{ SKU: "SKU-001", ...(value === undefined ? {} : { Boost: value }) }],
+      productsBySku: new Map([["sku-001", product]]),
+      existingRows: [],
+      catalog,
+    });
+
+  it("parses a valid Boost into the pending product", () => {
+    const result = merge("50");
+    expect(result.errors).toEqual([]);
+    expect(result.rows.find((r) => r.kind === "parent")?.pending.boost).toBe(50);
+  });
+
+  it("keeps the current value when the cell is empty", () => {
+    const result = merge("");
+    expect(result.errors).toEqual([]);
+    expect(result.rows.find((r) => r.kind === "parent")?.pending.boost ?? 0).toBe(0);
+  });
+
+  it.each(["abc", "150", "-1", "1.5"])("reports invalid Boost %s", (value) => {
+    expect(merge(value).errors[0]?.message).toMatch(/Invalid Boost/);
+  });
+
+  it("detects a boost-only change without touching other fields", () => {
+    const pending = applyPatchToProduct(product, { boost: 30 });
+    expect(getChangedFields(product, pending)).toEqual(["boost"]);
+    expect(pending.description).toEqual(product.description);
+  });
+
+  it("blocks an out-of-range boost in validation", () => {
+    const row = createWorkspaceRow(product);
+    row.pending = applyPatchToProduct(row.pending, { boost: 30 });
+    row.changedFields = getChangedFields(row.original, row.pending);
+    expect(
+      validateBulkUpdate([row], catalog).filter((i) => i.field === "boost")
+    ).toEqual([]);
+    row.pending = { ...row.pending, boost: 150 };
+    row.changedFields = getChangedFields(row.original, row.pending);
+    expect(
+      validateBulkUpdate([row], catalog).some((i) => i.field === "boost" && i.status === "blocked")
+    ).toBe(true);
+  });
+});

@@ -28,6 +28,7 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<CmsProduct | null>(null);
   const [baseline, setBaseline] = useState("");
   const [loading, setLoading] = useState(true);
+  const [boostValid, setBoostValid] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
   const notifyPending = usePendingApprovalNotice();
 
@@ -78,6 +79,10 @@ export default function ProductDetailPage() {
   }
 
   const handleSave = () => {
+    if (!boostValid) {
+      toast.error(t("editor.boostInvalid"));
+      return;
+    }
     const variantError = validateColorVariants(product.colorVariants, {
       defaultColor: product.defaultColor,
       defaultColorName: product.defaultColorName,
@@ -131,6 +136,7 @@ export default function ProductDetailPage() {
       <ProductEditorForm
         product={product}
         onChange={(updater) => setProduct((current) => (current ? updater(current) : current))}
+        onBoostValidityChange={setBoostValid}
       />
 
       <AdminPageFooterActions dirty={JSON.stringify(product) !== baseline}>

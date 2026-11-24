@@ -11,6 +11,7 @@ import { compactImages, withAlignedImages } from "@/lib/cms/bulk-import/images";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { CmsStatus } from "@/lib/cms/types";
 import { parseSaleMode } from "@/lib/cms/bulk-update/spreadsheet";
+import { PRODUCT_BOOST_MAX, PRODUCT_BOOST_MIN, parseBoostInput } from "@/lib/shop/boost";
 import { parsePriceInput, type PriceCurrencyHint } from "@/lib/cms/parse-price";
 
 export const IMPORT_SPREADSHEET_HEADERS = [
@@ -28,6 +29,7 @@ export const IMPORT_SPREADSHEET_HEADERS = [
   "stock_quantity",
   "unlimited_stock",
   "sale_mode",
+  "boost",
   "status",
   "main_image",
   "image_2",
@@ -77,6 +79,8 @@ const HEADER_ALIASES: Record<string, ImportSpreadsheetHeader> = {
   sale_mode: "sale_mode",
   salemode: "sale_mode",
   "sale mode": "sale_mode",
+  boost: "boost",
+  "listing boost": "boost",
   status: "status",
   shop: "status",
   main_image: "main_image",
@@ -296,6 +300,17 @@ function rowToProduct(
       suggestedAction: "Use stock or quote.",
     });
   }
+  const boostRaw = cells.boost?.trim() ?? "";
+  const parsedBoost = parseBoostInput(boostRaw);
+  const boost = parsedBoost === null || Number.isNaN(parsedBoost) ? 0 : parsedBoost;
+  if (boostRaw && Number.isNaN(parsedBoost)) {
+    errors.push({
+      row: rowNumber,
+      sku,
+      message: `Invalid boost "${boostRaw}".`,
+      suggestedAction: `Use a whole number from ${PRODUCT_BOOST_MIN} to ${PRODUCT_BOOST_MAX}.`,
+    });
+  }
   const moqRaw = cells.moq?.trim();
   let moq = 1;
   if (moqRaw) {
@@ -326,6 +341,7 @@ function rowToProduct(
     moq,
     status,
     saleMode,
+    boost,
     name: {
       en: cells.name_en ?? "",
       "pt-BR": cells.name_ptBR ?? "",
@@ -411,6 +427,7 @@ const TEMPLATE_SAMPLE: Record<ImportSpreadsheetHeader, string> = {
   stock_quantity: "10",
   unlimited_stock: "0",
   sale_mode: "stock",
+  boost: "0",
   status: "draft",
   main_image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?q=80&w=800",
   image_2: "",

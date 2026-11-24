@@ -21,6 +21,7 @@ export const BULK_PARENT_TAXONOMY_FIELDS = [
   "enabledCountries",
   "status",
   "saleMode",
+  "boost",
 ] as const;
 
 export const BULK_PARENT_PRICE_FIELDS = [
@@ -90,6 +91,7 @@ export type BulkProductPatch = Partial<{
   enabledCountries: Record<string, boolean>;
   status: CmsStatus;
   saleMode: SaleMode;
+  boost: number;
   priceUsd: number | null;
   priceBrl: number | null;
   priceEur: number | null;

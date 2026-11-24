@@ -22,6 +22,7 @@ import {
 import { BULK_FIELD_LABELS } from "@/lib/cms/bulk-update/field-labels";
 import { displayProductName } from "@/lib/cms/bulk-update/search-products";
 import { issuesForProduct } from "@/lib/cms/bulk-update/validate";
+import { PRODUCT_BOOST_MAX, PRODUCT_BOOST_MIN } from "@/lib/shop/boost";
 import type {
   BulkEditableField,
   BulkProductPatch,
@@ -339,6 +340,12 @@ export function BulkProductTable({
               </th>
               <th className={cn(TH, "min-w-[8rem] border-b border-border/60")}>
                 {BULK_FIELD_LABELS.saleMode}
+              </th>
+              <th
+                className={cn(TH, "min-w-[5rem] border-b border-border/60")}
+                title={t("boostHint")}
+              >
+                {BULK_FIELD_LABELS.boost}
               </th>
               <th className={cn(TH, "min-w-[11rem] border-b border-border/60")}>USD</th>
               <th className={cn(TH, "min-w-[11rem] border-b border-border/60")}>BRL</th>
@@ -843,6 +850,35 @@ export function BulkProductTable({
                           <option value="stock">{t("saleModeStock")}</option>
                           <option value="quote">{t("saleModeQuote")}</option>
                         </select>
+                      </CellShell>
+                    ) : (
+                      <DimmedDash />
+                    )}
+                  </td>
+                  <td className={TD}>
+                    {isParent ? (
+                      <CellShell
+                        field="boost"
+                        row={row}
+                        catalog={catalog}
+                        locale={locale}
+                        issues={issues}
+                        className={FIELD_CELL_SHELL}
+                      >
+                        <Input
+                          type="number"
+                          min={PRODUCT_BOOST_MIN}
+                          max={PRODUCT_BOOST_MAX}
+                          step={1}
+                          className={cn(CONTROL, "min-w-[5rem]")}
+                          value={product.boost ? product.boost : ""}
+                          placeholder="0"
+                          onChange={(event) =>
+                            onPatch(row.productId, {
+                              boost: event.target.value === "" ? 0 : Number(event.target.value),
+                            })
+                          }
+                        />
                       </CellShell>
                     ) : (
                       <DimmedDash />

@@ -22,6 +22,8 @@ interface ProductEditorFormProps {
    * rendered `product` loses edits made meanwhile (e.g. typing while an image uploads).
    */
   onChange: (updater: (current: CmsProduct) => CmsProduct) => void;
+  /** Reports whether the boost input holds a savable value. */
+  onBoostValidityChange?: (valid: boolean) => void;
 }
 
 export function createEmptyCmsProduct(seed?: {
@@ -47,6 +49,7 @@ export function createEmptyCmsProduct(seed?: {
     certifications: [],
     countryOfOrigin: "",
     saleMode: "stock",
+    boost: 0,
     stockStatus: "in_stock",
     stockQuantity: null,
     unlimitedStock: true,
@@ -70,7 +73,11 @@ export function createEmptyCmsProduct(seed?: {
   };
 }
 
-export function ProductEditorForm({ product, onChange }: ProductEditorFormProps) {
+export function ProductEditorForm({
+  product,
+  onChange,
+  onBoostValidityChange,
+}: ProductEditorFormProps) {
   const { catalog, currencies, loading: catalogLoading } = useAdminMarketplaceCatalog();
 
   const update = (patch: ProductPatch) =>
@@ -86,6 +93,7 @@ export function ProductEditorForm({ product, onChange }: ProductEditorFormProps)
         currencies={currencies}
         currenciesLoading={catalogLoading}
         onUpdate={update}
+        onBoostValidityChange={onBoostValidityChange}
       />
 
       <ProductColorVariantsCard

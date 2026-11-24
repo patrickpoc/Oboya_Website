@@ -10,6 +10,7 @@ import {
   type BulkSkuRowKind,
   type BulkWorkspaceRow,
 } from "@/lib/cms/bulk-update/types";
+import { normalizeBoost } from "@/lib/shop/boost";
 import type { ProductColorVariant } from "@/lib/shop/types";
 import { normalizeColorVariants, normalizeLocalizedColorName } from "@/lib/shop/color-variants";
 
@@ -98,6 +99,8 @@ export function isBulkFieldEqual(
       return original.status === pending.status;
     case "saleMode":
       return (original.saleMode ?? "stock") === (pending.saleMode ?? "stock");
+    case "boost":
+      return normalizeBoost(original.boost) === Number(pending.boost ?? 0);
     case "priceUsd":
       return priceValue(original.prices, "USD") === priceValue(pending.prices, "USD");
     case "priceBrl":
@@ -304,6 +307,7 @@ export function applyPatchToProduct(
   }
   if (patch.status !== undefined) next.status = patch.status;
   if (patch.saleMode !== undefined) next.saleMode = patch.saleMode;
+  if (patch.boost !== undefined) next.boost = patch.boost;
   if (patch.priceUsd !== undefined) {
     next.prices = setCurrencyPrice(next.prices, "USD", patch.priceUsd);
   }
@@ -388,6 +392,9 @@ export function buildPatchFromPending(
       case "saleMode":
         patch.saleMode = pending.saleMode ?? "stock";
         break;
+      case "boost":
+        patch.boost = Number(pending.boost ?? 0);
+        break;
       case "priceUsd":
         patch.priceUsd = pending.prices?.USD ?? null;
         break;
@@ -441,6 +448,7 @@ export function normalizeProductForBulk(product: CmsProduct): CmsProduct {
     availability: { ...enabledCountries },
     status: product.status ?? "draft",
     saleMode: product.saleMode === "quote" ? "quote" : "stock",
+    boost: normalizeBoost(product.boost),
     prices: { ...(product.prices ?? {}) },
     defaultColor: product.defaultColor ?? "",
     defaultColorName: normalizeLocalizedColorName(product.defaultColorName),
@@ -585,6 +593,8 @@ export function formatFieldValue(
       return product.status === "published" ? "yes" : "no";
     case "saleMode":
       return product.saleMode === "quote" ? "quote" : "stock";
+    case "boost":
+      return String(normalizeBoost(product.boost));
     case "priceUsd":
       return String(priceValue(product.prices, "USD") || "");
     case "priceBrl":

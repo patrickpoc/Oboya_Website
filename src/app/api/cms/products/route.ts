@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { invalidBoostResponse, schemaPendingResponse } from "@/lib/cms/server/boost-guard";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import {
   readProducts,
@@ -146,6 +147,8 @@ export async function POST(request: Request) {
     if (!body?.id || !body?.sku) {
       return NextResponse.json({ error: "Product id and SKU are required" }, { status: 400 });
     }
+    const boostError = invalidBoostResponse([body]);
+    if (boostError) return boostError;
     const deferRevalidate = shouldDeferRevalidate(request);
     await assertProductIsNew(body);
     await assertVariantChangesValid([{ incoming: body, previous: null }]);
@@ -171,8 +174,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message, field: "colorVariants" }, { status: 400 });
     }
     if (error instanceof CmsReadError) return readFailureResponse(error);
+    const schemaPending = schemaPendingResponse(error);
+    if (schemaPending) return schemaPending;
     const message = error instanceof Error ? error.message : "Failed to persist product";
-    const status = /exceeds|too many images/i.test(message) ? 400 : 500;
-    return NextResponse.json({ error: message }, { status });
+    if (/exceeds|too many images/i.test(message)) {
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
+    return publicApiError(error, "Failed to persist product");
   }
 }

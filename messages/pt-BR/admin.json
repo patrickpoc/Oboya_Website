@@ -516,6 +516,10 @@
           "desc_zhCN": {
             "meaning": "Descrição completa do produto em chinês simplificado.",
             "example": "包含特点和使用说明的演示描述。"
+          },
+          "boost": {
+            "meaning": "Impulso na listagem: número inteiro de 0 a 100. Valores maiores exibem o produto antes na ordem padrão da loja. Vazio significa 0. Um valor inválido vira 0 e gera um erro.",
+            "example": "0"
           }
         },
         "rule4": "Use ponto como separador decimal (12.50). Em arquivo CSV, decimal com vírgula deve estar entre aspas (\"12,50\"); caso contrário, use ponto. Não use separadores de milhar."
@@ -602,6 +606,9 @@
       "priceHint": "Moedas configuradas em Marketplace → Moedas. Vazio ou 0 oculta o produto nessa moeda.",
       "loadingCurrencies": "Carregando moedas…",
       "saleMode": "Modo de venda",
+      "boost": "Impulso na listagem",
+      "boostHint": "0 a 100. Valores maiores exibem o produto antes na ordem padrão da loja. 0 mantém a ordem normal.",
+      "boostInvalid": "Use um número inteiro de 0 a 100.",
       "saleModeHint": "Produtos com estoque exibem preço. Produtos sob consulta nunca exibem preço.",
       "saleModeStock": "Com estoque",
       "saleModeQuote": "Sob consulta (RFQ)",
@@ -954,6 +961,10 @@
             "meaning": "Somente linhas pai. stock (ou In stock) vende a preço fixo; quote (ou On request, RFQ) significa preço sob consulta.",
             "example": "stock"
           },
+          "boost": {
+            "meaning": "Somente linhas pai. Impulso na listagem: número inteiro de 0 a 100. Valores maiores exibem o produto antes na ordem padrão da loja. Vazio mantém o valor atual; um valor inválido gera um erro.",
+            "example": "50"
+          },
           "priceUSD": {
             "meaning": "Preço em dólares americanos, somente números, sem separadores de milhar. Na linha-mãe é o preço do produto; na linha de cor é o preço dessa cor (Variant price USD prevalece se ambos forem preenchidos).",
             "example": "10.50"
@@ -1004,7 +1015,8 @@
           }
         },
         "rule4": "Use ponto como separador decimal (10.50). Em arquivo CSV, decimal com vírgula deve estar entre aspas (\"10,50\"); caso contrário, use ponto. Não use separadores de milhar."
-      }
+      },
+      "boostHint": "Impulso na listagem, de 0 a 100. Valores maiores exibem o produto antes na loja. 0 mantém a ordem normal."
     }
   },
   "taxonomy": {

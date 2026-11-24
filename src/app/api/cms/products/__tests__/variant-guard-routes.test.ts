@@ -262,3 +262,40 @@ describe("variant changes are validated on the server", () => {
     expect((await bulk([listRow(legacy, { moq: 6 })])).status).toBe(200);
   });
 });
+
+describe("boost is validated and schema errors stay generic", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    approvalRequired = false;
+    readProductByIdStrict.mockResolvedValue(stored());
+    vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  it.each([150, -1, 1.5, "10", null])("rejects boost %s with 400 field boost on every write route", async (boost) => {
+    const body = listRow(stored(), { boost });
+    for (const res of [
+      await put("P1", body),
+      await post({ ...body, id: "N1", sku: "N1" }),
+      await bulk([body]),
+      await bulkCreate([{ ...body, id: "N2", sku: "N2" }]),
+      await bulkSubmit([body]),
+    ]) {
+      expect(res.status).toBe(400);
+      expect(((await res.json()) as { field: string }).field).toBe("boost");
+    }
+    expect(saveProduct).not.toHaveBeenCalled();
+  });
+
+  it("accepts a valid boost", async () => {
+    expect((await put("P1", listRow(stored(), { boost: 40 }))).status).toBe(200);
+  });
+
+  it("returns a generic 503 when the migration is pending", async () => {
+    saveProduct.mockRejectedValueOnce(
+      Object.assign(new Error("Apply migration 20261124_cms_products_boost first"), { status: 503 })
+    );
+    const res = await put("P1", listRow(stored(), { boost: 5 }));
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ error: "Product schema update pending" });
+  });
+});

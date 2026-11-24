@@ -5,6 +5,7 @@ import type {
   SortOption,
 } from "@/lib/shop/types";
 import { resolveCatalogPrice } from "@/lib/shop/color-variants";
+import { compareBoostDesc } from "@/lib/shop/boost";
 import { getEffectiveSaleMode } from "@/lib/shop/sale-mode";
 
 function matchesSearch(product: ShopProduct, query: string): boolean {
@@ -108,6 +109,29 @@ function isVisibleByBusinessRules(
   return resolveCatalogPrice(product, currency) > 0;
 }
 
+/** 0 = price shown, 1 = no price in currency, 2 = quote / On Demand. */
+function priceRank(product: ShopProduct, price: number): number {
+  return getEffectiveSaleMode(product) === "quote" ? 2 : price > 0 ? 0 : 1;
+}
+
+function enabledCountryCount(product: ShopProduct): number {
+  const map = product.enabledCountries ?? product.availability ?? {};
+  return Object.values(map).filter(Boolean).length;
+}
+
+/** Relevance: boost desc, single-country before multi-country, price shown before quote/no price. Ties keep order. */
+function compareRelevance(
+  a: ShopProduct,
+  b: ShopProduct,
+  currency: CurrencyCode | null
+): number {
+  const aSingle = enabledCountryCount(a) === 1 ? 0 : 1;
+  const bSingle = enabledCountryCount(b) === 1 ? 0 : 1;
+  const aShown = priceRank(a, resolveCatalogPrice(a, currency ?? "USD")) === 0 ? 0 : 1;
+  const bShown = priceRank(b, resolveCatalogPrice(b, currency ?? "USD")) === 0 ? 0 : 1;
+  return compareBoostDesc(a, b) || aSingle - bSingle || aShown - bShown;
+}
+
 /** Priced products first (by direction), then products without a price in the currency, quote products last. */
 function comparePrice(
   a: ShopProduct,
@@ -115,12 +139,10 @@ function comparePrice(
   currency: CurrencyCode | null,
   direction: 1 | -1
 ): number {
-  const rank = (product: ShopProduct, price: number) =>
-    getEffectiveSaleMode(product) === "quote" ? 2 : price > 0 ? 0 : 1;
   const aPrice = resolveCatalogPrice(a, currency ?? "USD");
   const bPrice = resolveCatalogPrice(b, currency ?? "USD");
-  const aRank = rank(a, aPrice);
-  const bRank = rank(b, bPrice);
+  const aRank = priceRank(a, aPrice);
+  const bRank = priceRank(b, bPrice);
   if (aRank !== bRank) return aRank - bRank;
   return aRank === 0 ? direction * (aPrice - bPrice) : 0;
 }
@@ -176,7 +198,7 @@ export function sortProducts(
           (a as ShopProduct & { name?: { en?: string } }).name?.en ?? a.id;
         const bName =
           (b as ShopProduct & { name?: { en?: string } }).name?.en ?? b.id;
-        return aName.localeCompare(bName);
+        return aName.localeCompare(bName) || compareBoostDesc(a, b);
       });
     case "name_desc":
       return list.sort((a, b) => {
@@ -184,20 +206,22 @@ export function sortProducts(
           (a as ShopProduct & { name?: { en?: string } }).name?.en ?? a.id;
         const bName =
           (b as ShopProduct & { name?: { en?: string } }).name?.en ?? b.id;
-        return bName.localeCompare(aName);
+        return bName.localeCompare(aName) || compareBoostDesc(a, b);
       });
     case "price_asc":
-      return list.sort((a, b) => comparePrice(a, b, currency, 1));
+      return list.sort((a, b) => comparePrice(a, b, currency, 1) || compareBoostDesc(a, b));
     case "price_desc":
-      return list.sort((a, b) => comparePrice(a, b, currency, -1));
+      return list.sort((a, b) => comparePrice(a, b, currency, -1) || compareBoostDesc(a, b));
     case "availability":
       return list.sort((a, b) => {
         const order = { in_stock: 0, limited: 1, on_request: 2 };
-        return order[a.stockStatus] - order[b.stockStatus];
+        return (
+          order[a.stockStatus] - order[b.stockStatus] || compareBoostDesc(a, b)
+        );
       });
     case "relevance":
     default:
-      return list;
+      return list.sort((a, b) => compareRelevance(a, b, currency));
   }
 }
 

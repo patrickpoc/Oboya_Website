@@ -7,6 +7,7 @@ import {
   requiresApprovalFor,
 } from "@/lib/cms/server/approvals.server";
 import { submitBulkUpdateRequest } from "@/lib/cms/server/bulk-approval.server";
+import { invalidBoostResponse, schemaPendingResponse } from "@/lib/cms/server/boost-guard";
 import { VariantValidationError } from "@/lib/cms/server/product-writes.server";
 
 export const dynamic = "force-dynamic";
@@ -22,11 +23,14 @@ export async function POST(request: Request) {
     const auth = await cmsGuard("marketplace", "edit");
     if ("response" in auth) return auth.response;
 
+    const body = (await request.json()) as { products?: CmsProduct[] };
+    const boostError = invalidBoostResponse(Array.isArray(body.products) ? body.products : []);
+    if (boostError) return boostError;
+
     if (!(await requiresApprovalFor(auth.user, "marketplace.bulk_update"))) {
       return NextResponse.json({ approvalRequired: false });
     }
 
-    const body = (await request.json()) as { products?: CmsProduct[] };
     const products = Array.isArray(body.products)
       ? body.products.filter((p) => p?.id && p?.sku)
       : [];

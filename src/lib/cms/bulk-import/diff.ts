@@ -42,6 +42,9 @@ export function getImportChangedFields(
       case "moq":
         if (Number(original.moq ?? 0) !== Number(pending.moq ?? 0)) changed.push(field);
         break;
+      case "boost":
+        if (Number(original.boost ?? 0) !== Number(pending.boost ?? 0)) changed.push(field);
+        break;
       case "categoryId":
         if ((original.categoryId ?? "") !== (pending.categoryId ?? "")) changed.push(field);
         break;

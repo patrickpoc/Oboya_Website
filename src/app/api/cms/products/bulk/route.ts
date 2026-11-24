@@ -10,6 +10,12 @@ import {
   readProductByIdStrict,
   saveProduct,
 } from "@/lib/cms/server/products.server";
+import {
+  invalidBoostResponse,
+  SCHEMA_PENDING_MESSAGE,
+  schemaPendingResponse,
+} from "@/lib/cms/server/boost-guard";
+import { publicApiError } from "@/lib/security/public-error";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
 import { CmsReadError, readFailureResponse } from "@/lib/cms/server/strict-read";
@@ -76,6 +82,9 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    const boostError = invalidBoostResponse(products);
+    if (boostError) return boostError;
 
     // Create rows: reject invalid or colliding colors before anything is held or written.
     if (mode === "create") {
@@ -231,7 +240,11 @@ export async function POST(request: Request) {
         // A failed baseline read is not a per-item failure: stop with 503.
         if (error instanceof CmsReadError) throw error;
         const message =
-          error instanceof Error ? error.message : "Failed to persist product";
+          (error as { status?: number } | null)?.status === 503
+            ? SCHEMA_PENDING_MESSAGE
+            : error instanceof Error
+              ? error.message
+              : "Failed to persist product";
         results.push({
           productId: product.id,
           sku: product.sku,
@@ -266,8 +279,8 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    const message =
-      error instanceof Error ? error.message : "Failed to bulk persist products";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const schemaPending = schemaPendingResponse(error);
+    if (schemaPending) return schemaPending;
+    return publicApiError(error, "Failed to bulk persist products");
   }
 }

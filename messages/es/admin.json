@@ -516,6 +516,10 @@
           "desc_zhCN": {
             "meaning": "Descripción completa del producto en chino simplificado.",
             "example": "包含特点和使用说明的演示描述。"
+          },
+          "boost": {
+            "meaning": "Impulso en el listado: número entero de 0 a 100. Los valores más altos muestran el producto antes en el orden predeterminado de la tienda. Vacío equivale a 0. Un valor no válido se convierte en 0 y genera un error.",
+            "example": "0"
           }
         },
         "rule4": "Use punto como separador decimal (12.50). En un archivo CSV, un decimal con coma debe ir entre comillas (\"12,50\"); de lo contrario, use punto. No use separadores de miles."
@@ -602,6 +606,9 @@
       "priceHint": "Monedas configuradas en Marketplace → Monedas. Vacío o 0 oculta el producto en esa moneda.",
       "loadingCurrencies": "Cargando monedas…",
       "saleMode": "Modo de venta",
+      "boost": "Impulso en el listado",
+      "boostHint": "De 0 a 100. Los valores más altos muestran el producto antes en el orden predeterminado de la tienda. 0 mantiene el orden normal.",
+      "boostInvalid": "Usa un número entero de 0 a 100.",
       "saleModeHint": "Los productos en stock muestran precio. Los productos bajo consulta nunca muestran precio.",
       "saleModeStock": "En stock",
       "saleModeQuote": "Bajo consulta (RFQ)",
@@ -954,6 +961,10 @@
             "meaning": "Solo filas padre. stock (o In stock) vende a precio fijo; quote (u On request, RFQ) significa precio bajo consulta.",
             "example": "stock"
           },
+          "boost": {
+            "meaning": "Solo filas principales. Impulso en el listado: número entero de 0 a 100. Los valores más altos muestran el producto antes en el orden predeterminado de la tienda. Vacío mantiene el valor actual; un valor no válido genera un error.",
+            "example": "50"
+          },
           "priceUSD": {
             "meaning": "Precio en dólares estadounidenses, solo números, sin separadores de miles. En una fila principal es el precio del producto; en una fila de color es el precio de ese color (Variant price USD prevalece si se rellenan ambos).",
             "example": "10.50"
@@ -1004,7 +1015,8 @@
           }
         },
         "rule4": "Use punto como separador decimal (10.50). En un archivo CSV, un decimal con coma debe ir entre comillas (\"10,50\"); de lo contrario, use punto. No use separadores de miles."
-      }
+      },
+      "boostHint": "Impulso en el listado, de 0 a 100. Los valores más altos muestran el producto antes en la tienda. 0 mantiene el orden normal."
     }
   },
   "taxonomy": {

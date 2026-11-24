@@ -3,6 +3,7 @@ import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import { readProductById, readProductByIdStrict } from "@/lib/cms/server/products.server";
 import { cmsGuard, requireCmsAuth } from "@/lib/cms/server/require-cms-auth";
 import { CmsReadError, readFailureResponse } from "@/lib/cms/server/strict-read";
+import { invalidBoostResponse, schemaPendingResponse } from "@/lib/cms/server/boost-guard";
 import { publicApiError } from "@/lib/security/public-error";
 import { toPublicProduct } from "@/lib/cms/server/public-product";
 import { noStoreHeaders } from "@/lib/security/http-cache";
@@ -80,6 +81,8 @@ export async function PUT(
     if (incoming.id !== id) {
       return NextResponse.json({ error: "ID mismatch" }, { status: 400 });
     }
+    const boostError = invalidBoostResponse([incoming]);
+    if (boostError) return boostError;
     const deferRevalidate = shouldDeferRevalidate(request);
     const previous = (await readProductByIdStrict(id)) ?? null;
     const body = mergeProductUpdate(incoming, previous);
@@ -145,9 +148,13 @@ export async function PUT(
     if (error instanceof VariantValidationError) {
       return NextResponse.json({ error: error.message, field: "colorVariants" }, { status: 400 });
     }
+    const schemaPending = schemaPendingResponse(error);
+    if (schemaPending) return schemaPending;
     const message = error instanceof Error ? error.message : "Failed to persist product";
-    const status = /exceeds|too many images/i.test(message) ? 400 : 500;
-    return NextResponse.json({ error: message }, { status });
+    if (/exceeds|too many images/i.test(message)) {
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
+    return publicApiError(error, "Failed to persist product");
   }
 }
 

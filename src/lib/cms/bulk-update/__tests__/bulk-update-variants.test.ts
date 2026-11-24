@@ -419,5 +419,6 @@ describe("spreadsheet", () => {
     expect(sample[headers.indexOf("MOQ")]).toBe("100");
     expect(sample[headers.indexOf("Market availability")]).toBe("BR;US");
     expect(sample[headers.indexOf("Sale mode")]).toBe("stock");
+    expect(headers).toContain("Boost");
   });
 });

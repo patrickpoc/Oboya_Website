@@ -25,6 +25,7 @@ export default function ProductNewPage() {
   const router = useRouter();
   const { catalog, loading } = useAdminMarketplaceCatalog();
   const [product, setProduct] = useState<CmsProduct | null>(null);
+  const [boostValid, setBoostValid] = useState(true);
   const notifyPending = usePendingApprovalNotice();
 
   useEffect(() => {
@@ -40,6 +41,10 @@ export default function ProductNewPage() {
 
   const handleSave = () => {
     if (!product) return;
+    if (!boostValid) {
+      toast.error(t("editor.boostInvalid"));
+      return;
+    }
     const sku = product.sku.trim();
     if (!sku) {
       toast.error("SKU is required.");
@@ -93,6 +98,7 @@ export default function ProductNewPage() {
         <ProductEditorForm
           product={product}
           onChange={(updater) => setProduct((current) => (current ? updater(current) : current))}
+          onBoostValidityChange={setBoostValid}
         />
       ) : (
         <FormSkeleton />

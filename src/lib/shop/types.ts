@@ -102,6 +102,8 @@ export interface ShopProduct {
   id: string;
   sku: string;
   moq: number;
+  /** Forced listing score 0-100 (higher first); missing = 0. */
+  boost?: number;
   categoryId: string;
   subcategoryId: string;
   images: string[];

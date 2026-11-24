@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { LocalizedFieldGrid } from "@/components/admin/marketplace/LocalizedFieldGrid";
 import { RegistrationSection } from "@/components/admin/marketplace/RegistrationSection";
@@ -11,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { stockProductNeedsPrice } from "@/lib/cms/product-sale-mode";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { CmsLocale } from "@/lib/cms/types";
+import { PRODUCT_BOOST_MAX, PRODUCT_BOOST_MIN, parseBoostInput } from "@/lib/shop/boost";
 import { cn } from "@/lib/utils";
 
 interface ProductRegistrationCardProps {
@@ -18,6 +20,8 @@ interface ProductRegistrationCardProps {
   currencies: string[];
   currenciesLoading?: boolean;
   onUpdate: (patch: Partial<CmsProduct>) => void;
+  /** Reports whether the boost input currently holds a savable value. */
+  onBoostValidityChange?: (valid: boolean) => void;
 }
 
 export function ProductRegistrationCard({
@@ -25,8 +29,27 @@ export function ProductRegistrationCard({
   currencies,
   currenciesLoading = false,
   onUpdate,
+  onBoostValidityChange,
 }: ProductRegistrationCardProps) {
   const t = useTranslations("admin.products.editor");
+  const [boostDraft, setBoostDraft] = useState<string | null>(null);
+  const [boostInvalid, setBoostInvalid] = useState(false);
+  const setBoostValidity = (invalid: boolean) => {
+    setBoostInvalid(invalid);
+    onBoostValidityChange?.(!invalid);
+  };
+
+  // A different product loads: drop any half-typed value so it cannot leak across products.
+  const [boostProductId, setBoostProductId] = useState(product.id);
+  if (boostProductId !== product.id) {
+    setBoostProductId(product.id);
+    setBoostDraft(null);
+    setBoostInvalid(false);
+  }
+  useEffect(() => {
+    onBoostValidityChange?.(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id]);
 
   const setCurrencyPrice = (currency: string, value: string) => {
     const nextPrices = { ...product.prices };
@@ -136,6 +159,39 @@ export function ProductRegistrationCard({
                 onChange={(e) => onUpdate({ moq: Math.max(1, Number(e.target.value) || 1) })}
               />
             </div>
+          </div>
+        </RegistrationSection>
+
+        <RegistrationSection title={t("boost")} description={t("boostHint")}>
+          <div className="max-w-40 space-y-1.5">
+            <Input
+              id="product-boost"
+              type="number"
+              inputMode="numeric"
+              min={PRODUCT_BOOST_MIN}
+              max={PRODUCT_BOOST_MAX}
+              step={1}
+              value={boostDraft ?? String(product.boost ?? 0)}
+              aria-label={t("boost")}
+              aria-invalid={boostInvalid}
+              onChange={(e) => {
+                const raw = e.target.value;
+                const parsed = parseBoostInput(raw);
+                setBoostDraft(raw);
+                if (e.target.validity.badInput || Number.isNaN(parsed)) {
+                  setBoostValidity(true);
+                  return;
+                }
+                setBoostValidity(false);
+                onUpdate({ boost: parsed ?? 0 });
+              }}
+              onBlur={() => {
+                if (!boostInvalid) setBoostDraft(null);
+              }}
+            />
+            {boostInvalid ? (
+              <p className="text-sm text-oboya-orange">{t("boostInvalid")}</p>
+            ) : null}
           </div>
         </RegistrationSection>
 
