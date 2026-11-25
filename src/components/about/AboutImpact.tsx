@@ -16,6 +16,7 @@ interface AboutImpactProps {
 export function AboutImpact({ data, locale }: AboutImpactProps) {
   const reduceMotion = useReducedMotion();
   const title = pickLocalized(data.title, locale);
+  const description = data.description ? pickLocalized(data.description, locale).trim() : "";
   const eyebrow = data.eyebrow
     ? pickLocalized(data.eyebrow, locale)
     : null;
@@ -59,6 +60,17 @@ export function AboutImpact({ data, locale }: AboutImpactProps) {
         >
           <NumbersGrid stats={data.stats} locale={locale} />
         </motion.div>
+
+        {description ? (
+          <motion.p
+            {...(reveal ?? {})}
+            initial={reveal ? "hidden" : false}
+            variants={reduceMotion ? undefined : fadeInUp}
+            className="mx-auto mt-[clamp(3rem,7vw,6rem)] max-w-3xl text-center font-body text-base leading-[1.6] text-oboya-blue-dark text-balance md:text-[1.0625rem]"
+          >
+            {description}
+          </motion.p>
+        ) : null}
       </Container>
     </section>
   );
