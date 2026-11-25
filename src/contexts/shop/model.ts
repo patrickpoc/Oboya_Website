@@ -36,6 +36,8 @@ export interface ShopContextValue extends ShopState {
   catalogReady: boolean;
   shopConfig: ShopConfig;
   pageSize: number;
+  /** Refetches the catalog (Retry on the error state). */
+  reloadCatalog: () => void;
   itemCount: number;
   activeFilterCount: number;
   filteredProducts: ShopProduct[];

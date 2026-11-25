@@ -15,6 +15,7 @@ import { readAboutPageSettingsDurable } from "@/lib/cms/server/about-page.server
 import { readCaseStudiesDurable } from "@/lib/cms/server/case-studies.server";
 import { readFaqsDurable } from "@/lib/cms/server/faqs.server";
 import { hydrateShopCatalogDurable } from "@/lib/cms/server/marketplace-config.server";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { siteConfig } from "@/constants/site";
 
 export async function readMapDataForSite() {
@@ -26,15 +27,20 @@ export async function readShopCatalog() {
   return getShopCatalog();
 }
 
-export async function readProducts() {
+export async function readProducts(options?: { source?: string }) {
   await hydrateShopCatalogDurable();
   const { readProducts: readProductsFromStore } = await import(
     "@/lib/cms/server/products.server"
   );
   const live = (
-    await readProductsFromStore({ fields: "list", skipPurge: true })
+    await readProductsFromStore({
+      fields: "list",
+      skipPurge: true,
+      source: options?.source,
+    })
   ).filter((product) => product.status === "published" && !product.deletedAt);
-  if (live.length > 0) return live;
+  // With Supabase an empty list is a valid result; the seed is a local-dev fallback only.
+  if (isSupabaseConfigured() || live.length > 0) return live;
   const cmsProducts = getCmsProducts();
   if (cmsProducts.length > 0) {
     return cmsProducts.filter((p) => p.status === "published" && !p.deletedAt);
@@ -46,7 +52,10 @@ export async function readPublishedProductById(id: string) {
   const { readProductById: readProductByIdFromStore } = await import(
     "@/lib/cms/server/products.server"
   );
-  const product = await readProductByIdFromStore(id, { asAdmin: false });
+  const product = await readProductByIdFromStore(id, {
+    asAdmin: false,
+    source: "readPublishedProductById",
+  });
   if (!product || product.status !== "published" || product.deletedAt) {
     return undefined;
   }
@@ -61,7 +70,10 @@ export const readPublishedProductByParam = cache(async (param: string) => {
   const { readProductById: readProductByIdFromStore } = await import(
     "@/lib/cms/server/products.server"
   );
-  const product = await readProductByIdFromStore(param, { asAdmin: false });
+  const product = await readProductByIdFromStore(param, {
+    asAdmin: false,
+    source: "readPublishedProductByParam",
+  });
   if (!product || product.status !== "published" || product.deletedAt) {
     return undefined;
   }

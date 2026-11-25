@@ -8,13 +8,13 @@ import { createImportWorkspaceRow } from "@/lib/cms/bulk-import/diff";
 import { validateBulkImport } from "@/lib/cms/bulk-import/validate";
 import type { ImportCatalog } from "@/lib/cms/bulk-import/types";
 import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
-import { getCmsProducts } from "@/lib/cms/repositories/product-repository";
 import {
   readMarketplaceCurrencies,
   readMarketplaceFilters,
 } from "@/lib/cms/server/marketplace-config.server";
 import { cmsGuard } from "@/lib/cms/server/require-cms-auth";
-import { readProducts } from "@/lib/cms/server/products.server";
+import { readProductsStrict } from "@/lib/cms/server/products.server";
+import { CmsReadError, readFailureResponse } from "@/lib/cms/server/strict-read";
 import { publicApiError } from "@/lib/security/public-error";
 
 export const dynamic = "force-dynamic";
@@ -42,10 +42,7 @@ export async function POST(request: Request) {
     const auth = await cmsGuard("marketplace", isCreate ? "create" : "edit");
     if ("response" in auth) return auth.response;
 
-    let products = await readProducts({ includeDeleted: true });
-    if (products.length === 0) {
-      products = getCmsProducts({ includeDeleted: true });
-    }
+    const products = await readProductsStrict("list");
 
     const [filters, currencies] = await Promise.all([
       readMarketplaceFilters(),
@@ -104,6 +101,7 @@ export async function POST(request: Request) {
       validFieldChangeCount: Math.max(0, changedFieldCount - blockedCount - warningCount),
     });
   } catch (error) {
+    if (error instanceof CmsReadError) return readFailureResponse(error);
     return publicApiError(error, "Failed to validate bulk request");
   }
 }

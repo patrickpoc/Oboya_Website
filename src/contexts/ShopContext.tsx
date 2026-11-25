@@ -76,6 +76,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     shopConfig,
     shopConfigRef,
     pageSize,
+    reloadCatalog,
   } = useCatalogLoader({
     setState,
     setIsReady,
@@ -255,6 +256,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       displayCurrency,
       shopConfig,
       pageSize,
+      reloadCatalog,
       itemCount,
       activeFilterCount,
       filteredProducts,
@@ -311,6 +313,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       displayCurrency,
       shopConfig,
       pageSize,
+      reloadCatalog,
       itemCount,
       activeFilterCount,
       filteredProducts,

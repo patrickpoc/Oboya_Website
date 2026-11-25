@@ -3,7 +3,7 @@
 /* Dependency lists match the provider before this split. Setters and refs are stable. */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { useEffect, useLayoutEffect, useRef, useState, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
 import {
   getShopCatalog,
   updateShopCatalog,
@@ -23,13 +23,8 @@ import {
   isExplicitAll,
   resolveMarketTransition,
 } from "@/lib/shop/market";
-import {
-  normalizeColorVariants,
-  normalizeImageColorIds,
-  normalizeLocalizedColorName,
-} from "@/lib/shop/color-variants";
+import { publishedProducts, requestCatalog } from "@/contexts/shop/catalog-request";
 import type { ShopProduct, ShopState } from "@/lib/shop/types";
-import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import { remapCartLine } from "@/lib/shop/product-id-remap";
 import { PRODUCTS_PAGE_SIZE } from "@/lib/shop/catalog";
 import {
@@ -50,6 +45,9 @@ export function useCatalogLoader({
   const [shopProducts, setShopProducts] = useState<ShopProduct[]>([]);
   const [catalogReady, setCatalogReady] = useState(false);
   const [catalogTick, setCatalogTick] = useState(0);
+  // Bumped by reloadCatalog (Retry); the first load stays a plain cacheable GET.
+  const [reloadKey, setReloadKey] = useState(0);
+  const reloadCatalog = useCallback(() => setReloadKey((n) => n + 1), []);
   // True once the API returned its active countries (seed countries do not count).
   const [countriesLoaded, setCountriesLoaded] = useState(false);
   // Market restored from storage, before any URL overrides the state.
@@ -102,20 +100,7 @@ export function useCatalogLoader({
       try {
         // Edge-cached and tag-invalidated on CMS writes; a plain GET lets the
         // CDN serve it instead of re-running the function per visitor.
-        const catalogRes = await fetch("/api/shop/catalog");
-        if (!catalogRes.ok) throw new Error("Failed to load products");
-        const catalog = (await catalogRes.json()) as {
-          products?: CmsProduct[];
-          filters?: {
-            categories?: ReturnType<typeof getShopCatalog>["categories"];
-            filterGroups?: ReturnType<typeof getShopCatalog>["filterGroups"];
-            filterOptions?: ReturnType<typeof getShopCatalog>["filterOptions"];
-          };
-          currencies?: {
-            countries?: ReturnType<typeof getShopCatalog>["countries"];
-          };
-          shopConfig?: unknown;
-        };
+        const catalog = await requestCatalog(fetch, reloadKey > 0);
 
         const filters = catalog.filters;
         if (filters) {
@@ -167,23 +152,7 @@ export function useCatalogLoader({
           }));
         }
 
-        const products = catalog.products ?? [];
-        const published = products
-          .filter(
-            (product) => product.status === "published" && !product.deletedAt
-          )
-          .map((product) => ({
-            ...product,
-            defaultColor: product.defaultColor ?? "",
-            defaultColorName: normalizeLocalizedColorName(
-              product.defaultColorName
-            ),
-            imageColorIds: normalizeImageColorIds(
-              product.imageColorIds,
-              (product.images ?? []).length
-            ),
-            colorVariants: normalizeColorVariants(product.colorVariants),
-          }));
+        const published = publishedProducts(catalog.products);
         if (cancelled) return;
 
         if (published.length > 0) {
@@ -209,10 +178,7 @@ export function useCatalogLoader({
         setCatalogReady(true);
       } catch {
         if (cancelled) return;
-        // Last-resort seed fallback only when the API is unavailable.
-        setShopProducts((prev) =>
-          prev.length > 0 ? prev : getShopCatalog().products
-        );
+        // Never fall back to seed data: keep what loaded before, else an empty list.
         setCatalogReady(true);
         setCatalogTick((n) => n + 1);
         setState((prev) =>
@@ -230,7 +196,7 @@ export function useCatalogLoader({
     return () => {
       cancelled = true;
     };
-  }, [isShopAreaRoute]);
+  }, [isShopAreaRoute, reloadKey]);
 
   return {
     shopProducts,
@@ -242,6 +208,7 @@ export function useCatalogLoader({
     shopConfig,
     shopConfigRef,
     pageSize,
+    reloadCatalog,
   };
 }
 

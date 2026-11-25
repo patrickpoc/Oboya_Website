@@ -88,12 +88,29 @@ export function LoadingSkeleton({ viewMode }: { viewMode: "grid" | "list" }) {
   );
 }
 
-export function ErrorState() {
+export function ErrorState({ inline = false }: { inline?: boolean }) {
   const t = useTranslations("shop");
+  const { reloadCatalog } = useShop();
 
   return (
-    <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-6 py-12 text-center">
+    <div
+      className={
+        inline
+          ? "mb-4 flex items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3"
+          : "rounded-xl border border-destructive/30 bg-destructive/5 px-6 py-12 text-center"
+      }
+    >
       <p className="text-sm text-destructive">{t("loadError")}</p>
+      <button
+        type="button"
+        onClick={reloadCatalog}
+        className={buttonVariants({
+          variant: "outline",
+          className: inline ? "rounded-full" : "mt-4 rounded-full",
+        })}
+      >
+        {t("retry")}
+      </button>
     </div>
   );
 }

@@ -7,14 +7,18 @@ import {
   type CmsProduct,
 } from "@/lib/cms/repositories/product-repository";
 import { rethrowNextSignals } from "@/lib/cms/server/rethrow-next-signals";
-import { CmsReadError } from "@/lib/cms/server/strict-read";
+import {
+  CmsReadError,
+  CmsReadTimeoutError,
+  withReadTimeout,
+} from "@/lib/cms/server/strict-read";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
 import {
   createServiceClient,
   isServiceRoleConfigured,
 } from "@/lib/supabase/admin";
-import { logCmsPerf } from "@/lib/cms/server/perf-log.server";
+import { logCmsPerf, logCmsReadFailure } from "@/lib/cms/server/perf-log.server";
 import {
   CATALOG_READ_TAGS,
   PRODUCT_LIST_COLUMNS,
@@ -106,7 +110,10 @@ export async function readProducts(options?: {
   fields?: ProductReadFields;
   /** Skip trash purge (hot paths). */
   skipPurge?: boolean;
+  /** Caller label for failure logs only. */
+  source?: string;
 }) {
+  const started = Date.now();
   const fields = options?.fields ?? "full";
 
   if (!options?.skipPurge) {
@@ -126,11 +133,6 @@ export async function readProducts(options?: {
     return local.map((product) => projectFields(product, fields));
   }
 
-  const fallback = () => {
-    const local = getCmsProducts(options);
-    return local.map((product) => projectFields(product, fields));
-  };
-
   try {
     const supabase = options?.asAdmin
       ? await createClient()
@@ -140,16 +142,12 @@ export async function readProducts(options?: {
       let query = supabase
         .from("cms_products")
         .select(selectColumns(fields))
-        .order("updated_at", { ascending: false });
+        .order("updated_at", { ascending: false })
+        .order("id", { ascending: true });
       if (!options?.includeDeleted) {
         query = query.is("deleted_at", null);
       }
-      return Promise.race([
-        query,
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("Supabase products timeout")), 15000)
-        ),
-      ]);
+      return withReadTimeout(query, 15000, "Supabase products timeout");
     };
 
     let { data, error } = await runQuery();
@@ -164,22 +162,15 @@ export async function readProducts(options?: {
         return projectFields(product, fields);
       })
       .filter((product) => !isProductPurgeDue(product));
-    if (products.length === 0 && options?.asAdmin) {
-      const seed = fallback();
-      if (seed.length > 0) return seed;
-    }
     return products;
   } catch (error) {
     rethrowNextSignals(error);
-    console.error(
-      "cms_products read:",
-      error instanceof Error ? error.message : error
-    );
-    const seed = fallback();
-    if (options?.asAdmin) return seed;
-    return seed.filter(
-      (product) => product.status === "published" && !product.deletedAt
-    );
+    logCmsReadFailure("readProducts", started, {
+      source: options?.source,
+      reason: error instanceof CmsReadTimeoutError ? "timeout" : "error",
+      detail: error,
+    });
+    throw new CmsReadError();
   }
 }
 
@@ -286,6 +277,7 @@ export async function readProductDescriptionsStrict(): Promise<
 /** Slim SKU index for duplicate / uniqueness checks — no images or HTML. */
 export async function readProductSkuIndex(options?: {
   asAdmin?: boolean;
+  source?: string;
 }): Promise<Array<{ id: string; sku: string; variantSkus: string[] }>> {
   const started = Date.now();
 
@@ -310,9 +302,11 @@ export async function readProductSkuIndex(options?: {
       options?.asAdmin !== false
         ? await createClient()
         : createPublicClient({ tags: CATALOG_READ_TAGS });
-    const { data, error } = await supabase
-      .from("cms_products")
-      .select("id, sku, color_variants, deleted_at");
+    const { data, error } = await withReadTimeout(
+      supabase.from("cms_products").select("id, sku, color_variants, deleted_at"),
+      15000,
+      "Supabase sku index timeout"
+    );
     if (error) throw new Error(error.message);
 
     const index = (data ?? []).map((row) => {
@@ -331,13 +325,12 @@ export async function readProductSkuIndex(options?: {
     return index;
   } catch (error) {
     rethrowNextSignals(error);
-    console.error(
-      "cms_products sku index:",
-      error instanceof Error ? error.message : error
-    );
-    const index = toIndex(getCmsProducts({ includeDeleted: true }));
-    logCmsPerf("readProductSkuIndex.fallback", started, { count: index.length });
-    return index;
+    logCmsReadFailure("readProductSkuIndex", started, {
+      source: options?.source,
+      reason: error instanceof CmsReadTimeoutError ? "timeout" : "error",
+      detail: error,
+    });
+    throw new CmsReadError();
   }
 }
 

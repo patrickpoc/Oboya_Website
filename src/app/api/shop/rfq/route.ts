@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { addQuoteSubmissionWithReference } from "@/lib/cms/server/forms.server";
+import { CmsReadError, readFailureResponse } from "@/lib/cms/server/strict-read";
 import { readProducts } from "@/lib/cms/server/products.server";
 import {
   readMarketplaceCurrencies,
@@ -144,11 +145,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: limited.error }, { status: 429 });
     }
 
-    const products = await readProducts({
-      includeDeleted: false,
-      fields: "list",
-      skipPurge: true,
-    });
+    // Never validate items or prices against anything but the live catalog.
+    let products;
+    try {
+      products = await readProducts({
+        includeDeleted: false,
+        fields: "list",
+        skipPurge: true,
+        source: "api/shop/rfq",
+      });
+    } catch (error) {
+      if (error instanceof CmsReadError) return readFailureResponse(error);
+      throw error;
+    }
     const published = new Map(
       products
         .filter((product) => product.status === "published" && !product.deletedAt)

@@ -25,6 +25,33 @@ export class CmsReadError extends Error {
   }
 }
 
+/** A Supabase read exceeded its time budget. */
+export class CmsReadTimeoutError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "CmsReadTimeoutError";
+  }
+}
+
+/** Races `work` against a timer and always clears the timer. */
+export async function withReadTimeout<T>(
+  work: PromiseLike<T>,
+  ms: number,
+  message: string
+): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      work,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new CmsReadTimeoutError(message)), ms);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** `?forEdit=1`: the caller wants a save baseline, not a display read. */
 export function isEditRead(request: Request): boolean {
   return new URL(request.url).searchParams.get("forEdit") === "1";

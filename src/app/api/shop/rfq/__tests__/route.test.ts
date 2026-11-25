@@ -170,3 +170,15 @@ describe("POST /api/shop/rfq sale modes", () => {
     expect(addQuote).not.toHaveBeenCalled();
   });
 });
+
+describe("POST /api/shop/rfq read failures", () => {
+  it("returns 503 no-store and saves nothing when the catalog read fails", async () => {
+    const { CmsReadError } = await import("@/lib/cms/server/strict-read");
+    readProducts.mockRejectedValueOnce(new CmsReadError());
+    addQuote.mockClear();
+    const res = await post([{ productId: "stock", quantity: 1 }]);
+    expect(res.status).toBe(503);
+    expect(res.headers.get("cache-control")).toContain("no-store");
+    expect(addQuote).not.toHaveBeenCalled();
+  });
+});

@@ -82,6 +82,7 @@ export async function collectInUseMediaUrls(): Promise<Set<string>> {
       includeDeleted: true,
       fields: "list",
       skipPurge: true,
+      source: "in-use-media",
     });
     collectFromValue(products, urls);
   } catch (error) {

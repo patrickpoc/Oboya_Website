@@ -13,6 +13,9 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
  * cached response. Freshness comes from tag invalidation on CMS writes
  * (catalog / product / cms-doc tags); the TTL is only a safety net.
  * Must stay free of request-time APIs (cookies, headers, searchParams).
+ * Read failures must throw (no try/catch, no fallback response): a failed ISR
+ * revalidation keeps serving the last good response, while a returned response
+ * would be cached.
  */
 export const dynamic = "force-static";
 // Literal required by segment config; keep in sync with PUBLIC_DATA_REVALIDATE_SECONDS.
@@ -20,7 +23,12 @@ export const revalidate = 86400;
 
 export async function GET() {
   const [products, filters, currencies, shopConfig] = await Promise.all([
-    readProducts({ includeDeleted: false, fields: "list", skipPurge: true }),
+    readProducts({
+      includeDeleted: false,
+      fields: "list",
+      skipPurge: true,
+      source: "api/shop/catalog",
+    }),
     readMarketplaceFilters(),
     readMarketplaceCurrencies(),
     readMarketplaceShopConfig(),

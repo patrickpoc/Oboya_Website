@@ -164,3 +164,28 @@ describe("sortProducts boost", () => {
     expect(ids(sortProducts(list, "availability", "BRL"))).toEqual(["b", "c", "a"]);
   });
 });
+
+describe("sortProducts determinism on ties", () => {
+  const ids = (l: ShopProduct[]) => l.map((p) => p.id);
+  const tied = Array.from({ length: 12 }, (_, i) => product({ id: `p${String(i).padStart(2, "0")}` }));
+  // Same shuffle each run, then the server order (updated_at desc, id asc) is reapplied.
+  const shuffled = (list: ShopProduct[], step: number) =>
+    list.map((_, i) => list[(i * step) % list.length]);
+  const serverOrder = (list: ShopProduct[]) => [...list].sort((a, b) => a.id.localeCompare(b.id));
+
+  it("relevance keeps the input order for fully tied products", () => {
+    const input = shuffled(tied, 5);
+    expect(ids(sortProducts([...input], "relevance", "BRL"))).toEqual(ids(input));
+  });
+  it("relevance gives identical results for the same server order", () => {
+    const a = sortProducts(serverOrder(shuffled(tied, 5)), "relevance", "BRL");
+    const b = sortProducts(serverOrder(shuffled(tied, 7)), "relevance", "BRL");
+    expect(ids(a)).toEqual(ids(b));
+  });
+  it("price_asc with equal prices keeps the server order", () => {
+    const a = sortProducts(serverOrder(shuffled(tied, 5)), "price_asc", "BRL");
+    const b = sortProducts(serverOrder(shuffled(tied, 7)), "price_asc", "BRL");
+    expect(ids(a)).toEqual(ids(b));
+    expect(ids(a)).toEqual(ids(serverOrder(tied)));
+  });
+});

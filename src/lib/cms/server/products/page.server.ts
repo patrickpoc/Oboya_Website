@@ -6,10 +6,14 @@ import {
   type CmsProduct,
 } from "@/lib/cms/repositories/product-repository";
 import { rethrowNextSignals } from "@/lib/cms/server/rethrow-next-signals";
-import { CmsReadError } from "@/lib/cms/server/strict-read";
+import {
+  CmsReadError,
+  CmsReadTimeoutError,
+  withReadTimeout,
+} from "@/lib/cms/server/strict-read";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient, createPublicClient } from "@/lib/supabase/server";
-import { logCmsPerf } from "@/lib/cms/server/perf-log.server";
+import { logCmsPerf, logCmsReadFailure } from "@/lib/cms/server/perf-log.server";
 import { ALL_PRODUCTS_TAG, productTag } from "@/lib/cms/cache-tags";
 import {
   CATALOG_READ_TAGS,
@@ -111,6 +115,7 @@ export async function readProductsPage(options: {
   limit?: number;
   tab?: "active" | "archived" | "trash" | "all";
   q?: string;
+  source?: string;
 }): Promise<ProductPageResult> {
   const started = Date.now();
   const page = Math.max(1, options.page ?? 1);
@@ -162,22 +167,15 @@ export async function readProductsPage(options: {
     let pageQuery = supabase
       .from("cms_products")
       .select(selectColumns(fields), { count: "exact" })
-      .order("updated_at", { ascending: false });
+      .order("updated_at", { ascending: false })
+      .order("id", { ascending: true });
     pageQuery = applyTabFilter(pageQuery, tab);
     pageQuery = applySearchFilter(pageQuery, q);
     pageQuery = pageQuery.range(from, to);
 
     const [pageResult, activeHead, archivedHead, trashHead, unitStatsRpc] =
       await Promise.all([
-        Promise.race([
-          pageQuery,
-          new Promise<never>((_, reject) =>
-            setTimeout(
-              () => reject(new Error("Supabase products page timeout")),
-              15000
-            )
-          ),
-        ]),
+        withReadTimeout(pageQuery, 15000, "Supabase products page timeout"),
         supabase
           .from("cms_products")
           .select("id", { count: "exact", head: true })
@@ -264,32 +262,12 @@ export async function readProductsPage(options: {
     return result;
   } catch (error) {
     rethrowNextSignals(error);
-    console.error(
-      "cms_products page:",
-      error instanceof Error ? error.message : error
-    );
-    // Fallback: in-memory page from seed/cache.
-    const all = getCmsProducts({ includeDeleted: true }).map((product) =>
-      projectFields(product, fields)
-    );
-    const filtered = all.filter(
-      (product) =>
-        productMatchesTab(product, tab) && productMatchesQuery(product, q)
-    );
-    const start = (page - 1) * limit;
-    const result = {
-      items: filtered.slice(start, start + limit),
-      total: filtered.length,
-      page,
-      limit,
-      tabCounts: computeTabCounts(all),
-      unitStats: computeUnitStats(all),
-    };
-    logCmsPerf("readProductsPage.fallback", started, {
-      tab,
-      total: result.total,
+    logCmsReadFailure("readProductsPage", started, {
+      source: options.source,
+      reason: error instanceof CmsReadTimeoutError ? "timeout" : "error",
+      detail: error,
     });
-    return result;
+    throw new CmsReadError();
   }
 }
 
@@ -300,9 +278,10 @@ export async function readProductsPage(options: {
 
 export async function readProductById(
   id: string,
-  options?: { asAdmin?: boolean }
+  options?: { asAdmin?: boolean; source?: string }
 ): Promise<CmsProduct | undefined> {
   if (!id) return undefined;
+  const started = Date.now();
 
   if (!isSupabaseConfigured()) {
     const products = getCmsProducts({ includeDeleted: true });
@@ -317,12 +296,11 @@ export async function readProductById(
       ? await createClient()
       : createPublicClient({ tags: [productTag(id), ALL_PRODUCTS_TAG] });
 
-    const byId = await Promise.race([
+    const byId = await withReadTimeout(
       supabase.from("cms_products").select("*").eq("id", id).maybeSingle(),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Supabase product timeout")), 8000)
-      ),
-    ]);
+      8000,
+      "Supabase product timeout"
+    );
 
     if (byId.error) throw new Error(byId.error.message);
     if (byId.data) {
@@ -331,12 +309,11 @@ export async function readProductById(
       return product;
     }
 
-    const bySku = await Promise.race([
+    const bySku = await withReadTimeout(
       supabase.from("cms_products").select("*").eq("sku", id).maybeSingle(),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Supabase product timeout")), 8000)
-      ),
-    ]);
+      8000,
+      "Supabase product timeout"
+    );
 
     if (bySku.error) throw new Error(bySku.error.message);
     if (!bySku.data) return undefined;
@@ -345,12 +322,12 @@ export async function readProductById(
     return product;
   } catch (error) {
     rethrowNextSignals(error);
-    console.error(
-      "cms_products readById:",
-      error instanceof Error ? error.message : error
-    );
-    const seed = getCmsProducts({ includeDeleted: true });
-    return seed.find((product) => product.id === id || product.sku === id);
+    logCmsReadFailure("readProductById", started, {
+      source: options?.source,
+      reason: error instanceof CmsReadTimeoutError ? "timeout" : "error",
+      detail: error,
+    });
+    throw new CmsReadError();
   }
 }
 

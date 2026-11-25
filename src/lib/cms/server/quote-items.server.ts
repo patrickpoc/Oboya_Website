@@ -17,7 +17,18 @@ export async function withQuoteItemImages(item: FormSubmission): Promise<FormSub
   const items = item.data.items as StoredQuoteItem[];
   if (items.every((line) => line.image)) return item;
 
-  const products = await readProducts({ includeDeleted: true, fields: "list", skipPurge: true });
+  // Images are cosmetic: a failed read must not break the forms view.
+  let products;
+  try {
+    products = await readProducts({
+      includeDeleted: true,
+      fields: "list",
+      skipPurge: true,
+      source: "quote-items",
+    });
+  } catch {
+    return item;
+  }
   const byId = new Map(products.map((product) => [product.id, product]));
 
   return {

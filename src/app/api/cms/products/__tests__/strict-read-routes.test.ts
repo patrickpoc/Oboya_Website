@@ -193,3 +193,38 @@ describe("product routes fail closed on a baseline read error", () => {
     expect(readProductsStrict).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("list and bulk-validate routes return 503 on a read failure", () => {
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    guard = { user: { id: "u1" } };
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const { readProductsPage, readProducts } = await import("@/lib/cms/server/products.server");
+    const error = await readError();
+    vi.mocked(readProductsPage).mockRejectedValue(error);
+    vi.mocked(readProducts).mockRejectedValue(error);
+    readProductsStrict.mockRejectedValue(error);
+  });
+
+  it.each([
+    ["?page=1"],
+    ["?includeDeleted=1"],
+    [""],
+  ])("GET /api/cms/products%s", async (qs) => {
+    const { GET } = await import("../route");
+    const res = await GET(new Request(`http://x/api/cms/products${qs}`));
+    expect(res.status).toBe(503);
+  });
+
+  it("bulk-validate reads strictly and returns 503", async () => {
+    const { POST } = await import("../bulk-validate/route");
+    const res = await POST(
+      new Request("http://x/api/cms/products/bulk-validate", {
+        method: "POST",
+        body: JSON.stringify({ updates: [] }),
+      })
+    );
+    expect(res.status).toBe(503);
+    expect(readProductsStrict).toHaveBeenCalledWith("list");
+  });
+});

@@ -61,7 +61,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [index, ...articles];
   });
 
-  const products = await readProducts();
+  const products = await readProducts({ source: "sitemap" });
   const productEntries = routing.locales.flatMap((locale) =>
     products.map((product) => ({
       url: `${baseUrl}/${locale}/shop/products/${product.sku || product.id}`,

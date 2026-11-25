@@ -59,7 +59,10 @@ export async function GET(request: Request) {
       if ("response" in auth) return auth.response;
 
       if (fields === "skus") {
-        const index = await readProductSkuIndex({ asAdmin: true });
+        const index = await readProductSkuIndex({
+          asAdmin: true,
+          source: "api/cms/products?fields=skus",
+        });
         const skus: string[] = [];
         for (const row of index) {
           if (row.id) skus.push(row.id.toLowerCase());
@@ -92,6 +95,7 @@ export async function GET(request: Request) {
               | "all"
               | null) || "active",
           q: url.searchParams.get("q") ?? "",
+          source: "api/cms/products?page",
         });
         logCmsPerf("GET /api/cms/products?page", started, {
           total: result.total,
@@ -110,6 +114,7 @@ export async function GET(request: Request) {
             asAdmin: true,
             fields,
             skipPurge: true,
+            source: "api/cms/products?includeDeleted",
           });
       logCmsPerf("GET /api/cms/products?includeDeleted", started, {
         count: products.length,
@@ -123,6 +128,7 @@ export async function GET(request: Request) {
         includeDeleted: false,
         fields: fields === "full" ? "list" : fields,
         skipPurge: true,
+        source: "api/cms/products",
       })
     )
       .filter((product) => product.status === "published" && !product.deletedAt)

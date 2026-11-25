@@ -17,3 +17,29 @@ export function logCmsPerf(
   );
   return ms;
 }
+
+/** One structured line per failed or timed-out CMS read (no row data, no secrets). */
+export function logCmsReadFailure(
+  label: string,
+  startedAtMs: number,
+  info: {
+    source?: string;
+    reason: "timeout" | "error";
+    detail?: unknown;
+  }
+) {
+  const ms = Date.now() - startedAtMs;
+  const detail =
+    info.detail instanceof Error ? info.detail.message : String(info.detail ?? "");
+  console.error(
+    JSON.stringify({
+      type: "cms_read_error",
+      label,
+      source: info.source,
+      reason: info.reason,
+      ms,
+      detail: detail.slice(0, 200),
+    })
+  );
+  return ms;
+}

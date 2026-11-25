@@ -5,7 +5,8 @@ import { toPublicProduct } from "@/lib/cms/server/public-product";
 /**
  * Public product detail (with description HTML) for the shop quick view.
  * Cached per product and busted by that product's tag on CMS writes; must
- * stay free of request-time APIs. Admin draft reads use /api/cms/products/[id].
+ * stay free of request-time APIs. Read failures throw so ISR keeps the last good
+ * response instead of caching an error or a 404. Admin draft reads use /api/cms/products/[id].
  */
 export const dynamic = "force-static";
 export const revalidate = 86400;

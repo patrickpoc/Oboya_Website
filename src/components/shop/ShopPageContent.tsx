@@ -14,7 +14,8 @@ import {
 } from "@/components/shop/states/ShopStateViews";
 
 export function ShopPageContent() {
-  const { status, catalogReady } = useShop();
+  const { status, catalogReady, filteredProducts } = useShop();
+  const hasProducts = filteredProducts.length > 0;
 
   if (!catalogReady) {
     return (
@@ -35,7 +36,7 @@ export function ShopPageContent() {
 
       <section className="py-8 md:py-12">
         <Container size="wide">
-          {status === "error" ? (
+          {status === "error" && !hasProducts ? (
             <ErrorState />
           ) : (
             <div className="flex gap-5 lg:gap-6">
@@ -44,6 +45,7 @@ export function ShopPageContent() {
               </div>
 
               <div className="min-w-0 flex-1">
+                {status === "error" && <ErrorState inline />}
                 <ProductCatalog />
               </div>
             </div>
