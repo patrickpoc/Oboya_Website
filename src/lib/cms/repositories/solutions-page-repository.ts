@@ -287,10 +287,10 @@ export function createDefaultSolutionsPageSettings(): SolutionsPageSettings {
         "哪种解决方案适合您？"
       ),
       description: L(
-        "In our work culture, honesty is a priority. We are here to offer you the solution you really need. Find out what it is here.",
-        "Em nossa cultura de trabalho, a honestidade é prioridade. Estamos aqui para oferecer a solução de que você realmente precisa. Descubra qual é aqui.",
-        "En nuestra cultura de trabajo, la honestidad es una prioridad. Estamos aquí para ofrecerle la solución que realmente necesita. Descubra cuál es aquí.",
-        "在我们的工作文化中，诚信是首要原则。我们致力于为您提供真正需要的解决方案。点击此处了解详情。"
+        "In our work culture, honesty is a priority. We are here to offer you the solution you really need. Click on the button below to find out what it is.",
+        "Em nossa cultura de trabalho, a honestidade é prioridade. Estamos aqui para oferecer a solução de que você realmente precisa. Clique no botão abaixo para descobrir qual é.",
+        "En nuestra cultura de trabajo, la honestidad es una prioridad. Estamos aquí para ofrecerle la solución que realmente necesita. Haga clic en el botón de abajo para descubrir cuál es.",
+        "在我们的工作文化中，诚信是首要原则。我们致力于为您提供真正需要的解决方案。点击下方按钮了解详情。"
       ),
       buttonLabel: L("Contact Us", "Fale conosco", "Contáctenos", "联系我们"),
       href: "/contact",
@@ -405,8 +405,10 @@ function normalizeChallenges(value: unknown, cropId: string): LocalizedString[] 
 
 const LEGACY_CTA = {
   title: "Ready to find the right solution?",
-  description:
+  description: [
     "Browse products in the Shop or contact our team for tailored recommendations.",
+    "In our work culture, honesty is a priority. We are here to offer you the solution you really need. Find out what it is here.",
+  ],
   buttonLabel: "Go to Shop",
   href: "/shop",
 };
@@ -414,10 +416,12 @@ const LEGACY_CTA = {
 /** Stored value that still equals the old default (EN) upgrades to the new one. */
 function ctaField(
   value: unknown,
-  legacyEn: string,
+  legacyEn: string | string[],
   fallback: LocalizedString
 ): LocalizedString {
-  if ((value as { en?: unknown } | undefined)?.en === legacyEn) {
+  const en = (value as { en?: unknown } | undefined)?.en;
+  const legacy = Array.isArray(legacyEn) ? legacyEn : [legacyEn];
+  if (typeof en === "string" && legacy.includes(en)) {
     return { ...fallback };
   }
   return normalizeLocalized(value, fallback);

@@ -1,0 +1,32 @@
+import { describe, expect, it } from "vitest";
+import { normalizeSolutionsPageSettings } from "@/lib/cms/repositories/solutions-page-repository";
+
+const en = (text: string) => ({ en: text, "pt-BR": "", es: "", "zh-CN": "" });
+
+describe("solutions page copy upgrades", () => {
+  it("upgrades the previous hero body default to the current one", () => {
+    const out = normalizeSolutionsPageSettings({
+      hero: {
+        body: en(
+          "Different crops, different markets, different operational realities.\nEvery business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth.\nExplore solutions tailored to your sector and designed to support every stage of your horticultural operation."
+        ),
+      },
+    });
+    expect(out.hero.body.en).toMatch(/^Different crops, different markets and different operational realities\./);
+  });
+
+  it("upgrades the previous CTA description and keeps an edited one", () => {
+    const upgraded = normalizeSolutionsPageSettings({
+      cta: {
+        description: en(
+          "In our work culture, honesty is a priority. We are here to offer you the solution you really need. Find out what it is here."
+        ),
+      },
+    });
+    expect(upgraded.cta.description.en).toMatch(/Click on the button below to find out what it is\.$/);
+    expect(upgraded.cta.description["pt-BR"]).toMatch(/Clique no botão abaixo/);
+
+    const kept = normalizeSolutionsPageSettings({ cta: { description: en("My own text.") } });
+    expect(kept.cta.description.en).toBe("My own text.");
+  });
+});
