@@ -2,10 +2,10 @@
   "metaTitle": "Solutions",
   "heroHeadline": "Solutions for Every Stage of Horticulture",
   "heroTagline": "Different crops.\nDifferent markets.\nDifferent operational realities.",
-  "heroBody": "Different crops, different markets, different operational realities. Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth. Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
+  "heroBody": "Different crops, different markets and different operational realities. Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth. Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
   "heroAccent": "Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
   "heroEyebrow": "Solutions for Every Stage of Horticulture",
-  "heroTitle": "Different crops, different markets, different operational realities. Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth. Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
+  "heroTitle": "Different crops, different markets and different operational realities. Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth. Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
   "backToSolutions": "All Solutions",
   "filters": {
     "all": "All Crops",
@@ -135,8 +135,8 @@
     "eyebrow": "Explore our solutions",
     "title": "Solutions for every horticulture sector",
     "description": "Supporting flower growers, exporters, distributors, and retailers from propagation to point of sale.",
-    "headingAll": "Solutions For Every Crop",
-    "headingFor": "Solutions For {sector}",
+    "headingAll": "Solutions for Every Crop",
+    "headingFor": "Solutions for {sector}",
     "challengesTitle": "Challenges We Help Address",
     "navLabel": "Crop filters",
     "filters": {

@@ -149,9 +149,11 @@ function defaultCrops(): SolutionsPageCrop[] {
 
 const BANNER_CROP_IDS: SolutionsBannerCropId[] = ["flowers", "vegetables", "fruits"];
 
-/** Previous single-line default of the solutions hero body (English). */
-const LEGACY_HERO_BODY_EN =
-  "Different crops, different markets, different operational realities. Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth. Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.";
+/** Previous defaults of the solutions hero body (English); stored copies get the current default. */
+const LEGACY_HERO_BODIES_EN = new Set([
+  "Different crops, different markets, different operational realities. Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth. Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
+  "Different crops, different markets, different operational realities.\nEvery business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth.\nExplore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
+]);
 
 function cropImages(stage: string): Record<SolutionsBannerCropId, string> {
   return {
@@ -269,7 +271,7 @@ export function createDefaultSolutionsPageSettings(): SolutionsPageSettings {
         "覆盖园艺每个阶段的解决方案"
       ),
       body: L(
-        "Different crops, different markets, different operational realities.\nEvery business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth.\nExplore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
+        "Different crops, different markets and different operational realities.\nEvery business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth.\nExplore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
         "Culturas, mercados e realidades operacionais diferentes.\nCada negócio enfrenta desafios próprios, mas o objetivo é o mesmo: melhorar o desempenho, proteger a qualidade e sustentar o crescimento.\nExplore soluções feitas para o seu setor e para cada etapa da operação.",
         "Cultivos, mercados y realidades operativas distintas.\nCada negocio enfrenta desafíos propios, pero el objetivo es el mismo: mejorar el rendimiento, proteger la calidad y sostener el crecimiento.\nExplore soluciones hechas para su sector y para cada etapa de la operación.",
         "作物、市场和运营现实各不相同。\n每家企业都有自己的挑战，但目标一致：提升绩效、保障品质并支持可持续增长。\n探索为您的领域和园艺运营每个阶段设计的解决方案。"
@@ -544,9 +546,11 @@ const banners =
   return {
     hero: {
       headline: normalizeLocalized(hero.headline, defaults.hero.headline),
-      // The old single-line default now has one sentence per line.
+      // Older defaults (single line; "different operational realities" without "and") get the current one.
       body:
-        (hero.body as { en?: unknown } | undefined)?.en === LEGACY_HERO_BODY_EN
+        LEGACY_HERO_BODIES_EN.has(
+          String((hero.body as { en?: unknown } | undefined)?.en ?? "")
+        )
           ? defaults.hero.body
           : normalizeLocalized(hero.body, defaults.hero.body),
     },
