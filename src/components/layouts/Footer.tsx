@@ -20,9 +20,6 @@ export async function Footer() {
             <Logo className="mb-6" />
             <div className="max-w-xs space-y-3 text-sm leading-relaxed text-oboya-blue-dark/60">
               <p>
-                <span className="block text-xs font-semibold tracking-wider text-oboya-blue-dark/80 uppercase">
-                  {t("footer.legalContact")}
-                </span>
                 <a
                   href={`mailto:${siteConfig.company.email}`}
                   className="transition-colors hover:text-oboya-green"
