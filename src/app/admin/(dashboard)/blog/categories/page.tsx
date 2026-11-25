@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Can } from "@/components/admin/permissions/Can";
-import type { BlogCategory } from "@/lib/cms/repositories/blog-categories-repository";
+import { BLOG_CATEGORY_SCOPES, type BlogCategory } from "@/lib/cms/repositories/blog-categories-repository";
 import type { CmsLocale } from "@/lib/cms/types";
 import { AccessDenied } from "@/components/admin/permissions/AccessDenied";
 
@@ -74,6 +74,7 @@ export default function BlogCategoriesPage() {
       id,
       slug: id,
       name: emptyLocalizedString(),
+      scope: "blog",
     };
     setCategories((prev) => [...prev, category]);
     setEditingId(id);
@@ -122,7 +123,9 @@ export default function BlogCategoriesPage() {
                   className="flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-muted/50"
                 >
                   <span className="font-medium">{category.name.en || category.slug}</span>
-                  <span className="text-xs text-muted-foreground">{category.slug}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {t(`scope.${category.scope}`)} · {category.slug}
+                  </span>
                 </button>
               ))}
             </div>
@@ -143,6 +146,29 @@ export default function BlogCategoriesPage() {
                       setEditingId(updated.id);
                     }}
                   />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label>{t("page")}</Label>
+                  <select
+                    value={editing.scope}
+                    onChange={(e) => {
+                      const updated = {
+                        ...editing,
+                        scope: e.target.value as BlogCategory["scope"],
+                      };
+                      setCategories((prev) =>
+                        prev.map((c) => (c.id === updated.id ? updated : c))
+                      );
+                    }}
+                    className="h-8 w-full rounded-lg border border-input px-2.5 text-sm"
+                  >
+                    {BLOG_CATEGORY_SCOPES.map((scope) => (
+                      <option key={scope} value={scope}>
+                        {t(`scope.${scope}`)}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <LocaleFieldTabs value={locale} onChange={setLocale}>

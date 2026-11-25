@@ -1475,7 +1475,12 @@
       "saved": "Categoría guardada",
       "deleted": "Categoría eliminada",
       "add": "Nueva categoría",
-      "save": "Guardar categoría"
+      "save": "Guardar categoría",
+      "page": "Página",
+      "scope": {
+        "blog": "Blog",
+        "news": "Sala de Prensa"
+      }
     }
   },
   "caseStudies": {

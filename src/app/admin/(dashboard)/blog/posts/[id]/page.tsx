@@ -18,7 +18,11 @@ import { Label } from "@/components/ui/label";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { BLOG_CROP_IDS, type CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
 import type { BlogAuthor } from "@/lib/cms/repositories/blog-authors-repository";
-import type { BlogCategory } from "@/lib/cms/repositories/blog-categories-repository";
+import {
+  BLOG_CATEGORY_SCOPES,
+  categoriesForScope,
+  type BlogCategory,
+} from "@/lib/cms/repositories/blog-categories-repository";
 import type { CmsLocale, CmsStatus } from "@/lib/cms/types";
 import {
   isoToDateInput,
@@ -54,6 +58,7 @@ function emptyPost(
 export default function BlogPostEditPage() {
   const t = useTranslations("admin.blog.postEditor");
   const tCommon = useTranslations("admin.common");
+  const tCat = useTranslations("admin.blog.categories");
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
@@ -294,10 +299,14 @@ export default function BlogPostEditPage() {
                   onChange={(e) => setPost({ ...post, categoryId: e.target.value })}
                   className="h-8 w-full rounded-lg border border-input px-2.5 text-sm"
                 >
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name.en}
-                    </option>
+                  {BLOG_CATEGORY_SCOPES.map((scope) => (
+                    <optgroup key={scope} label={tCat(`scope.${scope}`)}>
+                      {categoriesForScope(categories, scope).map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name.en}
+                        </option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
               </div>

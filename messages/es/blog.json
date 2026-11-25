@@ -1,16 +1,16 @@
 {
   "eyebrow": "Blog",
-  "title": "Ideas y noticias",
-  "description": "Tendencias, innovación e historias de toda la cadena de suministro hortícola.",
+  "title": "Perspectivas para una Industria en Cambio",
+  "description": "Ideas, tendencias, innovaciones y conocimiento práctico de toda la cadena de suministro hortícola.",
   "readMore": "Leer artículo",
   "allPosts": "Todos",
-  "filterLabel": "Filtrar por cultivo",
+  "filterLabel": "Filtrar por categoría",
   "cropAll": "Todos los cultivos",
   "cropFlowers": "Flores",
   "cropVegetables": "Hortalizas y hierbas",
   "cropFruits": "Frutas",
   "articleLabel": "Artículo",
-  "empty": "Ningún artículo coincide con este cultivo.",
+  "empty": "No hay artículos en esta categoría.",
   "emptyAll": "Aún no hay artículos publicados.",
   "featuredLabel": "Destacado",
   "detailPlaceholder": "El contenido completo del artículo aparecerá aquí cuando se añada en el panel.",
@@ -37,5 +37,6 @@
       "p3": "Localized assortments help chains tailor pack sizes to regional demand."
     }
   },
-  "backToBlog": "Volver al blog"
+  "backToBlog": "Volver al blog",
+  "categoryAll": "Todas"
 }

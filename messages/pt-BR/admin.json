@@ -1475,7 +1475,12 @@
       "saved": "Categoria salva",
       "deleted": "Categoria excluída",
       "add": "Nova categoria",
-      "save": "Salvar categoria"
+      "save": "Salvar categoria",
+      "page": "Página",
+      "scope": {
+        "blog": "Blog",
+        "news": "Sala de Imprensa"
+      }
     }
   },
   "caseStudies": {

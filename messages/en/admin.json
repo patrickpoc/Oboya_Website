@@ -1475,7 +1475,12 @@
       "saved": "Category saved",
       "deleted": "Category deleted",
       "add": "New category",
-      "save": "Save category"
+      "save": "Save category",
+      "page": "Page",
+      "scope": {
+        "blog": "Blog",
+        "news": "Newsroom"
+      }
     }
   },
   "caseStudies": {

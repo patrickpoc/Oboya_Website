@@ -1,16 +1,16 @@
 {
   "eyebrow": "博客",
-  "title": "洞察与资讯",
-  "description": "来自园艺供应链的趋势、创新与故事。",
+  "title": "洞察变革中的行业",
+  "description": "来自整个园艺供应链的理念、趋势、创新与实用知识。",
   "readMore": "阅读文章",
   "allPosts": "全部",
-  "filterLabel": "按作物筛选",
+  "filterLabel": "按类别筛选",
   "cropAll": "全部作物",
   "cropFlowers": "花卉",
   "cropVegetables": "蔬菜与香草",
   "cropFruits": "水果",
   "articleLabel": "文章",
-  "empty": "没有符合该作物的文章。",
+  "empty": "此类别下暂无文章。",
   "emptyAll": "尚未发布文章。",
   "featuredLabel": "精选",
   "detailPlaceholder": "文章全文将在后台添加后显示在这里。",
@@ -37,5 +37,6 @@
       "p3": "Localized assortments help chains tailor pack sizes to regional demand."
     }
   },
-  "backToBlog": "返回博客"
+  "backToBlog": "返回博客",
+  "categoryAll": "全部"
 }

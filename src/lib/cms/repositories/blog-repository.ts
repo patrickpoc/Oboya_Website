@@ -37,6 +37,25 @@ const SEED_CROPS: Record<string, BlogCropId[]> = {
   "greenhouse-technology": ["vegetables"],
   "retail-display-innovation": ["flowers"],
 };
+const SEED_CATEGORY: Record<string, string> = {
+  "2025-exhibition-overview": "trade-fairs-events",
+  "sustainable-packaging-trends": "packaging-innovation",
+  "greenhouse-innovation-2026": "innovation-technology",
+  "berry-retail-growth": "industry-trends",
+  "asia-pacific-expansion": "supply-chain-logistics",
+  "greenhouse-technology": "innovation-technology",
+  "circular-packaging-program": "packaging-innovation",
+  "retail-display-innovation": "retail-merchandising",
+  "global-partner-summit": "trade-fairs-events",
+};
+/** Previous category ids -> closest current one (stored posts). */
+const LEGACY_CATEGORY: Record<string, string> = {
+  general: "industry-trends",
+  innovation: "innovation-technology",
+  sustainability: "packaging-innovation",
+  market: "industry-trends",
+  events: "trade-fairs-events",
+};
 const SEED_FEATURED_SLUG = "2025-exhibition-overview";
 
 /** Fills defaults / drops invalid values for posts read from storage. */
@@ -47,6 +66,7 @@ export function normalizeBlogPost(post: CmsBlogPost): CmsBlogPost {
     : [];
   return {
     ...post,
+    categoryId: LEGACY_CATEGORY[post.categoryId] ?? post.categoryId,
     crops,
     featured: (post as { featured?: unknown }).featured === true,
   };
@@ -83,7 +103,7 @@ function seed(): CmsBlogPost[] {
       excerpt,
       body: emptyLoc(),
       author: p.author,
-      categoryId: p.categoryId,
+      categoryId: SEED_CATEGORY[p.slug] ?? p.categoryId,
       featuredImage: p.featuredImage,
       relatedPostIds: [],
       crops: SEED_CROPS[p.slug] ?? [],

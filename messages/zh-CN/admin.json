@@ -1475,7 +1475,12 @@
       "saved": "分类已保存",
       "deleted": "分类已删除",
       "add": "新建分类",
-      "save": "保存分类"
+      "save": "保存分类",
+      "page": "页面",
+      "scope": {
+        "blog": "博客",
+        "news": "新闻中心"
+      }
     }
   },
   "caseStudies": {

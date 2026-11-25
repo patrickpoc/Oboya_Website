@@ -6,17 +6,16 @@ import { Container } from "@/components/ui/container";
 import { PageIntroBanner } from "@/components/ui/PageIntroBanner";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { BlogFeaturedHero } from "@/components/blog/BlogFeaturedHero";
-import type { BlogCropId, CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
+import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
 import {
-  BLOG_CROP_IDS,
   pickFeaturedPost,
   sortBlogPostsForDisplay,
 } from "@/lib/cms/repositories/blog-repository";
-import type { BlogCategory } from "@/lib/cms/repositories/blog-categories-repository";
+import { categoriesForScope, type BlogCategory } from "@/lib/cms/repositories/blog-categories-repository";
 import { pickLocalized } from "@/lib/cms/utils";
 import { cn } from "@/lib/utils";
 
-type CropFilter = "all" | BlogCropId;
+type CategoryFilter = "all" | string;
 
 interface BlogPageContentProps {
   posts: CmsBlogPost[];
@@ -38,20 +37,25 @@ function formatBlogDate(isoDate: string | undefined, locale: string): string {
 
 export function BlogPageContent({ posts, categories, locale }: BlogPageContentProps) {
   const t = useTranslations("blog");
-  const [crop, setCrop] = useState<CropFilter>("all");
+  const [category, setCategory] = useState<CategoryFilter>("all");
 
-  // Sync from ?crop= after mount (avoids Suspense/static-render bailout of useSearchParams).
+  const blogCategories = useMemo(
+    () => categoriesForScope(categories, "blog"),
+    [categories]
+  );
+
+  // Sync from ?category= after mount (avoids Suspense/static-render bailout of useSearchParams).
   useEffect(() => {
-    const param = new URLSearchParams(window.location.search).get("crop");
-    const match = BLOG_CROP_IDS.find((c) => c === param);
-    if (match) setCrop(match); // eslint-disable-line react-hooks/set-state-in-effect
-  }, []);
+    const param = new URLSearchParams(window.location.search).get("category");
+    const match = blogCategories.find((c) => c.id === param);
+    if (match) setCategory(match.id); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [blogCategories]);
 
-  const selectCrop = (next: CropFilter) => {
-    setCrop(next);
+  const selectCategory = (next: CategoryFilter) => {
+    setCategory(next);
     const url = new URL(window.location.href);
-    if (next === "all") url.searchParams.delete("crop");
-    else url.searchParams.set("crop", next);
+    if (next === "all") url.searchParams.delete("category");
+    else url.searchParams.set("category", next);
     window.history.replaceState(null, "", url);
   };
 
@@ -62,17 +66,15 @@ export function BlogPageContent({ posts, categories, locale }: BlogPageContentPr
 
   const filteredPosts = useMemo(() => {
     const sorted = sortBlogPostsForDisplay(posts);
-    if (crop === "all") return sorted;
-    return sorted.filter((post) => post.crops.includes(crop));
-  }, [posts, crop]);
+    if (category === "all") return sorted;
+    return sorted.filter((post) => post.categoryId === category);
+  }, [posts, category]);
 
   const featuredPost = pickFeaturedPost(filteredPosts);
   const gridPosts = filteredPosts.filter((p) => p !== featuredPost);
-  const filters: { id: CropFilter; label: string }[] = [
-    { id: "all", label: t("cropAll") },
-    { id: "flowers", label: t("cropFlowers") },
-    { id: "vegetables", label: t("cropVegetables") },
-    { id: "fruits", label: t("cropFruits") },
+  const filters: { id: CategoryFilter; label: string }[] = [
+    { id: "all", label: t("categoryAll") },
+    ...blogCategories.map((c) => ({ id: c.id, label: pickLocalized(c.name, locale) })),
   ];
 
   return (
@@ -83,13 +85,13 @@ export function BlogPageContent({ posts, categories, locale }: BlogPageContentPr
         <Container>
           <nav aria-label={t("filterLabel")} className="mb-8 flex flex-wrap gap-2 md:mb-10">
             {filters.map((filter) => {
-              const isActive = filter.id === crop;
+              const isActive = filter.id === category;
               return (
                 <button
                   key={filter.id}
                   type="button"
                   aria-pressed={isActive}
-                  onClick={() => selectCrop(filter.id)}
+                  onClick={() => selectCategory(filter.id)}
                   className={cn(
                     "rounded-full px-3.5 py-1.5 font-body text-[0.8125rem] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-oboya-green md:text-sm",
                     isActive
@@ -105,7 +107,7 @@ export function BlogPageContent({ posts, categories, locale }: BlogPageContentPr
 
           {filteredPosts.length === 0 ? (
             <p className="py-16 text-center text-muted-foreground">
-              {crop === "all" ? t("emptyAll") : t("empty")}
+              {category === "all" ? t("emptyAll") : t("empty")}
             </p>
           ) : (
             <div className="space-y-8 md:space-y-10">

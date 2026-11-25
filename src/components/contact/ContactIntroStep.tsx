@@ -12,12 +12,12 @@ export function ContactIntroStep({ onStart }: { onStart: () => void }) {
     <>
       <section className="bg-oboya-blue-dark pb-36 pt-16 md:pb-44 md:pt-20">
         <Container className="text-center">
-          <p className="text-sm font-semibold tracking-wide text-white">
+          <h1 className="font-display text-[length:clamp(2.25rem,4.5vw,3.5rem)] font-light leading-[1.15] text-white">
             {t("eyebrow")}
-          </p>
-          <h1 className="mx-auto mt-6 max-w-3xl font-display text-[length:clamp(1.75rem,3.4vw,2.5rem)] font-light leading-[1.2] text-white">
-            {t("title")}
           </h1>
+          <p className="mx-auto mt-6 max-w-3xl font-body text-[clamp(1.125rem,1.8vw,1.5rem)] font-light leading-snug text-white/85">
+            {t("title")}
+          </p>
         </Container>
       </section>
 

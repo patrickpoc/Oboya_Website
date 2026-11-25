@@ -1,13 +1,15 @@
 {
   "metaTitle": "Latest News",
-  "title": "Newsroom",
-  "description": "Company news, events and announcements from Oboya Horticulture.",
+  "title": "The Latest From Oboya Horticulture",
+  "description": "Company announcements, partnerships, innovations, product launches, and industry news.",
   "emptyAll": "No news published yet.",
   "allNews": "All news",
-  "filterLabel": "Filter by crop",
+  "filterLabel": "Filter by category",
   "articleLabel": "News",
-  "empty": "No news match this crop.",
+  "empty": "No news in this category.",
   "prevPage": "Previous page",
   "nextPage": "Next page",
-  "detailPlaceholder": "Full article content will appear here once added in the dashboard."
+  "detailPlaceholder": "Full article content will appear here once added in the dashboard.",
+  "intro": "Stay up to date on developments across Oboya's global operations, strategic partnerships, events, and innovation initiatives.",
+  "categoryAll": "All"
 }

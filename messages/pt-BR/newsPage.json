@@ -1,13 +1,15 @@
 {
   "metaTitle": "Últimas notícias",
-  "title": "Sala de Imprensa",
-  "description": "Notícias da empresa, eventos e comunicados da Oboya Horticulture.",
+  "title": "As Novidades da Oboya Horticulture",
+  "description": "Comunicados da empresa, parcerias, inovações, lançamentos de produtos e notícias do setor.",
   "emptyAll": "Nenhuma notícia publicada ainda.",
   "allNews": "Todas as notícias",
-  "filterLabel": "Filtrar por cultura",
+  "filterLabel": "Filtrar por categoria",
   "articleLabel": "Notícia",
-  "empty": "Nenhuma notícia corresponde a esta cultura.",
+  "empty": "Nenhuma notícia nesta categoria.",
   "prevPage": "Página anterior",
   "nextPage": "Próxima página",
-  "detailPlaceholder": "O conteúdo completo do artigo aparecerá aqui quando adicionado no painel."
+  "detailPlaceholder": "O conteúdo completo do artigo aparecerá aqui quando adicionado no painel.",
+  "intro": "Acompanhe os desenvolvimentos das operações globais, parcerias estratégicas, eventos e iniciativas de inovação da Oboya.",
+  "categoryAll": "Todas"
 }

@@ -1,16 +1,16 @@
 {
   "eyebrow": "Blog",
-  "title": "Insights & news",
-  "description": "Trends, innovation, and stories from across the horticulture supply chain.",
+  "title": "Insights for a Changing Industry",
+  "description": "Ideas, trends, innovations, and practical knowledge from across the horticultural supply chain.",
   "readMore": "Read Article",
   "allPosts": "All",
-  "filterLabel": "Filter by crop",
+  "filterLabel": "Filter by category",
   "cropAll": "All Crops",
   "cropFlowers": "Flowers",
   "cropVegetables": "Vegetables & Herbs",
   "cropFruits": "Fruits",
   "articleLabel": "Article",
-  "empty": "No articles match this crop.",
+  "empty": "No articles in this category.",
   "emptyAll": "No articles published yet.",
   "featuredLabel": "Featured",
   "detailPlaceholder": "Full article content will appear here once added in the dashboard.",
@@ -37,5 +37,6 @@
       "p2": "Retail-ready packs and display trolleys improve visibility and reduce handling damage.",
       "p3": "Localized assortments help chains tailor pack sizes to regional demand."
     }
-  }
+  },
+  "categoryAll": "All"
 }
