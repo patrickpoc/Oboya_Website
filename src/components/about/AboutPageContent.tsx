@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { readAboutPageSettings, readHomepageSettings } from "@/lib/cms/readers";
 import { pickLocalized } from "@/lib/cms/utils";
-import { Container } from "@/components/ui/container";
 import { AboutInstitutionalImage } from "@/components/about/AboutInstitutionalImage";
 import { AboutImpact } from "@/components/about/AboutImpact";
 import { AboutCallout } from "@/components/about/AboutCallout";
@@ -38,19 +37,18 @@ export async function AboutPageContent({
   return (
     <>
       {/* Intro above the hero image: title left, body right (stacked on mobile). */}
-      <section className="bg-white pt-[clamp(3.5rem,9vw,8rem)] pb-[clamp(0.5rem,2vw,1.5rem)]">
-        <Container>
-          <div className="grid gap-6 md:grid-cols-2 md:items-start md:gap-16 lg:gap-24">
-            <h1 className="font-display text-[clamp(2.25rem,4.4vw,3.75rem)] font-light leading-[1.05] tracking-[-0.02em] text-oboya-blue-dark text-balance">
-              {pickLocalized(about.hero.title, locale)}
-            </h1>
-            {heroBody ? (
-              <p className="max-w-xl font-body text-base leading-[1.75] text-oboya-blue-dark md:pt-1 md:text-[1.0625rem]">
-                {heroBody}
-              </p>
-            ) : null}
-          </div>
-        </Container>
+      {/* Same structure as the "More Than a Supplier" callout (AboutCallout). */}
+      <section className="bg-white">
+        <div className="mx-auto grid w-full max-w-[var(--container-max)] gap-6 px-[var(--container-padding)] pt-[clamp(4rem,9vw,7rem)] pb-[clamp(1rem,3vw,2rem)] lg:grid-cols-12 lg:gap-12">
+          <h1 className="font-display text-[clamp(1.85rem,3.6vw,3.15rem)] font-light leading-[1.08] tracking-[-0.02em] text-oboya-blue-dark text-balance lg:col-span-5">
+            {pickLocalized(about.hero.title, locale)}
+          </h1>
+          {heroBody ? (
+            <div className="font-body text-[0.9375rem] leading-[1.6] text-oboya-blue-dark/80 text-pretty lg:col-span-7 lg:col-start-6">
+              <p>{heroBody}</p>
+            </div>
+          ) : null}
+        </div>
       </section>
 
       {about.sections.institutionalImage.enabled ? (
