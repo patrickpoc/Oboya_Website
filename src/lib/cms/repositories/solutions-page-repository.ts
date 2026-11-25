@@ -117,10 +117,10 @@ function defaultCrops(): SolutionsPageCrop[] {
       id: "vegetables",
       label: L("Vegetables & Herbs", "Hortaliças e ervas", "Hortalizas y hierbas", "蔬菜与香草"),
       description: L(
-        "Supporting efficient production, handling, packaging, and commercialization for vegetable and herb operations.",
-        "Apoio à produção, ao manuseio, à embalagem e à comercialização eficientes de hortaliças e ervas.",
-        "Apoyo a la producción, manipulación, empaque y comercialización eficientes de hortalizas y hierbas.",
-        "支持蔬菜与香草在生产、搬运、包装和销售环节的高效运营。"
+        "Solutions that support efficient production, handling, packaging, and commercialization.",
+        "Soluções que apoiam a produção, o manuseio, a embalagem e a comercialização eficientes.",
+        "Soluciones que apoyan la producción, la manipulación, el empaque y la comercialización eficientes.",
+        "支持高效生产、搬运、包装与销售的解决方案。"
       ),
       sectorTitle: L(
         "Vegetables & Herbs",
@@ -135,10 +135,10 @@ function defaultCrops(): SolutionsPageCrop[] {
       id: "fruits",
       label: L("Fruits", "Frutas", "Frutas", "水果"),
       description: L(
-        "Optimizing cultivation, handling, packaging, and distribution across the fruit supply chain.",
-        "Otimização do cultivo, manuseio, embalagem e distribuição em toda a cadeia de frutas.",
-        "Optimización del cultivo, la manipulación, el empaque y la distribución en toda la cadena de frutas.",
-        "优化水果供应链中的种植、搬运、包装与配送。"
+        "Protecting quality, improving movement, and supporting performance throughout the supply chain.",
+        "Protegendo a qualidade, melhorando a movimentação e apoiando o desempenho em toda a cadeia de suprimentos.",
+        "Protegiendo la calidad, mejorando el movimiento y apoyando el rendimiento en toda la cadena de suministro.",
+        "在整个供应链中保护品质、改善流转并提升绩效。"
       ),
       sectorTitle: L("Fruits", "Frutas", "Frutas", "水果"),
       challenges: defaultChallenges("fruits"),
@@ -150,6 +150,11 @@ function defaultCrops(): SolutionsPageCrop[] {
 const BANNER_CROP_IDS: SolutionsBannerCropId[] = ["flowers", "vegetables", "fruits"];
 
 /** Previous defaults of the solutions hero body (English); stored copies get the current default. */
+const LEGACY_CROP_DESCRIPTIONS_EN = new Set([
+  "Supporting efficient production, handling, packaging, and commercialization for vegetable and herb operations.",
+  "Optimizing cultivation, handling, packaging, and distribution across the fruit supply chain.",
+]);
+
 const LEGACY_HERO_BODIES_EN = new Set([
   "Different crops, different markets, different operational realities. Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth. Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
   "Different crops, different markets, different operational realities.\nEvery business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth.\nExplore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
@@ -468,10 +473,13 @@ export function normalizeSolutionsPageSettings(
           .map((crop, index) => {
             const byId = defaults.crops.find((item) => item.id === crop.id);
             const fallback = byId ?? defaults.crops[index] ?? defaults.crops[0]!;
-            const description = normalizeLocalized(
-              crop.description,
-              fallback.description
+            const storedDescEn = String(
+              (crop.description as { en?: unknown } | undefined)?.en ?? ""
             );
+            // Previous default sector blurbs upgrade to the current defaults.
+            const description = LEGACY_CROP_DESCRIPTIONS_EN.has(storedDescEn)
+              ? { ...fallback.description }
+              : normalizeLocalized(crop.description, fallback.description);
             // Promote legacy All Crops blurb to the verified copy.
             if (
               crop.id === "all" &&

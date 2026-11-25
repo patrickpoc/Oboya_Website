@@ -49,6 +49,20 @@ describe("solutions page copy upgrades", () => {
     expect(automation?.cropImages?.fruits).toBe("/assets/solutions/fruits/automation.jpg");
   });
 
+  it("upgrades the previous vegetables/fruits sector descriptions", () => {
+    const out = normalizeSolutionsPageSettings({
+      crops: [
+        { id: "vegetables", description: en("Supporting efficient production, handling, packaging, and commercialization for vegetable and herb operations.") },
+        { id: "fruits", description: en("My own fruit text.") },
+      ],
+    });
+    const byId = Object.fromEntries(out.crops.map((c) => [c.id, c]));
+    expect(byId.vegetables.description.en).toBe(
+      "Solutions that support efficient production, handling, packaging, and commercialization."
+    );
+    expect(byId.fruits.description.en).toBe("My own fruit text.");
+  });
+
   it("upgrades the previous CTA description and keeps an edited one", () => {
     const upgraded = normalizeSolutionsPageSettings({
       cta: {
