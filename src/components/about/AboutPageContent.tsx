@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { readAboutPageSettings, readHomepageSettings } from "@/lib/cms/readers";
 import { pickLocalized } from "@/lib/cms/utils";
+import { Container } from "@/components/ui/container";
 import { AboutInstitutionalImage } from "@/components/about/AboutInstitutionalImage";
 import { AboutImpact } from "@/components/about/AboutImpact";
 import { AboutCallout } from "@/components/about/AboutCallout";
@@ -32,10 +33,25 @@ export async function AboutPageContent({
     locale as Locale
   );
 
+  const heroBody = about.hero.body ? pickLocalized(about.hero.body, locale).trim() : "";
+
   return (
     <>
-      {/* The visual hero block was removed; keep the page's h1 for screen readers and SEO. */}
-      <h1 className="sr-only">{pickLocalized(about.hero.title, locale)}</h1>
+      {/* Intro above the hero image: title left, body right (stacked on mobile). */}
+      <section className="bg-white pt-[clamp(3.5rem,9vw,8rem)] pb-[clamp(0.5rem,2vw,1.5rem)]">
+        <Container>
+          <div className="grid gap-6 md:grid-cols-2 md:items-start md:gap-16 lg:gap-24">
+            <h1 className="font-display text-[clamp(2.25rem,4.4vw,3.75rem)] font-light leading-[1.05] tracking-[-0.02em] text-oboya-blue-dark text-balance">
+              {pickLocalized(about.hero.title, locale)}
+            </h1>
+            {heroBody ? (
+              <p className="max-w-xl font-body text-base leading-[1.75] text-oboya-blue-dark md:pt-1 md:text-[1.0625rem]">
+                {heroBody}
+              </p>
+            ) : null}
+          </div>
+        </Container>
+      </section>
 
       {about.sections.institutionalImage.enabled ? (
         <AboutInstitutionalImage
