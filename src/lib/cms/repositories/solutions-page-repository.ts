@@ -155,9 +155,20 @@ const LEGACY_HERO_BODIES_EN = new Set([
   "Different crops, different markets, different operational realities.\nEvery business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth.\nExplore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
 ]);
 
+/** Flowers stages whose photo was replaced (new filename so the image cache picks it up). */
+const FLOWERS_IMAGE_OVERRIDES: Record<string, string> = {
+  harvest: "/assets/solutions/flowers/harvest-v2.jpg",
+  retail: "/assets/solutions/flowers/retail-v2.jpg",
+};
+/** Previous default Flowers paths; a stored copy of one of these gets the new default. */
+const LEGACY_FLOWERS_CROP_IMAGES = new Set([
+  "/assets/solutions/flowers/harvest.jpg",
+  "/assets/solutions/flowers/retail.jpg",
+]);
+
 function cropImages(stage: string): Record<SolutionsBannerCropId, string> {
   return {
-    flowers: `/assets/solutions/flowers/${stage}.jpg`,
+    flowers: FLOWERS_IMAGE_OVERRIDES[stage] ?? `/assets/solutions/flowers/${stage}.jpg`,
     vegetables: `/assets/solutions/vegetables/${stage}.jpg`,
     fruits: `/assets/solutions/fruits/${stage}.jpg`,
   };
@@ -520,9 +531,10 @@ const banners =
           const bannerCropImages: Partial<Record<SolutionsBannerCropId, string>> = {};
           for (const cropId of BANNER_CROP_IDS) {
             const stored = storedCropImages[cropId];
+            const storedPath = typeof stored === "string" ? stored.trim() : "";
             const value =
-              typeof stored === "string" && stored.trim()
-                ? stored.trim()
+              storedPath && !LEGACY_FLOWERS_CROP_IMAGES.has(storedPath)
+                ? storedPath
                 : byId?.cropImages?.[cropId];
             if (value) bannerCropImages[cropId] = value;
           }

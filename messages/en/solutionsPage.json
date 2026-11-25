@@ -7,6 +7,11 @@
   "heroEyebrow": "Solutions for Every Stage of Horticulture",
   "heroTitle": "Different crops, different markets and different operational realities. Every business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth. Explore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
   "backToSolutions": "All Solutions",
+  "featured": {
+    "title": "Featured",
+    "caseStudyTag": "Case Study",
+    "readArticle": "Read Article"
+  },
   "filters": {
     "all": "All Crops",
     "flowers": "Flowers",

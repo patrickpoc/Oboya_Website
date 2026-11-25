@@ -15,6 +15,18 @@ describe("solutions page copy upgrades", () => {
     expect(out.hero.body.en).toMatch(/^Different crops, different markets and different operational realities\./);
   });
 
+  it("upgrades old Flowers harvest/retail images and keeps custom ones", () => {
+    const out = normalizeSolutionsPageSettings({
+      banners: [
+        { id: "harvest", cropImages: { flowers: "/assets/solutions/flowers/harvest.jpg" } },
+        { id: "retail", cropImages: { flowers: "/uploads/my-retail.jpg" } },
+      ],
+    });
+    const byId = Object.fromEntries(out.banners.map((b) => [b.id, b]));
+    expect(byId.harvest.cropImages?.flowers).toBe("/assets/solutions/flowers/harvest-v2.jpg");
+    expect(byId.retail.cropImages?.flowers).toBe("/uploads/my-retail.jpg");
+  });
+
   it("upgrades the previous CTA description and keeps an edited one", () => {
     const upgraded = normalizeSolutionsPageSettings({
       cta: {

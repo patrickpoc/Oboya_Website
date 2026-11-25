@@ -7,6 +7,11 @@
   "heroEyebrow": "Soluciones para Cada Etapa de la Horticultura",
   "heroTitle": "Cultivos diferentes, mercados diferentes, realidades operativas diferentes. Cada negocio enfrenta retos únicos, pero el objetivo sigue siendo el mismo: mejorar el rendimiento, proteger la calidad y respaldar un crecimiento sostenible. Explore soluciones adaptadas a su sector y diseñadas para apoyar cada etapa de su operación hortícola.",
   "backToSolutions": "Todas las Soluciones",
+  "featured": {
+    "title": "Destacados",
+    "caseStudyTag": "Caso de estudio",
+    "readArticle": "Leer artículo"
+  },
   "filters": {
     "all": "Todos los cultivos",
     "flowers": "Flores",
