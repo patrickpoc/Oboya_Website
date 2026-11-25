@@ -27,6 +27,28 @@ describe("solutions page copy upgrades", () => {
     expect(byId.retail.cropImages?.flowers).toBe("/uploads/my-retail.jpg");
   });
 
+  it("uses the new crop photos and appends Automation & Machinery when missing", () => {
+    const out = normalizeSolutionsPageSettings({
+      banners: [
+        {
+          id: "harvest",
+          cropImages: {
+            vegetables: "/assets/solutions/vegetables/harvest.jpg",
+            fruits: "/assets/solutions/fruits/harvest.jpg",
+          },
+        },
+      ],
+    });
+    const harvest = out.banners.find((b) => b.id === "harvest");
+    expect(harvest?.cropImages?.vegetables).toBe("/assets/solutions/vegetables/harvest-v2.jpg");
+    expect(harvest?.cropImages?.fruits).toBe("/assets/solutions/fruits/harvest-v2.jpg");
+    const automation = out.banners.find((b) => b.id === "automation");
+    expect(automation?.title.en).toBe("Automation & Machinery");
+    expect(automation?.cropImages?.flowers).toBe("/assets/solutions/flowers/automation-v2.jpg");
+    expect(automation?.cropImages?.vegetables).toBe("/assets/solutions/vegetables/automation-v2.jpg");
+    expect(automation?.cropImages?.fruits).toBe("/assets/solutions/fruits/automation.jpg");
+  });
+
   it("upgrades the previous CTA description and keeps an edited one", () => {
     const upgraded = normalizeSolutionsPageSettings({
       cta: {

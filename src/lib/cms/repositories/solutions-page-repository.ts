@@ -155,22 +155,33 @@ const LEGACY_HERO_BODIES_EN = new Set([
   "Different crops, different markets, different operational realities.\nEvery business faces unique challenges, but the objective remains the same: improve performance, protect quality, and support sustainable growth.\nExplore solutions tailored to your sector and designed to support every stage of your horticultural operation.",
 ]);
 
-/** Flowers stages whose photo was replaced (new filename so the image cache picks it up). */
-const FLOWERS_IMAGE_OVERRIDES: Record<string, string> = {
-  harvest: "/assets/solutions/flowers/harvest-v2.jpg",
-  retail: "/assets/solutions/flowers/retail-v2.jpg",
+/**
+ * Crop/stage photos that were replaced. The new file gets a "-v2" name so the image cache
+ * picks it up; a stored copy of the old default path upgrades to the new one.
+ */
+const REPLACED_CROP_IMAGES: Record<SolutionsBannerCropId, Record<string, string>> = {
+  flowers: { harvest: "-v2", retail: "-v2", automation: "-v2" },
+  vegetables: { harvest: "-v2", retail: "-v2", automation: "-v2" },
+  fruits: { harvest: "-v2", transport: "-v2", retail: "-v3" },
 };
-/** Previous default Flowers paths; a stored copy of one of these gets the new default. */
-const LEGACY_FLOWERS_CROP_IMAGES = new Set([
-  "/assets/solutions/flowers/harvest.jpg",
-  "/assets/solutions/flowers/retail.jpg",
+const LEGACY_CROP_IMAGES = new Set([
+  ...Object.entries(REPLACED_CROP_IMAGES).flatMap(([crop, stages]) =>
+    Object.keys(stages).map((stage) => `/assets/solutions/${crop}/${stage}.jpg`)
+  ),
+  // Superseded intermediate version.
+  "/assets/solutions/fruits/retail-v2.jpg",
 ]);
+
+function cropImagePath(crop: SolutionsBannerCropId, stage: string): string {
+  const suffix = REPLACED_CROP_IMAGES[crop][stage] ?? "";
+  return `/assets/solutions/${crop}/${stage}${suffix}.jpg`;
+}
 
 function cropImages(stage: string): Record<SolutionsBannerCropId, string> {
   return {
-    flowers: FLOWERS_IMAGE_OVERRIDES[stage] ?? `/assets/solutions/flowers/${stage}.jpg`,
-    vegetables: `/assets/solutions/vegetables/${stage}.jpg`,
-    fruits: `/assets/solutions/fruits/${stage}.jpg`,
+    flowers: cropImagePath("flowers", stage),
+    vegetables: cropImagePath("vegetables", stage),
+    fruits: cropImagePath("fruits", stage),
   };
 }
 
@@ -533,7 +544,7 @@ const banners =
             const stored = storedCropImages[cropId];
             const storedPath = typeof stored === "string" ? stored.trim() : "";
             const value =
-              storedPath && !LEGACY_FLOWERS_CROP_IMAGES.has(storedPath)
+              storedPath && !LEGACY_CROP_IMAGES.has(storedPath)
                 ? storedPath
                 : byId?.cropImages?.[cropId];
             if (value) bannerCropImages[cropId] = value;
@@ -558,6 +569,11 @@ const banners =
           };
         })
       : defaults.banners;
+  // Every crop must show "Automation & Machinery": stored lists saved before it existed get it appended.
+  const automationDefault = defaults.banners.find((b) => b.id === "automation");
+  if (automationDefault && !banners.some((b) => b.id === "automation")) {
+    banners.push(automationDefault);
+  }
 
   return {
     hero: {

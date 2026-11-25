@@ -42,13 +42,6 @@ export async function SolutionsPageContent() {
       <Suspense fallback={null}>
         <SolutionsExplorer settings={settings} />
       </Suspense>
-      <SolutionsCta
-        title={pickLocalized(settings.cta.title, locale)}
-        description={pickLocalized(settings.cta.description, locale)}
-        buttonLabel={pickLocalized(settings.cta.buttonLabel, locale)}
-        href={settings.cta.href}
-        imageSrc="/assets/homepage/cta-flowers-field.jpg"
-      />
       {featured.length > 0 ? (
         <SolutionsFeatured
           title={t("title")}
@@ -57,6 +50,13 @@ export async function SolutionsPageContent() {
           items={featured}
         />
       ) : null}
+      <SolutionsCta
+        title={pickLocalized(settings.cta.title, locale)}
+        description={pickLocalized(settings.cta.description, locale)}
+        buttonLabel={pickLocalized(settings.cta.buttonLabel, locale)}
+        href={settings.cta.href}
+        imageSrc="/assets/homepage/cta-flowers-field.jpg"
+      />
     </>
   );
 }
