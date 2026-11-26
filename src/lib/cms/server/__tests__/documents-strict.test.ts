@@ -58,6 +58,14 @@ describe("document strict readers and saves", () => {
       malformed: { nope: 1 },
     },
     {
+      name: "oboya-terra",
+      load: () => import("@/lib/cms/server/oboya-terra.server") as never,
+      strict: "readOboyaTerraSettingsStrict",
+      save: "saveOboyaTerraSettingsDurable",
+      saveArg: { blocks: [] },
+      malformed: { nope: 1 },
+    },
+    {
       name: "solutions",
       load: () => import("@/lib/cms/server/solutions-page.server") as never,
       strict: "readSolutionsPageSettingsStrict",

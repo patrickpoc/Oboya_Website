@@ -19,6 +19,7 @@ import type { CmsProduct } from "@/lib/cms/repositories/product-repository";
 import type { HomepageSettings } from "@/lib/cms/repositories/homepage-repository";
 import type { AboutPageSettings } from "@/lib/cms/repositories/about-page-repository";
 import type { SolutionsPageSettings } from "@/lib/cms/repositories/solutions-page-repository";
+import type { OboyaTerraSettings } from "@/lib/cms/repositories/oboya-terra-repository";
 import type { NewsPageSettings } from "@/lib/cms/repositories/news-page-repository";
 import type { CmsFaqCategory, CmsFaqItem } from "@/lib/cms/repositories/faqs-repository";
 import type { CmsBlogPost } from "@/lib/cms/repositories/blog-repository";
@@ -298,6 +299,18 @@ async function buildApplier(changeType: ChangeTypeId): Promise<Applier | null> {
       );
     }
 
+    case "website.oboya_terra": {
+      const { readOboyaTerraSettingsStrict, saveOboyaTerraSettingsDurable } = await import(
+        "@/lib/cms/server/oboya-terra.server"
+      );
+      const { revalidateOboyaTerraPages } = await import("@/lib/cms/revalidate-site");
+      return settingsDoc<OboyaTerraSettings>(
+        readOboyaTerraSettingsStrict,
+        saveOboyaTerraSettingsDurable,
+        revalidateOboyaTerraPages
+      );
+    }
+
     case "website.news_page": {
       const { readNewsPageSettingsStrict, saveNewsPageSettingsDurable } = await import(
         "@/lib/cms/server/news-page.server"
@@ -454,6 +467,10 @@ export async function currentVsProposed(req: ChangeRequest): Promise<ChangeDiffE
         "@/lib/cms/server/solutions-page.server"
       );
       return diffJson(await readSolutionsPageSettingsStrict(), req.payloadProposed);
+    }
+    case "website.oboya_terra": {
+      const { readOboyaTerraSettingsStrict } = await import("@/lib/cms/server/oboya-terra.server");
+      return diffJson(await readOboyaTerraSettingsStrict(), req.payloadProposed);
     }
     case "website.news_page": {
       const { readNewsPageSettingsStrict } = await import("@/lib/cms/server/news-page.server");

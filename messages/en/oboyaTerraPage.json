@@ -1,0 +1,46 @@
+{
+  "metaTitle": "Oboya Terra™",
+  "heroTitle": "Sustainable Solutions. Practical Performance.",
+  "heroBody": "Growing operations today face increasing pressure to balance plant quality, operational efficiency and sustainability objectives.\n\nOboya Terra™ brings together innovative growing containers and horticultural solutions designed to support healthier plants, optimize operations, and help businesses meet evolving sustainability expectations.\n\nBuilt on material innovation and practical performance, Oboya Terra™ products help growers, exporters, distributors, and retailers improve plant quality, optimize operations, and create value throughout the horticultural value chain.",
+  "challenges": [
+    "Root health and plant performance",
+    "Transportation and logistics optimization",
+    "Product presentation and differentiation",
+    "Operational and resource efficiency",
+    "Evolving sustainability requirements"
+  ],
+  "explore": {
+    "title": "Explore Oboya Terra™ Solutions",
+    "cta": "Explore Products"
+  },
+  "why": {
+    "title": "Why Oboya Terra?",
+    "items": [
+      {
+        "title": "Designed for Plant Performance",
+        "body": "Solutions developed to support root health, aeration, drainage and overall plant development.",
+        "imageAlt": "Grower inspecting plants in a greenhouse"
+      },
+      {
+        "title": "Built for Operational Efficiency",
+        "body": "Products engineered to improve handling, transportation and growing operations.",
+        "imageAlt": "Team working together in a greenhouse"
+      },
+      {
+        "title": "Material Innovation",
+        "body": "Continuous product development focused on practical, sustainability-oriented solutions for horticulture.",
+        "imageAlt": "Horticulture specialists reviewing plant samples"
+      },
+      {
+        "title": "Trusted Horticultural Expertise",
+        "body": "Backed by Oboya's global manufacturing, product development and horticultural experience.",
+        "imageAlt": "Oboya experts collaborating with growers"
+      }
+    ]
+  },
+  "cta": {
+    "title": "Looking for the Right Solution for Your Growing Operation?",
+    "body": "Whether you are seeking sustainable growing containers, innovative materials, or solutions that improve both performance and efficiency, our specialists can help.",
+    "button": "Request a Quote"
+  }
+}

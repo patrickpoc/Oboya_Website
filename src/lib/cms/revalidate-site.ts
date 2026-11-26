@@ -98,6 +98,12 @@ export function revalidateContactPages() {
   });
 }
 
+export function revalidateOboyaTerraPages() {
+  forEachLocale((locale) => {
+    revalidatePath(`/${locale}/oboya-terra`);
+  });
+}
+
 export function revalidateNewsPages() {
   forEachLocale((locale) => {
     revalidatePath(`/${locale}/news`);

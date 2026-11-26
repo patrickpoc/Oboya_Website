@@ -19,6 +19,7 @@ export const CHANGE_TYPES = [
   { id: "website.about", module: "website", entityType: "about_page", available: true },
   { id: "website.solutions", module: "website", entityType: "solutions_page", available: true },
   { id: "website.news_page", module: "website", entityType: "news_page", available: true },
+  { id: "website.oboya_terra", module: "website", entityType: "oboya_terra", available: true },
   { id: "website.contact_team", module: "website", entityType: "contact_team", available: true },
   { id: "website.faqs", module: "website", entityType: "faq", available: true },
   { id: "website.header", module: "website", entityType: "header", available: false },

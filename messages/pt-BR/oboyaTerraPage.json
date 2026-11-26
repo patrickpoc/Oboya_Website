@@ -1,0 +1,46 @@
+{
+  "metaTitle": "Oboya Terra™",
+  "heroTitle": "Soluções sustentáveis. Desempenho prático.",
+  "heroBody": "As operações de cultivo enfrentam hoje uma pressão crescente para equilibrar qualidade das plantas, eficiência operacional e metas de sustentabilidade.\n\nA Oboya Terra™ reúne embalagens de cultivo inovadoras e soluções hortícolas projetadas para apoiar plantas mais saudáveis, otimizar operações e ajudar as empresas a atender às expectativas de sustentabilidade em evolução.\n\nBaseados em inovação de materiais e desempenho prático, os produtos Oboya Terra™ ajudam produtores, exportadores, distribuidores e varejistas a melhorar a qualidade das plantas, otimizar operações e gerar valor em toda a cadeia hortícola.",
+  "challenges": [
+    "Saúde das raízes e desempenho das plantas",
+    "Otimização de transporte e logística",
+    "Apresentação e diferenciação do produto",
+    "Eficiência operacional e de recursos",
+    "Requisitos de sustentabilidade em evolução"
+  ],
+  "explore": {
+    "title": "Conheça as soluções Oboya Terra™",
+    "cta": "Explorar produtos"
+  },
+  "why": {
+    "title": "Por que Oboya Terra?",
+    "items": [
+      {
+        "title": "Projetado para o desempenho das plantas",
+        "body": "Soluções desenvolvidas para apoiar a saúde das raízes, a aeração, a drenagem e o desenvolvimento geral das plantas.",
+        "imageAlt": "Produtor inspecionando plantas em uma estufa"
+      },
+      {
+        "title": "Feito para a eficiência operacional",
+        "body": "Produtos desenvolvidos para melhorar o manuseio, o transporte e as operações de cultivo.",
+        "imageAlt": "Equipe trabalhando em conjunto em uma estufa"
+      },
+      {
+        "title": "Inovação em materiais",
+        "body": "Desenvolvimento contínuo de produtos voltado a soluções práticas e orientadas à sustentabilidade para a horticultura.",
+        "imageAlt": "Especialistas em horticultura analisando amostras de plantas"
+      },
+      {
+        "title": "Expertise hortícola de confiança",
+        "body": "Respaldada pela experiência global da Oboya em manufatura, desenvolvimento de produtos e horticultura.",
+        "imageAlt": "Especialistas da Oboya colaborando com produtores"
+      }
+    ]
+  },
+  "cta": {
+    "title": "Procurando a solução certa para a sua operação de cultivo?",
+    "body": "Seja você busque embalagens de cultivo sustentáveis, materiais inovadores ou soluções que melhorem desempenho e eficiência, nossos especialistas podem ajudar.",
+    "button": "Solicitar cotação"
+  }
+}

@@ -74,6 +74,7 @@ export const adminNavigation: AdminNavItem[] = [
       { labelKey: "aboutUs", label: "About Us", href: "/admin/website/about" },
       { labelKey: "solutions", label: "Solutions", href: "/admin/website/solutions" },
       { labelKey: "newsPage", label: "News Page", href: "/admin/website/news" },
+      { labelKey: "oboyaTerra", label: "Oboya Terra", href: "/admin/website/oboya-terra" },
       { labelKey: "contactTeam", label: "Contact team", href: "/admin/website/contact-team" },
       { labelKey: "pages", label: "Pages", href: "/admin/website/pages" },
       { labelKey: "faqs", label: "FAQs", href: "/admin/website/faqs" },

@@ -20,7 +20,7 @@ const VALUE_IMAGES = [
 
 /** Edit images / links here when replacing the featured cards. */
 const FEATURED = [
-  { image: "/assets/innovation/oboya-terra.jpg", href: "/shop" },
+  { image: "/assets/innovation/oboya-terra.jpg", href: "/oboya-terra" },
   { image: "/assets/innovation/bioglitter.jpg", href: "/shop" },
   { image: "/assets/homepage/wheel-harvest.jpg", href: "/solutions" },
 ] as const;

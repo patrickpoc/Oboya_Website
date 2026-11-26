@@ -9,6 +9,7 @@ import { readMapLocations } from "@/lib/map-locations.server";
 import { getCmsProducts, getCmsProductById } from "@/lib/cms/repositories/product-repository";
 import { readBlogPostsDurable } from "@/lib/cms/server/blog-posts.server";
 import { readBlogCategoriesDurable } from "@/lib/cms/server/blog-categories.server";
+import { readOboyaTerraSettingsDurable } from "@/lib/cms/server/oboya-terra.server";
 import { readNewsPageSettingsDurable } from "@/lib/cms/server/news-page.server";
 import { readHomepageSettingsDurable } from "@/lib/cms/server/homepage.server";
 import { readAboutPageSettingsDurable } from "@/lib/cms/server/about-page.server";
@@ -94,6 +95,7 @@ export async function readBlogCategories() {
   return readBlogCategoriesDurable();
 }
 
+export const readOboyaTerraSettings = cache(async () => readOboyaTerraSettingsDurable());
 export const readNewsPageSettings = cache(async () => readNewsPageSettingsDurable());
 
 export async function readHomepageSettings() {
