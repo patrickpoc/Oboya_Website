@@ -18,7 +18,6 @@ function isNews(value: unknown): value is NewsPageSettings {
   return Boolean(
     value &&
       typeof value === "object" &&
-      "headline" in value &&
       "postsPerPage" in value
   );
 }

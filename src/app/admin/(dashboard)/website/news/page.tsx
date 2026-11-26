@@ -86,31 +86,34 @@ export default function NewsPageAdmin() {
                 {(loc) => (
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <Label>{t("eyebrowLabel")}</Label>
+                      <Label>{t("titleLabel")}</Label>
                       <Input
-                        value={settings.eyebrow[loc]}
+                        value={settings.title[loc]}
                         onChange={(e) =>
-                          setSettings({
-                            ...settings,
-                            eyebrow: { ...settings.eyebrow, [loc]: e.target.value },
-                          })
+                          setSettings({ ...settings, title: { ...settings.title, [loc]: e.target.value } })
                         }
-                        placeholder={t("eyebrowPlaceholder")}
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>{tCommon("title")}</Label>
+                      <Label>{t("subtitleLabel")}</Label>
                       <textarea
-                        value={settings.headline[loc]}
+                        value={settings.subtitle[loc]}
                         onChange={(e) =>
-                          setSettings({
-                            ...settings,
-                            headline: { ...settings.headline, [loc]: e.target.value },
-                          })
+                          setSettings({ ...settings, subtitle: { ...settings.subtitle, [loc]: e.target.value } })
+                        }
+                        rows={3}
+                        className="w-full rounded-lg border border-input px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>{t("introLabel")}</Label>
+                      <textarea
+                        value={settings.intro[loc]}
+                        onChange={(e) =>
+                          setSettings({ ...settings, intro: { ...settings.intro, [loc]: e.target.value } })
                         }
                         rows={4}
                         className="w-full rounded-lg border border-input px-3 py-2 text-sm"
-                        placeholder={t("headlinePlaceholder")}
                       />
                     </div>
                   </div>

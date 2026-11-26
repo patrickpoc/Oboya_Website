@@ -91,12 +91,15 @@ export function NewsPageContent({ posts, categories, settings, locale }: NewsPag
 
   return (
     <>
-      <PageIntroBanner title={t("title")} body={t("description")} />
+      <PageIntroBanner
+        title={pickLocalized(settings.title, locale) || t("title")}
+        body={pickLocalized(settings.subtitle, locale) || t("description")}
+      />
 
       <section className="bg-oboya-soft-white py-10 md:py-14 lg:py-16">
         <Container>
           <p className="mb-6 max-w-3xl font-body text-base text-oboya-blue-dark md:text-lg">
-            {t("intro")}
+            {pickLocalized(settings.intro, locale) || t("intro")}
           </p>
           <nav aria-label={t("filterLabel")} className="mb-8 flex flex-wrap gap-2 md:mb-10">
             {filters.map((filter) => {
