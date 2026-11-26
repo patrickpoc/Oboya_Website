@@ -229,7 +229,7 @@ const defaultSettings = (): HomepageSettings => ({
   hero: {
     mediaType: "video",
     backgroundImage: "/assets/homepage/hero-vineyard.jpg",
-    backgroundVideo: "/assets/homepage/hero-hands-herbs.mp4",
+    backgroundVideo: "/assets/homepage/hero-home-2026.mp4",
     eyebrow: H.hero.eyebrow,
     title: H.hero.title,
     description: H.hero.description,
@@ -508,6 +508,9 @@ const upgradeLegacy = (v: LocalizedString | undefined, old: LocalizedString, nex
   isLegacy(v, old) ? next : v;
 
 const clampPct = (n: number) => Math.min(100, Math.max(0, n));
+
+/** Previous default hero video; a stored copy of it upgrades to the current default. */
+const LEGACY_HERO_VIDEO = "/assets/homepage/hero-hands-herbs.mp4";
 
 /** Previous default photo and pin positions; stored copies of these get the new defaults. */
 const LEGACY_CHALLENGES_IMAGES = new Set([
@@ -912,7 +915,9 @@ function migrateSettings(settings: HomepageSettings): HomepageSettings {
       backgroundImage:
         withoutLegacy.hero?.backgroundImage || defaults.hero.backgroundImage,
       backgroundVideo:
-        rawHero?.backgroundVideo !== undefined
+        rawHero?.backgroundVideo === LEGACY_HERO_VIDEO
+          ? defaults.hero.backgroundVideo
+          : rawHero?.backgroundVideo !== undefined
           ? rawHero.backgroundVideo
           : mediaType === "video"
             ? defaults.hero.backgroundVideo

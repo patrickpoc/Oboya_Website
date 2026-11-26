@@ -31,7 +31,7 @@ export function HeroSectionEditor({
         mediaType: next,
         backgroundVideo:
           next === "video"
-            ? hero.backgroundVideo || "/assets/homepage/hero-hands-herbs.mp4"
+            ? hero.backgroundVideo || "/assets/homepage/hero-home-2026.mp4"
             : hero.backgroundVideo,
         backgroundImage:
           next === "image"
